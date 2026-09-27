@@ -1,5 +1,12 @@
 :root {
+  /* Meaning colors (SPEC §3). Never decorative. */
   --ink: #1d1d1d;
+  --opposite: #b8508f;  /* magenta: always with an underline */
+  --cancel: #d55e00;    /* vermillion: always a slash */
+
+  /* Neutral UI */
+  --muted: #7a818c;
+  --paper: #fff;
   --grid-minor: #e6ecf3;
   --grid-major: #d5dee9;
   --grid: 24px;
@@ -23,7 +30,7 @@ body {
   min-height: 100vh;
   padding: 0 16px;
   color: var(--ink);
-  background-color: #fff;
+  background-color: var(--paper);
   background-image:
     linear-gradient(to right, var(--grid-major) 1px, transparent 1px),
     linear-gradient(to bottom, var(--grid-major) 1px, transparent 1px),
@@ -37,25 +44,252 @@ body {
   font-family: 'Lexend', system-ui, sans-serif;
 }
 
-.hello {
+/* ---------- Screen layout (SPEC §4) ---------- */
+
+.screen {
+  max-width: 960px;
   min-height: 100vh;
+  margin: 0 auto;
   display: flex;
   flex-direction: column;
+  gap: 8px;
+  padding: 8px 0 16px;
+}
+
+.topbar {
+  display: flex;
   align-items: center;
-  justify-content: center;
-  text-align: center;
+  gap: 16px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid var(--ink);
 }
 
-.printed {
-  margin: 0;
-  font-family: 'Lexend', system-ui, sans-serif;
+.title {
+  white-space: nowrap;
   font-weight: 600;
-  font-size: 48px;
+  font-size: 20px;
+  letter-spacing: 0.04em;
 }
 
-.handwritten {
+.dots {
+  display: flex;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.dot {
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--ink);
+  border-radius: 50%;
+}
+
+.dot.done {
+  background: var(--ink);
+}
+
+.dot.current {
+  background: linear-gradient(to right, var(--ink) 50%, transparent 50%);
+}
+
+.steps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
   margin: 8px 0 0;
-  font-family: 'Kalam', cursive;
-  font-weight: 700;
-  font-size: 32px;
+  padding: 0;
+  list-style: none;
+  font-weight: 600;
+  font-size: 17px;
+  color: var(--muted);
+}
+
+.steps li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 12px 0 4px;
+  border: 2px solid transparent;
+  border-radius: 999px;
+}
+
+.steps .num {
+  display: inline-grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border: 2px solid currentColor;
+  border-radius: 50%;
+  font-size: 15px;
+}
+
+.steps .done {
+  color: var(--ink);
+}
+
+.steps .done .num {
+  font-size: 0; /* replaced by a check mark */
+}
+
+.steps .done .num::after {
+  content: '\2713';
+  font-size: 16px;
+}
+
+.steps .current {
+  color: var(--ink);
+  border-color: var(--ink);
+}
+
+.mat-wrap {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.feedback {
+  min-height: 1.5em;
+  margin: 0;
+  text-align: center;
+  font-weight: 400;
+  font-size: 20px;
+}
+
+.palette {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 24px;
+  padding-top: 12px;
+  border-top: 2px solid var(--ink);
+}
+
+.palette .group {
+  display: flex;
+  gap: 12px;
+}
+
+/* ---------- Buttons: outlined, low ink, 44px minimum ---------- */
+
+.btn {
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0 18px;
+  border: 2px solid var(--ink);
+  border-radius: 10px;
+  background: var(--paper);
+  color: var(--ink);
+  font: 600 18px 'Lexend', system-ui, sans-serif;
+  cursor: pointer;
+}
+
+.btn:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.btn:focus-visible {
+  outline: 3px solid var(--ink);
+  outline-offset: 3px;
+}
+
+.btn-quiet {
+  border-color: transparent;
+  font-size: 16px;
+}
+
+.btn-primary {
+  border-width: 3px;
+  min-width: 140px;
+}
+
+.btn-sign {
+  width: 56px;
+  padding: 0;
+}
+
+.btn-sign svg {
+  width: 28px;
+  height: 28px;
+  stroke: var(--ink);
+  stroke-width: 4;
+  stroke-linecap: round;
+}
+
+/* ---------- The Mat (SVG) ---------- */
+
+.mat {
+  width: 100%;
+  max-width: 920px;
+  height: auto;
+  /* leave room for the header, step bar, feedback line and palette */
+  max-height: calc(100vh - 280px);
+}
+
+.mat .mark {
+  stroke: var(--ink);
+  stroke-width: 4;
+  stroke-linecap: round;
+}
+
+.mat .is-opposite .mark {
+  stroke: var(--opposite);
+}
+
+.mat .slash {
+  stroke: var(--cancel);
+  stroke-width: 4;
+  stroke-linecap: round;
+}
+
+.mat .hit {
+  fill: transparent;
+}
+
+.mat text {
+  fill: var(--ink);
+}
+
+.mat .problem text {
+  font: 600 48px 'Lexend', system-ui, sans-serif;
+}
+
+.mat .rewritten text {
+  font: 700 44px 'Kalam', cursive;
+}
+
+.mat text.is-opposite {
+  fill: var(--opposite);
+}
+
+.mat .underline {
+  stroke: var(--opposite);
+  stroke-width: 3;
+  stroke-linecap: round;
+}
+
+/* Narrow screens: keep the header on one or two tidy lines. */
+@media (max-width: 600px) {
+  .topbar {
+    flex-wrap: wrap;
+    gap: 4px 12px;
+  }
+  .title {
+    white-space: nowrap;
+    font-size: 17px;
+  }
+  .dots {
+    order: 3;
+    width: 100%;
+    margin: 0 0 4px;
+    justify-content: center;
+  }
+  .steps {
+    font-size: 15px;
+    gap: 4px 8px;
+  }
 }
