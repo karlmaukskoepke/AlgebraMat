@@ -160,17 +160,30 @@ body {
 
 .palette {
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px 24px;
+  flex-direction: column;
+  gap: 10px;
   padding-top: 12px;
   border-top: 2px solid var(--ink);
 }
 
+.palette-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px 20px;
+}
+
 .palette .group {
   display: flex;
-  gap: 12px;
+  gap: 10px;
+}
+
+.pad {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
 }
 
 /* ---------- Buttons: outlined, low ink, 44px minimum ---------- */
@@ -212,6 +225,17 @@ body {
   padding: 0;
 }
 
+.btn[aria-pressed='true'] {
+  border-width: 4px;
+  background: #eef1f5;
+}
+
+.btn-pad {
+  min-width: 52px;
+  padding: 0 10px;
+  font-size: 22px;
+}
+
 .btn-sign svg {
   width: 28px;
   height: 28px;
@@ -226,8 +250,8 @@ body {
   width: 100%;
   max-width: 920px;
   height: auto;
-  /* leave room for the header, step bar, feedback line and palette */
-  max-height: calc(100vh - 280px);
+  /* leave room for the header, step bar, feedback line, palette and pad */
+  max-height: calc(100vh - 340px);
 }
 
 .mat .mark {
@@ -248,6 +272,38 @@ body {
 
 .mat .hit {
   fill: transparent;
+}
+
+.mat [data-action] {
+  cursor: pointer;
+}
+
+.mat .zone-area {
+  fill: transparent;
+  stroke: var(--muted);
+  stroke-width: 1.5;
+  stroke-dasharray: 6 6;
+}
+
+.mat .ring {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 2.5;
+  stroke-dasharray: 5 4;
+}
+
+.mat .tap-text .hit {
+  stroke: var(--muted);
+  stroke-width: 1.5;
+  stroke-dasharray: 6 6;
+}
+
+.mat .answer {
+  font: 700 44px 'Kalam', cursive;
+}
+
+.mat .answer.is-empty {
+  fill: var(--muted);
 }
 
 .mat text {
@@ -291,5 +347,40 @@ body {
   .steps {
     font-size: 15px;
     gap: 4px 8px;
+  }
+}
+
+/* ---------- Motion (kept small; none if the viewer prefers less) ---------- */
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-6px); }
+  40%, 80% { transform: translateX(6px); }
+}
+
+@keyframes pop {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.08); }
+  100% { transform: scale(1); }
+}
+
+.mat .shake {
+  animation: shake 0.35s ease;
+}
+
+.feedback.bad {
+  animation: shake 0.35s ease;
+}
+
+.feedback.celebrate {
+  font-weight: 600;
+  animation: pop 0.5s ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mat .shake,
+  .feedback.bad,
+  .feedback.celebrate {
+    animation: none;
   }
 }

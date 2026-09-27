@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { counterPositions, rowSizes, COUNTER_PITCH as P } from '../src/view/layout.js';
+import { counterPositions, readingPositions, rowSizes, COUNTER_PITCH as P } from '../src/view/layout.js';
 
 describe('rowSizes', () => {
   it('keeps up to 4 in a single row', () => {
@@ -51,5 +51,19 @@ describe('counterPositions', () => {
     expect(() => counterPositions(13)).toThrow();
     expect(() => counterPositions(-1)).toThrow();
     expect(counterPositions(0)).toEqual([]);
+  });
+});
+
+describe('readingPositions (while drawing)', () => {
+  it('never moves a placed counter when another is added', () => {
+    for (let n = 1; n < 12; n++) {
+      expect(readingPositions(n + 1).slice(0, n)).toEqual(readingPositions(n));
+    }
+  });
+
+  it('fills rows of 4 from the bottom', () => {
+    const ps = readingPositions(6);
+    expect(ps.slice(0, 4).map((p) => p.y)).toEqual([0, 0, 0, 0]);
+    expect(ps.slice(4).map((p) => [p.x, p.y])).toEqual([[-1.5 * P, -P], [-0.5 * P, -P]]);
   });
 });

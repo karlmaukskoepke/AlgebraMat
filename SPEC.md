@@ -107,6 +107,7 @@ Each move has a validator in `engine/moves.js` that returns `{ ok, feedbackKey }
 - Tapping the **number's sign** flips it (−3 → +3, or 6 → −6).
 - **Both flips are required.** After one flip, the step stays open and the feedback says: *"Flip both signs!"*
 - Flipped pieces turn magenta and get an underline, with a short flip animation. Tapping a flipped piece undoes it.
+- *(Build decision)* Flipping happens on the student's Kalam line under the problem; the printed problem line never changes. On an addition problem, tapping a sign flips nothing and shows the message below.
 - **"Nothing to rewrite" button:** when the problem is addition, the correct move is to press this button instead of flipping. This keeps students from flipping everything blindly.
   - If they flip on an addition problem: *"It's already addition — nothing to rewrite."*
 
@@ -115,6 +116,7 @@ Each move has a validator in `engine/moves.js` that returns `{ ok, feedbackKey }
 - The student selects `+` or `−` in the palette, then taps a counter zone to add one counter per tap. Tapping a counter removes it.
 - Each zone holds up to 12 counters, above its number. Up to 4 sit in one row; more form a balanced grid, never more than 4 across, with wider rows nearest the number (6 = 3 × 2, 7 = 4 + 3, 12 = 4 × 3).
 - Counters for the flipped (opposite) number are drawn in magenta, as in the notes.
+- *(Build decision)* While drawing, counters fill rows of 4 from the bottom, left to right, so nothing moves once placed. After Check passes, the zone tidies into the balanced grid.
 - **Check** validates that each zone has the right **type** and **count**. Feedback is specific, for example:
   - *"That number is −3, so it needs 3 negatives."*
   - *"Count again — you have 4, the number is 5."*
@@ -129,6 +131,7 @@ Each move has a validator in `engine/moves.js` that returns `{ ok, feedbackKey }
 - The student taps one `+` and one `−`, and the pair gets vermillion slashes.
 - Tapping two of the same sign does nothing, with a small shake and *"A pair is one + and one −."*
 - The step is complete when only one kind is left.
+- *(Build decision)* The first tap selects a counter (dashed ring); the second tap pairs it. Tapping the selected counter again deselects it. After a same-sign tap, the first counter stays selected.
 - Party problems skip this step (it shows as done).
 
 ### ⑤ Answer
@@ -136,6 +139,7 @@ Each move has a validator in `engine/moves.js` that returns `{ ok, feedbackKey }
 - The student uses an on-screen pad: a `±` toggle plus digits.
 - Correct answer: celebrate briefly, then go to the next problem.
 - Wrong answer: *"Count who is left."* Unlimited retries.
+- *(Build decision)* The answer appears after an `=` on the student's Kalam line. The pad takes up to 2 digits. After a correct answer, the next problem loads after 2.5 s, or right away with **Next →**.
 
 **General rules:**
 - There is never a penalty.
