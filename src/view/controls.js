@@ -61,7 +61,7 @@ export function buildControls(root, dispatch) {
       plus.setAttribute('aria-pressed', String(step === 'draw' && s.drawSign === '+'));
       minus.setAttribute('aria-pressed', String(step === 'draw' && s.drawSign === '-'));
       party.disabled = battle.disabled = step !== 'partyBattle';
-      const done = step === 'done';
+      const done = step === 'done'; // 'levelDone' leaves every control disabled
       check.disabled = !(step === 'draw' || step === 'answer' || done);
       check.innerHTML = done ? 'Next →' : 'Check ✓';
       if (done) check.dataset.next = '1'; else delete check.dataset.next;

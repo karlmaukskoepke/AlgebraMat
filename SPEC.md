@@ -171,6 +171,13 @@ Each level has 5 problems, generated with a seed. All |values| ≤ 12, and there
 
 **Pack map (home screen):** cards for Flip It (open) and Lasso (locked, "Coming soon"). Each card shows its level dots.
 
+*(Build decisions, Step 5)*
+- The Lasso card is always on the pack map, locked and marked "Coming soon". When Level 4 is finished, the Flip It card shows **Complete ✓**, and the level-complete panel says Lasso is coming soon.
+- Students pick a level from buttons on the pack card. Finished levels can be replayed; locked levels are dimmed and can't be tapped.
+- Finishing the 5th problem shows a level-complete panel with **Level N+1 →** and **Pack map**. After Level 4, it shows **Play Level 4 again** and **Pack map**.
+- **← Packs** in the middle of a level leaves without penalty. Coming back starts a fresh set of 5.
+- `?level=N` (with or without `?seed=`) opens a level directly, ignoring locks, so a teacher can project a specific level.
+
 ## 7. Progress and save code
 
 **localStorage.** One key, `mat.v1`, holding JSON:
