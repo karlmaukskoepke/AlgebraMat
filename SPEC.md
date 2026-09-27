@@ -65,7 +65,7 @@ tests/
 | Magenta | `#B8508F` | Opposite. Always paired with an underline. |
 | Vermillion | `#D55E00` | Cancel. Always shown as a slash through a counter. |
 
-**Counters:** drawn as stroked `+` and `−` marks with round caps (not text glyphs), about 22px in size. They sit in rows above their number, as in the notes.
+**Counters:** drawn as stroked `+` and `−` marks with round caps (not text glyphs), about 22px in size. They sit above their number, as in the notes, in a balanced grid at most 4 across (see §5 ② Draw).
 
 **Canceling:** a vermillion slash through each canceled counter.
 
@@ -113,7 +113,7 @@ Each move has a validator in `engine/moves.js` that returns `{ ok, feedbackKey }
 ### ② Draw
 
 - The student selects `+` or `−` in the palette, then taps a counter zone to add one counter per tap. Tapping a counter removes it.
-- Each zone holds up to 12 counters, laid out in rows (5 per row) above its number.
+- Each zone holds up to 12 counters, above its number. Up to 4 sit in one row; more form a balanced grid, never more than 4 across, with wider rows nearest the number (6 = 3 × 2, 7 = 4 + 3, 12 = 4 × 3).
 - Counters for the flipped (opposite) number are drawn in magenta, as in the notes.
 - **Check** validates that each zone has the right **type** and **count**. Feedback is specific, for example:
   - *"That number is −3, so it needs 3 negatives."*

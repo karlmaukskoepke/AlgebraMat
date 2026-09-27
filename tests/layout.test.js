@@ -1,27 +1,49 @@
 import { describe, it, expect } from 'vitest';
-import { counterPositions, COUNTER_PITCH as P } from '../src/view/layout.js';
+import { counterPositions, rowSizes, COUNTER_PITCH as P } from '../src/view/layout.js';
 
-describe('counterPositions', () => {
-  it('centers a single row on the anchor', () => {
-    expect(counterPositions(1)).toEqual([{ x: 0, y: -0 }]);
-    expect(counterPositions(2).map((p) => p.x)).toEqual([-P / 2, P / 2]);
+describe('rowSizes', () => {
+  it('keeps up to 4 in a single row', () => {
+    expect(rowSizes(0)).toEqual([]);
+    expect(rowSizes(1)).toEqual([1]);
+    expect(rowSizes(4)).toEqual([4]);
   });
 
-  it('puts 5 per row and stacks extra rows upward', () => {
-    const ps = counterPositions(12);
-    expect(ps).toHaveLength(12);
-    expect(ps.slice(0, 5).every((p) => p.y === 0)).toBe(true);
-    expect(ps.slice(5, 10).every((p) => p.y === -P)).toBe(true);
-    expect(ps.slice(10).map((p) => p.y)).toEqual([-2 * P, -2 * P]);
-    // the short top row is centered too
-    expect(ps.slice(10).map((p) => p.x)).toEqual([-P / 2, P / 2]);
+  it('makes a balanced grid, never more than 4 across, wider rows at the bottom', () => {
+    expect(rowSizes(5)).toEqual([3, 2]);
+    expect(rowSizes(6)).toEqual([3, 3]);
+    expect(rowSizes(7)).toEqual([4, 3]);
+    expect(rowSizes(8)).toEqual([4, 4]);
+    expect(rowSizes(9)).toEqual([3, 3, 3]);
+    expect(rowSizes(10)).toEqual([4, 3, 3]);
+    expect(rowSizes(11)).toEqual([4, 4, 3]);
+    expect(rowSizes(12)).toEqual([4, 4, 4]);
+  });
+
+  it('always accounts for every counter', () => {
+    for (let n = 0; n <= 12; n++) {
+      const rows = rowSizes(n);
+      expect(rows.reduce((a, b) => a + b, 0)).toBe(n);
+      expect(Math.max(0, ...rows)).toBeLessThanOrEqual(4);
+      expect(Math.max(0, ...rows) - Math.min(Infinity, ...rows)).toBeLessThanOrEqual(1);
+    }
+  });
+});
+
+describe('counterPositions', () => {
+  it('centers each row on the anchor and stacks rows upward', () => {
+    expect(counterPositions(2)).toEqual([{ x: -P / 2, y: 0 }, { x: P / 2, y: 0 }]);
+    const ps = counterPositions(7); // rows of 4 then 3
+    expect(ps.slice(0, 4).map((p) => p.y)).toEqual([0, 0, 0, 0]);
+    expect(ps.slice(4).map((p) => p.y)).toEqual([-P, -P, -P]);
+    expect(ps.slice(4).map((p) => p.x)).toEqual([-P, 0, P]);
   });
 
   it('keeps counters a full touch target apart', () => {
-    const ps = counterPositions(7);
-    for (let i = 0; i < ps.length; i++) for (let j = i + 1; j < ps.length; j++) {
-      const d = Math.hypot(ps[i].x - ps[j].x, ps[i].y - ps[j].y);
-      expect(d).toBeGreaterThanOrEqual(44);
+    for (let n = 2; n <= 12; n++) {
+      const ps = counterPositions(n);
+      for (let i = 0; i < ps.length; i++) for (let j = i + 1; j < ps.length; j++) {
+        expect(Math.hypot(ps[i].x - ps[j].x, ps[i].y - ps[j].y)).toBeGreaterThanOrEqual(44);
+      }
     }
   });
 
