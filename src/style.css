@@ -1,0 +1,61 @@
+:root {
+  --ink: #1d1d1d;
+  --grid-minor: #e6ecf3;
+  --grid-major: #d5dee9;
+  --grid: 24px;
+  --grid-5: calc(var(--grid) * 5);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  overflow-x: hidden;
+}
+
+/* Graph paper: 24px squares, every 5th line darker (SPEC §3). */
+body {
+  min-height: 100vh;
+  padding: 0 16px;
+  color: var(--ink);
+  background-color: #fff;
+  background-image:
+    linear-gradient(to right, var(--grid-major) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--grid-major) 1px, transparent 1px),
+    linear-gradient(to right, var(--grid-minor) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--grid-minor) 1px, transparent 1px);
+  background-size:
+    var(--grid-5) var(--grid-5),
+    var(--grid-5) var(--grid-5),
+    var(--grid) var(--grid),
+    var(--grid) var(--grid);
+  font-family: 'Lexend', system-ui, sans-serif;
+}
+
+.hello {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.printed {
+  margin: 0;
+  font-family: 'Lexend', system-ui, sans-serif;
+  font-weight: 600;
+  font-size: 48px;
+}
+
+.handwritten {
+  margin: 8px 0 0;
+  font-family: 'Kalam', cursive;
+  font-weight: 700;
+  font-size: 32px;
+}
