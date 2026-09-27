@@ -12,9 +12,11 @@
     />
   </head>
   <body>
-    <div class="screen">
+    <main id="home" class="home" hidden></main>
+
+    <div class="screen" id="play" hidden>
       <header class="topbar">
-        <button class="btn btn-quiet" disabled>&larr; Packs</button>
+        <button class="btn btn-quiet" id="back" type="button">&larr; Packs</button>
         <div class="title" id="title">FLIP IT</div>
         <div class="dots" id="dots">
           <span class="dot"></span><span class="dot"></span><span class="dot"></span
@@ -31,7 +33,7 @@
         <li><span class="num">5</span> Answer</li>
       </ol>
 
-      <main id="mat" class="mat-wrap"></main>
+      <div id="mat" class="mat-wrap"></div>
 
       <p class="feedback" id="feedback" role="status" aria-live="polite"></p>
 

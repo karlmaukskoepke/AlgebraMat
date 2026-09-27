@@ -15,15 +15,39 @@ BASE_PATH=/AlgebraMat/ npm run build   # production build for a sub-path
 
 `BASE_PATH` sets Vite's `base`, so the site can later move to a sub-path of grafables.com by changing one line in `.github/workflows/ci-deploy.yml`.
 
-Add `?seed=123` to the URL to replay a fixed problem set, for example to project the same problems to a whole class.
+Add `?seed=123` to the URL to replay a fixed problem set, and `?level=2` to open a level directly (locks are ignored). Together they let you project the same problems to a whole class.
 
 ## Layout
 
-- `src/engine/`: pure logic, no DOM. `expr.js` (expression model), `generate.js` (seeded levels), `moves.js` (validators), `session.js` (one problem's steps as a reducer).
-- `src/view/`: DOM and SVG. `mat.js`, `controls.js`, `feedback.js` (every message, in one table), `layout.js` (counter geometry).
+- `src/engine/`: pure logic, no DOM. `expr.js` (expression model), `generate.js` (seeded levels), `moves.js` (validators), `session.js` (one problem's steps as a reducer), `progress.js` (level unlocks).
+- `src/view/`: DOM and SVG. `mat.js`, `controls.js`, `packmap.js` (home and level-complete panel), `feedback.js` (every message, in one table), `layout.js` (counter geometry).
+- `src/packs/`: pack definitions (`flipit.js`; `index.js` lists every pack).
 - `tests/`: Vitest.
 
 ## Changelog
+
+### Step 5: level flow, unlocks, pack map (SPEC §6)
+- **Engine:** `engine/progress.js` holds the progress object from SPEC §7 (`{ v: 1, packs: { flipit: { levels: [...] } } }`).
+  - It covers: Level 1 always open, finishing a level unlocks the next, finishing Level 4 completes the pack, replays keep a level finished.
+  - Tested.
+- **Packs:** `packs/flipit.js` (title, level names, generator) and `packs/index.js` (the pack list, with Lasso as a "Coming soon" card).
+- **UI:**
+  - The pack map is now the home screen. The Flip It card has level dots and four level buttons; locked levels are dimmed. The Lasso card is dashed and says "Coming soon".
+  - Play shows "FLIP IT · Level N" with per-problem dots.
+  - After the 5th problem, a level-complete panel offers **Level N+1 →** or **Pack map**.
+  - **← Packs** works.
+  - After Level 4 the card shows **Complete ✓**.
+- **Verified:**
+  - 72 unit tests.
+  - A Playwright run started from the pack map. It checked that locked levels can't be opened and that leaving Level 1 early doesn't count it. Then it played all four levels in a row (20 problems, read off the screen and solved by tapping), checked each unlock and the panel text, confirmed the pack showed Complete ✓ at the end, and confirmed that a `?level=3&seed=7` link gives the same set twice. No page errors.
+  - Also checked at phone width.
+- **Judgment calls** (also in SPEC §6):
+  - The SPEC could be read as showing Lasso only after Level 4. I show it always, locked, and mention it on the final panel.
+  - Levels are chosen from buttons on the pack card, with no separate level screen.
+  - Leaving mid-level forgets that level's set without penalty.
+  - `?level=N` ignores locks, for projecting.
+  - I shortened Level 4's name on the card to "mixed, some addition".
+- **Not yet:** progress lives in memory only, so a reload resets it. Saving is Step 6 (localStorage + save code).
 
 ### Step 4: the five moves (SPEC §5)
 - **Engine:**
@@ -38,7 +62,7 @@ Add `?seed=123` to the URL to replay a fixed problem set, for example to project
   - Answer: an on-screen pad with ± and a delete key.
   - Only the current step's controls are enabled.
 - **Verified:**
-  - 70+ unit tests.
+  - 66 unit tests.
   - A Playwright run tapped through a full Level 4 set (2 Battles, 2 Parties, 1 addition). It checked every wrong-move message on the way: one flip, "Nothing to rewrite" on a subtraction, flipping on an addition, drawing before picking a sign, a wrong count, the wrong Party/Battle choice, a same-sign pair, an empty answer, and a wrong answer.
 - **Judgment calls** (also noted in SPEC §5):
   - Flipping happens on the Kalam line; the printed problem never changes.
@@ -50,7 +74,7 @@ Add `?seed=123` to the URL to replay a fixed problem set, for example to project
 - **Deferred:**
   - Hints after 3 wrong tries go to Step 7. Wrong tries are already counted per step (`session.tries`).
   - Flip and cancel animations go to Step 7. There's only a small shake and celebrate for now.
-- **Temporary:** the page plays endless Level 4 sets. Level flow, unlocks and the pack map are Step 5.
+- **Temporary** (replaced in Step 5): the page played endless Level 4 sets.
 
 ### Step 3: static Mat
 - `view/mat.js` draws the Mat as inline SVG:
