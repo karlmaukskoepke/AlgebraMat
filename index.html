@@ -7,15 +7,36 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Kalam:wght@700&family=Lexend:wght@600&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Kalam:wght@700&family=Lexend:wght@400;600&display=swap"
       rel="stylesheet"
     />
   </head>
   <body>
-    <main class="hello">
-      <h1 class="printed">The Mat</h1>
-      <p class="handwritten">coming soon</p>
-    </main>
+    <div class="screen">
+      <header class="topbar">
+        <button class="btn btn-quiet" disabled>&larr; Packs</button>
+        <div class="title" id="title">FLIP IT</div>
+        <div class="dots" id="dots">
+          <span class="dot"></span><span class="dot"></span><span class="dot"></span
+          ><span class="dot"></span><span class="dot"></span>
+        </div>
+        <button class="btn btn-quiet" disabled>Save code</button>
+      </header>
+
+      <ol class="steps" id="steps">
+        <li><span class="num">1</span> Rewrite</li>
+        <li><span class="num">2</span> Draw</li>
+        <li><span class="num">3</span> Party or Battle?</li>
+        <li><span class="num">4</span> Cancel</li>
+        <li><span class="num">5</span> Answer</li>
+      </ol>
+
+      <main id="mat" class="mat-wrap"></main>
+
+      <p class="feedback" id="feedback" role="status" aria-live="polite"></p>
+
+      <footer class="palette" id="controls"></footer>
+    </div>
     <script type="module" src="/src/main.js"></script>
   </body>
 </html>

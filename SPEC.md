@@ -65,7 +65,7 @@ tests/
 | Magenta | `#B8508F` | Opposite. Always paired with an underline. |
 | Vermillion | `#D55E00` | Cancel. Always shown as a slash through a counter. |
 
-**Counters:** drawn as stroked `+` and `−` marks with round caps (not text glyphs), about 22px in size. They sit in rows above their number, as in the notes.
+**Counters:** drawn as stroked `+` and `−` marks with round caps (not text glyphs), about 22px in size. They sit above their number, as in the notes, in a balanced grid at most 4 across (see §5 ② Draw).
 
 **Canceling:** a vermillion slash through each canceled counter.
 
@@ -107,14 +107,16 @@ Each move has a validator in `engine/moves.js` that returns `{ ok, feedbackKey }
 - Tapping the **number's sign** flips it (−3 → +3, or 6 → −6).
 - **Both flips are required.** After one flip, the step stays open and the feedback says: *"Flip both signs!"*
 - Flipped pieces turn magenta and get an underline, with a short flip animation. Tapping a flipped piece undoes it.
+- *(Build decision)* Flipping happens on the student's Kalam line under the problem; the printed problem line never changes. On an addition problem, tapping a sign flips nothing and shows the message below.
 - **"Nothing to rewrite" button:** when the problem is addition, the correct move is to press this button instead of flipping. This keeps students from flipping everything blindly.
   - If they flip on an addition problem: *"It's already addition — nothing to rewrite."*
 
 ### ② Draw
 
 - The student selects `+` or `−` in the palette, then taps a counter zone to add one counter per tap. Tapping a counter removes it.
-- Each zone holds up to 12 counters, laid out in rows (5 per row) above its number.
+- Each zone holds up to 12 counters, above its number. Up to 4 sit in one row; more form a balanced grid, never more than 4 across, with wider rows nearest the number (6 = 3 × 2, 7 = 4 + 3, 12 = 4 × 3).
 - Counters for the flipped (opposite) number are drawn in magenta, as in the notes.
+- *(Build decision)* While drawing, counters fill rows of 4 from the bottom, left to right, so nothing moves once placed. After Check passes, the zone tidies into the balanced grid.
 - **Check** validates that each zone has the right **type** and **count**. Feedback is specific, for example:
   - *"That number is −3, so it needs 3 negatives."*
   - *"Count again — you have 4, the number is 5."*
@@ -129,6 +131,7 @@ Each move has a validator in `engine/moves.js` that returns `{ ok, feedbackKey }
 - The student taps one `+` and one `−`, and the pair gets vermillion slashes.
 - Tapping two of the same sign does nothing, with a small shake and *"A pair is one + and one −."*
 - The step is complete when only one kind is left.
+- *(Build decision)* The first tap selects a counter (dashed ring); the second tap pairs it. Tapping the selected counter again deselects it. After a same-sign tap, the first counter stays selected.
 - Party problems skip this step (it shows as done).
 
 ### ⑤ Answer
@@ -136,6 +139,7 @@ Each move has a validator in `engine/moves.js` that returns `{ ok, feedbackKey }
 - The student uses an on-screen pad: a `±` toggle plus digits.
 - Correct answer: celebrate briefly, then go to the next problem.
 - Wrong answer: *"Count who is left."* Unlimited retries.
+- *(Build decision)* The answer appears after an `=` on the student's Kalam line. The pad takes up to 2 digits. After a correct answer, the next problem loads after 2.5 s, or right away with **Next →**.
 
 **General rules:**
 - There is never a penalty.
@@ -148,9 +152,18 @@ Each level has 5 problems, generated with a seed. All |values| ≤ 12, and there
 | Level | Problem type | Example | Notes |
 |---|---|---|---|
 | 1 | positive − (negative) | 5 − (−3) | Always a Party after rewriting |
-| 2 | negative − (negative) | −2 − (−6) | Mix of Party and Battle |
+| 2 | negative − (negative) | −2 − (−6) | Always a Battle after rewriting. Mix of positive and negative answers |
 | 3 | number − positive | 2 − 6, −4 − 5 | Flip to + (−6) |
 | 4 | Mixed | 3 − (−2), −4 + (−5) | Includes 1–2 addition problems (answer: "Nothing to rewrite"). Zero answers are allowed. |
+
+**Generator rules:**
+- Operands are nonzero with |n| ≤ 12. Answers are not capped (up to 24).
+- Within a set of 5: no two problems share an answer (so no repeated problems either).
+- Levels 1–2 lean toward small numbers: problems with both numbers in 1–6 are 6× as likely to be picked. Numbers 7–12 still appear.
+- Level 2: at least 2 positive and at least 2 negative answers.
+- Level 3: at least 2 Party (negative first number) and at least 2 Battle (positive first number).
+- Level 4: 1 or 2 addition problems, the rest subtraction with any signs.
+- A new seed on each play gives a fresh set; the same seed always gives the same set. Keeping the current seed across a reload is part of Step 6 (storage).
 
 **Unlocks:**
 - Finishing a level unlocks the next one.
