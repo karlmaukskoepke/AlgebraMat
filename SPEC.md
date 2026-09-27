@@ -155,6 +155,7 @@ Each level has 5 problems, generated with a seed. All |values| ≤ 12, and there
 **Generator rules:**
 - Operands are nonzero with |n| ≤ 12. Answers are not capped (up to 24).
 - Within a set of 5: no two problems share an answer (so no repeated problems either).
+- Levels 1–2 lean toward small numbers: problems with both numbers in 1–6 are 6× as likely to be picked. Numbers 7–12 still appear.
 - Level 2: at least 2 positive and at least 2 negative answers.
 - Level 3: at least 2 Party (negative first number) and at least 2 Battle (positive first number).
 - Level 4: 1 or 2 addition problems, the rest subtraction with any signs.

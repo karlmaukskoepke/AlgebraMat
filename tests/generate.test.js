@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { generateLevel, PROBLEMS_PER_LEVEL, MAX_ABS } from '../src/engine/generate.js';
+import { generateLevel, PROBLEMS_PER_LEVEL, MAX_ABS, SMALL_MAX } from '../src/engine/generate.js';
 import { evaluate, partyOrBattle } from '../src/engine/expr.js';
 
 const SEEDS = Array.from({ length: 200 }, (_, i) => i * 7919 + 1);
@@ -78,6 +78,20 @@ describe('level-specific rules', () => {
       seen.add(adds);
     }
     expect(seen).toEqual(new Set([1, 2]));
+  });
+
+  it('levels 1–2 lean toward small numbers but still use the full range', () => {
+    const maxOp = (p) => Math.max(Math.abs(p.left.value), Math.abs(p.right.value));
+    const smallShare = (level) => {
+      const ps = SEEDS.flatMap((s) => generateLevel(level, s));
+      return count(ps, (p) => maxOp(p) <= SMALL_MAX) / ps.length;
+    };
+    for (const level of [1, 2]) {
+      expect(smallShare(level)).toBeGreaterThan(0.5);
+      expect(smallShare(level)).toBeGreaterThan(smallShare(3) + 0.2);
+      const ps = SEEDS.flatMap((s) => generateLevel(level, s));
+      expect(ps.some((p) => maxOp(p) > SMALL_MAX)).toBe(true);
+    }
   });
 
   it('rejects unknown levels', () => {

@@ -21,6 +21,14 @@ export function mulberry32(seed) {
   };
 }
 
+// Weighted random order (Efraimidis–Spirakis): higher weight → likelier to come early.
+export function weightedShuffle(arr, weight, rng) {
+  return arr
+    .map((item) => ({ item, key: rng() ** (1 / weight(item)) }))
+    .sort((x, y) => y.key - x.key)
+    .map(({ item }) => item);
+}
+
 export function shuffle(arr, rng) {
   const out = arr.slice();
   for (let i = out.length - 1; i > 0; i--) {
@@ -44,6 +52,14 @@ function pairs(as, op, bs, keep = () => true) {
   return out;
 }
 
+// Early levels lean toward short counter rows: problems with both numbers
+// in 1–6 are SMALL_WEIGHT times as likely to be picked. 7–12 still appear.
+export const SMALL_MAX = 6;
+const SMALL_WEIGHT = 6;
+const maxOperand = (p) => Math.max(Math.abs(p.left.value), Math.abs(p.right.value));
+const preferSmall = (p) => (maxOperand(p) <= SMALL_MAX ? SMALL_WEIGHT : 1);
+const even = () => 1;
+
 const any = () => true;
 const nonzero = (p) => evaluate(p) !== 0;
 const positiveAnswer = (p) => evaluate(p) > 0;
@@ -58,6 +74,7 @@ export const LEVELS = {
   // positive − (negative): always a Party after rewriting.
   1: {
     allowZero: false,
+    weight: preferSmall,
     build: () => ({
       candidates: pairs(POS, '-', NEG),
       groups: [{ test: any, count: 5 }],
@@ -66,6 +83,7 @@ export const LEVELS = {
   // negative − (negative): always a Battle; mix who wins.
   2: {
     allowZero: false,
+    weight: preferSmall,
     build: () => ({
       candidates: pairs(NEG, '-', NEG, nonzero),
       groups: [
@@ -108,7 +126,7 @@ export function generateLevel(level, seed) {
   if (!spec) throw new Error(`Unknown level: ${level}`);
   const rng = mulberry32(seed);
   const { candidates, groups } = spec.build(rng);
-  const pool = shuffle(candidates, rng);
+  const pool = weightedShuffle(candidates, spec.weight ?? even, rng);
   const usedAnswers = new Set();
   const picked = [];
 
