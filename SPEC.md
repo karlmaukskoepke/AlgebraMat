@@ -148,9 +148,17 @@ Each level has 5 problems, generated with a seed. All |values| ≤ 12, and there
 | Level | Problem type | Example | Notes |
 |---|---|---|---|
 | 1 | positive − (negative) | 5 − (−3) | Always a Party after rewriting |
-| 2 | negative − (negative) | −2 − (−6) | Mix of Party and Battle |
+| 2 | negative − (negative) | −2 − (−6) | Always a Battle after rewriting. Mix of positive and negative answers |
 | 3 | number − positive | 2 − 6, −4 − 5 | Flip to + (−6) |
 | 4 | Mixed | 3 − (−2), −4 + (−5) | Includes 1–2 addition problems (answer: "Nothing to rewrite"). Zero answers are allowed. |
+
+**Generator rules:**
+- Operands are nonzero with |n| ≤ 12. Answers are not capped (up to 24).
+- Within a set of 5: no two problems share an answer (so no repeated problems either).
+- Level 2: at least 2 positive and at least 2 negative answers.
+- Level 3: at least 2 Party (negative first number) and at least 2 Battle (positive first number).
+- Level 4: 1 or 2 addition problems, the rest subtraction with any signs.
+- A new seed on each play gives a fresh set; the same seed always gives the same set. Keeping the current seed across a reload is part of Step 6 (storage).
 
 **Unlocks:**
 - Finishing a level unlocks the next one.
