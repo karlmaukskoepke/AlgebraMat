@@ -54,6 +54,12 @@ Same shell as Flip It: header, step bar, Mat, feedback line, hint line, palette,
 - **Check** confirms every lasso holds B. Feedback: *"Each group is −2, so each lasso needs 2 negatives."* and *"This lasso has 3 — each group is −2."*
 - **Build decision:** counters inside lassos are too small to tap one at a time at 44px, so removing is done with **Undo**, not by tapping a counter.
 
+- *(Build decisions, Lasso step 3)*
+  - Before the first group is right, tapping another lasso doesn't copy it. The student gets *"Fill the first lasso first: a group of −2 is 2 negatives."*
+  - **Undo** takes back the most recent counter or copy.
+  - Tapping an already-copied lasso copies again, which refreshes it after the first lasso changed.
+  - One lasso can take up to 12 counters, and a student can draw up to 6 lassos (one more than any problem needs), so "too many" can still happen and get feedback.
+
 **④ Count.**
 - The student types the total of the groups on the pad, e.g. `−8`. It appears after `→` in the arrow chain.
 - For + groups, this is the answer, and the problem is done.
@@ -62,6 +68,7 @@ Same shell as Flip It: header, step bar, Mat, feedback line, hint line, palette,
 **⑤ Opposite** (− groups only; for + groups it shows as done):
 - Tap **opp.** Every counter turns over to its opposite and is drawn magenta, and the arrow chain shows `opp. →`.
 - Then type the final answer (`8`). Wrong: *"The opposite of −8 is…?"* (the hint gives it).
+- *(Build decision, Lasso step 3)* Until **opp.** is tapped, **Check** and the pad stay dimmed (only the current step's controls are live). The typed number appears in the arrow chain as it's entered: `→ ?` while counting, then `opp. → ?` after flipping.
 
 ### 3b. Fraction groups: 2/3(−6), −1/4(−16)
 

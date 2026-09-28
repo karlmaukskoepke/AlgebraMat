@@ -6,6 +6,9 @@
 // fraction problems, e.g. 2/3(−6):
 //   { script: 'fraction', problem, whole: [terms], parts: [{ terms, taken }],
 //     total, flipped, answer }
+// Optional, while playing: `tap` ('lassos' makes lassos tappable), `slot`
+// (show the tappable gap for the hidden 1), and `totalText` / `answerText`
+// (what's being typed on the pad, shown in the arrow chain).
 //
 // Colors carry meaning, as in the notes: blue = how many groups (A, the
 // fraction, split parts, the take bracket), green = inside a group (B, the
@@ -75,6 +78,13 @@ function problemText(s) {
   if (d > 1) parts.push(fraction(n, d));
   else if (!p.hidden1) parts.push(html('span', 'groups', `${n}`));
   else if (s.wroteOne) parts.push(html('span', 'groups written', '1'));
+  else if (s.slot) {
+    const slot = html('span', 'one-slot', '1?');
+    slot.setAttribute('data-action', 'writeOne');
+    slot.setAttribute('role', 'button');
+    slot.setAttribute('aria-label', 'Write the hidden 1');
+    parts.push(slot);
+  }
   parts.push(html('span', 'inside', `(${signed(p.inside.value)})`));
   return html('div', 'lasso-problem', ...parts);
 }
@@ -112,19 +122,22 @@ function arrow(x1, x2, y, cls) {
 
 export const CHAIN_WIDTH = 186; // first arrow → end of a two-digit answer like "−20"
 
+const has = (v) => v !== null && v !== undefined;
+
 function chain(s, x, y) {
   const g = el('g', { class: 'chain' });
-  if (s.total === null || s.total === undefined) return g;
+  const totalText = has(s.total) ? signed(s.total) : s.totalText;
+  if (!has(totalText)) return g;
   const ay = y - 9; // arrows sit at the middle of the digits
   g.append(arrow(x, x + 30, ay, 'is-ink'));
-  g.append(el('text', { x: x + 38, y, class: 'chain-total' }, [signed(s.total)]));
+  g.append(el('text', { x: x + 38, y, class: `chain-total${has(s.total) ? '' : ' is-typing'}` }, [totalText]));
   if (s.flipped) {
     const x2 = x + 96;
     g.append(el('text', { x: x2 + 17, y: ay - 11, class: 'chain-opp', 'text-anchor': 'middle' }, ['opp.']));
     g.append(line(x2 + 2, ay - 7, x2 + 32, ay - 7, 'chain-opp-underline'));
     g.append(arrow(x2, x2 + 34, ay + 4, 'is-opposite'));
-    const shownAnswer = s.answer === null || s.answer === undefined ? '?' : signed(s.answer);
-    g.append(el('text', { x: x2 + 42, y, class: 'chain-answer is-opposite' }, [shownAnswer]));
+    const shownAnswer = has(s.answer) ? signed(s.answer) : (s.answerText ?? '?');
+    g.append(el('text', { x: x2 + 42, y, class: `chain-answer is-opposite${has(s.answer) ? '' : ' is-typing'}` }, [shownAnswer]));
   }
   return g;
 }
@@ -136,7 +149,11 @@ function wholeScript(svg, s) {
   const widest = Math.max(Math.abs(s.problem.inside.value), ...s.lassos.map((l) => l.terms.length));
   const w = lassoWidth(widest);
   s.lassos.forEach((lasso, i) => {
-    const g = el('g', { class: 'lasso', 'data-lasso': i });
+    const tap = s.tap === 'lassos';
+    const g = el('g', {
+      class: `lasso${tap ? ' tappable' : ''}`, 'data-lasso': i,
+      'data-action': tap ? 'lasso' : null, 'data-index': tap ? i : null,
+    });
     g.append(el('ellipse', { cx: STACK_X, cy: ys[i], rx: w / 2, ry: LASSO_HEIGHT / 2, class: 'lasso-oval is-inside' }));
     if (lasso.opposite) {
       // A magenta minus: the sign itself is the shape cue. An underline under a

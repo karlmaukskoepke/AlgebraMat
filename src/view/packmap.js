@@ -73,7 +73,7 @@ export function renderPackMap(root, progress, packs, { onPlay, onSaveCode, onEnt
 
 // Shown in place of the Mat when the fifth problem of a level is solved.
 export function renderLevelDone(root, { pack, level, packComplete, onNext, onMap, onReplay }) {
-  const hasNext = level < pack.levels;
+  const hasNext = level < (pack.playable ?? pack.levels);
   const buttons = h('div', { class: 'level-done-actions' });
   if (hasNext) buttons.append(h('button', { type: 'button', class: 'btn btn-primary', 'data-go': 'next' }, `Level ${level + 1} →`));
   else buttons.append(h('button', { type: 'button', class: 'btn', 'data-go': 'replay' }, `Play Level ${level} again`));
@@ -81,9 +81,11 @@ export function renderLevelDone(root, { pack, level, packComplete, onNext, onMap
 
   const panel = h('section', { class: 'level-done', 'aria-live': 'polite' },
     h('h2', {}, `Level ${level} complete!`),
-    h('p', {}, packComplete && !hasNext
-      ? `You finished ${pack.title}! The Lasso pack is coming soon.`
-      : `Level ${level + 1} is open.`),
+    h('p', {}, hasNext
+      ? `Level ${level + 1} is open.`
+      : packComplete && pack.id === 'flipit'
+        ? `You finished ${pack.title}! The Lasso pack is coming soon.`
+        : packComplete ? `You finished ${pack.title}!` : `More ${pack.title} levels are coming soon.`),
     buttons);
   panel.addEventListener('click', (e) => {
     const go = e.target.closest('[data-go]')?.dataset.go;

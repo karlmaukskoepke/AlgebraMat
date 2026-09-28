@@ -22,10 +22,42 @@ Add `?seed=123` to the URL to replay a fixed problem set, and `?level=2` to open
 - `src/engine/`: pure logic, no DOM. `expr.js` (expression model), `generate.js` (seeded levels), `moves.js` (validators), `session.js` (one problem's steps as a reducer), `progress.js` (level unlocks, save code), `hints.js` (hints after 3 wrong tries), `groups.js` + `generateLasso.js` (Lasso problems).
 - `src/view/`: DOM and SVG. `mat.js`, `controls.js`, `lassoMat.js` + `lassoLayout.js` (the Lasso Mat), `packmap.js` (home and level-complete panel), `codes.js` (save-code dialogs), `feedback.js` (every message, in one table), `layout.js` (counter geometry).
 - `src/storage.js`: localStorage wrapper that falls back to memory.
+- `src/play/`: one play adapter per pack (`flipitPlay.js`, `lassoPlay.js`); `main.js` runs whichever the pack uses.
 - `src/packs/`: pack definitions (`flipit.js`; `index.js` lists every pack).
 - `tests/`: Vitest.
 
 ## Changelog
+
+### Lasso step 3: whole-number moves, playable (SPEC-LASSO.md §8.3)
+- **Engine:**
+  - `engine/lassoMoves.js` validates each move: Groups (the hidden 1, |A| lassos), + or −, Fill (each lasso holds B), Count (the total before any opposite), and Opposite (the answer after flipping).
+  - `engine/lassoSession.js` is a pure reducer through Groups → + or − → Fill → Count → Opposite.
+  - Tested move by move and with full walkthroughs of `3(−2)`, `−2(−4)` and `−(−5)` from the notes, including Undo, copy-before-ready, the caps, and moves outside their step.
+- **Play adapters (refactor):** the play screen used to be Flip It-only. Now each pack supplies an adapter, and `main.js` runs whichever the pack uses:
+  - `play/flipitPlay.js` and `play/lassoPlay.js`
+  - each adapter provides the step labels, session, Mat, controls, messages and tap handling
+  - the step bar is built from the adapter's labels
+  - the palette is rebuilt when the pack changes
+
+  Flip It behaves exactly as before: the four-level playthrough, saving and codes, hints, and the touch audit all pass.
+- **UI:**
+  - `view/lassoControls.js`: **Add lasso**, **+ groups / − groups**, the + / − palette with **Undo**, **opp.**, **Check**, and the pad.
+  - The Lasso Mat makes the hidden 1 a dashed **1?** slot and makes lassos tappable. While counting it shows `→ ?`, and after **opp.** it shows `opp. → ?`, as the number is typed.
+  - `view/lassoFeedback.js` holds every Lasso message, with a test that every key has wording.
+- **Where to play it:** `?pack=lasso&level=1` (or 2 or 3). The pack map still says Lasso is coming soon. After Level 3, the panel says more levels are coming.
+- **Verified:**
+  - 145 unit tests.
+  - A Playwright run played Lasso Levels 1–3 (15 problems) from the URL. On the first problem of each level it made every wrong move: too few lassos, the wrong group sign, copying too early, an extra counter undone, and a wrong count. It also checked the hidden 1 must be written before a lasso, and that Check and the pad wait for **opp.** No page errors.
+  - The Flip It regression runs all pass.
+- **Judgment calls** (also in SPEC-LASSO.md §3):
+  - Copying waits until the first group is right.
+  - Undo takes back the latest counter or copy.
+  - Check and the pad stay dimmed until **opp.** is tapped.
+  - At most 6 lassos and 12 counters per lasso.
+- **Not yet:**
+  - Fraction problems (step 4).
+  - Opening the Lasso card and saving Lasso progress in the level flow (step 5).
+  - Hints, animations and the touch audit for Lasso (step 6).
 
 ### Lasso step 2: the static Lasso Mat (SPEC-LASSO.md §8.2)
 - **`view/lassoMat.js`** draws both step scripts from a view state (the same state the moves will drive in steps 3–4):
