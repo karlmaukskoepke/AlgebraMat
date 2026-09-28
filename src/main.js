@@ -1,20 +1,20 @@
 import './style.css';
 import { PROBLEMS_PER_LEVEL } from './engine/generate.js';
-import { newSession, reduce, STEPS } from './engine/session.js';
-import { hintFor } from './engine/hints.js';
 import {
   completeLevel, isPackComplete, isLevelUnlocked, normalizeProgress, mergeProgress,
   encodeProgress, decodeProgress,
 } from './engine/progress.js';
 import { createStore } from './storage.js';
 import { PACKS, packById } from './packs/index.js';
-import { renderMat } from './view/mat.js';
-import { buildControls } from './view/controls.js';
-import { feedbackText } from './view/feedback.js';
+import { flipitPlay } from './play/flipitPlay.js';
+import { lassoPlay } from './play/lassoPlay.js';
 import { renderPackMap, renderLevelDone } from './view/packmap.js';
 import { showSaveCode, askForCode } from './view/codes.js';
 
 const $ = (id) => document.getElementById(id);
+
+// Each pack's play adapter: its steps, session, Mat, controls and messages.
+const PLAY = { flipit: flipitPlay, lasso: lassoPlay };
 const newSeed = () => Math.floor(Math.random() * 2 ** 32);
 
 // ?seed=123 replays a fixed set (handy for projecting the same problems to a
@@ -30,7 +30,7 @@ const saved = store.load();
 let progress = normalizeProgress(saved, PACKS);
 let homeNote = null;
 
-let play = null; // { pack, level, seed, problems, index, session, finished }
+let play = null; // { pack, adapter, level, seed, problems, index, session, finished }
 
 function persist() {
   const current = play && !play.finished
@@ -43,7 +43,19 @@ let nextTimer = null;
 const matRoot = $('mat');
 const feedback = $('feedback');
 const hintLine = $('hint');
-const controls = buildControls($('controls'), dispatch);
+
+// The palette belongs to the pack, so it's rebuilt when the pack changes
+// (on a fresh element, so old click handlers go with the old one).
+let controls = null;
+let controlsFor = null;
+function useControls(adapter) {
+  if (controlsFor === adapter) return;
+  const old = $('controls');
+  const fresh = old.cloneNode(false);
+  old.replaceWith(fresh);
+  controls = adapter.buildControls(fresh, dispatch);
+  controlsFor = adapter;
+}
 
 function showScreen(name) {
   $('home').hidden = name !== 'home';
@@ -80,10 +92,12 @@ function restoreFromCode(text) {
 function startLevel(packId, level, resume = null) {
   clearTimeout(nextTimer);
   const pack = packById(packId);
+  const adapter = PLAY[pack.id];
   const seed = resume?.seed ?? fixedSeed ?? newSeed();
   const problems = pack.generate(level, seed);
   const index = resume?.index ?? 0;
-  play = { pack, level, seed, problems, index, session: newSession(problems[index]), finished: false };
+  play = { pack, adapter, level, seed, problems, index, session: adapter.newSession(problems[index]), finished: false };
+  useControls(adapter);
   $('title').textContent = `${pack.title.toUpperCase()} · Level ${level}`;
   persist();
   showScreen('play');
@@ -94,7 +108,7 @@ function dispatch(action) {
   if (!play || play.finished) return;
   if (action.type === 'next') return nextProblem();
   const before = play.session;
-  play.session = reduce(before, action);
+  play.session = play.adapter.reduce(before, action);
   if (play.session !== before) render(before);
 }
 
@@ -102,7 +116,7 @@ function nextProblem() {
   clearTimeout(nextTimer);
   if (play.index + 1 >= PROBLEMS_PER_LEVEL) return finishLevel();
   play.index += 1;
-  play.session = newSession(play.problems[play.index]);
+  play.session = play.adapter.newSession(play.problems[play.index]);
   persist();
   render();
 }
@@ -123,10 +137,26 @@ function finishLevel() {
   });
 }
 
+// The step bar is the pack's (and, in Lasso, the problem's) list of steps.
 function renderSteps(session) {
-  const current = STEPS.indexOf(session.step);
-  $('steps').querySelectorAll('li').forEach((li, i) => {
-    const step = STEPS[i];
+  const steps = play.adapter.steps(session);
+  const bar = $('steps');
+  const labels = steps.map((x) => x.label).join('|');
+  if (bar.dataset.labels !== labels) {
+    bar.replaceChildren(...steps.map((x, i) => {
+      const li = document.createElement('li');
+      const num = document.createElement('span');
+      num.className = 'num';
+      num.textContent = String(i + 1);
+      li.append(num, ` ${x.label}`);
+      return li;
+    }));
+    bar.dataset.labels = labels;
+  }
+  const ids = steps.map((x) => x.id);
+  const current = ids.indexOf(session.step);
+  bar.querySelectorAll('li').forEach((li, i) => {
+    const step = ids[i];
     const done = session.step === 'done' || i < current || session.skipped.includes(step);
     li.classList.toggle('done', done);
     li.classList.toggle('current', !done && i === current);
@@ -145,32 +175,19 @@ function renderDots() {
   $('dots').setAttribute('aria-label', `Problem ${Math.min(index + 1, PROBLEMS_PER_LEVEL)} of ${PROBLEMS_PER_LEVEL}`);
 }
 
-// View-only effects for one render: which piece just flipped, which
-// counters were just canceled (to animate), and the current hint.
-function effects(before, session) {
-  const fx = { hint: hintFor(session), justFlipped: null, justCanceled: [] };
-  if (!before) return fx; // `before` is only passed for a move within the same problem
-  for (const part of ['op', 'sign']) {
-    if (before.flips[part] !== session.flips[part]) fx.justFlipped = part;
-  }
-  session.zones.forEach((zone, z) => zone.forEach((c, index) => {
-    if (c.canceled && !before.zones[z]?.[index]?.canceled) fx.justCanceled.push({ zone: z, index });
-  }));
-  return fx;
-}
-
 function render(before) {
   const { session, finished } = play;
-  const fx = effects(before, session);
+  const { adapter } = play;
+  const fx = adapter.effects(before, session);
   renderSteps(session);
   renderDots();
   controls.update(finished ? { ...session, step: 'levelDone' } : session, fx.hint);
   hintLine.hidden = finished || !fx.hint;
   if (finished) return;
 
-  matRoot.replaceChildren(renderMat(session, fx));
-  hintLine.textContent = fx.hint ? `Hint: ${feedbackText(fx.hint)}` : '';
-  feedback.textContent = feedbackText(session.feedback);
+  matRoot.replaceChildren(adapter.renderMat(session, fx));
+  hintLine.textContent = fx.hint ? `Hint: ${adapter.feedbackText(fx.hint)}` : '';
+  feedback.textContent = adapter.feedbackText(session.feedback);
   // restart the shake/celebrate animation on repeated messages
   feedback.classList.remove('bad', 'celebrate');
   void feedback.offsetWidth;
@@ -184,11 +201,9 @@ function render(before) {
 
 matRoot.addEventListener('click', (e) => {
   const t = e.target.closest('[data-action]');
-  if (!t) return;
-  const { action, part, zone, index: i } = t.dataset;
-  if (action === 'flip') dispatch({ type: 'flip', part });
-  if (action === 'zone') dispatch({ type: 'tapZone', zone: Number(zone) });
-  if (action === 'counter') dispatch({ type: 'tapCounter', zone: Number(zone), index: Number(i) });
+  if (!t || !play) return;
+  const action = play.adapter.matAction(t.dataset);
+  if (action) dispatch(action);
 });
 
 $('back').addEventListener('click', goHome);
@@ -205,13 +220,17 @@ function savedCurrent() {
   return ok ? c : null;
 }
 
+// ?level=N opens a Flip It level; ?pack=lasso&level=N opens a Lasso level
+// (only the levels built so far, until the Lasso card opens in Lasso step 5).
 const urlLevel = Number(params.get('level'));
+const urlPack = packById(params.get('pack') ?? 'flipit');
 const resume = savedCurrent();
 if (params.get('demo') === 'lasso') {
   // Lasso step 2: a static preview of the Lasso Mat (loaded only on this URL).
   import('./view/lassoDemo.js').then((m) => m.showLassoDemo(document.body));
-} else if (Number.isInteger(urlLevel) && urlLevel >= 1 && urlLevel <= packById('flipit').levels) {
-  startLevel('flipit', urlLevel);
+} else if (urlPack && PLAY[urlPack.id] && Number.isInteger(urlLevel) && urlLevel >= 1
+  && urlLevel <= (urlPack.playable ?? urlPack.levels)) {
+  startLevel(urlPack.id, urlLevel);
 } else if (resume) {
   startLevel(resume.pack, resume.level, resume);
 } else {

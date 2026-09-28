@@ -980,3 +980,41 @@ body {
   font-size: 17px;
   color: var(--muted);
 }
+
+/* Playing the Lasso Mat */
+.lasso-mat .lasso.tappable {
+  cursor: pointer;
+}
+
+.lasso-mat .lasso.tappable .lasso-oval {
+  fill: transparent;
+  pointer-events: all;
+}
+
+.lasso-mat .chain .is-typing {
+  opacity: 0.75;
+}
+
+.one-slot {
+  display: inline-grid;
+  place-items: center;
+  min-width: 48px;
+  min-height: 52px;
+  margin: 0 2px;
+  border: 2px dashed var(--groups);
+  border-radius: 10px;
+  color: var(--groups);
+  font: 700 28px 'Kalam', cursive;
+  cursor: pointer;
+}
+
+/* Lasso buttons carry the opposite color: the word "opp." is underlined; a lone minus isn't. */
+.btn .opp-word {
+  color: var(--opposite);
+}
+
+.btn[data-action="flip"] .opp-word {
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+}
