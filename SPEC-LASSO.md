@@ -1,4 +1,4 @@
-# The Mat — Lasso pack spec (DRAFT for Karl's review)
+# The Mat — Lasso pack spec (approved 2026-09-28)
 
 *This builds on SPEC.md: same engine, screen shell, rules (no timers, no penalties, hints after 3 wrong tries), storage and save code. Only what's new or different is written here. The source is Mr. Mauks's notes, "Integers & Algebraic Expressions", page 1 (Multiplication) and page 2 (A fraction of a group), plus Karl's answers on 2026-09-28.*
 
@@ -44,7 +44,7 @@ Same shell as Flip It: header, step bar, Mat, feedback line, hint line, palette,
 
 **③ Fill.**
 - Pick + or − in the palette, then tap the first lasso to add counters, one per tap. **Undo** removes the last one.
-- Once the first lasso is right, **Copy group** fills the next empty lasso on each tap.
+- Once the first lasso is right, the student taps each remaining lasso to copy the group into it: one tap fills one lasso (Karl's choice).
 - **Check** confirms every lasso holds B. Feedback: *"Each group is −2, so each lasso needs 2 negatives."* and *"This lasso has 3 — each group is −2."*
 - **Build decision:** counters inside lassos are too small to tap one at a time at 44px, so removing is done with **Undo**, not by tapping a counter.
 
@@ -93,11 +93,22 @@ Each level has 5 problems, the same generator rules as Flip It (seeded, no repea
 
 - **Counter limits:** at most 20 counters on the Mat, at most 5 lassos of at most 5 counters for whole-number groups, and at most 12 counters to deal in fraction problems. That keeps every tap target at 44px on a Chromebook window (1366×657).
 - **Unlocks:** finishing a level unlocks the next, as in Flip It.
-- **Proposal: Lasso is open from the start.** It's a separate topic, and teachers may assign it directly, so it wouldn't need Flip It finished first.
+- **Lasso is open from the start** (Karl's choice). It doesn't need Flip It finished first.
 
 ## 5. Pack map and future packs
 
 - Lasso becomes a playable card.
+- **Every pack card gets a subtitle that names the math** (Karl's choice):
+
+  | Pack | Subtitle |
+  |---|---|
+  | Flip It | Subtraction with negative numbers |
+  | Lasso | The meaning of multiplication as groups and opposites |
+  | Boxes & Circles | Combining like terms |
+  | Groups of Terms | The distributive property |
+  | Distribute, then combine | Distributing, then combining like terms |
+
+  The subtitle sits under the pack name, with the short blurb below it.
 - Add "Coming soon" cards, in order, for the next packs in the notes:
   - **Boxes & Circles** (combining like terms: mystery boxes for x)
   - **Groups of Terms** (distributive property)
@@ -130,9 +141,9 @@ Each level has 5 problems, the same generator rules as Flip It (seeded, no repea
 5. Lasso level flow on the pack map, the new "Coming soon" cards, and saving.
 6. Lasso hints, the flip animation for groups, and the touch-target audit at 1366×657.
 
-## 9. Open questions for Karl
+## 9. Decisions (Karl, 2026-09-28)
 
-1. **Order inside ① and ②:** your notes draw the groups, then take the opposite of the *total*. Your message says to mark each lasso as opposite *before* filling. This draft does both: the − marks go on in ②, and the counters flip in ⑤. OK?
-2. **Is Lasso open from the start,** or does it unlock after Flip It?
-3. **Limits:** up to 5 groups of up to 5 (and fractions of up to 12). Too big, too small?
-4. **Copy group:** one tap per lasso (as drafted), or one tap fills all the rest?
+1. **Opposite:** the magenta "−" goes on each lasso in ②, and the counters flip at the end in ⑤. One tap on **opp.** flips every group at once.
+2. **Lasso is open from the start.** Every pack card gets a subtitle naming the math (§5).
+3. **Numbers stay limited as drafted.** The goal is conceptual depth, not fluency across the number system. Bigger ranges can come later.
+4. **Filling:** the student taps each lasso to fill it, one tap per lasso, with no "fill all" button.
