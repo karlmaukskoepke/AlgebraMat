@@ -70,31 +70,51 @@ export function mergeProgress(a, b) {
 
 // ---------- Save code ----------
 //
-// "MAT-" + 4 symbols: [version][data][data][checksum].
-// Symbols: 31 characters with no look-alikes (no 0/O, no 1/I/L). The SPEC
-// says "base32", but taking those five out of 0–9A–Z leaves 31, so the code
-// is base 31. v1 data is a bitmask of finished levels, packed in PACK_BITS
-// order: Flip It uses bits 0–3, and the rest of the two data symbols
-// (31² = 961 values, about 9 bits) is room for the next pack. A future
-// version symbol can change the layout.
+// "MAT-" + [version][data…][checksum], using 31 symbols with no look-alikes
+// (no 0/O, no 1/I/L). The SPEC says "base32", but removing those five from
+// 0–9A–Z leaves 31, so codes are base 31. Data is a bitmask of finished
+// levels, packed in each layout's pack order.
+//
+//   v1: 2 data symbols (961 values):    Flip It (4 bits)          → MAT-XXXX
+//   v2: 3 data symbols (29,791 values): Flip It (4) + Lasso (7)   → MAT-XXXXX
+//
+// New codes are always v2; v1 codes (written down before Lasso) still work.
+// v2 leaves 3 spare bits (about 14.8 in all) for one more small pack.
 
 export const CODE_ALPHABET = '23456789ABCDEFGHJKMNPQRSTUVWXYZ';
 export const CODE_PREFIX = 'MAT';
 const BASE = CODE_ALPHABET.length; // 31 (prime, which makes the checksum strong)
-const CODE_VERSION = 1;
-const PACK_BITS = [{ id: 'flipit', levels: 4 }];
+const LAYOUTS = {
+  1: { data: 2, packs: [{ id: 'flipit', levels: 4 }] },
+  2: { data: 3, packs: [{ id: 'flipit', levels: 4 }, { id: 'lasso', levels: 7 }] },
+};
+export const CODE_VERSION = 2;
 
+// Weighted sum mod 31. Weights 2, 3, 4, … are all nonzero mod 31 and differ
+// by 1 between neighbors, so any single typo or neighbor swap is caught.
 const checksum = (values) => values.reduce((sum, v, i) => sum + (i + 2) * v, 0) % BASE;
 
-export function encodeProgress(progress) {
+function toDigits(value, count) {
+  const out = [];
+  for (let i = 0; i < count; i++) {
+    out.unshift(value % BASE);
+    value = Math.floor(value / BASE);
+  }
+  return out;
+}
+
+const fromDigits = (digits) => digits.reduce((v, x) => v * BASE + x, 0);
+
+export function encodeProgress(progress, version = CODE_VERSION) {
+  const layout = LAYOUTS[version];
   let bits = 0;
   let shift = 0;
-  for (const { id, levels } of PACK_BITS) {
+  for (const { id, levels } of layout.packs) {
     const done = progress.packs[id]?.levels ?? [];
-    for (let i = 0; i < levels; i++) if (done[i] === true) bits |= 1 << (shift + i);
+    for (let i = 0; i < levels; i++) if (done[i] === true) bits += 2 ** (shift + i);
     shift += levels;
   }
-  const values = [CODE_VERSION, Math.floor(bits / BASE), bits % BASE];
+  const values = [version, ...toDigits(bits, layout.data)];
   values.push(checksum(values));
   return `${CODE_PREFIX}-${values.map((v) => CODE_ALPHABET[v]).join('')}`;
 }
@@ -104,19 +124,24 @@ export function encodeProgress(progress) {
 export function decodeProgress(code, packs) {
   if (typeof code !== 'string') return null;
   let s = code.toUpperCase().replace(/[\s-]/g, '');
-  if (s.startsWith(CODE_PREFIX) && s.length === CODE_PREFIX.length + 4) s = s.slice(CODE_PREFIX.length);
-  if (s.length !== 4) return null;
+  const lengths = Object.values(LAYOUTS).map((l) => l.data + 2);
+  if (s.startsWith(CODE_PREFIX) && lengths.includes(s.length - CODE_PREFIX.length)) s = s.slice(CODE_PREFIX.length);
   const values = [...s].map((ch) => CODE_ALPHABET.indexOf(ch));
-  if (values.some((v) => v < 0)) return null;
-  const [version, hi, lo, check] = values;
-  if (checksum([version, hi, lo]) !== check || version !== CODE_VERSION) return null;
-  const bits = hi * BASE + lo;
+  if (values.length < 3 || values.some((v) => v < 0)) return null;
+  const [version] = values;
+  const layout = LAYOUTS[version];
+  if (!layout || values.length !== layout.data + 2) return null;
+  const check = values[values.length - 1];
+  const body = values.slice(0, -1);
+  if (checksum(body) !== check) return null;
+
+  const bits = fromDigits(body.slice(1));
   const raw = { packs: {} };
   let shift = 0;
-  for (const { id, levels } of PACK_BITS) {
-    raw.packs[id] = { levels: Array.from({ length: levels }, (_, i) => Boolean(bits & (1 << (shift + i)))) };
+  for (const { id, levels } of layout.packs) {
+    raw.packs[id] = { levels: Array.from({ length: levels }, (_, i) => Math.floor(bits / 2 ** (shift + i)) % 2 === 1) };
     shift += levels;
   }
-  if (bits >= 1 << shift) return null; // bits set for packs that don't exist yet
+  if (bits >= 2 ** shift) return null; // bits set for packs this version doesn't have
   return normalizeProgress(raw, packs);
 }

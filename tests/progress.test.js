@@ -7,14 +7,19 @@ import { PACKS } from '../src/packs/index.js';
 describe('progress', () => {
   const fresh = newProgress(PACKS);
 
-  it('starts with every Flip It level unfinished and no entry for coming-soon packs', () => {
-    expect(fresh).toEqual({ v: 1, packs: { flipit: { levels: [false, false, false, false] } } });
+  it('starts with every level of every pack unfinished', () => {
+    expect(fresh).toEqual({
+      v: 1,
+      packs: { flipit: { levels: Array(4).fill(false) }, lasso: { levels: Array(7).fill(false) } },
+    });
   });
 
   it('opens Level 1 only, at first', () => {
     expect([1, 2, 3, 4].map((l) => isLevelUnlocked(fresh, 'flipit', l))).toEqual([true, false, false, false]);
     expect(isLevelUnlocked(fresh, 'flipit', 5)).toBe(false);
-    expect(isLevelUnlocked(fresh, 'lasso', 1)).toBe(false);
+    // Lasso is open from the start (SPEC-LASSO.md §4), independent of Flip It.
+    expect(isLevelUnlocked(fresh, 'lasso', 1)).toBe(true);
+    expect(isLevelUnlocked(fresh, 'lasso', 2)).toBe(false);
     expect(nextLevel(fresh, 'flipit')).toBe(1);
   });
 
@@ -43,6 +48,7 @@ describe('progress', () => {
 
   it('rejects levels that do not exist', () => {
     expect(() => completeLevel(fresh, 'flipit', 5)).toThrow();
-    expect(() => completeLevel(fresh, 'lasso', 1)).toThrow();
+    expect(() => completeLevel(fresh, 'lasso', 8)).toThrow();
+    expect(() => completeLevel(fresh, 'nope', 1)).toThrow();
   });
 });

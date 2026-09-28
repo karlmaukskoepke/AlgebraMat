@@ -92,6 +92,12 @@ Each level has 5 problems, the same generator rules as Flip It (seeded, no repea
 | 7 | Opposite fraction | −2/3(−6) | as Level 6 |
 
 - **Counter limits:** at most 20 counters on the Mat, at most 5 lassos of at most 5 counters for whole-number groups, and at most 12 counters to deal in fraction problems. That keeps every tap target at 44px on a Chromebook window (1366×657).
+- *(Build decisions, Lasso step 1)*
+  - **Level 2's single lasso holds up to 8 counters.** The level table allows B up to ±8, which overrides the general "at most 5 per lasso" limit; one lasso of 8 still fits.
+  - **Fractions are in lowest terms:** unit fractions 1/2 through 1/6, and non-unit 2/3, 3/4, 2/5, 3/5, 4/5, 5/6. Unreduced forms like 4/6 are left out, to keep to the friendly fractions in the notes.
+  - **Every level mixes signs inside the groups:** at least 2 positive and 2 negative values of B. Level 2 needs 1 of each, plus its 2 hidden-1 problems.
+  - **Levels 1–2 lean small:** problems with at most 10 counters are 4× as likely.
+  - **Seeds:** the level number is mixed into the seed, so paired levels (1 and 3, 4 and 5, 6 and 7) don't mirror each other under one `?seed=` link.
 - **Unlocks:** finishing a level unlocks the next, as in Flip It.
 - **Lasso is open from the start** (Karl's choice). It doesn't need Flip It finished first.
 
@@ -120,6 +126,7 @@ Each level has 5 problems, the same generator rules as Flip It (seeded, no repea
 - Lasso adds 7 level bits, 11 in all, which is more than v1's two data symbols hold (961 values, about 9.9 bits).
 - **v2:** `MAT-` plus 5 symbols (version, 3 data symbols, checksum). That's 29,791 values, about 14.8 bits, which leaves room for one more pack.
 - v1 codes still decode.
+- *(Build decision, Lasso step 1)* New codes are always v2, even before Lasso is playable. Codes students write down now will keep working once Lasso ships. The version symbol shows the format: v1 codes start `MAT-3…`, and v2 codes start `MAT-4…`.
 
 ## 7. Required tests (Vitest)
 

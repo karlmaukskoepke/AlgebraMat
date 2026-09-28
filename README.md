@@ -19,13 +19,41 @@ Add `?seed=123` to the URL to replay a fixed problem set, and `?level=2` to open
 
 ## Layout
 
-- `src/engine/`: pure logic, no DOM. `expr.js` (expression model), `generate.js` (seeded levels), `moves.js` (validators), `session.js` (one problem's steps as a reducer), `progress.js` (level unlocks, save code), `hints.js` (hints after 3 wrong tries).
+- `src/engine/`: pure logic, no DOM. `expr.js` (expression model), `generate.js` (seeded levels), `moves.js` (validators), `session.js` (one problem's steps as a reducer), `progress.js` (level unlocks, save code), `hints.js` (hints after 3 wrong tries), `groups.js` + `generateLasso.js` (Lasso problems).
 - `src/view/`: DOM and SVG. `mat.js`, `controls.js`, `packmap.js` (home and level-complete panel), `codes.js` (save-code dialogs), `feedback.js` (every message, in one table), `layout.js` (counter geometry).
 - `src/storage.js`: localStorage wrapper that falls back to memory.
 - `src/packs/`: pack definitions (`flipit.js`; `index.js` lists every pack).
 - `tests/`: Vitest.
 
 ## Changelog
+
+### Lasso step 1: engine, 7-level generator, save code v2 (SPEC-LASSO.md §8.1)
+- **`engine/groups.js`:** the group-problem model for A(B), meaning A groups of B.
+  - A is a sign plus a fraction n/d (d = 1 for whole numbers), with a `hidden1` flag for problems written −(B).
+  - B is a term (`{ kind: 'int', value }`), which leaves room for variable terms in Groups of Terms.
+  - It computes the lasso count, the part size, the total before any opposite (the notes' "→ −8"), and the answer.
+  - It formats problems as `3(−2)`, `−(−5)`, `−1(−5)`, `2/3(−6)`.
+  - Tested against every worked example in the notes.
+- **`engine/generateLasso.js`:** seeded 5-problem sets for all 7 levels, within SPEC-LASSO.md §4's limits.
+  - Flip It's set-picking code moved into a shared `pickSet` in `generate.js`, so both packs follow the same rules: seeded, no repeated answers, required mixes.
+  - Flip It's sets are unchanged, and old `?seed=` links give the same problems.
+- **Save code v2:** `MAT-` plus 5 symbols (version, 3 data symbols, checksum) covers Flip It's 4 levels and Lasso's 7, with 3 bits to spare.
+  - New codes start `MAT-4…`.
+  - v1 codes (`MAT-3…`) still decode.
+  - Tested: round-trips all 2,048 two-pack states, rejects every single-letter typo and swap of two neighboring letters, rejects unknown versions, and restores the real v1 code `MAT-3238` both in the tests and in the browser.
+- **Progress:** Lasso's 7 levels are now counted in progress and in codes, and progress saved before Lasso still loads. The Lasso card stays "Coming soon" until step 5.
+- **Verified:**
+  - 124 unit tests.
+  - Re-ran the Flip It browser runs: storage and save codes (now 5 letters, plus an old v1 code), the four-level playthrough, the hints, and the touch audit at 1366×657 and 1280×610.
+  - All clean, no page errors.
+- **Judgment calls** (also in SPEC-LASSO.md §4 and §6):
+  - Level 2's single lasso holds up to 8 counters.
+  - Fractions are in lowest terms only.
+  - Every level mixes the sign of B.
+  - Levels 1–2 lean toward totals of 10 or less.
+  - The level number is mixed into the seed so paired levels don't mirror each other.
+  - New codes are always v2.
+- **Nothing visible changes for students yet,** except that save codes are one letter longer.
 
 ### Step 7: polish (SPEC §9 step 7). This completes the v1 build order.
 - **Hints after 3 wrong tries** (`engine/hints.js`, pure and tested). The hint shows on a second line and never makes the move:
