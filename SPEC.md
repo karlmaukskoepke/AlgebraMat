@@ -240,7 +240,7 @@ Each level has 5 problems, generated with a seed. All |values| ≤ 12, and there
 
 ## 10. Out of scope for v1
 
-- Lasso and all other packs (only a locked card appears).
+- Lasso and all other packs (only a locked card appears). *The Lasso pack is specified in [SPEC-LASSO.md](SPEC-LASSO.md).*
 - Integer Wars linking.
 - Sound.
 - Teacher dashboard or any data collection.
