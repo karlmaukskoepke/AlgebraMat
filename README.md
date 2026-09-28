@@ -20,12 +20,30 @@ Add `?seed=123` to the URL to replay a fixed problem set, and `?level=2` to open
 ## Layout
 
 - `src/engine/`: pure logic, no DOM. `expr.js` (expression model), `generate.js` (seeded levels), `moves.js` (validators), `session.js` (one problem's steps as a reducer), `progress.js` (level unlocks, save code), `hints.js` (hints after 3 wrong tries), `groups.js` + `generateLasso.js` (Lasso problems).
-- `src/view/`: DOM and SVG. `mat.js`, `controls.js`, `packmap.js` (home and level-complete panel), `codes.js` (save-code dialogs), `feedback.js` (every message, in one table), `layout.js` (counter geometry).
+- `src/view/`: DOM and SVG. `mat.js`, `controls.js`, `lassoMat.js` + `lassoLayout.js` (the Lasso Mat), `packmap.js` (home and level-complete panel), `codes.js` (save-code dialogs), `feedback.js` (every message, in one table), `layout.js` (counter geometry).
 - `src/storage.js`: localStorage wrapper that falls back to memory.
 - `src/packs/`: pack definitions (`flipit.js`; `index.js` lists every pack).
 - `tests/`: Vitest.
 
 ## Changelog
+
+### Lasso step 2: the static Lasso Mat (SPEC-LASSO.md §8.2)
+- **`view/lassoMat.js`** draws both step scripts from a view state (the same state the moves will drive in steps 3–4):
+  - **Whole-number groups:** a stack of green lassos with green counters. Opposite groups get a magenta minus in front. After flipping, the counters turn to their opposites in magenta. The arrow chain reads **→ −8**, then a magenta **opp.** arrow to **8**.
+  - **Fraction groups:** the whole group (green) in the left column; the split parts (blue) stacked on the right; a blue **take n** bracket beside the taken parts, with parts not taken faded; then the same arrow chain.
+  - **The left column:** the problem in meaning colors (magenta minus, blue group count or stacked fraction, green inside), what it means in words as in the notes ("opposite of 2 groups of −4", "2/3 of a group of −6"), and the final line in Kalam. The hidden 1 shows as a written blue 1.
+- **`view/lassoLayout.js`:** tested geometry. The biggest cases fit the drawing: 5 lassos, the widest lasso (8), sixths, halves of 12, and the full arrow chain.
+- **Preview:** `?demo=lasso` shows 7 hard-coded problems: `3(−2)`, `−2(−4)`, `−(−5)`, `−3(4)`, `2/3(−6)`, `−1/4(−12)` mid-split, and `−3/5(10)`. It's loaded only on that URL; the pack map still says Lasso is coming soon.
+- **Verified:**
+  - 131 unit tests.
+  - Screenshots of all 7 previews, compared against the notes.
+  - Re-ran Flip It's storage/save-code run and the four-level playthrough. No page errors.
+- **Judgment calls** (also in SPEC-LASSO.md §2):
+  - The two-column layout (the one-column paper layout would shrink the lassos below 44px).
+  - Magenta underlines are for words only; a lone magenta minus isn't underlined because it would read as "=".
+  - Parts that aren't taken fade.
+  - Arrows are drawn shapes, not font characters.
+  - The preview lives at `?demo=lasso`.
 
 ### Lasso step 1: engine, 7-level generator, save code v2 (SPEC-LASSO.md §8.1)
 - **`engine/groups.js`:** the group-problem model for A(B), meaning A groups of B.
