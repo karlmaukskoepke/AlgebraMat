@@ -121,12 +121,10 @@ export const LEVELS = {
   },
 };
 
-export function generateLevel(level, seed) {
-  const spec = LEVELS[level];
-  if (!spec) throw new Error(`Unknown level: ${level}`);
-  const rng = mulberry32(seed);
-  const { candidates, groups } = spec.build(rng);
-  const pool = weightedShuffle(candidates, spec.weight ?? even, rng);
+// Shared by every pack: order the candidates (weighted, seeded), then fill
+// each group in turn without reusing an answer, then shuffle the set.
+export function pickSet({ candidates, groups, weight = even, answerOf, rng, label }) {
+  const pool = weightedShuffle(candidates, weight, rng);
   const usedAnswers = new Set();
   const picked = [];
 
@@ -134,14 +132,22 @@ export function generateLevel(level, seed) {
     let got = 0;
     for (const p of pool) {
       if (got === count) break;
-      const answer = evaluate(p);
+      const answer = answerOf(p);
       if (usedAnswers.has(answer) || !test(p)) continue;
       usedAnswers.add(answer);
       picked.push(p);
       got++;
     }
-    if (got < count) throw new Error(`Level ${level}: could not fill group`);
+    if (got < count) throw new Error(`${label}: could not fill group`);
   }
 
   return shuffle(picked, rng);
+}
+
+export function generateLevel(level, seed) {
+  const spec = LEVELS[level];
+  if (!spec) throw new Error(`Unknown level: ${level}`);
+  const rng = mulberry32(seed);
+  const { candidates, groups } = spec.build(rng);
+  return pickSet({ candidates, groups, weight: spec.weight, answerOf: evaluate, rng, label: `Level ${level}` });
 }
