@@ -1,6 +1,7 @@
 import './style.css';
 import { PROBLEMS_PER_LEVEL } from './engine/generate.js';
 import { newSession, reduce, STEPS } from './engine/session.js';
+import { hintFor } from './engine/hints.js';
 import {
   completeLevel, isPackComplete, isLevelUnlocked, normalizeProgress, mergeProgress,
   encodeProgress, decodeProgress,
@@ -41,6 +42,7 @@ let nextTimer = null;
 
 const matRoot = $('mat');
 const feedback = $('feedback');
+const hintLine = $('hint');
 const controls = buildControls($('controls'), dispatch);
 
 function showScreen(name) {
@@ -143,14 +145,31 @@ function renderDots() {
   $('dots').setAttribute('aria-label', `Problem ${Math.min(index + 1, PROBLEMS_PER_LEVEL)} of ${PROBLEMS_PER_LEVEL}`);
 }
 
+// View-only effects for one render: which piece just flipped, which
+// counters were just canceled (to animate), and the current hint.
+function effects(before, session) {
+  const fx = { hint: hintFor(session), justFlipped: null, justCanceled: [] };
+  if (!before) return fx; // `before` is only passed for a move within the same problem
+  for (const part of ['op', 'sign']) {
+    if (before.flips[part] !== session.flips[part]) fx.justFlipped = part;
+  }
+  session.zones.forEach((zone, z) => zone.forEach((c, index) => {
+    if (c.canceled && !before.zones[z]?.[index]?.canceled) fx.justCanceled.push({ zone: z, index });
+  }));
+  return fx;
+}
+
 function render(before) {
   const { session, finished } = play;
+  const fx = effects(before, session);
   renderSteps(session);
   renderDots();
-  controls.update(finished ? { ...session, step: 'levelDone' } : session);
+  controls.update(finished ? { ...session, step: 'levelDone' } : session, fx.hint);
+  hintLine.hidden = finished || !fx.hint;
   if (finished) return;
 
-  matRoot.replaceChildren(renderMat(session));
+  matRoot.replaceChildren(renderMat(session, fx));
+  hintLine.textContent = fx.hint ? `Hint: ${feedbackText(fx.hint)}` : '';
   feedback.textContent = feedbackText(session.feedback);
   // restart the shake/celebrate animation on repeated messages
   feedback.classList.remove('bad', 'celebrate');

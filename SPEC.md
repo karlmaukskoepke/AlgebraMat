@@ -75,6 +75,8 @@ tests/
 
 **Touch targets:** at least 44×44px. Nothing depends on hover. Every color cue has a shape cue as well (underline, slash).
 
+*(Build decision, Step 7)* The touch-target audit uses what a Chromebook's browser window actually shows: 1366×657 (a 768px screen minus tabs and address bar) and 1280×610. The play screen fits the window with no scrolling, and the Mat grows to fill whatever height is left, so counters stay at 44px or more (55px at 1366×657 with a hint showing). On phones the Mat is limited by screen width and counters come out smaller than 44px. Phones aren't a v1 target.
+
 ## 4. Screen layout
 
 ```
@@ -144,6 +146,13 @@ Each move has a validator in `engine/moves.js` that returns `{ ok, feedbackKey }
 **General rules:**
 - There is never a penalty.
 - After 3 wrong tries on the same step, show a hint that demonstrates the move (for example, the flip animates itself). The student still has to do it.
+- *(Build decisions, Step 7)* Hints appear on a second line under the feedback ("Hint: …") and clear when the step changes. Each one shows the move without making it:
+  - **Rewrite:** the pieces still unflipped keep demonstrating a flip. On an addition problem, **Nothing to rewrite** pulses.
+  - **Draw:** faint dashed "ghost" counters show exactly what goes where, and the hint names the type and count.
+  - **Party or Battle:** both signed numbers pulse, and the hint says whether their signs are the same or different.
+  - **Cancel:** one + and one − blink, each with a dashed ring.
+  - **Answer:** the surviving counters blink, and the hint says which sign survived (not how many).
+- *(Build decisions, Step 7)* Motion: a flipped piece turns over like a card (0.35 s), and a cancel slash draws itself in (0.3 s). Canceled counters fade to 45% so the survivors stand out. Every animation is off when the device asks for reduced motion.
 
 ## 6. Flip It pack
 

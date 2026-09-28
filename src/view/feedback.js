@@ -38,6 +38,19 @@ export const FEEDBACK = {
   typeAnswer: () => 'Type a number first.',
   countWhoIsLeft: () => 'Count who is left.',
   correct: ({ answer }) => `Yes! The answer is ${signed(answer)}.`,
+
+  // Hints, shown after 3 wrong tries on a step. They show the move; the
+  // student still makes it.
+  hintRewrite: () => 'Watch the wiggling signs: tap each one to flip it.',
+  hintNothing: () => 'It already says +. Tap “Nothing to rewrite.”',
+  hintDraw: ({ left, right }) =>
+    `Draw ${kind(left > 0 ? '+' : '-', Math.abs(left))} on the left and ${kind(right > 0 ? '+' : '-', Math.abs(right))} on the right. The faint ones show where.`,
+  hintPartyBattle: ({ a, b, same }) =>
+    `${signed(a)} is ${a > 0 ? 'positive' : 'negative'} and ${signed(b)} is ${b > 0 ? 'positive' : 'negative'}: ${same ? 'same signs, so it’s a Party.' : 'different signs, so it’s a Battle.'}`,
+  hintCancel: () => 'Tap the two blinking counters: one + and one −.',
+  hintAnswer: ({ sign, none }) => (none
+    ? 'Every counter canceled. Nobody is left.'
+    : `Count the ones without a slash. They are ${sign === '+' ? 'positives' : 'negatives'}.`),
 };
 
 export function feedbackText(fb) {

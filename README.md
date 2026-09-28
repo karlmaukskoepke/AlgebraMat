@@ -19,13 +19,40 @@ Add `?seed=123` to the URL to replay a fixed problem set, and `?level=2` to open
 
 ## Layout
 
-- `src/engine/`: pure logic, no DOM. `expr.js` (expression model), `generate.js` (seeded levels), `moves.js` (validators), `session.js` (one problem's steps as a reducer), `progress.js` (level unlocks, save code).
+- `src/engine/`: pure logic, no DOM. `expr.js` (expression model), `generate.js` (seeded levels), `moves.js` (validators), `session.js` (one problem's steps as a reducer), `progress.js` (level unlocks, save code), `hints.js` (hints after 3 wrong tries).
 - `src/view/`: DOM and SVG. `mat.js`, `controls.js`, `packmap.js` (home and level-complete panel), `codes.js` (save-code dialogs), `feedback.js` (every message, in one table), `layout.js` (counter geometry).
 - `src/storage.js`: localStorage wrapper that falls back to memory.
 - `src/packs/`: pack definitions (`flipit.js`; `index.js` lists every pack).
 - `tests/`: Vitest.
 
 ## Changelog
+
+### Step 7: polish (SPEC §9 step 7). This completes the v1 build order.
+- **Hints after 3 wrong tries** (`engine/hints.js`, pure and tested). The hint shows on a second line and never makes the move:
+  - **Rewrite:** the unflipped pieces demonstrate a flip. On an addition problem, **Nothing to rewrite** pulses.
+  - **Draw:** ghost counters show exactly what goes where.
+  - **Party or Battle:** both signed numbers pulse, and the hint says same or different signs.
+  - **Cancel:** one valid pair blinks.
+  - **Answer:** the surviving counters blink, and the hint names their sign.
+- **Animations:** a flipped piece turns over like a card, and cancel slashes draw themselves in. Canceled counters fade so the survivors are easy to count. Everything turns off when the device asks for reduced motion.
+- **Touch-target audit:** an automated Playwright check measures every enabled button, input and Mat target at every step, plus the pack map and both dialogs. It runs at 1366×768, 1280×720, and the sizes a Chromebook's browser window actually shows: **1366×657** and **1280×610**.
+  - **Found:** at 1366×657, counters were 37px, below 44. The Mat was capped by a fixed CSS guess at the height of everything else on the screen.
+  - **Fixed:**
+    - The play screen now fits the window exactly, and the Mat fills whatever height is left.
+    - The Mat's drawing area drops an unused strip along its top edge.
+    - Spacing tightens on short screens.
+  - **Result:** everything is 44px or more at all four sizes (counters are 55px at 1366×657 even with a hint showing), with no scrolling.
+- **Bug found and fixed during verification:** the flip animation never played, because the code compared problem objects by identity and every move makes a fresh copy of the state.
+- **Verified:**
+  - 93 unit tests.
+  - A Playwright hint run checked each hint appears on the 3rd wrong try (not the 2nd), points at the right pieces, clears when the step changes, and leaves the problem solvable. It also checked both animations fire and that reduced motion turns them off.
+  - The touch audit is clean at all four sizes.
+  - Re-ran the Step 5 four-level run and the Step 6 storage/save-code run. No page errors.
+- **Judgment calls** (also in SPEC §3 and §5):
+  - The Answer hint names the sign that survived but not the count.
+  - Canceled counters fade to 45%.
+  - Hints use a second line instead of replacing the feedback message.
+- **Known limit:** on phones, Mat counters are smaller than 44px because the Mat is sized by screen width. Phones aren't a v1 target.
 
 ### Step 6: saving progress and the save code (SPEC §7)
 - **Storage:** `src/storage.js` wraps localStorage under the one key `mat.v1`. Every read and write is in try/catch. If storage is missing, throws, is corrupt, or hits a quota error partway through, the site keeps working from memory, and the home screen shows a quiet note.
@@ -95,9 +122,7 @@ Add `?seed=123` to the URL to replay a fixed problem set, and `?level=2` to open
   - During Cancel, a same-sign second tap shakes, and the first counter stays selected.
   - The answer goes after `=` on the Kalam line. The next problem loads after 2.5 s, or on **Next →**.
   - Added the `?seed=` URL option.
-- **Deferred:**
-  - Hints after 3 wrong tries go to Step 7. Wrong tries are already counted per step (`session.tries`).
-  - Flip and cancel animations go to Step 7. There's only a small shake and celebrate for now.
+- **Deferred** (done in Step 7): hints after 3 wrong tries, and the flip and cancel animations.
 - **Temporary** (replaced in Step 5): the page played endless Level 4 sets.
 
 ### Step 3: static Mat
