@@ -207,7 +207,10 @@ function savedCurrent() {
 
 const urlLevel = Number(params.get('level'));
 const resume = savedCurrent();
-if (Number.isInteger(urlLevel) && urlLevel >= 1 && urlLevel <= packById('flipit').levels) {
+if (params.get('demo') === 'lasso') {
+  // Lasso step 2: a static preview of the Lasso Mat (loaded only on this URL).
+  import('./view/lassoDemo.js').then((m) => m.showLassoDemo(document.body));
+} else if (Number.isInteger(urlLevel) && urlLevel >= 1 && urlLevel <= packById('flipit').levels) {
   startLevel('flipit', urlLevel);
 } else if (resume) {
   startLevel(resume.pack, resume.level, resume);

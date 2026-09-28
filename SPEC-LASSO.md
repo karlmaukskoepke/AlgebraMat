@@ -26,6 +26,12 @@
 - **The arrow chain** reads to the right of the stack, as in the notes: `→ −8`, then magenta `opp. → 8`.
 - **The student's final line** is written in Kalam at the bottom, e.g. `−2(−4) = 8`.
 - Vermillion (cancel) isn't used in Lasso.
+- *(Build decisions, Lasso step 2)*
+  - **Two-column layout.** The problem, its meaning in words ("opposite of 2 groups of −4"), and the final line sit on the left. The lasso stack and arrow chain sit on the right. Stacking everything in one column like the paper would shrink the lassos below 44px on a Chromebook window.
+  - **Fractions:** the whole group sits in the left column, and the split parts stack on the right with the take bracket, so up to 6 parts stay tappable.
+  - **Magenta underlines are for words only** ("opposite of", "opp."). A lone magenta minus, whether in front of a lasso or in the problem, isn't underlined, because minus-plus-underline reads as "=". The minus sign is itself the shape cue. This follows the notes, which underline "the opposite of" but not the minus.
+  - **Parts that aren't taken fade** once any part is taken.
+  - **Arrows are drawn shapes,** not font characters, so they read the same in every font.
 
 ## 3. Screens and steps
 
