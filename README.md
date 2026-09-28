@@ -19,12 +19,36 @@ Add `?seed=123` to the URL to replay a fixed problem set, and `?level=2` to open
 
 ## Layout
 
-- `src/engine/`: pure logic, no DOM. `expr.js` (expression model), `generate.js` (seeded levels), `moves.js` (validators), `session.js` (one problem's steps as a reducer), `progress.js` (level unlocks).
-- `src/view/`: DOM and SVG. `mat.js`, `controls.js`, `packmap.js` (home and level-complete panel), `feedback.js` (every message, in one table), `layout.js` (counter geometry).
+- `src/engine/`: pure logic, no DOM. `expr.js` (expression model), `generate.js` (seeded levels), `moves.js` (validators), `session.js` (one problem's steps as a reducer), `progress.js` (level unlocks, save code).
+- `src/view/`: DOM and SVG. `mat.js`, `controls.js`, `packmap.js` (home and level-complete panel), `codes.js` (save-code dialogs), `feedback.js` (every message, in one table), `layout.js` (counter geometry).
+- `src/storage.js`: localStorage wrapper that falls back to memory.
 - `src/packs/`: pack definitions (`flipit.js`; `index.js` lists every pack).
 - `tests/`: Vitest.
 
 ## Changelog
+
+### Step 6: saving progress and the save code (SPEC §7)
+- **Storage:** `src/storage.js` wraps localStorage under the one key `mat.v1`. Every read and write is in try/catch. If storage is missing, throws, is corrupt, or hits a quota error partway through, the site keeps working from memory, and the home screen shows a quiet note.
+- **Resume:** the level in play (pack, level, seed, problem number) is saved alongside progress. A reload brings the student back to the same problem in the same set of 5.
+- **Save code:** `engine/progress.js` has `encodeProgress` and `decodeProgress`. Codes look like `MAT-3238`: a version symbol, two data symbols, and a checksum, using 31 symbols with no 0/O/1/I/L.
+  - **Save code** (home and play header) shows the code large.
+  - **Enter code** (home) takes a code, forgiving case, spaces and dashes. A bad code shows "That code doesn't look right — check each letter."
+- **Verified:**
+  - 85 unit tests. They include a round trip for all 16 progress states, rejection of every single-letter typo and every swap of two neighboring letters, junk input, and storage that throws, is missing, is corrupt, or runs out of room.
+  - A Playwright run covered:
+    - Reloading mid-level lands on the same problem.
+    - A finished level survives a reload.
+    - Save code shows a code.
+    - On a fresh browser, a typo gets the exact error message, and the correct code typed in lowercase restores the levels and survives a reload.
+    - With localStorage blocked by the browser, play still works and the note shows.
+    - With corrupt saved data, the home screen loads fresh.
+  - Re-ran the Step 5 four-level run. No page errors.
+- **Judgment calls** (also in SPEC §7):
+  - The prefix is `MAT`, not the example's `FLP`, because one code covers all packs.
+  - Base 31, not base 32: removing the five look-alikes leaves 31 symbols.
+  - Enter code merges with this device's progress instead of replacing it, so an old code can't erase anything.
+  - A reload resumes the current problem from its first step. Steps inside a problem aren't saved.
+  - Leaving with **← Packs** forgets the level in play.
 
 ### Step 5: level flow, unlocks, pack map (SPEC §6)
 - **Engine:** `engine/progress.js` holds the progress object from SPEC §7 (`{ v: 1, packs: { flipit: { levels: [...] } } }`).
@@ -47,7 +71,7 @@ Add `?seed=123` to the URL to replay a fixed problem set, and `?level=2` to open
   - Leaving mid-level forgets that level's set without penalty.
   - `?level=N` ignores locks, for projecting.
   - I shortened Level 4's name on the card to "mixed, some addition".
-- **Not yet:** progress lives in memory only, so a reload resets it. Saving is Step 6 (localStorage + save code).
+- **Not yet** (done in Step 6): progress lived in memory only.
 
 ### Step 4: the five moves (SPEC §5)
 - **Engine:**

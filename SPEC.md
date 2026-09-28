@@ -194,6 +194,16 @@ Each level has 5 problems, generated with a seed. All |values| ≤ 12, and there
 - The home screen has "Enter code" to restore on any device. A bad code shows: *"That code doesn't look right — check each letter."*
 - The encoding must leave room for future packs (versioned payload).
 
+*(Build decisions, Step 6)*
+- **Code format:** `MAT-` plus 4 symbols: version, two data symbols, checksum. The prefix is `MAT` rather than the example's `FLP` because one code covers every pack.
+- **Alphabet:** taking 0/O and 1/I/L out of 0–9A–Z leaves 31 symbols, so the code is base 31, not base 32. The checksum is a weighted sum mod 31, which catches every single-letter typo and every swap of two neighboring letters.
+- **Room to grow:** v1 uses 4 bits (Flip It's levels). The two data symbols hold about 9 bits, which leaves room for the next pack; a new version symbol can change the layout.
+- **Typing a code:** lowercase, spaces, dashes and a missing `MAT` are all accepted.
+- **Enter code merges:** any level finished in either the code or this device stays finished, so typing an old code can never erase progress.
+- **Where the buttons are:** Save code and Enter code sit on the home screen. Save code is also in the play header.
+- **Resuming after a reload:** `mat.v1` also holds `current: { pack, level, seed, index }` for the level in play. After a reload, the student is back on the same problem (restarted from its first step) with the same set of 5. **← Packs** or finishing the level clears it.
+- **Blocked storage:** the home screen shows a quiet note, "Progress won't be remembered on this device. Use Save code to keep it."
+
 ## 8. Required tests (Vitest)
 
 - **Generator:** every level's problems meet its constraints (types, |n| ≤ 12, no zero answer before Level 4). Same seed gives the same problems.

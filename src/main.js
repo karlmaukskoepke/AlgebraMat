@@ -1,12 +1,17 @@
 import './style.css';
 import { PROBLEMS_PER_LEVEL } from './engine/generate.js';
 import { newSession, reduce, STEPS } from './engine/session.js';
-import { newProgress, completeLevel, isPackComplete } from './engine/progress.js';
+import {
+  completeLevel, isPackComplete, isLevelUnlocked, normalizeProgress, mergeProgress,
+  encodeProgress, decodeProgress,
+} from './engine/progress.js';
+import { createStore } from './storage.js';
 import { PACKS, packById } from './packs/index.js';
 import { renderMat } from './view/mat.js';
 import { buildControls } from './view/controls.js';
 import { feedbackText } from './view/feedback.js';
 import { renderPackMap, renderLevelDone } from './view/packmap.js';
+import { showSaveCode, askForCode } from './view/codes.js';
 
 const $ = (id) => document.getElementById(id);
 const newSeed = () => Math.floor(Math.random() * 2 ** 32);
@@ -17,10 +22,21 @@ const params = new URLSearchParams(location.search);
 const urlSeed = Number(params.get('seed'));
 const fixedSeed = Number.isInteger(urlSeed) && urlSeed > 0 ? urlSeed : null;
 
-// Progress lives in memory for now; Step 6 saves it (localStorage + save code).
-let progress = newProgress(PACKS);
+// Progress and the level in play are saved under one key (SPEC §7). If
+// storage is blocked, everything still works from memory for this visit.
+const store = createStore('mat.v1');
+const saved = store.load();
+let progress = normalizeProgress(saved, PACKS);
+let homeNote = null;
 
-let play = null; // { pack, level, problems, index, session, finished }
+let play = null; // { pack, level, seed, problems, index, session, finished }
+
+function persist() {
+  const current = play && !play.finished
+    ? { pack: play.pack.id, level: play.level, seed: play.seed, index: play.index }
+    : null;
+  store.save({ ...progress, current });
+}
 let nextTimer = null;
 
 const matRoot = $('mat');
@@ -33,19 +49,41 @@ function showScreen(name) {
   window.scrollTo(0, 0);
 }
 
+const STORAGE_NOTE = 'Progress won’t be remembered on this device. Use Save code to keep it.';
+
 function goHome() {
   clearTimeout(nextTimer);
   play = null;
-  renderPackMap($('home'), progress, PACKS, startLevel);
+  persist();
+  renderPackMap($('home'), progress, PACKS, {
+    onPlay: startLevel,
+    onSaveCode: () => showSaveCode(encodeProgress(progress)),
+    onEnterCode: () => askForCode(restoreFromCode),
+    note: homeNote ?? (store.available ? null : STORAGE_NOTE),
+  });
   showScreen('home');
 }
 
-function startLevel(packId, level) {
+function restoreFromCode(text) {
+  const restored = decodeProgress(text, PACKS);
+  if (!restored) return false;
+  progress = mergeProgress(progress, restored);
+  homeNote = 'Code accepted — your levels are back.';
+  goHome();
+  homeNote = null;
+  return true;
+}
+
+// resume = { seed, index } picks up a level after a reload.
+function startLevel(packId, level, resume = null) {
   clearTimeout(nextTimer);
   const pack = packById(packId);
-  const problems = pack.generate(level, fixedSeed ?? newSeed());
-  play = { pack, level, problems, index: 0, session: newSession(problems[0]), finished: false };
+  const seed = resume?.seed ?? fixedSeed ?? newSeed();
+  const problems = pack.generate(level, seed);
+  const index = resume?.index ?? 0;
+  play = { pack, level, seed, problems, index, session: newSession(problems[index]), finished: false };
   $('title').textContent = `${pack.title.toUpperCase()} · Level ${level}`;
+  persist();
   showScreen('play');
   render();
 }
@@ -63,6 +101,7 @@ function nextProblem() {
   if (play.index + 1 >= PROBLEMS_PER_LEVEL) return finishLevel();
   play.index += 1;
   play.session = newSession(play.problems[play.index]);
+  persist();
   render();
 }
 
@@ -70,6 +109,7 @@ function finishLevel() {
   const { pack, level } = play;
   progress = completeLevel(progress, pack.id, level);
   play.finished = true;
+  persist();
   render();
   feedback.textContent = '';
   renderLevelDone(matRoot, {
@@ -133,10 +173,25 @@ matRoot.addEventListener('click', (e) => {
 });
 
 $('back').addEventListener('click', goHome);
+$('save-code').addEventListener('click', () => showSaveCode(encodeProgress(progress)));
+
+// A saved level in play, if it still makes sense to resume.
+function savedCurrent() {
+  const c = saved?.current;
+  if (!c || typeof c !== 'object') return null;
+  const pack = packById(c.pack);
+  const ok = pack && !pack.comingSoon && isLevelUnlocked(progress, pack.id, c.level)
+    && Number.isInteger(c.seed) && c.seed >= 0
+    && Number.isInteger(c.index) && c.index >= 0 && c.index < PROBLEMS_PER_LEVEL;
+  return ok ? c : null;
+}
 
 const urlLevel = Number(params.get('level'));
+const resume = savedCurrent();
 if (Number.isInteger(urlLevel) && urlLevel >= 1 && urlLevel <= packById('flipit').levels) {
   startLevel('flipit', urlLevel);
+} else if (resume) {
+  startLevel(resume.pack, resume.level, resume);
 } else {
   goHome();
 }

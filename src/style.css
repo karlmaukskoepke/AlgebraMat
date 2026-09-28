@@ -165,6 +165,92 @@ body {
   border-width: 3px;
 }
 
+/* Home header: title on the left, save-code buttons on the right. */
+.home-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px 24px;
+}
+
+.home-actions {
+  display: flex;
+  gap: 12px;
+  padding-top: 12px;
+}
+
+.home-note {
+  margin: -12px 0 20px;
+  color: var(--muted);
+  font-size: 17px;
+}
+
+/* ---------- Save-code dialogs ---------- */
+
+.dialog {
+  width: min(520px, calc(100vw - 32px));
+  padding: 28px 32px;
+  border: 2px solid var(--ink);
+  border-radius: 16px;
+  color: var(--ink);
+  background: var(--paper);
+  font-family: 'Lexend', system-ui, sans-serif;
+}
+
+.dialog::backdrop {
+  background: rgba(29, 29, 29, 0.35);
+}
+
+.dialog h2 {
+  margin: 0 0 12px;
+  font-weight: 600;
+  font-size: 30px;
+}
+
+.dialog p,
+.dialog label {
+  display: block;
+  margin: 0 0 16px;
+  font-size: 18px;
+  line-height: 1.4;
+}
+
+.dialog .code {
+  margin: 8px 0 20px;
+  font-weight: 600;
+  font-size: 52px;
+  letter-spacing: 0.08em;
+  text-align: center;
+}
+
+.dialog input {
+  width: 100%;
+  min-height: 60px;
+  margin-bottom: 12px;
+  padding: 0 16px;
+  border: 2px solid var(--ink);
+  border-radius: 10px;
+  font: 600 32px 'Lexend', system-ui, sans-serif;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.dialog input:focus-visible {
+  outline: 3px solid var(--ink);
+  outline-offset: 2px;
+}
+
+.code-error {
+  font-weight: 600;
+}
+
+.dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
 /* ---------- Level complete ---------- */
 
 .level-done {
