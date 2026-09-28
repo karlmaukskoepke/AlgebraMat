@@ -165,6 +165,92 @@ body {
   border-width: 3px;
 }
 
+/* Home header: title on the left, save-code buttons on the right. */
+.home-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px 24px;
+}
+
+.home-actions {
+  display: flex;
+  gap: 12px;
+  padding-top: 12px;
+}
+
+.home-note {
+  margin: -12px 0 20px;
+  color: var(--muted);
+  font-size: 17px;
+}
+
+/* ---------- Save-code dialogs ---------- */
+
+.dialog {
+  width: min(520px, calc(100vw - 32px));
+  padding: 28px 32px;
+  border: 2px solid var(--ink);
+  border-radius: 16px;
+  color: var(--ink);
+  background: var(--paper);
+  font-family: 'Lexend', system-ui, sans-serif;
+}
+
+.dialog::backdrop {
+  background: rgba(29, 29, 29, 0.35);
+}
+
+.dialog h2 {
+  margin: 0 0 12px;
+  font-weight: 600;
+  font-size: 30px;
+}
+
+.dialog p,
+.dialog label {
+  display: block;
+  margin: 0 0 16px;
+  font-size: 18px;
+  line-height: 1.4;
+}
+
+.dialog .code {
+  margin: 8px 0 20px;
+  font-weight: 600;
+  font-size: 52px;
+  letter-spacing: 0.08em;
+  text-align: center;
+}
+
+.dialog input {
+  width: 100%;
+  min-height: 60px;
+  margin-bottom: 12px;
+  padding: 0 16px;
+  border: 2px solid var(--ink);
+  border-radius: 10px;
+  font: 600 32px 'Lexend', system-ui, sans-serif;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.dialog input:focus-visible {
+  outline: 3px solid var(--ink);
+  outline-offset: 2px;
+}
+
+.code-error {
+  font-weight: 600;
+}
+
+.dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
 /* ---------- Level complete ---------- */
 
 .level-done {
@@ -199,7 +285,7 @@ body {
 
 .screen {
   max-width: 960px;
-  min-height: 100vh;
+  height: 100vh;
   margin: 0 auto;
   display: flex;
   flex-direction: column;
@@ -398,11 +484,11 @@ body {
 /* ---------- The Mat (SVG) ---------- */
 
 .mat {
+  /* Fill whatever height is left after the header, step bar, feedback and
+     palette; the viewBox keeps the proportions. */
   width: 100%;
+  height: 100%;
   max-width: 920px;
-  height: auto;
-  /* leave room for the header, step bar, feedback line, palette and pad */
-  max-height: calc(100vh - 340px);
 }
 
 .mat .mark {
@@ -528,10 +614,120 @@ body {
   animation: pop 0.5s ease;
 }
 
+/* Canceled counters step back so the survivors are easy to count. */
+.mat .is-canceled .mark {
+  opacity: 0.45;
+}
+
+/* Cancel: the vermillion slash draws itself in. */
+@keyframes slash-in {
+  from { stroke-dashoffset: 1; }
+  to { stroke-dashoffset: 0; }
+}
+
+.mat .slash-in {
+  stroke-dasharray: 1;
+  animation: slash-in 0.3s ease-out;
+}
+
+/* Rewrite: a flipped piece turns over like a card. */
+@keyframes flip-in {
+  0% { transform: scaleY(1); }
+  50% { transform: scaleY(0); }
+  100% { transform: scaleY(1); }
+}
+
+.mat text,
+.mat .counter {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.mat .flip-in {
+  animation: flip-in 0.35s ease-in-out;
+}
+
+/* ---------- Hints (after 3 wrong tries) ---------- */
+
+.hint {
+  margin: -4px 0 0;
+  text-align: center;
+  font-family: 'Kalam', cursive;
+  font-weight: 700;
+  font-size: 22px;
+}
+
+/* Rewrite hint: the piece to tap keeps demonstrating its flip. */
+@keyframes hint-flip {
+  0%, 55%, 100% { transform: scaleY(1); }
+  70% { transform: scaleY(0); }
+  85% { transform: scaleY(1); }
+}
+
+.mat .hint-flip {
+  animation: hint-flip 1.6s ease-in-out infinite;
+}
+
+/* Cancel and Answer hints: counters blink gently (shape cue: a ring). */
+@keyframes hint-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.25; }
+}
+
+.mat .hint-blink .mark {
+  animation: hint-blink 1.2s ease-in-out infinite;
+}
+
+.mat .hint-blink:not(.is-canceled) .hit {
+  stroke: var(--ink);
+  stroke-width: 2;
+  stroke-dasharray: 4 4;
+  rx: 22px;
+}
+
+/* Party/Battle hint: the two signed numbers pulse. */
+@keyframes hint-glow {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.12); }
+}
+
+.mat .hint-glow {
+  animation: hint-glow 1.2s ease-in-out infinite;
+}
+
+/* Draw hint: faint outlines where the counters go. */
+.mat .ghost .mark {
+  stroke: var(--muted);
+  stroke-width: 2.5;
+  stroke-dasharray: 3 4;
+  opacity: 0.8;
+}
+
+.mat .ghost {
+  pointer-events: none;
+}
+
+/* "Nothing to rewrite" hint. */
+@keyframes hint-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(29, 29, 29, 0.5); }
+  50% { box-shadow: 0 0 0 6px rgba(29, 29, 29, 0); }
+}
+
+.btn.hint-pulse {
+  border-width: 3px;
+  animation: hint-pulse 1.2s ease-in-out infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .mat .shake,
   .feedback.bad,
-  .feedback.celebrate {
+  .feedback.celebrate,
+  .mat .slash-in,
+  .mat .flip-in,
+  .mat .hint-flip,
+  .mat .hint-blink .mark,
+  .mat .hint-glow,
+  .btn.hint-pulse {
     animation: none;
   }
 }
@@ -546,5 +742,50 @@ body {
   }
   .btn.level-btn {
     min-height: 72px;
+  }
+}
+
+/* Short screens (a Chromebook's 768px minus the browser's tabs and address
+   bar leaves about 657px): tighten the spacing so the Mat keeps 44px counters. */
+@media (max-height: 720px) {
+  .screen {
+    gap: 4px;
+    padding: 4px 0 8px;
+  }
+  .topbar {
+    padding-bottom: 4px;
+  }
+  .steps {
+    margin-top: 2px;
+    font-size: 16px;
+  }
+  .steps li {
+    min-height: 36px;
+  }
+  .steps .num {
+    width: 26px;
+    height: 26px;
+  }
+  .feedback {
+    font-size: 18px;
+  }
+  .hint {
+    font-size: 18px;
+  }
+  .palette {
+    gap: 6px;
+    padding-top: 6px;
+  }
+}
+
+/* Phones: the palette wraps into several rows, so let the page scroll and
+   size the Mat by width instead of squeezing it into the leftover height. */
+@media (max-width: 600px) {
+  .screen {
+    height: auto;
+    min-height: 100vh;
+  }
+  .mat {
+    height: auto;
   }
 }

@@ -11,7 +11,9 @@ import {
 
 const SVG_NS = 'http://www.w3.org/2000/svg';
 
-const VIEW = { width: 740, height: 350 };
+// The drawing area. It starts at y = 44: nothing is drawn above the zones'
+// dashed boxes, and trimming that strip makes everything bigger on short screens.
+const VIEW = { top: 44, width: 740, height: 296 };
 const COLUMN = { left: 210, op: 350, right: 490, eq: 595, answer: 672 };
 const ZONE_BASE_Y = 170;   // center of the bottom counter row
 const PROBLEM_Y = 245;     // baseline of the problem line
@@ -30,7 +32,8 @@ const stroke = (x1, y1, x2, y2, cls) => el('line', { x1, y1, x2, y2, class: cls 
 const signed = (n, explicitPlus) => (n < 0 ? `${MINUS}${-n}` : explicitPlus ? `+${n}` : `${n}`);
 
 // A counter is a stroked + or − (never a text glyph), with an optional cancel slash.
-function counter(c, { x, y, zone, index, magenta, selected, shake, tappable }) {
+// fx: justCanceled (draw the slash in), hinted (blink as a hint), ghost (hint outline).
+function counter(c, { x, y, zone, index, magenta, selected, shake, tappable, justCanceled, hinted, ghost }) {
   const h = COUNTER_SIZE / 2;
   const s = COUNTER_PITCH / 2 - 6;
   const outer = el('g', {
@@ -41,19 +44,24 @@ function counter(c, { x, y, zone, index, magenta, selected, shake, tappable }) {
   });
   const g = el('g', {
     class: ['counter', magenta && 'is-opposite', c.canceled && 'is-canceled',
-      selected && 'is-selected', shake && 'shake', tappable && 'tappable'].filter(Boolean).join(' '),
+      selected && 'is-selected', shake && 'shake', tappable && 'tappable',
+      hinted && 'hint-blink', ghost && 'ghost'].filter(Boolean).join(' '),
     'data-sign': c.sign,
   });
-  g.append(el('rect', { class: 'hit', x: -COUNTER_PITCH / 2, y: -COUNTER_PITCH / 2, width: COUNTER_PITCH, height: COUNTER_PITCH }));
+  if (!ghost) g.append(el('rect', { class: 'hit', x: -COUNTER_PITCH / 2, y: -COUNTER_PITCH / 2, width: COUNTER_PITCH, height: COUNTER_PITCH }));
   if (selected) g.append(el('circle', { class: 'ring', r: COUNTER_PITCH / 2 - 2 }));
   g.append(stroke(-h, 0, h, 0, 'mark'));
   if (c.sign === '+') g.append(stroke(0, -h, 0, h, 'mark'));
-  if (c.canceled) g.append(stroke(-s, s, s, -s, 'slash'));
+  if (c.canceled) {
+    const slash = stroke(-s, s, s, -s, `slash${justCanceled ? ' slash-in' : ''}`);
+    slash.setAttribute('pathLength', '1');
+    g.append(slash);
+  }
   outer.append(g);
   return outer;
 }
 
-function zone(s, i, cx) {
+function zone(s, i, cx, fx) {
   const g = el('g', { class: 'zone' });
   const drawing = s.step === 'draw';
   if (drawing) {
@@ -68,12 +76,26 @@ function zone(s, i, cx) {
   const counters = s.zones[i];
   const place = s.tidy ? counterPositions : readingPositions;
   const magenta = i === 1 && isSubtraction(s.problem);
+  const show = fx.hint?.show ?? {};
+
+  // Draw hint: faint outlines where the right counters would go.
+  const ghost = show.ghosts?.[i];
+  if (ghost) {
+    readingPositions(ghost.count).forEach((p) => {
+      g.append(counter({ sign: ghost.sign }, { x: cx + p.x, y: ZONE_BASE_Y + p.y, zone: i, ghost: true }));
+    });
+  }
+
+  const is = (list, index) => (list ?? []).some((c) => c.zone === i && c.index === index);
   place(counters.length).forEach((p, index) => {
-    g.append(counter(counters[index], {
+    const c = counters[index];
+    g.append(counter(c, {
       x: cx + p.x, y: ZONE_BASE_Y + p.y, zone: i, index, magenta,
       selected: s.selected?.zone === i && s.selected?.index === index,
       shake: s.shake?.zone === i && s.shake?.index === index,
-      tappable: drawing || (s.step === 'cancel' && !counters[index].canceled),
+      tappable: drawing || (s.step === 'cancel' && !c.canceled),
+      justCanceled: is(fx.justCanceled, index),
+      hinted: is(show.pair, index) || (show.survivors && !c.canceled),
     }));
   });
   return g;
@@ -100,7 +122,7 @@ function problemLine(p) {
   return g;
 }
 
-function rewrittenLine(s) {
+function rewrittenLine(s, fx) {
   const { problem, flips } = s;
   const sub = isSubtraction(problem);
   const op = sub && !flips.op ? MINUS : '+';
@@ -109,9 +131,15 @@ function rewrittenLine(s) {
   const rightText = r < 0 || flips.sign ? `(${signed(r, true)})` : signed(r);
   const g = el('g', { class: 'rewritten' });
   const live = s.step === 'rewrite';
-  g.append(text(signed(problem.left.value), COLUMN.left, REWRITE_Y, 'term'));
-  const opCls = `op${flips.op ? ' is-opposite' : ''}`;
-  const rCls = `term${flips.sign ? ' is-opposite' : ''}`;
+  g.append(text(signed(problem.left.value), COLUMN.left, REWRITE_Y, `term${fx.hint?.show?.signs ? ' hint-glow' : ''}`));
+  const show = fx.hint?.show ?? {};
+  const extra = (part) => [
+    fx.justFlipped === part && 'flip-in',
+    show.flip?.includes(part) && 'hint-flip',
+    show.signs && part === 'sign' && 'hint-glow',
+  ].filter(Boolean).map((c) => ` ${c}`).join('');
+  const opCls = `op${flips.op ? ' is-opposite' : ''}${extra('op')}`;
+  const rCls = `term${flips.sign ? ' is-opposite' : ''}${extra('sign')}`;
   if (live) {
     g.append(tappable(op, COLUMN.op, REWRITE_Y, opCls, 'flip', 'op', 64));
     g.append(tappable(rightText, COLUMN.right, REWRITE_Y, rCls, 'flip', 'sign', 130));
@@ -141,16 +169,17 @@ function placeUnderlines(svg) {
   });
 }
 
-export function renderMat(s) {
+// fx (view-only effects): { hint, justFlipped: 'op'|'sign'|null, justCanceled: [{zone,index}] }
+export function renderMat(s, fx = {}) {
   const svg = el('svg', {
     class: `mat step-${s.step}`,
-    viewBox: `0 0 ${VIEW.width} ${VIEW.height}`,
+    viewBox: `0 ${VIEW.top} ${VIEW.width} ${VIEW.height}`,
     role: 'group',
     'aria-label': 'The Mat',
   });
-  svg.append(zone(s, 0, COLUMN.left), zone(s, 1, COLUMN.right));
+  svg.append(zone(s, 0, COLUMN.left, fx), zone(s, 1, COLUMN.right, fx));
   svg.append(problemLine(s.problem));
-  svg.append(rewrittenLine(s));
+  svg.append(rewrittenLine(s, fx));
   requestAnimationFrame(() => placeUnderlines(svg));
   document.fonts?.ready.then(() => placeUnderlines(svg));
   return svg;

@@ -54,9 +54,10 @@ export function buildControls(root, dispatch) {
   });
 
   return {
-    update(s) {
+    update(s, hint = null) {
       const step = s.step;
       nothing.disabled = step !== 'rewrite';
+      nothing.classList.toggle('hint-pulse', Boolean(hint?.show?.nothingButton));
       plus.disabled = minus.disabled = step !== 'draw';
       plus.setAttribute('aria-pressed', String(step === 'draw' && s.drawSign === '+'));
       minus.setAttribute('aria-pressed', String(step === 'draw' && s.drawSign === '-'));

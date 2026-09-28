@@ -50,16 +50,24 @@ function packCard(progress, pack) {
     levels);
 }
 
-export function renderPackMap(root, progress, packs, onPlay) {
+export function renderPackMap(root, progress, packs, { onPlay, onSaveCode, onEnterCode, note }) {
   root.replaceChildren(
     h('header', { class: 'home-head' },
-      h('h1', {}, 'The Mat'),
-      h('p', { class: 'tagline' }, 'Pick a pack and a level.')),
+      h('div', {},
+        h('h1', {}, 'The Mat'),
+        h('p', { class: 'tagline' }, 'Pick a pack and a level.')),
+      h('div', { class: 'home-actions' },
+        h('button', { type: 'button', class: 'btn', 'data-home': 'save' }, 'Save code'),
+        h('button', { type: 'button', class: 'btn', 'data-home': 'enter' }, 'Enter code'))),
+    h('p', { class: 'home-note', role: 'status', hidden: !note }, note ?? ''),
     h('div', { class: 'pack-grid' }, ...packs.map((p) => packCard(progress, p))),
   );
   root.onclick = (e) => {
     const b = e.target.closest('button[data-level]');
-    if (b && !b.disabled) onPlay(b.dataset.pack, Number(b.dataset.level));
+    if (b && !b.disabled) return onPlay(b.dataset.pack, Number(b.dataset.level));
+    const act = e.target.closest('[data-home]')?.dataset.home;
+    if (act === 'save') onSaveCode();
+    if (act === 'enter') onEnterCode();
   };
 }
 
