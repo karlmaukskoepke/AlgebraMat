@@ -143,6 +143,13 @@ Each level has 5 problems, the same generator rules as Flip It (seeded, no repea
   - **Distribute, then combine**
 - **Planned now so those packs slot in later:** a lasso's contents are a list of *terms*, `{ kind: 'int' | 'x', sign }`. In Lasso every term is a counter (`int`); Groups of Terms will put boxes (`x`) in lassos with the same Fill and Copy group moves.
 
+- *(Build decisions, Lasso step 5)*
+  - The pack map shows the two playable packs side by side, and a **Coming soon** row of three smaller dashed cards below them. Each shows only its name and subtitle, with no levels.
+  - The Lasso blurb: *"Lasso the groups, fill them, count them, then flip for the opposite."*
+  - Future packs are listed with `levels: 0`, so they add nothing to progress or save codes until they're built.
+  - Finishing a pack names the next one: *"You finished Flip It! Next up: Lasso, on the pack map."* After Lasso: *"Boxes & Circles is coming soon."*
+  - A Lasso level in play resumes after a reload, like Flip It.
+
 ## 6. Save code v2
 
 - Lasso adds 7 level bits, 11 in all, which is more than v1's two data symbols hold (961 values, about 9.9 bits).

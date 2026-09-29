@@ -22,12 +22,14 @@ function levelDots(progress, pack) {
   return dots;
 }
 
+// A future pack: its name and the math it's about, no levels yet.
+function soonCard(pack) {
+  return h('article', { class: 'pack-card is-soon', 'aria-label': `${pack.title}, ${pack.subtitle}, coming soon` },
+    h('h2', {}, pack.title),
+    h('p', { class: 'subtitle' }, pack.subtitle));
+}
+
 function packCard(progress, pack) {
-  if (pack.comingSoon) {
-    return h('article', { class: 'pack-card is-locked', 'aria-label': `${pack.title}, coming soon` },
-      h('div', { class: 'pack-head' }, h('h2', {}, pack.title), h('span', { class: 'tag' }, 'Coming soon')),
-      h('p', { class: 'blurb' }, 'Locked for now.'));
-  }
   const complete = isPackComplete(progress, pack.id);
   const levels = h('div', { class: 'level-list' });
   for (let l = 1; l <= pack.levels; l++) {
@@ -38,7 +40,7 @@ function packCard(progress, pack) {
       class: `btn level-btn${done ? ' is-done' : ''}`,
       disabled: !open,
       dataset: { pack: pack.id, level: String(l) },
-      'aria-label': `Level ${l}, ${pack.levelNames[l - 1]}${done ? ', done' : open ? '' : ', locked'}`,
+      'aria-label': `${pack.title} Level ${l}, ${pack.levelNames[l - 1]}${done ? ', done' : open ? '' : ', locked'}`,
     },
     h('span', { class: 'level-num' }, `${done ? '✓ ' : ''}Level ${l}`),
     h('span', { class: 'level-name' }, open ? pack.levelNames[l - 1] : 'Locked')));
@@ -46,6 +48,7 @@ function packCard(progress, pack) {
   return h('article', { class: 'pack-card' },
     h('div', { class: 'pack-head' }, h('h2', {}, pack.title),
       complete ? h('span', { class: 'tag' }, 'Complete ✓') : levelDots(progress, pack)),
+    h('p', { class: 'subtitle' }, pack.subtitle),
     h('p', { class: 'blurb' }, pack.blurb),
     levels);
 }
@@ -60,7 +63,9 @@ export function renderPackMap(root, progress, packs, { onPlay, onSaveCode, onEnt
         h('button', { type: 'button', class: 'btn', 'data-home': 'save' }, 'Save code'),
         h('button', { type: 'button', class: 'btn', 'data-home': 'enter' }, 'Enter code'))),
     h('p', { class: 'home-note', role: 'status', hidden: !note }, note ?? ''),
-    h('div', { class: 'pack-grid' }, ...packs.map((p) => packCard(progress, p))),
+    h('div', { class: 'pack-grid' }, ...packs.filter((p) => !p.comingSoon).map((p) => packCard(progress, p))),
+    h('h2', { class: 'soon-head' }, 'Coming soon'),
+    h('div', { class: 'soon-grid' }, ...packs.filter((p) => p.comingSoon).map(soonCard)),
   );
   root.onclick = (e) => {
     const b = e.target.closest('button[data-level]');
@@ -72,8 +77,8 @@ export function renderPackMap(root, progress, packs, { onPlay, onSaveCode, onEnt
 }
 
 // Shown in place of the Mat when the fifth problem of a level is solved.
-export function renderLevelDone(root, { pack, level, packComplete, onNext, onMap, onReplay }) {
-  const hasNext = level < (pack.playable ?? pack.levels);
+export function renderLevelDone(root, { pack, level, packComplete, nextPack, onNext, onMap, onReplay }) {
+  const hasNext = level < pack.levels;
   const buttons = h('div', { class: 'level-done-actions' });
   if (hasNext) buttons.append(h('button', { type: 'button', class: 'btn btn-primary', 'data-go': 'next' }, `Level ${level + 1} →`));
   else buttons.append(h('button', { type: 'button', class: 'btn', 'data-go': 'replay' }, `Play Level ${level} again`));
@@ -83,11 +88,11 @@ export function renderLevelDone(root, { pack, level, packComplete, onNext, onMap
     h('h2', {}, `Level ${level} complete!`),
     h('p', {}, hasNext
       ? `Level ${level + 1} is open.`
-      : packComplete && pack.id === 'flipit'
-        ? `You finished ${pack.title}! The Lasso pack is coming soon.`
-        : packComplete ? `You finished ${pack.title}!`
-          : level >= pack.levels ? `That’s the last ${pack.title} level! Finish the others to complete the pack.`
-            : `More ${pack.title} levels are coming soon.`),
+      : packComplete && nextPack?.comingSoon
+        ? `You finished ${pack.title}! ${nextPack.title} is coming soon.`
+        : packComplete && nextPack ? `You finished ${pack.title}! Next up: ${nextPack.title}, on the pack map.`
+          : packComplete ? `You finished ${pack.title}!`
+            : `That’s the last ${pack.title} level! Finish the others to complete the pack.`),
     buttons);
   panel.addEventListener('click', (e) => {
     const go = e.target.closest('[data-go]')?.dataset.go;

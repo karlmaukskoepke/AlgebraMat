@@ -1,14 +1,13 @@
-// Every pack on the pack map, in order. Lasso is a locked "Coming soon" card in v1.
+// Every pack, in pack-map order. Packs with `comingSoon` show as a card only
+// (SPEC-LASSO.md §5); they have no levels yet, so they take no room in saves.
 import { flipit } from './flipit.js';
 import { generateLassoLevel } from '../engine/generateLasso.js';
 
-// Lasso's 7 levels are counted in progress and save codes already, so codes
-// made now keep working. The card stays "Coming soon" until Lasso step 5
-// turns on its level flow (SPEC-LASSO.md §8).
 export const lasso = {
   id: 'lasso',
   title: 'Lasso',
-  blurb: 'Coming soon.',
+  subtitle: 'The meaning of multiplication as groups and opposites',
+  blurb: 'Lasso the groups, fill them, count them, then flip for the opposite.',
   levels: 7,
   levelNames: [
     'positive groups',
@@ -19,12 +18,16 @@ export const lasso = {
     'fraction of a group',
     'opposite fraction',
   ],
-  // All 7 levels are built. Reachable only at ?pack=lasso&level=N until
-  // Lasso step 5 opens the card.
-  playable: 7,
-  comingSoon: true,
   generate: (level, seed) => generateLassoLevel(level, seed),
 };
 
-export const PACKS = [flipit, lasso];
+const soon = (id, title, subtitle) => ({ id, title, subtitle, levels: 0, comingSoon: true });
+
+export const PACKS = [
+  flipit,
+  lasso,
+  soon('boxes', 'Boxes & Circles', 'Combining like terms'),
+  soon('groups-of-terms', 'Groups of Terms', 'The distributive property'),
+  soon('distribute-combine', 'Distribute, then combine', 'Distributing, then combining like terms'),
+];
 export const packById = (id) => PACKS.find((p) => p.id === id);
