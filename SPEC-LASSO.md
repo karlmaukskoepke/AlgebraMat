@@ -1,4 +1,6 @@
-# The Mat — Lasso pack spec (approved 2026-09-28)
+# The Mat — Group It pack spec (approved 2026-09-28, revised 2026-09-29)
+
+> **Revised 2026-09-29 (Karl): the pack is now "Group It", and §10 replaces the step scripts in §3.** Where §2–§3 and §9 say "lasso", read "group"; where they disagree with §10, §10 wins. The pack's internal id stays `lasso` so saved progress and save codes still work.
 
 *This builds on SPEC.md: same engine, screen shell, rules (no timers, no penalties, hints after 3 wrong tries), storage and save code. Only what's new or different is written here. The source is Mr. Mauks's notes, "Integers & Algebraic Expressions", page 1 (Multiplication) and page 2 (A fraction of a group), plus Karl's answers on 2026-09-28.*
 
@@ -177,9 +179,33 @@ Each level has 5 problems, the same generator rules as Flip It (seeded, no repea
 5. Lasso level flow on the pack map, the new "Coming soon" cards, and saving.
 6. Lasso hints, the flip animation for groups, and the touch-target audit at 1366×657.
 
-## 9. Decisions (Karl, 2026-09-28)
+## 9. Decisions (Karl, 2026-09-28; 1 and 4 replaced by §10)
 
 1. **Opposite:** the magenta "−" goes on each lasso in ②, and the counters flip at the end in ⑤. One tap on **opp.** flips every group at once.
 2. **Lasso is open from the start.** Every pack card gets a subtitle naming the math (§5).
 3. **Numbers stay limited as drafted.** The goal is conceptual depth, not fluency across the number system. Bigger ranges can come later.
 4. **Filling:** the student taps each lasso to fill it, one tap per lasso, with no "fill all" button.
+
+## 10. Revision: Group It (Karl, 2026-09-29)
+
+Karl played Lasso and asked for these before moving on. They jumped the build order, ahead of step 6.
+
+1. **Name:** "Group It", to match Flip It. The word "lasso" is gone from everything students see ("Add group", "group" in every message). Kids don't know what a lasso is.
+2. **Bigger instructions** in both packs: the feedback line is 30px semi-bold (26px on short Chromebook screens, 22px on phones). Hints went up too.
+3. **Whole-number script:** Groups → + or − → Fill → Flip → Count.
+   - **Fill:** pick + or −, then tap *any* group, in any order, one counter per tap. 5(2) is ten taps. No "fill the first group, then copy." Check names the first group that's off ("The second group has 1 — each group is 2.").
+   - **The − is part of the group:** choosing "− groups" puts a magenta − beside every group.
+   - **Flip** (only for − groups): tap each − (or the group itself) to flip that group, or **Flip all**. A magenta arrow arcs from the − into the group, and its counters turn into their opposites, in magenta. + groups skip Flip.
+   - **Count comes last, after the flip,** so the one number counted is the answer. No more counting before the flip and again after.
+4. **Fraction script:** Groups → + or − → Fill → Take → Flip → Count.
+   - **Groups:** make d groups, where d is the denominator. They're drawn as one **fraction bar**: d rectangles that touch, inside one outline, instead of separate ovals. The old "draw the whole group" step is gone.
+   - **+ or −:** as for whole numbers; − puts one magenta − beside the bar.
+   - **Fill (deal):** pick + or −, then deal B one counter at a time into the **lit-up** group, top to bottom, then around again. So 1/5(10) is two times around five groups. Tapping a different group says "the next counter goes in the lit-up group" and doesn't count as a wrong try. Undo takes back the latest counter, and the light moves back with it.
+   - **Take** n groups, as before.
+   - **Flip:** the bar's − (or Flip all) flips the groups taken.
+   - **Count** the groups taken, after the flip.
+- *(Build decisions, 2026-09-29)*
+  - Unflipped −'s get a dashed magenta ring while flipping, to show they're tappable.
+  - The static preview page (`?demo=lasso`) was removed. It showed the old flow.
+  - `?pack=groupit&level=N` opens a level. `?pack=lasso` still works.
+  - Step 6 (hints, the flip animation, the touch audit) comes next, on this new flow. The pack map now scrolls on a Chromebook (the 7-level card plus the Coming-soon row), so step 6's audit should decide whether to compact it.

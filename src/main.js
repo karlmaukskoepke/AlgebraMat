@@ -138,7 +138,7 @@ function finishLevel() {
   });
 }
 
-// The step bar is the pack's (and, in Lasso, the problem's) list of steps.
+// The step bar is the pack's (and, in Group It, the problem's) list of steps.
 function renderSteps(session) {
   const steps = play.adapter.steps(session);
   const bar = $('steps');
@@ -221,14 +221,12 @@ function savedCurrent() {
   return ok ? c : null;
 }
 
-// ?level=N opens a Flip It level; ?pack=lasso&level=N opens a Lasso level.
+// ?level=N opens a Flip It level; ?pack=groupit&level=N opens a Group It level
+// (?pack=lasso, its id from before the rename, still works).
 const urlLevel = Number(params.get('level'));
-const urlPack = packById(params.get('pack') ?? 'flipit');
+const urlPack = packById(params.get('pack') === 'groupit' ? 'lasso' : params.get('pack') ?? 'flipit');
 const resume = savedCurrent();
-if (params.get('demo') === 'lasso') {
-  // Lasso step 2: a static preview of the Lasso Mat (loaded only on this URL).
-  import('./view/lassoDemo.js').then((m) => m.showLassoDemo(document.body));
-} else if (urlPack && PLAY[urlPack.id] && Number.isInteger(urlLevel) && urlLevel >= 1
+if (urlPack && PLAY[urlPack.id] && Number.isInteger(urlLevel) && urlLevel >= 1
   && urlLevel <= urlPack.levels) {
   startLevel(urlPack.id, urlLevel);
 } else if (resume) {

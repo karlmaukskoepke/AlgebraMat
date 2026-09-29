@@ -3,11 +3,13 @@
 import { flipit } from './flipit.js';
 import { generateLassoLevel } from '../engine/generateLasso.js';
 
+// Group It (built as "Lasso"; its id stays 'lasso' so saved progress and
+// save codes from before the rename still work).
 export const lasso = {
   id: 'lasso',
-  title: 'Lasso',
+  title: 'Group It',
   subtitle: 'The meaning of multiplication as groups and opposites',
-  blurb: 'Lasso the groups, fill them, count them, then flip for the opposite.',
+  blurb: 'Make the groups, fill them, flip the opposites, then count.',
   levels: 7,
   levelNames: [
     'positive groups',

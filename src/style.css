@@ -3,8 +3,8 @@
   --ink: #1d1d1d;
   --opposite: #b8508f;  /* magenta: always with an underline */
   --cancel: #d55e00;    /* vermillion: always a slash */
-  --groups: #0072b2;    /* blue: how many groups (Lasso) */
-  --inside: #009e73;    /* green: inside a group (Lasso) */
+  --groups: #0072b2;    /* blue: how many groups (Group It) */
+  --inside: #009e73;    /* green: inside a group (Group It) */
 
   /* Neutral UI */
   --muted: #7a818c;
@@ -424,11 +424,12 @@ body {
 }
 
 .feedback {
-  min-height: 1.5em;
+  min-height: 1.3em;
   margin: 0;
   text-align: center;
-  font-weight: 400;
-  font-size: 20px;
+  font-weight: 600;
+  font-size: 30px;
+  line-height: 1.2;
 }
 
 .palette {
@@ -444,7 +445,7 @@ body {
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 10px 20px;
+  gap: 10px 14px;
 }
 
 .palette .group {
@@ -690,7 +691,7 @@ body {
   text-align: center;
   font-family: 'Kalam', cursive;
   font-weight: 700;
-  font-size: 22px;
+  font-size: 26px;
 }
 
 /* Rewrite hint: the piece to tap keeps demonstrating its flip. */
@@ -779,6 +780,9 @@ body {
   .btn.level-btn {
     min-height: 72px;
   }
+  .feedback {
+    font-size: 22px;
+  }
 }
 
 /* Short screens (a Chromebook's 768px minus the browser's tabs and address
@@ -803,10 +807,10 @@ body {
     height: 26px;
   }
   .feedback {
-    font-size: 18px;
+    font-size: 26px;
   }
   .hint {
-    font-size: 18px;
+    font-size: 22px;
   }
   .palette {
     gap: 6px;
@@ -826,7 +830,7 @@ body {
   }
 }
 
-/* ---------- The Lasso Mat (SPEC-LASSO.md §2) ---------- */
+/* ---------- The Group It Mat (SPEC-LASSO.md §2) ---------- */
 
 .lasso-mat .lasso-oval {
   fill: none;
@@ -863,25 +867,52 @@ body {
   font: 600 40px 'Lexend', system-ui, sans-serif;
 }
 
-.lasso-mat .chain-opp-underline {
-  stroke: var(--opposite);
-  stroke-width: 2.5;
-  stroke-linecap: round;
-}
-
-.lasso-mat .chain-total,
-.lasso-mat .chain-answer {
+.lasso-mat .chain-total {
   fill: var(--ink);
   font: 700 30px 'Kalam', cursive;
 }
 
-.lasso-mat .chain-answer.is-opposite,
-.lasso-mat .chain-opp {
-  fill: var(--opposite);
+/* Tap a − to flip its group; the hit circle keeps the target 44px+. */
+.lasso-mat .mark-hit {
+  fill: transparent;
+  stroke: var(--opposite);
+  stroke-width: 2;
+  stroke-dasharray: 5 5;
+  pointer-events: all;
 }
 
-.lasso-mat .chain-opp {
-  font: 700 18px 'Kalam', cursive;
+.lasso-mat .flip-arrow {
+  fill: none;
+  stroke: var(--opposite);
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* The fraction bar: d groups that touch, inside one outline. */
+.lasso-mat .bar-part {
+  fill: transparent;
+  stroke: var(--groups);
+  stroke-width: 2;
+  pointer-events: all;
+}
+
+.lasso-mat .bar-outline {
+  fill: none;
+  stroke: var(--groups);
+  stroke-width: 4;
+}
+
+.lasso-mat .part.is-taken .bar-part {
+  fill: rgb(0 114 178 / 0.12);
+}
+
+/* The lit-up group: the next counter is dealt here. */
+.lasso-mat .next-ring {
+  fill: rgb(0 158 115 / 0.12);
+  stroke: var(--inside);
+  stroke-width: 3;
+  stroke-dasharray: 8 6;
 }
 
 .lasso-mat .arrow {
@@ -986,36 +1017,7 @@ body {
   font-size: 0.8em;
 }
 
-/* Static preview page (?demo=lasso) */
-.lasso-demo {
-  max-width: 960px;
-  margin: 0 auto;
-  padding: 24px 0 48px;
-}
-
-.lasso-demo h1 {
-  font-weight: 600;
-  font-size: 32px;
-}
-
-.lasso-demo figure {
-  margin: 0 0 28px;
-  padding: 8px 12px 12px;
-  border: 2px solid var(--ink);
-  border-radius: 16px;
-  background: var(--paper);
-}
-
-.lasso-demo .mat {
-  height: auto;
-}
-
-.lasso-demo figcaption {
-  font-size: 17px;
-  color: var(--muted);
-}
-
-/* Playing the Lasso Mat */
+/* Playing the Group It Mat */
 .lasso-mat .tappable {
   cursor: pointer;
 }
@@ -1023,11 +1025,6 @@ body {
 .lasso-mat .tappable .lasso-oval {
   fill: transparent;
   pointer-events: all;
-}
-
-/* In Take, a part that isn't taken yet shouldn't look faded: it's still a choice. */
-.lasso-mat .part.tappable.is-left {
-  opacity: 0.7;
 }
 
 .lasso-mat .chain .is-typing {
@@ -1047,13 +1044,7 @@ body {
   cursor: pointer;
 }
 
-/* Lasso buttons carry the opposite color: the word "opp." is underlined; a lone minus isn't. */
+/* The − groups button carries the opposite color (a lone minus isn't underlined). */
 .btn .opp-word {
   color: var(--opposite);
-}
-
-.btn[data-action="flip"] .opp-word {
-  text-decoration: underline;
-  text-decoration-thickness: 2px;
-  text-underline-offset: 3px;
 }
