@@ -982,13 +982,18 @@ body {
 }
 
 /* Playing the Lasso Mat */
-.lasso-mat .lasso.tappable {
+.lasso-mat .tappable {
   cursor: pointer;
 }
 
-.lasso-mat .lasso.tappable .lasso-oval {
+.lasso-mat .tappable .lasso-oval {
   fill: transparent;
   pointer-events: all;
+}
+
+/* In Take, a part that isn't taken yet shouldn't look faded: it's still a choice. */
+.lasso-mat .part.tappable.is-left {
+  opacity: 0.7;
 }
 
 .lasso-mat .chain .is-typing {

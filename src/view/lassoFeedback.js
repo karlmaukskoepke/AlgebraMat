@@ -41,6 +41,32 @@ export const LASSO_FEEDBACK = {
   oppDone: ({ total }) => `Flipped! Now type the opposite of ${signed(total)}.`,
   oppositeOf: ({ total }) => `The opposite of ${signed(total)} is…?`,
 
+  // Fraction groups: ① Whole
+  wholeIntro: () => 'Draw the whole group: pick + or −, then tap the green lasso once per counter.',
+  wholeType: ({ b, count, sign }) => `The whole group is ${signed(b)}, so it needs ${kind(sign, count)}.`,
+  wholeCount: ({ b, have }) => `Count again — you have ${have}, the whole group is ${signed(b)}.`,
+  wholeDone: ({ d }) => `Now split it into ${d} equal parts: tap Add part ${d} times, then tap a part to deal a counter into it.`,
+
+  // ② Split
+  splitIntro: () => 'Tap a part to deal one counter into it. Keep the parts equal.',
+  tooManyParts: () => 'That’s more parts than any fraction here needs. Undo takes one back.',
+  allDealt: () => 'Every counter is dealt. Check the parts.',
+  splitParts: ({ d, have }) => `Split into ${d} parts — you have ${have}.`,
+  dealAll: () => 'Deal out every counter first.',
+  unequalParts: () => 'The parts aren’t equal yet — each part needs the same number.',
+  splitDone: ({ n }) => `Equal parts! Now take ${n} — tap each part you take.`,
+
+  // ③ Take
+  takeIntro: ({ n }) => `Tap a part to take it (tap again to put it back). The top number says ${n}.`,
+  takeN: () => 'The top number says how many parts to take.',
+  takeDone: () => 'Now count the counters in the parts you took, and type the total.',
+  countTaken: () => 'Count the counters in the parts you took.',
+
+  // ⑤ Opposite or not
+  oppOrNot: ({ total }) => `The parts you took make ${signed(total)}. Is it the opposite? Tap opp. or No opposite.`,
+  isOppositeGroup: () => 'There’s a − in front of the fraction — it’s the opposite.',
+  notOpposite: () => 'Look at the sign in front of the fraction — is there a −?',
+
   typeAnswer: () => 'Type a number first.',
   correct: ({ answer }) => `Yes! The answer is ${signed(answer)}.`,
 };

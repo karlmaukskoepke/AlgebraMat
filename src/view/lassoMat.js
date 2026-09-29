@@ -6,7 +6,8 @@
 // fraction problems, e.g. 2/3(−6):
 //   { script: 'fraction', problem, whole: [terms], parts: [{ terms, taken }],
 //     total, flipped, answer }
-// Optional, while playing: `tap` ('lassos' makes lassos tappable), `slot`
+// Optional, while playing: `tap` ('lassos', 'whole' or 'parts' makes those
+// tappable), `slot`
 // (show the tappable gap for the hidden 1), and `totalText` / `answerText`
 // (what's being typed on the pad, shown in the arrow chain).
 //
@@ -175,13 +176,16 @@ function fractionScript(svg, s) {
   const perRow = Math.max(3, ...rows);
   const wholeH = 40 + 30 * Math.max(0, rows.length - 1);
   const wy = 205;
-  svg.append(el('ellipse', {
+  const wholeTap = s.tap === 'whole';
+  const wholeG = el('g', { class: `whole-group${wholeTap ? ' tappable' : ''}`, 'data-action': wholeTap ? 'whole' : null });
+  wholeG.append(el('ellipse', {
     cx: LEFT_X, cy: wy, rx: lassoWidth(perRow) / 2, ry: wholeH / 2, class: 'lasso-oval is-inside whole',
   }));
+  svg.append(wholeG);
   let k = 0;
   rows.forEach((count, r) => {
     const y = wy - (30 * (rows.length - 1)) / 2 + r * 30;
-    svg.append(counterRow(s.whole.slice(k, k + count), LEFT_X, y));
+    wholeG.append(counterRow(s.whole.slice(k, k + count), LEFT_X, y));
     k += count;
   });
 
@@ -191,7 +195,11 @@ function fractionScript(svg, s) {
   const w = lassoWidth(Math.max(2, each, ...s.parts.map((p) => p.terms.length)));
   const anyTaken = s.parts.some((p) => p.taken);
   s.parts.forEach((part, i) => {
-    const g = el('g', { class: `part${part.taken ? ' is-taken' : anyTaken ? ' is-left' : ''}`, 'data-part': i });
+    const tap = s.tap === 'parts';
+    const g = el('g', {
+      class: `part${part.taken ? ' is-taken' : anyTaken ? ' is-left' : ''}${tap ? ' tappable' : ''}`, 'data-part': i,
+      'data-action': tap ? 'part' : null, 'data-index': tap ? i : null,
+    });
     g.append(el('ellipse', { cx: STACK_X, cy: ys[i], rx: w / 2, ry: PART_HEIGHT / 2, class: 'lasso-oval is-groups' }));
     g.append(counterRow(part.terms, STACK_X, ys[i], { flipped: s.flipped && part.taken }));
     svg.append(g);

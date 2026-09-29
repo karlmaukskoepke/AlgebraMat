@@ -64,3 +64,43 @@ export function validateOppositeAnswer(problem, value) {
   if (value !== evaluateGroups(problem)) return fail('oppositeOf', { total: groupTotal(problem) });
   return pass('correct', { answer: value });
 }
+
+// ---------- Fraction groups (SPEC-LASSO.md §3b) ----------
+
+// Most parts a student can draw (sixths are the most; one extra so "too many" can happen).
+export const MAX_PARTS = 7;
+
+// ① Whole: the whole group B, drawn in one lasso.
+export function validateWhole(problem, terms) {
+  const b = problem.inside.value;
+  const sign = b > 0 ? '+' : '-';
+  const count = Math.abs(b);
+  if (terms.length === 0 || terms.some((t) => t.sign !== sign)) return fail('wholeType', { b, count, sign });
+  if (terms.length !== count) return fail('wholeCount', { b, have: terms.length });
+  return pass('wholeDone', { d: problem.count.d });
+}
+
+// ② Split: d parts, every counter dealt out, all parts equal.
+export function validateSplit(problem, { whole, parts }) {
+  const d = problem.count.d;
+  if (parts.length !== d) return fail('splitParts', { d, have: parts.length });
+  if (whole.length > 0) return fail('dealAll');
+  const sizes = parts.map((p) => p.terms.length);
+  if (sizes.some((n) => n !== sizes[0])) return fail('unequalParts');
+  return pass('splitDone', { n: problem.count.n, size: problem.inside.value / d });
+}
+
+// ③ Take: exactly n parts.
+export function validateTake(problem, parts) {
+  const n = problem.count.n;
+  const taken = parts.filter((p) => p.taken).length;
+  if (taken !== n) return fail('takeN', { n, have: taken });
+  return pass('takeDone');
+}
+
+// ⑤ Opposite or not: "No opposite" passes only when A > 0; opp. only when A < 0.
+export function validateOppositeChoice(problem, choice) {
+  const right = isOpposite(problem) ? 'opp' : 'none';
+  if (choice !== right) return fail(right === 'opp' ? 'isOppositeGroup' : 'notOpposite');
+  return pass(right === 'opp' ? 'oppDone' : 'correct');
+}

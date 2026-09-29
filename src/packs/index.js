@@ -19,9 +19,9 @@ export const lasso = {
     'fraction of a group',
     'opposite fraction',
   ],
-  // Levels built so far (whole-number groups). Reachable only at
-  // ?pack=lasso&level=N until Lasso step 5 opens the card.
-  playable: 3,
+  // All 7 levels are built. Reachable only at ?pack=lasso&level=N until
+  // Lasso step 5 opens the card.
+  playable: 7,
   comingSoon: true,
   generate: (level, seed) => generateLassoLevel(level, seed),
 };

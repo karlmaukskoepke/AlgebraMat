@@ -28,15 +28,17 @@ export function buildLassoControls(root, dispatch) {
   const row = document.createElement('div');
   row.className = 'palette-row';
 
-  const addLasso = button('Add lasso', 'addLasso');
+  const addLasso = button('Add lasso', 'addLasso'); // "Add part" in fraction problems
   const plusGroups = button('+ groups', 'chooseSign', { data: { sign: '+' } });
   const minusGroups = button('<span class="opp-word">−</span> groups', 'chooseSign', { data: { sign: '-' }, aria: 'Minus groups (opposite)' });
   const plus = button(PLUS_SVG, 'pickSign', { cls: 'btn-sign', data: { sign: '+' }, aria: 'Plus counter' });
   const minus = button(MINUS_SVG, 'pickSign', { cls: 'btn-sign', data: { sign: '-' }, aria: 'Minus counter' });
   const undo = button('Undo', 'undo');
   const opp = button('<span class="opp-word">opp.</span>', 'flip', { aria: 'Opposite: flip every group' });
+  const noOpp = button('No opposite', 'noOpposite');
   const check = button('Check ✓', 'check', { cls: 'btn-primary' });
-  row.append(group(addLasso), group(plusGroups, minusGroups), group(plus, minus, undo), group(opp), check);
+  const signGroup = group(plusGroups, minusGroups);
+  row.append(group(addLasso), signGroup, group(plus, minus, undo), group(opp, noOpp), check);
 
   const pad = document.createElement('div');
   pad.className = 'pad';
@@ -59,15 +61,25 @@ export function buildLassoControls(root, dispatch) {
   return {
     update(s) {
       const step = s.step;
-      addLasso.disabled = step !== 'groups';
+      const fraction = s.script === 'fraction';
+      // The two scripts share one palette; fraction problems swap in their own buttons.
+      addLasso.textContent = fraction ? 'Add part' : 'Add lasso';
+      addLasso.dataset.action = fraction ? 'addPart' : 'addLasso';
+      signGroup.hidden = fraction;
+      noOpp.hidden = !fraction;
+      const drawing = fraction ? step === 'whole' : step === 'fill';
+      addLasso.disabled = step !== (fraction ? 'split' : 'groups');
       plusGroups.disabled = minusGroups.disabled = step !== 'sign';
-      plus.disabled = minus.disabled = undo.disabled = step !== 'fill';
-      plus.setAttribute('aria-pressed', String(step === 'fill' && s.drawSign === '+'));
-      minus.setAttribute('aria-pressed', String(step === 'fill' && s.drawSign === '-'));
-      opp.disabled = !(step === 'opposite' && !s.flipped);
+      plus.disabled = minus.disabled = !drawing;
+      undo.disabled = !(drawing || (fraction && step === 'split'));
+      plus.setAttribute('aria-pressed', String(drawing && s.drawSign === '+'));
+      minus.setAttribute('aria-pressed', String(drawing && s.drawSign === '-'));
+      opp.disabled = noOpp.disabled = !(step === 'opposite' && !s.flipped);
+      if (!fraction) noOpp.disabled = true;
       const padOpen = step === 'count' || (step === 'opposite' && s.flipped);
       const done = step === 'done'; // 'levelDone' leaves every control disabled
-      check.disabled = !(step === 'groups' || step === 'fill' || padOpen || done);
+      const checkable = ['groups', 'fill', 'whole', 'split', 'take'].includes(step);
+      check.disabled = !(checkable || padOpen || done);
       check.innerHTML = done ? 'Next →' : 'Check ✓';
       if (done) check.dataset.next = '1'; else delete check.dataset.next;
       for (const b of pad.querySelectorAll('button')) b.disabled = !padOpen;
