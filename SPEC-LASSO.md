@@ -88,6 +88,15 @@ Same shell as Flip It: header, step bar, Mat, feedback line, hint line, palette,
 
 **⑤ Opposite.** Choose **opp.** or **No opposite**. The choice is required, like "Nothing to rewrite", so students can't flip blindly. Negative fractions then flip and ask for the answer again, as in 3a ⑤.
 
+- *(Build decisions, Lasso step 4)*
+  - The whole group is drawn by tapping the green lasso in the left column, with the same + / − palette and Undo as Fill. It holds at most 12 counters.
+  - In Split, **Undo** takes back the latest deal (the counter goes back to the whole) or the latest part. It can't reach back into the already-checked whole.
+  - A student can draw up to 7 parts (sixths are the most), so "too many" can still happen.
+  - In Take, tapping a part toggles it. A part that isn't taken stays slightly faded while choosing.
+  - A wrong fraction count says *"Count the counters in the parts you took."*
+  - After Count, every fraction problem asks **opp.** or **No opposite**. The wrong choice gets *"There's a − in front of the fraction — it's the opposite."* or *"Look at the sign in front of the fraction — is there a −?"*
+  - The palette is shared between the scripts. Fraction problems show **Add part** in place of **Add lasso**, and **No opposite** in place of the + / − groups buttons.
+
 **Answer entry:** same ± pad. Every step's answers are signed integers.
 
 ## 4. Levels (Karl's order)

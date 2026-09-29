@@ -28,6 +28,29 @@ Add `?seed=123` to the URL to replay a fixed problem set, and `?level=2` to open
 
 ## Changelog
 
+### Lasso step 4: fraction moves, playable (SPEC-LASSO.md §8.4)
+- **Engine:**
+  - `lassoMoves.js` adds validators for Whole (B in one lasso), Split (d parts, every counter dealt, all equal), Take (exactly n), and opp. / No opposite (No opposite passes only when A > 0).
+  - `lassoSession.js` runs the fraction script (Whole → Split → Take → Count → Opposite) alongside the whole-number one.
+  - Tested with walkthroughs of `2/3(−6)` and `−1/4(−12)`, including undoing deals, unequal parts, leftover counters, too few or too many parts, the wrong take count, and the wrong opp. / No opposite choice.
+- **UI:**
+  - Tap the green whole lasso to draw.
+  - **Add part** makes blue parts. Tapping a part deals one counter into it during Split, and toggles it taken during Take (the blue bracket appears).
+  - Then Count, and **opp.** or **No opposite**.
+  - The palette swaps **Add part** / **No opposite** in for fraction problems.
+- **Levels 4–7 are playable** at `?pack=lasso&level=4` through `7`. The pack map still says Lasso is coming soon (step 5 opens it).
+- **Fixed:** finishing Level 7 before the other levels said "More Lasso levels are coming soon". It now says it's the last level and to finish the others.
+- **Verified:**
+  - 153 unit tests.
+  - A Playwright run played Lasso Levels 4–7 (20 problems). On the first problem of each level it made every wrong move: an extra counter (or the 12-counter cap), no parts, a partial deal, dealing with nothing left, taking none, a wrong count, and the wrong opp. choice.
+  - Re-ran Lasso Levels 1–3 and all Flip It runs (four levels, save codes, hints, touch audit). No page errors.
+- **Judgment calls** (also in SPEC-LASSO.md §3b):
+  - Undo scope in Split (deals and parts only, not the checked whole).
+  - Up to 7 parts.
+  - Take toggles.
+  - The fraction-specific count message.
+  - Every fraction problem asks opp. or No opposite.
+
 ### Lasso step 3: whole-number moves, playable (SPEC-LASSO.md §8.3)
 - **Engine:**
   - `engine/lassoMoves.js` validates each move: Groups (the hidden 1, |A| lassos), + or −, Fill (each lasso holds B), Count (the total before any opposite), and Opposite (the answer after flipping).

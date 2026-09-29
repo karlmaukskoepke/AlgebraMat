@@ -85,7 +85,9 @@ export function renderLevelDone(root, { pack, level, packComplete, onNext, onMap
       ? `Level ${level + 1} is open.`
       : packComplete && pack.id === 'flipit'
         ? `You finished ${pack.title}! The Lasso pack is coming soon.`
-        : packComplete ? `You finished ${pack.title}!` : `More ${pack.title} levels are coming soon.`),
+        : packComplete ? `You finished ${pack.title}!`
+          : level >= pack.levels ? `That’s the last ${pack.title} level! Finish the others to complete the pack.`
+            : `More ${pack.title} levels are coming soon.`),
     buttons);
   panel.addEventListener('click', (e) => {
     const go = e.target.closest('[data-go]')?.dataset.go;

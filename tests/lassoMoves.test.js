@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { makeGroups } from '../src/engine/groups.js';
 import {
   validateGroups, validateGroupSign, validateGroup, validateFill, validateCount, validateOppositeAnswer,
+  validateWhole, validateSplit, validateTake, validateOppositeChoice,
 } from '../src/engine/lassoMoves.js';
 import { newLassoSession, reduceLasso, stepsFor } from '../src/engine/lassoSession.js';
 
@@ -147,8 +148,118 @@ describe('Lasso session: whole-number groups', () => {
     expect(reduceLasso(s0, { type: 'chooseSign', sign: '+' })).toBe(s0);
   });
 
-  it('fraction problems wait for Lasso step 4', () => {
-    expect(() => newLassoSession(makeGroups({ n: 2, d: 3 }, -6))).toThrow();
+});
+
+describe('Lasso fraction validators', () => {
+  const p = makeGroups({ n: 2, d: 3 }, -6);
+  const part = (n, taken = false) => ({ terms: t('-', n), taken });
+
+  it('① Whole: B drawn in one lasso', () => {
+    expect(validateWhole(p, t('-', 6)).ok).toBe(true);
+    expect(validateWhole(p, t('+', 6))).toMatchObject({ feedbackKey: 'wholeType', params: { b: -6, count: 6, sign: '-' } });
+    expect(validateWhole(p, t('-', 5))).toMatchObject({ feedbackKey: 'wholeCount', params: { have: 5 } });
+  });
+
+  it('② Split: d parts, all dealt, all equal', () => {
+    expect(validateSplit(p, { whole: [], parts: [part(2), part(2), part(2)] }).ok).toBe(true);
+    expect(validateSplit(p, { whole: [], parts: [part(3), part(3)] })).toMatchObject({ feedbackKey: 'splitParts', params: { d: 3, have: 2 } });
+    expect(validateSplit(p, { whole: t('-', 1), parts: [part(2), part(2), part(1)] }).feedbackKey).toBe('dealAll');
+    expect(validateSplit(p, { whole: [], parts: [part(3), part(2), part(1)] }).feedbackKey).toBe('unequalParts');
+  });
+
+  it('③ Take: exactly n parts', () => {
+    expect(validateTake(p, [part(2, true), part(2, true), part(2)]).ok).toBe(true);
+    expect(validateTake(p, [part(2, true), part(2), part(2)])).toMatchObject({ feedbackKey: 'takeN', params: { n: 2, have: 1 } });
+  });
+
+  it('⑤ "No opposite" passes only when A > 0, opp. only when A < 0', () => {
+    expect(validateOppositeChoice(p, 'none').ok).toBe(true);
+    expect(validateOppositeChoice(p, 'opp')).toMatchObject({ ok: false, feedbackKey: 'notOpposite' });
+    const neg = makeGroups({ neg: true, n: 1, d: 4 }, -12);
+    expect(validateOppositeChoice(neg, 'opp').ok).toBe(true);
+    expect(validateOppositeChoice(neg, 'none')).toMatchObject({ ok: false, feedbackKey: 'isOppositeGroup' });
+  });
+});
+
+describe('Lasso session: fraction groups', () => {
+  it('uses the five fraction steps', () => {
+    expect(stepsFor(makeGroups({ n: 2, d: 3 }, -6)).map((x) => x.id)).toEqual(['whole', 'split', 'take', 'count', 'opposite']);
+  });
+
+  it('2/3(−6) = −4: draw, split, take 2, count, No opposite', () => {
+    let s = newLassoSession(makeGroups({ n: 2, d: 3 }, -6));
+    expect(s).toMatchObject({ script: 'fraction', step: 'whole' });
+    s = run(s, { type: 'tapWhole' });
+    expect(s.feedback.key).toBe('pickSignFirst');
+    s = run(s, { type: 'pickSign', sign: '-' }, ...times(7, { type: 'tapWhole' }), { type: 'check' });
+    expect(s.feedback.key).toBe('wholeCount');
+    s = run(s, { type: 'undo' }, { type: 'check' });
+    expect(s.step).toBe('split');
+
+    s = run(s, ...times(2, { type: 'addPart' }), { type: 'check' });
+    expect(s.feedback).toMatchObject({ key: 'splitParts', params: { d: 3, have: 2 } });
+    s = run(s, { type: 'addPart' }, ...times(3, { type: 'tapPart', index: 0 }), { type: 'check' });
+    expect(s.feedback.key).toBe('dealAll');
+    s = run(s, ...times(3, { type: 'tapPart', index: 1 }), { type: 'check' });
+    expect(s.feedback.key).toBe('unequalParts');
+    s = run(s, { type: 'undo' }, { type: 'undo' }, { type: 'undo' }); // three deals back into the whole
+    expect(s.whole).toHaveLength(3);
+    s = run(s, { type: 'tapPart', index: 1 }, { type: 'tapPart', index: 1 }, { type: 'tapPart', index: 2 },
+      { type: 'tapPart', index: 2 }, { type: 'tapPart', index: 2 });
+    expect(s.feedback.key).toBe('allDealt');
+    expect(s.parts.map((x) => x.terms.length)).toEqual([3, 2, 1]);
+    s = run(s, { type: 'undo' }, { type: 'undo' }, { type: 'tapPart', index: 1 }, { type: 'tapPart', index: 2 }, { type: 'undo' });
+    // parts are now [3, 3, 0] with 0 left… rebuild a fair split from scratch
+    s = run(newLassoSession(makeGroups({ n: 2, d: 3 }, -6)), { type: 'pickSign', sign: '-' }, ...times(6, { type: 'tapWhole' }), { type: 'check' },
+      ...times(3, { type: 'addPart' }), ...[0, 1, 2, 0, 1, 2].map((i) => ({ type: 'tapPart', index: i })), { type: 'check' });
+    expect(s.step).toBe('take');
+
+    s = run(s, { type: 'tapPart', index: 0 }, { type: 'check' });
+    expect(s.feedback.key).toBe('takeN');
+    s = run(s, { type: 'tapPart', index: 2 }, { type: 'check' });
+    expect(s.step).toBe('count');
+    s = run(s, ...type(-6));
+    expect(s.feedback.key).toBe('countTaken');
+    s = run(s, { type: 'backspace' }, { type: 'digit', digit: 4 }, { type: 'check' });
+    expect(s).toMatchObject({ step: 'opposite', total: -4 });
+    expect(s.feedback.key).toBe('oppOrNot');
+    s = run(s, { type: 'flip' });
+    expect(s.feedback.key).toBe('notOpposite');
+    s = run(s, { type: 'noOpposite' });
+    expect(s).toMatchObject({ step: 'done', answer: -4, skipped: ['opposite'] });
+  });
+
+  it('−1/4(−12) = 3: opposite fraction flips, then asks for the answer', () => {
+    let s = run(newLassoSession(makeGroups({ neg: true, n: 1, d: 4 }, -12)), { type: 'pickSign', sign: '-' },
+      ...times(12, { type: 'tapWhole' }), { type: 'check' }, ...times(4, { type: 'addPart' }),
+      ...Array.from({ length: 12 }, (_, i) => ({ type: 'tapPart', index: i % 4 })), { type: 'check' },
+      { type: 'tapPart', index: 3 }, { type: 'check' }, ...type(-3));
+    expect(s).toMatchObject({ step: 'opposite', total: -3 });
+    s = run(s, { type: 'noOpposite' });
+    expect(s.feedback.key).toBe('isOppositeGroup');
+    s = run(s, { type: 'flip' });
+    expect(s.flipped).toBe(true);
+    s = run(s, ...type(-3));
+    expect(s.feedback.key).toBe('oppositeOf');
+    s = run(s, { type: 'toggleSign' }, { type: 'check' });
+    expect(s).toMatchObject({ step: 'done', answer: 3 });
+  });
+
+  it('Undo in Whole takes back counters only; in Split, parts and deals only', () => {
+    let s = run(newLassoSession(makeGroups({ n: 1, d: 2 }, 4)), { type: 'pickSign', sign: '+' }, ...times(4, { type: 'tapWhole' }), { type: 'check' });
+    s = run(s, { type: 'undo' });
+    expect(s.whole).toHaveLength(4); // can't undo into the checked whole
+    s = run(s, { type: 'addPart' }, { type: 'addPart' }, { type: 'tapPart', index: 0 }, { type: 'undo' }, { type: 'undo' });
+    expect(s.parts).toHaveLength(1);
+    expect(s.whole).toHaveLength(4);
+  });
+
+  it('ignores whole-number moves, and caps parts', () => {
+    const s0 = newLassoSession(makeGroups({ n: 2, d: 3 }, -6));
+    expect(reduceLasso(s0, { type: 'addLasso' })).toBe(s0);
+    let s = run(s0, { type: 'pickSign', sign: '-' }, ...times(6, { type: 'tapWhole' }), { type: 'check' }, ...times(9, { type: 'addPart' }));
+    expect(s.parts).toHaveLength(7);
+    expect(s.feedback.key).toBe('tooManyParts');
   });
 });
 

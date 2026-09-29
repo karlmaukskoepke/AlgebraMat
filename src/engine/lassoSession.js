@@ -1,11 +1,13 @@
 // One Lasso problem's walk through its steps, as a pure reducer (like
-// engine/session.js for Flip It). Whole-number groups for now; the fraction
-// script (Whole → Split → Take → Count → Opposite) comes in Lasso step 4.
+// engine/session.js for Flip It). Two scripts (SPEC-LASSO.md §3):
+//   whole-number groups: Groups → + or − → Fill → Count → Opposite
+//   fraction groups:     Whole → Split → Take → Count → Opposite
 
 import { isFraction, isOpposite } from './groups.js';
 import {
   validateGroups, validateGroupSign, validateGroup, validateFill, validateCount,
-  validateOppositeAnswer, MAX_IN_LASSO, MAX_LASSOS,
+  validateOppositeAnswer, validateWhole, validateSplit, validateTake, validateOppositeChoice,
+  MAX_IN_LASSO, MAX_LASSOS, MAX_PARTS,
 } from './lassoMoves.js';
 import { entryValue } from './session.js';
 
@@ -17,13 +19,18 @@ export const WHOLE_STEPS = [
   { id: 'opposite', label: 'Opposite' },
 ];
 
-export function stepsFor(problem) {
-  if (isFraction(problem)) throw new Error('Fraction groups arrive in Lasso step 4');
-  return WHOLE_STEPS;
-}
+export const FRACTION_STEPS = [
+  { id: 'whole', label: 'Whole' },
+  { id: 'split', label: 'Split' },
+  { id: 'take', label: 'Take' },
+  { id: 'count', label: 'Count' },
+  { id: 'opposite', label: 'Opposite' },
+];
+
+export const stepsFor = (problem) => (isFraction(problem) ? FRACTION_STEPS : WHOLE_STEPS);
 
 export function newLassoSession(problem) {
-  stepsFor(problem); // fraction problems aren't playable yet
+  if (isFraction(problem)) return newFractionSession(problem);
   return {
     problem,
     script: 'whole',
@@ -39,6 +46,25 @@ export function newLassoSession(problem) {
     entry: { negative: false, digits: '' },
     tries: {},
     feedback: { key: problem.hidden1 ? 'groupsIntroHidden' : 'groupsIntro' },
+  };
+}
+
+function newFractionSession(problem) {
+  return {
+    problem,
+    script: 'fraction',
+    step: 'whole',
+    skipped: [],
+    whole: [],                   // counters in the whole group
+    parts: [],                   // [{ terms, taken }]
+    history: [],                 // newest last: { type: 'draw' | 'part' | 'deal', index }
+    drawSign: null,
+    total: null,
+    flipped: false,
+    answer: null,
+    entry: { negative: false, digits: '' },
+    tries: {},
+    feedback: { key: 'wholeIntro' },
   };
 }
 
@@ -67,6 +93,7 @@ function finish(s, answer, res) {
 const padOpen = (s) => s.step === 'count' || (s.step === 'opposite' && s.flipped);
 
 export function reduceLasso(state, action) {
+  if (state.script === 'fraction') return reduceFraction(state, action);
   const s = clone(state);
   const { problem } = s;
 
@@ -200,4 +227,137 @@ export function reduceLasso(state, action) {
     default:
       return state;
   }
+}
+
+// ---------- Fraction groups ----------
+
+function reduceFraction(state, action) {
+  const s = clone(state);
+  const { problem } = s;
+
+  switch (action.type) {
+    case 'pickSign': {
+      if (s.step !== 'whole') return state;
+      s.drawSign = action.sign;
+      return s;
+    }
+
+    case 'tapWhole': { // ① draw the whole group, one counter per tap
+      if (s.step !== 'whole') return state;
+      if (!s.drawSign) return note(s, 'pickSignFirst');
+      if (s.whole.length >= MAX_IN_LASSO) return note(s, 'lassoFull');
+      s.whole.push({ kind: 'int', sign: s.drawSign });
+      s.history.push({ type: 'draw' });
+      return note(s, 'wholeIntro');
+    }
+
+    case 'addPart': {
+      if (s.step !== 'split') return state;
+      if (s.parts.length >= MAX_PARTS) return note(s, 'tooManyParts');
+      s.parts.push({ terms: [], taken: false });
+      s.history.push({ type: 'part' });
+      return note(s, 'splitIntro');
+    }
+
+    case 'tapPart': {
+      const part = s.parts[action.index];
+      if (!part) return state;
+      if (s.step === 'split') { // deal one counter from the whole into this part
+        if (s.whole.length === 0) return note(s, 'allDealt');
+        part.terms.push(s.whole.pop());
+        s.history.push({ type: 'deal', index: action.index });
+        return note(s, 'splitIntro');
+      }
+      if (s.step === 'take') {
+        part.taken = !part.taken;
+        return note(s, 'takeIntro', { n: problem.count.n });
+      }
+      return state;
+    }
+
+    case 'undo': { // takes back the latest counter, part, or deal
+      if ((s.step !== 'whole' && s.step !== 'split') || s.history.length === 0) return state;
+      const last = s.history[s.history.length - 1];
+      if (s.step === 'whole' && last.type !== 'draw') return state;
+      if (s.step === 'split' && last.type === 'draw') return state; // the whole is already checked
+      s.history.pop();
+      if (last.type === 'draw') s.whole.pop();
+      if (last.type === 'part') s.parts.pop();
+      if (last.type === 'deal') s.whole.push(s.parts[last.index].terms.pop());
+      return s;
+    }
+
+    case 'flip':
+    case 'noOpposite': {
+      if (s.step !== 'opposite' || s.flipped) return state;
+      const res = validateOppositeChoice(problem, action.type === 'flip' ? 'opp' : 'none');
+      if (!res.ok) return wrong(s, res);
+      if (action.type === 'noOpposite') {
+        s.skipped.push('opposite');
+        return finish(s, s.total, { ok: true, feedbackKey: 'correct', params: { answer: s.total } });
+      }
+      s.flipped = true;
+      s.entry = emptyEntry();
+      return note(s, 'oppDone', { total: s.total });
+    }
+
+    case 'check': {
+      if (s.step === 'whole') {
+        const res = validateWhole(problem, s.whole);
+        if (!res.ok) return wrong(s, res);
+        s.step = 'split';
+        return say(s, res);
+      }
+      if (s.step === 'split') {
+        const res = validateSplit(problem, { whole: s.whole, parts: s.parts });
+        if (!res.ok) return wrong(s, res);
+        s.step = 'take';
+        return say(s, res);
+      }
+      if (s.step === 'take') {
+        const res = validateTake(problem, s.parts);
+        if (!res.ok) return wrong(s, res);
+        s.step = 'count';
+        s.entry = emptyEntry();
+        return say(s, res);
+      }
+      if (s.step === 'count') {
+        const value = entryValue(s.entry);
+        const res = validateCount(problem, value);
+        if (res.feedbackKey === 'typeAnswer') return say(s, res);
+        if (!res.ok) return wrong(s, { ...res, feedbackKey: 'countTaken' });
+        s.total = value;
+        s.entry = emptyEntry();
+        s.step = 'opposite'; // every fraction problem asks: opp. or No opposite?
+        return note(s, 'oppOrNot', { total: value });
+      }
+      if (s.step === 'opposite') {
+        if (!s.flipped) return note(s, 'oppOrNot', { total: s.total });
+        const value = entryValue(s.entry);
+        const res = validateOppositeAnswer(problem, value);
+        if (!res.ok) return res.feedbackKey === 'typeAnswer' ? say(s, res) : wrong(s, res);
+        return finish(s, value, res);
+      }
+      return state;
+    }
+
+    case 'digit':
+    case 'toggleSign':
+    case 'backspace':
+      return reducePad(state, s, action);
+
+    default:
+      return state;
+  }
+}
+
+function reducePad(state, s, action) {
+  if (!padOpen(s)) return state;
+  if (action.type === 'digit') {
+    if (s.entry.digits.length >= 2) return state;
+    s.entry.digits = s.entry.digits === '0' ? String(action.digit) : s.entry.digits + action.digit;
+  }
+  if (action.type === 'toggleSign') s.entry.negative = !s.entry.negative;
+  if (action.type === 'backspace') s.entry.digits = s.entry.digits.slice(0, -1);
+  return s;
 }
