@@ -1,71 +1,72 @@
-// Every Lasso message in one table (like view/feedback.js for Flip It).
+// Every Group It message in one table (like view/feedback.js for Flip It).
 // Keys come from engine/lassoMoves.js and engine/lassoSession.js.
 
 import { MINUS } from '../engine/expr.js';
 
 const signed = (n) => (n < 0 ? `${MINUS}${-n}` : `${n}`);
 const kind = (sign, count) => `${count} ${sign === '+' ? 'positive' : 'negative'}${count === 1 ? '' : 's'}`;
-const lassos = (n) => `${n} lasso${n === 1 ? '' : 's'}`;
+const groups = (n) => `${n} group${n === 1 ? '' : 's'}`;
+const ORDINAL = ['first', 'second', 'third', 'fourth', 'fifth', 'sixth', 'seventh'];
+const nth = (i) => ORDINAL[i] ?? `number ${i + 1}`;
 
 export const LASSO_FEEDBACK = {
   // ① Groups
   groupsIntroHidden: () => 'There’s 1 hidden group — tap the gap before the ( to write the 1.',
-  groupsIntro: () => 'Draw one lasso for each group: tap Add lasso, then Check.',
+  groupsIntro: () => 'Make one group for each group in the problem: tap Add group, then Check.',
+  partsIntro: ({ d }) => `The bottom number is ${d}: tap Add group to make ${d} equal groups in one bar, then Check.`,
   writeOne: () => 'There’s 1 hidden group — write the 1.',
   writeOneFirst: () => 'Write the hidden 1 first — tap the gap before the (.',
-  tooManyLassos: () => 'That’s more lassos than any problem needs. Tap one to erase it.',
-  groupCount: ({ n, have }) => `The number of groups is ${n} — you have ${lassos(have)}.`,
+  tooManyGroups: () => 'That’s more groups than any problem needs. Tap one to erase it.',
+  groupCount: ({ n, have }) => `The number of groups is ${n} — you have ${groups(have)}.`,
+  partCount: ({ d, have }) => `The bottom number is ${d}, so make ${d} groups — you have ${have}.`,
   groupsDone: () => 'Are these + groups, or − groups (the opposite)?',
+  partsDone: () => 'Is this bar + or − (the opposite)?',
 
   // ② + or −
   lookAtSign: () => 'Look at the sign in front of the groups.',
-  plusGroups: () => 'Plus groups! Pick + or −, then tap the first lasso to fill it.',
-  oppositeGroups: () => 'Opposite groups — each lasso gets a −. Pick + or −, then tap the first lasso to fill it.',
+  lookAtFractionSign: () => 'Look at the sign in front of the fraction.',
+  plusGroups: ({ fraction }) => (fraction
+    ? 'Plus! Pick + or −, then tap the lit-up group to deal the first counter.'
+    : 'Plus groups! Pick + or −, then tap any group to add a counter.'),
+  oppositeGroups: ({ fraction }) => (fraction
+    ? 'Opposite! The bar gets a −. Pick + or −, then tap the lit-up group to deal the first counter.'
+    : 'Opposite groups — each group gets a −. Pick + or −, then tap any group to add a counter.'),
 
   // ③ Fill
   pickSignFirst: () => 'Pick + or − first.',
-  fillIntro: () => 'Tap the first lasso to add a counter. When it’s one group, tap each other lasso to copy it.',
-  lassoFull: () => 'That’s more than one group needs. Undo takes one back.',
-  fixFirstGroup: ({ b, count, sign }) => `Fill the first lasso first: a group of ${signed(b)} is ${kind(sign, count)}.`,
+  fillIntro: () => 'Tap any group to add a counter. Fill every group, then Check.',
+  groupFull: () => 'That’s more than it needs. Undo takes one back.',
   groupOk: () => 'That’s one group.',
-  copied: () => 'Copied! Tap the next empty lasso, then Check.',
-  needGroupType: ({ b, count, sign }) => `Each group is ${signed(b)}, so each lasso needs ${kind(sign, count)}.`,
-  groupCountAgain: ({ b, have }) => `This lasso has ${have} — each group is ${signed(b)}.`,
-  copyEachGroup: ({ b }) => `Tap each empty lasso to fill it with a group of ${signed(b)}.`,
-  fillDone: () => 'Groups filled! Count every counter in every lasso and type the total.',
+  emptyGroup: ({ b, index }) => `The ${nth(index)} group is empty — every group is ${signed(b)}.`,
+  needGroupType: ({ b, count, sign }) => `Each group is ${signed(b)}, so each group needs ${kind(sign, count)}.`,
+  groupCountAgain: ({ b, have, index }) => `The ${nth(index)} group has ${have} — each group is ${signed(b)}.`,
+  fillDone: () => 'Groups filled! Count every counter and type the total.',
+  fillDoneOpp: () => 'Groups filled! They’re opposite groups — tap each − to flip its group, or tap Flip all.',
 
-  // ④ Count and ⑤ Opposite
-  countAll: () => 'Count all the counters in all the lassos.',
-  countDoneOpp: ({ total }) => `That’s ${signed(total)} in the groups. They’re opposite groups — tap opp. to flip every counter.`,
-  tapOppFirst: () => 'Tap opp. first to flip every counter.',
-  oppDone: ({ total }) => `Flipped! Now type the opposite of ${signed(total)}.`,
-  oppositeOf: ({ total }) => `The opposite of ${signed(total)} is…?`,
+  // ③ Fill, fraction bar
+  dealIntro: () => 'Keep going: tap the lit-up group. Deal one at a time, top to bottom, then around again.',
+  dealHere: () => 'Deal in order — the next counter goes in the lit-up group.',
+  dealType: ({ b, count, sign }) => `The whole group is ${signed(b)}, so deal ${kind(sign, count)}.`,
+  dealCount: ({ b, have }) => `You dealt ${have} — the whole group is ${signed(b)}.`,
+  dealDone: ({ n }) => `Equal groups! Now take ${n} — tap each group you take.`,
 
-  // Fraction groups: ① Whole
-  wholeIntro: () => 'Draw the whole group: pick + or −, then tap the green lasso once per counter.',
-  wholeType: ({ b, count, sign }) => `The whole group is ${signed(b)}, so it needs ${kind(sign, count)}.`,
-  wholeCount: ({ b, have }) => `Count again — you have ${have}, the whole group is ${signed(b)}.`,
-  wholeDone: ({ d }) => `Now split it into ${d} equal parts: tap Add part ${d} times, then tap a part to deal a counter into it.`,
+  // ④ Take
+  takeIntro: ({ n }) => `Tap a group to take it (tap again to put it back). The top number says ${n}.`,
+  takeN: () => 'The top number says how many groups to take.',
+  takeDone: () => 'Now count the counters in the groups you took, and type the total.',
+  takeDoneOpp: () => 'It’s the opposite — tap the − to flip the groups you took.',
 
-  // ② Split
-  splitIntro: () => 'Tap a part to deal one counter into it. Keep the parts equal.',
-  tooManyParts: () => 'That’s more parts than any fraction here needs. Undo takes one back.',
-  allDealt: () => 'Every counter is dealt. Check the parts.',
-  splitParts: ({ d, have }) => `Split into ${d} parts — you have ${have}.`,
-  dealAll: () => 'Deal out every counter first.',
-  unequalParts: () => 'The parts aren’t equal yet — each part needs the same number.',
-  splitDone: ({ n }) => `Equal parts! Now take ${n} — tap each part you take.`,
+  // Flip
+  tapFlip: () => 'Tap each − to flip its group, or tap Flip all.',
+  tapFlipBar: () => 'Tap the − to flip the groups you took.',
+  flipMore: () => 'Flipped! Keep going — tap the next −.',
+  flipDone: ({ fraction }) => (fraction
+    ? 'Flipped! Now count the counters in the groups you took, and type the total.'
+    : 'All flipped! Now count every counter and type the total.'),
 
-  // ③ Take
-  takeIntro: ({ n }) => `Tap a part to take it (tap again to put it back). The top number says ${n}.`,
-  takeN: () => 'The top number says how many parts to take.',
-  takeDone: () => 'Now count the counters in the parts you took, and type the total.',
-  countTaken: () => 'Count the counters in the parts you took.',
-
-  // ⑤ Opposite or not
-  oppOrNot: ({ total }) => `The parts you took make ${signed(total)}. Is it the opposite? Tap opp. or No opposite.`,
-  isOppositeGroup: () => 'There’s a − in front of the fraction — it’s the opposite.',
-  notOpposite: () => 'Look at the sign in front of the fraction — is there a −?',
+  // Count
+  countAll: () => 'Count all the counters in all the groups.',
+  countTaken: () => 'Count the counters in the groups you took.',
 
   typeAnswer: () => 'Type a number first.',
   correct: ({ answer }) => `Yes! The answer is ${signed(answer)}.`,

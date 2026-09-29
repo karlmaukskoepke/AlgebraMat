@@ -1,30 +1,28 @@
-// Renders the Lasso Mat as inline SVG (SPEC-LASSO.md §2), from a view state:
+// Renders the Group It Mat as inline SVG (SPEC-LASSO.md §2), from a view state:
 //
-// whole-number problems, e.g. −2(−4):
-//   { script: 'whole', problem, wroteOne, lassos: [{ opposite, terms: [{ kind, sign }] }],
-//     total, flipped, answer }
-// fraction problems, e.g. 2/3(−6):
-//   { script: 'fraction', problem, whole: [terms], parts: [{ terms, taken }],
-//     total, flipped, answer }
-// Optional, while playing: `tap` ('lassos', 'whole' or 'parts' makes those
-// tappable), `slot`
-// (show the tappable gap for the hidden 1), and `totalText` / `answerText`
-// (what's being typed on the pad, shown in the arrow chain).
+//   { script: 'whole' | 'fraction', problem, wroteOne, groups: [{ terms, taken, flipped }],
+//     opposite, answer }
+//
+// Whole numbers draw separate oval groups; a fraction draws one bar split
+// into d connected groups. Optional, while playing: `tap` ('groups' makes the
+// groups tappable, 'flip' the − marks), `next` (the lit-up part to deal into),
+// `slot` (the tappable gap for the hidden 1) and `totalText` (what's being
+// typed on the pad, shown after the arrow).
 //
 // Colors carry meaning, as in the notes: blue = how many groups (A, the
-// fraction, split parts, the take bracket), green = inside a group (B, the
-// lassos, their counters), magenta + underline = opposite.
+// fraction, the bar, the take bracket), green = inside a group (B, the
+// groups, their counters), magenta = opposite (the − marks, flipped counters).
 
 import { MINUS } from '../engine/expr.js';
 import { isOpposite, isFraction } from '../engine/groups.js';
 import {
-  LASSO_VIEW, LEFT_X, STACK_X, LASSO_HEIGHT, LASSO_GAP, PART_HEIGHT, PART_GAP,
-  lassoWidth, stackCenters, rowXs, wholeRows, takenRuns,
+  LASSO_VIEW, STACK_X, LASSO_HEIGHT, PART_HEIGHT,
+  lassoWidth, stackCenters, rowXs, takenRuns,
 } from './lassoLayout.js';
 
 const SVG_NS = 'http://www.w3.org/2000/svg';
 const HTML_NS = 'http://www.w3.org/1999/xhtml';
-const GLYPH = 18; // counter size inside a lasso
+const GLYPH = 18; // counter size inside a group
 
 function el(name, attrs = {}, children = []) {
   const node = document.createElementNS(SVG_NS, name);
@@ -53,13 +51,11 @@ function counter(sign, x, y, cls) {
   return g;
 }
 
-// Terms flip to their opposite (and turn magenta) after "opp.".
-const shown = (term, flipped) => (flipped ? (term.sign === '+' ? '-' : '+') : term.sign);
-
-function counterRow(terms, cx, cy, { flipped = false } = {}) {
+// Flipped groups hold their opposites already; they're drawn magenta.
+function counterRow(terms, cx, cy, flipped = false) {
   const g = el('g', { class: 'row' });
   rowXs(terms.length, cx).forEach((x, i) => {
-    g.append(counter(shown(terms[i], flipped), x, cy, flipped ? 'is-opposite' : 'is-inside'));
+    g.append(counter(terms[i].sign, x, cy, flipped ? 'is-opposite' : 'is-inside'));
   });
   return g;
 }
@@ -114,31 +110,45 @@ function foreign(x, y, width, height, child) {
   return fo;
 }
 
-// ---------- The arrow chain: → −8, then opp. → 8 ----------
+// ---------- The arrow and the count: → 8 ----------
 // Arrows are drawn shapes, not font glyphs, so they read the same in any font.
 
 function arrow(x1, x2, y, cls) {
   return el('path', { d: `M ${x1} ${y} H ${x2} M ${x2 - 9} ${y - 7} L ${x2} ${y} L ${x2 - 9} ${y + 7}`, class: `arrow ${cls}` });
 }
 
-export const CHAIN_WIDTH = 186; // first arrow → end of a two-digit answer like "−20"
+export const CHAIN_WIDTH = 110; // arrow → end of a two-digit answer like "−20"
 
 const has = (v) => v !== null && v !== undefined;
 
 function chain(s, x, y) {
   const g = el('g', { class: 'chain' });
-  const totalText = has(s.total) ? signed(s.total) : s.totalText;
-  if (!has(totalText)) return g;
-  const ay = y - 9; // arrows sit at the middle of the digits
-  g.append(arrow(x, x + 30, ay, 'is-ink'));
-  g.append(el('text', { x: x + 38, y, class: `chain-total${has(s.total) ? '' : ' is-typing'}` }, [totalText]));
-  if (s.flipped) {
-    const x2 = x + 96;
-    g.append(el('text', { x: x2 + 17, y: ay - 11, class: 'chain-opp', 'text-anchor': 'middle' }, ['opp.']));
-    g.append(line(x2 + 2, ay - 7, x2 + 32, ay - 7, 'chain-opp-underline'));
-    g.append(arrow(x2, x2 + 34, ay + 4, 'is-opposite'));
-    const shownAnswer = has(s.answer) ? signed(s.answer) : (s.answerText ?? '?');
-    g.append(el('text', { x: x2 + 42, y, class: `chain-answer is-opposite${has(s.answer) ? '' : ' is-typing'}` }, [shownAnswer]));
+  const text = has(s.answer) ? signed(s.answer) : s.totalText;
+  if (!has(text)) return g;
+  g.append(arrow(x, x + 30, y - 9, 'is-ink'));
+  g.append(el('text', { x: x + 38, y, class: `chain-total${has(s.answer) ? '' : ' is-typing'}` }, [text]));
+  return g;
+}
+
+// ---------- The − marks: tap one to flip ----------
+
+// A magenta minus beside a group (or the bar). An underline under a lone
+// minus would read as "=", so only words get underlined. Once flipped, an
+// arrow arcs from the − over into the group: the group became its opposite.
+function oppMark(s, x, y, { index, flipped, tipX, tipY }) {
+  const tap = s.tap === 'flip' && !flipped;
+  const g = el('g', {
+    class: `opp-mark-group${tap ? ' tappable' : ''}${flipped ? ' is-flipped' : ''}`,
+    'data-action': tap ? 'flip' : null, 'data-index': tap ? index : null,
+  });
+  if (tap) g.append(el('circle', { cx: x, cy: y - 2, r: 24, class: 'mark-hit' }));
+  g.append(el('text', { x, y: y + 11, class: 'opp-mark', 'text-anchor': 'middle' }, [MINUS]));
+  if (flipped) {
+    const x0 = x + 4, y0 = y - 16;
+    g.append(el('path', {
+      d: `M ${x0} ${y0} Q ${(x0 + tipX) / 2} ${y0 - 26} ${tipX} ${tipY} M ${tipX - 9} ${tipY - 5} L ${tipX} ${tipY} L ${tipX - 3} ${tipY - 10}`,
+      class: 'flip-arrow',
+    }));
   }
   return g;
 }
@@ -146,80 +156,72 @@ function chain(s, x, y) {
 // ---------- Whole-number groups ----------
 
 function wholeScript(svg, s) {
-  const ys = stackCenters(s.lassos.length);
-  const widest = Math.max(Math.abs(s.problem.inside.value), ...s.lassos.map((l) => l.terms.length));
+  const ys = stackCenters(s.groups.length);
+  const widest = Math.max(Math.abs(s.problem.inside.value), ...s.groups.map((g) => g.terms.length));
   const w = lassoWidth(widest);
-  s.lassos.forEach((lasso, i) => {
-    const tap = s.tap === 'lassos';
+  const left = STACK_X - w / 2;
+  s.groups.forEach((group, i) => {
+    const tap = s.tap === 'groups' || (s.tap === 'flip' && !group.flipped);
     const g = el('g', {
       class: `lasso${tap ? ' tappable' : ''}`, 'data-lasso': i,
-      'data-action': tap ? 'lasso' : null, 'data-index': tap ? i : null,
+      'data-action': tap ? (s.tap === 'flip' ? 'flip' : 'group') : null, 'data-index': tap ? i : null,
     });
     g.append(el('ellipse', { cx: STACK_X, cy: ys[i], rx: w / 2, ry: LASSO_HEIGHT / 2, class: 'lasso-oval is-inside' }));
-    if (lasso.opposite) {
-      // A magenta minus: the sign itself is the shape cue. An underline under a
-      // lone minus would read as "=", so only words get underlined.
-      g.append(el('text', { x: STACK_X - w / 2 - 20, y: ys[i] + 11, class: 'opp-mark', 'text-anchor': 'middle' }, [MINUS]));
-    }
-    g.append(counterRow(lasso.terms, STACK_X, ys[i], { flipped: s.flipped }));
+    g.append(counterRow(group.terms, STACK_X, ys[i], group.flipped));
     svg.append(g);
+    if (s.opposite) {
+      svg.append(oppMark(s, left - 24, ys[i], { index: i, flipped: group.flipped, tipX: left + 16, tipY: ys[i] - LASSO_HEIGHT / 2 + 4 }));
+    }
   });
   const midY = ys.length ? (ys[0] + ys[ys.length - 1]) / 2 + 10 : LASSO_VIEW.height / 2;
   svg.append(chain(s, STACK_X + w / 2 + 18, midY));
 }
 
-// ---------- Fraction groups ----------
+// ---------- Fraction groups: one bar, d connected groups ----------
 
 function fractionScript(svg, s) {
-  // The whole group, in the left column under the meaning.
-  const rows = wholeRows(s.whole.length);
-  const perRow = Math.max(3, ...rows);
-  const wholeH = 40 + 30 * Math.max(0, rows.length - 1);
-  const wy = 205;
-  const wholeTap = s.tap === 'whole';
-  const wholeG = el('g', { class: `whole-group${wholeTap ? ' tappable' : ''}`, 'data-action': wholeTap ? 'whole' : null });
-  wholeG.append(el('ellipse', {
-    cx: LEFT_X, cy: wy, rx: lassoWidth(perRow) / 2, ry: wholeH / 2, class: 'lasso-oval is-inside whole',
-  }));
-  svg.append(wholeG);
-  let k = 0;
-  rows.forEach((count, r) => {
-    const y = wy - (30 * (rows.length - 1)) / 2 + r * 30;
-    wholeG.append(counterRow(s.whole.slice(k, k + count), LEFT_X, y));
-    k += count;
-  });
-
-  // The split parts, stacked on the right, in blue.
-  const ys = stackCenters(s.parts.length, { height: PART_HEIGHT, gap: PART_GAP });
+  const d = s.groups.length;
   const each = Math.abs(s.problem.inside.value) / s.problem.count.d;
-  const w = lassoWidth(Math.max(2, each, ...s.parts.map((p) => p.terms.length)));
-  const anyTaken = s.parts.some((p) => p.taken);
-  s.parts.forEach((part, i) => {
-    const tap = s.tap === 'parts';
-    const g = el('g', {
-      class: `part${part.taken ? ' is-taken' : anyTaken ? ' is-left' : ''}${tap ? ' tappable' : ''}`, 'data-part': i,
-      'data-action': tap ? 'part' : null, 'data-index': tap ? i : null,
-    });
-    g.append(el('ellipse', { cx: STACK_X, cy: ys[i], rx: w / 2, ry: PART_HEIGHT / 2, class: 'lasso-oval is-groups' }));
-    g.append(counterRow(part.terms, STACK_X, ys[i], { flipped: s.flipped && part.taken }));
+  const w = lassoWidth(Math.max(2, each, ...s.groups.map((g) => g.terms.length)));
+  const left = STACK_X - w / 2;
+  const top = (LASSO_VIEW.height - d * PART_HEIGHT) / 2;
+  const yOf = (i) => top + i * PART_HEIGHT;
+  const anyTaken = s.groups.some((g) => g.taken);
+
+  s.groups.forEach((part, i) => {
+    const tap = s.tap === 'groups';
+    const next = s.next === i;
+    const cls = ['part', part.taken ? 'is-taken' : anyTaken && s.tap !== 'groups' ? 'is-left' : '', next ? 'is-next' : '', tap ? 'tappable' : '']
+      .filter(Boolean).join(' ');
+    const g = el('g', { class: cls, 'data-part': i, 'data-action': tap ? 'group' : null, 'data-index': tap ? i : null });
+    g.append(el('rect', { x: left, y: yOf(i), width: w, height: PART_HEIGHT, class: 'bar-part' }));
+    if (next) g.append(el('rect', { x: left + 4, y: yOf(i) + 4, width: w - 8, height: PART_HEIGHT - 8, rx: 6, class: 'next-ring' }));
+    g.append(counterRow(part.terms, STACK_X, yOf(i) + PART_HEIGHT / 2, part.flipped));
     svg.append(g);
   });
+  if (d) svg.append(el('rect', { x: left, y: top, width: w, height: d * PART_HEIGHT, rx: 4, class: 'bar-outline' }));
 
-  // The "take n" bracket beside each run of taken parts, and the chain after it.
+  // The "take n" bracket beside each run of taken parts, and the count after it.
   const bx = STACK_X + w / 2 + 14;
-  const runs = takenRuns(s.parts.map((p) => p.taken));
+  const runs = takenRuns(s.groups.map((g) => g.taken));
   runs.forEach(([a, b]) => {
-    const top = ys[a] - PART_HEIGHT / 2 + 2;
-    const bottom = ys[b] + PART_HEIGHT / 2 - 2;
-    const path = `M ${bx - 8} ${top} H ${bx} V ${bottom} H ${bx - 8}`;
+    const path = `M ${bx - 8} ${yOf(a) + 3} H ${bx} V ${yOf(b + 1) - 3} H ${bx - 8}`;
     svg.append(el('path', { d: path, class: 'take-bracket' }));
   });
   if (runs.length) {
     const [a, b] = runs[0];
-    const y = (ys[a] + ys[b]) / 2 + 8;
-    const taken = s.parts.filter((p) => p.taken).length;
+    const y = (yOf(a) + yOf(b + 1)) / 2 + 8;
+    const taken = s.groups.filter((g) => g.taken).length;
     svg.append(el('text', { x: bx + 10, y, class: 'take-label' }, [`take ${taken}`]));
     svg.append(chain(s, bx + 76, y));
+  }
+
+  // One − for the whole bar. Flipping it flips the groups taken.
+  if (s.opposite && d) {
+    const flipped = s.groups.some((g) => g.flipped);
+    const first = s.groups.findIndex((g) => g.taken);
+    const tipY = first >= 0 ? yOf(first) + 8 : top + 8;
+    svg.append(oppMark(s, left - 24, top + (d * PART_HEIGHT) / 2, { index: 0, flipped, tipX: left + 14, tipY }));
   }
 }
 
@@ -228,7 +230,7 @@ export function renderLassoMat(s) {
     class: `mat lasso-mat script-${s.script}`,
     viewBox: `0 0 ${LASSO_VIEW.width} ${LASSO_VIEW.height}`,
     role: 'group',
-    'aria-label': 'The Lasso Mat',
+    'aria-label': 'The Group It Mat',
   });
   svg.append(foreign(0, 18, 300, 140, html('div', 'lasso-left', problemText(s), meaningText(s.problem))));
   if (s.answer !== null && s.answer !== undefined) {

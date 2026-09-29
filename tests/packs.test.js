@@ -32,7 +32,7 @@ describe('pack list', () => {
   });
 
   it('finds packs by id', () => {
-    expect(packById('lasso').title).toBe('Lasso');
+    expect(packById('lasso').title).toBe('Group It');
     expect(packById('nope')).toBeUndefined();
   });
 });

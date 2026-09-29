@@ -19,14 +19,33 @@ Add `?seed=123` to the URL to replay a fixed problem set, and `?level=2` to open
 
 ## Layout
 
-- `src/engine/`: pure logic, no DOM. `expr.js` (expression model), `generate.js` (seeded levels), `moves.js` (validators), `session.js` (one problem's steps as a reducer), `progress.js` (level unlocks, save code), `hints.js` (hints after 3 wrong tries), `groups.js` + `generateLasso.js` (Lasso problems).
-- `src/view/`: DOM and SVG. `mat.js`, `controls.js`, `lassoMat.js` + `lassoLayout.js` (the Lasso Mat), `packmap.js` (home and level-complete panel), `codes.js` (save-code dialogs), `feedback.js` (every message, in one table), `layout.js` (counter geometry).
+- `src/engine/`: pure logic, no DOM. `expr.js` (expression model), `generate.js` (seeded levels), `moves.js` (validators), `session.js` (one problem's steps as a reducer), `progress.js` (level unlocks, save code), `hints.js` (hints after 3 wrong tries), `groups.js` + `generateLasso.js` (Group It problems; files keep the old "lasso" name).
+- `src/view/`: DOM and SVG. `mat.js`, `controls.js`, `lassoMat.js` + `lassoLayout.js` (the Group It Mat), `packmap.js` (home and level-complete panel), `codes.js` (save-code dialogs), `feedback.js` (every message, in one table), `layout.js` (counter geometry).
 - `src/storage.js`: localStorage wrapper that falls back to memory.
 - `src/play/`: one play adapter per pack (`flipitPlay.js`, `lassoPlay.js`); `main.js` runs whichever the pack uses.
 - `src/packs/`: pack definitions (`flipit.js`; `index.js` has Lasso and lists every pack, including the Coming-soon ones).
 - `tests/`: Vitest.
 
 ## Changelog
+
+### Group It: Karl's fixes (SPEC-LASSO.md §10)
+- **Renamed Lasso to "Group It".** "Lasso" is gone from the screens: the button is "Add group", and every message says "group".
+- **Bigger instructions** in both packs (30px semi-bold).
+- **Whole numbers: Groups → + or − → Fill → Flip → Count.**
+  - Fill any group, in any order, one tap per counter.
+  - − groups carry a magenta − each. Tap a − (or Flip all) to flip that group, with an arrow into it.
+  - Count once, after the flip.
+- **Fractions: Groups → + or − → Fill → Take → Flip → Count.**
+  - d groups joined in one fraction bar.
+  - Deal B one at a time into the lit-up group, top to bottom and around.
+  - Take n, flip the taken groups with the bar's −, then count.
+- Removed the `?demo=lasso` preview. `?pack=groupit&level=N` opens a level.
+- **Verified:** 158 tests (the Group It engine tests were rewritten for the new flow). Playwright:
+  - all 7 levels played through at 1366×657 and 1280×610, including out-of-order filling, dealing out of turn, and flipping one group then Flip all
+  - no tap target under 44px on the play screens
+  - Flip It, save-code and hint flows still pass
+  - no horizontal scroll on a phone
+- **Known:** the pack map now scrolls on a Chromebook. Step 6's touch audit will look at compacting it.
 
 ### Lasso step 5: Lasso on the pack map (SPEC-LASSO.md §8.5)
 - **Lasso is open from the start** on the pack map, with its 7 levels, dots and unlocks.
