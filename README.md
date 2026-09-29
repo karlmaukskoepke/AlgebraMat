@@ -23,10 +23,24 @@ Add `?seed=123` to the URL to replay a fixed problem set, and `?level=2` to open
 - `src/view/`: DOM and SVG. `mat.js`, `controls.js`, `lassoMat.js` + `lassoLayout.js` (the Lasso Mat), `packmap.js` (home and level-complete panel), `codes.js` (save-code dialogs), `feedback.js` (every message, in one table), `layout.js` (counter geometry).
 - `src/storage.js`: localStorage wrapper that falls back to memory.
 - `src/play/`: one play adapter per pack (`flipitPlay.js`, `lassoPlay.js`); `main.js` runs whichever the pack uses.
-- `src/packs/`: pack definitions (`flipit.js`; `index.js` lists every pack).
+- `src/packs/`: pack definitions (`flipit.js`; `index.js` has Lasso and lists every pack, including the Coming-soon ones).
 - `tests/`: Vitest.
 
 ## Changelog
+
+### Lasso step 5: Lasso on the pack map (SPEC-LASSO.md §8.5)
+- **Lasso is open from the start** on the pack map, with its 7 levels, dots and unlocks.
+- **Every card has a subtitle naming the math**, e.g. Flip It: "Subtraction with negative numbers"; Lasso: "The meaning of multiplication as groups and opposites".
+- **Coming-soon row:** Boxes & Circles, Groups of Terms, and Distribute, then combine, as dashed cards with their subtitles.
+- **Saving:** a Lasso level in play resumes after a reload. Lasso progress is in save codes (v2).
+- **Messages:** finishing Flip It now says "Next up: Lasso, on the pack map." Finishing Lasso says Boxes & Circles is coming soon.
+- `?pack=lasso&level=N` still opens any Lasso level directly.
+- **Verified:** 158 tests, including a new `packs.test.js`. Playwright:
+  - pack map order and subtitles
+  - Lasso Level 1 played from the map, reload mid-level resumes on problem 3, Level 2 unlocks
+  - save code round trip
+  - the Flip It, save-code, hint and Lasso Level 1–7 flows all pass again
+  - no horizontal scroll at phone width, no buttons under 44px at 1280×610
 
 ### Lasso step 4: fraction moves, playable (SPEC-LASSO.md §8.4)
 - **Engine:**

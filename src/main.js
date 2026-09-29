@@ -131,6 +131,7 @@ function finishLevel() {
   renderLevelDone(matRoot, {
     pack, level,
     packComplete: isPackComplete(progress, pack.id),
+    nextPack: PACKS[PACKS.indexOf(pack) + 1],
     onNext: () => startLevel(pack.id, level + 1),
     onMap: goHome,
     onReplay: () => startLevel(pack.id, level),
@@ -220,8 +221,7 @@ function savedCurrent() {
   return ok ? c : null;
 }
 
-// ?level=N opens a Flip It level; ?pack=lasso&level=N opens a Lasso level
-// (only the levels built so far, until the Lasso card opens in Lasso step 5).
+// ?level=N opens a Flip It level; ?pack=lasso&level=N opens a Lasso level.
 const urlLevel = Number(params.get('level'));
 const urlPack = packById(params.get('pack') ?? 'flipit');
 const resume = savedCurrent();
@@ -229,7 +229,7 @@ if (params.get('demo') === 'lasso') {
   // Lasso step 2: a static preview of the Lasso Mat (loaded only on this URL).
   import('./view/lassoDemo.js').then((m) => m.showLassoDemo(document.body));
 } else if (urlPack && PLAY[urlPack.id] && Number.isInteger(urlLevel) && urlLevel >= 1
-  && urlLevel <= (urlPack.playable ?? urlPack.levels)) {
+  && urlLevel <= urlPack.levels) {
   startLevel(urlPack.id, urlLevel);
 } else if (resume) {
   startLevel(resume.pack, resume.level, resume);

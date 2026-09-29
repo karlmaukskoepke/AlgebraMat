@@ -4,6 +4,7 @@ import { generateLevel } from '../engine/generate.js';
 export const flipit = {
   id: 'flipit',
   title: 'Flip It',
+  subtitle: 'Subtraction with negative numbers',
   blurb: 'Subtract by adding the opposite.',
   levels: 4,
   levelNames: [
