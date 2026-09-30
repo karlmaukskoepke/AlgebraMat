@@ -228,3 +228,18 @@ Karl played Lasso and asked for these before moving on. They jumped the build or
   - the Coming-soon cards on one row beside their label
 
   Taller screens and projectors keep the big layout. Phones scroll, as before.
+
+## 12. Revision 2 (Karl, 2026-09-30)
+
+1. **Flip redraws the group to the right.** Tapping a group's − (or Flip all) leaves the original group as drawn, with its −. An arrow then points to a **redrawn copy on the right**: same shape, counters turned to their opposites (magenta), and no −. That redrawn group is what the student counts, so the end result is asked for only after the redraw.
+   - Whole numbers: one arrow and redrawn group per flipped group. Count → after the redrawn groups.
+   - Fractions: tapping the bar's − draws an arrow from the "take n" bracket to a new bar holding just the groups taken, flipped and without the −. The label "take n" rides above the arrow. Count → after the new bar.
+   - The flip animation now plays on the redrawn group (it turns over) and its arrow (it draws in).
+2. **The hidden 1 is typed.** In −(B) problems, a blue arrow points up at the empty gap in front of the (. The student types the number **1** (number pad or keyboard) and checks it; it appears in the gap. Making groups waits until it's in. Any other number: "−(…) means the opposite of 1 group. Type the number 1 in the gap." Wrong tries count toward a hint (the gap pulses). Tapping the gap no longer does anything.
+3. **Keyboard:** the number keys (top row or number pad) type on the pad, Backspace deletes, **−** changes the sign, and **Enter** is Check (and Next → after a right answer). This works in both Flip It and Group It, and only when the matching button is enabled. It's ignored while a dialog or text box has focus, and a focused ← Packs / Save code button keeps its own Enter.
+- *(Build decisions)*
+  - Terms stay as drawn in the engine; a group is only marked `flipped`, and the view draws the opposite. So the original is never lost.
+  - **The drawing widens for − groups** (up to about 1040 units, from 860) so the original, arrow, redrawn group and count all fit. The Mat scales down a little (about 92%), so group height went up (fraction bar parts are 48 units) and every tap target stays at least 44px.
+  - Counters close up (pitch 30 → 25 → 22) for 6 to 8 in a group so a single group of −8 still fits. An overfilled group squeezes its counters instead of growing.
+  - The − tap ring is 54 units across.
+  - The hidden 1 is one digit, always positive: ± stays off until Count.

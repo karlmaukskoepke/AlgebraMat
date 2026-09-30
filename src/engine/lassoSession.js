@@ -7,7 +7,7 @@
 
 import { isFraction, isOpposite } from './groups.js';
 import {
-  validateGroups, validateGroupSign, validateFill, validateDeal, validateTake, validateCount,
+  validateHiddenOne, validateGroups, validateGroupSign, validateFill, validateDeal, validateTake, validateCount,
   MAX_PER_GROUP, MAX_GROUPS_MADE, MAX_PARTS, MAX_DEALT,
 } from './lassoMoves.js';
 import { entryValue } from './session.js';
@@ -38,8 +38,9 @@ export function newLassoSession(problem) {
     script: fraction ? 'fraction' : 'whole',
     step: 'groups',
     skipped: [],
-    wroteOne: !problem.hidden1,  // −(B) problems start with the 1 unwritten
+    wroteOne: !problem.hidden1,  // −(B) problems start with the 1 unwritten: the student types it
     // Whole numbers: separate groups. Fractions: the parts of one bar.
+    // Terms stay as drawn; a flipped group is redrawn (opposite signs) beside the original.
     groups: [],                  // [{ terms: [{ kind: 'int', sign }], taken, flipped }]
     opposite: false,             // − groups, once chosen in step ②
     history: [],                 // group indices filled, newest last (for Undo)
@@ -65,6 +66,12 @@ function wrong(s, res) {
 }
 
 const note = (s, key, params) => { s.feedback = { key, params }; return s; };
+
+// The hidden 1 in −(B) is typed in step ①, before any group can be made.
+export const oneOpen = (s) => s.step === 'groups' && s.problem.hidden1 && !s.wroteOne;
+
+// The pad works in Count, and in Groups while the hidden 1 is still to type.
+const padOpen = (s) => s.step === 'count' || oneOpen(s);
 
 // Fractions deal one counter into each part in turn, top to bottom, then around again.
 export const nextPart = (s) => s.history.length % Math.max(1, s.groups.length);
@@ -92,7 +99,6 @@ function flipGroup(s, i) {
   const g = s.groups[i];
   if (!g || g.flipped || !flippable(s).includes(i)) return false;
   g.flipped = true;
-  g.terms = g.terms.map((t) => ({ ...t, sign: t.sign === '+' ? '-' : '+' }));
   return true;
 }
 
@@ -104,12 +110,6 @@ export function reduceLasso(state, action) {
   const fraction = s.script === 'fraction';
 
   switch (action.type) {
-    case 'writeOne': {
-      if (s.step !== 'groups' || s.wroteOne) return state;
-      s.wroteOne = true;
-      return note(s, 'groupsIntro');
-    }
-
     case 'addGroup': {
       if (s.step !== 'groups') return state;
       if (!s.wroteOne) return wrong(s, { ok: false, feedbackKey: 'writeOneFirst' });
@@ -178,6 +178,13 @@ export function reduceLasso(state, action) {
     }
 
     case 'check': {
+      if (s.step === 'groups' && oneOpen(s)) { // type the hidden 1, then Check
+        const res = validateHiddenOne(entryValue(s.entry));
+        if (!res.ok) return res.feedbackKey === 'typeOne' ? say(s, res) : wrong(s, res);
+        s.wroteOne = true;
+        s.entry = emptyEntry();
+        return say(s, res);
+      }
       if (s.step === 'groups') {
         const res = validateGroups(problem, { count: s.groups.length, wroteOne: s.wroteOne });
         if (!res.ok) return wrong(s, res);
@@ -208,19 +215,19 @@ export function reduceLasso(state, action) {
     }
 
     case 'digit': {
-      if (s.step !== 'count' || s.entry.digits.length >= 2) return state;
+      if (!padOpen(s) || s.entry.digits.length >= (oneOpen(s) ? 1 : 2)) return state;
       s.entry.digits = s.entry.digits === '0' ? String(action.digit) : s.entry.digits + action.digit;
       return s;
     }
 
     case 'toggleSign': {
-      if (s.step !== 'count') return state;
+      if (s.step !== 'count') return state; // the hidden 1 is always positive
       s.entry.negative = !s.entry.negative;
       return s;
     }
 
     case 'backspace': {
-      if (s.step !== 'count') return state;
+      if (!padOpen(s)) return state;
       s.entry.digits = s.entry.digits.slice(0, -1);
       return s;
     }

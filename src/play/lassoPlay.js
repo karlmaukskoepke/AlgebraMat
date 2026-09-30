@@ -2,7 +2,7 @@
 // so the shared play screen runs either pack, for both step scripts.
 
 import { MINUS } from '../engine/expr.js';
-import { newLassoSession, reduceLasso, stepsFor, nextPart } from '../engine/lassoSession.js';
+import { newLassoSession, reduceLasso, stepsFor, nextPart, oneOpen } from '../engine/lassoSession.js';
 import { lassoHintFor } from '../engine/lassoHints.js';
 import { renderLassoMat } from '../view/lassoMat.js';
 import { buildLassoControls } from '../view/lassoControls.js';
@@ -21,7 +21,8 @@ export function lassoViewState(s) {
     ...s,
     tap,
     next: s.script === 'fraction' && s.step === 'fill' ? nextPart(s) : null,
-    slot: s.step === 'groups' && s.problem.hidden1 && !s.wroteOne,
+    oneOpen: oneOpen(s),
+    oneText: oneOpen(s) ? s.entry.digits : '',
     totalText: s.step === 'count' ? entryText(s.entry) : undefined,
   };
 }
@@ -43,7 +44,6 @@ export const lassoPlay = {
   renderMat: (session, fx = {}) => renderLassoMat({ ...lassoViewState(session), fx }),
 
   matAction({ action, index }) {
-    if (action === 'writeOne') return { type: 'writeOne' };
     if (action === 'group') return { type: 'tapGroup', index: Number(index) };
     if (action === 'flip') return { type: 'flipGroup', index: Number(index) };
     return null;
