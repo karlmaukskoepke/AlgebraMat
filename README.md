@@ -19,7 +19,7 @@ Add `?seed=123` to the URL to replay a fixed problem set, and `?level=2` to open
 
 ## Layout
 
-- `src/engine/`: pure logic, no DOM. `expr.js` (expression model), `generate.js` (seeded levels), `moves.js` (validators), `session.js` (one problem's steps as a reducer), `progress.js` (level unlocks, save code), `hints.js` (hints after 3 wrong tries), `groups.js` + `generateLasso.js` (Group It problems; files keep the old "lasso" name).
+- `src/engine/`: pure logic, no DOM. `expr.js` (expression model), `generate.js` (seeded levels), `moves.js` (validators), `session.js` (one problem's steps as a reducer), `progress.js` (level unlocks, save code), `hints.js` + `lassoHints.js` (hints after 3 wrong tries), `groups.js` + `generateLasso.js` (Group It problems; files keep the old "lasso" name).
 - `src/view/`: DOM and SVG. `mat.js`, `controls.js`, `lassoMat.js` + `lassoLayout.js` (the Group It Mat), `packmap.js` (home and level-complete panel), `codes.js` (save-code dialogs), `feedback.js` (every message, in one table), `layout.js` (counter geometry).
 - `src/storage.js`: localStorage wrapper that falls back to memory.
 - `src/play/`: one play adapter per pack (`flipitPlay.js`, `lassoPlay.js`); `main.js` runs whichever the pack uses.
@@ -27,6 +27,25 @@ Add `?seed=123` to the URL to replay a fixed problem set, and `?level=2` to open
 - `tests/`: Vitest.
 
 ## Changelog
+
+### Group It step 6: hints, flip animation, pack map fits a Chromebook (SPEC-LASSO.md §11)
+- **Hints** after 3 wrong tries on a step (new `engine/lassoHints.js`). They show the move without making it:
+  - Groups: the number to make, with Add group pulsing. Extra groups blink so they can be tapped away, and the gap for the hidden 1 pulses.
+  - + or −: the right button pulses.
+  - Fill: the unfinished groups blink, and the right counter button pulses.
+  - Take: the first n groups blink as an example.
+  - Count: the groups to count blink, and the hint gives the answer's sign, not the number.
+- **Flip animation:** a group's counters turn over like a card when its − is tapped, and the arrow draws in. Flip all turns them all. Both are off under reduced motion.
+- **Pack map fits without scrolling** at 1366×657 and 1280×610: a smaller title, tighter cards, Group It's levels three to a row, and the Coming-soon row on one line. Tall screens keep the big layout.
+- **Verified:**
+  - 165 tests, including the new `lassoHints.test.js`.
+  - Playwright:
+    - each hint appears on the 3rd wrong try (not the 2nd) and clears on the next step
+    - the flip animation plays on the tapped group only, then on the rest with Flip all
+    - all 7 Group It levels at both Chromebook sizes
+    - the Flip It, save-code, hint and pack-map flows
+  - The touch audit is clean at 1366×657 and 1280×610, including the pack map. That was the audit's last failure.
+- **Group It's build order (SPEC-LASSO.md §8) is complete.** Boxes & Circles needs a spec from Karl.
 
 ### Group It: Karl's fixes (SPEC-LASSO.md §10)
 - **Renamed Lasso to "Group It".** "Lasso" is gone from the screens: the button is "Add group", and every message says "group".
