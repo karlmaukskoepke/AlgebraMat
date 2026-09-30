@@ -31,7 +31,7 @@ function soonCard(pack) {
 
 function packCard(progress, pack) {
   const complete = isPackComplete(progress, pack.id);
-  const levels = h('div', { class: 'level-list' });
+  const levels = h('div', { class: `level-list${pack.levels > 4 ? ' many' : ''}` });
   for (let l = 1; l <= pack.levels; l++) {
     const done = isLevelDone(progress, pack.id, l);
     const open = isLevelUnlocked(progress, pack.id, l);
@@ -64,8 +64,9 @@ export function renderPackMap(root, progress, packs, { onPlay, onSaveCode, onEnt
         h('button', { type: 'button', class: 'btn', 'data-home': 'enter' }, 'Enter code'))),
     h('p', { class: 'home-note', role: 'status', hidden: !note }, note ?? ''),
     h('div', { class: 'pack-grid' }, ...packs.filter((p) => !p.comingSoon).map((p) => packCard(progress, p))),
-    h('h2', { class: 'soon-head' }, 'Coming soon'),
-    h('div', { class: 'soon-grid' }, ...packs.filter((p) => p.comingSoon).map(soonCard)),
+    h('section', { class: 'soon', 'aria-label': 'Coming soon' },
+      h('h2', { class: 'soon-head' }, 'Coming soon'),
+      h('div', { class: 'soon-grid' }, ...packs.filter((p) => p.comingSoon).map(soonCard))),
   );
   root.onclick = (e) => {
     const b = e.target.closest('button[data-level]');

@@ -177,7 +177,7 @@ Each level has 5 problems, the same generator rules as Flip It (seeded, no repea
 3. Whole-number moves: Groups (with the rewritten 1) → + or − → Fill (+ Copy group) → Count → Opposite. Validators and tests first, then the UI.
 4. Fraction moves: Whole → Split (deal) → Take → Count → Opposite. Validators and tests first.
 5. Lasso level flow on the pack map, the new "Coming soon" cards, and saving.
-6. Lasso hints, the flip animation for groups, and the touch-target audit at 1366×657.
+6. Lasso hints, the flip animation for groups, and the touch-target audit at 1366×657. *(Built after the §10 revision; see §11.)*
 
 ## 9. Decisions (Karl, 2026-09-28; 1 and 4 replaced by §10)
 
@@ -209,3 +209,22 @@ Karl played Lasso and asked for these before moving on. They jumped the build or
   - The static preview page (`?demo=lasso`) was removed. It showed the old flow.
   - `?pack=groupit&level=N` opens a level. `?pack=lasso` still works.
   - Step 6 (hints, the flip animation, the touch audit) comes next, on this new flow. The pack map now scrolls on a Chromebook (the 7-level card plus the Coming-soon row), so step 6's audit should decide whether to compact it.
+
+## 11. Step 6 decisions (hints, flip animation, touch audit), 2026-09-30
+
+- **Hints** appear after 3 wrong tries on one step, as in Flip It. They show the move and never make it:
+  - **Groups:** "The number in front is 3…" (for fractions, the bottom number), and Add group pulses. With too many groups, the extras blink so they can be tapped away. On −(B), the gap for the hidden 1 pulses.
+  - **+ or −:** says whether there's a − in front, and the right button pulses.
+  - **Fill:** says what one group is, the right counter button pulses, and every group that isn't one group of B yet blinks. For fractions: deal |B| in all into the lit-up group.
+  - **Take:** the top number, with the first n groups blinking as an example.
+  - **Count:** the groups to count blink, and the hint names the answer's sign ("They're all negative, so the answer is negative"), not the number.
+  - **Flip** has no hint: a − can't be tapped wrongly.
+- **Flip animation:** the tapped group's counters turn over like a card (the same 0.45s scale flip Flip It uses for signs), and the arrow from the − draws itself in. Flip all turns every group at once. Both are off under reduced motion.
+- **Touch audit:** every play-screen target is at least 44px at 1366×657 and 1280×610.
+- **Pack map:** on short desktop screens (height ≤ 800px), it compacts so it fits without scrolling:
+  - a smaller title, with the tagline beside it
+  - tighter cards
+  - Group It's levels three to a row, in 64px buttons
+  - the Coming-soon cards on one row beside their label
+
+  Taller screens and projectors keep the big layout. Phones scroll, as before.

@@ -57,8 +57,14 @@ export function buildLassoControls(root, dispatch) {
   });
 
   return {
-    update(s) {
+    update(s, hint = null) {
       const step = s.step;
+      // A hint can pulse the button to tap next ('addGroup', 'chooseSign:-', 'pickSign:+').
+      const pulse = hint?.show?.button;
+      const named = (b) => [b.dataset.action, b.dataset.sign].filter(Boolean).join(':');
+      for (const b of row.querySelectorAll('button')) {
+        b.classList.toggle('hint-pulse', Boolean(pulse) && (named(b) === pulse || b.dataset.action === pulse));
+      }
       addGroup.disabled = step !== 'groups';
       plusGroups.disabled = minusGroups.disabled = step !== 'sign';
       const filling = step === 'fill';

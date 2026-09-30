@@ -3,6 +3,7 @@
 
 import { MINUS } from '../engine/expr.js';
 import { newLassoSession, reduceLasso, stepsFor, nextPart } from '../engine/lassoSession.js';
+import { lassoHintFor } from '../engine/lassoHints.js';
 import { renderLassoMat } from '../view/lassoMat.js';
 import { buildLassoControls } from '../view/lassoControls.js';
 import { lassoFeedbackText } from '../view/lassoFeedback.js';
@@ -31,8 +32,15 @@ export const lassoPlay = {
   reduce: reduceLasso,
   feedbackText: lassoFeedbackText,
   buildControls: buildLassoControls,
-  effects: () => ({ hint: null }), // Group It hints come in step 6
-  renderMat: (session) => renderLassoMat(lassoViewState(session)),
+  // View-only effects for one render: the hint, and which groups just flipped
+  // (to animate them turning over).
+  effects(before, session) {
+    const fx = { hint: lassoHintFor(session), justFlipped: [] };
+    if (!before) return fx; // `before` is only passed for a move within the same problem
+    session.groups.forEach((g, i) => { if (g.flipped && !before.groups[i]?.flipped) fx.justFlipped.push(i); });
+    return fx;
+  },
+  renderMat: (session, fx = {}) => renderLassoMat({ ...lassoViewState(session), fx }),
 
   matAction({ action, index }) {
     if (action === 'writeOne') return { type: 'writeOne' };

@@ -98,6 +98,7 @@ body {
   }
 }
 
+
 .pack-head h2,
 .level-num {
   white-space: nowrap;
@@ -761,6 +762,10 @@ body {
   .feedback.celebrate,
   .mat .slash-in,
   .mat .flip-in,
+  .mat .draw-in,
+  .mat .hint-blink-group .lasso-oval,
+  .mat .hint-blink-group .bar-part,
+  .one-slot.hint-pulse,
   .mat .hint-flip,
   .mat .hint-blink .mark,
   .mat .hint-glow,
@@ -1044,7 +1049,137 @@ body {
   cursor: pointer;
 }
 
+/* Flip: the group's counters turn over like a card, and the arrow draws in. */
+.lasso-mat .row {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.lasso-mat .row.flip-in {
+  animation: flip-in 0.45s ease-in-out;
+}
+
+@keyframes draw-in {
+  from { stroke-dashoffset: 1; }
+  to { stroke-dashoffset: 0; }
+}
+
+.lasso-mat .flip-arrow.draw-in {
+  stroke-dasharray: 1;
+  animation: draw-in 0.45s ease-out;
+}
+
+/* Hints: the groups to look at blink gently; the hidden 1's gap pulses. */
+@keyframes group-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+
+.lasso-mat .hint-blink-group .lasso-oval,
+.lasso-mat .hint-blink-group .bar-part {
+  stroke-width: 5;
+  animation: group-blink 1.2s ease-in-out infinite;
+}
+
+.one-slot.hint-pulse {
+  border-width: 3px;
+  animation: hint-pulse 1.2s ease-in-out infinite;
+}
+
 /* The − groups button carries the opposite color (a lone minus isn't underlined). */
 .btn .opp-word {
   color: var(--opposite);
+}
+
+/* Seven levels (Group It) sit three to a row beside Flip It's two. */
+@media (min-width: 761px) {
+  .level-list.many {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+  }
+}
+
+/* Short desktop screens (a Chromebook window): the whole pack map fits
+   without scrolling. Tall screens and projectors keep the big layout. */
+@media (min-width: 761px) and (max-height: 800px) {
+  .home {
+    padding: 12px 0 12px;
+  }
+  .home-head {
+    align-items: center;
+  }
+  .home-head > div {
+    display: flex;
+    align-items: baseline;
+    gap: 20px;
+  }
+  .home-head h1 {
+    font-size: 40px;
+  }
+  .tagline {
+    margin: 0;
+    font-size: 22px;
+  }
+  .home-actions {
+    padding-top: 0;
+  }
+  .pack-grid {
+    margin-top: 12px;
+    gap: 16px;
+  }
+  .pack-card {
+    padding: 14px 18px 16px;
+  }
+  .pack-head h2 {
+    font-size: 30px;
+  }
+  .subtitle {
+    margin-top: 2px;
+    font-size: 16px;
+  }
+  .blurb {
+    margin: 4px 0 10px;
+    font-size: 17px;
+  }
+  .level-list {
+    gap: 10px;
+  }
+  .btn.level-btn {
+    min-height: 64px;
+    padding-top: 6px;
+    padding-bottom: 6px;
+    gap: 0;
+  }
+  .level-num {
+    font-size: 20px;
+  }
+  .level-name {
+    font-size: 14px;
+    line-height: 1.2;
+  }
+  .soon {
+    display: flex;
+    align-items: stretch;
+    gap: 14px;
+    margin-top: 14px;
+  }
+  .soon-head {
+    align-self: center;
+    margin: 0;
+    font-size: 18px;
+    white-space: nowrap;
+  }
+  .soon-grid {
+    flex: 1;
+    gap: 12px;
+  }
+  .pack-card.is-soon {
+    padding: 8px 14px 10px;
+  }
+  .pack-card.is-soon h2 {
+    font-size: 19px;
+  }
+  .pack-card.is-soon .subtitle {
+    font-size: 14px;
+  }
 }

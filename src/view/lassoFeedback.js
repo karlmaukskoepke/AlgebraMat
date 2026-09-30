@@ -68,6 +68,23 @@ export const LASSO_FEEDBACK = {
   countAll: () => 'Count all the counters in all the groups.',
   countTaken: () => 'Count the counters in the groups you took.',
 
+  // Hints (after 3 wrong tries on a step)
+  hintWriteOne: () => '−(…) means the opposite of 1 group. Tap the blinking gap to write the 1.',
+  hintGroups: ({ n, have }) => (have > n
+    ? `The number in front is ${n}. Tap the blinking groups to erase them.`
+    : `The number in front is ${n}, so make ${n} group${n === 1 ? '' : 's'}: tap Add group until there are ${n}.`),
+  hintParts: ({ n, have }) => (have > n
+    ? `The bottom number is ${n}. Tap the blinking groups to erase them.`
+    : `The bottom number is ${n}, so the bar needs ${n} groups: tap Add group until there are ${n}.`),
+  hintSign: ({ sign, fraction }) => (sign === '-'
+    ? `There’s a − in front of the ${fraction ? 'fraction' : 'groups'}: that means opposite. Tap − groups.`
+    : `Nothing in front of the ${fraction ? 'fraction' : 'groups'} says opposite. Tap + groups.`),
+  hintFill: ({ b, count, sign }) => `Each group is ${signed(b)}: pick the ${sign === '+' ? '+' : '−'} counter, then fill each blinking group until it has ${count}. Undo takes one back.`,
+  hintDeal: ({ b, count, sign }) => `The whole group is ${signed(b)}: pick the ${sign === '+' ? '+' : '−'} counter and deal ${count} in all, one at a time into the lit-up group.`,
+  hintTake: ({ n }) => `The top number is ${n}: take ${n} group${n === 1 ? '' : 's'} — like the blinking one${n === 1 ? '' : 's'}.`,
+  hintCount: ({ sign }) => `Count every counter in the blinking groups. They’re all ${sign === '+' ? 'positive' : 'negative'}, so the answer is ${sign === '+' ? 'positive' : 'negative'}.`,
+  hintCountTaken: ({ sign }) => `Count only the counters in the groups you took (they blink). They’re ${sign === '+' ? 'positive' : 'negative'}, so the answer is ${sign === '+' ? 'positive' : 'negative'}.`,
+
   typeAnswer: () => 'Type a number first.',
   correct: ({ answer }) => `Yes! The answer is ${signed(answer)}.`,
 };
