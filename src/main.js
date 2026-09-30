@@ -207,6 +207,29 @@ matRoot.addEventListener('click', (e) => {
   if (action) dispatch(action);
 });
 
+// Keyboard: type numbers (top row or number pad), Backspace, "-" for the sign,
+// and Enter to Check, the same as tapping the pad. Both packs' palettes use the
+// same buttons, so this drives whichever is showing (and respects what's disabled).
+document.addEventListener('keydown', (e) => {
+  if (!play || play.finished || e.ctrlKey || e.metaKey || e.altKey) return;
+  if ($('play').hidden || $('dialog').open) return;
+  const t = e.target;
+  if (t instanceof HTMLElement) {
+    if (t.matches('input, textarea, select, [contenteditable]')) return;
+    // A focused button elsewhere (Packs, Save code) keeps its own Enter.
+    if (t.matches('button, a') && !t.closest('#controls')) return;
+  }
+  let target = null;
+  if (/^[0-9]$/.test(e.key)) target = `.pad button[data-digit="${e.key}"]`;
+  else if (e.key === 'Backspace' || e.key === 'Delete') target = '.pad button[data-action="backspace"]';
+  else if (e.key === '-' || e.key === '−') target = '.pad button[data-action="toggleSign"]';
+  else if (e.key === 'Enter' && !e.repeat) target = 'button[data-action="check"]';
+  if (!target) return;
+  e.preventDefault(); // a focused pad button shouldn't also press itself
+  const b = $('controls').querySelector(target);
+  if (b && !b.disabled) b.click();
+});
+
 $('back').addEventListener('click', goHome);
 $('save-code').addEventListener('click', () => showSaveCode(encodeProgress(progress)));
 

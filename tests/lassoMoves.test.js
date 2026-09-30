@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { makeGroups } from '../src/engine/groups.js';
 import {
-  validateGroups, validateGroupSign, validateGroup, validateFill, validateDeal, validateTake, validateCount,
+  validateHiddenOne, validateGroups, validateGroupSign, validateGroup, validateFill, validateDeal, validateTake, validateCount,
 } from '../src/engine/lassoMoves.js';
 import { newLassoSession, reduceLasso, stepsFor, nextPart } from '../src/engine/lassoSession.js';
 
@@ -10,6 +10,7 @@ const grp = (sign, n, extra = {}) => ({ terms: t(sign, n), taken: false, flipped
 const run = (s, ...actions) => actions.reduce(reduceLasso, s);
 const times = (n, a) => Array.from({ length: n }, () => a);
 const tap = (i) => ({ type: 'tapGroup', index: i });
+const check = { type: 'check' };
 const type = (v) => [
   ...(v < 0 ? [{ type: 'toggleSign' }] : []),
   ...[...String(Math.abs(v))].map((d) => ({ type: 'digit', digit: Number(d) })),
@@ -27,6 +28,20 @@ const pm14m12 = makeGroups({ neg: true, n: 1, d: 4 }, -12);      // −1/4(−12
 const p15p10 = makeGroups({ n: 1, d: 5 }, 10);                   // 1/5(10)
 
 describe('Group It validators', () => {
+  it('① The hidden 1 must be the typed number 1', () => {
+    expect(validateHiddenOne(1)).toMatchObject({ ok: true, feedbackKey: 'oneWritten' });
+    expect(validateHiddenOne(null)).toMatchObject({ ok: false, feedbackKey: 'typeOne' });
+    expect(validateHiddenOne(2)).toMatchObject({ ok: false, feedbackKey: 'notOne' });
+    expect(validateHiddenOne(-1).ok).toBe(false);
+  });
+
+  it('① The hidden 1 must be the typed number 1', () => {
+    expect(validateHiddenOne(1)).toMatchObject({ ok: true, feedbackKey: 'oneWritten' });
+    expect(validateHiddenOne(null)).toMatchObject({ ok: false, feedbackKey: 'typeOne' });
+    expect(validateHiddenOne(2)).toMatchObject({ ok: false, feedbackKey: 'notOne' });
+    expect(validateHiddenOne(-1).ok).toBe(false);
+  });
+
   it('① Groups: |A| groups (d for a fraction), and the hidden 1 written first', () => {
     expect(validateGroups(p3m2, { count: 3, wroteOne: true }).ok).toBe(true);
     expect(validateGroups(p3m2, { count: 2, wroteOne: true })).toMatchObject({ ok: false, feedbackKey: 'groupCount', params: { n: 3, have: 2 } });
@@ -115,7 +130,8 @@ describe('Group It session: whole-number groups', () => {
     s = run(s, { type: 'check' });
     expect(s.feedback.key).toBe('tapFlip');
     s = run(s, { type: 'flipGroup', index: 1 });
-    expect(s.groups.map((g) => [g.flipped, signs(g)])).toEqual([[false, '----'], [true, '++++']]);
+    // The original stays as drawn; the view redraws its opposite to the right.
+    expect(s.groups.map((g) => [g.flipped, signs(g)])).toEqual([[false, '----'], [true, '----']]);
     expect(s).toMatchObject({ step: 'flip', feedback: { key: 'flipMore' } });
     s = run(s, { type: 'flipGroup', index: 1 }); // already flipped: nothing happens
     expect(s.groups[1].flipped).toBe(true);
@@ -131,16 +147,30 @@ describe('Group It session: whole-number groups', () => {
     const s = run(newLassoSession(pm3p4), ...times(3, { type: 'addGroup' }), { type: 'check' }, { type: 'chooseSign', sign: '-' },
       { type: 'pickSign', sign: '+' }, ...[0, 1, 2].flatMap((i) => times(4, tap(i))), { type: 'check' }, { type: 'flipAll' });
     expect(s.step).toBe('count');
-    expect(s.groups.every((g) => g.flipped && signs(g) === '----')).toBe(true);
+    expect(s.groups.every((g) => g.flipped && signs(g) === '++++')).toBe(true);
     expect(run(s, ...type(-12)).answer).toBe(-12);
   });
 
-  it('−(−5): the hidden 1 must be written before any group', () => {
+  it('−(−5): the hidden 1 is typed (and checked) before any group can be made', () => {
     let s = run(newLassoSession(pmm5), { type: 'addGroup' });
     expect(s.feedback).toMatchObject({ key: 'writeOneFirst', bad: true });
     expect(s.groups).toHaveLength(0);
-    s = run(s, { type: 'writeOne' }, { type: 'addGroup' }, { type: 'check' });
+    s = run(s, { type: 'check' });
+    expect(s.feedback).toMatchObject({ key: 'typeOne' });
+    expect(s.tries.groups ?? 0).toBe(1); // only the group tap counted as a wrong try
+    s = run(s, { type: 'toggleSign' }, { type: 'digit', digit: 2 }, check);
+    expect(s.feedback).toMatchObject({ key: 'notOne', bad: true });
+    expect(s.wroteOne).toBe(false);
+    expect(s.entry.negative).toBe(false); // the hidden 1 is always positive
+    s = run(s, { type: 'backspace' }, { type: 'digit', digit: 1 }, { type: 'digit', digit: 1 });
+    expect(s.entry.digits).toBe('1'); // one digit at most
+    s = run(s, check);
+    expect(s).toMatchObject({ wroteOne: true, step: 'groups', feedback: { key: 'oneWritten' } });
+    expect(s.entry).toEqual({ negative: false, digits: '' });
+    s = run(s, { type: 'addGroup' }, check);
     expect(s.step).toBe('sign');
+    // the pad is closed again: typing does nothing until Count
+    expect(reduceLasso(s, { type: 'digit', digit: 5 })).toBe(s);
   });
 
   it('Undo takes back the latest counter; tapping a group in Groups erases it', () => {
@@ -203,7 +233,7 @@ describe('Group It session: fraction groups', () => {
     expect(s).toMatchObject({ step: 'flip', feedback: { key: 'takeDoneOpp' } });
     s = run(s, { type: 'flipGroup', index: 0 });
     expect(s.step).toBe('count');
-    expect(s.groups.map((g) => [g.flipped, signs(g)])).toEqual([[true, '+++'], [false, '---'], [false, '---'], [false, '---']]);
+    expect(s.groups.map((g) => [g.flipped, signs(g)])).toEqual([[true, '---'], [false, '---'], [false, '---'], [false, '---']]);
     expect(run(s, ...type(3))).toMatchObject({ step: 'done', answer: 3 });
   });
 

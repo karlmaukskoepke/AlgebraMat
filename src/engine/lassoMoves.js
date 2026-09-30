@@ -32,6 +32,15 @@ export function validateGroups(problem, { count, wroteOne }) {
   return pass('groupsDone');
 }
 
+const noValue = (v) => v === null || v === undefined || Number.isNaN(v);
+
+// ① The hidden 1 in −(B): the student types the number 1 for the gap.
+export function validateHiddenOne(value) {
+  if (noValue(value)) return fail('typeOne');
+  if (value !== 1) return fail('notOne');
+  return pass('oneWritten');
+}
+
 // ② + or − groups: − for opposite groups.
 export function validateGroupSign(problem, sign) {
   const right = isOpposite(problem) ? '-' : '+';
@@ -78,8 +87,6 @@ export function validateTake(problem, groups) {
   if (taken !== n) return fail('takeN', { n, have: taken });
   return pass(isOpposite(problem) ? 'takeDoneOpp' : 'takeDone');
 }
-
-const noValue = (v) => v === null || v === undefined || Number.isNaN(v);
 
 // Count: the total after any flip — the answer.
 export function validateCount(problem, value) {

@@ -886,13 +886,6 @@ body {
   pointer-events: all;
 }
 
-.lasso-mat .flip-arrow {
-  fill: none;
-  stroke: var(--opposite);
-  stroke-width: 3;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
 
 /* The fraction bar: d groups that touch, inside one outline. */
 .lasso-mat .bar-part {
@@ -1037,6 +1030,7 @@ body {
 }
 
 .one-slot {
+  position: relative;
   display: inline-grid;
   place-items: center;
   min-width: 48px;
@@ -1064,9 +1058,28 @@ body {
   to { stroke-dashoffset: 0; }
 }
 
-.lasso-mat .flip-arrow.draw-in {
+.lasso-mat .arrow.draw-in {
   stroke-dasharray: 1;
   animation: draw-in 0.45s ease-out;
+}
+
+/* The hidden 1: an arrow points up at the gap, and the meaning line makes room. */
+.slot-arrow {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  width: 24px;
+  height: 34px;
+  margin-left: -12px;
+  fill: none;
+  stroke: var(--groups);
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.lasso-left.needs-one .lasso-meaning {
+  margin-top: 34px;
 }
 
 /* Hints: the groups to look at blink gently; the hidden 1's gap pulses. */

@@ -11,11 +11,14 @@ const nth = (i) => ORDINAL[i] ?? `number ${i + 1}`;
 
 export const LASSO_FEEDBACK = {
   // ① Groups
-  groupsIntroHidden: () => 'There’s 1 hidden group — tap the gap before the ( to write the 1.',
+  groupsIntroHidden: () => 'There’s a hidden 1 in front of the ( — type the number 1 for the gap the arrow points to, then Check.',
   groupsIntro: () => 'Make one group for each group in the problem: tap Add group, then Check.',
   partsIntro: ({ d }) => `The bottom number is ${d}: tap Add group to make ${d} equal groups in one bar, then Check.`,
-  writeOne: () => 'There’s 1 hidden group — write the 1.',
-  writeOneFirst: () => 'Write the hidden 1 first — tap the gap before the (.',
+  writeOne: () => 'Type the hidden 1 first, then Check.',
+  writeOneFirst: () => 'Type the hidden 1 first — the arrow points to where it goes.',
+  typeOne: () => 'Type the number 1 for the gap, then Check.',
+  notOne: () => '−(…) means the opposite of 1 group. Type the number 1 in the gap.',
+  oneWritten: () => 'Yes, the hidden number is 1! Now make one group for each group in the problem: tap Add group, then Check.',
   tooManyGroups: () => 'That’s more groups than any problem needs. Tap one to erase it.',
   groupCount: ({ n, have }) => `The number of groups is ${n} — you have ${groups(have)}.`,
   partCount: ({ d, have }) => `The bottom number is ${d}, so make ${d} groups — you have ${have}.`,
@@ -59,17 +62,17 @@ export const LASSO_FEEDBACK = {
   // Flip
   tapFlip: () => 'Tap each − to flip its group, or tap Flip all.',
   tapFlipBar: () => 'Tap the − to flip the groups you took.',
-  flipMore: () => 'Flipped! Keep going — tap the next −.',
+  flipMore: () => 'Flipped — the new group is drawn on the right. Keep going: tap the next −.',
   flipDone: ({ fraction }) => (fraction
-    ? 'Flipped! Now count the counters in the groups you took, and type the total.'
-    : 'All flipped! Now count every counter and type the total.'),
+    ? 'Flipped! Now count the counters in the new groups on the right, and type the total.'
+    : 'All flipped! Now count every counter in the new groups on the right, and type the total.'),
 
   // Count
   countAll: () => 'Count all the counters in all the groups.',
   countTaken: () => 'Count the counters in the groups you took.',
 
   // Hints (after 3 wrong tries on a step)
-  hintWriteOne: () => '−(…) means the opposite of 1 group. Tap the blinking gap to write the 1.',
+  hintWriteOne: () => '−(…) means the opposite of 1 group. Type the number 1 for the blinking gap, then Check.',
   hintGroups: ({ n, have }) => (have > n
     ? `The number in front is ${n}. Tap the blinking groups to erase them.`
     : `The number in front is ${n}, so make ${n} group${n === 1 ? '' : 's'}: tap Add group until there are ${n}.`),

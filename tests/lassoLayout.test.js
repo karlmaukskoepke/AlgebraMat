@@ -1,9 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import {
-  LASSO_VIEW, lassoWidth, stackCenters, rowXs, takenRuns,
-  LASSO_HEIGHT, LASSO_GAP, PART_HEIGHT, STACK_X,
+  LASSO_VIEW, lassoWidth, stackCenters, rowXs, takenRuns, counterPitch, groupWidth, rowPitch,
+  wholeColumns, fractionColumns, LASSO_HEIGHT, LASSO_GAP, PART_HEIGHT, STACK_X, MARK_X, ORIG_LEFT, CHAIN_WIDTH,
 } from '../src/view/lassoLayout.js';
-import { CHAIN_WIDTH } from '../src/view/lassoMat.js';
 import { MAX_GROUPS, MAX_SINGLE_GROUP, MAX_DENOMINATOR } from '../src/engine/generateLasso.js';
 import { MAX_PARTS } from '../src/engine/lassoMoves.js';
 
@@ -20,10 +19,11 @@ describe('Group It layout', () => {
     expect(MAX_PARTS * PART_HEIGHT).toBeLessThanOrEqual(LASSO_VIEW.height);
   });
 
-  it('keeps the widest group and its − clear of the left column and the edge', () => {
-    const w = lassoWidth(MAX_SINGLE_GROUP);
-    expect(STACK_X - w / 2 - 24 - 12).toBeGreaterThan(280);         // the − mark; the left column's text ends before 280
+  it('keeps the widest + group and the count clear of the edge, and the − clear of the left column', () => {
+    const w = groupWidth(MAX_SINGLE_GROUP);
     expect(STACK_X + w / 2 + 18 + CHAIN_WIDTH).toBeLessThanOrEqual(LASSO_VIEW.width); // "→ −20"
+    expect(MARK_X - 27).toBeGreaterThan(300 - 12);                   // the − and its tap ring start right of the left column
+    expect(lassoWidth(3)).toBe(3 * 30 + 44);
   });
 
   it('centers a row of counters', () => {
@@ -33,8 +33,51 @@ describe('Group It layout', () => {
   });
 
   it('keeps the fraction count on the drawing with the widest bar (halves of 12)', () => {
-    const bx = STACK_X + lassoWidth(6) / 2 + 14;
+    const w = groupWidth(6);
+    const bx = STACK_X + w / 2 + 14;
     expect(bx + 76 + CHAIN_WIDTH).toBeLessThanOrEqual(LASSO_VIEW.width);
+  });
+
+  it('closes counters up a little for 6 to 8 in a group, so widths stay reasonable', () => {
+    expect([1, 3, 5].map(counterPitch)).toEqual([30, 30, 30]);
+    expect([6, 7, 8].map(counterPitch)).toEqual([25, 22, 22]);
+    expect(groupWidth(8)).toBe(8 * 22 + 44);
+    expect(groupWidth(2)).toBe(groupWidth(3)); // never narrower than 3
+  });
+
+  it('squeezes an overfilled group into its width instead of growing it', () => {
+    const w = groupWidth(3);
+    expect(rowPitch(3, w, 30)).toBe(30);
+    expect(rowPitch(12, w, 30)).toBeCloseTo((w - 44) / 12);
+  });
+
+  it('draws − groups, their redrawn opposites and the count in a widened drawing', () => {
+    const plain = wholeColumns(groupWidth(5), false);
+    expect(plain).toMatchObject({ origX: STACK_X, width: LASSO_VIEW.width });
+    for (const expected of [1, 3, 5, 8]) {
+      const w = groupWidth(expected);
+      const cols = wholeColumns(w, true);
+      expect(cols.markX).toBe(MARK_X);
+      expect(cols.origX - w / 2).toBe(ORIG_LEFT);
+      expect(cols.arrow[0]).toBeGreaterThan(cols.origX + w / 2);          // the arrow starts after the original
+      expect(cols.redrawX - w / 2).toBeGreaterThan(cols.arrow[1]);         // and ends before the redrawn group
+      expect(cols.chainX).toBeGreaterThan(cols.redrawX + w / 2);
+      expect(cols.chainX + CHAIN_WIDTH).toBeLessThanOrEqual(cols.width);   // the count fits
+      expect(cols.width).toBeLessThan(1040);                              // scale stays big enough to tap
+    }
+  });
+
+  it('draws a − fraction bar, its taken parts redrawn, and the count in a widened drawing', () => {
+    for (const each of [2, 3, 4, 6]) {
+      const w = groupWidth(each);
+      const cols = fractionColumns(w, true);
+      expect(cols.left + w).toBeLessThan(cols.bx);
+      expect(cols.arrow[0]).toBeGreaterThan(cols.bx);
+      expect(cols.redrawLeft).toBeGreaterThan(cols.arrow[1]);
+      expect(cols.chainX + CHAIN_WIDTH).toBeLessThanOrEqual(cols.width);
+      expect(cols.width).toBeLessThan(1060);
+    }
+    expect(fractionColumns(groupWidth(6), false).width).toBe(LASSO_VIEW.width);
   });
 
   it('finds runs of taken parts for the bracket', () => {

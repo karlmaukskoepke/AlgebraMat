@@ -24,9 +24,27 @@ Add `?seed=123` to the URL to replay a fixed problem set, and `?level=2` to open
 - `src/storage.js`: localStorage wrapper that falls back to memory.
 - `src/play/`: one play adapter per pack (`flipitPlay.js`, `lassoPlay.js`); `main.js` runs whichever the pack uses.
 - `src/packs/`: pack definitions (`flipit.js`; `index.js` has Lasso and lists every pack, including the Coming-soon ones).
+- `SPEC.md`, `SPEC-LASSO.md`, `SPEC-ROADMAP.md`: the specs, and Karl's notes for the packs after Group It.
 - `tests/`: Vitest.
 
 ## Changelog
+
+### Group It: redraw on flip, typed hidden 1, keyboard (SPEC-LASSO.md §12)
+- **Flip redraws the group.** Tapping a − (or Flip all) leaves the original group and draws an arrow to a copy on the right with the counters flipped and no −. The count comes after that. Fractions do the same with the parts taken, drawn as a new bar.
+- **The hidden 1 is typed.** In −(B) problems an arrow points at the gap, and students type the number 1 and check it. Tapping the gap no longer works.
+- **Keyboard:** number keys and the number pad, Backspace, − for the sign, and Enter to Check (or go Next). It works in Flip It too, and is ignored in dialogs and text boxes.
+- **Judgment calls:**
+  - The drawing widens for − groups so everything fits, and the Mat scales down about 8%.
+  - Counters close up slightly in wide groups.
+  - Flip All is still there.
+- **Verified:**
+  - 171 tests.
+  - Playwright:
+    - all 7 levels, alternating the keyboard and the pad, with the redraw checked after each flip
+    - the typed 1 (nothing typed, wrong number, right number, arrow gone)
+    - keyboard entry in Flip It, ignored behind a dialog, and Enter on Packs still working
+    - the Flip It, save-code, hint and pack-map flows
+  - The touch audit is clean at 1366×657 and 1280×610.
 
 ### Group It step 6: hints, flip animation, pack map fits a Chromebook (SPEC-LASSO.md §11)
 - **Hints** after 3 wrong tries on a step (new `engine/lassoHints.js`). They show the move without making it:

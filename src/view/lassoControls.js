@@ -76,7 +76,10 @@ export function buildLassoControls(root, dispatch) {
       check.disabled = !['groups', 'fill', 'take', 'count'].includes(step) && !done;
       check.innerHTML = done ? 'Next →' : 'Check ✓';
       if (done) check.dataset.next = '1'; else delete check.dataset.next;
-      for (const b of pad.querySelectorAll('button')) b.disabled = step !== 'count';
+      // The pad types the count, or the hidden 1 in −(B) (a positive digit only).
+      const typing = step === 'count' || (step === 'groups' && s.problem.hidden1 && !s.wroteOne);
+      for (const b of pad.querySelectorAll('button')) b.disabled = !typing;
+      toggle.disabled = step !== 'count';
     },
   };
 }
