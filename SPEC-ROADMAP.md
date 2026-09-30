@@ -2,11 +2,11 @@
 
 *Not yet specced. This records what Karl asked for, in his words as closely as possible, so it survives between sessions. Each pack gets its own spec (like SPEC-LASSO.md) and Karl's approval before it's built.*
 
-**Open item:** Karl mentioned "the work on the notes page I provided" for Boxes & Circles, but the uploaded PDF (Integers_Notes_WORKED.pdf) has only two pages: addition and subtraction of integers, multiplication as groups, and a fraction of a group. It has no boxes-and-circles page. Karl needs to send that page.
+**Where the visuals are:** all three algebra packs are on **page 2 of Karl's notes** (Integers_Notes_WORKED.pdf), under "Combining Like Terms", "Distributive Property" and "Distribute, then combine." The details below come from that page.
 
 ## Boxes & Circles (combining like terms)
 
-**Status: draft spec in SPEC-BOXES.md, waiting on Karl's review.** Karl's answers of 2026-09-30:
+**Status: revised spec in SPEC-BOXES.md, waiting on Karl's go-ahead.** Karl's answers of 2026-09-30:
 - Levels: (1) only + terms; (2) negative constants; (3) negative x terms and −x / +x as 1x; (4) subtracting a negative term; (5) mixed order. *"That looks good."*
 - A boxed `−3x` gets **three negative boxes drawn above the expression**, and the drawing is a separate step after boxing and circling.
 - Cancelling works the same as in Flip It.
@@ -24,11 +24,20 @@
 
 ## Groups of Terms (the distributive property)
 
+*From the notes:* "Still **A** groups of **B**. Now **B** has 2+ terms."
+- `3(2x − 1)` is "3 groups of (2x − 1)". Each group is an oval holding **two boxes and a negative counter** (`□□−`). Three ovals stack, and an arrow leads to the result `6x − 3`, with the note *"6 boxes, 3 negatives."*
+- `−2(x − 4)` is "the opposite of 2 groups of (x − 4)". Each oval holds a box and four negatives (`□−−−−`). The result is `2x − 8`, then an **opp.** arrow (magenta) to `−2x + 8`, exactly as the Group It flip.
+- Examples: `4(3x − 2) = 12x − 8` and `−3(x − 5) = −3x + 15`. The colors are as in Group It: blue for A, green for B and the ovals, magenta for opposite.
+
 - Students start by **drawing groups, just like in Group It**.
 - The progression through the levels is **very similar to Group It's**, except that now the **box drawings for all the x terms** are included.
 - It **ends with fractions of groups**, as long as the products come out as integer coefficients and constant terms.
 
 ## Distribute, then combine (last in this build)
+
+*From the notes:* "You can't combine until you know how many of each you have. Open the groups first!"
+- `2(3x − 4) − x + 5` → **① distribute:** `= 6x − 8 − x + 5` → **② combine:** `= 5x − 3`.
+- Examples: `3(x + 2) − 5x = 3x + 6 − 5x = −2x + 6`, and `5 − 2(2x − 3) = 5 + −2(2x − 3) = 5 − 4x + 6 = −4x + 11`, with the magenta note *"subtract = add the opposite"* (the `+ −2` is underlined in magenta).
 
 - **Round 1:** problems in the forms **A + B(Cx + D)** and **B(Cx + D) + A**. Students distribute first to "open up" the groups, then combine like terms, using the modeling tools already built and small values that are fast to draw.
 - **Round 2:** problems in the forms **A + (Bx + C)** and **A − (Bx + C)**, focused on **writing the invisible 1 in front of the parentheses** and distributing it.
