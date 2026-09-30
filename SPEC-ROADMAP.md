@@ -6,6 +6,13 @@
 
 ## Boxes & Circles (combining like terms)
 
+**Status: draft spec in SPEC-BOXES.md, waiting on Karl's review.** Karl's answers of 2026-09-30:
+- Levels: (1) only + terms; (2) negative constants; (3) negative x terms and −x / +x as 1x; (4) subtracting a negative term; (5) mixed order. *"That looks good."*
+- A boxed `−3x` gets **three negative boxes drawn above the expression**, and the drawing is a separate step after boxing and circling.
+- Cancelling works the same as in Flip It.
+- Answers are typed with the buttons at the bottom of the screen, **and** on the keyboard, which quick-keys those buttons.
+- Boxes and circles separate the terms into two kinds (boxes for variable terms, circles for constants), and help students capture the + or − operation in front to see how it influences the term's sign.
+
 - Should **function very closely to the notes page**, and **feel very similar to Flip It**.
 - Given an expression with variable terms and constant terms (all with absolute value below 10).
 - Students are asked to **"Box the variable terms, remembering to include the signs and + or − operation in front of it."**
