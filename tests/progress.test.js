@@ -10,7 +10,7 @@ describe('progress', () => {
   it('starts with every level of every pack unfinished', () => {
     expect(fresh).toEqual({
       v: 1,
-      packs: { combineit: { levels: Array(2).fill(false) }, flipit: { levels: Array(4).fill(false) }, lasso: { levels: Array(7).fill(false) }, boxes: { levels: Array(5).fill(false) }, 'groups-of-terms': { levels: Array(8).fill(false) } },
+      packs: { combineit: { levels: Array(3).fill(false) }, flipit: { levels: Array(5).fill(false) }, lasso: { levels: Array(7).fill(false) }, boxes: { levels: Array(5).fill(false) }, 'groups-of-terms': { levels: Array(8).fill(false) } },
     });
   });
 
@@ -26,16 +26,16 @@ describe('progress', () => {
   it('finishing a level unlocks the next one', () => {
     const p = completeLevel(fresh, 'flipit', 1);
     expect(isLevelDone(p, 'flipit', 1)).toBe(true);
-    expect([1, 2, 3, 4].map((l) => isLevelUnlocked(p, 'flipit', l))).toEqual([true, true, false, false]);
+    expect([1, 2, 3, 4, 5].map((l) => isLevelUnlocked(p, 'flipit', l))).toEqual([true, true, false, false, false]);
     expect(nextLevel(p, 'flipit')).toBe(2);
     expect(isLevelDone(fresh, 'flipit', 1)).toBe(false); // not mutated
   });
 
-  it('finishing Level 4 marks the pack complete', () => {
+  it('finishing the last level (Flip It\'s mixed Level 5) marks the pack complete', () => {
     let p = fresh;
-    for (const l of [1, 2, 3]) p = completeLevel(p, 'flipit', l);
+    for (const l of [1, 2, 3, 4]) p = completeLevel(p, 'flipit', l);
     expect(isPackComplete(p, 'flipit')).toBe(false);
-    p = completeLevel(p, 'flipit', 4);
+    p = completeLevel(p, 'flipit', 5);
     expect(isPackComplete(p, 'flipit')).toBe(true);
     expect(nextLevel(p, 'flipit')).toBe(null);
     expect(isPackComplete(p, 'lasso')).toBe(false);
@@ -43,11 +43,11 @@ describe('progress', () => {
 
   it('replaying a finished level keeps it finished', () => {
     const p = completeLevel(completeLevel(fresh, 'flipit', 1), 'flipit', 1);
-    expect(p.packs.flipit.levels).toEqual([true, false, false, false]);
+    expect(p.packs.flipit.levels).toEqual([true, false, false, false, false]);
   });
 
   it('rejects levels that do not exist', () => {
-    expect(() => completeLevel(fresh, 'flipit', 5)).toThrow();
+    expect(() => completeLevel(fresh, 'flipit', 6)).toThrow();
     expect(() => completeLevel(fresh, 'lasso', 8)).toThrow();
     expect(() => completeLevel(fresh, 'nope', 1)).toThrow();
   });

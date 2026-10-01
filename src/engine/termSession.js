@@ -3,12 +3,27 @@
 // SPEC-BOXES.md §2:  (Rewrite) → Box & Circle → Draw → Cancel → Answer
 //
 // Levels 4–5 start with Rewrite (a problem carries `level`); the rest start at Box & Circle.
+//
+// The same walk runs the integer problems of Combine it and Flip It (SPEC-COMBINE.md), which have no
+// x terms to box and circle, so a problem with `mode` set starts at Draw (Combine it's Level 3,
+// mode 'integers') or at Rewrite and then Draw (Flip It's Level 5, mode 'integers-flip').
 
 import { termParts, needsRewrite, prettyAnswer } from './terms.js';
 
-// Does this problem begin with Rewrite? Levels 4 and 5 do (even when nothing needs it).
-export const hasRewrite = (problem) => (problem.level ?? 0) >= 4;
-export const termSteps = (problem) => (hasRewrite(problem) ? [REWRITE_STEP, ...TERM_STEPS] : TERM_STEPS);
+// Integer problems (no x terms): Combine it's Level 3 and Flip It's mixed Level 5.
+export const isIntegers = (problem) => problem.mode === 'integers' || problem.mode === 'integers-flip';
+
+// Does this problem begin with Rewrite? Boxes & Circles' Levels 4 and 5 do (even when nothing needs it),
+// and so does Flip It's mixed level.
+export const hasRewrite = (problem) => problem.mode === 'integers-flip' || (!isIntegers(problem) && (problem.level ?? 0) >= 4);
+
+// The step after Rewrite, and the first step when there's no Rewrite: Box & Circle, or Draw for integers.
+const firstDrawingStep = (problem) => (isIntegers(problem) ? 'draw' : 'boxcircle');
+
+export function termSteps(problem) {
+  const steps = isIntegers(problem) ? TERM_STEPS.filter((t) => t.id !== 'boxcircle') : TERM_STEPS;
+  return hasRewrite(problem) ? [REWRITE_STEP, ...steps] : steps;
+}
 
 // The terms of `- (-7)` kind, and which of their two parts (operation, number) are flipped.
 export const rewritable = (problem) => problem.terms.map((t, i) => (needsRewrite(t) ? i : -1)).filter((i) => i >= 0);
@@ -31,7 +46,7 @@ export const MAX_ANSWER_LENGTH = 12;
 export function newTermSession(problem) {
   return {
     problem,                    // the expression (engine/terms.js)
-    step: hasRewrite(problem) ? 'rewrite' : 'boxcircle',
+    step: hasRewrite(problem) ? 'rewrite' : firstDrawingStep(problem),
     skipped: [],
     flips: {},                  // { 'term:op'|'term:num': true } the parts of a − (−7) term the student flipped
     tool: null,                 // 'box' | 'circle' | null: which shape a drag draws
@@ -45,7 +60,7 @@ export function newTermSession(problem) {
     entry: '',                  // what's been typed for the answer
     finalText: null,
     tries: {},
-    feedback: { key: hasRewrite(problem) ? 'rewriteIntro' : 'boxCircleIntro' },
+    feedback: { key: hasRewrite(problem) ? 'rewriteIntro' : isIntegers(problem) ? 'drawIntro' : 'boxCircleIntro' },
   };
 }
 
@@ -107,7 +122,7 @@ export function reduceTerms(state, action) {
       if (s.flips[key]) delete s.flips[key]; else s.flips[key] = true;
       const todo = rewritable(problem);
       if (todo.every((t) => fullyFlipped(s, t))) {
-        s.step = 'boxcircle';
+        s.step = firstDrawingStep(problem);
         return note(s, 'rewriteDone');
       }
       const half = s.flips[key] && !fullyFlipped(s, action.term);
@@ -117,7 +132,7 @@ export function reduceTerms(state, action) {
     case 'nothingToRewrite': {
       if (s.step !== 'rewrite') return state;
       if (rewritable(problem).length > 0) return wrong(s, { ok: false, feedbackKey: 'somethingToRewrite' });
-      s.step = 'boxcircle';
+      s.step = firstDrawingStep(problem);
       return note(s, 'nothingToRewriteOk');
     }
 

@@ -5,9 +5,11 @@ import {
 import { PACKS } from '../src/packs/index.js';
 
 const bitsOf = (n, count, shift = 0) => Array.from({ length: count }, (_, i) => Boolean(n & (1 << (shift + i))));
-const state = (flipit, lasso = Array(7).fill(false), boxes = Array(5).fill(false), terms = Array(8).fill(false), combine = Array(2).fill(false)) => ({
+// Flip It has five levels and Combine it three now; shorter lists (older saves) are filled out with unfinished levels.
+const pad = (levels, n) => [...levels, ...Array(Math.max(0, n - levels.length)).fill(false)];
+const state = (flipit, lasso = Array(7).fill(false), boxes = Array(5).fill(false), terms = Array(8).fill(false), combine = Array(3).fill(false)) => ({
   v: 1,
-  packs: { combineit: { levels: combine }, flipit: { levels: flipit }, lasso: { levels: lasso }, boxes: { levels: boxes }, 'groups-of-terms': { levels: terms } },
+  packs: { combineit: { levels: pad(combine, 3) }, flipit: { levels: pad(flipit, 5) }, lasso: { levels: lasso }, boxes: { levels: boxes }, 'groups-of-terms': { levels: terms } },
 });
 const state3 = state;
 
@@ -43,7 +45,7 @@ describe('save code v5', () => {
     expect(decodeProgress(encodeProgress(p), PACKS)).toEqual(p);
     const without = PACKS.filter((q) => q.id !== 'groups-of-terms');
     expect(decodeProgress(encodeProgress(p), without)).toEqual({ ...p, packs: { ...p.packs, 'groups-of-terms': undefined } });
-    const all = state(Array(4).fill(true), Array(7).fill(true), Array(5).fill(true), Array(8).fill(true));
+    const all = state(Array(5).fill(true), Array(7).fill(true), Array(5).fill(true), Array(8).fill(true), Array(3).fill(true));
     expect(decodeProgress(encodeProgress(all), PACKS)).toEqual(all);
   });
 
@@ -55,10 +57,10 @@ describe('save code v5', () => {
       packs: { ...base.packs, flipit: { levels: [false, true, false, true, true] }, combineit: { levels: [true, true, false, true] } },
     };
     expect(decodeProgress(encodeProgress(full), listed)).toEqual(full);
-    // Only the levels that are playable now (Flip It's four, Combine it's first two) come back.
+    // Only the levels that are playable now (all five of Flip It's, Combine it's first three) come back.
     const now = decodeProgress(encodeProgress(full), PACKS);
-    expect(now.packs.flipit.levels).toEqual([false, true, false, true]);
-    expect(now.packs.combineit.levels).toEqual([true, true]);
+    expect(now.packs.flipit.levels).toEqual([false, true, false, true, true]);
+    expect(now.packs.combineit.levels).toEqual([true, true, false]);
   });
 
   it('still reads v4 codes (before Combine it)', () => {
@@ -66,7 +68,7 @@ describe('save code v5', () => {
     const v4 = encodeProgress(p, 4);
     expect(v4).toMatch(/^MAT-6[2-9A-HJKMNP-Z]{6}$/);
     expect(decodeProgress(v4, PACKS)).toEqual(p);
-    expect(decodeProgress(v4, PACKS).packs.combineit).toEqual({ levels: Array(2).fill(false) });
+    expect(decodeProgress(v4, PACKS).packs.combineit).toEqual({ levels: Array(3).fill(false) });
   });
 
   it('still reads v3 codes (before Groups of Terms)', () => {
@@ -162,7 +164,7 @@ describe('normalizeProgress / mergeProgress', () => {
     expect(normalizeProgress({ packs: { flipit: { levels: [true, 'yes', true] }, ghost: { levels: [true] } } }, PACKS))
       .toEqual(state([true, false, true, false]));
     expect(normalizeProgress({ packs: { flipit: { levels: Array(9).fill(true) } } }, PACKS))
-      .toEqual(state([true, true, true, true]));
+      .toEqual(state([true, true, true, true, true]));   // extra levels are dropped
   });
 
   it('reads progress saved before Lasso existed', () => {

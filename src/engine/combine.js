@@ -9,7 +9,8 @@
 
 import { makeTerm, makeExpression, effective, formatExpression } from './terms.js';
 
-export const intTerm = (op, value) => makeTerm('int', op, value);
+// `flip` marks a subtracted term that Rewrite flips (Flip It's mixed level), whatever its number's sign.
+export const intTerm = (op, value, flip) => (flip === undefined ? makeTerm('int', op, value) : { ...makeTerm('int', op, value), flip });
 
 // An addition expression from signed numbers: [5, −8, 2] → 5 + (−8) + 2.
 export const sumExpression = (values) => makeExpression(values.map((v, i) => intTerm('+', v)));

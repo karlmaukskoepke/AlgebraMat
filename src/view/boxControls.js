@@ -4,6 +4,8 @@
 // `data-key` names the keyboard key that presses a button (B and C pick the
 // tools, Backspace is Undo or the pad's delete, x, + and − type; Enter is Check).
 
+import { hasRewrite } from '../engine/termSession.js';
+
 const BOX_SVG = '<svg viewBox="0 0 26 22" aria-hidden="true"><rect x="2" y="2" width="22" height="18" rx="4"/></svg>';
 const CIRCLE_SVG = '<svg viewBox="0 0 26 22" aria-hidden="true"><rect x="2" y="2" width="22" height="18" rx="9"/></svg>';
 // The pieces as the Mat draws them: □ is x, −□ is −x (a dash on its left), + and − counters.
@@ -75,7 +77,7 @@ export function buildBoxControls(root, dispatch) {
       const boxCircle = step === 'boxcircle';
       const drawing = step === 'draw';
       const answering = step === 'answer';
-      nothing.hidden = !s.problem || (s.problem.level ?? 0) < 4; // only Levels 4–5 have a Rewrite step
+      nothing.hidden = !s.problem || !hasRewrite(s.problem); // only problems that begin with Rewrite have the button
       nothing.disabled = step !== 'rewrite';
       box.disabled = circle.disabled = !boxCircle;
       box.setAttribute('aria-pressed', String(boxCircle && s.tool === 'box'));
