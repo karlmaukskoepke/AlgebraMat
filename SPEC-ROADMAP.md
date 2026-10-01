@@ -6,7 +6,7 @@
 
 ## Combine it (integer addition), new 2026-10-01
 
-**Status: Karl's request, not yet specced.** *"A simple 'Combine it' section about integer addition. Similar to Flip It, without the flipping, of course."*
+**Status: drafted in SPEC-COMBINE.md, waiting on Karl's approval.** Karl's answers of 2026-10-01: yes to the four levels as read, yes to mixing who wins in Level 1, yes to the circling steps in Level 4; Combine it goes **before Flip It** on the pack map. *"A simple 'Combine it' section about integer addition. Similar to Flip It, without the flipping, of course."*
 - **Round 1:** adding a positive and a negative (all **battles**). Modeled with the + and − counters.
 - **Round 2:** adding negatives and negatives. Modeled with counters.
 - **Round 3:** three or more terms. Modeled with counters.
@@ -14,7 +14,7 @@
 
 ## Flip It: a final mixed level, new 2026-10-01
 
-**Status: Karl's request, not yet specced.** Add a **mixed practice of addition and subtraction** at the end of Flip It, so both operations show up as the final challenge there.
+**Status: drafted in SPEC-COMBINE.md §4.** Karl: three to four integers, a combination of addition and subtraction; there may be a Flip it step, or it may be all addition with nothing to flip. *"The variety is the point."* Add a **mixed practice of addition and subtraction** at the end of Flip It, so both operations show up as the final challenge there.
 
 ## Boxes & Circles (combining like terms)
 
