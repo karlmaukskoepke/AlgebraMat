@@ -86,12 +86,23 @@ function fraction(n, d) {
   return html('span', 'frac groups', html('span', 'num', `${n}`), html('span', 'den', `${d}`));
 }
 
-function problemText(p) {
+function problemText(s) {
+  const p = s.problem;
   const { neg, n, d } = p.count;
   const parts = [];
   if (neg) parts.push(html('span', 'opp-sign', MINUS));
   if (d > 1) parts.push(fraction(n, d));
   else if (!p.hidden1) parts.push(html('span', 'groups', `${n}`));
+  else if (s.wroteOne) parts.push(html('span', 'groups written', '1'));
+  else if (s.oneOpen) {
+    // The hidden 1: an arrow points at the gap; the student types the number.
+    const slot = html('span', `one-slot${s.fx?.hint?.show?.slot ? ' hint-pulse' : ''}`, s.oneText || '?');
+    slot.setAttribute('aria-label', 'The hidden number: type a 1');
+    slot.append(el('svg', { class: 'slot-arrow', viewBox: '0 0 24 34', 'aria-hidden': 'true' }, [
+      el('path', { d: 'M12 33 V6 M4 14 L12 5 L20 14' }),
+    ]));
+    parts.push(slot);
+  }
   parts.push(html('span', 'inside', `(${insideText(p)})`));
   return html('div', 'lasso-problem tg-problem', ...parts);
 }
@@ -335,7 +346,7 @@ export function renderTermGroupMat(s) {
   if (s.checkIt) {
     checkIt(svg, s);
   } else {
-    svg.append(foreign(0, 18, 300, 150, html('div', 'lasso-left', problemText(s.problem), meaningText(s.problem))));
+    svg.append(foreign(0, 18, 300, 150, html('div', `lasso-left${s.oneOpen ? ' needs-one' : ''}`, problemText(s), meaningText(s.problem))));
     if (has(s.answer)) svg.append(foreign(0, 256, 300, 78, html('div', 'lasso-left', finalText(s.problem, s.answer))));
   }
   const width = isFraction(s.problem) ? fractionScript(svg, s) : wholeScript(svg, s);
