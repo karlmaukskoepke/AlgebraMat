@@ -101,3 +101,16 @@ A **Level 5** on the Flip It pack, so both operations show up as the final chall
 - **Adapters per level:** a pack can use a different play adapter for some levels (Combine it Levels 1–2 are Flip It's two-term engine; Level 3 and Flip It's Level 5 are the integer steps).
 - **Touch:** every target is at least 44px at 1366 × 657 and 1280 × 610, checked on the most crowded Level 3 and Level 5 problems (four terms, up to 20 counters).
 
+## 11. Build decisions, step 4 (Level 4: big numbers, no counters)
+
+- **Steps** (problems carry `mode: 'integers-big'`). Two terms: **Circle → Party or Battle? → Add or Subtract? → Sign → Answer**. Three terms add **Combine** after Circle. Combine it is complete: four levels.
+- **Circle** is Boxes & Circles' step, with only circles (no tool to pick): drag across each term from the sign in front, with the live yellow selection; a shape that leaves out the sign or number is dashed; Check says what's missing. The first number is circled with its own sign (`−23`), a later one with its operation (`+ (−15)`).
+- **Combine (three terms):** tap the two circled terms that share a sign (they glow yellow; tap one again to put it back; a third is refused), type what they make with the pad (`−38`), and Check. A wrong pair says to find the two with the same sign; a wrong value says to add their values and keep the sign. Fewer than two taps, or nothing typed, just asks (not a wrong try). After it, the Mat's notes show `−23 + (−15) = −38`.
+- **Party or Battle** is about the two numbers that meet (for three terms, the combined pair and the other one, which always makes a battle). **Add or Subtract?** (party: add; battle: subtract the smaller value from the larger). **Sign:** a party keeps the sign they share; in a battle the bigger value wins and the answer has its sign. Each wrong choice says what to look at (*"In a battle, the bigger value wins and the answer has its sign. Which value is bigger?"*), never the answer.
+- **Answer** is typed with the pad (digits and a −; keyboard too, up to 5 characters), with the sign the student found. A right size with the wrong sign says so (*"The size is right! Now the sign: you found negative…"*); a wrong size says to check the addition or subtraction again.
+- **The Mat shows the reasoning** in Kalam above the expression, a line a step as it's chosen: `battle`, `subtract: 86 − 55`, `sign: −` (and the Combine line first for three terms). There are no counters, so the drawing is cropped to just that room, and the circled terms are as narrow as their text.
+- **Keys:** **P** Party, **B** Battle, **A** Add, **S** Subtract, **+** and **−** the sign (and the pad's −, while typing), digits, Backspace (Undo while circling, delete while typing), Enter Check and Next →.
+- **Hints** after 3 wrong tries: Circle (the terms still to circle blink), Combine (the pair blinks), Party or Battle (both numbers blink, naming whether the signs match), Add or Subtract (what a party or battle does), Sign (the bigger value blinks in a battle), Answer (the operation and sign you found).
+- **Touch:** every target at least 44px at 1366 × 657 and 1280 × 610 (circled terms 57px or more, palette buttons 44px).
+- **Pack list:** Combine it now lists all four levels (names: *positive + negative*, *negative + negative*, *three or more numbers*, *big numbers, no counters*).
+

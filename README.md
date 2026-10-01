@@ -19,7 +19,7 @@ Add `?seed=123` to the URL to replay a fixed problem set, and `?level=2` to open
 
 ## Layout
 
-- `src/engine/`: pure logic, no DOM. `expr.js` (expression model), `generate.js` (seeded levels), `moves.js` (validators), `session.js` (one problem's steps as a reducer), `progress.js` (level unlocks, save code), `hints.js` + `lassoHints.js` (hints after 3 wrong tries), `groups.js` + `generateLasso.js` (Group It problems; files keep the old "lasso" name), `terms.js` + `termPieces.js` + `termMoves.js` + `termSession.js` + `termHints.js` + `generateTerms.js` (Boxes & Circles), `combine.js` + `generateCombine.js` + `integerFeedback.js` (Combine it, and Flip It's mixed level), `termGroups.js` + `generateTermGroups.js` (Groups of Terms), `termGroupMat.js` (its Mat), `termGroupSession.js` + `termGroupMoves.js` + `termGroupHints.js` (its steps).
+- `src/engine/`: pure logic, no DOM. `expr.js` (expression model), `generate.js` (seeded levels), `moves.js` (validators), `session.js` (one problem's steps as a reducer), `progress.js` (level unlocks, save code), `hints.js` + `lassoHints.js` (hints after 3 wrong tries), `groups.js` + `generateLasso.js` (Group It problems; files keep the old "lasso" name), `terms.js` + `termPieces.js` + `termMoves.js` + `termSession.js` + `termHints.js` + `generateTerms.js` (Boxes & Circles), `combine.js` + `generateCombine.js` + `integerFeedback.js` + `bigSession.js` + `bigHints.js` (Combine it, and Flip It's mixed level), `termGroups.js` + `generateTermGroups.js` (Groups of Terms), `termGroupMat.js` (its Mat), `termGroupSession.js` + `termGroupMoves.js` + `termGroupHints.js` (its steps).
 - `src/view/`: DOM and SVG. `mat.js`, `controls.js`, `lassoMat.js` + `lassoLayout.js` (the Group It Mat), `boxMat.js` + `boxLayout.js` + `boxPointer.js` + `boxControls.js` (the Boxes & Circles Mat, its drag and palette), `packmap.js` (home and level-complete panel), `codes.js` (save-code dialogs), `feedback.js` (every message, in one table), `layout.js` (counter geometry).
 - `src/storage.js`: localStorage wrapper that falls back to memory.
 - `src/play/`: one play adapter per pack (`flipitPlay.js`, `lassoPlay.js`); `main.js` runs whichever the pack uses.
@@ -28,6 +28,12 @@ Add `?seed=123` to the URL to replay a fixed problem set, and `?level=2` to open
 - `tests/`: Vitest.
 
 ## Changelog
+
+### Combine it step 4: Level 4, big numbers with no counters (SPEC-COMBINE.md §6.4, §11)
+
+- **Combine it is complete:** Level 4 has numbers from 11 to 60 and no counters. Circle each number with its sign in front, then say **Party or Battle**, **Add or Subtract**, the **Sign**, and type the answer. Your reasoning builds up above the problem as you go (`battle`, `subtract: 41 − 38`, `sign: +`).
+- **Three-number problems** add a **Combine** step: tap the two with the same sign and type what they make, then battle the result against the other number.
+- **Keys:** P and B for Party and Battle, A and S for Add and Subtract, + and − for the sign.
 
 ### Combine it step 3: Level 3, and Flip It's mixed Level 5 (SPEC-COMBINE.md §6.3, §10)
 

@@ -68,8 +68,8 @@ describe('Combine it (Levels 1 and 2 on Flip It\'s engine)', () => {
   });
 
   it('the pack lists its built levels with names and a generator for each', () => {
-    expect(combineit.levels).toBe(3);
-    expect(combineit.levelNames).toHaveLength(3);
-    for (let l = 1; l <= 3; l++) expect(combineit.generate(l, 7)).toHaveLength(5);
+    expect(combineit.levels).toBe(4);
+    expect(combineit.levelNames).toHaveLength(4);
+    for (let l = 1; l <= 4; l++) expect(combineit.generate(l, 7)).toHaveLength(5);
   });
 });

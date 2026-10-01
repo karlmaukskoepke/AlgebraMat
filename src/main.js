@@ -9,6 +9,7 @@ import { PACKS, packById } from './packs/index.js';
 import { flipitPlay } from './play/flipitPlay.js';
 import { combinePlay } from './play/combinePlay.js';
 import { integerPlay } from './play/integerPlay.js';
+import { bigPlay } from './play/bigPlay.js';
 import { lassoPlay } from './play/lassoPlay.js';
 import { termGroupPlay } from './play/termGroupPlay.js';
 import { boxPlay } from './play/boxPlay.js';
@@ -19,9 +20,9 @@ const $ = (id) => document.getElementById(id);
 
 // Each pack's play adapter: its steps, session, Mat, controls and messages.
 // A pack can use a different adapter for some levels (Combine it's Level 3 and Flip It's Level 5 run on the
-// integer steps), so each entry is the adapter or a function of the level.
+// integer steps, and Level 4 its own), so each entry is the adapter or a function of the level.
 const PLAY = {
-  combineit: (level) => (level >= 3 ? integerPlay : combinePlay),
+  combineit: (level) => (level >= 4 ? bigPlay : level === 3 ? integerPlay : combinePlay),
   flipit: (level) => (level >= 5 ? integerPlay : flipitPlay),
   lasso: lassoPlay,
   boxes: boxPlay,
@@ -250,8 +251,8 @@ document.addEventListener('keydown', (e) => {
   const letter = /^[a-z]$/i.test(e.key);
   if (/^[0-9]$/.test(e.key)) candidates.push(`.pad button[data-digit="${e.key}"]`);
   else if (e.key === 'Backspace' || e.key === 'Delete') candidates.push('.pad button[data-action="backspace"]', 'button[data-key="Backspace"]');
-  else if (e.key === '-' || e.key === '−') candidates.push('.pad button[data-action="toggleSign"]', '.pad button[data-key="-"]');
-  else if (e.key === '+') candidates.push('.pad button[data-key="+"]');
+  else if (e.key === '-' || e.key === '−') candidates.push('.pad button[data-action="toggleSign"]', '.pad button[data-key="-"]', 'button[data-key="-"]');
+  else if (e.key === '+') candidates.push('.pad button[data-key="+"]', 'button[data-key="+"]');
   else if (e.key === 'Enter' && !e.repeat) candidates.push('button[data-action="check"]');
   else if (letter) candidates.push(`button[data-key="${e.key.toLowerCase()}"]`);
   if (!candidates.length) return;
