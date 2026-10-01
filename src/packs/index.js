@@ -39,11 +39,13 @@ export const boxes = {
   generate: (level, seed) => generateTermLevel(level, seed).map((expr) => ({ ...expr, level })),
 };
 
-// Groups of Terms is still a Coming-soon card (no levels, nothing in saves), but its finished
-// steps can be played at ?pack=groups-of-terms&level=N while it's built.
-const groupsOfTerms = {
-  ...soon('groups-of-terms', 'Groups of Terms', 'The distributive property'),
-  previewLevels: 8,
+// Groups of Terms: the distributive property, A groups of B where B has two terms.
+export const groupsOfTerms = {
+  id: 'groups-of-terms',
+  title: 'Groups of Terms',
+  subtitle: 'The distributive property',
+  blurb: 'Make the groups, fill them with boxes and counters, flip the opposites, then write what they make.',
+  levels: 8,
   levelNames: ['all positive', 'a negative number', 'a negative x term', 'opposite groups', 'challenge: number first',
     'unit fraction of a group', 'fraction of a group', 'challenge: negative fractions'],
   generate: (level, seed) => generateTermGroupsLevel(level, seed),

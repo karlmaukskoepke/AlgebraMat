@@ -3,12 +3,21 @@
 // the Fill messages are this pack's. Keys not listed here fall back to Group It's table.
 
 import { LASSO_FEEDBACK } from './lassoFeedback.js';
+import { TERM_FEEDBACK } from './termFeedback.js';
 
 const ORDINAL = ['first', 'second', 'third', 'fourth', 'fifth', 'sixth', 'seventh'];
 const nth = (i) => ORDINAL[i] ?? `number ${i + 1}`;
 const kindWord = (kind) => (kind === 'box' ? 'boxes' : 'counters');
 
+// ⑤ Answer, the expression typed with the pad: Boxes & Circles' messages.
+const ANSWER_KEYS = ['typeAnswer', 'answerUnreadable', 'combineAll', 'noZeroTerm', 'checkBoxes', 'checkNumbers'];
+const answerMessages = Object.fromEntries(ANSWER_KEYS.map((k) => [k, TERM_FEEDBACK[k]]));
+
 export const TERM_GROUP_FEEDBACK = {
+  ...answerMessages,
+  // ⑥ Check it: the distributing arrows, after a right answer
+  correct: ({ answer }) => `Yes! ${answer}. Check it: the arrows show the shortcut, multiplying the number in front by each term.`,
+
   // ② + or −: what to do next is a piece, not a counter
   plusGroups: ({ fraction }) => (fraction
     ? 'Plus! Pick a piece, then tap the lit-up group to deal the first one.'
@@ -26,7 +35,7 @@ export const TERM_GROUP_FEEDBACK = {
   groupOk: () => 'That’s one group.',
   emptyGroup: ({ index, text, need }) => `The ${nth(index)} group is empty. Each group is (${text}): ${need}.`,
   groupOff: ({ index, text, need }) => `The ${nth(index)} group isn’t (${text}) yet. Each group needs ${need}.`,
-  fillDone: () => 'Groups filled! The next build adds the answer.',
+  fillDone: () => 'Groups filled! Now read all the groups together and type what they make, like 6x − 3.',
   fillDoneOpp: () => 'Groups filled! They’re opposite groups: tap each − to flip its group, or tap Flip all.',
 
   // ③ Fill, fraction bar: one kind of piece at a time
@@ -38,11 +47,11 @@ export const TERM_GROUP_FEEDBACK = {
   dealDone: ({ n }) => `Equal groups! Now take ${n}: tap each group you take.`,
 
   // ④ Take, ⑤ Flip: the answer comes in the next build
-  takeDone: () => 'Taken! The next build adds the answer.',
+  takeDone: () => 'Taken! Now type what the groups you took make, like 2x + 3.',
   takeDoneOpp: () => 'Taken! It’s the opposite, so tap the − to flip the groups you took.',
   flipDone: ({ fraction }) => (fraction
-    ? 'Flipped! The groups you took are redrawn on the right. The next build adds the answer.'
-    : 'All flipped! Each group is redrawn on the right. The next build adds the answer.'),
+    ? 'Flipped! Now type what the new groups on the right make, like −2x + 3.'
+    : 'All flipped! Now type what the new groups on the right make, like −2x + 8.'),
 };
 
 export function termGroupFeedbackText(fb) {

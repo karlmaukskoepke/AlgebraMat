@@ -207,3 +207,7 @@ My calls, open to change:
   - **The drawing's top is cropped to fit** the tallest column a term can hold (what it needs plus two spare, never over 10), so a small problem gets a bigger Mat. Drawing more than that says *"That's more than any term needs."*
 - **Boxes & Circles is complete** (SPEC-BOXES.md §7, all six steps).
 
+## 15. Zone hover (Karl, 2026-10-01)
+
+- In Draw, **when the mouse is over a zone you can tap** (the column above a term), a dashed rounded outline and a faint tint show the whole zone. It's mouse-only (`@media (hover: hover)`), so touch screens don't get a stuck outline.
+

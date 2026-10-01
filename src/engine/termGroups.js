@@ -117,3 +117,9 @@ export function distributeLines(p) {
     return { a, term: t, product, text: `${a} · ${shown} = ${numberText(product)}` };
   });
 }
+
+// The combined line the arrows lead to, in the order B is written: "6x − 3", "−2x + 8", "12 − 3x".
+export function distributeSum(p) {
+  const [a, b] = distributeLines(p).map((l) => l.product);
+  return `${numberText(a)} ${b.value < 0 ? MINUS : '+'} ${numberText({ ...b, value: Math.abs(b.value) })}`;
+}

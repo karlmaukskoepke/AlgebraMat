@@ -3,11 +3,13 @@
 //   whole-number groups: Groups → + or − → Fill → Flip → Answer → Check it
 //   fraction groups:     Groups → + or − → Fill → Take → Flip → Answer → Check it
 //
-// Built so far: Groups, + or −, Fill, Take and Flip. The answer and Check it come in later builds.
+// Answer (typed with the pad) comes after Flip; once it's right, Check it shows the distributing
+// arrows and the student goes on with Next →.
 
 import { isFraction } from './termGroups.js';
+import { prettyAnswer } from './terms.js';
 import {
-  validateHiddenOne, validateGroups, validateGroupSign, validateFill, validateDeal, validateTake,
+  validateHiddenOne, validateGroups, validateGroupSign, validateFill, validateDeal, validateTake, validateAnswer,
   MAX_GROUPS_MADE, MAX_PARTS, maxInGroup, neededOf, SPARE,
 } from './termGroupMoves.js';
 import { entryValue } from './session.js';
@@ -33,8 +35,7 @@ export const FRACTION_STEPS = [
 
 export const stepsFor = (problem) => (isFraction(problem) ? FRACTION_STEPS : WHOLE_STEPS);
 
-// The steps built so far; after Fill the problem waits for the next build.
-export const BUILT_STEPS = ['groups', 'sign', 'fill', 'take', 'flip'];
+export const MAX_ANSWER_LENGTH = 12;
 
 export function newTermGroupSession(problem) {
   const fraction = isFraction(problem);
@@ -48,7 +49,9 @@ export function newTermGroupSession(problem) {
     opposite: false,             // − groups, once chosen in step ②
     pick: null,                  // { type: 'box' | 'counter', sign } the piece Fill adds
     snapshots: [],               // each group's pieces before every change, for Undo
-    entry: { digits: '' },
+    entry: { digits: '' },        // the hidden 1, while it's being typed
+    typed: '',                    // the answer, while it's being typed
+    finalText: null,              // the answer as written, once it's right
     tries: {},
     feedback: { key: problem.hidden1 ? 'groupsIntroHidden' : fraction ? 'partsIntro' : 'groupsIntro', params: { d: problem.count.d } },
   };
@@ -229,17 +232,41 @@ export function reduceTermGroups(state, action) {
         return s;
       }
       if (s.step === 'flip') return note(s, fraction ? 'tapFlipBar' : 'tapFlip');
+      if (s.step === 'answer') {
+        const res = validateAnswer(problem, s.typed);
+        if (!res.ok) return res.feedbackKey === 'typeAnswer' ? say(s, res) : wrong(s, res);
+        s.finalText = prettyAnswer(s.typed);
+        s.step = 'checkit';
+        return say(s, res);
+      }
       return state;
     }
 
-    // The pad types the hidden 1 (one positive digit).
+    // The pad types the hidden 1 (one positive digit), or the answer.
     case 'digit': {
-      if (!oneOpen(s) || s.entry.digits.length >= 1 || !Number.isInteger(action.digit) || action.digit < 0 || action.digit > 9) return state;
+      if (!Number.isInteger(action.digit) || action.digit < 0 || action.digit > 9) return state;
+      if (s.step === 'answer') {
+        if (s.typed.length >= MAX_ANSWER_LENGTH) return state;
+        s.typed += String(action.digit);
+        return s;
+      }
+      if (!oneOpen(s) || s.entry.digits.length >= 1) return state;
       s.entry.digits = String(action.digit);
       return s;
     }
 
+    case 'typeChar': {
+      if (s.step !== 'answer' || !['x', '+', '-'].includes(action.ch) || s.typed.length >= MAX_ANSWER_LENGTH) return state;
+      s.typed += action.ch;
+      return s;
+    }
+
     case 'backspace': {
+      if (s.step === 'answer') {
+        if (s.typed === '') return state;
+        s.typed = s.typed.slice(0, -1);
+        return s;
+      }
       if (!oneOpen(s)) return state;
       s.entry.digits = s.entry.digits.slice(0, -1);
       return s;

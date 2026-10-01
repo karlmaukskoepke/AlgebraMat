@@ -1,7 +1,8 @@
 // Groups of Terms' play adapter (SPEC-GROUPS-OF-TERMS.md §3): the same interface as Group It's,
-// so the shared play screen runs it. Built so far: Groups, + or −, Fill, Take and Flip.
+// so the shared play screen runs it.
 
 import { newTermGroupSession, reduceTermGroups, stepsFor, nextPart, oneOpen } from '../engine/termGroupSession.js';
+import { prettyAnswer } from '../engine/terms.js';
 import { renderTermGroupMat } from '../view/termGroupMat.js';
 import { buildTermGroupControls } from '../view/termGroupControls.js';
 import { termGroupFeedbackText } from '../view/termGroupFeedback.js';
@@ -14,6 +15,10 @@ export function termGroupViewState(s) {
     next: s.script === 'fraction' && s.step === 'fill' ? nextPart(s) : null,
     oneOpen: oneOpen(s),
     oneText: oneOpen(s) ? s.entry.digits : '',
+    // The answer: what's being typed after the arrow, then what was written once it's right.
+    totalText: s.step === 'answer' ? prettyAnswer(s.typed) || '?' : undefined,
+    answer: s.finalText ?? null,
+    checkIt: s.step === 'checkit',
   };
 }
 
