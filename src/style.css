@@ -1294,10 +1294,32 @@ body {
     padding-right: 24px;
   }
   .pack-grid {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(var(--packs, 3), 1fr);
   }
   .soon-grid {
     grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Every pack card is the same size; a long list of levels scrolls inside its card
+   (three rows show), so the cards line up and the page doesn't scroll. */
+@media (min-width: 761px) {
+  .pack-grid {
+    align-items: stretch;
+    grid-auto-rows: 1fr;     /* every row the same height too */
+  }
+  .pack-grid .pack-card {
+    display: flex;
+    flex-direction: column;
+  }
+  .pack-grid .level-list {
+    flex: 1;
+    min-height: 0;
+    align-content: start;
+    max-height: 330px;       /* three rows of 96px buttons */
+    overflow-y: auto;
+    padding: 4px;            /* room for the 3px outlines inside the scroll box */
+    margin: -4px;
   }
 }
 
@@ -1353,6 +1375,9 @@ body {
   }
   .level-list {
     gap: 10px;
+  }
+  .pack-grid .level-list {
+    max-height: 222px;       /* three rows of 64px buttons */
   }
   .btn.level-btn {
     min-height: 64px;

@@ -90,8 +90,12 @@ const LAYOUTS = {
   1: { data: 2, packs: [{ id: 'flipit', levels: 4 }] },
   2: { data: 3, packs: [{ id: 'flipit', levels: 4 }, { id: 'lasso', levels: 7 }] },
   3: { data: 4, packs: [{ id: 'flipit', levels: 4 }, { id: 'lasso', levels: 7 }, { id: 'boxes', levels: 5 }] },
+  4: {
+    data: 5,
+    packs: [{ id: 'flipit', levels: 4 }, { id: 'lasso', levels: 7 }, { id: 'boxes', levels: 5 }, { id: 'groups-of-terms', levels: 8 }],
+  },
 };
-export const CODE_VERSION = 3;
+export const CODE_VERSION = 4;
 
 // Weighted sum mod 31. Weights 2, 3, 4, … are all nonzero mod 31 and differ
 // by 1 between neighbors, so any single typo or neighbor swap is caught.

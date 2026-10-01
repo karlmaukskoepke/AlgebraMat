@@ -17,7 +17,7 @@ const allStates3 = Array.from({ length: 2 ** 16 }, (_, n) => state3(bitsOf(n, 4)
 // A spread of them for the slower typo checks.
 const sample = allStates3.filter((_, n) => n % 997 === 0 || n === 65535 || n === 15);
 
-describe('save code v3', () => {
+describe('save code v4', () => {
   it('uses no look-alike characters', () => {
     expect(CODE_ALPHABET).toHaveLength(31);
     for (const ch of '01OIL') expect(CODE_ALPHABET).not.toContain(ch);
@@ -28,11 +28,31 @@ describe('save code v3', () => {
     const codes = new Set();
     for (const p of allStates3) {
       const code = encodeProgress(p);
-      expect(code).toMatch(/^MAT-5[2-9A-HJKMNP-Z]{5}$/); // "5" is version 3
+      expect(code).toMatch(/^MAT-6[2-9A-HJKMNP-Z]{6}$/); // "6" is version 4
       expect(decodeProgress(code, WITH_BOXES)).toEqual(p);
       codes.add(code);
     }
     expect(codes.size).toBe(65536);
+  });
+
+  it('carries Groups of Terms progress once the pack is listed, and drops it before', () => {
+    const terms = (levels) => ({ ...state(bitsOf(0b1010, 4), bitsOf(0b11, 7), [true, false, false, false, false]), });
+    const base = terms();
+    const withTerms = { ...base, packs: { ...base.packs, 'groups-of-terms': { levels: [true, true, false, true, false, false, false, true] } } };
+    const listed = [...WITH_BOXES, { id: 'groups-of-terms', levels: 8 }];
+    expect(decodeProgress(encodeProgress(withTerms), listed)).toEqual(withTerms);
+    expect(decodeProgress(encodeProgress(withTerms), PACKS)).toEqual(base);   // not playable yet: read and dropped
+    const all = { ...base, packs: { ...base.packs, 'groups-of-terms': { levels: Array(8).fill(true) } } };
+    expect(decodeProgress(encodeProgress(all), listed)).toEqual(all);
+  });
+
+  it('still reads v3 codes (before Groups of Terms)', () => {
+    const p = state3(bitsOf(0b0110, 4), bitsOf(0b1011, 7), [true, true, true, false, false]);
+    const v3 = encodeProgress(p, 3);
+    expect(v3).toMatch(/^MAT-5[2-9A-HJKMNP-Z]{5}$/);
+    expect(decodeProgress(v3, PACKS)).toEqual(p);
+    const listed = [...WITH_BOXES, { id: 'groups-of-terms', levels: 8 }];
+    expect(decodeProgress(v3, listed).packs['groups-of-terms']).toEqual({ levels: Array(8).fill(false) });
   });
 
   it('carries Boxes & Circles progress', () => {

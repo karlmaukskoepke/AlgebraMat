@@ -19,7 +19,7 @@ Add `?seed=123` to the URL to replay a fixed problem set, and `?level=2` to open
 
 ## Layout
 
-- `src/engine/`: pure logic, no DOM. `expr.js` (expression model), `generate.js` (seeded levels), `moves.js` (validators), `session.js` (one problem's steps as a reducer), `progress.js` (level unlocks, save code), `hints.js` + `lassoHints.js` (hints after 3 wrong tries), `groups.js` + `generateLasso.js` (Group It problems; files keep the old "lasso" name), `terms.js` + `termPieces.js` + `termMoves.js` + `termSession.js` + `termHints.js` + `generateTerms.js` (Boxes & Circles).
+- `src/engine/`: pure logic, no DOM. `expr.js` (expression model), `generate.js` (seeded levels), `moves.js` (validators), `session.js` (one problem's steps as a reducer), `progress.js` (level unlocks, save code), `hints.js` + `lassoHints.js` (hints after 3 wrong tries), `groups.js` + `generateLasso.js` (Group It problems; files keep the old "lasso" name), `terms.js` + `termPieces.js` + `termMoves.js` + `termSession.js` + `termHints.js` + `generateTerms.js` (Boxes & Circles), `termGroups.js` + `generateTermGroups.js` (Groups of Terms).
 - `src/view/`: DOM and SVG. `mat.js`, `controls.js`, `lassoMat.js` + `lassoLayout.js` (the Group It Mat), `boxMat.js` + `boxLayout.js` + `boxPointer.js` + `boxControls.js` (the Boxes & Circles Mat, its drag and palette), `packmap.js` (home and level-complete panel), `codes.js` (save-code dialogs), `feedback.js` (every message, in one table), `layout.js` (counter geometry).
 - `src/storage.js`: localStorage wrapper that falls back to memory.
 - `src/play/`: one play adapter per pack (`flipitPlay.js`, `lassoPlay.js`); `main.js` runs whichever the pack uses.
@@ -28,6 +28,16 @@ Add `?seed=123` to the URL to replay a fixed problem set, and `?level=2` to open
 - `tests/`: Vitest.
 
 ## Changelog
+
+### Groups of Terms step 1: model, level generator, save code v4 (SPEC-GROUPS-OF-TERMS.md §7.1, §9)
+
+- **Engine only:** `termGroups.js` (the problem, its answer, its pieces, and the distributing-arrow lines for Check it) and `generateTermGroups.js` (8 seeded levels, five problems each, no repeated answers, number-first on the two challenge levels).
+- **Save code v4:** new codes are `MAT-6` plus six symbols and carry Flip It, Group It, Boxes & Circles and Groups of Terms (24 bits). v1, v2 and v3 codes still work.
+- **Not visible yet:** Groups of Terms is still a Coming-soon card.
+
+### Pack map: equal-size cards (SPEC-GROUPS-OF-TERMS.md §6)
+
+- **Every pack card is the same size,** and the cards sit in one row on wide screens (one column per pack). A card with more levels than fit (three rows show) **scrolls inside the card**, so the page doesn't scroll on a Chromebook. Narrower screens use two columns (equal row heights), phones one column as before.
 
 ### Boxes & Circles step 6: hints, animations, touch audit (SPEC-BOXES.md §7.6, §14)
 
