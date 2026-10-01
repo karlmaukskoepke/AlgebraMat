@@ -29,6 +29,12 @@ Add `?seed=123` to the URL to replay a fixed problem set, and `?level=2` to open
 
 ## Changelog
 
+### Groups of Terms step 5: Answer, Check it, level flow, the pack card (SPEC-GROUPS-OF-TERMS.md §7.5, §13)
+
+- **Groups of Terms is open** on the pack map: eight levels, saved progress, save code v4. The preview page `?demo=groupterms` is gone.
+- **Answer:** type what the groups make on the pad or the keyboard (x, +, −, digits). **Check it** then draws the distributing arrows and the products, show-only; Check becomes **Next →**.
+- **Pack map:** four cards in one row on a wide screen, level buttons two to a row, long lists scroll inside their card.
+
 ### Zone hover in Draw (Karl's request)
 
 - **A dashed outline shows the zone under the mouse** in Boxes & Circles' Draw step (and will in Combine it), so students see where a tap will land. Mouse only; touch screens don't get it.

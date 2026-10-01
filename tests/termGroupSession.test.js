@@ -4,7 +4,7 @@ import { newTermGroupSession, reduceTermGroups as reduce, stepsFor, nextPart, ki
 import { validateGroup, validateFill, validateDeal, describeB, maxInGroup } from '../src/engine/termGroupMoves.js';
 import { termGroupFeedbackText } from '../src/view/termGroupFeedback.js';
 import { generateTermGroupsLevel } from '../src/engine/generateTermGroups.js';
-import { piecesOfGroup } from '../src/engine/termGroups.js';
+import { piecesOfGroup, answerText } from '../src/engine/termGroups.js';
 
 const x = (value) => ({ kind: 'x', value });
 const n = (value) => ({ kind: 'int', value });
@@ -280,5 +280,82 @@ describe('Groups of Terms session: Take and Flip', () => {
     expect(run(s, check).feedback.key).toBe('tapFlip');
     expect(reduce(s, add)).toBe(s);
     expect(reduce(s, pick('box', '+'))).toBe(s);
+  });
+});
+
+describe('Groups of Terms session: Answer and Check it', () => {
+  const typed = (text) => [...text].map((ch) => (/\d/.test(ch) ? { type: 'digit', digit: Number(ch) } : { type: 'typeChar', ch }));
+  const toAnswer = (p) => {
+    const fraction = p.count.d > 1;
+    let s = run(newTermGroupSession(p), ...(p.hidden1 ? [{ type: 'digit', digit: 1 }, check] : []));
+    s = run(s, ...Array(fraction ? p.count.d : p.count.n).fill(add), check, sign(p.count.neg ? '-' : '+'));
+    if (fraction) {
+      for (const type of ['counter', 'box']) {
+        const kind = piecesOfGroup(p).filter((q) => q.type === type);
+        s = run(s, pick(type, kind[0].sign));
+        for (let i = 0; i < kind.length; i++) s = run(s, tap(i % p.count.d));
+      }
+      s = run(s, check);
+      for (let i = 0; i < p.count.n; i++) s = run(s, tap(i));
+      s = run(s, check);
+    } else {
+      for (const q of piecesOfGroup(p)) s = run(s, pick(q.type, q.sign), tap(0));
+      s = run(s, { type: 'copyAll' }, check);
+    }
+    if (s.step === 'flip') s = run(s, { type: 'flipAll' }, ...(fraction ? [{ type: 'flipGroup', index: 0 }] : []));
+    return s;
+  };
+
+  it('types the answer with the pad and keys, and takes it back with Backspace', () => {
+    let s = toAnswer(WHOLE);
+    expect(s.step).toBe('answer');
+    s = run(s, ...typed('6x+3'), { type: 'backspace' }, ...typed('-3'));
+    expect(s.typed).toBe('6x+-3');
+    s = run(s, { type: 'backspace' }, { type: 'backspace' }, ...typed('3'));
+    expect(s.typed).toBe('6x+3');
+  });
+
+  it('accepts the right answer in either order, as x or 1x, and goes to Check it', () => {
+    for (const [p, text, shown] of [[WHOLE, '6x-3', '6x − 3'], [WHOLE, '-3+6x', '−3 + 6x'], [OPP, '-2x+8', '−2x + 8'], [FRACTION, '2x+3', '2x + 3']]) {
+      const s = run(toAnswer(p), ...typed(text), check);
+      expect(s, text).toMatchObject({ step: 'checkit', finalText: shown, feedback: { key: 'correct' } });
+    }
+    const one = run(toAnswer(makeTermGroups({ n: 1, d: 2 }, [x(2), n(4)])), ...typed('1x+2'), check);   // 1/2(2x + 4) = x + 2
+    expect(one.step).toBe('checkit');
+  });
+
+  it('says what is wrong without giving the number', () => {
+    const wrongTry = (t) => run(toAnswer(WHOLE), ...typed(t), check);
+    expect(wrongTry('').feedback.key).toBe('typeAnswer');
+    expect(wrongTry('').tries.answer ?? 0).toBe(0);
+    expect(wrongTry('6x+').feedback.key).toBe('answerUnreadable');
+    expect(wrongTry('6x+3-6').feedback.key).toBe('combineAll');
+    expect(wrongTry('6x+0').feedback.key).toBe('noZeroTerm');
+    expect(wrongTry('3x-3').feedback.key).toBe('checkBoxes');
+    expect(wrongTry('6x+3').feedback.key).toBe('checkNumbers');
+    expect(wrongTry('6x+3').tries.answer).toBe(1);
+    expect(termGroupFeedbackText(wrongTry('6x+3').feedback)).toMatch(/numbers/);
+  });
+
+  it('stops typing at 12 characters, ignores other characters, and the pad only works in Answer', () => {
+    const s = run(toAnswer(WHOLE), ...typed('1234567890123456'));
+    expect(s.typed).toHaveLength(12);
+    expect(reduce(s, { type: 'typeChar', ch: 'q' })).toBe(s);
+    const early = atFill();
+    expect(reduce(early, { type: 'typeChar', ch: 'x' })).toBe(early);
+  });
+
+  it('Check it is the last step: nothing changes it', () => {
+    const s = run(toAnswer(WHOLE), ...typed('6x-3'), check);
+    for (const a of [add, check, { type: 'digit', digit: 1 }, { type: 'undo' }]) expect(reduce(s, a)).toBe(s);
+  });
+
+  it('plays every generated problem to Check it with the right answer', () => {
+    for (let level = 1; level <= 8; level++) {
+      for (const p of generateTermGroupsLevel(level, 31)) {
+        const s = run(toAnswer(p), ...typed(answerText(p).replace(/\s/g, '').replace(/−/g, '-')), check);
+        expect(s.step, `${level} ${answerText(p)}`).toBe('checkit');
+      }
+    }
   });
 });

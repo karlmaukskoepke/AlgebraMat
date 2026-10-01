@@ -4,7 +4,8 @@
 // `count` and `hidden1` as a Group It problem. Pure logic, no DOM.
 
 import { validateGroups, validateHiddenOne, validateGroupSign, validateTake, MAX_GROUPS_MADE, MAX_PARTS } from './lassoMoves.js';
-import { isOpposite, insideText, piecesOfGroup } from './termGroups.js';
+import { isOpposite, insideText, piecesOfGroup, evaluateTermGroups, answerText } from './termGroups.js';
+import { parseAnswer } from './terms.js';
 import { piecePhrase } from './termMoves.js';
 
 export { validateGroups, validateHiddenOne, validateGroupSign, validateTake, MAX_GROUPS_MADE, MAX_PARTS };
@@ -61,4 +62,16 @@ export function validateDeal(problem, groups) {
   const part = piecesOfGroup(problem, true);
   if (!groups.every((g) => sameTally(g.pieces, part))) return fail('dealUneven', params);
   return pass('dealDone', { n: problem.count.n });
+}
+
+// ⑤ Answer: the typed expression, readable, fully combined, and right. Feedback says which
+// kind is off (the boxes or the numbers) without giving the number.
+export function validateAnswer(problem, text) {
+  const read = parseAnswer(text);
+  if (!read.ok) return read.reason === 'empty' ? fail('typeAnswer') : fail('answerUnreadable');
+  if (!read.combined) return fail(read.terms.some((t) => t.value === 0) ? 'noZeroTerm' : 'combineAll');
+  const want = evaluateTermGroups(problem);
+  if (read.x !== want.x) return fail('checkBoxes');
+  if (read.n !== want.n) return fail('checkNumbers');
+  return pass('correct', { answer: answerText(problem) });
 }

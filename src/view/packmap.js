@@ -65,7 +65,7 @@ export function renderPackMap(root, progress, packs, { onPlay, onSaveCode, onEnt
         h('button', { type: 'button', class: 'btn', 'data-home': 'save' }, 'Save code'),
         h('button', { type: 'button', class: 'btn', 'data-home': 'enter' }, 'Enter code'))),
     h('p', { class: 'home-note', role: 'status', hidden: !note }, note ?? ''),
-    h('div', { class: 'pack-grid', style: `--packs: ${packs.filter((p) => !p.comingSoon).length}` },
+    h('div', { class: `pack-grid${packs.filter((p) => !p.comingSoon).length >= 4 ? ' four-up' : ''}`, style: `--packs: ${packs.filter((p) => !p.comingSoon).length}` },
       ...packs.filter((p) => !p.comingSoon).map((p) => packCard(progress, p))),
     h('section', { class: 'soon', 'aria-label': 'Coming soon' },
       h('h2', { class: 'soon-head' }, 'Coming soon'),

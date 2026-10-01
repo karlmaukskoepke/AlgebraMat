@@ -15,7 +15,7 @@
 // right (no −) after an arrow, and that is what gets read for the answer.
 
 import { MINUS } from '../engine/expr.js';
-import { isOpposite, isFraction, insideText, formatTermGroups, distributeLines, partPieces, groupPieces } from '../engine/termGroups.js';
+import { isOpposite, isFraction, insideText, formatTermGroups, distributeLines, distributeSum, partPieces, groupPieces } from '../engine/termGroups.js';
 import {
   LASSO_VIEW, CHAIN_WIDTH,
   groupWidth, counterPitch, rowPitch, stackCenters, rowXs, takenRuns, wholeColumns, fractionColumns,
@@ -321,9 +321,8 @@ function checkIt(svg, s) {
     g.append(el('text', { x: CHECK_X, y: baseY + 52 + k * 38, class: 'tg-product' }, [l.text]));
   });
   svg.append(g);
-  if (has(s.answer)) {
-    svg.append(el('text', { x: CHECK_X, y: baseY + 52 + lines.length * 38 + 10, class: 'tg-product tg-sum' }, [`= ${s.answer}`]));
-  }
+  // The combined line the arrows lead to, in the order B is written.
+  svg.append(el('text', { x: CHECK_X, y: baseY + 52 + lines.length * 38 + 10, class: 'tg-product tg-sum' }, [`= ${distributeSum(p)}`]));
 }
 
 // A term's own text: 2x, −x, 5, −3.

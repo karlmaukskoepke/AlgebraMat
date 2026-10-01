@@ -16,6 +16,13 @@
 
 **Status: drafted in SPEC-COMBINE.md §4.** Karl: three to four integers, a combination of addition and subtraction; there may be a Flip it step, or it may be all addition with nothing to flip. *"The variety is the point."* Add a **mixed practice of addition and subtraction** at the end of Flip It, so both operations show up as the final challenge there.
 
+## Build order (Karl, 2026-10-01)
+
+1. **Finish Groups of Terms** (steps 5 and 6).
+2. **Combine it**, with Flip It's mixed Level 5 (SPEC-COMBINE.md).
+3. **Distribute, then combine** last.
+4. Then Substitute it, Solve it, Model it.
+
 ## Boxes & Circles (combining like terms)
 
 **Status: revised spec in SPEC-BOXES.md, waiting on Karl's go-ahead.** Karl's answers of 2026-09-30:

@@ -1,5 +1,5 @@
 // Groups of Terms palette: Add group, + groups / − groups, the four pieces (□, −□, +, −),
-// Copy to all, Undo, Check, and the pad (digits, x, + and −). Only the current step's controls
+// Copy to all, Undo, Check, and the pad (digits, x, + and −; the pad types the hidden 1, then the answer). After a right answer Check becomes Next →. Only the current step's controls
 // are enabled; the rest stay visible but dimmed. `data-key` names the keyboard key that
 // presses a button (K copies, Backspace is Undo or the pad's delete; Enter is Check).
 
@@ -84,7 +84,12 @@ export function buildTermGroupControls(root, dispatch) {
       const hiddenOne = step === 'groups' && s.problem?.hidden1 && !s.wroteOne;
       for (const b of pad.querySelectorAll('button')) b.disabled = true;
       if (hiddenOne) for (const b of pad.querySelectorAll('[data-action="digit"], [data-action="backspace"]')) b.disabled = false;
-      check.disabled = !(hiddenOne || ['groups', 'fill', 'take'].includes(step));
+      const answering = step === 'answer';
+      if (answering) for (const b of pad.querySelectorAll('button')) b.disabled = false;
+      const looking = step === 'checkit' || step === 'done'; // the arrows are showing: Next →
+      check.disabled = !(hiddenOne || answering || looking || ['groups', 'fill', 'take'].includes(step));
+      check.innerHTML = looking ? 'Next →' : 'Check ✓';
+      if (looking) check.dataset.next = '1'; else delete check.dataset.next;
     },
   };
 }

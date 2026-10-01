@@ -273,10 +273,7 @@ function savedCurrent() {
 const urlLevel = Number(params.get('level'));
 const urlPack = packById(params.get('pack') === 'groupit' ? 'lasso' : params.get('pack') ?? 'flipit');
 const resume = savedCurrent();
-if (params.get('demo') === 'groupterms') {
-  // Groups of Terms step 2: a static preview of the Mat (loaded only on this URL).
-  import('./view/termGroupDemo.js').then((m) => m.showTermGroupDemo(document.body));
-} else if (urlPack && PLAY[urlPack.id] && Number.isInteger(urlLevel) && urlLevel >= 1 && urlLevel <= (urlPack.levels || urlPack.previewLevels || 0)) {
+if (urlPack && PLAY[urlPack.id] && Number.isInteger(urlLevel) && urlLevel >= 1 && urlLevel <= urlPack.levels) {
   startLevel(urlPack.id, urlLevel);
 } else if (resume) {
   startLevel(resume.pack, resume.level, resume);
