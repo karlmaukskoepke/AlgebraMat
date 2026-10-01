@@ -746,6 +746,42 @@ body {
   pointer-events: none;
 }
 
+/* Boxes & Circles: hinted terms blink, new pieces pop in, a new shape fades in. */
+.box-mat .bm-text.hint-blink-text {
+  animation: hint-blink 1.2s ease-in-out infinite;
+}
+
+.box-mat .hint-blink:not(.is-canceled) .bm-hit {
+  stroke: var(--ink);
+  stroke-width: 2;
+  stroke-dasharray: 4 4;
+  rx: 18px;
+}
+
+.box-mat .bm-text.hint-flip {
+  fill: var(--opposite);
+}
+
+@keyframes pop-in {
+  0% { transform: scale(0.5); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.box-mat .pop-in .bm-mark {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: pop-in 0.22s ease-out;
+}
+
+@keyframes shape-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.box-mat .bm-shape.shape-in {
+  animation: shape-in 0.25s ease-out;
+}
+
 /* "Nothing to rewrite" hint. */
 @keyframes hint-pulse {
   0%, 100% { box-shadow: 0 0 0 0 rgba(29, 29, 29, 0.5); }
@@ -768,6 +804,9 @@ body {
   .mat .hint-blink-group .bar-part,
   .one-slot.hint-pulse,
   .mat .hint-flip,
+  .box-mat .bm-text.hint-blink-text,
+  .box-mat .pop-in .bm-mark,
+  .box-mat .bm-shape.shape-in,
   .mat .hint-blink .mark,
   .mat .hint-glow,
   .btn.hint-pulse {

@@ -14,6 +14,7 @@
 // 44px tap target on a Chromebook, and what a drag selects).
 
 import { termParts, pieceCount } from '../engine/terms.js';
+import { maxPieces } from '../engine/termMoves.js';
 
 export const BOX_VIEW = { width: 860, height: 340 };
 export const ROW_Y = 250;            // baseline of the expression row
@@ -23,11 +24,11 @@ export const ANSWER_Y = 322;         // baseline of "= 2x + 2"
 export const LABEL_Y = 292;          // "is +7" under a rewritten term
 export const FONT = 40;              // expression text, in drawing units
 
-export const PIECE_W = 42;           // one cell of the piece grid
-export const PIECE_H = 38;
-export const PIECES_BOTTOM_Y = 186;  // center of the grid's bottom row
+export const PIECE_W = 46;           // one cell of the piece grid (about 44px on a Chromebook)
+export const PIECE_H = 47;
+export const PIECES_BOTTOM_Y = 182;  // center of the grid's bottom row
 export const COLUMN_GAP = 20;       // between columns; closes up to MIN_GAP for a wide problem
-export const MIN_GAP = 8;
+export const MIN_GAP = 4;
 const EDGE = 12;                     // the row never comes closer than this to the drawing's edge
 const PAD_X = 12;                    // room between a term's text and its column edge
 const OP_W = 30;                     // the operation's glyph box
@@ -50,25 +51,37 @@ export function textWidth(text, size = FONT) {
   return Math.ceil(w * size);
 }
 
-// Pieces sit two to a row, filled rows on top and an odd piece alone at the
-// bottom, as in the notes (7 counters are 2 + 2 + 2 + 1). Positions are in
-// reading order, centered on cx. Returns [{ x, y }].
-export function piecePositions(count, cx) {
+// Pieces sit two to a row, filled rows on top and an odd piece alone at the bottom,
+// as in the notes (7 counters are 2 + 2 + 2 + 1). A term that needs 7 or more
+// goes three to a row instead, so a tall column never shrinks the whole Mat below
+// a 44px tap target. Positions are in reading order, centered on cx. Returns [{ x, y }].
+export const BIG_COLUMN = 7;
+export const perRowFor = (term) => (pieceCount(term) >= BIG_COLUMN ? 3 : 2);
+
+export function piecePositions(count, cx, perRow = 2) {
   if (count <= 0) return [];
-  const full = Math.floor(count / 2);
-  const odd = count % 2;
-  const rows = full + odd;
+  const full = Math.floor(count / perRow);
+  const rest = count % perRow;
+  const rows = full + (rest ? 1 : 0);
   const topY = PIECES_BOTTOM_Y - (rows - 1) * PIECE_H;
+  const across = (k, y) => Array.from({ length: k }, (_, j) => ({ x: cx + (j - (k - 1) / 2) * PIECE_W, y }));
   const out = [];
-  for (let r = 0; r < full; r++) {
-    const y = topY + r * PIECE_H;
-    out.push({ x: cx - PIECE_W / 2, y }, { x: cx + PIECE_W / 2, y });
-  }
-  if (odd) out.push({ x: cx, y: PIECES_BOTTOM_Y });
+  for (let r = 0; r < full; r++) out.push(...across(perRow, topY + r * PIECE_H));
+  if (rest) out.push(...across(rest, PIECES_BOTTOM_Y));
   return out;
 }
 
-export const pieceRows = (count) => Math.ceil(count / 2);
+export const pieceRows = (count, perRow = 2) => Math.ceil(count / perRow);
+
+// The part of the drawing to show: the top is cropped (or made taller) to fit the
+// tallest column a term can hold, so a small problem gets a bigger Mat and a big
+// one still has room above it. Returns { y, height } for the viewBox.
+export function viewFor(expr) {
+  const rows = Math.max(1, ...expr.terms.map((t) => pieceRows(maxPieces(t), perRowFor(t))));
+  const topEdge = PIECES_BOTTOM_Y - (rows - 1) * PIECE_H - PIECE_H / 2;
+  const y = Math.max(-40, Math.floor(topEdge - 10));
+  return { y, height: BOX_VIEW.height - y };
+}
 
 // Where everything goes for an expression: one column per term, centered in the
 // drawing. Each column has `cx`, `left`, `width`, and its text parts.
@@ -81,8 +94,9 @@ export function exprLayout(expr) {
     const numW = textWidth(numText);
     const textW = (hasOp ? OP_W + IN_GAP : 0) + numW;
     const pieces = pieceCount(term);
-    const piecesW = pieces === 0 ? 0 : Math.min(pieces, 2) * PIECE_W;
-    return { term: i, hasOp, numText, numW, textW, pieces, width: Math.max(textW + 2 * PAD_X, piecesW + 6) };
+    const perRow = perRowFor(term);
+    const piecesW = pieces === 0 ? 0 : Math.min(pieces, perRow) * PIECE_W;
+    return { term: i, hasOp, numText, numW, textW, pieces, perRow, width: Math.max(textW + 2 * PAD_X, piecesW + 6) };
   });
   const widths = columns.reduce((sum, c) => sum + c.width, 0);
   const gaps = Math.max(1, columns.length - 1);
@@ -119,7 +133,7 @@ export function exprLayout(expr) {
       num.hitLeft = Math.max(num.hitLeft, mid);
       num.hitRight = Math.max(num.hitRight, num.hitLeft + HIT_W);
     }
-    const col = { term: c.term, cx, left, width: c.width, pieces: c.pieces, parts: mine };
+    const col = { term: c.term, cx, left, width: c.width, pieces: c.pieces, perRow: c.perRow, parts: mine };
     left += c.width + gap;
     return col;
   });

@@ -19,7 +19,7 @@ Add `?seed=123` to the URL to replay a fixed problem set, and `?level=2` to open
 
 ## Layout
 
-- `src/engine/`: pure logic, no DOM. `expr.js` (expression model), `generate.js` (seeded levels), `moves.js` (validators), `session.js` (one problem's steps as a reducer), `progress.js` (level unlocks, save code), `hints.js` + `lassoHints.js` (hints after 3 wrong tries), `groups.js` + `generateLasso.js` (Group It problems; files keep the old "lasso" name), `terms.js` + `termPieces.js` + `termMoves.js` + `termSession.js` + `generateTerms.js` (Boxes & Circles).
+- `src/engine/`: pure logic, no DOM. `expr.js` (expression model), `generate.js` (seeded levels), `moves.js` (validators), `session.js` (one problem's steps as a reducer), `progress.js` (level unlocks, save code), `hints.js` + `lassoHints.js` (hints after 3 wrong tries), `groups.js` + `generateLasso.js` (Group It problems; files keep the old "lasso" name), `terms.js` + `termPieces.js` + `termMoves.js` + `termSession.js` + `termHints.js` + `generateTerms.js` (Boxes & Circles).
 - `src/view/`: DOM and SVG. `mat.js`, `controls.js`, `lassoMat.js` + `lassoLayout.js` (the Group It Mat), `boxMat.js` + `boxLayout.js` + `boxPointer.js` + `boxControls.js` (the Boxes & Circles Mat, its drag and palette), `packmap.js` (home and level-complete panel), `codes.js` (save-code dialogs), `feedback.js` (every message, in one table), `layout.js` (counter geometry).
 - `src/storage.js`: localStorage wrapper that falls back to memory.
 - `src/play/`: one play adapter per pack (`flipitPlay.js`, `lassoPlay.js`); `main.js` runs whichever the pack uses.
@@ -28,6 +28,14 @@ Add `?seed=123` to the URL to replay a fixed problem set, and `?level=2` to open
 - `tests/`: Vitest.
 
 ## Changelog
+
+### Boxes & Circles step 6: hints, animations, touch audit (SPEC-BOXES.md §7.6, §14)
+
+- **Hints after 3 wrong tries,** one per step: signs to flip wiggle, unfinished terms blink, dashed pieces show what to draw, a pair that cancels blinks, and leftover pieces blink with the signs named (never the counts).
+- **Small animations:** pieces pop in, shapes fade in, slashes draw, signs flip. All off with reduced motion.
+- **Touch targets** are at least 44px at 1366 × 657 and 1280 × 610. Columns of 7 or more pieces go three to a row, and the Mat crops to the room a problem needs.
+- **Fixed:** Undo with a piece picked in Cancel now lets go of it.
+- **Boxes & Circles is finished.** Next in the roadmap: Groups of Terms.
 
 ### Boxes & Circles step 5: Rewrite, level flow, the pack map (SPEC-BOXES.md §7.5, §13)
 

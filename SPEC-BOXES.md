@@ -191,3 +191,19 @@ My calls, open to change:
 - **Palette:** all of it fits on one row at 1280 × 610 (buttons a little tighter than the other packs: 48px piece buttons, 17px labels, all still at least 44px tall).
 - **Pack map:** on screens 1100px wide or more the three packs sit side by side (the page is 1280 wide), so the whole map, Coming-soon row included, fits without scrolling at 1366 × 657 and 1280 × 610. Narrower screens keep two columns and scroll.
 
+## 14. Build decisions, step 6 (hints, animations, touch audit)
+
+- **Hints** appear after 3 wrong tries on a step (the same rule as the other packs), in Kalam under the feedback, and stay until the step changes. A hint shows the move and never makes it.
+  - **Rewrite:** the signs still to flip turn magenta and wiggle. If nothing needs rewriting, the Nothing to rewrite button pulses.
+  - **Box & Circle:** the terms with no finished shape of the right kind blink.
+  - **Draw:** faint dashed pieces show what each wrong term needs, and the piece button to use next pulses.
+  - **Cancel:** a pair that cancels blinks (the match for a piece already picked, if one is).
+  - **Answer:** the leftover pieces blink, and the hint names the sign of each kind and never the count (*"the boxes are positive, and the numbers are negative"*).
+- **Animations** (all off with reduced motion): a new piece pops in, a new shape fades in, a canceled pair's slash draws itself, a flipped sign flips over.
+- **Undo while a piece is picked in Cancel** lets go of it first (before, it did nothing).
+- **Touch audit:** every target is at least 44px at 1366 × 657 and 1280 × 610 (checked over Levels 1–5, three seeds each). To get there:
+  - Piece cells are 46 × 46 (were 42 × 38), and the gap between columns can close to 4 (was 8).
+  - **A term that needs 7 or more pieces draws them three to a row** (7 is 3 + 3 + 1), not two, so no column is more than 4 rows tall. The notes' 2-wide grid is kept for 6 or fewer.
+  - **The drawing's top is cropped to fit** the tallest column a term can hold (what it needs plus two spare, never over 10), so a small problem gets a bigger Mat. Drawing more than that says *"That's more than any term needs."*
+- **Boxes & Circles is complete** (SPEC-BOXES.md §7, all six steps).
+

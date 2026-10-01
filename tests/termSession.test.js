@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { makeTerm, makeExpression, evaluate, formatAnswer } from '../src/engine/terms.js';
+import { maxPieces } from '../src/engine/termMoves.js';
 import { boxes } from '../src/packs/index.js';
 import { newTermSession, reduceTerms, TERM_STEPS, termSteps, shapeComplete } from '../src/engine/termSession.js';
 import { TERM_FEEDBACK, termFeedbackText } from '../src/view/termFeedback.js';
@@ -162,10 +163,13 @@ describe('Boxes & Circles session: Draw', () => {
     expect(s.pieces[0]).toHaveLength(0);
   });
 
-  it('caps a term at 10 pieces', () => {
-    const s = run(atDraw(), pick('box', '+'), ...Array(12).fill(zone(0)));
-    expect(s.pieces[0]).toHaveLength(10);
+  it('caps a term at what it needs plus two spare (never over 10)', () => {
+    const s = run(atDraw(), pick('box', '+'), ...Array(12).fill(zone(0)));      // 3x needs 3
+    expect(s.pieces[0]).toHaveLength(5);
     expect(s.feedback.key).toBe('columnFull');
+    expect(maxPieces(x('+', 9))).toBe(10);
+    expect(maxPieces(n('-', 9))).toBe(10);
+    expect(maxPieces(n('+', 1))).toBe(3);
   });
 
   it('names the first term that is off, and counts the wrong try', () => {
@@ -244,6 +248,16 @@ describe('Boxes & Circles session: Cancel', () => {
     s = run(s, { type: 'undo' }, { type: 'undo' });
     expect(s.pairs).toEqual([]);
     expect(s.pieces.flat().some((p) => p.canceled)).toBe(false);
+  });
+
+  it('Undo with a piece picked lets go of it first, then takes back pairs', () => {
+    let s = run(atCancel(), piece(0, 0), piece(3, 0), piece(1, 0));
+    expect(s.selected).toEqual({ term: 1, index: 0 });
+    s = run(s, { type: 'undo' });
+    expect(s).toMatchObject({ selected: null, pairs: [[[0, 0], [3, 0]]] });
+    expect(run(atCancel(), piece(0, 0), { type: 'undo' }).selected).toBeNull();
+    s = run(s, { type: 'undo' });
+    expect(s.pairs).toEqual([]);
   });
 
   it('moves on to Answer by itself when every pair is canceled, and not before', () => {

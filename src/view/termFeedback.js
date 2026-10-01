@@ -2,6 +2,21 @@
 // Keys come from engine/termMoves.js and engine/termSession.js.
 
 export const TERM_FEEDBACK = {
+  // Hints (after 3 wrong tries on a step)
+  hintRewrite: () => 'Flip both signs of each wiggling term: the − in front, and the − inside the parentheses.',
+  hintNothing: () => 'Nothing here subtracts a negative. Tap “Nothing to rewrite.”',
+  hintBoxCircle: () => 'Box the x terms and circle the numbers. The blinking ones aren’t done yet. The sign in front goes inside the shape!',
+  hintDraw: () => 'The dashed pieces show what goes above each term. Pick that piece, then tap above the term until it matches.',
+  hintCancel: ({ kind }) => `Try the blinking pair: ${kind === 'box' ? 'a box with a − box' : 'a + with a −'}.`,
+  hintAnswer: ({ x, n }) => {
+    const word = (sign) => (sign === '+' ? 'positive' : 'negative');
+    const bits = [
+      x ? `the boxes are ${word(x)}` : 'no boxes are left, so leave x out',
+      n ? `the numbers are ${word(n)}` : 'no numbers are left, so leave them out',
+    ];
+    return `The blinking pieces are what’s left: ${bits.join(', and ')}. Count each kind.`;
+  },
+
   // ⓪ Rewrite
   rewriteIntro: () => 'Subtracting a negative? Flip both signs: tap the − in front and the − inside the parentheses. Or tap “Nothing to rewrite.”',
   flipBoth: () => 'Flip both signs: the operation in front and the sign inside the parentheses.',
