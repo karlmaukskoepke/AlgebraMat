@@ -29,6 +29,12 @@ Add `?seed=123` to the URL to replay a fixed problem set, and `?level=2` to open
 
 ## Changelog
 
+### Groups of Terms step 4: Take and Flip (SPEC-GROUPS-OF-TERMS.md §7.4, §12)
+
+- **Fractions:** after dealing, tap the parts to take them (exactly the top number).
+- **− groups flip:** tap a group's − (or Flip all) and the group is redrawn on the right with every piece turned to its opposite (magenta, no −). On a fraction bar, the one − flips the parts taken.
+- **Still hidden:** the pack is a Coming-soon card, playable at `?pack=groups-of-terms&level=N` up to the answer, which comes next.
+
 ### Groups of Terms step 3: Groups, + or −, Fill (SPEC-GROUPS-OF-TERMS.md §7.3, §11)
 
 - **Playable up to Fill** at `?pack=groups-of-terms&level=N`: make the groups (typing the hidden 1 for `−(B)`), choose + or − groups, then fill: pick a piece and tap a group, **Copy to all** (key K) for the rest, or, for fractions, deal one kind of piece at a time into the lit-up part.

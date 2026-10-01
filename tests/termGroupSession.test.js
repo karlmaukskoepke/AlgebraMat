@@ -212,3 +212,73 @@ describe('Groups of Terms moves', () => {
     }
   });
 });
+
+describe('Groups of Terms session: Take and Flip', () => {
+  const dealAll = (s0, p) => {
+    let s = s0;
+    for (const type of ['counter', 'box']) {
+      const kind = piecesOfGroup(p).filter((q) => q.type === type);
+      s = run(s, pick(type, kind[0].sign));
+      for (let i = 0; i < kind.length; i++) s = run(s, tap(i % p.count.d));
+    }
+    return s;
+  };
+  const fillWhole = (s0, p) => {
+    let s = s0;
+    for (const q of piecesOfGroup(p)) s = run(s, pick(q.type, q.sign), tap(0));
+    return run(s, { type: 'copyAll' }, check);
+  };
+  const NEG_FRACTION = makeTermGroups({ neg: true, n: 2, d: 3 }, [x(3), n(-6)]);        // −2/3(3x − 6)
+
+  it('takes parts of a fraction: tap to take, tap again to put back, exactly n', () => {
+    let s = dealAll(atFill(NEG_FRACTION, '-'), NEG_FRACTION);
+    s = run(s, check);
+    expect(s.step).toBe('take');
+    s = run(s, tap(0), tap(0), tap(1));
+    expect(s.groups.map((g) => g.taken)).toEqual([false, true, false]);
+    s = run(s, check);
+    expect(s).toMatchObject({ step: 'take', feedback: { key: 'takeN', bad: true }, tries: { take: 1 } });
+    s = run(s, tap(2), check);
+    expect(s).toMatchObject({ step: 'flip', feedback: { key: 'takeDoneOpp' } });
+  });
+
+  it('a + fraction skips Flip after Take', () => {
+    let s = dealAll(atFill(FRACTION, '+'), FRACTION);
+    s = run(s, check, tap(1), check);
+    expect(s).toMatchObject({ step: 'answer', skipped: ['flip'], feedback: { key: 'takeDone' } });
+  });
+
+  it('flips − groups one at a time, or all at once, and goes on when every group has flipped', () => {
+    let s = fillWhole(atFill(OPP, '-'), OPP);
+    expect(s.step).toBe('flip');
+    s = run(s, { type: 'flipGroup', index: 0 });
+    expect(s).toMatchObject({ step: 'flip', feedback: { key: 'flipMore' } });
+    expect(s.groups.map((g) => g.flipped)).toEqual([true, false]);
+    expect(run(s, { type: 'flipGroup', index: 0 })).toBe(s);                        // already flipped: nothing
+    s = run(s, tap(1));                                                              // tapping the group flips it too
+    expect(s).toMatchObject({ step: 'answer', feedback: { key: 'flipDone' } });
+    const all = run(fillWhole(atFill(OPP, '-'), OPP), { type: 'flipAll' });
+    expect(all).toMatchObject({ step: 'answer' });
+    expect(all.groups.every((g) => g.flipped)).toBe(true);
+  });
+
+  it('the one − on a fraction bar flips the parts taken, and only those', () => {
+    let s = dealAll(atFill(NEG_FRACTION, '-'), NEG_FRACTION);
+    s = run(s, check, tap(0), tap(2), check);
+    s = run(s, { type: 'flipGroup', index: 0 });
+    expect(s.step).toBe('answer');
+    expect(s.groups.map((g) => g.flipped)).toEqual([true, false, true]);
+  });
+
+  it('keeps the original pieces when a group is flipped (the view draws the opposite)', () => {
+    const s = run(fillWhole(atFill(OPP, '-'), OPP), { type: 'flipAll' });
+    expect(s.groups[0].pieces).toEqual(piecesOfGroup(OPP));
+  });
+
+  it('check in Flip says how to flip, and nothing but flips works there', () => {
+    const s = fillWhole(atFill(OPP, '-'), OPP);
+    expect(run(s, check).feedback.key).toBe('tapFlip');
+    expect(reduce(s, add)).toBe(s);
+    expect(reduce(s, pick('box', '+'))).toBe(s);
+  });
+});

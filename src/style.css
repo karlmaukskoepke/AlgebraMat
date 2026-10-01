@@ -1171,6 +1171,28 @@ body {
   min-width: 120px;
 }
 
+.tg-palette {
+  gap: 8px 8px;
+}
+
+.tg-palette .btn {
+  padding: 0 9px;
+  font-size: 16px;
+}
+
+.tg-palette .btn-sign {
+  width: 46px;
+  padding: 0;
+}
+
+.tg-palette .group {
+  gap: 8px;
+}
+
+.tg-palette .btn-primary {
+  min-width: 100px;
+}
+
 .box-palette [hidden] {
   display: none;
 }

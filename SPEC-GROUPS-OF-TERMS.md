@@ -112,3 +112,10 @@
 - **Keyboard:** digits type the hidden 1, K copies, Backspace is the pad's delete or Undo, Enter is Check (as in the other packs). The x, + and − pad buttons exist but stay dim until the Answer step.
 - **Taps:** every play-screen target is at least 44px at 1280 × 610 (checked on Levels 1, 4 and 6).
 
+## 12. Build decisions, step 4 (Take and Flip)
+
+- **Playable up to the answer** at `?pack=groups-of-terms&level=N`: after Flip (or after Fill for + groups) the problem waits for the Answer step in the next build.
+- **Take (fractions):** tap a part to take it, tap again to put it back, then Check; exactly n parts (Group It's check, *"The top number says how many groups to take."*).
+- **Flip (− groups):** as Group It §12. Tap a group's `−` (or the group, or **Flip all**) and an arrow draws to a redrawn copy on the right, every piece turned to its opposite in magenta and no `−`. The original stays as drawn (the session only marks a group `flipped`). On a fraction bar the one `−` flips the parts taken. When every group has flipped, the problem goes to the Answer step; + groups skip Flip.
+- **Palette:** Flip all joins the row. To keep the row on one line at 1280 × 610 (so the Mat doesn't shrink) this pack's buttons are a little tighter (16px labels, 9px padding, 46px piece buttons); every target is still at least 44px.
+

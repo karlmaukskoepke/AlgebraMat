@@ -3,11 +3,11 @@
 //   whole-number groups: Groups → + or − → Fill → Flip → Answer → Check it
 //   fraction groups:     Groups → + or − → Fill → Take → Flip → Answer → Check it
 //
-// Built so far: Groups, + or −, and Fill. The steps after it come in later builds.
+// Built so far: Groups, + or −, Fill, Take and Flip. The answer and Check it come in later builds.
 
 import { isFraction } from './termGroups.js';
 import {
-  validateHiddenOne, validateGroups, validateGroupSign, validateFill, validateDeal,
+  validateHiddenOne, validateGroups, validateGroupSign, validateFill, validateDeal, validateTake,
   MAX_GROUPS_MADE, MAX_PARTS, maxInGroup, neededOf, SPARE,
 } from './termGroupMoves.js';
 import { entryValue } from './session.js';
@@ -34,7 +34,7 @@ export const FRACTION_STEPS = [
 export const stepsFor = (problem) => (isFraction(problem) ? FRACTION_STEPS : WHOLE_STEPS);
 
 // The steps built so far; after Fill the problem waits for the next build.
-export const BUILT_STEPS = ['groups', 'sign', 'fill'];
+export const BUILT_STEPS = ['groups', 'sign', 'fill', 'take', 'flip'];
 
 export function newTermGroupSession(problem) {
   const fraction = isFraction(problem);
@@ -85,6 +85,18 @@ export function nextPart(s) {
   return kind ? countOf(s, kind) % Math.max(1, s.groups.length) : 0;
 }
 
+// The groups that flip: every group, or in a fraction the parts taken.
+export const flippable = (s) => s.groups.map((g, i) => i).filter((i) => s.script === 'whole' || s.groups[i].taken);
+
+function flipGroup(s, i) {
+  const g = s.groups[i];
+  if (!g || g.flipped || !flippable(s).includes(i)) return false;
+  g.flipped = true;
+  return true;
+}
+
+const allFlipped = (s) => flippable(s).every((i) => s.groups[i].flipped);
+
 function pushSnapshot(s) {
   s.snapshots.push(s.groups.map((g) => g.pieces.map((q) => ({ ...q }))));
 }
@@ -127,6 +139,11 @@ export function reduceTermGroups(state, action) {
         s.groups.splice(i, 1);
         return s;
       }
+      if (s.step === 'take') { // tapping a part takes it (tap again to put it back)
+        g.taken = !g.taken;
+        return note(s, 'takeIntro', { n: problem.count.n });
+      }
+      if (s.step === 'flip') return reduceTermGroups(state, { type: 'flipGroup', index: i });
       if (s.step !== 'fill') return state;
       if (!s.pick) return note(s, 'pickPieceFirst');
 
@@ -160,6 +177,20 @@ export function reduceTermGroups(state, action) {
       return s;
     }
 
+    // Flip: tap a group's − to flip that group (in a fraction bar, the one − flips the parts
+    // taken), or Flip all for every one at once. The original stays; its opposite is redrawn.
+    case 'flipGroup':
+    case 'flipAll': {
+      if (s.step !== 'flip') return state;
+      const targets = action.type === 'flipAll' || fraction ? flippable(s) : [action.index];
+      if (!targets.map((i) => flipGroup(s, i)).some(Boolean)) return state;
+      if (allFlipped(s)) {
+        s.step = 'answer';
+        return note(s, 'flipDone', { fraction });
+      }
+      return note(s, 'flipMore');
+    }
+
     case 'chooseSign': {
       if (s.step !== 'sign') return state;
       const res = validateGroupSign(problem, action.sign);
@@ -188,6 +219,16 @@ export function reduceTermGroups(state, action) {
         if (!res.ok) return wrong(s, res);
         return afterFill(s, res);
       }
+      if (s.step === 'take') {
+        const res = validateTake(problem, s.groups);
+        if (!res.ok) return wrong(s, res);
+        say(s, res);
+        if (s.opposite) { s.step = 'flip'; return s; }
+        s.skipped.push('flip');
+        s.step = 'answer';
+        return s;
+      }
+      if (s.step === 'flip') return note(s, fraction ? 'tapFlipBar' : 'tapFlip');
       return state;
     }
 
