@@ -83,3 +83,13 @@
 1. **Check it is show-only:** the distributing arrows draw themselves and the products appear; the student doesn't type or draw them.
 2. **Challenge levels are 5 and 8:** B can be written number first.
 3. Earlier answers: x first at early levels; deal one kind at a time, in either order; no separate Collect step (the student writes the final answer, then Check it shows the arrows); pack cards all the same size, scrolling inside long level lists.
+
+## 9. Build decisions, step 1 (model, generator, save code v4)
+
+- **A problem** is `{ kind: 'termgroups', count: { neg, n, d }, inside: [term, term], hidden1 }`. A is stored as in Group It; `inside` is B's two terms **in the order written** (`x` and a number), each signed as it reads after its operation. So `−2/3(6 − 3x)` is neg, n 2, d 3, inside `[int 6, x −3]`.
+- **Math:** the groups hold `n·C/d` boxes and `n·D/d` numbers; an opposite flips both. Every candidate has whole products (d divides C and D).
+- **Levels as §4,** with these generator limits: whole-number groups use 2–5 ovals, up to 4 boxes and 5 counters per group, at most 20 pieces in all (problems with at most 12 are 4× as likely on Levels 1–4). Fraction levels use denominators 2–6 in lowest terms, C and D multiples of d up to 12 each, and at most 14 pieces to deal out. Level 4 and 5 also include `−1(B)` and the hidden-1 `−(B)` (Level 4 needs at least 2 of those). Level 5 and 8 need at least 2 number-first and at least 1 x-first. Fraction levels need at least 3 problems with a negative term and at least 1 all-positive.
+- **Check it lines** (`distributeLines`): one per term in the order written, in the form `−2 · (−4) = 8`, from A as it reads (with its sign), so the arrows run from A itself and agree with the typed answer.
+- **Save code v4** (`MAT-6` plus six symbols) carries Groups of Terms (pack id `groups-of-terms`, 8 levels, bits 16–23). The pack is still a Coming-soon card, so its bits are read and dropped until it opens (step 5). v1, v2 and v3 codes still decode.
+- **Not visible yet:** this step is engine only.
+
