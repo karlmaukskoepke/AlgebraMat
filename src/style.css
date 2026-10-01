@@ -1113,6 +1113,28 @@ body {
   -webkit-user-select: none;
 }
 
+.box-palette {
+  gap: 10px 10px;
+}
+
+.box-palette .btn {
+  padding: 0 12px;
+  font-size: 17px;
+}
+
+.box-palette .btn-sign {
+  width: 48px;
+  padding: 0;
+}
+
+.box-palette .btn-primary {
+  min-width: 120px;
+}
+
+.box-palette [hidden] {
+  display: none;
+}
+
 .btn-tool svg {
   width: 26px;
   height: 22px;
@@ -1132,6 +1154,10 @@ body {
 .box-mat .bm-selecting {
   fill: #ffe45c;
   opacity: 0.85;
+}
+
+.box-mat .bm-text.is-flipped {
+  fill: var(--opposite);
 }
 
 .box-mat .bm-text.is-selecting {
@@ -1221,34 +1247,19 @@ body {
   font: 700 22px 'Kalam', cursive;
 }
 
-/* Static preview page (?demo=boxes) */
-.box-demo {
-  max-width: 960px;
-  margin: 0 auto;
-  padding: 24px 12px 48px;
-}
-
-.box-demo h1 {
-  font-weight: 600;
-  font-size: 32px;
-}
-
-.box-demo figure {
-  margin: 0 0 28px;
-  padding: 8px 12px 12px;
-  border: 2px solid var(--ink);
-  border-radius: 16px;
-  background: var(--paper);
-}
-
-.box-demo .mat {
-  width: 100%;
-  height: auto;
-}
-
-.box-demo figcaption {
-  font-size: 17px;
-  color: var(--muted);
+/* Three packs side by side on a wide screen (a Chromebook is 1280 or more). */
+@media (min-width: 1100px) {
+  .home {
+    max-width: 1280px;
+    padding-left: 24px;
+    padding-right: 24px;
+  }
+  .pack-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .soon-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
 /* Seven levels (Group It) sit three to a row beside Flip It's two. */

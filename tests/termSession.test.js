@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { makeTerm, makeExpression, evaluate, formatAnswer } from '../src/engine/terms.js';
-import { newTermSession, reduceTerms, TERM_STEPS, shapeComplete } from '../src/engine/termSession.js';
+import { boxes } from '../src/packs/index.js';
+import { newTermSession, reduceTerms, TERM_STEPS, termSteps, shapeComplete } from '../src/engine/termSession.js';
 import { TERM_FEEDBACK, termFeedbackText } from '../src/view/termFeedback.js';
 import { generateTermLevel } from '../src/engine/generateTerms.js';
 import { fullyCanceled } from '../src/engine/termPieces.js';
@@ -322,6 +323,75 @@ describe('Boxes & Circles session: Answer', () => {
       expect(s.step, `${level}`).toBe('answer');
       s = run(s, ...typed(formatAnswer(evaluate(e)).replace(/\s/g, '').replace(/−/g, '-')), check);
       expect(s.step, `${level}`).toBe('done');
+    }
+  });
+});
+
+describe('Boxes & Circles session: Rewrite (Levels 4–5)', () => {
+  // 4x − (−2x) + 3: the second term subtracts a negative. Parts: 0=4x, 1=−, 2=(−2x), 3=+, 4=3
+  const SUBNEG = { ...makeExpression([x('+', 4), x('-', -2), n('+', 3)]), level: 4 };
+  const flip = (term, part) => ({ type: 'flip', term, part });
+
+  it('starts at Rewrite on Levels 4–5 only, and the step bar says so', () => {
+    expect(newTermSession(SUBNEG)).toMatchObject({ step: 'rewrite', feedback: { key: 'rewriteIntro' } });
+    expect(newTermSession(EX1).step).toBe('boxcircle');
+    expect(newTermSession({ ...EX1, level: 3 }).step).toBe('boxcircle');
+    expect(termSteps(SUBNEG).map((t) => t.id)).toEqual(['rewrite', 'boxcircle', 'draw', 'cancel', 'answer']);
+    expect(termSteps(EX1).map((t) => t.id)).toEqual(['boxcircle', 'draw', 'cancel', 'answer']);
+  });
+
+  it('needs both signs flipped, in either order, and goes on when they are', () => {
+    let s = run(newTermSession(SUBNEG), flip(1, 'num'));
+    expect(s).toMatchObject({ step: 'rewrite', feedback: { key: 'flipBoth' } });
+    s = run(s, flip(1, 'op'));
+    expect(s).toMatchObject({ step: 'boxcircle', feedback: { key: 'rewriteDone' } });
+    const t = run(newTermSession(SUBNEG), flip(1, 'op'), flip(1, 'num'));
+    expect(t.step).toBe('boxcircle');
+  });
+
+  it('flips back when tapped again, and flipPart reads the Mat\'s part index', () => {
+    let s = run(newTermSession(SUBNEG), { type: 'flipPart', index: 1 });
+    expect(s.flips).toEqual({ '1:op': true });
+    s = run(s, { type: 'flipPart', index: 1 });
+    expect(s.flips).toEqual({});
+    expect(run(newTermSession(SUBNEG), { type: 'flipPart', index: 99 }).flips).toEqual({});
+  });
+
+  it('tapping a term that needs no flip is a wrong try', () => {
+    const s = run(newTermSession(SUBNEG), flip(0, 'num'));
+    expect(s).toMatchObject({ step: 'rewrite', tries: { rewrite: 1 }, feedback: { key: 'notNegative', bad: true } });
+  });
+
+  it('Nothing to rewrite works only when nothing subtracts a negative', () => {
+    const wrong = run(newTermSession(SUBNEG), { type: 'nothingToRewrite' });
+    expect(wrong).toMatchObject({ step: 'rewrite', feedback: { key: 'somethingToRewrite', bad: true } });
+    const plain = { ...EX1, level: 5 };
+    expect(run(newTermSession(plain), { type: 'nothingToRewrite' })).toMatchObject({ step: 'boxcircle', feedback: { key: 'nothingToRewriteOk' } });
+  });
+
+  it('nothing else works until Rewrite is done', () => {
+    const s = newTermSession(SUBNEG);
+    for (const a of [tool('box'), draw(0, 0), { type: 'check' }, { type: 'digit', digit: 1 }]) expect(reduceTerms(s, a)).toBe(s);
+  });
+
+  it('plays a Level 4 problem start to finish, with magenta pieces for the rewritten term', () => {
+    let s = run(newTermSession(SUBNEG), flip(1, 'op'), flip(1, 'num'),
+      tool('box'), draw(0, 0), draw(1, 2), tool('circle'), draw(3, 4), check);
+    expect(s.step).toBe('draw');
+    s = run(s, { type: 'pickPiece', pieceType: 'box', sign: '+' }, ...Array(4).fill({ type: 'tapZone', term: 0 }), ...Array(2).fill({ type: 'tapZone', term: 1 }),
+      { type: 'pickPiece', pieceType: 'counter', sign: '+' }, ...Array(3).fill({ type: 'tapZone', term: 2 }), check);
+    expect(s.pieces[1].every((p) => p.opposite)).toBe(true);
+    expect(s.step).toBe('answer');
+    s = run(s, ...typed('6x+3'), check);
+    expect(s).toMatchObject({ step: 'done', finalText: '6x + 3' });
+  });
+
+  it('the pack\'s generator hands each problem its level, and every Level 4–5 set plays through', () => {
+    for (const level of [4, 5]) {
+      for (const e of boxes.generate(level, 11)) {
+        expect(e.level).toBe(level);
+        expect(newTermSession(e).step).toBe('rewrite');
+      }
     }
   });
 });

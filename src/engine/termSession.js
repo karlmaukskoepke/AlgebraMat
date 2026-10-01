@@ -2,13 +2,23 @@
 // engine/session.js for Flip It and engine/lassoSession.js for Group It).
 // SPEC-BOXES.md §2:  (Rewrite) → Box & Circle → Draw → Cancel → Answer
 //
-// Built so far: Box & Circle, Draw, Cancel and Answer. Rewrite (Levels 4–5)
-// comes in a later build, so those levels are played as written for now.
+// Levels 4–5 start with Rewrite (a problem carries `level`); the rest start at Box & Circle.
 
 import { termParts, needsRewrite, prettyAnswer } from './terms.js';
+
+// Does this problem begin with Rewrite? Levels 4 and 5 do (even when nothing needs it).
+export const hasRewrite = (problem) => (problem.level ?? 0) >= 4;
+export const termSteps = (problem) => (hasRewrite(problem) ? [REWRITE_STEP, ...TERM_STEPS] : TERM_STEPS);
+
+// The terms of `- (-7)` kind, and which of their two parts (operation, number) are flipped.
+export const rewritable = (problem) => problem.terms.map((t, i) => (needsRewrite(t) ? i : -1)).filter((i) => i >= 0);
+export const flipKey = (term, part) => `${term}:${part}`;
+export const fullyFlipped = (s, term) => Boolean(s.flips[flipKey(term, 'op')] && s.flips[flipKey(term, 'num')]);
+
 import { canCancel, fullyCanceled, makePiece } from './termPieces.js';
 import { validateShapes, validateDraw, validateAnswer, shapeInfo, overlaps, MAX_PER_TERM } from './termMoves.js';
 
+export const REWRITE_STEP = { id: 'rewrite', label: 'Rewrite' };
 export const TERM_STEPS = [
   { id: 'boxcircle', label: 'Box & Circle' },
   { id: 'draw', label: 'Draw' },
@@ -21,8 +31,9 @@ export const MAX_ANSWER_LENGTH = 12;
 export function newTermSession(problem) {
   return {
     problem,                    // the expression (engine/terms.js)
-    step: 'boxcircle',
+    step: hasRewrite(problem) ? 'rewrite' : 'boxcircle',
     skipped: [],
+    flips: {},                  // { 'term:op'|'term:num': true } the parts of a − (−7) term the student flipped
     tool: null,                 // 'box' | 'circle' | null: which shape a drag draws
     shapes: [],                 // [{ kind, from, to }] around parts of the expression
     selecting: null,            // { from, to } while a drag is in progress
@@ -34,7 +45,7 @@ export function newTermSession(problem) {
     entry: '',                  // what's been typed for the answer
     finalText: null,
     tries: {},
-    feedback: { key: 'boxCircleIntro' },
+    feedback: { key: hasRewrite(problem) ? 'rewriteIntro' : 'boxCircleIntro' },
   };
 }
 
@@ -80,6 +91,36 @@ export function reduceTerms(state, action) {
   const validTerm = (t) => Number.isInteger(t) && t >= 0 && t < problem.terms.length;
 
   switch (action.type) {
+    // ---------- ⓪ Rewrite (Levels 4–5) ----------
+
+    // The Mat reports which part (an index into termParts) was tapped.
+    case 'flipPart': {
+      const p = termParts(problem)[action.index];
+      return p ? reduceTerms(state, { type: 'flip', term: p.term, part: p.part }) : state;
+    }
+
+    // Tapped the operation or the number of a term: flip it (tap again to flip back).
+    case 'flip': {
+      if (s.step !== 'rewrite' || !validTerm(action.term) || !['op', 'num'].includes(action.part)) return state;
+      if (!needsRewrite(problem.terms[action.term])) return wrong(s, { ok: false, feedbackKey: 'notNegative' });
+      const key = flipKey(action.term, action.part);
+      if (s.flips[key]) delete s.flips[key]; else s.flips[key] = true;
+      const todo = rewritable(problem);
+      if (todo.every((t) => fullyFlipped(s, t))) {
+        s.step = 'boxcircle';
+        return note(s, 'rewriteDone');
+      }
+      const half = s.flips[key] && !fullyFlipped(s, action.term);
+      return note(s, half ? 'flipBoth' : 'rewriteIntro');
+    }
+
+    case 'nothingToRewrite': {
+      if (s.step !== 'rewrite') return state;
+      if (rewritable(problem).length > 0) return wrong(s, { ok: false, feedbackKey: 'somethingToRewrite' });
+      s.step = 'boxcircle';
+      return note(s, 'nothingToRewriteOk');
+    }
+
     // ---------- ① Box & Circle ----------
 
     case 'pickTool': {

@@ -2,6 +2,14 @@
 // Keys come from engine/termMoves.js and engine/termSession.js.
 
 export const TERM_FEEDBACK = {
+  // ⓪ Rewrite
+  rewriteIntro: () => 'Subtracting a negative? Flip both signs: tap the − in front and the − inside the parentheses. Or tap “Nothing to rewrite.”',
+  flipBoth: () => 'Flip both signs: the operation in front and the sign inside the parentheses.',
+  notNegative: () => 'Only a − (−…) term needs flipping. Tap one of those.',
+  somethingToRewrite: () => 'Look again: one term subtracts a negative. Flip both of its signs.',
+  rewriteDone: () => 'Rewritten! Now box the x terms and circle the numbers, signs and all.',
+  nothingToRewriteOk: () => 'Right, nothing to rewrite. Now box the x terms and circle the numbers.',
+
   // ① Box & Circle
   boxCircleIntro: () => 'Box the x terms and circle the numbers. Drag across a term, and take the sign in front with it!',
   boxToolOn: () => 'Box it: drag across an x term, from the sign in front to the end.',

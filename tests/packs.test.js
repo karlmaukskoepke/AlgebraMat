@@ -7,10 +7,10 @@ describe('pack list', () => {
     for (const p of PACKS) expect(p.subtitle, p.id).toMatch(/\w/);
   });
 
-  it('opens Flip It and Lasso, with the three future packs coming soon, in order', () => {
-    expect(PACKS.filter((p) => !p.comingSoon).map((p) => p.id)).toEqual(['flipit', 'lasso']);
+  it('opens Flip It, Group It and Boxes & Circles, with the two future packs coming soon, in order', () => {
+    expect(PACKS.filter((p) => !p.comingSoon).map((p) => p.id)).toEqual(['flipit', 'lasso', 'boxes']);
     expect(PACKS.filter((p) => p.comingSoon).map((p) => p.title))
-      .toEqual(['Boxes & Circles', 'Groups of Terms', 'Distribute, then combine']);
+      .toEqual(['Groups of Terms', 'Distribute, then combine']);
   });
 
   it('gives each playable pack a name and a generator for every level', () => {
@@ -22,7 +22,7 @@ describe('pack list', () => {
 
   it('keeps coming-soon packs out of progress and save codes', () => {
     const fresh = newProgress(PACKS);
-    expect(Object.keys(fresh.packs)).toEqual(['flipit', 'lasso']);
+    expect(Object.keys(fresh.packs)).toEqual(['flipit', 'lasso', 'boxes']);
     expect(isLevelUnlocked(fresh, 'lasso', 1)).toBe(true);
     let p = fresh;
     for (let l = 1; l <= 4; l++) p = completeLevel(p, 'flipit', l);
