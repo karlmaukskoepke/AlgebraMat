@@ -29,6 +29,10 @@ Add `?seed=123` to the URL to replay a fixed problem set, and `?level=2` to open
 
 ## Changelog
 
+### Pack map: level names no longer clip
+
+- **Fixed:** in the equal-size cards, a level button whose name wraps to two or three lines (Group It's "opposite of several groups") could be squeezed shorter than its text. The scrolling now happens in a plain wrapper around the level grid, and the grid's rows are always as tall as their text. Cards are still equal size, and the page still doesn't scroll on a Chromebook.
+
 ### Groups of Terms step 4: Take and Flip (SPEC-GROUPS-OF-TERMS.md §7.4, §12)
 
 - **Fractions:** after dealing, tap the parts to take them (exactly the top number).

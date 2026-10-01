@@ -50,7 +50,9 @@ function packCard(progress, pack) {
       complete ? h('span', { class: 'tag' }, 'Complete ✓') : levelDots(progress, pack)),
     h('p', { class: 'subtitle' }, pack.subtitle),
     h('p', { class: 'blurb' }, pack.blurb),
-    levels);
+    // The scroll box is a plain wrapper, so the grid inside sizes its rows to their text
+    // (a grid with a fixed height squeezes its rows and clips the level names).
+    h('div', { class: 'level-scroll' }, levels));
 }
 
 export function renderPackMap(root, progress, packs, { onPlay, onSaveCode, onEnterCode, note }) {
