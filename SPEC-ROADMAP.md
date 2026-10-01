@@ -4,6 +4,18 @@
 
 **Where the visuals are:** all three algebra packs are on **page 2 of Karl's notes** (Integers_Notes_WORKED.pdf), under "Combining Like Terms", "Distributive Property" and "Distribute, then combine." The details below come from that page.
 
+## Combine it (integer addition), new 2026-10-01
+
+**Status: Karl's request, not yet specced.** *"A simple 'Combine it' section about integer addition. Similar to Flip It, without the flipping, of course."*
+- **Round 1:** adding a positive and a negative (all **battles**). Modeled with the + and − counters.
+- **Round 2:** adding negatives and negatives. Modeled with counters.
+- **Round 3:** three or more terms. Modeled with counters.
+- **Final level:** larger values (**magnitude 11 to 60**) and **no modeling** with + or −. Students **circle the positive and negative terms, including the addition symbol in front**, then decide **party or battle**, whether to **add or subtract the values**, and **the sign of the result**.
+
+## Flip It: a final mixed level, new 2026-10-01
+
+**Status: Karl's request, not yet specced.** Add a **mixed practice of addition and subtraction** at the end of Flip It, so both operations show up as the final challenge there.
+
 ## Boxes & Circles (combining like terms)
 
 **Status: revised spec in SPEC-BOXES.md, waiting on Karl's go-ahead.** Karl's answers of 2026-09-30:

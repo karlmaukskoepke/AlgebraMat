@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import {
   makeTermGroups, formatTermGroups, evaluateTermGroups, groupTotal, answerText, groupPieces, partPieces,
-  pieceTotal, groupCount, isNumberFirst, distributeLines, xTerm, numTerm, isFraction, isOpposite,
+  pieceTotal, groupCount, isNumberFirst, distributeLines, xTerm, numTerm, isFraction, isOpposite, piecesOfGroup, insideText,
 } from '../src/engine/termGroups.js';
 
 const x = (value) => ({ kind: 'x', value });
@@ -46,6 +46,17 @@ describe('term groups: the model', () => {
     expect(pieceTotal(f)).toBe(9);
     expect(isFraction(f)).toBe(true);
     expect(isOpposite(a)).toBe(false);
+  });
+
+  it('lists the pieces of one group in the order B is written, and of one part when dealt', () => {
+    const box = (sign) => ({ type: 'box', sign });
+    const counter = (sign) => ({ type: 'counter', sign });
+    expect(piecesOfGroup(makeTermGroups({ n: 3 }, [x(2), n(-1)]))).toEqual([box('+'), box('+'), counter('-')]);
+    expect(piecesOfGroup(makeTermGroups({ n: 3 }, [n(2), x(-1)]))).toEqual([counter('+'), counter('+'), box('-')]);
+    const f = makeTermGroups({ n: 2, d: 3 }, [x(-3), n(6)]);
+    expect(piecesOfGroup(f)).toHaveLength(9);
+    expect(piecesOfGroup(f, true)).toEqual([box('-'), counter('+'), counter('+')]);
+    expect(insideText(f)).toBe('−3x + 6');
   });
 
   it('knows the order B is written in, and finds its terms', () => {

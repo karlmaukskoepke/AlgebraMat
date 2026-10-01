@@ -93,3 +93,13 @@
 - **Save code v4** (`MAT-6` plus six symbols) carries Groups of Terms (pack id `groups-of-terms`, 8 levels, bits 16–23). The pack is still a Coming-soon card, so its bits are read and dropped until it opens (step 5). v1, v2 and v3 codes still decode.
 - **Not visible yet:** this step is engine only.
 
+## 10. Build decisions, step 2 (the static Mat)
+
+- **Preview page:** `?demo=groupterms` draws the Mat in every state: filled ovals, the typed answer, Check it, − groups before and after the flip, the hidden 1, a challenge-level (number first) oval, fractions dealt and taken, both Check it forms, and the most crowded problems. It's removed when the pack becomes playable (step 5).
+- **It reuses Group It's Mat:** the same geometry, colors and classes (blue A, green inside, magenta opposite). Pieces are Boxes & Circles': a square for a box, a square with a dash at its left for −x, and + and − marks. They're green in an oval, magenta once flipped.
+- **Ovals are 56 tall and bar parts 54** (Group It's are 50 and 48), because this drawing is wider and scales down. Every oval, part and − mark is at least 49px on a Chromebook (the widest problems, 9 pieces per group flipped, scale to about 0.87).
+- **The count after the arrow** can be an expression (`→ −8x − 10`), so the drawing widens to fit it, up to about 1100 units.
+- **Pieces in an oval close up** from 30 to 22 apart for 6 to 9 in a group, and shrink a little so neighbors don't touch.
+- **Check it** replaces the problem text on the left: the problem set out as separate words (A in blue, the terms in green), a blue arrow from A over the top to each term (they draw themselves in), the two products written out below, then the combined line. Fractions read `1/2 · 4x = 2x` there.
+- **The left column** is a little smaller than Group It's (the problem at 36px, the final line at 28px and allowed to wrap), so `−2/3(−3x − 6) = …` fits.
+
