@@ -19,7 +19,7 @@ Add `?seed=123` to the URL to replay a fixed problem set, and `?level=2` to open
 
 ## Layout
 
-- `src/engine/`: pure logic, no DOM. `expr.js` (expression model), `generate.js` (seeded levels), `moves.js` (validators), `session.js` (one problem's steps as a reducer), `progress.js` (level unlocks, save code), `hints.js` + `lassoHints.js` (hints after 3 wrong tries), `groups.js` + `generateLasso.js` (Group It problems; files keep the old "lasso" name), `terms.js` + `termPieces.js` + `termMoves.js` + `termSession.js` + `termHints.js` + `generateTerms.js` (Boxes & Circles), `termGroups.js` + `generateTermGroups.js` (Groups of Terms).
+- `src/engine/`: pure logic, no DOM. `expr.js` (expression model), `generate.js` (seeded levels), `moves.js` (validators), `session.js` (one problem's steps as a reducer), `progress.js` (level unlocks, save code), `hints.js` + `lassoHints.js` (hints after 3 wrong tries), `groups.js` + `generateLasso.js` (Group It problems; files keep the old "lasso" name), `terms.js` + `termPieces.js` + `termMoves.js` + `termSession.js` + `termHints.js` + `generateTerms.js` (Boxes & Circles), `termGroups.js` + `generateTermGroups.js` (Groups of Terms), `termGroupMat.js` (its Mat), `termGroupSession.js` + `termGroupMoves.js` (its steps).
 - `src/view/`: DOM and SVG. `mat.js`, `controls.js`, `lassoMat.js` + `lassoLayout.js` (the Group It Mat), `boxMat.js` + `boxLayout.js` + `boxPointer.js` + `boxControls.js` (the Boxes & Circles Mat, its drag and palette), `packmap.js` (home and level-complete panel), `codes.js` (save-code dialogs), `feedback.js` (every message, in one table), `layout.js` (counter geometry).
 - `src/storage.js`: localStorage wrapper that falls back to memory.
 - `src/play/`: one play adapter per pack (`flipitPlay.js`, `lassoPlay.js`); `main.js` runs whichever the pack uses.
@@ -28,6 +28,18 @@ Add `?seed=123` to the URL to replay a fixed problem set, and `?level=2` to open
 - `tests/`: Vitest.
 
 ## Changelog
+
+### Groups of Terms step 3: Groups, + or −, Fill (SPEC-GROUPS-OF-TERMS.md §7.3, §11)
+
+- **Playable up to Fill** at `?pack=groups-of-terms&level=N`: make the groups (typing the hidden 1 for `−(B)`), choose + or − groups, then fill: pick a piece and tap a group, **Copy to all** (key K) for the rest, or, for fractions, deal one kind of piece at a time into the lit-up part.
+- **Check** says which group is off and what each needs, without giving the answer.
+- **Still hidden:** the pack stays a Coming-soon card; Flip, Take, Answer and Check it come next.
+
+### Groups of Terms step 2: the static Mat (SPEC-GROUPS-OF-TERMS.md §7.2, §10)
+
+- **Preview page at `?demo=groupterms`** draws the Mat in every state: filled ovals, the answer, the distributing arrows (Check it), − groups before and after the flip, a number-first challenge problem, fractions dealt and taken, and the most crowded problems. Nothing is playable yet.
+- **Look:** Group It's ovals and fraction bar, with Boxes & Circles' pieces inside (green, then magenta when flipped).
+- **Touch targets:** every oval, part and − is at least 49px on a Chromebook, even for the widest problems.
 
 ### Groups of Terms step 1: model, level generator, save code v4 (SPEC-GROUPS-OF-TERMS.md §7.1, §9)
 

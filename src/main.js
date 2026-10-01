@@ -8,6 +8,7 @@ import { createStore } from './storage.js';
 import { PACKS, packById } from './packs/index.js';
 import { flipitPlay } from './play/flipitPlay.js';
 import { lassoPlay } from './play/lassoPlay.js';
+import { termGroupPlay } from './play/termGroupPlay.js';
 import { boxPlay } from './play/boxPlay.js';
 import { renderPackMap, renderLevelDone } from './view/packmap.js';
 import { showSaveCode, askForCode } from './view/codes.js';
@@ -15,7 +16,7 @@ import { showSaveCode, askForCode } from './view/codes.js';
 const $ = (id) => document.getElementById(id);
 
 // Each pack's play adapter: its steps, session, Mat, controls and messages.
-const PLAY = { flipit: flipitPlay, lasso: lassoPlay, boxes: boxPlay };
+const PLAY = { flipit: flipitPlay, lasso: lassoPlay, boxes: boxPlay, 'groups-of-terms': termGroupPlay };
 const newSeed = () => Math.floor(Math.random() * 2 ** 32);
 
 // ?seed=123 replays a fixed set (handy for projecting the same problems to a
@@ -272,7 +273,10 @@ function savedCurrent() {
 const urlLevel = Number(params.get('level'));
 const urlPack = packById(params.get('pack') === 'groupit' ? 'lasso' : params.get('pack') ?? 'flipit');
 const resume = savedCurrent();
-if (urlPack && PLAY[urlPack.id] && Number.isInteger(urlLevel) && urlLevel >= 1 && urlLevel <= urlPack.levels) {
+if (params.get('demo') === 'groupterms') {
+  // Groups of Terms step 2: a static preview of the Mat (loaded only on this URL).
+  import('./view/termGroupDemo.js').then((m) => m.showTermGroupDemo(document.body));
+} else if (urlPack && PLAY[urlPack.id] && Number.isInteger(urlLevel) && urlLevel >= 1 && urlLevel <= (urlPack.levels || urlPack.previewLevels || 0)) {
   startLevel(urlPack.id, urlLevel);
 } else if (resume) {
   startLevel(resume.pack, resume.level, resume);

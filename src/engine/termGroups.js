@@ -54,6 +54,16 @@ export const partPieces = (p) => {
   return { ...g, boxes: g.boxes / p.count.d, counters: g.counters / p.count.d };
 };
 
+// One group's pieces in the order B is written: a box for each of C (a negative box if C < 0),
+// a counter for each of D. For a fraction, `perPart` gives what one equal part holds.
+export function piecesOfGroup(p, perPart = false) {
+  const div = perPart ? p.count.d : 1;
+  return p.inside.flatMap((t) => {
+    const sign = t.value < 0 ? '-' : '+';
+    return Array.from({ length: Math.abs(t.value) / div }, () => ({ type: t.kind === 'x' ? 'box' : 'counter', sign }));
+  });
+}
+
 // All the pieces drawn before any flip: n groups of B (whole), or B whole for a fraction.
 export const pieceTotal = (p) => {
   const g = groupPieces(p);
@@ -77,13 +87,18 @@ export const answerText = (p) => formatAnswer(evaluateTermGroups(p));
 
 const signed = (v) => (v < 0 ? `${MINUS}${-v}` : `${v}`);
 
+// What's inside the parentheses, as written: "2x − 1", "−x + 2", "6 − 3x".
+export function insideText(p) {
+  const [first, second] = p.inside;
+  const rest = `${second.value < 0 ? MINUS : '+'} ${numberText({ ...second, value: Math.abs(second.value) })}`;
+  return `${numberText(first)} ${rest}`;
+}
+
 // "3(2x − 1)", "−(x + 3)", "−1(x + 3)", "1/2(4x + 6)", "−2/3(6 − 3x)". The view draws fractions stacked.
 export function formatTermGroups(p) {
   const { neg, n, d } = p.count;
   const size = p.hidden1 ? '' : d > 1 ? `${n}/${d}` : `${n}`;
-  const [first, second] = p.inside;
-  const rest = `${second.value < 0 ? MINUS : '+'} ${numberText({ ...second, value: Math.abs(second.value) })}`;
-  return `${neg ? MINUS : ''}${size}(${numberText(first)} ${rest})`;
+  return `${neg ? MINUS : ''}${size}(${insideText(p)})`;
 }
 
 // The shorthand for Check it: one line per term of B, in the order written.

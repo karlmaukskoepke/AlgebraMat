@@ -3,6 +3,7 @@
 import { flipit } from './flipit.js';
 import { generateLassoLevel } from '../engine/generateLasso.js';
 import { generateTermLevel } from '../engine/generateTerms.js';
+import { generateTermGroupsLevel } from '../engine/generateTermGroups.js';
 
 // Group It (built as "Lasso"; its id stays 'lasso' so saved progress and
 // save codes from before the rename still work).
@@ -38,11 +39,21 @@ export const boxes = {
   generate: (level, seed) => generateTermLevel(level, seed).map((expr) => ({ ...expr, level })),
 };
 
+// Groups of Terms is still a Coming-soon card (no levels, nothing in saves), but its finished
+// steps can be played at ?pack=groups-of-terms&level=N while it's built.
+const groupsOfTerms = {
+  ...soon('groups-of-terms', 'Groups of Terms', 'The distributive property'),
+  previewLevels: 8,
+  levelNames: ['all positive', 'a negative number', 'a negative x term', 'opposite groups', 'challenge: number first',
+    'unit fraction of a group', 'fraction of a group', 'challenge: negative fractions'],
+  generate: (level, seed) => generateTermGroupsLevel(level, seed),
+};
+
 export const PACKS = [
   flipit,
   lasso,
   boxes,
-  soon('groups-of-terms', 'Groups of Terms', 'The distributive property'),
+  groupsOfTerms,
   soon('distribute-combine', 'Distribute, then combine', 'Distributing, then combining like terms'),
 ];
 export const packById = (id) => PACKS.find((p) => p.id === id);

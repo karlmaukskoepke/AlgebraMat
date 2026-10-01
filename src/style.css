@@ -795,6 +795,7 @@ body {
 
 @media (prefers-reduced-motion: reduce) {
   .mat .shake,
+  .tg-mat .check-arrow.draw-in,
   .feedback.bad,
   .feedback.celebrate,
   .mat .slash-in,
@@ -1321,6 +1322,110 @@ body {
     padding: 4px;            /* room for the 3px outlines inside the scroll box */
     margin: -4px;
   }
+}
+
+/* Static preview page (?demo=groupterms, until the pack is playable) */
+.box-demo {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 24px 12px 48px;
+}
+
+.box-demo h1 {
+  font-weight: 600;
+  font-size: 32px;
+}
+
+.box-demo figure {
+  margin: 0 0 28px;
+  padding: 8px 12px 12px;
+  border: 2px solid var(--ink);
+  border-radius: 16px;
+  background: var(--paper);
+}
+
+.box-demo .mat {
+  width: 100%;
+  height: auto;
+}
+
+.box-demo figcaption {
+  font-size: 17px;
+  color: var(--muted);
+}
+
+/* ---------- The Groups of Terms Mat (SPEC-GROUPS-OF-TERMS.md §2–3) ---------- */
+
+/* Boxes are green inside a group (magenta once flipped), as counters are. */
+.tg-mat .tg-box .box-outline,
+.tg-mat .tg-box .mark {
+  fill: none;
+  stroke-width: 2.5;
+  stroke-linecap: round;
+}
+
+.tg-mat .tg-box.is-inside .box-outline,
+.tg-mat .tg-box.is-inside .mark {
+  stroke: var(--inside);
+}
+
+.tg-mat .tg-box.is-opposite .box-outline,
+.tg-mat .tg-box.is-opposite .mark {
+  stroke: var(--opposite);
+}
+
+.tg-mat .tg-total,
+.tg-mat .tg-product {
+  fill: var(--ink);
+  font: 700 30px 'Kalam', cursive;
+}
+
+.tg-mat .tg-total {
+  font-size: 26px;
+}
+
+.tg-mat .tg-product {
+  font-size: 30px;
+}
+
+.tg-mat .tg-word {
+  font: 600 38px 'Lexend', system-ui, sans-serif;
+  fill: var(--ink);
+}
+
+.tg-mat .tg-word.is-groups {
+  fill: var(--groups);
+}
+
+.tg-mat .tg-word.is-inside {
+  fill: var(--inside);
+}
+
+.tg-mat .check-arrow {
+  stroke: var(--groups);
+  stroke-width: 3;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.tg-mat .check-arrow.draw-in {
+  stroke-dasharray: 1;
+  animation: draw-in 0.6s ease-out;
+}
+
+.tg-problem {
+  font-size: 36px;
+}
+
+.lasso-meaning .inside {
+  white-space: nowrap;
+}
+
+.tg-final {
+  font-size: 28px;
+  white-space: normal;
+  line-height: 1.15;
 }
 
 /* Seven levels (Group It) sit three to a row beside Flip It's two. */

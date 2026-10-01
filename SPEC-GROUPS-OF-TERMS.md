@@ -93,3 +93,22 @@
 - **Save code v4** (`MAT-6` plus six symbols) carries Groups of Terms (pack id `groups-of-terms`, 8 levels, bits 16–23). The pack is still a Coming-soon card, so its bits are read and dropped until it opens (step 5). v1, v2 and v3 codes still decode.
 - **Not visible yet:** this step is engine only.
 
+## 10. Build decisions, step 2 (the static Mat)
+
+- **Preview page:** `?demo=groupterms` draws the Mat in every state: filled ovals, the typed answer, Check it, − groups before and after the flip, the hidden 1, a challenge-level (number first) oval, fractions dealt and taken, both Check it forms, and the most crowded problems. It's removed when the pack becomes playable (step 5).
+- **It reuses Group It's Mat:** the same geometry, colors and classes (blue A, green inside, magenta opposite). Pieces are Boxes & Circles': a square for a box, a square with a dash at its left for −x, and + and − marks. They're green in an oval, magenta once flipped.
+- **Ovals are 56 tall and bar parts 54** (Group It's are 50 and 48), because this drawing is wider and scales down. Every oval, part and − mark is at least 49px on a Chromebook (the widest problems, 9 pieces per group flipped, scale to about 0.87).
+- **The count after the arrow** can be an expression (`→ −8x − 10`), so the drawing widens to fit it, up to about 1100 units.
+- **Pieces in an oval close up** from 30 to 22 apart for 6 to 9 in a group, and shrink a little so neighbors don't touch.
+- **Check it** replaces the problem text on the left: the problem set out as separate words (A in blue, the terms in green), a blue arrow from A over the top to each term (they draw themselves in), the two products written out below, then the combined line. Fractions read `1/2 · 4x = 2x` there.
+- **The left column** is a little smaller than Group It's (the problem at 36px, the final line at 28px and allowed to wrap), so `−2/3(−3x − 6) = …` fits.
+
+## 11. Build decisions, step 3 (Groups, + or −, Fill)
+
+- **Playable up to Fill** at `?pack=groups-of-terms&level=N` (levels 1 to 8) while the pack is built. It's still a Coming-soon card, nothing is saved, and a problem waits after Fill (Flip, Take, Answer and Check it come next).
+- **Groups and + or −** are Group It's, unchanged: Add group, tap a group to erase it, the typed hidden 1 for `−(B)`, then + groups or − groups. The checks and most messages are Group It's own; the pack's table only overrides what mentions counters.
+- **Fill, whole-number groups:** pick a piece (□, −□, + or −), tap a group to add one. **Copy to all** (key **K**) repeats the first group in every other group; Undo takes back one piece or a whole copy. A group holds what B needs plus 2 (never more). Check names the first group that's off and says what each group needs (*"The second group isn't (2x − 1) yet. Each group needs 2 boxes and 1 negative."*); it accepts the pieces in any order. A wrong sign (a box where a negative box belongs) is off too.
+- **Fill, fraction bar:** pick a piece and deal it one at a time into the lit-up part, top to bottom, around again. **One kind at a time, either order:** dealing the other kind before the first is finished says *"Finish dealing the boxes first, then the other kind."* and isn't a wrong try. The light restarts at the top for the next kind. There's no Copy to all (the button hides). Check wants all of B dealt, in equal parts.
+- **Keyboard:** digits type the hidden 1, K copies, Backspace is the pad's delete or Undo, Enter is Check (as in the other packs). The x, + and − pad buttons exist but stay dim until the Answer step.
+- **Taps:** every play-screen target is at least 44px at 1280 × 610 (checked on Levels 1, 4 and 6).
+
