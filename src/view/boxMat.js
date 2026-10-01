@@ -121,7 +121,7 @@ export function renderBoxMat(s) {
   for (const p of layout.parts) {
     svg.append(el('text', {
       x: p.cx, y: ROW_Y, 'text-anchor': 'middle',
-      class: `bm-text ${p.part === 'op' ? 'is-op' : 'is-num'}${selected(p.index) ? ' is-selecting' : ''}`,
+      class: `bm-text ${p.part === 'op' ? 'is-op' : 'is-num'}${selected(p.index) ? ' is-selecting' : ''}${s.flipped?.includes(p.index) ? ' is-flipped' : ''}`,
       'data-part': p.index,
     }, [p.text]));
     if (s.tap === 'parts') {

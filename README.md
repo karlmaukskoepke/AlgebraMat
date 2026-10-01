@@ -29,6 +29,13 @@ Add `?seed=123` to the URL to replay a fixed problem set, and `?level=2` to open
 
 ## Changelog
 
+### Boxes & Circles step 5: Rewrite, level flow, the pack map (SPEC-BOXES.md §7.5, §13)
+
+- **Boxes & Circles is open.** Third card on the pack map with five levels; finishing a level saves it and unlocks the next, and it's part of save codes (v3). Groups of Terms and Distribute, then combine are still Coming soon.
+- **Rewrite on Levels 4–5:** flip the − and the sign in the parentheses of a `− (−7)` term (it turns magenta and says "is +7"), or press **Nothing to rewrite** (key N).
+- **Pack map:** three packs side by side on wide screens, so it still fits without scrolling on a Chromebook.
+- **Removed:** the `?demo=boxes` preview page.
+
 ### Boxes & Circles step 4: Draw, Cancel and Answer (SPEC-BOXES.md §7.4, §12)
 
 - **A whole level plays through** at `?pack=boxes&level=N`: Box & Circle → Draw the boxes and counters above each term → Cancel pairs (either order) → type the answer.

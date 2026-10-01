@@ -26,13 +26,16 @@ export const lasso = {
 
 const soon = (id, title, subtitle) => ({ id, title, subtitle, levels: 0, comingSoon: true });
 
-// Boxes & Circles is still a Coming-soon card (no levels, nothing in saves), but
-// its finished steps can be played at ?pack=boxes&level=N while it's built.
-const boxes = {
-  ...soon('boxes', 'Boxes & Circles', 'Combining like terms'),
-  previewLevels: 5,
+// Boxes & Circles: combining like terms with boxes, circles and counters.
+// Each problem carries its level, which tells the session whether it starts with Rewrite.
+export const boxes = {
+  id: 'boxes',
+  title: 'Boxes & Circles',
+  subtitle: 'Combining like terms',
+  blurb: 'Box the x terms, circle the numbers, draw, cancel pairs, then type what’s left.',
+  levels: 5,
   levelNames: ['only + terms', 'subtracting numbers', 'negative x terms', 'subtracting a negative', 'everything mixed'],
-  generate: (level, seed) => generateTermLevel(level, seed),
+  generate: (level, seed) => generateTermLevel(level, seed).map((expr) => ({ ...expr, level })),
 };
 
 export const PACKS = [

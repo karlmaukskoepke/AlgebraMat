@@ -5,11 +5,10 @@ import {
 import { PACKS } from '../src/packs/index.js';
 
 const bitsOf = (n, count, shift = 0) => Array.from({ length: count }, (_, i) => Boolean(n & (1 << (shift + i))));
-const state = (flipit, lasso = Array(7).fill(false)) => ({ v: 1, packs: { flipit: { levels: flipit }, lasso: { levels: lasso } } });
-const state3 = (flipit, lasso, boxes) => ({ v: 1, packs: { flipit: { levels: flipit }, lasso: { levels: lasso }, boxes: { levels: boxes } } });
+const state = (flipit, lasso = Array(7).fill(false), boxes = Array(5).fill(false)) => ({ v: 1, packs: { flipit: { levels: flipit }, lasso: { levels: lasso }, boxes: { levels: boxes } } });
+const state3 = state;
 
-// Boxes & Circles isn't playable yet, so it isn't in PACKS; its codes still carry its 5 levels.
-const WITH_BOXES = [...PACKS.filter((p) => !p.comingSoon), { id: 'boxes', levels: 5 }];
+const WITH_BOXES = PACKS.filter((p) => !p.comingSoon);
 
 // Flip It and Group It together: 2^11 = 2048 states (what v2 codes carry).
 const allStates = Array.from({ length: 2 ** 11 }, (_, n) => state(bitsOf(n, 4), bitsOf(n, 7, 4)));
@@ -36,11 +35,9 @@ describe('save code v3', () => {
     expect(codes.size).toBe(65536);
   });
 
-  it('keeps Boxes & Circles progress out of the game until the pack is playable', () => {
+  it('carries Boxes & Circles progress', () => {
     const p = state3(bitsOf(0b1010, 4), bitsOf(0b11, 7), [true, true, false, false, false]);
-    const back = decodeProgress(encodeProgress(p), PACKS);
-    expect(back).toEqual(state(bitsOf(0b1010, 4), bitsOf(0b11, 7)));
-    expect(back.packs.boxes).toBeUndefined();
+    expect(decodeProgress(encodeProgress(p), PACKS)).toEqual(p);
   });
 
   it('is forgiving about case, spaces, dashes and the prefix', () => {

@@ -136,7 +136,7 @@ function nextProblem() {
 
 function finishLevel() {
   const { pack, level } = play;
-  if (!pack.comingSoon) progress = completeLevel(progress, pack.id, level); // a preview pack saves nothing
+  progress = completeLevel(progress, pack.id, level);
   play.finished = true;
   persist();
   render();
@@ -268,15 +268,11 @@ function savedCurrent() {
 
 // ?level=N opens a Flip It level; ?pack=groupit&level=N opens a Group It level
 // (?pack=lasso, its id from before the rename, still works); ?pack=boxes&level=N
-// plays the finished steps of Boxes & Circles while it's being built.
+// opens a Boxes & Circles level.
 const urlLevel = Number(params.get('level'));
 const urlPack = packById(params.get('pack') === 'groupit' ? 'lasso' : params.get('pack') ?? 'flipit');
 const resume = savedCurrent();
-if (params.get('demo') === 'boxes') {
-  // Boxes & Circles step 2: a static preview of the Mat (loaded only on this URL).
-  import('./view/boxDemo.js').then((m) => m.showBoxDemo(document.body));
-} else if (urlPack && PLAY[urlPack.id] && Number.isInteger(urlLevel) && urlLevel >= 1
-  && urlLevel <= (urlPack.levels || urlPack.previewLevels || 0)) {
+if (urlPack && PLAY[urlPack.id] && Number.isInteger(urlLevel) && urlLevel >= 1 && urlLevel <= urlPack.levels) {
   startLevel(urlPack.id, urlLevel);
 } else if (resume) {
   startLevel(resume.pack, resume.level, resume);

@@ -182,3 +182,12 @@ My calls, open to change:
 - **Next →:** after a right answer the Check button becomes **Next →** (Enter presses it), and the problem also moves on by itself after 2.5 seconds, as in the other packs.
 - **Keyboard handler:** among matching buttons the first *enabled* one is pressed, so Backspace is the pad's delete while typing and Undo otherwise. A preview pack doesn't save progress on finishing a level.
 
+## 13. Build decisions, step 5 (Rewrite, level flow, the pack map)
+
+- **Boxes & Circles is open** on the pack map as the third card (5 levels, Level 1 open, the rest unlocking in order, saved in `mat.v1` and in save code v3). The Coming-soon row is now Groups of Terms and Distribute, then combine. `?demo=boxes` is gone; `?pack=boxes&level=N` still opens a level.
+- **Rewrite** is step ① on Levels 4 and 5 (each problem carries its `level`; Levels 1–3 start at Box & Circle). Tap the **operation** and the **sign in the parentheses** of a `− (−7)` term, in either order; both must flip. A flipped part turns magenta, and a term with both flipped says **"is +7"** under it. The printed expression doesn't change. Tapping a flipped part again flips it back.
+- **When both signs of every such term are flipped, it moves on by itself**, like Flip It. One half says *"Flip both signs…"*. Tapping a term that doesn't need it counts as a wrong try (*"Only a − (−…) term needs flipping"*).
+- **Nothing to rewrite** (key **N**) is the way through on a Level 5 problem with no subtracted negative; pressed when there is one, it says *"Look again: one term subtracts a negative."* The button only appears on Levels 4–5.
+- **Palette:** all of it fits on one row at 1280 × 610 (buttons a little tighter than the other packs: 48px piece buttons, 17px labels, all still at least 44px tall).
+- **Pack map:** on screens 1100px wide or more the three packs sit side by side (the page is 1280 wide), so the whole map, Coming-soon row included, fits without scrolling at 1366 × 657 and 1280 × 610. Narrower screens keep two columns and scroll.
+

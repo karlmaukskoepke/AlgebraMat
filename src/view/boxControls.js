@@ -1,4 +1,4 @@
-// Boxes & Circles palette: the Box and Circle tools (Box & Circle), the four
+// Boxes & Circles palette: Nothing to rewrite (Levels 4–5), the Box and Circle tools (Box & Circle), the four
 // pieces (Draw), Undo, Check, and the answer pad (x, + and − next to the digits).
 // Only the current step's controls are enabled; the rest stay visible but dimmed.
 // `data-key` names the keyboard key that presses a button (B and C pick the
@@ -7,8 +7,8 @@
 const BOX_SVG = '<svg viewBox="0 0 26 22" aria-hidden="true"><rect x="2" y="2" width="22" height="18" rx="4"/></svg>';
 const CIRCLE_SVG = '<svg viewBox="0 0 26 22" aria-hidden="true"><rect x="2" y="2" width="22" height="18" rx="9"/></svg>';
 // The pieces as the Mat draws them: □ is x, −□ is −x (a dash on its left), + and − counters.
-const PIECE_BOX = '<svg viewBox="-14 -13 28 26" aria-hidden="true"><rect x="-11" y="-11" width="22" height="22" rx="2"/></svg>';
-const PIECE_NEG_BOX = '<svg viewBox="-21 -13 40 26" aria-hidden="true"><rect x="-5" y="-11" width="22" height="22" rx="2"/><line x1="-19" y1="0" x2="-5" y2="0"/></svg>';
+const PIECE_BOX = '<svg viewBox="-14 -13 28 26" aria-hidden="true"><rect x="-11" y="-11" width="22" height="22" rx="2" style="stroke-width:2.5"/></svg>';
+const PIECE_NEG_BOX = '<svg viewBox="-21 -13 40 26" aria-hidden="true"><rect x="-5" y="-11" width="22" height="22" rx="2" style="stroke-width:2.5"/><line x1="-19" y1="0" x2="-5" y2="0" style="stroke-width:2.5"/></svg>';
 const PLUS_SVG = '<svg viewBox="-16 -16 32 32" aria-hidden="true"><line x1="-11" y1="0" x2="11" y2="0"/><line x1="0" y1="-11" x2="0" y2="11"/></svg>';
 const MINUS_SVG = '<svg viewBox="-16 -16 32 32" aria-hidden="true"><line x1="-11" y1="0" x2="11" y2="0"/></svg>';
 
@@ -33,7 +33,7 @@ const group = (...items) => {
 export function buildBoxControls(root, dispatch) {
   root.innerHTML = '';
   const row = document.createElement('div');
-  row.className = 'palette-row';
+  row.className = 'palette-row box-palette';
 
   const box = button(`${BOX_SVG}Box`, 'pickTool', { cls: 'btn-tool', data: { tool: 'box', key: 'b' }, aria: 'Box tool (key B)' });
   const circle = button(`${CIRCLE_SVG}Circle`, 'pickTool', { cls: 'btn-tool', data: { tool: 'circle', key: 'c' }, aria: 'Circle tool (key C)' });
@@ -41,9 +41,10 @@ export function buildBoxControls(root, dispatch) {
   const boxMinus = button(PIECE_NEG_BOX, 'pickPiece', { cls: 'btn-sign', data: { pieceType: 'box', sign: '-' }, aria: 'Negative box (minus x)' });
   const plus = button(PLUS_SVG, 'pickPiece', { cls: 'btn-sign', data: { pieceType: 'counter', sign: '+' }, aria: 'Plus counter' });
   const minus = button(MINUS_SVG, 'pickPiece', { cls: 'btn-sign', data: { pieceType: 'counter', sign: '-' }, aria: 'Minus counter' });
+  const nothing = button('Nothing to rewrite', 'nothingToRewrite', { data: { key: 'n' }, aria: 'Nothing to rewrite (key N)' });
   const undo = button('Undo', 'undo', { data: { key: 'Backspace' }, aria: 'Undo' });
   const check = button('Check ✓', 'check', { cls: 'btn-primary' });
-  row.append(group(box, circle), group(boxPlus, boxMinus, plus, minus), group(undo), check);
+  row.append(group(nothing), group(box, circle), group(boxPlus, boxMinus, plus, minus), group(undo), check);
 
   const pad = document.createElement('div');
   pad.className = 'pad';
@@ -70,6 +71,8 @@ export function buildBoxControls(root, dispatch) {
       const boxCircle = step === 'boxcircle';
       const drawing = step === 'draw';
       const answering = step === 'answer';
+      nothing.hidden = !s.problem || (s.problem.level ?? 0) < 4; // only Levels 4–5 have a Rewrite step
+      nothing.disabled = step !== 'rewrite';
       box.disabled = circle.disabled = !boxCircle;
       box.setAttribute('aria-pressed', String(boxCircle && s.tool === 'box'));
       circle.setAttribute('aria-pressed', String(boxCircle && s.tool === 'circle'));

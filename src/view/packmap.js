@@ -79,7 +79,7 @@ export function renderPackMap(root, progress, packs, { onPlay, onSaveCode, onEnt
 
 // Shown in place of the Mat when the fifth problem of a level is solved.
 export function renderLevelDone(root, { pack, level, packComplete, nextPack, onNext, onMap, onReplay }) {
-  const hasNext = level < (pack.levels || pack.previewLevels || 0);
+  const hasNext = level < pack.levels;
   const buttons = h('div', { class: 'level-done-actions' });
   if (hasNext) buttons.append(h('button', { type: 'button', class: 'btn btn-primary', 'data-go': 'next' }, `Level ${level + 1} →`));
   else buttons.append(h('button', { type: 'button', class: 'btn', 'data-go': 'replay' }, `Play Level ${level} again`));
