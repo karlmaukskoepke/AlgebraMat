@@ -2,7 +2,7 @@
 // { ok, feedbackKey, params? }; the wording lives in view/termFeedback.js.
 // Pure logic, no DOM.
 
-import { termParts, termText, isX } from './terms.js';
+import { termParts, termText, isX, pieceCount, pieceSign, evaluate, formatAnswer, parseAnswer } from './terms.js';
 import { MINUS } from './expr.js';
 
 const pass = (feedbackKey, params) => ({ ok: true, feedbackKey, params });
@@ -67,4 +67,49 @@ export function validateShapes(expr, shapes) {
     return fail(isX(expr.terms[i]) ? 'boxMissing' : 'circleMissing', { text: termText(expr.terms[i], i === 0) });
   }
   return pass('boxCircleDone');
+}
+
+// ---------- ② Draw ----------
+
+// Most pieces one term's column can hold (a term needs at most 9; one over so "too many" can happen).
+export const MAX_PER_TERM = 10;
+
+// What a term should draw, in words: "4 negative boxes", "1 box", "5 negatives", "7 positives".
+export function piecePhrase(term) {
+  const count = pieceCount(term);
+  const neg = pieceSign(term) === '-';
+  if (isX(term)) return `${count} ${neg ? 'negative ' : ''}box${count === 1 ? '' : 'es'}`;
+  return `${count} ${neg ? 'negative' : 'positive'}${count === 1 ? '' : 's'}`;
+}
+
+// Every term has the right pieces: boxes for an x term, counters for a number,
+// of the sign the term is worth, and the right number of them. Feedback is about
+// the first term (in reading order) that's off.
+export function validateDraw(expr, columns) {
+  for (let i = 0; i < expr.terms.length; i++) {
+    const term = expr.terms[i];
+    const column = columns[i] ?? [];
+    const text = termText(term, i === 0);
+    const type = isX(term) ? 'box' : 'counter';
+    if (column.some((p) => p.type !== type)) return fail(isX(term) ? 'drawBoxes' : 'drawCounters', { text });
+    if (column.length === 0 || column.some((p) => p.sign !== pieceSign(term))) {
+      return fail('needPieces', { text, phrase: piecePhrase(term) });
+    }
+    if (column.length !== pieceCount(term)) return fail('countAgain', { text, have: column.length, count: pieceCount(term) });
+  }
+  return pass('drawDone');
+}
+
+// ---------- ④ Answer ----------
+
+// The typed expression: readable, fully combined, and right. Feedback says which
+// kind is off (the boxes or the numbers) without giving the number.
+export function validateAnswer(expr, text) {
+  const read = parseAnswer(text);
+  if (!read.ok) return read.reason === 'empty' ? fail('typeAnswer') : fail('answerUnreadable');
+  if (!read.combined) return fail(read.terms.some((t) => t.value === 0) ? 'noZeroTerm' : 'combineAll');
+  const want = evaluate(expr);
+  if (read.x !== want.x) return fail('checkBoxes');
+  if (read.n !== want.n) return fail('checkNumbers');
+  return pass('correct', { answer: formatAnswer(want) });
 }

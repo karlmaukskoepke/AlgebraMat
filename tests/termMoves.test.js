@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { makeTerm, makeExpression } from '../src/engine/terms.js';
-import { validateShapes, shapeInfo, overlaps } from '../src/engine/termMoves.js';
+import { validateShapes, shapeInfo, overlaps, validateDraw, validateAnswer, piecePhrase } from '../src/engine/termMoves.js';
+import { piecesForExpression, makePiece } from '../src/engine/termPieces.js';
 
 const x = (op, v) => makeTerm('x', op, v);
 const n = (op, v) => makeTerm('int', op, v);
@@ -82,5 +83,67 @@ describe('Box & Circle check', () => {
 
   it('treats a negative first term as one part, so its circle is whole already', () => {
     expect(shapeInfo(EX2, circle(0))).toMatchObject({ term: 0, complete: true });
+  });
+});
+
+describe('Draw check', () => {
+  it('passes the right pieces and names the first term that is off', () => {
+    const right = piecesForExpression(EX1);
+    expect(validateDraw(EX1, right)).toMatchObject({ ok: true, feedbackKey: 'drawDone' });
+    const short = right.map((c) => [...c]);
+    short[2] = short[2].slice(1);
+    expect(validateDraw(EX1, short)).toMatchObject({ ok: false, feedbackKey: 'countAgain', params: { text: '+ 7', have: 6, count: 7 } });
+    const swapped = right.map((c) => [...c]);
+    swapped[1] = Array(5).fill(makePiece('counter', '+'));
+    expect(validateDraw(EX1, swapped)).toMatchObject({ feedbackKey: 'needPieces', params: { text: '− 5', phrase: '5 negatives' } });
+    expect(validateDraw(EX1, [[], [], [], []])).toMatchObject({ feedbackKey: 'needPieces', params: { text: '3x', phrase: '3 boxes' } });
+  });
+
+  it('wants boxes on x terms and counters on numbers', () => {
+    const right = piecesForExpression(EX1);
+    const mixed = right.map((c) => [...c]);
+    mixed[3] = [makePiece('counter', '-')];
+    expect(validateDraw(EX1, mixed)).toMatchObject({ feedbackKey: 'drawBoxes', params: { text: '− x' } });
+    mixed[3] = right[3];
+    mixed[1] = [makePiece('box', '-'), ...right[1].slice(1)];
+    expect(validateDraw(EX1, mixed)).toMatchObject({ feedbackKey: 'drawCounters' });
+  });
+
+  it('puts the count in words', () => {
+    expect(piecePhrase(x('-', 4))).toBe('4 negative boxes');
+    expect(piecePhrase(x('+', 1))).toBe('1 box');
+    expect(piecePhrase(n('-', 5))).toBe('5 negatives');
+    expect(piecePhrase(n('-', -7))).toBe('7 positives');
+    expect(piecePhrase(n('+', 1))).toBe('1 positive');
+  });
+});
+
+describe('Answer check', () => {
+  it('accepts the notes\' answers in either order', () => {
+    expect(validateAnswer(EX1, '2x + 2')).toMatchObject({ ok: true, params: { answer: '2x + 2' } });
+    expect(validateAnswer(EX1, '2+2x').ok).toBe(true);
+    expect(validateAnswer(EX2, '-3x+2').ok).toBe(true);
+    expect(validateAnswer(EX2, '−3x + 2').ok).toBe(true);
+  });
+
+  it('says which kind is off, boxes first, never the number', () => {
+    expect(validateAnswer(EX1, '3x + 2')).toMatchObject({ ok: false, feedbackKey: 'checkBoxes' });
+    expect(validateAnswer(EX1, '2x + 5')).toMatchObject({ feedbackKey: 'checkNumbers' });
+    expect(validateAnswer(EX1, '3x + 5')).toMatchObject({ feedbackKey: 'checkBoxes' });
+    expect(validateAnswer(EX1, '2x')).toMatchObject({ feedbackKey: 'checkNumbers' });
+    expect(validateAnswer(EX1, '2')).toMatchObject({ feedbackKey: 'checkBoxes' });
+  });
+
+  it('wants it readable and combined', () => {
+    expect(validateAnswer(EX1, '')).toMatchObject({ feedbackKey: 'typeAnswer' });
+    expect(validateAnswer(EX1, '2x+')).toMatchObject({ feedbackKey: 'answerUnreadable' });
+    expect(validateAnswer(EX1, '2x + 3 − 1')).toMatchObject({ feedbackKey: 'combineAll' });
+    expect(validateAnswer(EX1, 'x + x + 2')).toMatchObject({ feedbackKey: 'combineAll' });
+    expect(validateAnswer(EX1, '2x + 2 + 0')).toMatchObject({ feedbackKey: 'noZeroTerm' });
+  });
+
+  it('takes x and 1x, −x and −1x as the same', () => {
+    const e = makeExpression([x('+', 3), n('+', 1), x('-', 2)]);   // 3x + 1 − 2x = x + 1
+    for (const t of ['x+1', '1x+1', '1+x', '1+1x']) expect(validateAnswer(e, t).ok, t).toBe(true);
   });
 });

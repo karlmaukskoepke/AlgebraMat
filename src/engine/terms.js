@@ -115,3 +115,11 @@ export function parseAnswer(text) {
   const combined = new Set(kinds).size === kinds.length && terms.every((t) => t.value !== 0);
   return { ok: true, terms, x, n, combined };
 }
+
+// What the student has typed so far, set out the way it reads: the keyboard's
+// "-" becomes a real minus, and spaces go around the operations (not a leading
+// sign). "2x+3" → "2x + 3", "-3x-2" → "−3x − 2". Half-typed text is fine: "2x+" → "2x +".
+export function prettyAnswer(text) {
+  const s = String(text ?? '').replace(/\s+/g, '').replace(/[-–—]/g, MINUS);
+  return s.replace(/(?<=.)([+−])/g, ' $1 ').trim();
+}

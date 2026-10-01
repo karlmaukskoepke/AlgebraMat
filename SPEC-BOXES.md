@@ -170,3 +170,15 @@ My calls, open to change:
 - **Rewrite (Levels 4–5) isn't built yet** (build step 5), so Box & Circle works on those levels as written.
 - **Keyboard quick keys are now generic:** any palette button can name a key with `data-key` (a letter or Backspace), and the shared handler presses it. The Answer step's x, + and − buttons will use this.
 - **On a phone** the Mat is small (about 40% scale), as in Group It. The target is a Chromebook.
+
+## 12. Build decisions, step 4 (Draw, Cancel and Answer)
+
+- **A level can now be played start to finish** at `?pack=boxes&level=N` (the pack is still a Coming-soon card, so nothing is saved and no level unlocks).
+- **Draw:** four piece buttons, □ (box), −□ (negative box), + and −. Pick one, then tap above a term to add it to that term's column (up to 10). Tapping a piece takes it away; Undo takes back the latest. The mystery-box key (□ = x, −□ = −x) shows during Draw. A piece from a subtracted negative term (Level 4–5, once Rewrite exists) is magenta.
+- **Check (Draw) says which term is off, in reading order:** wrong kind of piece (*boxes for x, counters for numbers*), wrong sign or none (*"This term is 6, so it needs 6 positives."*), or right kind and sign but the wrong count (*"Count again"*, with how many you have, not the answer). Each wrong Check counts toward a hint.
+- **Cancel:** tap a piece, then its opposite, in either order and across boxes or numbers (student's choice). Wrong pairs say why (a box with a number; two of the same sign). Tap the picked piece again to let go. Undo takes back the latest pair. When nothing is left to cancel the step moves on by itself; if Draw leaves nothing to cancel, Cancel is skipped.
+- **Answer:** typed on the on-screen pad (digits, x, +, −, ⌫) or the keyboard (digits, **x**, **+**, **−**/**-**, Backspace, Enter). The line under the problem shows `= …` as it's typed, with the keyboard `-` shown as a real minus and spaces around the operations. Up to 12 characters.
+- **Check (Answer) says what's wrong without giving the number:** unreadable, not combined, a zero term, the boxes are off, or the numbers are off. Either order is right (`2x + 2` or `2 + 2x`), and `x` is the same as `1x`.
+- **Next →:** after a right answer the Check button becomes **Next →** (Enter presses it), and the problem also moves on by itself after 2.5 seconds, as in the other packs.
+- **Keyboard handler:** among matching buttons the first *enabled* one is pressed, so Backspace is the pad's delete while typing and Undo otherwise. A preview pack doesn't save progress on finishing a level.
+

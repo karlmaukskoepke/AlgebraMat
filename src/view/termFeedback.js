@@ -14,7 +14,36 @@ export const TERM_FEEDBACK = {
   circleIt: () => 'That’s just a number: no x. Circle it.',
   boxMissing: () => 'An x term is still not boxed.',
   circleMissing: () => 'A number is still not circled.',
-  boxCircleDone: () => 'Boxed and circled, signs and all! Next is Draw, coming in the next build.',
+  boxCircleDone: () => 'Boxed and circled, signs and all! Now draw each term above it: pick a piece, then tap above the term.',
+
+  // ② Draw
+  drawIntro: () => 'Pick a piece — box, − box, + or − — then tap above a term to add one. Tap a piece to take it away.',
+  pickPieceFirst: () => 'Pick a piece first: box, − box, + or −.',
+  columnFull: () => 'That’s more than any term needs. Tap a piece to take it away, or Undo.',
+  drawBoxes: () => 'This term has an x: draw boxes above it.',
+  drawCounters: () => 'This one is a number: use + and − counters, not boxes.',
+  needPieces: ({ text, phrase }) => `This term is ${text}, so it needs ${phrase}.`,
+  countAgain: ({ text, have, count }) => `Count again — you have ${have}, and ${text} needs ${count}.`,
+  drawDone: () => 'Everything’s drawn! Now cancel pairs: tap a piece, then its opposite. Boxes or numbers first — your choice.',
+  drawDoneNoCancel: () => 'Everything’s drawn, and nothing cancels! Now type what you have, like 2x + 2.',
+
+  // ③ Cancel
+  cancelIntro: () => 'Cancel pairs: tap a piece, then its opposite. A box pairs with a − box, and + pairs with −.',
+  cancelPick: () => 'Now tap its opposite.',
+  cancelPaired: () => 'Canceled! Keep going.',
+  alreadyCanceled: () => 'That one’s already canceled.',
+  notLikeTerms: () => 'A box and a number aren’t like terms — they don’t cancel.',
+  pairIsPlusMinus: () => 'A pair is one + and one −. Tap an opposite.',
+  cancelDone: () => 'All the pairs are canceled! Now type what’s left, like 2x + 2.',
+
+  // ④ Answer
+  typeAnswer: () => 'Type your answer first, like 2x + 2.',
+  answerUnreadable: () => 'Type it like 2x + 2: numbers, x, + and −.',
+  combineAll: () => 'Combine all the x terms into one, and all the numbers into one.',
+  noZeroTerm: () => 'Leave out a part that’s 0.',
+  checkBoxes: () => 'Look at the boxes that are left: what sign, and how many?',
+  checkNumbers: () => 'Look at the numbers that are left: what sign, and how many?',
+  correct: ({ answer }) => `Yes! The answer is ${answer}.`,
 };
 
 export function termFeedbackText(fb) {

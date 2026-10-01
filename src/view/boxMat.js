@@ -110,7 +110,7 @@ export function renderBoxMat(s) {
     }
     piecePositions(column.length, col.cx).forEach((pos, i) => {
       const selected = s.selected?.term === col.term && s.selected?.index === i;
-      const tap = s.tap === 'pieces' && !column[i].canceled ? { action: 'piece', term: col.term, index: i } : null;
+      const tap = (s.tap === 'pieces' || s.tap === 'zones') && !column[i].canceled ? { action: 'piece', term: col.term, index: i } : null;
       svg.append(pieceNode(column[i], pos.x, pos.y, { selected, hinted: hint.pieces?.some((p) => p.term === col.term && p.index === i), tap }));
     });
   });

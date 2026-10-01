@@ -512,6 +512,7 @@ body {
 }
 
 .btn-sign svg {
+  fill: none;
   width: 28px;
   height: 28px;
   stroke: var(--ink);
