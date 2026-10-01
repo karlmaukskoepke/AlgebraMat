@@ -139,6 +139,18 @@ export function partAt(layout, x) {
   return layout.parts.findIndex((p) => x >= p.hitLeft && x <= p.hitRight);
 }
 
+// The part nearest x, if one is within `slack` of its hit box (so a press in the
+// small gaps between terms still lands). -1 if none.
+export function partNear(layout, x, slack = 18) {
+  let best = -1;
+  let bestDistance = slack + 1;
+  for (const p of layout.parts) {
+    const distance = x < p.hitLeft ? p.hitLeft - x : x > p.hitRight ? x - p.hitRight : 0;
+    if (distance < bestDistance) { best = p.index; bestDistance = distance; }
+  }
+  return best;
+}
+
 // The parts a drag from x1 to x2 covers: everything between the two ends.
 export function dragRange(layout, x1, x2) {
   const lo = Math.min(x1, x2);

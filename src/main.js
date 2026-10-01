@@ -8,13 +8,14 @@ import { createStore } from './storage.js';
 import { PACKS, packById } from './packs/index.js';
 import { flipitPlay } from './play/flipitPlay.js';
 import { lassoPlay } from './play/lassoPlay.js';
+import { boxPlay } from './play/boxPlay.js';
 import { renderPackMap, renderLevelDone } from './view/packmap.js';
 import { showSaveCode, askForCode } from './view/codes.js';
 
 const $ = (id) => document.getElementById(id);
 
 // Each pack's play adapter: its steps, session, Mat, controls and messages.
-const PLAY = { flipit: flipitPlay, lasso: lassoPlay };
+const PLAY = { flipit: flipitPlay, lasso: lassoPlay, boxes: boxPlay };
 const newSeed = () => Math.floor(Math.random() * 2 ** 32);
 
 // ?seed=123 replays a fixed set (handy for projecting the same problems to a
@@ -55,6 +56,17 @@ function useControls(adapter) {
   old.replaceWith(fresh);
   controls = adapter.buildControls(fresh, dispatch);
   controlsFor = adapter;
+}
+
+// Some packs' Mats are dragged rather than tapped (Boxes & Circles), so they
+// bring their own pointer listeners, bound once on the Mat's container.
+let matBoundFor = null;
+let unbindMat = null;
+function useMat(adapter) {
+  if (matBoundFor === adapter) return;
+  unbindMat?.();
+  unbindMat = adapter.bindMat ? adapter.bindMat(matRoot, dispatch, () => play?.session) : null;
+  matBoundFor = adapter;
 }
 
 function showScreen(name) {
@@ -98,6 +110,7 @@ function startLevel(packId, level, resume = null) {
   const index = resume?.index ?? 0;
   play = { pack, adapter, level, seed, problems, index, session: adapter.newSession(problems[index]), finished: false };
   useControls(adapter);
+  useMat(adapter);
   $('title').textContent = `${pack.title.toUpperCase()} · Level ${level}`;
   persist();
   showScreen('play');
@@ -219,14 +232,19 @@ document.addEventListener('keydown', (e) => {
     // A focused button elsewhere (Packs, Save code) keeps its own Enter.
     if (t.matches('button, a') && !t.closest('#controls')) return;
   }
-  let target = null;
-  if (/^[0-9]$/.test(e.key)) target = `.pad button[data-digit="${e.key}"]`;
-  else if (e.key === 'Backspace' || e.key === 'Delete') target = '.pad button[data-action="backspace"]';
-  else if (e.key === '-' || e.key === '−') target = '.pad button[data-action="toggleSign"]';
-  else if (e.key === 'Enter' && !e.repeat) target = 'button[data-action="check"]';
-  if (!target) return;
+  // The first button that exists wins. A button can also name its own key with
+  // data-key (a letter, or Backspace), which is how a pack's palette gets quick keys.
+  const candidates = [];
+  const letter = /^[a-z]$/i.test(e.key);
+  if (/^[0-9]$/.test(e.key)) candidates.push(`.pad button[data-digit="${e.key}"]`);
+  else if (e.key === 'Backspace' || e.key === 'Delete') candidates.push('.pad button[data-action="backspace"]', 'button[data-key="Backspace"]');
+  else if (e.key === '-' || e.key === '−') candidates.push('.pad button[data-action="toggleSign"]');
+  else if (e.key === 'Enter' && !e.repeat) candidates.push('button[data-action="check"]');
+  else if (letter) candidates.push(`button[data-key="${e.key.toLowerCase()}"]`);
+  if (!candidates.length) return;
+  const b = candidates.map((sel) => $('controls').querySelector(sel)).find(Boolean);
+  if (!b && letter) return; // a letter nothing uses: leave it alone
   e.preventDefault(); // a focused pad button shouldn't also press itself
-  const b = $('controls').querySelector(target);
   if (b && !b.disabled) b.click();
 });
 
@@ -245,7 +263,8 @@ function savedCurrent() {
 }
 
 // ?level=N opens a Flip It level; ?pack=groupit&level=N opens a Group It level
-// (?pack=lasso, its id from before the rename, still works).
+// (?pack=lasso, its id from before the rename, still works); ?pack=boxes&level=N
+// plays the finished steps of Boxes & Circles while it's being built.
 const urlLevel = Number(params.get('level'));
 const urlPack = packById(params.get('pack') === 'groupit' ? 'lasso' : params.get('pack') ?? 'flipit');
 const resume = savedCurrent();
@@ -253,7 +272,7 @@ if (params.get('demo') === 'boxes') {
   // Boxes & Circles step 2: a static preview of the Mat (loaded only on this URL).
   import('./view/boxDemo.js').then((m) => m.showBoxDemo(document.body));
 } else if (urlPack && PLAY[urlPack.id] && Number.isInteger(urlLevel) && urlLevel >= 1
-  && urlLevel <= urlPack.levels) {
+  && urlLevel <= (urlPack.levels || urlPack.previewLevels || 0)) {
   startLevel(urlPack.id, urlLevel);
 } else if (resume) {
   startLevel(resume.pack, resume.level, resume);

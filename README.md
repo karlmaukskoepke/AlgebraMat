@@ -19,8 +19,8 @@ Add `?seed=123` to the URL to replay a fixed problem set, and `?level=2` to open
 
 ## Layout
 
-- `src/engine/`: pure logic, no DOM. `expr.js` (expression model), `generate.js` (seeded levels), `moves.js` (validators), `session.js` (one problem's steps as a reducer), `progress.js` (level unlocks, save code), `hints.js` + `lassoHints.js` (hints after 3 wrong tries), `groups.js` + `generateLasso.js` (Group It problems; files keep the old "lasso" name), `terms.js` + `termPieces.js` + `generateTerms.js` (Boxes & Circles).
-- `src/view/`: DOM and SVG. `mat.js`, `controls.js`, `lassoMat.js` + `lassoLayout.js` (the Group It Mat), `boxMat.js` + `boxLayout.js` (the Boxes & Circles Mat), `packmap.js` (home and level-complete panel), `codes.js` (save-code dialogs), `feedback.js` (every message, in one table), `layout.js` (counter geometry).
+- `src/engine/`: pure logic, no DOM. `expr.js` (expression model), `generate.js` (seeded levels), `moves.js` (validators), `session.js` (one problem's steps as a reducer), `progress.js` (level unlocks, save code), `hints.js` + `lassoHints.js` (hints after 3 wrong tries), `groups.js` + `generateLasso.js` (Group It problems; files keep the old "lasso" name), `terms.js` + `termPieces.js` + `termMoves.js` + `termSession.js` + `generateTerms.js` (Boxes & Circles).
+- `src/view/`: DOM and SVG. `mat.js`, `controls.js`, `lassoMat.js` + `lassoLayout.js` (the Group It Mat), `boxMat.js` + `boxLayout.js` + `boxPointer.js` + `boxControls.js` (the Boxes & Circles Mat, its drag and palette), `packmap.js` (home and level-complete panel), `codes.js` (save-code dialogs), `feedback.js` (every message, in one table), `layout.js` (counter geometry).
 - `src/storage.js`: localStorage wrapper that falls back to memory.
 - `src/play/`: one play adapter per pack (`flipitPlay.js`, `lassoPlay.js`); `main.js` runs whichever the pack uses.
 - `src/packs/`: pack definitions (`flipit.js`; `index.js` has Lasso and lists every pack, including the Coming-soon ones).
@@ -28,6 +28,21 @@ Add `?seed=123` to the URL to replay a fixed problem set, and `?level=2` to open
 - `tests/`: Vitest.
 
 ## Changelog
+
+### Boxes & Circles step 3: Box & Circle (SPEC-BOXES.md §7.3)
+- **Playable at `?pack=boxes&level=N`** (levels 1 to 5). The card on the pack map is still Coming soon. A correct Box & Circle moves on to Draw, which says it arrives in the next build.
+- **Box and Circle tools** (keys B and C), with **drag-to-select**: press on a term, drag across the operation and the number, and the parts light up yellow while the pointer is still down; letting go draws the shape. Works with mouse, touch and pen. A tap shapes one part (dashed until the sign is included), and tapping a finished shape removes it. A new shape replaces any it overlaps, so fixing a dashed one is a single drag.
+- **Check** says what's wrong, most specific first: a shape over two terms, the wrong shape for the term, a shape missing the sign (or the number), then what's missing. Order of boxing and circling is up to the student.
+- **Keyboard:** palette buttons can name their quick key with `data-key`, and the shared key handler presses them (B, C, Backspace for Undo, Enter for Check).
+- **New files:** `engine/termMoves.js` (the rules), `engine/termSession.js` (the reducer), `view/boxControls.js` (palette), `view/boxPointer.js` (the drag), `view/termFeedback.js` (messages), `play/boxPlay.js` (the adapter).
+- **Judgment calls:**
+  - Rewrite for Levels 4–5 waits for step 5, so those levels work as written for now.
+  - A press in the gap between terms picks the nearest part, so a slightly-off press still lands.
+  - `?demo=boxes` stays until the pack is playable.
+- **Verified:**
+  - 265 tests, including a check that every problem the levels make can be solved by drawing one right shape per term, and that every message key the engine can produce has wording.
+  - In a real browser on all five levels: a mouse drag shows the live highlight while the button is down and draws a finished shape on release; touch dragging works the same and doesn't scroll the page; a tap shapes one part (dashed); a drag fixes it; tapping a shape removes it; Backspace undoes; two terms in one shape, wrong shapes and missing shapes each get their own message; B, C and Enter work.
+  - The Flip It, Group It, hints, save-code and keyboard flows still pass, and the touch audit is clean at 1366×657 and 1280×610.
 
 ### Boxes & Circles step 2: the static Mat (SPEC-BOXES.md §7.2)
 - **Preview page at `?demo=boxes`** draws the Mat in every state, using the notes' two examples: shapes done, a dashed unfinished shape (the − left out), the live drag highlight, Draw with the mystery-box key, one piece picked to cancel, canceled and answered, the answer being typed, the rewritten `− (−7)` with its magenta "is +7", and the most crowded problem the levels can make. Nothing is playable yet.

@@ -156,3 +156,17 @@ My calls, open to change:
 - **Tap targets:** each part (operation, number) has a hit box at least 46 wide and 56 tall that never reaches into its neighbor. A drag covers every part between its two ends.
 - **"is +7"** sits under a rewritten term in magenta Kalam with an underline, and its pieces are magenta.
 - **Pieces are listed in reading order** (top-left first). When there's nothing left to cancel, each kind has only one sign left, and the leftovers always equal what the expression comes to (tested for every generated problem).
+
+## 11. Build decisions, step 3 (Box & Circle)
+
+- **Playable at `?pack=boxes&level=N`** (levels 1 to 5) while the pack is built. It's still a Coming-soon card, and the level can't be finished yet: a correct Box & Circle moves to the Draw step, which says it comes in the next build.
+- **Tools:** **Box** and **Circle** buttons (keys **B** and **C**), the chosen one stays pressed until the other is picked. **Undo** is Backspace. Enter checks. With no tool picked, a press on the expression says *"Pick Box or Circle first."*
+- **Dragging:** press on a part, drag, and the parts under the pointer turn highlighter yellow with bold text, live, until release. On release the shape is drawn around everything between the two ends (either direction). Mouse, touch and pen all work; a drag across the Mat never scrolls the page. A press in the small gap between terms lands on the nearest part (within 18 units).
+- **Taps:** a tap on a part draws the shape around just that part (dashed, since it isn't a whole term yet). A tap on a **finished shape removes it**.
+- **A new shape replaces any shape it overlaps**, so fixing the dashed shape is one drag across the whole term, and switching tool and dragging again turns a box into a circle.
+- **A shape is finished (solid)** only when it surrounds exactly one whole term: the operation and the number. The first term has no operation, so its number alone is whole.
+- **Check says what's wrong, most specific first:** a shape over two terms (*"One term at a time"*), then the wrong shape (*"That one has an x: box it."* / *"That's just a number: no x. Circle it."*), then an unfinished shape (*"Take the sign in front with it…"* or *"Take the number too…"*), then what's missing (*"An x term is still not boxed."* / *"A number is still not circled."*). Each wrong Check counts toward a hint (hints come in the last build).
+- **`− (−7)` is a number:** its circle must take the `−` and the whole `(−7)`.
+- **Rewrite (Levels 4–5) isn't built yet** (build step 5), so Box & Circle works on those levels as written.
+- **Keyboard quick keys are now generic:** any palette button can name a key with `data-key` (a letter or Backspace), and the shared handler presses it. The Answer step's x, + and − buttons will use this.
+- **On a phone** the Mat is small (about 40% scale), as in Group It. The target is a Chromebook.
