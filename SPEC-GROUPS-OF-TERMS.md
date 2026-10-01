@@ -126,3 +126,14 @@
 - **Check it:** a right answer goes to the Check it step: the problem text becomes the distributing arrows (blue, drawn in, from A to each term), the two products written out (`−1/2 · (−4) = 2`, `−1/2 · 6x = −3x`), and the combined line in the order B is written (`= 2 − 3x`). The Mat's groups stay beside it. It is show-only (Karl). **Check becomes Next →** (Enter does it too); there's no timer, so students can read it. Wrong answers count toward hints; Check it has none.
 - **Pack map, four cards:** one row of four on a wide screen, each card about 290px wide, so level buttons go two to a row and a long list (Group It's 7, this pack's 8) scrolls inside its card. The cards are equal size, and the page doesn't scroll at 1366 × 657 or 1280 × 610. Narrower screens use two columns, phones one.
 
+## 14. Build decisions, step 6 (hints, animations, touch audit)
+
+- **Hints** appear after 3 wrong tries on a step (the same rule as the other packs), in Kalam under the feedback, and stay until the step changes. A hint shows the move and never makes it. Group It's hints are used for Groups, + or − and Take (the hidden-1 gap pulses; Add group pulses, or the extra groups blink; the right + groups or − groups button pulses; the first n parts blink as an example). This pack adds:
+  - **Fill, whole numbers:** says what one group is (*"Each group is (2x − 1): 2 boxes and 1 negative"*), pulses the next piece to pick for the first group, then Copy to all, and blinks every group that's off.
+  - **Fill, fractions:** says what all of B is, and pulses the piece button for the kind being dealt (or the next kind to deal). The lit-up part is already shown.
+  - **Answer:** the groups to read (the flipped copies, or the parts taken) blink, and the hint names the sign of the boxes and the numbers, never how many.
+  - Flip and Check it have no hints (a − can't be tapped wrongly, and Check it asks for nothing).
+- **Animations** (all off with reduced motion): a piece just added pops in (Copy to all pops the new copies), the flip turns the group over and draws its arrow, and Check it's arrows draw themselves in.
+- **Touch audit:** every play-screen target is at least 44px at 1366 × 657 and 1280 × 610, checked over Levels 1 to 8, three seeds each: ovals and bar parts 50px or more, the − marks 49px or more, palette buttons 44px.
+- **Groups of Terms is complete** (SPEC-GROUPS-OF-TERMS.md §7, all six steps).
+

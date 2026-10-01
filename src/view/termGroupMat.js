@@ -52,9 +52,9 @@ const has = (v) => v !== null && v !== undefined;
 // ---------- Pieces ----------
 
 // A counter: a + or − mark. A box: a square; a negative box has a short dash touching its left.
-function piece(spec, x, y, cls, size = GLYPH) {
+function piece(spec, x, y, cls, size = GLYPH, popped = false) {
   const h = size / 2;
-  const g = el('g', { class: `tg-piece ${spec.type === 'box' ? 'tg-box' : 'counter'} ${cls}`, transform: `translate(${x} ${y})`, 'data-sign': spec.sign, 'data-type': spec.type });
+  const g = el('g', { class: `tg-piece ${spec.type === 'box' ? 'tg-box' : 'counter'} ${cls}${popped ? ' pop-in' : ''}`, transform: `translate(${x} ${y})`, 'data-sign': spec.sign, 'data-type': spec.type });
   if (spec.type === 'box') {
     const neg = spec.sign === '-';
     const left = neg ? -h * 0.55 : -h;
@@ -72,11 +72,11 @@ const opposites = (pieces) => pieces.map((p) => ({ ...p, sign: p.sign === '+' ? 
 
 // A row of pieces in a group of `width`. A redrawn (flipped) group is magenta
 // and turns over like a card when it has just been drawn (`turning`).
-function pieceRow(pieces, cx, cy, { width, base, magenta = false, turning = false }) {
+function pieceRow(pieces, cx, cy, { width, base, magenta = false, turning = false, popped = [] }) {
   const pitch = rowPitch(pieces.length, width, base);
   const size = Math.min(GLYPH, pitch - 6);
   const g = el('g', { class: `row${turning ? ' flip-in' : ''}` });
-  rowXs(pieces.length, cx, pitch).forEach((x, i) => g.append(piece(pieces[i], x, cy, magenta ? 'is-opposite' : 'is-inside', size)));
+  rowXs(pieces.length, cx, pitch).forEach((x, i) => g.append(piece(pieces[i], x, cy, magenta ? 'is-opposite' : 'is-inside', size, popped.includes(i))));
   return g;
 }
 
@@ -164,6 +164,9 @@ const chainRight = (s, x) => {
   return has(text) ? x + 38 + textWidth(text, 26) + 14 : 0;
 };
 
+// The pieces just added to group i, to pop in.
+const poppedIn = (s, i) => (s.fx?.added ?? []).filter((a) => a.group === i).map((a) => a.index);
+
 const turning = (s, i) => Boolean(s.fx?.justFlipped?.includes(i));
 const hinted = (s, i) => Boolean(s.fx?.hint?.show?.groups?.includes(i));
 
@@ -183,7 +186,7 @@ function wholeScript(svg, s) {
       'data-action': tap ? (s.tap === 'flip' ? 'flip' : 'group') : null, 'data-index': tap ? i : null,
     });
     g.append(el('ellipse', { cx: cols.origX, cy: ys[i], rx: w / 2, ry: OVAL_H / 2, class: 'lasso-oval is-inside' }));
-    g.append(pieceRow(group.pieces, cols.origX, ys[i], { width: w, base }));
+    g.append(pieceRow(group.pieces, cols.origX, ys[i], { width: w, base, popped: poppedIn(s, i) }));
     svg.append(g);
     if (!s.opposite) return;
     svg.append(oppMark(s, cols.markX, ys[i], { index: i, flipped: group.flipped }));
@@ -223,7 +226,7 @@ function fractionScript(svg, s) {
     const g = el('g', { class: cls, 'data-part': i, 'data-action': tap ? 'group' : null, 'data-index': tap ? i : null });
     g.append(el('rect', { x: cols.left, y: yOf(i), width: w, height: PART_H, class: 'bar-part' }));
     if (next) g.append(el('rect', { x: cols.left + 4, y: yOf(i) + 4, width: w - 8, height: PART_H - 8, rx: 6, class: 'next-ring' }));
-    g.append(pieceRow(group.pieces, cx, yOf(i) + PART_H / 2, { width: w, base }));
+    g.append(pieceRow(group.pieces, cx, yOf(i) + PART_H / 2, { width: w, base, popped: poppedIn(s, i) }));
     svg.append(g);
   });
   if (d) svg.append(el('rect', { x: cols.left, y: top, width: w, height: d * PART_H, rx: 4, class: 'bar-outline' }));

@@ -796,6 +796,7 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .mat .shake,
   .tg-mat .check-arrow.draw-in,
+  .tg-mat .tg-piece.pop-in > *,
   .feedback.bad,
   .feedback.celebrate,
   .mat .slash-in,
@@ -1403,6 +1404,13 @@ body {
 
 .tg-mat .tg-total {
   font-size: 26px;
+}
+
+/* A piece just added pops in (its marks scale up; the piece itself keeps its position). */
+.tg-mat .tg-piece.pop-in > * {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: pop-in 0.22s ease-out;
 }
 
 .tg-mat .tg-product {
