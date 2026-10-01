@@ -29,6 +29,12 @@ Add `?seed=123` to the URL to replay a fixed problem set, and `?level=2` to open
 
 ## Changelog
 
+### Combine it step 2: Levels 1 and 2, the pack card (SPEC-COMBINE.md §6.2, §9)
+
+- **Combine it is open** as the first card on the pack map, with its first two levels: add a positive and a negative (battles), then negatives and negatives (parties). Draw the counters, say party or battle, cancel pairs, type the answer. There's no Rewrite step, and the answer sits under the problem.
+- **Pack map:** five cards in one row on wide screens, equal size, with each card's levels in a scrolling list. Levels 3 and 4 of Combine it come next.
+- **Fixed:** the dashed hover outline on Draw zones flickered near the corners.
+
 ### Combine it step 1: model, generators, save code v5 (SPEC-COMBINE.md §6.1, §8)
 
 - **Engine only:** the problem model (`combine.js`), generators for Combine it's four levels and Flip It's mixed Level 5 (`generateCombine.js`), and save code v5.

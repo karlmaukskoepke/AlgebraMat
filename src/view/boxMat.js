@@ -113,7 +113,7 @@ export function renderBoxMat(s) {
     }
     if (s.tap === 'zones') {
       svg.append(el('rect', {
-        x: col.left, y: view.y + 4, width: col.width, height: SHAPE_TOP - 8 - view.y, class: 'bm-zone tappable',
+        x: col.left, y: view.y + 4, width: col.width, height: SHAPE_TOP - 8 - view.y, rx: 10, class: 'bm-zone tappable',
         'data-action': 'zone', 'data-term': col.term,
       }));
     }

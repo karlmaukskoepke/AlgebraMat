@@ -122,7 +122,23 @@ function problemLine(p) {
   return g;
 }
 
+// Combine it: nothing to rewrite, so the line under the problem is only the answer, set out
+// in the problem's columns:   5   +   (−8)
+//                                 =   −3
+function answerLine(s) {
+  const g = el('g', { class: 'rewritten' });
+  if (s.step === 'answer' || s.step === 'done') {
+    g.append(text('=', COLUMN.op, REWRITE_Y, 'op'));
+    const v = entryValue(s.entry);
+    const shown = v === null ? (s.entry.negative ? MINUS : '?') : signed(v);
+    g.append(text(shown, COLUMN.right, REWRITE_Y,
+      `answer${v === null ? ' is-empty' : ''}${s.step === 'done' ? ' is-correct' : ''}`));
+  }
+  return g;
+}
+
 function rewrittenLine(s, fx) {
+  if (s.combine) return answerLine(s);
   const { problem, flips } = s;
   const sub = isSubtraction(problem);
   const op = sub && !flips.op ? MINUS : '+';

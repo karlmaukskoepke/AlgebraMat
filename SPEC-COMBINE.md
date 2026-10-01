@@ -81,3 +81,11 @@ A **Level 5** on the Flip It pack, so both operations show up as the final chall
 - **Save code v5** (`MAT-7` plus seven symbols) is Flip It 5 + Group It 7 + Boxes & Circles 5 + Groups of Terms 8 + Combine it 4 = 29 bits, with 6 data symbols. Flip It's fifth bit and Combine it's four are read and dropped until those packs open. v1 to v4 codes still decode.
 - **Not visible yet:** this step is engine only.
 
+## 9. Build decisions, step 2 (Levels 1 and 2 playable, the pack card)
+
+- **Levels 1 and 2 play on Flip It's engine and Mat** with Rewrite left out: **Draw → Party or Battle? → Cancel → Answer** (a Party skips Cancel). The step bar lists those four, the palette has no *Nothing to rewrite* button, and Flip It's messages and hints are used as they are (every Draw, Party or Battle, Cancel and Answer message already read right for an addition).
+- **The Mat** draws the problem once (`−1 + 3`) with the counters above it, and under it only the answer in the problem's columns (`=` under the `+`, the answer under the second number), since there's no rewritten line to show.
+- **The pack card** is open from the start as the **first card** (ahead of Flip It), pack id `combineit`. **It lists only the two levels that are built** (a card with unplayable levels would be a dead end for students), and Levels 3 and 4 are added as they're built. Progress and save codes already have room for all four (save code v5), so nothing about saved progress changes then.
+- **Pack map, five cards:** at 1280px or wider all five packs sit in one row (cards about 235px wide, equal size). To fit, level buttons go **one to a row in a list that scrolls inside the card** (four and a half rows show, so the next one peeks out), the long blurb is left out, and each card's dots sit under its title so the cards line up. Between 1100 and 1279px the cards go three across (the page scrolls); narrower screens are as before. The page doesn't scroll at 1366 × 657 or 1280 × 610.
+- **Fix to the hover outline (Boxes & Circles):** rounding the zone's corners on hover made the pointer flicker in and out near the corners. The corners are now always rounded, and hover only changes the line and tint.
+

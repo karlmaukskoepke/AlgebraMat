@@ -1284,7 +1284,6 @@ body {
     stroke-width: 2.5;
     stroke-dasharray: 8 7;
     stroke-linecap: round;
-    rx: 16px;
     fill: rgba(29, 29, 29, 0.035);
   }
 }
@@ -1329,24 +1328,89 @@ body {
     padding-left: 24px;
     padding-right: 24px;
   }
-  .pack-grid {
-    grid-template-columns: repeat(var(--packs, 3), minmax(0, 1fr));
+  .pack-grid.packs-3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .pack-grid.packs-4 {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+  /* Five or more packs: three across until the screen is wide enough for every pack in one row. */
+  .pack-grid.packs-5,
+  .pack-grid.packs-6 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
   .soon-grid {
     grid-template-columns: repeat(2, 1fr);
   }
 }
 
+/* Five packs in one row (a Chromebook is 1280 or more): each card is about 235px wide, so the
+   levels go one to a row in a scrolling list (about four rows show), and the long blurb is left out. */
+@media (min-width: 1280px) {
+  .pack-grid.packs-5 {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 12px;
+  }
+  .pack-grid.packs-5 .pack-card {
+    padding: 12px 14px 14px;
+  }
+  .pack-grid.packs-5 .pack-head h2 {
+    font-size: 23px;
+    flex-basis: 100%;        /* the dots always sit under the title, so every card lines up */
+  }
+  .pack-grid.packs-5 .pack-head {
+    flex-wrap: wrap;
+    gap: 2px 8px;
+  }
+  .pack-grid.packs-5 .dot {
+    width: 11px;
+    height: 11px;
+    border-width: 1.5px;
+  }
+  .pack-grid.packs-5 .dots {
+    gap: 4px;
+    margin-left: 0;
+  }
+  .pack-grid.packs-5 .subtitle {
+    font-size: 14px;
+    margin: 2px 0 8px;
+    min-height: 3.6em;       /* three lines, so every card's levels start at the same height */
+  }
+  .pack-grid.packs-5 .blurb {
+    display: none;
+  }
+  .pack-grid.packs-5 .level-list,
+  .pack-grid.packs-5 .level-list.many {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+  .pack-grid.packs-5 .btn.level-btn {
+    min-height: 54px;
+    padding: 6px 12px;
+    gap: 0;
+  }
+  .pack-grid.packs-5 .level-num {
+    font-size: 18px;
+  }
+  .pack-grid.packs-5 .level-name {
+    font-size: 13px;
+    line-height: 1.2;
+  }
+  .pack-grid.packs-5 .level-scroll {
+    max-height: 272px;       /* four and a half rows, so the next one peeks out and says "scroll" */
+  }
+}
+
 /* Four packs across a Chromebook leave each card about 290px wide: two levels to a row. */
 @media (min-width: 1100px) {
-  .pack-grid.four-up .pack-head {
+  .pack-grid.packs-4 .pack-head {
     flex-wrap: wrap;
     gap: 4px 8px;
   }
-  .pack-grid.four-up .pack-head h2 {
+  .pack-grid.packs-4 .pack-head h2 {
     font-size: 26px;
   }
-  .pack-grid.four-up .level-list.many {
+  .pack-grid.packs-4 .level-list.many {
     grid-template-columns: repeat(2, 1fr);
     gap: 10px;
   }

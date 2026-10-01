@@ -10,7 +10,7 @@ describe('progress', () => {
   it('starts with every level of every pack unfinished', () => {
     expect(fresh).toEqual({
       v: 1,
-      packs: { flipit: { levels: Array(4).fill(false) }, lasso: { levels: Array(7).fill(false) }, boxes: { levels: Array(5).fill(false) }, 'groups-of-terms': { levels: Array(8).fill(false) } },
+      packs: { combineit: { levels: Array(2).fill(false) }, flipit: { levels: Array(4).fill(false) }, lasso: { levels: Array(7).fill(false) }, boxes: { levels: Array(5).fill(false) }, 'groups-of-terms': { levels: Array(8).fill(false) } },
     });
   });
 

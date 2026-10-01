@@ -1,5 +1,6 @@
 // Every pack, in pack-map order. Packs with `comingSoon` show as a card only
 // (SPEC-LASSO.md §5); they have no levels yet, so they take no room in saves.
+import { combineit } from './combineit.js';
 import { flipit } from './flipit.js';
 import { generateLassoLevel } from '../engine/generateLasso.js';
 import { generateTermLevel } from '../engine/generateTerms.js';
@@ -52,6 +53,7 @@ export const groupsOfTerms = {
 };
 
 export const PACKS = [
+  combineit,
   flipit,
   lasso,
   boxes,
