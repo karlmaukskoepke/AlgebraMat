@@ -29,6 +29,10 @@ Add `?seed=123` to the URL to replay a fixed problem set, and `?level=2` to open
 
 ## Changelog
 
+### Pack map: equal-size cards (SPEC-GROUPS-OF-TERMS.md §6)
+
+- **Every pack card is the same size,** and the cards sit in one row on wide screens (one column per pack). A card with more levels than fit (three rows show) **scrolls inside the card**, so the page doesn't scroll on a Chromebook. Narrower screens use two columns (equal row heights), phones one column as before.
+
 ### Boxes & Circles step 6: hints, animations, touch audit (SPEC-BOXES.md §7.6, §14)
 
 - **Hints after 3 wrong tries,** one per step: signs to flip wiggle, unfinished terms blink, dashed pieces show what to draw, a pair that cancels blinks, and leftover pieces blink with the signs named (never the counts).
