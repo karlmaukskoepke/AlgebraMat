@@ -19,7 +19,7 @@ Add `?seed=123` to the URL to replay a fixed problem set, and `?level=2` to open
 
 ## Layout
 
-- `src/engine/`: pure logic, no DOM. `expr.js` (expression model), `generate.js` (seeded levels), `moves.js` (validators), `session.js` (one problem's steps as a reducer), `progress.js` (level unlocks, save code), `hints.js` + `lassoHints.js` (hints after 3 wrong tries), `groups.js` + `generateLasso.js` (Group It problems; files keep the old "lasso" name), `terms.js` + `termPieces.js` + `termMoves.js` + `termSession.js` + `termHints.js` + `generateTerms.js` (Boxes & Circles), `termGroups.js` + `generateTermGroups.js` (Groups of Terms), `termGroupMat.js` (its Mat), `termGroupSession.js` + `termGroupMoves.js` + `termGroupHints.js` (its steps).
+- `src/engine/`: pure logic, no DOM. `expr.js` (expression model), `generate.js` (seeded levels), `moves.js` (validators), `session.js` (one problem's steps as a reducer), `progress.js` (level unlocks, save code), `hints.js` + `lassoHints.js` (hints after 3 wrong tries), `groups.js` + `generateLasso.js` (Group It problems; files keep the old "lasso" name), `terms.js` + `termPieces.js` + `termMoves.js` + `termSession.js` + `termHints.js` + `generateTerms.js` (Boxes & Circles), `combine.js` + `generateCombine.js` (Combine it), `termGroups.js` + `generateTermGroups.js` (Groups of Terms), `termGroupMat.js` (its Mat), `termGroupSession.js` + `termGroupMoves.js` + `termGroupHints.js` (its steps).
 - `src/view/`: DOM and SVG. `mat.js`, `controls.js`, `lassoMat.js` + `lassoLayout.js` (the Group It Mat), `boxMat.js` + `boxLayout.js` + `boxPointer.js` + `boxControls.js` (the Boxes & Circles Mat, its drag and palette), `packmap.js` (home and level-complete panel), `codes.js` (save-code dialogs), `feedback.js` (every message, in one table), `layout.js` (counter geometry).
 - `src/storage.js`: localStorage wrapper that falls back to memory.
 - `src/play/`: one play adapter per pack (`flipitPlay.js`, `lassoPlay.js`); `main.js` runs whichever the pack uses.
@@ -28,6 +28,12 @@ Add `?seed=123` to the URL to replay a fixed problem set, and `?level=2` to open
 - `tests/`: Vitest.
 
 ## Changelog
+
+### Combine it step 1: model, generators, save code v5 (SPEC-COMBINE.md §6.1, §8)
+
+- **Engine only:** the problem model (`combine.js`), generators for Combine it's four levels and Flip It's mixed Level 5 (`generateCombine.js`), and save code v5.
+- **Save code v5:** new codes are `MAT-7` plus seven symbols and have room for Flip It's fifth level and Combine it. v1 to v4 codes still work.
+- **Not visible yet:** nothing changes on screen.
 
 ### Groups of Terms step 6: hints, animations, touch audit (SPEC-GROUPS-OF-TERMS.md §7.6, §14)
 
