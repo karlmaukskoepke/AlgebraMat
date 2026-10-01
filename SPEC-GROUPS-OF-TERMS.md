@@ -1,4 +1,4 @@
-# The Mat: Groups of Terms pack spec (revised 2026-10-01 with Karl's answers; awaiting go-ahead)
+# The Mat: Groups of Terms pack spec (approved 2026-10-01)
 
 *Builds on SPEC.md, SPEC-LASSO.md (Group It) and SPEC-BOXES.md (Boxes & Circles): same shell, rules (no timers, no penalties, hints after 3 wrong tries), storage and keyboard quick-keys. Only what's new is written here. Source: Mr. Mauks's notes, page 2 (Distributive Property), plus Karl's answers of 2026-10-01.*
 
