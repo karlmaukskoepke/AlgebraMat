@@ -76,10 +76,12 @@ export function mergeProgress(a, b) {
 // levels, packed in each layout's pack order.
 //
 //   v1: 2 data symbols (961 values):    Flip It (4 bits)          → MAT-XXXX
-//   v2: 3 data symbols (29,791 values): Flip It (4) + Lasso (7)   → MAT-XXXXX
+//   v2: 3 data symbols (29,791 values): Flip It (4) + Group It (7)   → MAT-XXXXX
+//   v3: 4 data symbols (923,521 values): + Boxes & Circles (5)      → MAT-XXXXXX
 //
-// New codes are always v2; v1 codes (written down before Lasso) still work.
-// v2 leaves 3 spare bits (about 14.8 in all) for one more small pack.
+// New codes are always v3; v1 and v2 codes (written down earlier) still work.
+// (Group It's pack id is still `lasso`.) v3 holds 16 of about 19.8 bits, so
+// there is room for one more small pack before a v4 is needed.
 
 export const CODE_ALPHABET = '23456789ABCDEFGHJKMNPQRSTUVWXYZ';
 export const CODE_PREFIX = 'MAT';
@@ -87,8 +89,9 @@ const BASE = CODE_ALPHABET.length; // 31 (prime, which makes the checksum strong
 const LAYOUTS = {
   1: { data: 2, packs: [{ id: 'flipit', levels: 4 }] },
   2: { data: 3, packs: [{ id: 'flipit', levels: 4 }, { id: 'lasso', levels: 7 }] },
+  3: { data: 4, packs: [{ id: 'flipit', levels: 4 }, { id: 'lasso', levels: 7 }, { id: 'boxes', levels: 5 }] },
 };
-export const CODE_VERSION = 2;
+export const CODE_VERSION = 3;
 
 // Weighted sum mod 31. Weights 2, 3, 4, … are all nonzero mod 31 and differ
 // by 1 between neighbors, so any single typo or neighbor swap is caught.
