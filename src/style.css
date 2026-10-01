@@ -1104,6 +1104,136 @@ body {
   color: var(--opposite);
 }
 
+/* ---------- The Boxes & Circles Mat (SPEC-BOXES.md §2–3) ---------- */
+
+.box-mat .bm-text {
+  fill: var(--ink);
+  font: 600 40px 'Lexend', system-ui, sans-serif;
+}
+
+/* The live drag selection: highlighter yellow behind bolder text. */
+.box-mat .bm-selecting {
+  fill: #ffe45c;
+  opacity: 0.85;
+}
+
+.box-mat .bm-text.is-selecting {
+  stroke: var(--ink);
+  stroke-width: 1.2;
+}
+
+.box-mat .bm-shape {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 3;
+}
+
+.box-mat .bm-shape.is-incomplete {
+  stroke-dasharray: 7 6;
+  opacity: 0.8;
+}
+
+.box-mat .mark {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 3.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.box-mat .bm-piece.is-opposite .mark {
+  stroke: var(--opposite);
+}
+
+.box-mat .bm-piece.is-canceled .bm-mark {
+  opacity: 0.45;
+}
+
+.box-mat .bm-slash {
+  stroke: var(--cancel);
+  stroke-width: 3.5;
+  stroke-linecap: round;
+}
+
+.box-mat .bm-hit,
+.box-mat .bm-zone,
+.box-mat .bm-parthit {
+  fill: transparent;
+}
+
+.box-mat .tappable {
+  cursor: pointer;
+}
+
+.box-mat .bm-piece.tappable .bm-hit,
+.box-mat .bm-zone.tappable,
+.box-mat .bm-parthit.tappable {
+  pointer-events: all;
+}
+
+.box-mat .bm-ring {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 2.5;
+  stroke-dasharray: 5 4;
+}
+
+/* "is +7" under a rewritten term: magenta, underlined (it's words). */
+.box-mat .bm-label {
+  fill: var(--opposite);
+  font: 700 22px 'Kalam', cursive;
+}
+
+.box-mat .bm-label-line {
+  stroke: var(--opposite);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+}
+
+.box-mat .bm-answer {
+  fill: var(--ink);
+  font: 700 38px 'Kalam', cursive;
+}
+
+.box-mat .bm-answer.is-typing {
+  opacity: 0.75;
+}
+
+.box-mat .bm-key-text {
+  fill: var(--ink);
+  font: 700 22px 'Kalam', cursive;
+}
+
+/* Static preview page (?demo=boxes) */
+.box-demo {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 24px 12px 48px;
+}
+
+.box-demo h1 {
+  font-weight: 600;
+  font-size: 32px;
+}
+
+.box-demo figure {
+  margin: 0 0 28px;
+  padding: 8px 12px 12px;
+  border: 2px solid var(--ink);
+  border-radius: 16px;
+  background: var(--paper);
+}
+
+.box-demo .mat {
+  width: 100%;
+  height: auto;
+}
+
+.box-demo figcaption {
+  font-size: 17px;
+  color: var(--muted);
+}
+
 /* Seven levels (Group It) sit three to a row beside Flip It's two. */
 @media (min-width: 761px) {
   .level-list.many {

@@ -19,15 +19,42 @@ Add `?seed=123` to the URL to replay a fixed problem set, and `?level=2` to open
 
 ## Layout
 
-- `src/engine/`: pure logic, no DOM. `expr.js` (expression model), `generate.js` (seeded levels), `moves.js` (validators), `session.js` (one problem's steps as a reducer), `progress.js` (level unlocks, save code), `hints.js` + `lassoHints.js` (hints after 3 wrong tries), `groups.js` + `generateLasso.js` (Group It problems; files keep the old "lasso" name).
-- `src/view/`: DOM and SVG. `mat.js`, `controls.js`, `lassoMat.js` + `lassoLayout.js` (the Group It Mat), `packmap.js` (home and level-complete panel), `codes.js` (save-code dialogs), `feedback.js` (every message, in one table), `layout.js` (counter geometry).
+- `src/engine/`: pure logic, no DOM. `expr.js` (expression model), `generate.js` (seeded levels), `moves.js` (validators), `session.js` (one problem's steps as a reducer), `progress.js` (level unlocks, save code), `hints.js` + `lassoHints.js` (hints after 3 wrong tries), `groups.js` + `generateLasso.js` (Group It problems; files keep the old "lasso" name), `terms.js` + `termPieces.js` + `generateTerms.js` (Boxes & Circles).
+- `src/view/`: DOM and SVG. `mat.js`, `controls.js`, `lassoMat.js` + `lassoLayout.js` (the Group It Mat), `boxMat.js` + `boxLayout.js` (the Boxes & Circles Mat), `packmap.js` (home and level-complete panel), `codes.js` (save-code dialogs), `feedback.js` (every message, in one table), `layout.js` (counter geometry).
 - `src/storage.js`: localStorage wrapper that falls back to memory.
 - `src/play/`: one play adapter per pack (`flipitPlay.js`, `lassoPlay.js`); `main.js` runs whichever the pack uses.
 - `src/packs/`: pack definitions (`flipit.js`; `index.js` has Lasso and lists every pack, including the Coming-soon ones).
-- `SPEC.md`, `SPEC-LASSO.md`, `SPEC-ROADMAP.md`: the specs, and Karl's notes for the packs after Group It.
+- `SPEC.md`, `SPEC-LASSO.md`, `SPEC-BOXES.md`, `SPEC-ROADMAP.md`: the specs, and Karl's notes for the packs after Group It.
 - `tests/`: Vitest.
 
 ## Changelog
+
+### Boxes & Circles step 2: the static Mat (SPEC-BOXES.md §7.2)
+- **Preview page at `?demo=boxes`** draws the Mat in every state, using the notes' two examples: shapes done, a dashed unfinished shape (the − left out), the live drag highlight, Draw with the mystery-box key, one piece picked to cancel, canceled and answered, the answer being typed, the rewritten `− (−7)` with its magenta "is +7", and the most crowded problem the levels can make. Nothing is playable yet.
+- **Matches the notes:** rounded boxes around x terms, pills around numbers (each with the operation inside), pieces two to a row above their term (an odd one alone at the bottom), boxes `□` and negative boxes `−□`, vermillion slashes, magenta for the rewritten term.
+- **Layout (`view/boxLayout.js`)** is pure and tested: columns that fit every problem the generator can make, tap targets of at least 46 wide, and the drag-to-parts math for step 3. **Pieces (`engine/termPieces.js`)** are what each term draws and how pairs cancel.
+- **Judgment calls:**
+  - Gaps between columns close up when a problem is wide, rather than shrinking the text.
+  - The width estimates for text are generous, so a fallback font still fits inside its shape.
+  - The preview is temporary, and goes when the pack is playable.
+- **Verified:**
+  - 241 tests, including layout rules checked against 200 generated problems (every one fits the drawing, no tap targets overlap, columns clear the shapes) and a check that canceling everything always leaves exactly the answer.
+  - In the browser: all 9 preview states render with no errors, and the real text always sits inside its shape.
+  - The Flip It, Group It, save-code and keyboard flows still pass, and the touch audit is clean.
+
+### Boxes & Circles step 1: term model, level generator, save code v3 (SPEC-BOXES.md §7.1)
+- **Term model (`engine/terms.js`):** a term is its operation plus a signed number, so `− 4x`, `+ x` and `− (−7)` are all different and all worth something definite. It can say what a term is worth, how many pieces to draw (and of which sign), what an expression comes to, how to write it the way the notes do, and what the tappable parts of each term are (operation and number, for the drag selection in step 3).
+- **Typed answers:** `parseAnswer` reads `2x + 2`, `2+2x`, `−3x+2`, `x`, `1x` and `-x`, and can tell when an answer is not fully combined.
+- **Level generator (`engine/generateTerms.js`):** five levels as in the spec, five problems each, seeded, no repeated answers, interleaved variable terms and numbers, and the mix rules (e.g. Level 3 always has a negative x term and at least two bare x's). Only one problem per set can have a kind that vanishes.
+- **Save code v3:** new codes are `MAT-5` plus five symbols and carry Flip It, Group It and Boxes & Circles (16 of about 19.8 bits). v1 and v2 codes still work.
+- **Not visible yet:** Boxes & Circles is still a Coming-soon card. This step is engine only.
+- **Verified:**
+  - 223 tests, including:
+    - 150 seeds on every level for the generator rules
+    - all 65,536 three-pack progress states round-trip through v3 codes
+    - every single-letter typo and neighbor swap is rejected
+    - every v2 state still decodes
+  - In the browser: the save-code dialogs show and accept `MAT-5…` codes, the old `MAT-3238` still restores, and the Flip It, Group It and keyboard flows still pass.
 
 ### Group It: redraw on flip, typed hidden 1, keyboard (SPEC-LASSO.md §12)
 - **Flip redraws the group.** Tapping a − (or Flip all) leaves the original group and draws an arrow to a copy on the right with the counters flipped and no −. The count comes after that. Fractions do the same with the parts taken, drawn as a new bar.

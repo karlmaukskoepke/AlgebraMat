@@ -107,7 +107,7 @@ Each level has 5 problems, the same generator rules as Flip It (seeded, fresh se
 ## 6. Pack map, saving, hints
 
 - Boxes & Circles becomes a playable card, open from the start, with 5 levels. The Coming-soon row keeps Groups of Terms and Distribute, then combine.
-- **Save code v3** (Flip It 4 + Group It 7 + Boxes & Circles 5 = 16 bits) uses 4 data symbols, so new codes are one character longer (`MAT-5····`). v1 and v2 codes still work.
+- **Save code v3** (Flip It 4 + Group It 7 + Boxes & Circles 5 = 16 bits) uses 4 data symbols, so new codes are one character longer (`MAT-5` and five more symbols). v1 and v2 codes still work.
 - **Hints (after 3 wrong tries):** Box & Circle: the terms still to do blink. Draw: faint ghost pieces show what goes above each term. Cancel: a pair blinks. Answer: the leftover pieces blink, and the hint names the sign of each kind, not the count. Rewrite: the signs still to flip wiggle, as in Flip It.
 
 ## 7. Build order (one step per cycle)
@@ -128,3 +128,31 @@ My calls, open to change:
 - **Dragging is built**, with taps as a fallback, rather than tapping only.
 - The **"is +7" label** in magenta is how Rewrite shows its result, following the notes.
 - The **mystery-box key** (`□ = x`, `−□ = −x`) shows on the Mat during Draw.
+
+## 9. Build decisions, step 1 (term model, generator, save code v3)
+
+- A term is `{ kind, op, value }`. The **first term's `op` is always `+`** and is never shown; a negative first term keeps its sign in `value`. A later term is either `+`/`−` with a positive number, or `− (−…)` (subtracting a negative). `+ (−…)` is never generated.
+- **Generator, by level:**
+  - Level 1: all +, coefficients 2 to 9 (no bare `x` until Level 3).
+  - Level 2: positive x terms and a positive first term. At least one subtracted number every time, and at least 2 per set where the numbers cancel.
+  - Level 3: at least one negative x term every time, at least 2 per set with a bare x, and at least 2 where boxes cancel.
+  - Level 4: every problem has one or two `− (−…)` terms, on both x terms and numbers.
+  - Level 5: five or six terms, at least 2 per set with a `− (−…)` term and at least 2 without.
+  - Levels 1–2 lean small (85% of values are 5 or less), with at most 16 pieces to draw. Levels 3–5 allow up to 24.
+  - **One kind vanishes** (the answer is just `3x` or just `5`) in at most one problem per set, only in Levels 3–5, about half the sets. Everything cancelling is never generated.
+  - The seed is mixed with the level, so the same seed gives different sets on different levels, and the same set every time on one level.
+- **Typed answers** are read as: digits (up to 3), `x`, `+`, `−` (the keyboard's `-` too), spaces ignored. A term after the first needs its sign. `2x3`, `2++3` and a trailing sign are unreadable. `2x + 3 − 1` is readable but **not combined**, and so is `2x + 0`, so Check can say *"Combine all the numbers into one."*
+- **Save code v3:** Boxes & Circles takes bits 11 to 15. It isn't in the game's pack list until the pack is playable (step 5), so its bits are read and dropped until then. Nobody can have progress in it before that.
+
+## 10. Build decisions, step 2 (the static Mat)
+
+- **Preview page:** `?demo=boxes` draws the Mat in every state with the notes' two examples (and the most crowded problem the generator can make). It's removed when the pack becomes playable (step 5).
+- **The drawing is 860 × 340.** The expression is one row (baseline y = 250), with the typed answer line under it (y = 322) and the key at the right of that line. Pieces stand above in columns up to y ≈ 15.
+- **Columns:** each term has a column, as wide as its text or its pieces, whichever is wider, centered as a group. The gap between columns is 20, closing up to 8 for a wide problem, so six terms always fit with at least 12 to spare at each edge.
+- **Piece grid:** two pieces to a row, full rows on top, an odd piece alone at the bottom and centered (7 is 2 + 2 + 2 + 1). Cells are 42 × 38, which keeps pieces at least 44px on a Chromebook. A term has at most 9 pieces, so a column is at most 5 rows tall.
+- **Pieces:** a counter is a + or − mark; a box is a 22-unit square; a negative box is the same square with a dash touching its left side. A canceled piece fades to 45% and gets a vermillion slash. A piece picked for canceling gets a dashed ring.
+- **Shapes:** a box around an x term is a rounded square; a number gets a pill (capsule). Both stand 9 units off the text. A shape that doesn't include the operation, or whose parts aren't complete, is **dashed** (the "incomplete" look).
+- **Live selection:** a highlighter-yellow bar behind the covered parts, with bolder text.
+- **Tap targets:** each part (operation, number) has a hit box at least 46 wide and 56 tall that never reaches into its neighbor. A drag covers every part between its two ends.
+- **"is +7"** sits under a rewritten term in magenta Kalam with an underline, and its pieces are magenta.
+- **Pieces are listed in reading order** (top-left first). When there's nothing left to cancel, each kind has only one sign left, and the leftovers always equal what the expression comes to (tested for every generated problem).
