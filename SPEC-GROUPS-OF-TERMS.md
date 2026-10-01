@@ -76,9 +76,8 @@ Generator rules (as for Boxes & Circles): 5 problems per level, no repeated answ
 5. Answer (the pad), level flow, pack map, save code.
 6. Hints, animations and the touch audit.
 
-## 8. Open questions for Karl
+## 8. Settled (Karl, 2026-10-01)
 
-1. **Order inside B:** is x first always (`2x − 1`), or should later levels also show the number first (`3(5 + 2x)`, `−2(4 − x)`)? I assumed x first.
-2. **Fraction dealing:** is "boxes first, then counters" the right way to deal B into the parts, or should the student deal one piece of any kind at a time?
-3. **Collect:** is typing the two signed counts (*boxes: 6, numbers: −3*) what you had in mind, or something closer to the notes' *"6 boxes, 3 negatives"* written as words?
-4. **Pack map:** OK with two rows of two for four cards (or should I compact the Group It card first)?
+1. **Check it is show-only:** the distributing arrows draw themselves and the products appear; the student doesn't type or draw them.
+2. **Challenge levels are 5 and 8:** B can be written number first.
+3. Earlier answers: x first at early levels; deal one kind at a time, in either order; no separate Collect step (the student writes the final answer, then Check it shows the arrows); pack cards all the same size, scrolling inside long level lists.
