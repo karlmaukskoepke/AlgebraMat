@@ -136,7 +136,7 @@ function nextProblem() {
 
 function finishLevel() {
   const { pack, level } = play;
-  progress = completeLevel(progress, pack.id, level);
+  if (!pack.comingSoon) progress = completeLevel(progress, pack.id, level); // a preview pack saves nothing
   play.finished = true;
   persist();
   render();
@@ -238,11 +238,15 @@ document.addEventListener('keydown', (e) => {
   const letter = /^[a-z]$/i.test(e.key);
   if (/^[0-9]$/.test(e.key)) candidates.push(`.pad button[data-digit="${e.key}"]`);
   else if (e.key === 'Backspace' || e.key === 'Delete') candidates.push('.pad button[data-action="backspace"]', 'button[data-key="Backspace"]');
-  else if (e.key === '-' || e.key === '−') candidates.push('.pad button[data-action="toggleSign"]');
+  else if (e.key === '-' || e.key === '−') candidates.push('.pad button[data-action="toggleSign"]', '.pad button[data-key="-"]');
+  else if (e.key === '+') candidates.push('.pad button[data-key="+"]');
   else if (e.key === 'Enter' && !e.repeat) candidates.push('button[data-action="check"]');
   else if (letter) candidates.push(`button[data-key="${e.key.toLowerCase()}"]`);
   if (!candidates.length) return;
-  const b = candidates.map((sel) => $('controls').querySelector(sel)).find(Boolean);
+  // Of the buttons that exist, the first enabled one wins (Backspace is the
+  // pad's delete while typing and Undo otherwise).
+  const found = candidates.flatMap((sel) => [...$('controls').querySelectorAll(sel)]);
+  const b = found.find((x) => !x.disabled) ?? found[0];
   if (!b && letter) return; // a letter nothing uses: leave it alone
   e.preventDefault(); // a focused pad button shouldn't also press itself
   if (b && !b.disabled) b.click();

@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import {
   makeTerm, makeExpression, effective, needsRewrite, rewriteTerm, pieceCount, pieceSign, evaluate, totalPieces,
-  numberText, termText, formatExpression, termParts, formatAnswer, parseAnswer,
+  numberText, termText, formatExpression, termParts, formatAnswer, parseAnswer, prettyAnswer,
 } from '../src/engine/terms.js';
 
 const x = (op, value) => makeTerm('x', op, value);
@@ -109,5 +109,20 @@ describe('reading typed answers', () => {
       const r = parseAnswer(formatAnswer({ x: a, n: b }));
       expect(r.ok && r.x === a && r.n === b && (a === 0 && b === 0 ? true : r.combined)).toBe(true);
     }
+  });
+});
+
+describe('showing what is being typed', () => {
+  it('sets out operations and uses the real minus', () => {
+    expect(prettyAnswer('2x+3')).toBe('2x + 3');
+    expect(prettyAnswer('-3x-2')).toBe('−3x − 2');
+    expect(prettyAnswer('2x+')).toBe('2x +');
+    expect(prettyAnswer('-')).toBe('−');
+    expect(prettyAnswer('')).toBe('');
+    expect(prettyAnswer(' 2 x + 3 ')).toBe('2x + 3');
+  });
+
+  it('reads back as the same answer once spaced out', () => {
+    for (const t of ['2x+3', '-3x-2', 'x-1', '-x+4', '7']) expect(formatAnswer(parseAnswer(prettyAnswer(t))).length).toBeGreaterThan(0);
   });
 });

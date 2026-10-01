@@ -1,6 +1,7 @@
 // Boxes & Circles' play adapter (SPEC-BOXES.md): the same interface as Flip It's
-// and Group It's, so the shared play screen runs it. Built so far: Box & Circle.
+// and Group It's, so the shared play screen runs it. Built so far: Box & Circle, Draw, Cancel and Answer.
 
+import { prettyAnswer } from '../engine/terms.js';
 import { newTermSession, reduceTerms, shapeComplete, TERM_STEPS } from '../engine/termSession.js';
 import { renderBoxMat } from '../view/boxMat.js';
 import { buildBoxControls } from '../view/boxControls.js';
@@ -14,7 +15,11 @@ export function boxViewState(s) {
     shapes: s.shapes.map((shape) => ({ ...shape, complete: shapeComplete(s.problem, shape) })),
     selecting: s.selecting,
     pieces: s.pieces,
-    answer: s.answer,
+    key: s.step === 'draw',
+    tap: s.step === 'draw' ? 'zones' : s.step === 'cancel' ? 'pieces' : null,
+    selected: s.selected,
+    answer: s.step === 'answer' ? { text: prettyAnswer(s.entry), done: false }
+      : s.step === 'done' ? { text: s.finalText, done: true } : null,
   };
 }
 
@@ -26,6 +31,11 @@ export const boxPlay = {
   buildControls: buildBoxControls,
   effects: () => ({ hint: null }), // hints come in the last Boxes & Circles build
   renderMat: (session, fx = {}) => renderBoxMat({ ...boxViewState(session), fx }),
-  matAction: () => null,           // the Mat is dragged, not tapped: see bindMat
+  // Box & Circle is dragged (see bindMat); Draw and Cancel are tapped.
+  matAction: (d) => {
+    if (d.action === 'zone') return { type: 'tapZone', term: Number(d.term) };
+    if (d.action === 'piece') return { type: 'tapPiece', term: Number(d.term), index: Number(d.index) };
+    return null;
+  },
   bindMat: bindBoxMat,
 };

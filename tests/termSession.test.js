@@ -1,8 +1,9 @@
 import { describe, it, expect } from 'vitest';
-import { makeTerm, makeExpression } from '../src/engine/terms.js';
+import { makeTerm, makeExpression, evaluate, formatAnswer } from '../src/engine/terms.js';
 import { newTermSession, reduceTerms, TERM_STEPS, shapeComplete } from '../src/engine/termSession.js';
 import { TERM_FEEDBACK, termFeedbackText } from '../src/view/termFeedback.js';
 import { generateTermLevel } from '../src/engine/generateTerms.js';
+import { fullyCanceled } from '../src/engine/termPieces.js';
 
 const x = (op, v) => makeTerm('x', op, v);
 const n = (op, v) => makeTerm('int', op, v);
@@ -71,13 +72,14 @@ describe('Boxes & Circles session: Box & Circle', () => {
     let s = run(newTermSession(EX1), tool('box'), draw(0, 0), draw(6, 6), tool('circle'), draw(1, 2), draw(3, 4), check);
     expect(s).toMatchObject({ step: 'boxcircle', feedback: { key: 'includeSign', bad: true }, tries: { boxcircle: 1 } });
     s = run(s, tool('box'), draw(5, 6), check);
-    expect(s).toMatchObject({ step: 'draw', feedback: { key: 'boxCircleDone', bad: false } });
+    expect(s).toMatchObject({ step: 'draw', feedback: { key: 'boxCircleDone' } });
+    expect(s.feedback.bad).toBeFalsy();
     expect(s.tries.boxcircle).toBe(1);
   });
 
   it('ignores moves outside their step, and nonsense', () => {
     const done = run(newTermSession(EX1), tool('box'), draw(0, 0), draw(5, 6), tool('circle'), draw(1, 2), draw(3, 4), check);
-    for (const a of [draw(0, 0), tool('box'), { type: 'undo' }, { type: 'selecting', from: 0, to: 1 }, { type: 'removeShape', index: 0 }]) {
+    for (const a of [draw(0, 0), tool('box'), { type: 'selecting', from: 0, to: 1 }, { type: 'removeShape', index: 0 }, { type: 'digit', digit: 1 }]) {
       expect(reduceTerms(done, a)).toBe(done);
     }
     const s = run(newTermSession(EX1), tool('box'));
@@ -121,5 +123,205 @@ describe('Boxes & Circles feedback table', () => {
     expect(termFeedbackText({ key: 'includeSign', params: { op: '−' } })).toBe('Take the sign in front with it: drag from the − across the number.');
     expect(termFeedbackText({ key: 'twoTerms' })).toBe('One term at a time — this shape has two.');
     expect(termFeedbackText({ key: 'nope' })).toBe('');
+  });
+});
+
+// ---------- Draw, Cancel and Answer ----------
+
+const pick = (pieceType, sign) => ({ type: 'pickPiece', pieceType, sign });
+const zone = (term) => ({ type: 'tapZone', term });
+const piece = (term, index) => ({ type: 'tapPiece', term, index });
+const typed = (text) => [...text].map((ch) => (/\d/.test(ch) ? { type: 'digit', digit: Number(ch) } : { type: 'typeChar', ch }));
+
+// 3x − 5 + 7 − x: shapes done, ready to draw
+const atDraw = () => run(newTermSession(EX1), tool('box'), draw(0, 0), draw(5, 6), tool('circle'), draw(1, 2), draw(3, 4), check);
+// the right pieces for it: 3 boxes, 5 −, 7 +, 1 − box
+const drawAll = (s) => run(s,
+  pick('box', '+'), ...Array(3).fill(zone(0)),
+  pick('counter', '-'), ...Array(5).fill(zone(1)),
+  pick('counter', '+'), ...Array(7).fill(zone(2)),
+  pick('box', '-'), zone(3));
+
+describe('Boxes & Circles session: Draw', () => {
+  it('adds the picked piece above the tapped term, one per tap, any term in any order', () => {
+    let s = run(atDraw(), zone(1));
+    expect(s.feedback.key).toBe('pickPieceFirst');
+    s = run(s, pick('counter', '-'), zone(2), zone(1), zone(1));
+    expect(s.pieces.map((c) => c.length)).toEqual([0, 2, 1, 0]);
+    expect(s.pieces[1][0]).toMatchObject({ type: 'counter', sign: '-', canceled: false });
+  });
+
+  it('takes a piece away when it is tapped, and Undo takes back the latest', () => {
+    let s = run(atDraw(), pick('box', '+'), zone(0), zone(0), zone(0));
+    s = run(s, piece(0, 1));
+    expect(s.pieces[0]).toHaveLength(2);
+    s = run(s, { type: 'undo' });
+    expect(s.pieces[0]).toHaveLength(1);
+    s = run(s, { type: 'undo' }, { type: 'undo' });
+    expect(s.pieces[0]).toHaveLength(0);
+  });
+
+  it('caps a term at 10 pieces', () => {
+    const s = run(atDraw(), pick('box', '+'), ...Array(12).fill(zone(0)));
+    expect(s.pieces[0]).toHaveLength(10);
+    expect(s.feedback.key).toBe('columnFull');
+  });
+
+  it('names the first term that is off, and counts the wrong try', () => {
+    let s = run(atDraw(), pick('box', '+'), zone(0), zone(0), check);              // 3x needs 3
+    expect(s.feedback).toMatchObject({ key: 'countAgain', params: { text: '3x', have: 2, count: 3 }, bad: true });
+    s = run(newTermSession(EX1), tool('box'), draw(0, 0), draw(5, 6), tool('circle'), draw(1, 2), draw(3, 4), check, check);
+    expect(s.feedback).toMatchObject({ key: 'needPieces', params: { text: '3x', phrase: '3 boxes' } });
+    expect(s.tries.draw).toBe(1);
+    s = run(s, pick('counter', '+'), zone(0), check);
+    expect(s.feedback.key).toBe('drawBoxes');
+    s = run(atDraw(), pick('box', '-'), zone(0), zone(0), zone(0), check);        // negative boxes for 3x
+    expect(s.feedback).toMatchObject({ key: 'needPieces', params: { phrase: '3 boxes' } });
+    s = run(drawAll(atDraw()), piece(1, 0), pick('box', '+'), zone(1), check);    // a box above − 5
+    expect(s.feedback.key).toBe('drawCounters');
+  });
+
+  it('says what a subtracted term needs, in the sign it is worth', () => {
+    const e = makeExpression([n('+', -5), x('-', 2), x('-', 1), n('-', -7)]);       // −5 − 2x − x − (−7)
+    let s = run(newTermSession(e), tool('circle'), draw(0, 0), tool('box'), draw(1, 2), draw(3, 4), tool('circle'), draw(5, 6), check);
+    expect(s.step).toBe('draw');
+    s = run(s, check);
+    expect(s.feedback).toMatchObject({ key: 'needPieces', params: { text: '−5', phrase: '5 negatives' } });
+    s = run(s, pick('counter', '-'), ...Array(5).fill(zone(0)), pick('box', '-'), ...Array(2).fill(zone(1)), zone(2), check);
+    expect(s.feedback).toMatchObject({ key: 'needPieces', params: { text: '− (−7)', phrase: '7 positives' } });
+    s = run(s, pick('counter', '+'), ...Array(7).fill(zone(3)));
+    expect(s.pieces[3].every((p) => p.opposite)).toBe(true);   // the rewritten term's pieces are magenta
+    expect(run(s, check).step).toBe('cancel');
+  });
+
+  it('goes on to Cancel when pairs can cancel, and straight to Answer when none can', () => {
+    expect(run(drawAll(atDraw()), check)).toMatchObject({ step: 'cancel', feedback: { key: 'drawDone' } });
+    const plain = makeExpression([x('+', 2), n('+', 3), x('+', 1)]);
+    let s = run(newTermSession(plain), tool('box'), draw(0, 0), draw(3, 4), tool('circle'), draw(1, 2), check);
+    s = run(s, pick('box', '+'), zone(0), zone(0), zone(2), pick('counter', '+'), zone(1), zone(1), zone(1), check);
+    expect(s).toMatchObject({ step: 'answer', skipped: ['cancel'], feedback: { key: 'drawDoneNoCancel' } });
+  });
+});
+
+describe('Boxes & Circles session: Cancel', () => {
+  const atCancel = () => run(drawAll(atDraw()), check);
+
+  it('cancels a pair: tap a piece, then its opposite, in either order', () => {
+    let s = run(atCancel(), piece(0, 0));
+    expect(s).toMatchObject({ selected: { term: 0, index: 0 }, feedback: { key: 'cancelPick' } });
+    s = run(s, piece(3, 0));                          // the − box
+    expect(s.pieces[0][0].canceled && s.pieces[3][0].canceled).toBe(true);
+    expect(s.selected).toBeNull();
+    expect(s.pairs).toEqual([[[0, 0], [3, 0]]]);
+    s = run(s, piece(1, 2), piece(2, 4));             // a − then a +: the other way round
+    expect(s.pairs).toHaveLength(2);
+  });
+
+  it('lets go of a piece tapped twice, and ignores canceled ones', () => {
+    let s = run(atCancel(), piece(1, 0), piece(1, 0));
+    expect(s.selected).toBeNull();
+    s = run(s, piece(0, 0), piece(3, 0), piece(0, 0));
+    expect(s.feedback.key).toBe('alreadyCanceled');
+    expect(s.selected).toBeNull();
+  });
+
+  it('says why a pair does not work, keeps the first piece, and counts the try', () => {
+    let s = run(atCancel(), piece(0, 0), piece(1, 0));      // a box and a number
+    expect(s).toMatchObject({ feedback: { key: 'notLikeTerms', bad: true }, selected: { term: 0, index: 0 }, tries: { cancel: 1 } });
+    s = run(s, piece(0, 1));                                // two boxes
+    expect(s.feedback.key).toBe('pairIsPlusMinus');
+    s = run(atCancel(), piece(1, 0), piece(1, 1));          // two negatives
+    expect(s.feedback.key).toBe('pairIsPlusMinus');
+    expect(s.pairs).toEqual([]);
+  });
+
+  it('undoes the latest pair', () => {
+    let s = run(atCancel(), piece(0, 0), piece(3, 0), piece(1, 0), piece(2, 0));
+    s = run(s, { type: 'undo' });
+    expect(s.pairs).toHaveLength(1);
+    expect(s.pieces[1][0].canceled || s.pieces[2][0].canceled).toBe(false);
+    s = run(s, { type: 'undo' }, { type: 'undo' });
+    expect(s.pairs).toEqual([]);
+    expect(s.pieces.flat().some((p) => p.canceled)).toBe(false);
+  });
+
+  it('moves on to Answer by itself when every pair is canceled, and not before', () => {
+    let s = atCancel();
+    s = run(s, piece(0, 0), piece(3, 0));                              // the box pair
+    expect(s.step).toBe('cancel');
+    for (let i = 0; i < 5; i++) s = run(s, piece(1, i), piece(2, i));  // five counter pairs
+    expect(s).toMatchObject({ step: 'answer', feedback: { key: 'cancelDone' } });
+    expect(fullyCanceled(s.pieces)).toBe(true);
+  });
+});
+
+describe('Boxes & Circles session: Answer', () => {
+  const atAnswer = () => {
+    let s = run(drawAll(atDraw()), check, piece(0, 0), piece(3, 0));
+    for (let i = 0; i < 5; i++) s = run(s, piece(1, i), piece(2, i));
+    return s;
+  };
+
+  it('types digits, x, + and −, and Backspace takes one back', () => {
+    let s = run(atAnswer(), ...typed('2x+2'));
+    expect(s.entry).toBe('2x+2');
+    s = run(s, { type: 'backspace' }, { type: 'backspace' }, ...typed('-3'));
+    expect(s.entry).toBe('2x-3');
+    expect(reduceTerms(run(newTermSession(EX1), { type: 'typeChar', ch: 'x' }), { type: 'backspace' }).entry).toBe('');
+  });
+
+  it('stops typing at 12 characters, and ignores other characters', () => {
+    const s = run(atAnswer(), ...typed('1234567890123456'));
+    expect(s.entry).toHaveLength(12);
+    expect(reduceTerms(s, { type: 'typeChar', ch: 'q' })).toBe(s);
+  });
+
+  it('accepts the right answer in either order, as x or 1x, and goes on', () => {
+    for (const [t, shown] of [['2x+2', '2x + 2'], ['2+2x', '2 + 2x'], ['2x+2', '2x + 2']]) {
+      const s = run(atAnswer(), ...typed(t), check);
+      expect(s, t).toMatchObject({ step: 'done', finalText: shown, feedback: { key: 'correct', params: { answer: '2x + 2' } } });
+    }
+  });
+
+  it('says what is wrong without giving the number', () => {
+    const wrongTry = (t) => run(atAnswer(), ...typed(t), check);
+    expect(wrongTry('').feedback.key).toBe('typeAnswer');
+    expect(wrongTry('').tries.answer ?? 0).toBe(0);
+    expect(wrongTry('2x+').feedback.key).toBe('answerUnreadable');
+    expect(wrongTry('2x+3-1').feedback.key).toBe('combineAll');
+    expect(wrongTry('2x+0').feedback.key).toBe('noZeroTerm');
+    expect(wrongTry('3x+2').feedback.key).toBe('checkBoxes');
+    expect(wrongTry('2x+3').feedback.key).toBe('checkNumbers');
+    expect(wrongTry('-2x+2').feedback.key).toBe('checkBoxes');
+    expect(wrongTry('2x+3').tries.answer).toBe(1);
+  });
+
+  it('can be played from the first tap to the last on every problem the levels make', () => {
+    for (const level of [1, 2, 3, 4, 5]) for (let seed = 1; seed <= 12; seed++) for (const e of generateTermLevel(level, seed * 7)) {
+      let s = newTermSession(e);
+      let part = 0;
+      for (let i = 0; i < e.terms.length; i++) {
+        const last = part + (i === 0 ? 0 : 1);
+        s = run(s, tool(e.terms[i].kind === 'x' ? 'box' : 'circle'), draw(part, last));
+        part = last + 1;
+      }
+      s = run(s, check);
+      for (let i = 0; i < e.terms.length; i++) {
+        const eff = e.terms[i].op === '-' ? -e.terms[i].value : e.terms[i].value;
+        s = run(s, pick(e.terms[i].kind === 'x' ? 'box' : 'counter', eff < 0 ? '-' : '+'), ...Array(Math.abs(eff)).fill(zone(i)));
+      }
+      s = run(s, check);
+      expect(['cancel', 'answer'], `${level}`).toContain(s.step);
+      // cancel greedily: the first live + and − of the same type
+      for (let guard = 0; s.step === 'cancel' && guard < 40; guard++) {
+        const live = s.pieces.flatMap((c, t) => c.map((p, k) => ({ t, k, p }))).filter((o) => !o.p.canceled);
+        const a = live[0];
+        const b = live.find((o) => o.p.type === a.p.type && o.p.sign !== a.p.sign);
+        if (!b) { const alt = live.find((o) => live.some((q) => q.p.type === o.p.type && q.p.sign !== o.p.sign)); const mate = live.find((q) => q.p.type === alt.p.type && q.p.sign !== alt.p.sign); s = run(s, piece(alt.t, alt.k), piece(mate.t, mate.k)); } else s = run(s, piece(a.t, a.k), piece(b.t, b.k));
+      }
+      expect(s.step, `${level}`).toBe('answer');
+      s = run(s, ...typed(formatAnswer(evaluate(e)).replace(/\s/g, '').replace(/−/g, '-')), check);
+      expect(s.step, `${level}`).toBe('done');
+    }
   });
 });

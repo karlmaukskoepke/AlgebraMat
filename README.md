@@ -29,6 +29,13 @@ Add `?seed=123` to the URL to replay a fixed problem set, and `?level=2` to open
 
 ## Changelog
 
+### Boxes & Circles step 4: Draw, Cancel and Answer (SPEC-BOXES.md §7.4, §12)
+
+- **A whole level plays through** at `?pack=boxes&level=N`: Box & Circle → Draw the boxes and counters above each term → Cancel pairs (either order) → type the answer.
+- **Typing:** on-screen buttons for digits, x, + and −, or the keyboard (digits, x, +, −, Backspace, Enter).
+- **Still hidden:** the pack stays a Coming-soon card with no saved progress until the Rewrite step and level flow (step 5).
+- **Under the hood:** the shared keyboard handler now presses the first *enabled* matching button.
+
 ### Boxes & Circles step 3: Box & Circle (SPEC-BOXES.md §7.3)
 - **Playable at `?pack=boxes&level=N`** (levels 1 to 5). The card on the pack map is still Coming soon. A correct Box & Circle moves on to Draw, which says it arrives in the next build.
 - **Box and Circle tools** (keys B and C), with **drag-to-select**: press on a term, drag across the operation and the number, and the parts light up yellow while the pointer is still down; letting go draws the shape. Works with mouse, touch and pen. A tap shapes one part (dashed until the sign is included), and tapping a finished shape removes it. A new shape replaces any it overlaps, so fixing a dashed one is a single drag.
