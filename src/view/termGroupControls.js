@@ -29,7 +29,7 @@ const group = (...items) => {
 export function buildTermGroupControls(root, dispatch) {
   root.innerHTML = '';
   const row = document.createElement('div');
-  row.className = 'palette-row box-palette';
+  row.className = 'palette-row box-palette tg-palette';
 
   const addGroup = button('Add group', 'addGroup');
   const plusGroups = button('+ groups', 'chooseSign', { data: { sign: '+' } });
@@ -38,10 +38,11 @@ export function buildTermGroupControls(root, dispatch) {
   const boxMinus = button(PIECE_NEG_BOX, 'pickPiece', { cls: 'btn-sign', data: { pieceType: 'box', sign: '-' }, aria: 'Negative box (minus x)' });
   const plus = button(PLUS_SVG, 'pickPiece', { cls: 'btn-sign', data: { pieceType: 'counter', sign: '+' }, aria: 'Plus counter' });
   const minus = button(MINUS_SVG, 'pickPiece', { cls: 'btn-sign', data: { pieceType: 'counter', sign: '-' }, aria: 'Minus counter' });
+  const flipAll = button('Flip all', 'flipAll', { aria: 'Flip every − group to its opposite' });
   const copy = button('Copy to all', 'copyAll', { data: { key: 'k' }, aria: 'Copy the first group to all (key K)' });
   const undo = button('Undo', 'undo', { data: { key: 'Backspace' }, aria: 'Undo' });
   const check = button('Check ✓', 'check', { cls: 'btn-primary' });
-  row.append(group(addGroup), group(plusGroups, minusGroups), group(boxPlus, boxMinus, plus, minus), group(copy, undo), check);
+  row.append(group(addGroup), group(plusGroups, minusGroups), group(boxPlus, boxMinus, plus, minus), group(copy, undo, flipAll), check);
 
   const pad = document.createElement('div');
   pad.className = 'pad';
@@ -79,10 +80,11 @@ export function buildTermGroupControls(root, dispatch) {
       copy.hidden = !whole;
       copy.disabled = !(filling && whole);
       undo.disabled = !(filling && s.snapshots?.length > 0);
+      flipAll.disabled = step !== 'flip';
       const hiddenOne = step === 'groups' && s.problem?.hidden1 && !s.wroteOne;
       for (const b of pad.querySelectorAll('button')) b.disabled = true;
       if (hiddenOne) for (const b of pad.querySelectorAll('[data-action="digit"], [data-action="backspace"]')) b.disabled = false;
-      check.disabled = !(hiddenOne || ['groups', 'fill'].includes(step));
+      check.disabled = !(hiddenOne || ['groups', 'fill', 'take'].includes(step));
     },
   };
 }

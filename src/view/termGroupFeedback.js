@@ -27,7 +27,7 @@ export const TERM_GROUP_FEEDBACK = {
   emptyGroup: ({ index, text, need }) => `The ${nth(index)} group is empty. Each group is (${text}): ${need}.`,
   groupOff: ({ index, text, need }) => `The ${nth(index)} group isn’t (${text}) yet. Each group needs ${need}.`,
   fillDone: () => 'Groups filled! The next build adds the answer.',
-  fillDoneOpp: () => 'Groups filled! They’re opposite groups. The next build adds the flip and the answer.',
+  fillDoneOpp: () => 'Groups filled! They’re opposite groups: tap each − to flip its group, or tap Flip all.',
 
   // ③ Fill, fraction bar: one kind of piece at a time
   dealIntro: () => 'Keep going: deal one piece at a time into the lit-up group. Finish the boxes before the counters, or the other way round.',
@@ -35,7 +35,14 @@ export const TERM_GROUP_FEEDBACK = {
   finishKind: ({ kind }) => `Finish dealing the ${kindWord(kind)} first, then the other kind.`,
   dealOff: ({ text, need }) => `Deal out all of (${text}): ${need}, one kind at a time.`,
   dealUneven: () => 'The groups should be equal. Undo, and deal one piece at a time into the lit-up group.',
-  dealDone: ({ n }) => `Equal groups! The next build adds taking ${n}, flipping and the answer.`,
+  dealDone: ({ n }) => `Equal groups! Now take ${n}: tap each group you take.`,
+
+  // ④ Take, ⑤ Flip: the answer comes in the next build
+  takeDone: () => 'Taken! The next build adds the answer.',
+  takeDoneOpp: () => 'Taken! It’s the opposite, so tap the − to flip the groups you took.',
+  flipDone: ({ fraction }) => (fraction
+    ? 'Flipped! The groups you took are redrawn on the right. The next build adds the answer.'
+    : 'All flipped! Each group is redrawn on the right. The next build adds the answer.'),
 };
 
 export function termGroupFeedbackText(fb) {

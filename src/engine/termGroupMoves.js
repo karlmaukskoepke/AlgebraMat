@@ -3,11 +3,11 @@
 // The group-making and + or − checks are Group It's: a term-group problem has the same
 // `count` and `hidden1` as a Group It problem. Pure logic, no DOM.
 
-import { validateGroups, validateHiddenOne, validateGroupSign, MAX_GROUPS_MADE, MAX_PARTS } from './lassoMoves.js';
+import { validateGroups, validateHiddenOne, validateGroupSign, validateTake, MAX_GROUPS_MADE, MAX_PARTS } from './lassoMoves.js';
 import { isOpposite, insideText, piecesOfGroup } from './termGroups.js';
 import { piecePhrase } from './termMoves.js';
 
-export { validateGroups, validateHiddenOne, validateGroupSign, MAX_GROUPS_MADE, MAX_PARTS };
+export { validateGroups, validateHiddenOne, validateGroupSign, validateTake, MAX_GROUPS_MADE, MAX_PARTS };
 
 const pass = (feedbackKey, params) => ({ ok: true, feedbackKey, params });
 const fail = (feedbackKey, params) => ({ ok: false, feedbackKey, params });
