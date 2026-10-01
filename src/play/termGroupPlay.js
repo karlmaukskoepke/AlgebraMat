@@ -1,6 +1,7 @@
 // Groups of Terms' play adapter (SPEC-GROUPS-OF-TERMS.md §3): the same interface as Group It's,
 // so the shared play screen runs it.
 
+import { termGroupHintFor } from '../engine/termGroupHints.js';
 import { newTermGroupSession, reduceTermGroups, stepsFor, nextPart, oneOpen } from '../engine/termGroupSession.js';
 import { prettyAnswer } from '../engine/terms.js';
 import { renderTermGroupMat } from '../view/termGroupMat.js';
@@ -28,12 +29,16 @@ export const termGroupPlay = {
   reduce: reduceTermGroups,
   feedbackText: termGroupFeedbackText,
   buildControls: buildTermGroupControls,
-  // View-only effects for one render: which groups just flipped (to animate them turning over).
-  // Hints come in the last Groups of Terms build.
+  // View-only effects for one render: the hint, which groups just flipped (to turn them over),
+  // and which pieces were just added (to pop them in).
   effects(before, session) {
-    const fx = { hint: null, justFlipped: [] };
+    const fx = { hint: termGroupHintFor(session), justFlipped: [], added: [] };
     if (!before) return fx; // `before` is only passed for a move within the same problem
-    session.groups.forEach((g, i) => { if (g.flipped && !before.groups[i]?.flipped) fx.justFlipped.push(i); });
+    session.groups.forEach((g, i) => {
+      if (g.flipped && !before.groups[i]?.flipped) fx.justFlipped.push(i);
+      const had = before.groups[i]?.pieces.length ?? 0;
+      for (let k = had; k < g.pieces.length; k++) fx.added.push({ group: i, index: k });
+    });
     return fx;
   },
   renderMat: (session, fx = {}) => renderTermGroupMat({ ...termGroupViewState(session), fx }),

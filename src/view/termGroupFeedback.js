@@ -13,8 +13,15 @@ const kindWord = (kind) => (kind === 'box' ? 'boxes' : 'counters');
 const ANSWER_KEYS = ['typeAnswer', 'answerUnreadable', 'combineAll', 'noZeroTerm', 'checkBoxes', 'checkNumbers'];
 const answerMessages = Object.fromEntries(ANSWER_KEYS.map((k) => [k, TERM_FEEDBACK[k]]));
 
+const word = (sign) => (sign === '+' ? 'positive' : 'negative');
+
 export const TERM_GROUP_FEEDBACK = {
   ...answerMessages,
+  // Hints (after 3 wrong tries on a step); Group It's hints for Groups, + or − and Take are used as they are
+  hintFillTerms: ({ text, need }) => `Each group is (${text}): ${need}. Pick the blinking piece and add it to the first group, then Copy to all. Blinking groups still need fixing.`,
+  hintDealTerms: ({ text, need }) => `All of (${text}) is ${need}. Pick the blinking piece and deal that kind around, one at a time, before the other kind.`,
+  hintAnswerTerms: ({ x, n }) => `Look at the blinking groups together: the boxes are ${word(x)} and the numbers are ${word(n)}. Count each kind, then type it.`,
+
   // ⑥ Check it: the distributing arrows, after a right answer
   correct: ({ answer }) => `Yes! ${answer}. Check it: the arrows show the shortcut, multiplying the number in front by each term.`,
 

@@ -19,7 +19,7 @@ const allStates3 = Array.from({ length: 2 ** 16 }, (_, n) => state3(bitsOf(n, 4)
 // A spread of them for the slower typo checks.
 const sample = allStates3.filter((_, n) => n % 997 === 0 || n === 65535 || n === 15);
 
-describe('save code v4', () => {
+describe('save code v5', () => {
   it('uses no look-alike characters', () => {
     expect(CODE_ALPHABET).toHaveLength(31);
     for (const ch of '01OIL') expect(CODE_ALPHABET).not.toContain(ch);
@@ -30,7 +30,7 @@ describe('save code v4', () => {
     const codes = new Set();
     for (const p of allStates3) {
       const code = encodeProgress(p);
-      expect(code).toMatch(/^MAT-6[2-9A-HJKMNP-Z]{6}$/); // "6" is version 4
+      expect(code).toMatch(/^MAT-7[2-9A-HJKMNP-Z]{7}$/); // "7" is version 5
       expect(decodeProgress(code, WITH_BOXES)).toEqual(p);
       codes.add(code);
     }
@@ -44,6 +44,29 @@ describe('save code v4', () => {
     expect(decodeProgress(encodeProgress(p), without)).toEqual({ ...p, packs: { ...p.packs, 'groups-of-terms': undefined } });
     const all = state(Array(4).fill(true), Array(7).fill(true), Array(5).fill(true), Array(8).fill(true));
     expect(decodeProgress(encodeProgress(all), PACKS)).toEqual(all);
+  });
+
+  it('carries Combine it and Flip It\'s fifth level once those are listed, and drops them before', () => {
+    const base = state(bitsOf(0b1010, 4), bitsOf(0b11, 7), [true, false, false, false, false], [true, false, false, false, false, false, false, false]);
+    const listed = PACKS.map((p) => (p.id === 'flipit' ? { ...p, levels: 5 } : p)).concat([{ id: 'combineit', levels: 4 }]);
+    const full = {
+      ...base,
+      packs: { ...base.packs, flipit: { levels: [false, true, false, true, true] }, combineit: { levels: [true, true, false, true] } },
+    };
+    expect(decodeProgress(encodeProgress(full), listed)).toEqual(full);
+    // Not listed yet (the packs aren't playable): read and dropped.
+    const dropped = decodeProgress(encodeProgress(full), PACKS);
+    expect(dropped.packs.flipit.levels).toEqual([false, true, false, true]);
+    expect(dropped.packs.combineit).toBeUndefined();
+  });
+
+  it('still reads v4 codes (before Combine it)', () => {
+    const p = state(bitsOf(0b0110, 4), bitsOf(0b1011, 7), [true, true, false, false, false], [true, false, true, false, false, false, false, false]);
+    const v4 = encodeProgress(p, 4);
+    expect(v4).toMatch(/^MAT-6[2-9A-HJKMNP-Z]{6}$/);
+    expect(decodeProgress(v4, PACKS)).toEqual(p);
+    const listed = PACKS.concat([{ id: 'combineit', levels: 4 }]);
+    expect(decodeProgress(v4, listed).packs.combineit).toEqual({ levels: Array(4).fill(false) });
   });
 
   it('still reads v3 codes (before Groups of Terms)', () => {

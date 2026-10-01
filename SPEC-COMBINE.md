@@ -19,7 +19,7 @@
 | 4 | **Larger values (11 to 60), no modeling** | `−23 + 41`, `37 + (−52)`, `−48 + (−19)`; some with three terms: `−23 + 41 + (−15)` | Circle each term, then party or battle, add or subtract, and the sign (three terms: combine the negatives and the positives first, then battle) |
 
 - 5 problems per level, a fresh seed each play, **no repeated answers** in a set, and no zero answers (as Flip It's Levels 1 to 3).
-- Levels 1 and 2 use the numbers 1 to 12 and lean small, as Flip It does. Level 1 mixes who wins (at least 2 positive and 2 negative answers). Level 3 uses 3 or 4 terms with numbers 1 to 9, at least 2 positives and 2 negatives overall, and at most 20 counters in all. Level 4 has terms of 11 to 60, with answers that can be positive or negative. Two terms are a party or a battle (at least 2 of each in a set of five); **two of the five problems have three terms** (Karl: *"combine negatives and positives, then battle"*), always two of one sign and one of the other, so the combining is a party and the last step is a battle.
+- Levels 1 and 2 use the numbers 1 to 12 and lean small, as Flip It does. Level 1 mixes who wins (at least 2 positive and 2 negative answers). Level 3 uses 3 or 4 terms with numbers 1 to 9, at least 2 positives and 2 negatives overall, and at most 20 counters in all. Level 4 has terms of 11 to 60, with answers that can be positive or negative. Of the five, **two have three terms**, and the other three have two terms (at least one party and at least one battle among them); the three-term problems (Karl: *"combine negatives and positives, then battle"*) always have two of one sign and one of the other, so the combining is a party and the last step is a battle. The odd one out can be in any position.
 - Problems print as Flip It prints them: the first number as it is (`−7`), then `+`, then the next number in parentheses if it's negative (`+ (−8)`).
 
 ## 3. Steps
@@ -72,3 +72,12 @@ A **Level 5** on the Flip It pack, so both operations show up as the final chall
 3. No Party or Battle question when there are three or four terms (Combine it's Level 3 and Flip It's Level 5).
 4. Levels 3 and 5 use the Boxes & Circles Mat (counters in a column above each term), with a dashed line around the zone under the mouse. (Built already for Boxes & Circles' Draw zones.)
 5. Combine it comes before Flip It on the pack map.
+
+## 8. Build decisions, step 1 (model, generators, save code v5)
+
+- **Two models.** Levels 1 and 2 are Flip It's two-term problems (`engine/expr.js`, `5 + (−8)`) so Flip It's engine and Mat can run them. Everything longer (Level 3, Level 4, and Flip It's Level 5) is an expression of integer terms from `engine/terms.js` (each `{ kind: 'int', op, value }`), written `5 + (−8) + 2` or `5 − (−3) + (−7) − 2`. `engine/combine.js` holds the helpers: total, the subtracted terms, counters drawn, party or battle, and for Level 4's three terms which pair to combine first (`combineFirst`).
+- **Flip It's Rewrite on Level 5 flips every subtraction,** `− 2` as well as `− (−3)`, as Flip It does (it's adding the opposite); that's wider than Boxes & Circles' Rewrite, which only flips `− (−7)`.
+- **Generator limits:** Levels 1 and 2 use the numbers 1 to 12 and lean small (both numbers 1 to 6 are 6× as likely). Level 1 has at least 2 positive and 2 negative answers. Level 3 has 3 or 4 terms (at least 2 of each) with 1 to 9, both signs in every problem, at most 20 counters, and at least 2 positive and 2 negative answers. Level 4 has at least one two-term party, one two-term battle and two three-term problems, all terms 11 to 60. Flip It's Level 5 has 3 or 4 terms with 1 to 9, at most 20 counters, and in each set at least one with nothing to rewrite, one with one subtraction, two with two or more, and one with a negative first number. Zero answers are allowed only in Flip It's Level 5.
+- **Save code v5** (`MAT-7` plus seven symbols) is Flip It 5 + Group It 7 + Boxes & Circles 5 + Groups of Terms 8 + Combine it 4 = 29 bits, with 6 data symbols. Flip It's fifth bit and Combine it's four are read and dropped until those packs open. v1 to v4 codes still decode.
+- **Not visible yet:** this step is engine only.
+
