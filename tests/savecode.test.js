@@ -5,8 +5,9 @@ import {
 import { PACKS } from '../src/packs/index.js';
 
 const bitsOf = (n, count, shift = 0) => Array.from({ length: count }, (_, i) => Boolean(n & (1 << (shift + i))));
-const state = (flipit, lasso = Array(7).fill(false), boxes = Array(5).fill(false), terms = Array(8).fill(false)) => ({
-  v: 1, packs: { flipit: { levels: flipit }, lasso: { levels: lasso }, boxes: { levels: boxes }, 'groups-of-terms': { levels: terms } },
+const state = (flipit, lasso = Array(7).fill(false), boxes = Array(5).fill(false), terms = Array(8).fill(false), combine = Array(2).fill(false)) => ({
+  v: 1,
+  packs: { combineit: { levels: combine }, flipit: { levels: flipit }, lasso: { levels: lasso }, boxes: { levels: boxes }, 'groups-of-terms': { levels: terms } },
 });
 const state3 = state;
 
@@ -46,18 +47,18 @@ describe('save code v5', () => {
     expect(decodeProgress(encodeProgress(all), PACKS)).toEqual(all);
   });
 
-  it('carries Combine it and Flip It\'s fifth level once those are listed, and drops them before', () => {
+  it('carries Combine it\'s four levels and Flip It\'s fifth once those are listed, and drops what isn\'t listed yet', () => {
     const base = state(bitsOf(0b1010, 4), bitsOf(0b11, 7), [true, false, false, false, false], [true, false, false, false, false, false, false, false]);
-    const listed = PACKS.map((p) => (p.id === 'flipit' ? { ...p, levels: 5 } : p)).concat([{ id: 'combineit', levels: 4 }]);
+    const listed = PACKS.map((p) => (p.id === 'flipit' ? { ...p, levels: 5 } : p.id === 'combineit' ? { ...p, levels: 4 } : p));
     const full = {
       ...base,
       packs: { ...base.packs, flipit: { levels: [false, true, false, true, true] }, combineit: { levels: [true, true, false, true] } },
     };
     expect(decodeProgress(encodeProgress(full), listed)).toEqual(full);
-    // Not listed yet (the packs aren't playable): read and dropped.
-    const dropped = decodeProgress(encodeProgress(full), PACKS);
-    expect(dropped.packs.flipit.levels).toEqual([false, true, false, true]);
-    expect(dropped.packs.combineit).toBeUndefined();
+    // Only the levels that are playable now (Flip It's four, Combine it's first two) come back.
+    const now = decodeProgress(encodeProgress(full), PACKS);
+    expect(now.packs.flipit.levels).toEqual([false, true, false, true]);
+    expect(now.packs.combineit.levels).toEqual([true, true]);
   });
 
   it('still reads v4 codes (before Combine it)', () => {
@@ -65,8 +66,7 @@ describe('save code v5', () => {
     const v4 = encodeProgress(p, 4);
     expect(v4).toMatch(/^MAT-6[2-9A-HJKMNP-Z]{6}$/);
     expect(decodeProgress(v4, PACKS)).toEqual(p);
-    const listed = PACKS.concat([{ id: 'combineit', levels: 4 }]);
-    expect(decodeProgress(v4, listed).packs.combineit).toEqual({ levels: Array(4).fill(false) });
+    expect(decodeProgress(v4, PACKS).packs.combineit).toEqual({ levels: Array(2).fill(false) });
   });
 
   it('still reads v3 codes (before Groups of Terms)', () => {

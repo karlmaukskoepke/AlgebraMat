@@ -7,6 +7,7 @@ import {
 import { createStore } from './storage.js';
 import { PACKS, packById } from './packs/index.js';
 import { flipitPlay } from './play/flipitPlay.js';
+import { combinePlay } from './play/combinePlay.js';
 import { lassoPlay } from './play/lassoPlay.js';
 import { termGroupPlay } from './play/termGroupPlay.js';
 import { boxPlay } from './play/boxPlay.js';
@@ -16,7 +17,7 @@ import { showSaveCode, askForCode } from './view/codes.js';
 const $ = (id) => document.getElementById(id);
 
 // Each pack's play adapter: its steps, session, Mat, controls and messages.
-const PLAY = { flipit: flipitPlay, lasso: lassoPlay, boxes: boxPlay, 'groups-of-terms': termGroupPlay };
+const PLAY = { combineit: combinePlay, flipit: flipitPlay, lasso: lassoPlay, boxes: boxPlay, 'groups-of-terms': termGroupPlay };
 const newSeed = () => Math.floor(Math.random() * 2 ** 32);
 
 // ?seed=123 replays a fixed set (handy for projecting the same problems to a
