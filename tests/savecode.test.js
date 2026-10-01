@@ -38,7 +38,7 @@ describe('save code v5', () => {
       codes.add(code);
     }
     expect(codes.size).toBe(65536);
-  });
+  }, 60_000); // 65,536 round trips: about 3s here, so a loaded CI runner needs more than the 5s default
 
   it('carries Groups of Terms progress, and drops it when the pack is not listed', () => {
     const p = state(bitsOf(0b1010, 4), bitsOf(0b11, 7), [true, false, false, false, false], [true, true, false, true, false, false, false, true]);
