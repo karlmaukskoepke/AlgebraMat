@@ -249,7 +249,10 @@ function savedCurrent() {
 const urlLevel = Number(params.get('level'));
 const urlPack = packById(params.get('pack') === 'groupit' ? 'lasso' : params.get('pack') ?? 'flipit');
 const resume = savedCurrent();
-if (urlPack && PLAY[urlPack.id] && Number.isInteger(urlLevel) && urlLevel >= 1
+if (params.get('demo') === 'boxes') {
+  // Boxes & Circles step 2: a static preview of the Mat (loaded only on this URL).
+  import('./view/boxDemo.js').then((m) => m.showBoxDemo(document.body));
+} else if (urlPack && PLAY[urlPack.id] && Number.isInteger(urlLevel) && urlLevel >= 1
   && urlLevel <= urlPack.levels) {
   startLevel(urlPack.id, urlLevel);
 } else if (resume) {

@@ -143,3 +143,16 @@ My calls, open to change:
   - The seed is mixed with the level, so the same seed gives different sets on different levels, and the same set every time on one level.
 - **Typed answers** are read as: digits (up to 3), `x`, `+`, `−` (the keyboard's `-` too), spaces ignored. A term after the first needs its sign. `2x3`, `2++3` and a trailing sign are unreadable. `2x + 3 − 1` is readable but **not combined**, and so is `2x + 0`, so Check can say *"Combine all the numbers into one."*
 - **Save code v3:** Boxes & Circles takes bits 11 to 15. It isn't in the game's pack list until the pack is playable (step 5), so its bits are read and dropped until then. Nobody can have progress in it before that.
+
+## 10. Build decisions, step 2 (the static Mat)
+
+- **Preview page:** `?demo=boxes` draws the Mat in every state with the notes' two examples (and the most crowded problem the generator can make). It's removed when the pack becomes playable (step 5).
+- **The drawing is 860 × 340.** The expression is one row (baseline y = 250), with the typed answer line under it (y = 322) and the key at the right of that line. Pieces stand above in columns up to y ≈ 15.
+- **Columns:** each term has a column, as wide as its text or its pieces, whichever is wider, centered as a group. The gap between columns is 20, closing up to 8 for a wide problem, so six terms always fit with at least 12 to spare at each edge.
+- **Piece grid:** two pieces to a row, full rows on top, an odd piece alone at the bottom and centered (7 is 2 + 2 + 2 + 1). Cells are 42 × 38, which keeps pieces at least 44px on a Chromebook. A term has at most 9 pieces, so a column is at most 5 rows tall.
+- **Pieces:** a counter is a + or − mark; a box is a 22-unit square; a negative box is the same square with a dash touching its left side. A canceled piece fades to 45% and gets a vermillion slash. A piece picked for canceling gets a dashed ring.
+- **Shapes:** a box around an x term is a rounded square; a number gets a pill (capsule). Both stand 9 units off the text. A shape that doesn't include the operation, or whose parts aren't complete, is **dashed** (the "incomplete" look).
+- **Live selection:** a highlighter-yellow bar behind the covered parts, with bolder text.
+- **Tap targets:** each part (operation, number) has a hit box at least 46 wide and 56 tall that never reaches into its neighbor. A drag covers every part between its two ends.
+- **"is +7"** sits under a rewritten term in magenta Kalam with an underline, and its pieces are magenta.
+- **Pieces are listed in reading order** (top-left first). When there's nothing left to cancel, each kind has only one sign left, and the leftovers always equal what the expression comes to (tested for every generated problem).
