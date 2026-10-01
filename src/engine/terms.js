@@ -21,7 +21,9 @@ export const effective = (term) => (term.op === '-' ? -term.value : term.value);
 export const isX = (term) => term.kind === 'x';
 
 // Subtracting a negative needs the Rewrite step: `− (−7)` → `+ (+7)`, "is +7".
-export const needsRewrite = (term) => term.op === '-' && term.value < 0;
+// A term can say so itself with `flip`: Flip It's mixed level (integers) flips every subtraction,
+// `− 2` → `+ (−2)` as well as `− (−7)`, because it's adding the opposite.
+export const needsRewrite = (term) => term.flip ?? (term.op === '-' && term.value < 0);
 
 export const rewriteTerm = (term) => (needsRewrite(term) ? { ...term, op: '+', value: -term.value } : term);
 

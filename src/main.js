@@ -8,6 +8,8 @@ import { createStore } from './storage.js';
 import { PACKS, packById } from './packs/index.js';
 import { flipitPlay } from './play/flipitPlay.js';
 import { combinePlay } from './play/combinePlay.js';
+import { integerPlay } from './play/integerPlay.js';
+import { bigPlay } from './play/bigPlay.js';
 import { lassoPlay } from './play/lassoPlay.js';
 import { termGroupPlay } from './play/termGroupPlay.js';
 import { boxPlay } from './play/boxPlay.js';
@@ -17,7 +19,16 @@ import { showSaveCode, askForCode } from './view/codes.js';
 const $ = (id) => document.getElementById(id);
 
 // Each pack's play adapter: its steps, session, Mat, controls and messages.
-const PLAY = { combineit: combinePlay, flipit: flipitPlay, lasso: lassoPlay, boxes: boxPlay, 'groups-of-terms': termGroupPlay };
+// A pack can use a different adapter for some levels (Combine it's Level 3 and Flip It's Level 5 run on the
+// integer steps, and Level 4 its own), so each entry is the adapter or a function of the level.
+const PLAY = {
+  combineit: (level) => (level >= 4 ? bigPlay : level === 3 ? integerPlay : combinePlay),
+  flipit: (level) => (level >= 5 ? integerPlay : flipitPlay),
+  lasso: lassoPlay,
+  boxes: boxPlay,
+  'groups-of-terms': termGroupPlay,
+};
+const adapterFor = (packId, level) => (typeof PLAY[packId] === 'function' ? PLAY[packId](level) : PLAY[packId]);
 const newSeed = () => Math.floor(Math.random() * 2 ** 32);
 
 // ?seed=123 replays a fixed set (handy for projecting the same problems to a
@@ -106,7 +117,7 @@ function restoreFromCode(text) {
 function startLevel(packId, level, resume = null) {
   clearTimeout(nextTimer);
   const pack = packById(packId);
-  const adapter = PLAY[pack.id];
+  const adapter = adapterFor(pack.id, level);
   const seed = resume?.seed ?? fixedSeed ?? newSeed();
   const problems = pack.generate(level, seed);
   const index = resume?.index ?? 0;
@@ -240,8 +251,8 @@ document.addEventListener('keydown', (e) => {
   const letter = /^[a-z]$/i.test(e.key);
   if (/^[0-9]$/.test(e.key)) candidates.push(`.pad button[data-digit="${e.key}"]`);
   else if (e.key === 'Backspace' || e.key === 'Delete') candidates.push('.pad button[data-action="backspace"]', 'button[data-key="Backspace"]');
-  else if (e.key === '-' || e.key === '−') candidates.push('.pad button[data-action="toggleSign"]', '.pad button[data-key="-"]');
-  else if (e.key === '+') candidates.push('.pad button[data-key="+"]');
+  else if (e.key === '-' || e.key === '−') candidates.push('.pad button[data-action="toggleSign"]', '.pad button[data-key="-"]', 'button[data-key="-"]');
+  else if (e.key === '+') candidates.push('.pad button[data-key="+"]', 'button[data-key="+"]');
   else if (e.key === 'Enter' && !e.repeat) candidates.push('button[data-action="check"]');
   else if (letter) candidates.push(`button[data-key="${e.key.toLowerCase()}"]`);
   if (!candidates.length) return;

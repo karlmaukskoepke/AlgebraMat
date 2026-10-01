@@ -148,7 +148,10 @@ const MIXED_SEED = 0x51f15e;
 
 const mixedBuild = (rng) => {
   const n = 3 + Math.floor(rng() * 2);
-  const terms = Array.from({ length: n }, (_, i) => intTerm(i === 0 ? '+' : (rng() < 0.5 ? '-' : '+'), signed(rng, 1, MAX_MANY)));
+  const terms = Array.from({ length: n }, (_, i) => {
+    const op = i === 0 ? '+' : (rng() < 0.5 ? '-' : '+');
+    return intTerm(op, signed(rng, 1, MAX_MANY), op === '-');
+  });
   return makeExpression(terms);
 };
 

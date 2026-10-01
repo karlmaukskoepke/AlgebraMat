@@ -71,12 +71,18 @@ export function piecePositions(count, cx, perRow = 2) {
   return out;
 }
 
+export const BIG_VIEW_TOP = 60;       // the drawing starts here when there are no counters (notes sit above the row)
+export const NOTE_TOP = 88;           // baseline of the first note line, and the gap between lines
+export const NOTE_GAP = 32;
+
 export const pieceRows = (count, perRow = 2) => Math.ceil(count / perRow);
 
 // The part of the drawing to show: the top is cropped (or made taller) to fit the
 // tallest column a term can hold, so a small problem gets a bigger Mat and a big
 // one still has room above it. Returns { y, height } for the viewBox.
 export function viewFor(expr) {
+  // No counters (Combine it's Level 4): room above the expression for what the student works out, one line a step.
+  if (expr.mode === 'integers-big') return { y: BIG_VIEW_TOP, height: BOX_VIEW.height - BIG_VIEW_TOP };
   const rows = Math.max(1, ...expr.terms.map((t) => pieceRows(maxPieces(t), perRowFor(t))));
   const topEdge = PIECES_BOTTOM_Y - (rows - 1) * PIECE_H - PIECE_H / 2;
   const y = Math.max(-40, Math.floor(topEdge - 10));
@@ -93,7 +99,7 @@ export function exprLayout(expr) {
     const numText = mine.find((p) => p.part === 'num').text;
     const numW = textWidth(numText);
     const textW = (hasOp ? OP_W + IN_GAP : 0) + numW;
-    const pieces = pieceCount(term);
+    const pieces = expr.mode === 'integers-big' ? 0 : pieceCount(term); // Level 4 draws no counters
     const perRow = perRowFor(term);
     const piecesW = pieces === 0 ? 0 : Math.min(pieces, perRow) * PIECE_W;
     return { term: i, hasOp, numText, numW, textW, pieces, perRow, width: Math.max(textW + 2 * PAD_X, piecesW + 6) };

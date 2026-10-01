@@ -1296,6 +1296,11 @@ body {
 }
 
 /* "is +7" under a rewritten term: magenta, underlined (it's words). */
+.box-mat .bm-note {
+  fill: var(--ink);
+  font: 700 26px 'Kalam', cursive;
+}
+
 .box-mat .bm-label {
   fill: var(--opposite);
   font: 700 22px 'Kalam', cursive;

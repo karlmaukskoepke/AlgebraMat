@@ -21,7 +21,7 @@ import { MINUS } from '../engine/expr.js';
 import { effective } from '../engine/terms.js';
 import {
   BOX_VIEW, ROW_Y, SHAPE_HEIGHT, ANSWER_Y, LABEL_Y, PIECE_W, PIECE_H, HIT_H, SHAPE_TOP,
-  exprLayout, piecePositions, shapeBounds, viewFor,
+  exprLayout, piecePositions, shapeBounds, viewFor, NOTE_TOP, NOTE_GAP,
 } from './boxLayout.js';
 
 const SVG_NS = 'http://www.w3.org/2000/svg';
@@ -100,6 +100,15 @@ export function renderBoxMat(s) {
     svg.append(el('rect', { x: b.x, y: b.y + 4, width: b.width, height: b.height - 8, rx: 8, class: 'bm-selecting' }));
   }
 
+  // Combine it's Level 4: the terms picked to combine glow behind the text, and each is tappable.
+  for (const t of s.picked ?? []) {
+    const col = layout.columns[t];
+    const first = col.parts[0];
+    const last = col.parts[col.parts.length - 1];
+    const b = shapeBounds(layout, first.index, last.index);
+    svg.append(el('rect', { x: b.x, y: b.y + 4, width: b.width, height: b.height - 8, rx: 8, class: 'bm-selecting' }));
+  }
+
   // Pieces above each term, and the tappable column behind them (Draw).
   const fx = s.fx ?? {};
   const isIn = (list, term, index) => list?.some((p) => p.term === term && p.index === index);
@@ -130,7 +139,7 @@ export function renderBoxMat(s) {
   for (const p of layout.parts) {
     svg.append(el('text', {
       x: p.cx, y: ROW_Y, 'text-anchor': 'middle',
-      class: `bm-text ${p.part === 'op' ? 'is-op' : 'is-num'}${selected(p.index) ? ' is-selecting' : ''}${s.flipped?.includes(p.index) ? ' is-flipped' : ''}${fx.flipped?.includes(p.index) ? ' flip-in' : ''}${hint.parts?.includes(p.index) ? ' hint-flip' : ''}${hint.terms?.includes(p.term) ? ' hint-blink-text' : ''}`,
+      class: `bm-text ${p.part === 'op' ? 'is-op' : 'is-num'}${selected(p.index) || (s.picked ?? []).includes(p.term) ? ' is-selecting' : ''}${s.flipped?.includes(p.index) ? ' is-flipped' : ''}${fx.flipped?.includes(p.index) ? ' flip-in' : ''}${hint.parts?.includes(p.index) ? ' hint-flip' : ''}${hint.terms?.includes(p.term) ? ' hint-blink-text' : ''}`,
       'data-part': p.index,
     }, [p.text]));
     if (s.tap === 'parts') {
@@ -140,6 +149,22 @@ export function renderBoxMat(s) {
       }));
     }
   }
+
+  if (s.tap === 'terms') {
+    layout.columns.forEach((col) => {
+      const first = col.parts[0];
+      const last = col.parts[col.parts.length - 1];
+      svg.append(el('rect', {
+        x: first.hitLeft, y: ROW_Y - HIT_H + 18, width: last.hitRight - first.hitLeft, height: HIT_H, class: 'bm-parthit tappable',
+        'data-action': 'term', 'data-term': col.term,
+      }));
+    });
+  }
+
+  // What the student has worked out so far, a line a step above the expression (Combine it's Level 4).
+  (s.notes ?? []).forEach((text, i) => {
+    svg.append(el('text', { x: BOX_VIEW.width / 2, y: NOTE_TOP + i * NOTE_GAP, 'text-anchor': 'middle', class: 'bm-note' }, [text]));
+  });
 
   // A rewritten term says what it is worth: "is +7", in magenta with an underline.
   for (const i of s.rewritten ?? []) {

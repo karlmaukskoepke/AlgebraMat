@@ -107,6 +107,13 @@ export function validateDraw(expr, columns) {
 // kind is off (the boxes or the numbers) without giving the number.
 export function validateAnswer(expr, text) {
   const read = parseAnswer(text);
+  // Integer problems can come to zero (Flip It's mixed level): that's typed as a plain 0.
+  const total = evaluate(expr);
+  if (total.x === 0 && total.n === 0) {
+    if (!read.ok) return read.reason === 'empty' ? fail('typeAnswer') : fail('answerUnreadable');
+    const plainZero = read.terms.length === 1 && read.terms[0].kind === 'int' && read.terms[0].value === 0;
+    return plainZero && /^[-−+]?0+$/.test(String(text).replace(/\s/g, '')) ? pass('correct', { answer: '0' }) : fail('checkNumbers');
+  }
   if (!read.ok) return read.reason === 'empty' ? fail('typeAnswer') : fail('answerUnreadable');
   if (!read.combined) return fail(read.terms.some((t) => t.value === 0) ? 'noZeroTerm' : 'combineAll');
   const want = evaluate(expr);
