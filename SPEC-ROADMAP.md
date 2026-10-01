@@ -6,7 +6,7 @@
 
 ## Combine it (integer addition), new 2026-10-01
 
-**Status: drafted in SPEC-COMBINE.md, waiting on Karl's approval.** Karl's answers of 2026-10-01: yes to the four levels as read, yes to mixing who wins in Level 1, yes to the circling steps in Level 4; Combine it goes **before Flip It** on the pack map. *"A simple 'Combine it' section about integer addition. Similar to Flip It, without the flipping, of course."*
+**Status: approved in SPEC-COMBINE.md (2026-10-01), not yet built.** Karl's answers of 2026-10-01: yes to the four levels as read, yes to mixing who wins in Level 1, yes to the circling steps in Level 4; Combine it goes **before Flip It** on the pack map. *"A simple 'Combine it' section about integer addition. Similar to Flip It, without the flipping, of course."*
 - **Round 1:** adding a positive and a negative (all **battles**). Modeled with the + and − counters.
 - **Round 2:** adding negatives and negatives. Modeled with counters.
 - **Round 3:** three or more terms. Modeled with counters.

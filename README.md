@@ -29,6 +29,10 @@ Add `?seed=123` to the URL to replay a fixed problem set, and `?level=2` to open
 
 ## Changelog
 
+### Zone hover in Draw (Karl's request)
+
+- **A dashed outline shows the zone under the mouse** in Boxes & Circles' Draw step (and will in Combine it), so students see where a tap will land. Mouse only; touch screens don't get it.
+
 ### Pack map: level names no longer clip
 
 - **Fixed:** in the equal-size cards, a level button whose name wraps to two or three lines (Group It's "opposite of several groups") could be squeezed shorter than its text. The scrolling now happens in a plain wrapper around the level grid, and the grid's rows are always as tall as their text. Cards are still equal size, and the page still doesn't scroll on a Chromebook.

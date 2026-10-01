@@ -1276,6 +1276,18 @@ body {
   pointer-events: all;
 }
 
+/* Mouse over a zone you can tap: a dashed line shows the whole zone (not on touch screens). */
+@media (hover: hover) {
+  .box-mat .bm-zone.tappable:hover {
+    stroke: var(--ink);
+    stroke-width: 2.5;
+    stroke-dasharray: 8 7;
+    stroke-linecap: round;
+    rx: 16px;
+    fill: rgba(29, 29, 29, 0.035);
+  }
+}
+
 .box-mat .bm-ring {
   fill: none;
   stroke: var(--ink);
