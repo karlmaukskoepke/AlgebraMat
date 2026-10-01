@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import {
   BOX_VIEW, ROW_Y, SHAPE_TOP, SHAPE_HEIGHT, ANSWER_Y, PIECE_W, PIECE_H, HIT_W, COLUMN_GAP, MIN_GAP,
-  textWidth, piecePositions, pieceRows, exprLayout, shapeBounds, partAt, dragRange,
+  textWidth, piecePositions, pieceRows, viewFor, perRowFor, exprLayout, shapeBounds, partAt, dragRange,
 } from '../src/view/boxLayout.js';
 import { makeTerm, makeExpression, termParts } from '../src/engine/terms.js';
 import { generateTermLevel } from '../src/engine/generateTerms.js';
@@ -16,11 +16,11 @@ const problems = [1, 2, 3, 4, 5].flatMap((level) => Array.from({ length: 40 }, (
 describe('piece grids', () => {
   it('puts pieces two to a row, full rows on top and an odd piece alone at the bottom', () => {
     expect(piecePositions(0, 100)).toEqual([]);
-    expect(piecePositions(1, 100)).toEqual([{ x: 100, y: 186 }]);
+    expect(piecePositions(1, 100)).toEqual([{ x: 100, y: 182 }]);
     const seven = piecePositions(7, 100);
     expect(seven).toHaveLength(7);
     expect(seven.slice(0, 2).map((p) => p.x)).toEqual([100 - PIECE_W / 2, 100 + PIECE_W / 2]);
-    expect(seven[6]).toEqual({ x: 100, y: 186 });          // the odd one, bottom center
+    expect(seven[6]).toEqual({ x: 100, y: 182 });          // the odd one, bottom center
     expect(new Set(seven.map((p) => p.y)).size).toBe(4);   // 2 + 2 + 2 + 1
     expect(pieceRows(7)).toBe(4);
     expect(pieceRows(8)).toBe(4);
@@ -33,8 +33,33 @@ describe('piece grids', () => {
         const apart = Math.abs(ps[i].x - ps[j].x) >= PIECE_W || Math.abs(ps[i].y - ps[j].y) >= PIECE_H;
         expect(apart, `${count} pieces: ${i} and ${j}`).toBe(true);
       }
-      expect(Math.min(...ps.map((p) => p.y)) - PIECE_H / 2).toBeGreaterThanOrEqual(0);
       expect(Math.max(...ps.map((p) => p.y)) + PIECE_H / 2).toBeLessThan(SHAPE_TOP);
+    }
+  });
+
+  it('puts a big column (7 or more) three to a row, with the short row alone at the bottom', () => {
+    expect(perRowFor({ kind: 'int', op: '+', value: 6 })).toBe(2);
+    expect(perRowFor({ kind: 'int', op: '+', value: 7 })).toBe(3);
+    expect(perRowFor({ kind: 'x', op: '-', value: 5 })).toBe(2);
+    const seven = piecePositions(7, 100, 3);
+    expect(seven.slice(0, 3).map((p) => p.x)).toEqual([100 - PIECE_W, 100, 100 + PIECE_W]);
+    expect(new Set(seven.map((p) => p.y)).size).toBe(3);                          // 3 + 3 + 1
+    expect(seven[6]).toEqual({ x: 100, y: 182 });
+    expect(piecePositions(8, 100, 3).slice(6).map((p) => p.x)).toEqual([100 - PIECE_W / 2, 100 + PIECE_W / 2]);
+    expect(pieceRows(9, 3)).toBe(3);
+  });
+
+  it('shows enough of the drawing for the tallest column a term can hold, and crops the rest', () => {
+    const view = (...terms) => viewFor({ terms });
+    const small = view({ kind: 'int', op: '+', value: 1 });                   // holds 3: 2 rows
+    const big = view({ kind: 'x', op: '+', value: 9 });                       // holds 10: 5 rows
+    expect(small.y).toBeGreaterThan(0);                                         // cropped: a bigger Mat
+    expect(big.y).toBeLessThan(small.y);                                        // a taller column needs more of the drawing
+    for (const v of [small, big]) expect(v.y + v.height).toBe(BOX_VIEW.height);
+    for (const [value, v] of [[1, small], [9, big]]) {
+      const term = { kind: 'x', op: '+', value };
+      const top = Math.min(...piecePositions(Math.min(10, value + 2), 0, perRowFor(term)).map((p) => p.y)) - PIECE_H / 2;
+      expect(top).toBeGreaterThanOrEqual(v.y);                                  // the whole column is visible
     }
   });
 });
@@ -79,7 +104,7 @@ describe('the expression row', () => {
       expect(layout.left + layout.width).toBeLessThanOrEqual(BOX_VIEW.width - 11.99);
       for (const c of layout.columns) {
         expect(c.pieces).toBeLessThanOrEqual(9);
-        const ps = piecePositions(c.pieces, c.cx);
+        const ps = piecePositions(c.pieces, c.cx, c.perRow);
         for (const p of ps) {
           expect(p.x - PIECE_W / 2).toBeGreaterThanOrEqual(c.left - 0.001);
           expect(p.x + PIECE_W / 2).toBeLessThanOrEqual(c.left + c.width + 0.001);

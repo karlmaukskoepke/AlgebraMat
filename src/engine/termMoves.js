@@ -71,8 +71,9 @@ export function validateShapes(expr, shapes) {
 
 // ---------- ② Draw ----------
 
-// Most pieces one term's column can hold (a term needs at most 9; one over so "too many" can happen).
-export const MAX_PER_TERM = 10;
+// Most pieces one term's column can hold: what it needs plus two spare (up to 10), so
+// "too many" can happen but the Mat only has to make room for a few extra.
+export const maxPieces = (term) => Math.min(10, pieceCount(term) + 2);
 
 // What a term should draw, in words: "4 negative boxes", "1 box", "5 negatives", "7 positives".
 export function piecePhrase(term) {

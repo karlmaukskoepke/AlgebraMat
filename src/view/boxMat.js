@@ -21,7 +21,7 @@ import { MINUS } from '../engine/expr.js';
 import { effective } from '../engine/terms.js';
 import {
   BOX_VIEW, ROW_Y, SHAPE_HEIGHT, ANSWER_Y, LABEL_Y, PIECE_W, PIECE_H, HIT_H, SHAPE_TOP,
-  exprLayout, piecePositions, shapeBounds,
+  exprLayout, piecePositions, shapeBounds, viewFor,
 } from './boxLayout.js';
 
 const SVG_NS = 'http://www.w3.org/2000/svg';
@@ -58,36 +58,37 @@ function boxMarks(sign) {
   return g;
 }
 
-function pieceNode(piece, x, y, { selected = false, hinted = false, tap = null } = {}) {
+function pieceNode(piece, x, y, { selected = false, hinted = false, tap = null, added = false, justCanceled = false, ghost = false } = {}) {
   const cls = ['bm-piece', piece.type, piece.opposite ? 'is-opposite' : '', piece.canceled ? 'is-canceled' : '',
-    selected ? 'is-selected' : '', hinted ? 'hint-blink-piece' : '', tap ? 'tappable' : ''].filter(Boolean).join(' ');
+    selected ? 'is-selected' : '', hinted ? 'hint-blink' : '', tap ? 'tappable' : '', added ? 'pop-in' : '', ghost ? 'ghost' : ''].filter(Boolean).join(' ');
   const g = el('g', {
     class: cls, transform: `translate(${x} ${y})`, 'data-sign': piece.sign,
     'data-action': tap?.action ?? null, 'data-term': tap?.term ?? null, 'data-index': tap?.index ?? null,
   });
   g.append(el('rect', { x: -PIECE_W / 2, y: -PIECE_H / 2, width: PIECE_W, height: PIECE_H, class: 'bm-hit' }));
   g.append(piece.type === 'box' ? boxMarks(piece.sign) : counterMarks(piece.sign));
-  if (piece.canceled) g.append(line(-16, 14, 16, -14, 'bm-slash'));
+  if (piece.canceled) g.append(el('line', { x1: -16, y1: 14, x2: 16, y2: -14, class: `bm-slash${justCanceled ? ' slash-in' : ''}`, pathLength: 1 }));
   if (selected) g.append(el('rect', { x: -21, y: -17, width: 42, height: 34, rx: 8, class: 'bm-ring' }));
   return g;
 }
 
 // ---------- The expression row ----------
 
-function shapeNode(layout, shape) {
+function shapeNode(layout, shape, fresh) {
   const b = shapeBounds(layout, shape.from, shape.to);
   const pill = shape.kind === 'circle';
   return el('rect', {
     x: b.x, y: b.y, width: b.width, height: b.height,
     rx: pill ? SHAPE_HEIGHT / 2 : 10,
-    class: `bm-shape is-${shape.kind}${shape.complete === false ? ' is-incomplete' : ''}`,
+    class: `bm-shape is-${shape.kind}${shape.complete === false ? ' is-incomplete' : ''}${fresh ? ' shape-in' : ''}`,
     'data-from': shape.from, 'data-to': shape.to,
   });
 }
 
 export function renderBoxMat(s) {
+  const view = viewFor(s.expr);
   const svg = el('svg', {
-    class: 'mat box-mat', viewBox: `0 0 ${BOX_VIEW.width} ${BOX_VIEW.height}`,
+    class: 'mat box-mat', viewBox: `0 ${view.y} ${BOX_VIEW.width} ${view.height}`,
     role: 'group', 'aria-label': 'The Boxes and Circles Mat',
   });
   const layout = exprLayout(s.expr);
@@ -100,28 +101,36 @@ export function renderBoxMat(s) {
   }
 
   // Pieces above each term, and the tappable column behind them (Draw).
+  const fx = s.fx ?? {};
+  const isIn = (list, term, index) => list?.some((p) => p.term === term && p.index === index);
   layout.columns.forEach((col) => {
     const column = s.pieces?.[col.term] ?? [];
+    // Draw hint: faint pieces showing what this term needs.
+    const ghost = hint.ghosts?.find((g) => g.term === col.term);
+    if (ghost) {
+      piecePositions(ghost.count, col.cx, col.perRow).forEach((pos) => svg.append(
+        pieceNode({ type: ghost.type, sign: ghost.sign, canceled: false }, pos.x, pos.y, { ghost: true })));
+    }
     if (s.tap === 'zones') {
       svg.append(el('rect', {
-        x: col.left, y: 4, width: col.width, height: SHAPE_TOP - 8, class: 'bm-zone tappable',
+        x: col.left, y: view.y + 4, width: col.width, height: SHAPE_TOP - 8 - view.y, class: 'bm-zone tappable',
         'data-action': 'zone', 'data-term': col.term,
       }));
     }
-    piecePositions(column.length, col.cx).forEach((pos, i) => {
+    piecePositions(column.length, col.cx, col.perRow).forEach((pos, i) => {
       const selected = s.selected?.term === col.term && s.selected?.index === i;
       const tap = (s.tap === 'pieces' || s.tap === 'zones') && !column[i].canceled ? { action: 'piece', term: col.term, index: i } : null;
-      svg.append(pieceNode(column[i], pos.x, pos.y, { selected, hinted: hint.pieces?.some((p) => p.term === col.term && p.index === i), tap }));
+      svg.append(pieceNode(column[i], pos.x, pos.y, { selected, hinted: isIn(hint.pieces, col.term, i), tap, added: isIn(fx.added, col.term, i), justCanceled: isIn(fx.canceled, col.term, i) }));
     });
   });
 
   // Shapes, then the text on top.
-  for (const shape of s.shapes ?? []) svg.append(shapeNode(layout, shape));
+  (s.shapes ?? []).forEach((shape, i) => svg.append(shapeNode(layout, shape, fx.shape === i)));
   const selected = (i) => s.selecting && i >= Math.min(s.selecting.from, s.selecting.to) && i <= Math.max(s.selecting.from, s.selecting.to);
   for (const p of layout.parts) {
     svg.append(el('text', {
       x: p.cx, y: ROW_Y, 'text-anchor': 'middle',
-      class: `bm-text ${p.part === 'op' ? 'is-op' : 'is-num'}${selected(p.index) ? ' is-selecting' : ''}${s.flipped?.includes(p.index) ? ' is-flipped' : ''}`,
+      class: `bm-text ${p.part === 'op' ? 'is-op' : 'is-num'}${selected(p.index) ? ' is-selecting' : ''}${s.flipped?.includes(p.index) ? ' is-flipped' : ''}${fx.flipped?.includes(p.index) ? ' flip-in' : ''}${hint.parts?.includes(p.index) ? ' hint-flip' : ''}${hint.terms?.includes(p.term) ? ' hint-blink-text' : ''}`,
       'data-part': p.index,
     }, [p.text]));
     if (s.tap === 'parts') {

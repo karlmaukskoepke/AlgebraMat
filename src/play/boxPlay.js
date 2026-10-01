@@ -5,6 +5,7 @@ import { prettyAnswer } from '../engine/terms.js';
 import { newTermSession, reduceTerms, shapeComplete, termSteps, rewritable, fullyFlipped, flipKey } from '../engine/termSession.js';
 import { termParts } from '../engine/terms.js';
 import { renderBoxMat } from '../view/boxMat.js';
+import { termHintFor } from '../engine/termHints.js';
 import { buildBoxControls } from '../view/boxControls.js';
 import { termFeedbackText } from '../view/termFeedback.js';
 import { bindBoxMat } from '../view/boxPointer.js';
@@ -35,7 +36,22 @@ export const boxPlay = {
   reduce: reduceTerms,
   feedbackText: termFeedbackText,
   buildControls: buildBoxControls,
-  effects: () => ({ hint: null }), // hints come in the last Boxes & Circles build
+  // View-only effects for one render: the hint, and what just changed (to animate it).
+  effects(before, session) {
+    const fx = { hint: termHintFor(session), added: [], canceled: [], flipped: [], shape: null };
+    if (!before) return fx; // `before` is only passed for a move within the same problem
+    session.pieces.forEach((col, term) => col.forEach((p, index) => {
+      const was = before.pieces[term][index];
+      if (!was) fx.added.push({ term, index });
+      else if (p.canceled && !was.canceled) fx.canceled.push({ term, index });
+    }));
+    termParts(session.problem).forEach((p, i) => {
+      const key = flipKey(p.term, p.part);
+      if (session.flips[key] && !before.flips[key]) fx.flipped.push(i);
+    });
+    if (session.shapes.length > before.shapes.length) fx.shape = session.shapes.length - 1;
+    return fx;
+  },
   renderMat: (session, fx = {}) => renderBoxMat({ ...boxViewState(session), fx }),
   // Box & Circle is dragged (see bindMat); Draw and Cancel are tapped.
   matAction: (d) => {

@@ -66,7 +66,11 @@ export function buildBoxControls(root, dispatch) {
   });
 
   return {
-    update(s) {
+    update(s, hint = null) {
+      // A hint can pulse the button to use next: 'nothingToRewrite' or 'pickPiece:box:+'.
+      const pulse = hint?.show?.button;
+      const named = (b) => [b.dataset.action, b.dataset.pieceType, b.dataset.sign].filter(Boolean).join(':');
+      for (const b of row.querySelectorAll('button')) b.classList.toggle('hint-pulse', Boolean(pulse) && named(b) === pulse);
       const step = s.step === 'levelDone' ? 'done' : s.step;
       const boxCircle = step === 'boxcircle';
       const drawing = step === 'draw';

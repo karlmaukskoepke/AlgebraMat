@@ -16,7 +16,7 @@ export const flipKey = (term, part) => `${term}:${part}`;
 export const fullyFlipped = (s, term) => Boolean(s.flips[flipKey(term, 'op')] && s.flips[flipKey(term, 'num')]);
 
 import { canCancel, fullyCanceled, makePiece } from './termPieces.js';
-import { validateShapes, validateDraw, validateAnswer, shapeInfo, overlaps, MAX_PER_TERM } from './termMoves.js';
+import { validateShapes, validateDraw, validateAnswer, shapeInfo, overlaps, maxPieces } from './termMoves.js';
 
 export const REWRITE_STEP = { id: 'rewrite', label: 'Rewrite' };
 export const TERM_STEPS = [
@@ -176,7 +176,7 @@ export function reduceTerms(state, action) {
       if (s.step !== 'draw' || !validTerm(action.term)) return state;
       if (!s.pick) return note(s, 'pickPieceFirst');
       const column = s.pieces[action.term];
-      if (column.length >= MAX_PER_TERM) return note(s, 'columnFull');
+      if (column.length >= maxPieces(problem.terms[action.term])) return note(s, 'columnFull');
       // A piece from a term that was subtracted from a negative is "opposite" (magenta).
       column.push(makePiece(s.pick.type, s.pick.sign, needsRewrite(problem.terms[action.term])));
       s.drawn.push(action.term);
@@ -237,9 +237,10 @@ export function reduceTerms(state, action) {
         return note(s, 'drawIntro');
       }
       if (s.step === 'cancel') {
+        const held = s.selected;
         s.selected = null;
-        const pair = s.pairs.pop();
-        if (!pair) return state;
+        const pair = held ? null : s.pairs.pop(); // with a piece picked, Undo lets go of it first
+        if (!pair) return held ? note(s, 'cancelIntro') : state;
         for (const [term, index] of pair) s.pieces[term][index].canceled = false;
         return note(s, 'cancelIntro');
       }
