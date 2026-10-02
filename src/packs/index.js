@@ -52,14 +52,14 @@ export const groupsOfTerms = {
 };
 
 // Distribute, then combine (SPEC-DISTRIBUTE.md): still a Coming-soon card while it's built round by round, but
-// a round that's built opens from a link (?pack=distribute-combine&level=1). Round 1 so far.
+// a round that's built opens from a link (?pack=distribute-combine&level=2). Rounds 1 to 3 so far.
 export const distributeCombine = {
   id: 'distribute-combine',
   title: 'Distribute, then combine',
   subtitle: 'Distributing, then combining like terms',
   blurb: 'Open the groups first, then combine like terms.',
-  levels: 1,
-  levelNames: ['A + B(Cx + D)'],
+  levels: 3,
+  levelNames: ['A + B(Cx + D)', 'the invisible 1', 'subtracting a group'],
   comingSoon: true,
   generate: (level, seed) => generateDistributeLevel(level, seed),
 };

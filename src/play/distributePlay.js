@@ -13,7 +13,7 @@ import { distributeFeedbackText } from '../view/distributeFeedback.js';
 import { bindBoxMat } from '../view/boxPointer.js';
 import { newDistributeSession, reduceDistribute, distributeSteps, phaseLabel, groupProblem } from '../engine/distributeSession.js';
 import { distributeHintFor } from '../engine/distributeHints.js';
-import { formatDistribute } from '../engine/distribute.js';
+import { formatDistribute, hasSubtractedGroup, addOppositeSegments } from '../engine/distribute.js';
 import { answerText as groupAnswerText } from '../engine/termGroups.js';
 import { prettyAnswer } from '../engine/terms.js';
 
@@ -57,11 +57,14 @@ export function buildDistributeControls(root, dispatch) {
 
 // The Mat for each stage. The group gets the whole problem in its left column, so you can see what it's part of.
 function renderMat(s, fx = {}) {
+  // A subtracted group gets the magenta "subtract = add the opposite" once the student has chosen − groups.
+  const opposite = hasSubtractedGroup(s.problem) ? addOppositeSegments(s.problem) : null;
   if (s.stage === 'tg') {
-    return renderTermGroupMat({ ...termGroupViewState(s.tg), context: formatDistribute(s.problem), fx });
+    const chosen = !['groups', 'sign'].includes(s.tg.step);
+    return renderTermGroupMat({ ...termGroupViewState(s.tg), context: formatDistribute(s.problem), contextNote: chosen ? opposite : null, fx });
   }
   if (s.stage === 'line') {
-    return renderLineMat({ problemText: formatDistribute(s.problem), groupText: groupAnswerText(groupProblem(s.problem)), typed: prettyAnswer(s.line) });
+    return renderLineMat({ problemText: formatDistribute(s.problem), groupText: groupAnswerText(groupProblem(s.problem)), typed: prettyAnswer(s.line), note: opposite });
   }
   return renderBoxMat({ ...boxViewState(s.ts), fx });
 }

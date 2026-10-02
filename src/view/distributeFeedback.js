@@ -5,7 +5,7 @@ import { termGroupFeedbackText } from './termGroupFeedback.js';
 import { termFeedbackText } from './termFeedback.js';
 
 export const DISTRIBUTE_FEEDBACK = {
-  hintLine: ({ whole, group }) => `Copy the problem ${whole}, but write ${group} where the group was. Keep each other term's sign: it's the operation in front.`,
+  hintLine: ({ whole, group, opposite }) => `Copy the problem ${whole}, but write ${group} where the group was. Keep each other term's sign: it's the operation in front.${opposite ? ` Subtracting is adding the opposite: ${opposite}.` : ''}`,
   lineIntro: ({ group }) => `Now write the whole problem with the group opened: ${group} goes where the group was, and the other terms stay as they are. Don't combine yet!`,
   lineOk: ({ line }) => `Opened! ${line}. Now ② combine: box the x terms and circle the numbers, signs and all.`,
   lineTooSoon: () => 'That’s already combined! First write every term, just opened up. We combine in step ②.',

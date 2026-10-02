@@ -83,6 +83,6 @@ describe('term groups: the model', () => {
     expect(() => makeTermGroups({ n: 2 }, [x(0), n(1)])).toThrow();
     expect(() => makeTermGroups({ n: 1, d: 2 }, [x(3), n(2)])).toThrow();   // 3 doesn't split in half
     expect(() => makeTermGroups({ n: 2 }, [x(1), n(1)], { hidden1: true })).toThrow();
-    expect(() => makeTermGroups({ n: 1 }, [x(1), n(1)], { hidden1: true })).toThrow();   // only −(B) hides a 1
+    expect(makeTermGroups({ n: 1 }, [x(1), n(1)], { hidden1: true }).hidden1).toBe(true);   // (B) hides its 1 too (Distribute, then combine)
   });
 });

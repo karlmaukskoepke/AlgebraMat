@@ -6,7 +6,7 @@
 // B is two terms in the order they're written, each { kind: 'x' | 'int', value }
 // with the value signed as it reads after its operation:
 //   3(2x − 1)   → count { neg: false, n: 3, d: 1 }, inside [x 2, int −1]
-//   −(x + 3)    → count { neg: true,  n: 1, d: 1 }, hidden1: true
+//   −(x + 3)    → count { neg: true,  n: 1, d: 1 }, hidden1: true   (so is (x + 3), a positive single group)
 //   1/2(6 + 4x) → count { neg: false, n: 1, d: 2 }, inside [int 6, x 4]   (the challenge levels write the number first)
 
 import { MINUS } from './expr.js';
@@ -22,7 +22,7 @@ export function makeTermGroups({ neg = false, n, d = 1 }, inside, { hidden1 = fa
     if (!Number.isInteger(t.value) || t.value === 0) throw new Error(`Bad term value: ${t.value}`);
     if (t.value % d !== 0) throw new Error(`${t.value} doesn't split into ${d} equal parts`);
   }
-  if (hidden1 && !(neg && n === 1 && d === 1)) throw new Error('Only −(B) hides a 1');
+  if (hidden1 && !(n === 1 && d === 1)) throw new Error('Only a single group hides its 1');
   return { kind: 'termgroups', count: { neg, n, d }, inside: inside.map((t) => ({ kind: t.kind, value: t.value })), hidden1 };
 }
 

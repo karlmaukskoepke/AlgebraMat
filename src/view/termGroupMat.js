@@ -122,6 +122,16 @@ function finalText(p, answer) {
   return html('div', 'lasso-final tg-final', `${formatTermGroups(p)} = ${answer}`);
 }
 
+// "5 + −2(2x − 3)": the segments from engine/distribute.js, with the + − underlined in magenta.
+export function oppositeLine(segments) {
+  const line = html('span', 'dist-opp-line');
+  segments.forEach((seg, i) => {
+    if (i > 0 && !seg.joined) line.append(' ');
+    line.append(seg.opp ? html('span', 'dist-opp', seg.text) : seg.text);
+  });
+  return line;
+}
+
 function foreign(x, y, width, height, child) {
   const fo = el('foreignObject', { x, y, width, height });
   fo.append(child);
@@ -350,7 +360,10 @@ export function renderTermGroupMat(s) {
   } else {
     svg.append(foreign(0, 18, 300, 150, html('div', `lasso-left${s.oneOpen ? ' needs-one' : ''}`, problemText(s), meaningText(s.problem))));
     // Distribute, then combine: the whole problem this group is part of.
-    if (s.context && !has(s.answer)) svg.append(foreign(0, 178, 300, 70, html('div', 'dist-context', html('span', 'dist-label', 'the problem'), s.context)));
+    if (s.context && !has(s.answer)) {
+      svg.append(foreign(0, 178, 300, 110, html('div', 'dist-context', html('span', 'dist-label', 'the problem'), s.context,
+        ...(s.contextNote ? [html('span', 'dist-label', 'subtract = add the opposite'), oppositeLine(s.contextNote)] : []))));
+    }
     if (has(s.answer)) svg.append(foreign(0, 256, 300, 78, html('div', 'lasso-left', finalText(s.problem, s.answer))));
   }
   const width = isFraction(s.problem) ? fractionScript(svg, s) : wholeScript(svg, s);
