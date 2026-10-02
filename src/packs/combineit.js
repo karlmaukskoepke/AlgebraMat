@@ -11,5 +11,5 @@ export const combineit = {
   levels: 5,
   levelNames: ['positive + negative', 'negative + negative', 'party or battle?', 'three or more numbers', 'big numbers, no counters'],
   generate: (level, seed) => generateCombineLevel(level, seed).map((p) => (
-    level === 4 ? { ...p, mode: 'integers' } : level === 5 ? { ...p, mode: 'integers-big' } : p)),
+    level === 4 ? { ...p, mode: 'integers' } : level === 5 ? { ...p, mode: 'integers-big' } : { ...p, level })),
 };

@@ -13,11 +13,12 @@ function html(tag, cls, ...children) {
   return node;
 }
 
-// view: { problemText, typed, done, cloze, said }
+// view: { problemText, typed, done, cloze, said, readback }
 //   typed  what's been typed (with the keyboard's "-"), done says it's right
 //   cloze  while the cloze is showing: { sentence, choices: [{ text, index }], tried: [index] }
+//   readback  the typed answer in words ("negative 2"), under the answer, when the sign support is on
 //   said   once the right choice is picked: { sentence, leftover: { sign, count } }, kept while the student types
-export function renderLightMat({ problemText, typed, done, cloze, said }) {
+export function renderLightMat({ problemText, typed, done, cloze, said, readback }) {
   const svg = document.createElementNS(SVG_NS, 'svg');
   svg.setAttribute('class', 'mat dist-mat light-mat');
   svg.setAttribute('viewBox', '0 0 860 340');
@@ -49,6 +50,7 @@ export function renderLightMat({ problemText, typed, done, cloze, said }) {
     parts.push(html('div', 'dist-row dist-opened',
       html('span', 'dist-eq', '='),
       html('span', `dist-typed${done ? ' is-done' : ''}${!done && !shown ? ' is-empty' : ''}`, shown || '?')));
+    if (readback) parts.push(html('div', 'dist-note', readback));
   }
   fo.append(html('div', 'dist-line light-line', ...parts));
   svg.append(fo);

@@ -62,7 +62,7 @@ The choices are written with the **words** "negative" and "positive" (the digits
 After a mistake, the support that answered it is **on** for the next problems, shown *before* the student types:
 
 - `battle-as-party`, `party-as-battle`: the party-or-battle question first.
-- `sign-dropped`, `wrong-winner`: the cloze first.
+- `sign-dropped`, `wrong-winner`: the typed answer is **read back in words** as it's typed ("negative 2"). *(Changed in the build: the cloze shown before typing would hand over the answer, so the cloze stays the support right after the mistake and the read-back is what stays on.)*
 
 While a support is on, a problem answered **right on the first try** counts as a **clean** one. **Three clean** answers in a row turn the support off; a wrong first answer resets the count to three. (Three is a guess to tune in class.) A student who has never made a mistake never sees a support, except by pressing **I'm stuck**.
 
@@ -72,7 +72,7 @@ State is kept per device in `localStorage` under its own key (`mat.skills.v1`): 
 
 Every problem appends events to a small ring buffer in `localStorage` (`mat.events.v1`, newest 500, nothing identifying):
 
-`{ t, pack, level, problem, event }` where `event` is one of `answer { typed, correct, tag }`, `support { kind, rung }`, `stuck`, `done { clean, supports }`.
+One record per finished problem (a refinement of one event per move): `{ t, pack, level, problem, answers: [{ typed, tag }], supports: [kind], stuck, clean, on: { partyBattle, sign } }`, where `answers` are the wrong answers typed.
 
 This is what SPEC-JIT.md's pattern-finding and the teacher report will read; the pilot only writes it. The app never sends it anywhere.
 
@@ -90,7 +90,7 @@ This is what SPEC-JIT.md's pattern-finding and the teacher report will read; the
 1. **Signatures and the cloze** (**built**): `classify`, the cloze builder and the ladder, with tests of every row of §3 (including numbers that fit two signatures at once).
 2. **Light mode** (**built**, behind `?light=1` until step 6): the session, the palette, the Mat, **I'm stuck**, and the hand-off to the full walk. The party-or-battle question is the only support so far; the cloze is step 3.
 3. **The cloze on the Mat** (**built**): choices, the spoken sentence, the leftover counters, and a Sound on/off button.
-4. **Support that stays on, fading, and the event log.**
+4. **Support that stays on, fading, and the event log** (**built**).
 5. **The spotlight tour** (§1b), skippable and replayable.
 6. **Touch audit and real-browser runs** on Combine it Levels 1 to 3, docs.
 

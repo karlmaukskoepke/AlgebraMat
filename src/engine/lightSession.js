@@ -12,6 +12,7 @@ import { newCombineSession } from './combineSession.js';
 import { reduce as reduceWalk } from './session.js';
 import { validatePartyBattle } from './moves.js';
 import { classify, firstSupport, nextRung, buildCloze, spokenSentence, leftover, clozeFeedbackKey } from './scaffold.js';
+import { emptySkills, whichOn } from './skills.js';
 
 export const MAX_LIGHT_LENGTH = 4;
 
@@ -19,8 +20,11 @@ export const MAX_LIGHT_LENGTH = 4;
 const BUILT = new Set(['cloze', 'partyBattle', 'fullWalk']);
 const resolve = (kind) => (BUILT.has(kind) ? kind : 'partyBattle');
 
-export function newLightSession(problem) {
-  return {
+// `skills` are the supports that are on for this student (engine/skills.js): the party-or-battle question comes first
+// when it's on (the student types after it), and the typed answer is read back in words when the sign support is on.
+export function newLightSession(problem, skills = emptySkills()) {
+  const on = whichOn(skills);
+  const s = {
     problem,
     stage: 'light',            // 'light' | 'support' | 'walk' | 'done'
     step: 'answer',            // the step bar's current step
@@ -36,10 +40,25 @@ export function newLightSession(problem) {
     tags: [],                  // every wrong answer's tag, for the log
     stuck: 0,                  // times I'm stuck was pressed
     walk: null,                // Flip It's session, when the full walk is on
-    clean: false,              // right on the first try with no support: counts toward fading a support
+    helped: false,             // a support was brought in by a wrong answer or I'm stuck
+    clean: false,              // right on the first try with no help: counts toward fading a support
+    on,                        // which supports were on when the problem began: { partyBattle, sign }
+    upfront: false,            // the party-or-battle question was showing first because that support is on
+    answers: [],               // the wrong answers typed: { typed, tag }, for the log
+    supportsShown: [],         // the supports brought in by a wrong answer or I'm stuck, for the log
     finalText: null,
     feedback: { key: 'lightIntro' },
   };
+  if (on.sign && !on.partyBattle) s.feedback = { key: 'lightIntroSign' };
+  if (on.partyBattle) {
+    s.stage = 'support';
+    s.support = 'partyBattle';
+    s.step = 'partyBattle';
+    s.lastSupport = 'partyBattle';
+    s.upfront = true;
+    s.feedback = { key: 'lightPartyBattle', params: { a: problem.left.value, b: problem.right.value } };
+  }
+  return s;
 }
 
 const say = (s, key, params, bad = false) => { s.feedback = { key, params, bad }; return s; };
@@ -48,6 +67,8 @@ const say = (s, key, params, bad = false) => { s.feedback = { key, params, bad }
 function bringIn(s, tag) {
   const kind = resolve(s.lastSupport ? nextRung(s.lastSupport) : firstSupport(tag));
   s.lastSupport = kind;
+  s.helped = true;
+  s.supportsShown.push(kind);
   if (kind === 'fullWalk') {
     s.stage = 'walk';
     s.walk = newCombineSession(s.problem);
@@ -108,13 +129,14 @@ export function reduceLight(state, action) {
       if (correct) {
         s.stage = 'done';
         s.step = 'done';
-        s.clean = s.wrongs === 0 && s.stuck === 0 && !s.lastSupport;
+        s.clean = s.wrongs === 0 && s.stuck === 0 && !s.helped;
         s.finalText = String(evaluate(s.problem));
         return say(s, 'lightCorrect', { answer: s.finalText });
       }
       s.wrongs += 1;
       s.tag = tag;
       s.tags.push(tag);
+      s.answers.push({ typed: s.entry, tag });
       s.entry = '';
       return bringIn(s, tag);
     }

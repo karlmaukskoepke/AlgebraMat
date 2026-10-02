@@ -29,6 +29,13 @@ Add `?seed=123` to the URL to replay a fixed problem set, and `?level=2` to open
 
 ## Changelog
 
+### Scaffold pilot step 4: supports that stay on and fade, and the anonymous log (SPEC-SCAFFOLD.md §5, §6, §8.4)
+- **A mistake turns its support on for the next problems; three clean answers in a row turn it off.** A clean answer is right on the first try, never stuck. A wrong first answer starts the count again (for every support that was on), and being stuck without a wrong answer changes nothing. `engine/skills.js` holds the rules (pure); `lightStore.js` keeps `{ partyBattle, sign }` in this device's `localStorage` (`mat.skills.v1`), so a new device starts light.
+- **Party-or-battle on:** the question comes first, before the student types. Stuck while it's up, or a wrong answer after it, goes to the full walk.
+- **Sign on:** the typed answer is **read back in words as the student types** ("negative 6"), with an intro that says so. **Changed from the spec:** the cloze isn't what stays on, because shown before typing it would hand over the answer; the read-back makes the sign heard without giving anything away. The cloze is still the support right after a sign mistake.
+- **The anonymous log:** one small record per finished problem in `localStorage` (`mat.events.v1`, newest 500, never sent anywhere): the problem, the wrong answers typed with the mistake each looked like (`unmatched` ones are where new patterns show up), the supports brought in, times stuck, whether it was clean, and which supports were on. Combine it Levels 1 to 3 problems now carry their level.
+- Still behind `?light=1`. Real-browser run: a sign mistake turns the read-back on (3 → 2 → 1 → 0 with each clean answer, then plain light mode), a battle-as-party mistake makes the next problem start with the question. 502 tests (14 new).
+
 ### Scaffold pilot step 3: the sign cloze on the Mat (SPEC-SCAFFOLD.md §4, §8.3)
 - **A sign mistake now gets the cloze** (a dropped or flipped sign in light mode): a sentence with a blank, "The battle of 2 and −4 leaves ____ standing." (or "The party of −4 and −6 has ____ in all."), and four buttons written with the words "negative" and "positive."
 - **Every pick is read aloud** with the browser's built-in speech (offline, so fine on Chromebooks), the whole sentence with the pick in it, and only after the pick. A **Sound on / off** button turns it off; it's remembered on the device, and nothing breaks where speech isn't available.

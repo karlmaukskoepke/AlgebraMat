@@ -7,6 +7,7 @@ const term = (v) => (v < 0 ? `${MINUS}${-v}` : `${v}`);
 
 export const LIGHT_FEEDBACK = {
   lightIntro: () => 'Type the answer, then Check. Stuck? Press “I’m stuck.”',
+  lightIntroSign: () => 'Type the answer, with its sign. I’ll say it back in words as you type.',
   lightCorrect: ({ answer }) => `Yes! The answer is ${String(answer).replace('-', MINUS)}.`,
   lightPartyBattle: ({ a, b }) => `Let’s look at ${term(a)} and ${term(b)}. Same signs, or different signs?`,
   lightSameOrDifferent: () => 'Look at the signs again: are they the same or different?',

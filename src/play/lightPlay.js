@@ -9,6 +9,8 @@ import { renderLightMat } from '../view/lightMat.js';
 import { lightFeedbackText } from '../view/lightFeedback.js';
 import { formatProblem } from '../engine/expr.js';
 import { speak } from '../view/speech.js';
+import { loadSkills, recordProblem } from '../lightStore.js';
+import { readInteger } from '../engine/scaffold.js';
 
 const LIGHT_STEPS = [{ id: 'answer', label: 'Answer' }];
 const SUPPORT_STEPS = {
@@ -38,13 +40,24 @@ export function buildLightPlayControls(root, dispatch) {
   };
 }
 
+// The typed answer in words, for the support that makes the sign heard: "-2" → "negative 2".
+const readback = (entry) => {
+  const n = readInteger(entry);
+  return n === null ? null : `${n < 0 ? 'negative' : 'positive'} ${Math.abs(n)}`;
+};
+
 export const lightPlay = {
   steps: (s) => (s.stage === 'walk' ? combinePlay.steps() : s.stage === 'support' ? SUPPORT_STEPS[s.support] : LIGHT_STEPS),
-  newSession: newLightSession,
+  // The supports that are on for this student come with each new problem.
+  newSession: (problem) => newLightSession(problem, loadSkills()),
   reduce: reduceLight,
   feedbackText: lightFeedbackText,
   buildControls: buildLightPlayControls,
   effects(before, s) {
+    // A finished problem updates which supports are on and goes in the log (once: the step turns to done once).
+    if (before && before.step !== 'done' && s.step === 'done') {
+      recordProblem(s, { pack: 'combineit', level: s.problem.level ?? null, problem: formatProblem(s.problem) });
+    }
     // A picked choice is read aloud (once: the id changes each time).
     if (before && s.spoken && s.spoken.id !== before.spoken?.id) speak(s.spoken.text);
     if (s.stage !== 'walk') return { hint: null };
@@ -53,7 +66,7 @@ export const lightPlay = {
   renderMat(s, fx = {}) {
     if (s.stage === 'walk') return combinePlay.renderMat(s.walk, fx);
     const cloze = s.stage === 'support' && s.cloze ? s.cloze : null;
-    return renderLightMat({ problemText: formatProblem(s.problem), typed: s.entry, done: s.stage === 'done', cloze, said: s.said });
+    return renderLightMat({ problemText: formatProblem(s.problem), typed: s.entry, done: s.stage === 'done', cloze, said: s.said, readback: s.on.sign ? readback(s.entry) : null });
   },
   matAction: (d) => (d.action === 'choice' ? { type: 'pickChoice', index: Number(d.index) } : combinePlay.matAction(d)),
 };
