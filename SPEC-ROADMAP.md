@@ -52,7 +52,7 @@
 - The progression through the levels is **very similar to Group It's**, except that now the **box drawings for all the x terms** are included.
 - It **ends with fractions of groups**, as long as the products come out as integer coefficients and constant terms.
 
-## Distribute, then combine (last in this build)
+## Distribute, then combine (built; last in this build)
 
 *From the notes:* "You can't combine until you know how many of each you have. Open the groups first!"
 - `2(3x − 4) − x + 5` → **① distribute:** `= 6x − 8 − x + 5` → **② combine:** `= 5x − 3`.

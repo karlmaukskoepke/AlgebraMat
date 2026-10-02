@@ -51,8 +51,8 @@ export const groupsOfTerms = {
   generate: (level, seed) => generateTermGroupsLevel(level, seed),
 };
 
-// Distribute, then combine (SPEC-DISTRIBUTE.md): still a Coming-soon card while it's built round by round, but
-// a round that's built opens from a link (?pack=distribute-combine&level=4). Rounds 1 to 5 are built.
+// Distribute, then combine (SPEC-DISTRIBUTE.md): open the groups first (Groups of Terms' steps, then Write it),
+// then combine like terms (Boxes & Circles); Rounds 4 and 5 are typed, with help as hints.
 export const distributeCombine = {
   id: 'distribute-combine',
   title: 'Distribute, then combine',
@@ -60,7 +60,6 @@ export const distributeCombine = {
   blurb: 'Open the groups first, then combine like terms.',
   levels: 5,
   levelNames: ['A + B(Cx + D)', 'the invisible 1', 'subtracting a group', 'mixed, bigger numbers', 'everything mixed'],
-  comingSoon: true,
   // Each problem carries its round: Round 4 offers Show me, Round 5 doesn't.
   generate: (level, seed) => generateDistributeLevel(level, seed).map((p) => ({ ...p, level })),
 };

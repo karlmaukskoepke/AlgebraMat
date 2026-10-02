@@ -19,7 +19,7 @@ Add `?seed=123` to the URL to replay a fixed problem set, and `?level=2` to open
 
 ## Layout
 
-- `src/engine/`: pure logic, no DOM. `expr.js` (expression model), `generate.js` (seeded levels), `moves.js` (validators), `session.js` (one problem's steps as a reducer), `progress.js` (level unlocks, save code), `hints.js` + `lassoHints.js` (hints after 3 wrong tries), `groups.js` + `generateLasso.js` (Group It problems; files keep the old "lasso" name), `terms.js` + `termPieces.js` + `termMoves.js` + `termSession.js` + `termHints.js` + `generateTerms.js` (Boxes & Circles), `combine.js` + `generateCombine.js` + `integerFeedback.js` + `bigSession.js` + `bigHints.js` (Combine it, and Flip It's mixed level), `termGroups.js` + `generateTermGroups.js` (Groups of Terms), `termGroupMat.js` (its Mat), `termGroupSession.js` + `termGroupMoves.js` + `termGroupHints.js` (its steps).
+- `src/engine/`: pure logic, no DOM. `expr.js` (expression model), `generate.js` (seeded levels), `moves.js` (validators), `session.js` (one problem's steps as a reducer), `progress.js` (level unlocks, save code), `hints.js` + `lassoHints.js` (hints after 3 wrong tries), `groups.js` + `generateLasso.js` (Group It problems; files keep the old "lasso" name), `terms.js` + `termPieces.js` + `termMoves.js` + `termSession.js` + `termHints.js` + `generateTerms.js` (Boxes & Circles), `combine.js` + `generateCombine.js` + `integerFeedback.js` + `bigSession.js` + `bigHints.js` (Combine it, and Flip It's mixed level), `termGroups.js` + `generateTermGroups.js` (Groups of Terms), `termGroupMat.js` (its Mat), `termGroupSession.js` + `termGroupMoves.js` + `termGroupHints.js` (its steps), `distribute.js` + `generateDistribute.js` + `distributeSession.js` + `distributeMoves.js` + `distributeHints.js` + `distributeTyped.js` (Distribute, then combine: Rounds 1 to 3 chain Groups of Terms, Write it and Boxes & Circles; Rounds 4 and 5 are typed).
 - `src/view/`: DOM and SVG. `mat.js`, `controls.js`, `lassoMat.js` + `lassoLayout.js` (the Group It Mat), `boxMat.js` + `boxLayout.js` + `boxPointer.js` + `boxControls.js` (the Boxes & Circles Mat, its drag and palette), `packmap.js` (home and level-complete panel), `codes.js` (save-code dialogs), `feedback.js` (every message, in one table), `layout.js` (counter geometry).
 - `src/storage.js`: localStorage wrapper that falls back to memory.
 - `src/play/`: one play adapter per pack (`flipitPlay.js`, `lassoPlay.js`); `main.js` runs whichever the pack uses.
@@ -28,6 +28,12 @@ Add `?seed=123` to the URL to replay a fixed problem set, and `?level=2` to open
 - `tests/`: Vitest.
 
 ## Changelog
+
+### Distribute, then combine step 5: the pack opens, save code v6 (SPEC-DISTRIBUTE.md §6, §7.5)
+- **Distribute, then combine is open** on the pack map: five rounds, saved progress, each round opening the next. Six cards now, **three across and two rows** at the Chromebook sizes (the title takes a line of its own, the blurb is left out, and the cards stay equal-size with their levels scrolling). The page scrolls a little to reach the second row. The "Coming soon" section shows only when a pack is still being built, so it's gone for now.
+- **Save code v6:** new codes are `MAT-8` plus eight symbols and carry all six packs (34 of about 34.7 bits, so the next pack needs a v7). v1 to v5 codes still work, and a v5 code brings Distribute back unfinished.
+- All of Distribute, then combine is built: the model and generators, the two-phase Mat (Groups of Terms, Write it, Boxes & Circles), the invisible 1 and the subtracted group with the magenta note, and the typed Rounds 4 and 5 with hints and Show me.
+- The roadmap's "refinements to circle back to" (a mixed party-or-battle round, just-in-time scaffolds, diagnostics, skip-ahead with streaks, teacher visibility) are next, and need a spec of their own.
 
 ### Distribute, then combine step 4: Rounds 4 and 5, the supports fade (SPEC-DISTRIBUTE.md §2, §5, §7.4)
 - No drawing: **Open it** (type the line with every group opened, none combined) then **Answer** (type the combined result). `engine/distributeTyped.js` is its own small session; the Mat shows the problem, then each typed line under it.
