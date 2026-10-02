@@ -50,7 +50,7 @@ export const hasHiddenOne = (p) => groupParts(p).some((g) => g.hiddenOne);
 
 // A group part as a Groups of Terms problem (for the lasso, the deal-out and the arrows check).
 // A subtracted group has the opposite count: − 2(2x − 3) is "−2 groups of (2x − 3)".
-export const groupOf = (part) => makeTermGroups({ neg: part.op === '-', n: part.n }, part.inside);
+export const groupOf = (part) => makeTermGroups({ neg: part.op === '-', n: part.n }, part.inside, { hidden1: part.hiddenOne });
 
 // ---------- Writing ----------
 
@@ -63,6 +63,28 @@ export function formatDistribute(p) {
     return i === 0 ? `${part.op === '-' ? MINUS : ''}${groupBody(part)}` : `${part.op === '-' ? MINUS : '+'} ${groupBody(part)}`;
   }).join(' ');
 }
+
+// ---------- Subtract = add the opposite ----------
+
+// A group that's subtracted after something: 5 − 2(2x − 3).
+export const hasSubtractedGroup = (p) => p.parts.some((part, i) => i > 0 && part.type === 'group' && part.op === '-');
+
+// The same problem as adding the opposite, in segments so the view can underline the changed part:
+// `5 − 2(2x − 3)` → [5] [+ −2 (opposite)] [(2x − 3)], the notes' magenta "+ −2".
+export function addOppositeSegments(p) {
+  const out = [];
+  p.parts.forEach((part, i) => {
+    if (part.type === 'term') {
+      out.push({ text: i === 0 ? numberText(part.term) : termText(part.term) });
+    } else if (i > 0 && part.op === '-') {
+      out.push({ text: `+ ${MINUS}${part.hiddenOne ? '' : part.n}`, opp: true }, { text: `(${insideText(part)})`, joined: true });
+    } else {
+      out.push({ text: `${i > 0 ? '+ ' : ''}${part.hiddenOne ? '' : part.n}(${insideText(part)})` });
+    }
+  });
+  return out;
+}
+export const formatAddOpposite = (p) => addOppositeSegments(p).reduce((text, seg) => (text ? text + (seg.joined ? '' : ' ') : '') + seg.text, '');
 
 // ---------- ① distribute ----------
 

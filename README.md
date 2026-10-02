@@ -29,6 +29,12 @@ Add `?seed=123` to the URL to replay a fixed problem set, and `?level=2` to open
 
 ## Changelog
 
+### Distribute, then combine step 3: Rounds 2 and 3, the invisible 1 and the subtracted group (SPEC-DISTRIBUTE.md §3, §4, §7.3)
+- **Round 2** (`A + (Bx + C)`, `A − (Bx + C)`): the student writes the invisible 1 first (a positive single group hides its 1 too now, as `−(B)` did), then the Groups of Terms steps. A subtracted group is an opposite group, so Flip runs inside ①.
+- **Round 3** (`A − B(Cx + D)`): the sign trap. The group is `−B` groups, flipped, then Write it asks for the line with the right signs (`5 − 4x + 6`); a wrong sign is named.
+- **The magenta note:** once − groups is chosen, the group's Mat shows `subtract = add the opposite` with the `+ −2` underlined in magenta, and Write it shows it again. The problem is never forced into that form, so students can keep thinking of `5 − 7x` as a positive 5 and a negative 7x. The Write it hint adds the note too.
+- Rounds 1 to 3 open from a link (`?pack=distribute-combine&level=3`). Every generated problem of Rounds 1 to 3 walks start to finish in the tests, and in a real browser at 1280×610 and 1366×657 with every target at least 44px.
+
 ### Distribute, then combine step 2: Round 1 plays, start to finish (SPEC-DISTRIBUTE.md §3, §7.2)
 - `engine/distributeSession.js`: one session that runs Groups of Terms on the group (Groups → + or − → Fill → Flip → Answer → Check it), then **Write it** (the whole line with the group opened, in `engine/distributeMoves.js`: it says whether the line is already combined, a sign is off, terms are missing, or it's just off), then Boxes & Circles on that line (Box & Circle → Draw → Cancel → Answer). The step strip names the phase, **① distribute** or **② combine**.
 - `play/distributePlay.js` hands each step to the pack that teaches it; both palettes live in the footer, one shown at a time (Next → at Check it goes on to Write it, not to the next problem). The group's Mat shows the whole problem on its left.

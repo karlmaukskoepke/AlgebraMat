@@ -1692,3 +1692,14 @@ body {
 .steps[data-phase]::before {
   padding-right: 6px;
 }
+
+/* "subtract = add the opposite": the + − that replaces the minus is magenta and underlined (magenta always carries an underline). */
+.dist-opp {
+  color: var(--opposite);
+  text-decoration: underline;
+  text-decoration-thickness: 3px;
+  text-underline-offset: 5px;
+}
+.dist-opp-line {
+  font: 700 22px 'Kalam', cursive;
+}

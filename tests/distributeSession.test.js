@@ -9,6 +9,7 @@ import { distributeFeedbackText } from '../src/view/distributeFeedback.js';
 import { piecesOfGroup, answerText as groupAnswer } from '../src/engine/termGroups.js';
 import { termParts, formatAnswer, evaluate, effective } from '../src/engine/terms.js';
 import { generateDistributeLevel } from '../src/engine/generateDistribute.js';
+import { hasSubtractedGroup, addOppositeSegments, formatAddOpposite } from '../src/engine/distribute.js';
 
 const x = (value) => ({ kind: 'x', value });
 const n = (value) => ({ kind: 'int', value });
@@ -22,10 +23,13 @@ const P = makeDistribute([groupPart('+', 2, [x(3), n(-4)]), termPart('int', '+',
 // Walk ① distribute's Groups of Terms steps the way a student would, up to Check it.
 function toCheckIt(s) {
   const g = groupProblem(s.problem);
-  let t = run(s, ...Array(g.count.n).fill({ type: 'addGroup' }), check, { type: 'chooseSign', sign: '+' });
+  let t = s;
+  if (g.hidden1) t = run(t, { type: 'digit', digit: 1 }, check);                  // the invisible 1
+  t = run(t, ...Array(g.count.n).fill({ type: 'addGroup' }), check, { type: 'chooseSign', sign: g.count.neg ? '-' : '+' });
   for (const q of piecesOfGroup(g)) t = run(t, { type: 'pickPiece', pieceType: q.type, sign: q.sign }, { type: 'tapGroup', index: 0 });
-  t = run(t, { type: 'copyAll' }, check, ...typed(groupAnswer(g).replace(/[\s]/g, '').replace(/−/g, '-')), check);
-  return t;
+  t = run(t, { type: 'copyAll' }, check);
+  if (g.count.neg) t = run(t, { type: 'flipAll' });
+  return run(t, ...typed(groupAnswer(g).replace(/[\s]/g, '').replace(/−/g, '-')), check);
 }
 
 // Walk ② combine: box and circle, draw, cancel, type.
@@ -132,6 +136,59 @@ describe('Round 1 problems from the generator all open and combine', () => {
         expect(s.stage).toBe('tg');
         expect(formatDistribute(p)).toMatch(/\(/);
         expect(openedProblem(p).terms.length).toBe(distributedText(p).split(/ [+−] /).length);
+      }
+    }
+  });
+});
+
+describe('Rounds 2 and 3: the invisible 1 and the subtracted group', () => {
+  const plusOne = makeDistribute([termPart('int', '+', 4), groupPart('+', 1, [x(2), n(-3)], { hiddenOne: true })]);   // 4 + (2x − 3)
+  const minusOne = makeDistribute([termPart('int', '+', 4), groupPart('-', 1, [x(1), n(2)], { hiddenOne: true })]);   // 4 − (x + 2)
+  const minusMany = makeDistribute([termPart('int', '+', 5), groupPart('-', 2, [x(2), n(-3)])]);                      // 5 − 2(2x − 3)
+
+  it('writes a subtracted group as adding the opposite, with the changed part marked', () => {
+    expect(formatAddOpposite(minusMany)).toBe('5 + −2(2x − 3)');
+    expect(formatAddOpposite(minusOne)).toBe('4 + −(x + 2)');
+    expect(addOppositeSegments(minusMany).filter((g) => g.opp).map((g) => g.text)).toEqual(['+ −2']);
+    expect([plusOne, minusOne, minusMany].map(hasSubtractedGroup)).toEqual([false, true, true]);
+  });
+
+  it('a positive single group hides its 1 too, and the student writes it first', () => {
+    const s = newDistributeSession(plusOne);
+    expect(s.tg.problem.hidden1).toBe(true);
+    expect(s.feedback.key).toBe('groupsIntroHidden');
+    expect(reduce(s, { type: 'addGroup' }).feedback).toMatchObject({ key: 'writeOneFirst', bad: true });
+  });
+
+  it('a subtracted group flips before its answer, and the answer is what Write it opens', () => {
+    const atCheck = toCheckIt(newDistributeSession(minusMany));
+    expect(atCheck).toMatchObject({ stage: 'tg', step: 'checkit' });
+    expect(atCheck.skipped).toEqual([]);                                   // Flip was not skipped
+    const atLine = run(atCheck, { type: 'continue' });
+    expect(validateLine(minusMany, '5-4x+6').feedbackKey).toBe('lineOk');
+    expect(validateLine(minusMany, '5+4x+6').feedbackKey).toBe('lineSigns');
+    expect(validateLine(minusMany, '5-4x-6').feedbackKey).toBe('lineSigns');
+    expect(atLine.line).toBe('');
+  });
+
+  it('shows the add-the-opposite note in the hint for Write it', () => {
+    let s = run(toCheckIt(newDistributeSession(minusMany)), { type: 'continue' }, ...typed('5-2x'), check, check, check);
+    expect(distributeFeedbackText(distributeHintFor(s))).toContain('5 + −2(2x − 3)');
+    s = run(toCheckIt(newDistributeSession(plusOne)), { type: 'continue' }, ...typed('4'), check, check, check);
+    expect(distributeFeedbackText(distributeHintFor(s))).not.toContain('opposite');
+  });
+
+  it('every Round 1, 2 and 3 problem from the generator walks start to finish', () => {
+    for (const level of [1, 2, 3]) {
+      for (const seed of [3, 11]) {
+        for (const p of generateDistributeLevel(level, seed)) {
+          let s = toCheckIt(newDistributeSession(p));
+          expect(s.step).toBe('checkit');
+          s = run(s, { type: 'continue' }, ...typed(distributedText(p).replace(/\s/g, '').replace(/−/g, '-')), check);
+          expect(s.stage).toBe('ts');
+          s = solveCombine(s);
+          expect(s).toMatchObject({ step: 'done', finalText: answerText(p) });
+        }
       }
     }
   });
