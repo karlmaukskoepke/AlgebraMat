@@ -1,4 +1,4 @@
-# The Mat: the scaffold engine, piloted on Combine it (draft 2026-10-02, awaiting approval)
+# The Mat: the scaffold engine, piloted on Combine it (approved 2026-10-02)
 
 *Builds on SPEC-JIT.md (Karl's decisions and the misconception catalog), SPEC-COMBINE.md and SPEC-ROADMAP.md. Only what's new is written here. This is step 2 of Karl's build order: the pilot. The diagnostic, skip-ahead with streaks, and the teacher report come after.*
 
@@ -15,7 +15,7 @@ The first light problem on a new device opens with a short **guided tour** that 
 1. **The problem:** "Here's what you're adding."
 2. **The pad:** "Type the answer. ± makes it negative."
 3. **Check:** "Press Check when you're ready."
-4. **I'm stuck:** "Not sure? Press this anytime. No penalty." The tour then asks the student to **press it once**, so they meet the first support (the party-or-battle question) and see counters when they go on to the full walk. That's the "show off the features" part: they see help is real before they need it.
+4. **I'm stuck:** "Not sure? Press this anytime. No penalty." The tour then **requires the student to press it once** (Karl: so they have the memory of pressing it, not just a click past the feature), so they meet the first support (the party-or-battle question) and see counters when they go on to the full walk. That's the "show off the features" part: they see help is real before they need it.
 5. **Back to the problem:** the student finishes it themselves.
 
 The tour can be skipped (**Skip tour**) and replayed from a small **?** button on the light screen. It's remembered per device (`mat.tour.v1`). It spotlights real controls (not a picture of them), so it can't drift out of date.
@@ -94,7 +94,8 @@ This is what SPEC-JIT.md's pattern-finding and the teacher report will read; the
 5. **The spotlight tour** (§1b), skippable and replayable.
 6. **Touch audit and real-browser runs** on Combine it Levels 1 to 3, docs.
 
-## 9. Open question for Karl
+## 9. Decisions (Karl, 2026-10-02)
 
-1. *(Answered: a spotlight tour on the first problem, §1b. Per device only is okay for the pilot, §5.)* **The tour's details:** it's skippable and replayable from a **?** button, and step 4 asks the student to press **I'm stuck** once so they meet the supports. Does a required press feel right, or should the tour only point at it?
-*(Decided: the cloze has four choices and no "not sure.")*
+- A spotlight tour on a new device's first problem, with a **required** press of **I'm stuck** (§1b).
+- On/off counts and the tour flag are **per device** for the pilot (§5).
+- The cloze has **four choices and no "not sure"** (§4).
