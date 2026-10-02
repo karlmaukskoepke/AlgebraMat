@@ -29,7 +29,7 @@ function circleAll(s) {
   return run(t, check);
 }
 
-describe('Combine it Level 4: two terms', () => {
+describe('Combine it Level 5: two terms', () => {
   const P = big(-23, 41);                                                            // −23 + 41 = 18, a battle
 
   it('has the steps, and starts with circles only (no tool to pick)', () => {
@@ -109,7 +109,7 @@ describe('Combine it Level 4: two terms', () => {
   });
 });
 
-describe('Combine it Level 4: three terms', () => {
+describe('Combine it Level 5: three terms', () => {
   const T = big(-23, 41, -15);                                                       // −23 and −15 share a sign: −38, then 41 − 38 = 3
 
   it('has a Combine step after Circle', () => {
@@ -161,7 +161,7 @@ describe('Combine it Level 4: three terms', () => {
   });
 });
 
-describe('Combine it Level 4 hints', () => {
+describe('Combine it Level 5 hints', () => {
   const P = big(-23, 41);
   const wrongTimes = (s, k, a) => { for (let i = 0; i < k; i++) s = reduce(s, a); return s; };
 
@@ -202,12 +202,12 @@ describe('Combine it Level 4 hints', () => {
   });
 });
 
-describe('Combine it Level 4 problems', () => {
+describe('Combine it Level 5 problems', () => {
   it('the pack hands out big problems with the right mode, and each plays through the steps', () => {
-    expect(combineit.levels).toBe(4);
-    expect(combineit.levelNames).toHaveLength(4);
+    expect(combineit.levels).toBe(5);
+    expect(combineit.levelNames).toHaveLength(5);
     for (const seed of [1, 7, 99, 20260930]) {
-      for (const p of combineit.generate(4, seed)) {
+      for (const p of combineit.generate(5, seed)) {
         expect(p.mode).toBe('integers-big');
         let s = circleAll(newBigSession(p));
         expect(s.step).toBe(hasCombine(p) ? 'combine' : 'partyBattle');
@@ -222,7 +222,7 @@ describe('Combine it Level 4 problems', () => {
   });
 });
 
-describe('the ± button on Level 4', () => {
+describe('the ± button on Level 5', () => {
   it('flips a leading minus while typing the combine or answer', () => {
     const P = big(-23, 41);
     let s = { ...newBigSession(P), step: 'answer' };

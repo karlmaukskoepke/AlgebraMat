@@ -43,7 +43,7 @@ function cancelAll(s) {
 }
 
 describe('integer problems on the term steps', () => {
-  it('Combine it Level 3 starts at Draw and has no Box & Circle or Rewrite', () => {
+  it('Combine it Level 4 starts at Draw and has no Box & Circle or Rewrite', () => {
     const p = sum([5, -8, 2]);
     expect(isIntegers(p)).toBe(true);
     expect(hasRewrite(p)).toBe(false);
@@ -137,7 +137,7 @@ describe('integer problems on the term steps', () => {
 
   it('plays every generated problem of both levels through to done', () => {
     const problems = [
-      ...[1, 7, 99].flatMap((seed) => combineit.generate(3, seed)),
+      ...[1, 7, 99].flatMap((seed) => combineit.generate(4, seed)),
       ...[1, 7, 99].flatMap((seed) => flipit.generate(5, seed)),
     ];
     for (const p of problems) {
@@ -155,7 +155,7 @@ describe('integer problems on the term steps', () => {
   });
 
   it('the packs hand out integer problems with the right mode', () => {
-    expect(combineit.generate(3, 5).every((p) => p.mode === 'integers')).toBe(true);
+    expect(combineit.generate(4, 5).every((p) => p.mode === 'integers')).toBe(true);
     expect(combineit.generate(1, 5)[0].mode).toBeUndefined();
     expect(flipit.generate(5, 5).every((p) => p.mode === 'integers-flip')).toBe(true);
     expect(flipit.levels).toBe(5);

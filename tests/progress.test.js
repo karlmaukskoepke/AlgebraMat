@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import {
-  newProgress, isLevelDone, isLevelUnlocked, isPackComplete, completeLevel, nextLevel,
+  newProgress, isLevelDone, isLevelUnlocked, isPackComplete, completeLevel, nextLevel, normalizeProgress,
 } from '../src/engine/progress.js';
 import { PACKS } from '../src/packs/index.js';
 
@@ -10,7 +10,7 @@ describe('progress', () => {
   it('starts with every level of every pack unfinished', () => {
     expect(fresh).toEqual({
       v: 1,
-      packs: { combineit: { levels: Array(4).fill(false) }, flipit: { levels: Array(5).fill(false) }, lasso: { levels: Array(7).fill(false) }, boxes: { levels: Array(5).fill(false) }, 'groups-of-terms': { levels: Array(8).fill(false) }, 'distribute-combine': { levels: Array(5).fill(false) } },
+      packs: { combineit: { levels: Array(5).fill(false) }, flipit: { levels: Array(5).fill(false) }, lasso: { levels: Array(7).fill(false) }, boxes: { levels: Array(5).fill(false) }, 'groups-of-terms': { levels: Array(8).fill(false) }, 'distribute-combine': { levels: Array(5).fill(false) } },
     });
   });
 
@@ -50,5 +50,15 @@ describe('progress', () => {
     expect(() => completeLevel(fresh, 'flipit', 6)).toThrow();
     expect(() => completeLevel(fresh, 'lasso', 8)).toThrow();
     expect(() => completeLevel(fresh, 'nope', 1)).toThrow();
+  });
+
+  it('moves progress saved before the mixed party-or-battle round (4 Combine it levels) into the five-level pack', () => {
+    const old = { v: 1, packs: { combineit: { levels: [true, true, true, false] } } };
+    expect(normalizeProgress(old, PACKS).packs.combineit.levels).toEqual([true, true, true, true, false]);
+    const early = { v: 1, packs: { combineit: { levels: [true, true, false, false] } } };
+    expect(normalizeProgress(early, PACKS).packs.combineit.levels).toEqual([true, true, false, false, false]);
+    // A five-level save is left alone.
+    const now = { v: 1, packs: { combineit: { levels: [true, false, true, false, true] } } };
+    expect(normalizeProgress(now, PACKS).packs.combineit.levels).toEqual([true, false, true, false, true]);
   });
 });

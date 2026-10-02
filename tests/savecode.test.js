@@ -5,12 +5,12 @@ import {
 import { PACKS } from '../src/packs/index.js';
 
 const bitsOf = (n, count, shift = 0) => Array.from({ length: count }, (_, i) => Boolean(n & (1 << (shift + i))));
-// Flip It has five levels and Combine it four now; shorter lists (older saves) are filled out with unfinished levels.
+// Flip It has five levels and Combine it five now; shorter lists (older saves) are filled out with unfinished levels.
 const pad = (levels, n) => [...levels, ...Array(Math.max(0, n - levels.length)).fill(false)];
-const state = (flipit, lasso = Array(7).fill(false), boxes = Array(5).fill(false), terms = Array(8).fill(false), combine = Array(4).fill(false), distribute = Array(5).fill(false)) => ({
+const state = (flipit, lasso = Array(7).fill(false), boxes = Array(5).fill(false), terms = Array(8).fill(false), combine = Array(5).fill(false), distribute = Array(5).fill(false)) => ({
   v: 1,
   packs: {
-    combineit: { levels: pad(combine, 4) }, flipit: { levels: pad(flipit, 5) }, lasso: { levels: lasso }, boxes: { levels: boxes },
+    combineit: { levels: pad(combine, 5) }, flipit: { levels: pad(flipit, 5) }, lasso: { levels: lasso }, boxes: { levels: boxes },
     'groups-of-terms': { levels: terms }, 'distribute-combine': { levels: distribute },
   },
 });
@@ -25,7 +25,7 @@ const allStates3 = Array.from({ length: 2 ** 16 }, (_, n) => state3(bitsOf(n, 4)
 // A spread of them for the slower typo checks.
 const sample = allStates3.filter((_, n) => n % 997 === 0 || n === 65535 || n === 15);
 
-describe('save code v6', () => {
+describe('save code v7', () => {
   it('uses no look-alike characters', () => {
     expect(CODE_ALPHABET).toHaveLength(31);
     for (const ch of '01OIL') expect(CODE_ALPHABET).not.toContain(ch);
@@ -36,7 +36,7 @@ describe('save code v6', () => {
     const codes = new Set();
     for (const p of allStates3) {
       const code = encodeProgress(p);
-      expect(code).toMatch(/^MAT-8[2-9A-HJKMNP-Z]{8}$/); // "8" is version 6
+      expect(code).toMatch(/^MAT-9[2-9A-HJKMNP-Z]{9}$/); // "9" is version 7
       expect(decodeProgress(code, WITH_BOXES)).toEqual(p);
       codes.add(code);
     }
@@ -57,18 +57,31 @@ describe('save code v6', () => {
     expect(decodeProgress(encodeProgress(p), PACKS)).toEqual(p);
     const without = PACKS.filter((q) => q.id !== 'distribute-combine');
     expect(decodeProgress(encodeProgress(p), without)).toEqual({ ...p, packs: { ...p.packs, 'distribute-combine': undefined } });
-    // A v5 code, written before this pack: the pack comes back unfinished.
-    const old = state(bitsOf(0b1010, 4), bitsOf(0b11, 7), [true, false, false, false, false], Array(8).fill(false), [true, true, false, true]);
+    // A v5 code, written before this pack: the pack comes back unfinished, and Combine it's four old levels
+    // are in their new places (the mixed round at Level 3 counts as done once the old Level 3 was).
+    const old = state(bitsOf(0b1010, 4), bitsOf(0b11, 7), [true, false, false, false, false], Array(8).fill(false), [true, true, false, true, false]);
     const v5 = encodeProgress(old, 5);
     expect(v5).toMatch(/^MAT-7[2-9A-HJKMNP-Z]{7}$/);
-    expect(decodeProgress(v5, PACKS)).toEqual(old);
+    expect(decodeProgress(v5, PACKS)).toEqual({ ...old, packs: { ...old.packs, combineit: { levels: [true, true, false, false, true] } } });
   });
 
-  it('carries all four Combine it levels and Flip It\'s fifth', () => {
+  it('brings Combine it\'s old four levels (v6 and earlier) into the five-level pack', () => {
+    // Old levels: 1 battles, 2 parties, 3 three numbers, 4 big numbers. New: 1, 2, 3 mixed, 4 three numbers, 5 big.
+    const at = (old) => {
+      const p = state([], Array(7).fill(false), Array(5).fill(false), Array(8).fill(false), old.concat([false]));
+      return decodeProgress(encodeProgress(p, 6), PACKS).packs.combineit.levels;
+    };
+    expect(at([true, true, false, false])).toEqual([true, true, false, false, false]);   // the mixed round is still ahead
+    expect(at([true, true, true, false])).toEqual([true, true, true, true, false]);      // old Level 3 done: mixed counts as done
+    expect(at([true, true, true, true])).toEqual([true, true, true, true, true]);
+    expect(at([true, false, false, false])).toEqual([true, false, false, false, false]);
+  });
+
+  it('carries all five Combine it levels and Flip It\'s fifth', () => {
     const base = state(bitsOf(0b1010, 4), bitsOf(0b11, 7), [true, false, false, false, false], [true, false, false, false, false, false, false, false]);
     const full = {
       ...base,
-      packs: { ...base.packs, flipit: { levels: [false, true, false, true, true] }, combineit: { levels: [true, true, false, true] } },
+      packs: { ...base.packs, flipit: { levels: [false, true, false, true, true] }, combineit: { levels: [true, true, false, true, true] } },
     };
     expect(decodeProgress(encodeProgress(full), PACKS)).toEqual(full);
     // A pack that isn't listed is read and dropped.
@@ -81,7 +94,7 @@ describe('save code v6', () => {
     const v4 = encodeProgress(p, 4);
     expect(v4).toMatch(/^MAT-6[2-9A-HJKMNP-Z]{6}$/);
     expect(decodeProgress(v4, PACKS)).toEqual(p);
-    expect(decodeProgress(v4, PACKS).packs.combineit).toEqual({ levels: Array(4).fill(false) });
+    expect(decodeProgress(v4, PACKS).packs.combineit).toEqual({ levels: Array(5).fill(false) });
   });
 
   it('still reads v3 codes (before Groups of Terms)', () => {

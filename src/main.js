@@ -21,10 +21,10 @@ import { showSaveCode, askForCode } from './view/codes.js';
 const $ = (id) => document.getElementById(id);
 
 // Each pack's play adapter: its steps, session, Mat, controls and messages.
-// A pack can use a different adapter for some levels (Combine it's Level 3 and Flip It's Level 5 run on the
-// integer steps, and Level 4 its own), so each entry is the adapter or a function of the level.
+// A pack can use a different adapter for some levels (Combine it's Level 4 and Flip It's Level 5 run on the
+// integer steps, and Combine it's Level 5 its own), so each entry is the adapter or a function of the level.
 const PLAY = {
-  combineit: (level) => (level >= 4 ? bigPlay : level === 3 ? integerPlay : combinePlay),
+  combineit: (level) => (level >= 5 ? bigPlay : level === 4 ? integerPlay : combinePlay),
   flipit: (level) => (level >= 5 ? integerPlay : flipitPlay),
   lasso: lassoPlay,
   boxes: boxPlay,
@@ -42,6 +42,9 @@ const fixedSeed = Number.isInteger(urlSeed) && urlSeed > 0 ? urlSeed : null;
 
 // Progress and the level in play are saved under one key (SPEC §7). If
 // storage is blocked, everything still works from memory for this visit.
+// Combine it gained a level in the middle (the mixed party-or-battle round), so a level in play that was
+// saved before that (no `layout`) means a different level now and isn't resumed.
+const SAVE_LAYOUT = 2;
 const store = createStore('mat.v1');
 const saved = store.load();
 let progress = normalizeProgress(saved, PACKS);
@@ -53,7 +56,7 @@ function persist() {
   const current = play && !play.finished
     ? { pack: play.pack.id, level: play.level, seed: play.seed, index: play.index }
     : null;
-  store.save({ ...progress, current });
+  store.save({ ...progress, current, layout: SAVE_LAYOUT });
 }
 let nextTimer = null;
 
@@ -277,6 +280,7 @@ $('save-code').addEventListener('click', () => showSaveCode(encodeProgress(progr
 function savedCurrent() {
   const c = saved?.current;
   if (!c || typeof c !== 'object') return null;
+  if (c.pack === 'combineit' && saved.layout !== SAVE_LAYOUT) return null;
   const pack = packById(c.pack);
   const ok = pack && !pack.comingSoon && isLevelUnlocked(progress, pack.id, c.level)
     && Number.isInteger(c.seed) && c.seed >= 0

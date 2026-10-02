@@ -41,8 +41,8 @@ describe('Combine it (Levels 1 and 2 on Flip It\'s engine)', () => {
     expect(feedbackText(s.feedback)).toMatch(/Tap above a number/);
   });
 
-  it('plays every generated problem on both levels through to done', () => {
-    for (let level = 1; level <= 2; level++) {
+  it('plays every generated problem on Levels 1 to 3 (the mixed party-or-battle round too) through to done', () => {
+    for (let level = 1; level <= 3; level++) {
       for (const seed of [1, 7, 99, 20260930]) {
         for (const p of generateCombineLevel(level, seed)) {
           const s = play(p);
@@ -68,8 +68,9 @@ describe('Combine it (Levels 1 and 2 on Flip It\'s engine)', () => {
   });
 
   it('the pack lists its built levels with names and a generator for each', () => {
-    expect(combineit.levels).toBe(4);
-    expect(combineit.levelNames).toHaveLength(4);
-    for (let l = 1; l <= 4; l++) expect(combineit.generate(l, 7)).toHaveLength(5);
+    expect(combineit.levels).toBe(5);
+    expect(combineit.levelNames).toHaveLength(5);
+    expect(combineit.levelNames[2]).toBe('party or battle?');
+    for (let l = 1; l <= 5; l++) expect(combineit.generate(l, 7)).toHaveLength(5);
   });
 });

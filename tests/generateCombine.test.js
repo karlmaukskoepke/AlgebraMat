@@ -7,27 +7,27 @@ import { total, counterTotal, subtracted, combineFirst, meeting, termsText } fro
 
 const SEEDS = Array.from({ length: 60 }, (_, i) => 1000 + i * 7919);
 const sets = (level) => SEEDS.map((seed) => generateCombineLevel(level, seed));
-const answerOf = (level, p) => (level <= 2 ? evaluateTwo(p) : total(p));
-const text = (level, p) => (level <= 2 ? formatProblem(p) : termsText(p));
+const answerOf = (level, p) => (level <= 3 ? evaluateTwo(p) : total(p));   // Levels 1 to 3 are two-term Flip It problems
+const text = (level, p) => (level <= 3 ? formatProblem(p) : termsText(p));
 const values = (p) => (p.terms ? p.terms.map((t) => t.value) : [p.left.value, p.right.value]);
 
 describe('Combine it levels', () => {
-  it('has 4 levels of 5 problems, and rejects other levels', () => {
-    expect(COMBINE_LEVEL_COUNT).toBe(4);
-    for (let level = 1; level <= 4; level++) expect(generateCombineLevel(level, 5)).toHaveLength(PROBLEMS_PER_LEVEL);
+  it('has 5 levels of 5 problems, and rejects other levels', () => {
+    expect(COMBINE_LEVEL_COUNT).toBe(5);
+    for (let level = 1; level <= 5; level++) expect(generateCombineLevel(level, 5)).toHaveLength(PROBLEMS_PER_LEVEL);
     expect(() => generateCombineLevel(0, 1)).toThrow();
-    expect(() => generateCombineLevel(5, 1)).toThrow();
+    expect(() => generateCombineLevel(6, 1)).toThrow();
   });
 
   it('gives the same set for one seed and level, and different sets for different seeds', () => {
-    for (let level = 1; level <= 4; level++) {
+    for (let level = 1; level <= 5; level++) {
       expect(generateCombineLevel(level, 42)).toEqual(generateCombineLevel(level, 42));
       expect(new Set(SEEDS.map((s) => generateCombineLevel(level, s).map((p) => text(level, p)).join('|'))).size).toBeGreaterThan(20);
     }
   });
 
   it('never repeats a problem or an answer in a set, and never makes a zero', () => {
-    for (let level = 1; level <= 4; level++) {
+    for (let level = 1; level <= 5; level++) {
       for (const set of sets(level)) {
         expect(new Set(set.map((p) => text(level, p))).size).toBe(5);
         expect(new Set(set.map((p) => answerOf(level, p))).size).toBe(5);
@@ -56,8 +56,25 @@ describe('Combine it levels', () => {
     }
   });
 
-  it('Level 3: three or four terms, both signs, small numbers and few counters, a mix of answers and lengths', () => {
+  it('Level 3: parties and battles mixed, so the student has to decide: both kinds, positive and negative parties, both winners', () => {
     for (const set of sets(3)) {
+      const battles = set.filter((p) => partyOrBattle(p) === 'battle');
+      const parties = set.filter((p) => partyOrBattle(p) === 'party');
+      expect(battles.length).toBeGreaterThanOrEqual(2);
+      expect(parties.length).toBeGreaterThanOrEqual(2);
+      expect(battles.some((p) => evaluateTwo(p) > 0)).toBe(true);
+      expect(battles.some((p) => evaluateTwo(p) < 0)).toBe(true);
+      expect(parties.some((p) => p.left.value < 0)).toBe(true);
+      expect(parties.some((p) => p.left.value > 0)).toBe(true);
+      for (const p of set) {
+        expect(p.op).toBe('+');
+        for (const v of values(p)) expect(Math.abs(v)).toBeLessThanOrEqual(MAX_SMALL);
+      }
+    }
+  });
+
+  it('Level 4: three or four terms, both signs, small numbers and few counters, a mix of answers and lengths', () => {
+    for (const set of sets(4)) {
       expect(set.filter((p) => total(p) > 0).length).toBeGreaterThanOrEqual(2);
       expect(set.filter((p) => total(p) < 0).length).toBeGreaterThanOrEqual(2);
       expect(set.filter((p) => p.terms.length === 3).length).toBeGreaterThanOrEqual(2);
@@ -71,8 +88,8 @@ describe('Combine it levels', () => {
     }
   });
 
-  it('Level 4: values 11 to 60, two terms (a party and a battle in each set) and two with three terms (a pair that shares a sign)', () => {
-    for (const set of sets(4)) {
+  it('Level 5: values 11 to 60, two terms (a party and a battle in each set) and two with three terms (a pair that shares a sign)', () => {
+    for (const set of sets(5)) {
       const two = set.filter((p) => p.terms.length === 2);
       const three = set.filter((p) => p.terms.length === 3);
       expect(three.length).toBeGreaterThanOrEqual(2);

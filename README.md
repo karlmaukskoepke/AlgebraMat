@@ -29,6 +29,12 @@ Add `?seed=123` to the URL to replay a fixed problem set, and `?level=2` to open
 
 ## Changelog
 
+### Combine it gets a mixed party-or-battle round (SPEC-COMBINE.md §12; first build of SPEC-JIT.md)
+- **New Level 3, "party or battle?":** two-term problems where the student has to decide which it is. Every set has a battle a positive wins, a battle a negative wins, a party of negatives, a party of positives, and one of any kind (numbers 1 to 12, no repeated answers). It plays on the same steps as Levels 1 and 2 (Draw → Party or Battle → Cancel → Answer). Until now each of those levels was all one kind, so the choice never had to be made.
+- **Combine it now has five levels:** the old Level 3 (three or more numbers) is Level 4 and the old Level 4 (big numbers) is Level 5.
+- **Old progress carries over:** a save from before this (localStorage, or a v1–v6 code) is moved into the new places; the mixed round counts as done once the old Level 3 was. A level in play saved before this isn't resumed, since its number means something else now.
+- **Save code v7:** `MAT-9` plus nine symbols (35 of about 39.6 bits). v1–v6 codes still work.
+
 ### Distribute, then combine step 5: the pack opens, save code v6 (SPEC-DISTRIBUTE.md §6, §7.5)
 - **Distribute, then combine is open** on the pack map: five rounds, saved progress, each round opening the next. Six cards now, **three across and two rows** at the Chromebook sizes (the title takes a line of its own, the blurb is left out, and the cards stay equal-size with their levels scrolling). The page scrolls a little to reach the second row. The "Coming soon" section shows only when a pack is still being built, so it's gone for now.
 - **Save code v6:** new codes are `MAT-8` plus eight symbols and carry all six packs (34 of about 34.7 bits, so the next pack needs a v7). v1 to v5 codes still work, and a v5 code brings Distribute back unfinished.
