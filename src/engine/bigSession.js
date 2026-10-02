@@ -108,6 +108,14 @@ export function reduceBig(state, action) {
       return s;
     }
 
+    // The ± button (as on Flip It's pad): flips a leading minus on what's typed.
+    case 'toggleSign': {
+      if (!['combine', 'answer'].includes(s.step)) return state;
+      if (!s.entry.startsWith('-') && s.entry.length >= MAX_BIG_ENTRY) return state;
+      s.entry = s.entry.startsWith('-') ? s.entry.slice(1) : `-${s.entry}`;
+      return s;
+    }
+
     case 'backspace': {
       if (!['combine', 'answer'].includes(s.step) || s.entry === '') return state;
       s.entry = s.entry.slice(0, -1);

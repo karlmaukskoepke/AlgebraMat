@@ -164,3 +164,30 @@ describe('integer problems on the term steps', () => {
     expect(generateCombineLevel(3, 5).length).toBe(5);
   });
 });
+
+describe('the ± button on integer answers', () => {
+  const atAnswer = () => {
+    const t = cancelAll(draw(newTermSession(sum([5, -8, 2]))));
+    expect(t.step).toBe('answer');
+    return t;
+  };
+
+  it('flips a leading minus on what is typed, so ± then 1 reads −1', () => {
+    let s = atAnswer();
+    s = run(s, { type: 'toggleSign' }, ...typed('1'));
+    expect(s.entry).toBe('-1');
+    s = run(s, { type: 'toggleSign' });
+    expect(s.entry).toBe('1');
+    s = run(s, { type: 'toggleSign' });
+    expect(s.entry).toBe('-1');
+  });
+
+  it('does nothing outside the answer step, or on algebra problems', () => {
+    const early = newTermSession(sum([5, -8, 2]));
+    expect(reduce(early, { type: 'toggleSign' })).toBe(early);
+    const algebra = { ...makeExpression([{ kind: 'x', op: '+', value: 2 }, { kind: 'int', op: '+', value: 3 }]), level: 1 };
+    const s = newTermSession(algebra);
+    expect(reduce({ ...s, step: 'answer' }, { type: 'toggleSign' })).toMatchObject({ entry: '' });
+  });
+});
+

@@ -278,6 +278,14 @@ export function reduceTerms(state, action) {
       return s;
     }
 
+    // The ± button on integer problems (Flip It's pad): flips a leading minus on what's typed.
+    case 'toggleSign': {
+      if (s.step !== 'answer' || !isIntegers(problem)) return state;
+      if (!s.entry.startsWith('-') && s.entry.length >= MAX_ANSWER_LENGTH) return state;
+      s.entry = s.entry.startsWith('-') ? s.entry.slice(1) : `-${s.entry}`;
+      return s;
+    }
+
     case 'backspace': {
       if (s.step !== 'answer' || s.entry === '') return state;
       s.entry = s.entry.slice(0, -1);

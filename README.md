@@ -29,6 +29,11 @@ Add `?seed=123` to the URL to replay a fixed problem set, and `?level=2` to open
 
 ## Changelog
 
+### The ± button on every integer answer pad
+- Combine it Levels 3 and 4 and Flip It's mixed Level 5 now type negatives with the same ± button and digits as Combine it Levels 1 and 2 (Level 3 had x, + and − keys; Level 4 had a lone − after the digits). ± flips a leading minus on what's typed; the keyboard's − key presses it. Algebra problems keep x, + and −.
+- A hidden pad key is now also disabled, so it can't catch a keyboard press.
+- The roadmap lists the refinements Karl raised the same day (a mixed party/battle round, scaffolding on a wrong answer, diagnostics, skipping ahead with streaks).
+
 ### Distribute, then combine step 1: model and generators (SPEC-DISTRIBUTE.md §2, §7.1)
 - `engine/distribute.js`: a problem is a list of parts (groups and loose terms) in written order. It writes the problem (`2(3x − 4) − x + 5`), opens the groups into Boxes & Circles terms with the sign on the operation and nothing to rewrite (`6x − 8 − x + 5`), and finds the answer (`5x − 3`). A subtracted group turns into an opposite count for Groups of Terms' arrows check.
 - `engine/generateDistribute.js`: five rounds. Rounds 1 to 3 enumerate small problems (at most 20 pieces drawn, answers always have an x part and a number); rounds 4 and 5 sample larger ones with the seeded RNG (hidden 1s, leading minus, number-first insides, two loose terms, groups on both sides of a term). No repeated answers in a set.

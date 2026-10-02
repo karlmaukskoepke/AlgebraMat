@@ -68,3 +68,11 @@
 1. **Substitute it:** find the value of an algebraic expression for a given value, modeling with +, − and boxes first (filling the boxes with the value of x), and eventually rewriting expressions with a **"Parentheses package"** where the variables are, and evaluating that way.
 2. **Solve it:** one-step equations, then two-step, then variables on both sides, culminating in problems with no solution, one solution, and infinite solutions.
 3. **Model it:** students draw pictures and write equations to model situations using algebraic expressions.
+
+## Refinements to circle back to (Karl, 2026-10-02; after Distribute, then combine is finished)
+
+1. **Combine it practice round:** after Rounds 1 and 2 (battles, then parties), a mixed round of party and battle problems where students decide which it is. There's no round for that choice yet.
+2. **Scaffolding that appears on a wrong answer:** students shouldn't always have to draw every + and −. After a wrong answer, offer the drawing (or the other support) as needed, so the friction and slowing down reach only the students who need them. Apply this pedagogy across the whole design, with Rounds 4 and 5 of Distribute already working this way.
+3. **A diagnostic before each card's first round:** a few questions with answers typed and almost no scaffolding. What students miss directs them to the right practice.
+4. **Skipping ahead to later levels** of a card for higher difficulty, lower scaffolding, more variety and more repetition, with a **streak** (problems correct in a row) to be proud of.
+
