@@ -349,6 +349,8 @@ export function renderTermGroupMat(s) {
     checkIt(svg, s);
   } else {
     svg.append(foreign(0, 18, 300, 150, html('div', `lasso-left${s.oneOpen ? ' needs-one' : ''}`, problemText(s), meaningText(s.problem))));
+    // Distribute, then combine: the whole problem this group is part of.
+    if (s.context && !has(s.answer)) svg.append(foreign(0, 178, 300, 70, html('div', 'dist-context', html('span', 'dist-label', 'the problem'), s.context)));
     if (has(s.answer)) svg.append(foreign(0, 256, 300, 78, html('div', 'lasso-left', finalText(s.problem, s.answer))));
   }
   const width = isFraction(s.problem) ? fractionScript(svg, s) : wholeScript(svg, s);

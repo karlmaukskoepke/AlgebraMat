@@ -27,8 +27,9 @@ A term's sign is the operation in front of it, **whether or not it's rewritten a
 **Draw the groups → check → combine:**
 
 1. **Group** (Round 2 and 3 first, **Rewrite the 1**): in Round 2, the student writes the invisible 1 or −1 in front of the parentheses (the hidden-1 gap Group It pulses). In Round 3 the count is read from the circle, with its minus.
-2. **Distribute.** Groups of Terms' lasso and deal-out: the count of groups and the terms inside, ending with a **typed line** `6x − 8 − x + 5` (all terms, in order).
-3. **Check (between ① and ②).** The simple multiplication arrows (Groups of Terms' arrows check) are drawn on the written line: show only. The line is fixed to the correct one before ② starts, so a wrong ① never carries forward.
+2. **Distribute.** Groups of Terms' lasso and deal-out on the group (the count of groups and the terms inside), ending with what the group makes, typed: `6x − 8`.
+3. **Check it** (between ① and ②). Groups of Terms' simple multiplication arrows, show only.
+3b. **Write it.** The whole line with the group opened, typed: `6x − 8 − x + 5` (every term in order, none combined; a term's sign is the operation in front of it). Built as its own step after Check it, so the check comes first, and the line is correct before ② starts: a wrong ① never carries forward.
 4. **Circle the terms** (Boxes & Circles), with each term's sign or operation in front.
 5. **Draw** the boxes and counters (small values), **Cancel** the opposite pairs.
 6. **Answer** `5x − 3`, typed with the pad.

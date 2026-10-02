@@ -76,3 +76,5 @@
 3. **A diagnostic before each card's first round:** a few questions with answers typed and almost no scaffolding. What students miss directs them to the right practice.
 4. **Skipping ahead to later levels** of a card for higher difficulty, lower scaffolding, more variety and more repetition, with a **streak** (problems correct in a row) to be proud of.
 
+**The idea behind all four (Karl, 2026-10-02): just-in-time scaffolds.** Pam Harris's "just in time" idea, applied to supports instead of vocabulary: students practice with as little friction as possible, and each support (the party-or-battle question, drawing the + and −, the Rewrite, the circling) arrives only when a misconception calls for it, then fades. It should feel like a challenge towards mastery with help always close by. This needs a spec of its own: which wrong answers trigger which support, how a support is offered (asked for, or pushed), and how it fades. The diagnostic and the skip-ahead levels are the same machinery: the diagnostic reads the misconceptions, the later levels are the no-scaffold home base.
+

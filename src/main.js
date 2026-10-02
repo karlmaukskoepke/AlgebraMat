@@ -13,6 +13,7 @@ import { bigPlay } from './play/bigPlay.js';
 import { lassoPlay } from './play/lassoPlay.js';
 import { termGroupPlay } from './play/termGroupPlay.js';
 import { boxPlay } from './play/boxPlay.js';
+import { distributePlay } from './play/distributePlay.js';
 import { renderPackMap, renderLevelDone } from './view/packmap.js';
 import { showSaveCode, askForCode } from './view/codes.js';
 
@@ -27,6 +28,7 @@ const PLAY = {
   lasso: lassoPlay,
   boxes: boxPlay,
   'groups-of-terms': termGroupPlay,
+  'distribute-combine': distributePlay,
 };
 const adapterFor = (packId, level) => (typeof PLAY[packId] === 'function' ? PLAY[packId](level) : PLAY[packId]);
 const newSeed = () => Math.floor(Math.random() * 2 ** 32);
@@ -149,7 +151,7 @@ function nextProblem() {
 
 function finishLevel() {
   const { pack, level } = play;
-  progress = completeLevel(progress, pack.id, level);
+  if (!pack.comingSoon) progress = completeLevel(progress, pack.id, level); // a round opened from a link isn't saved yet
   play.finished = true;
   persist();
   render();
@@ -168,6 +170,8 @@ function finishLevel() {
 function renderSteps(session) {
   const steps = play.adapter.steps(session);
   const bar = $('steps');
+  const phase = play.adapter.phaseLabel?.(session); // a pack that runs in phases names the one in play
+  if (phase) bar.dataset.phase = phase; else delete bar.dataset.phase;
   const labels = steps.map((x) => x.label).join('|');
   if (bar.dataset.labels !== labels) {
     bar.replaceChildren(...steps.map((x, i) => {
