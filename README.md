@@ -29,6 +29,10 @@ Add `?seed=123` to the URL to replay a fixed problem set, and `?level=2` to open
 
 ## Changelog
 
+### Pack map: level buttons fit their cards (fix)
+- With six packs a card is about 400px wide, and once the real fonts (Lexend, Kalam) loaded, three levels to a row squeezed "Level 2" and "Level 3" out of their buttons and added a sideways scrollbar. Levels now go **two to a row** on the six-pack map, a button can shrink below its text without spilling over its neighbor, a long pack name wraps inside its card, and a level list never scrolls sideways.
+- Checked in a real browser at 1300×820, 1366×657, 1280×610, 1100×800 and 900×900 with a wide stand-in font (the sandbox can't load Google Fonts): 35 buttons overflowed before at 1300 and 1100, none after.
+
 ### Scaffold pilot step 5: the spotlight tour (SPEC-SCAFFOLD.md §1b, §8.5)
 - **The first light problem on a device opens with a guided tour.** The page dims and each real control lights up in turn with a yellow ring and a caption: the problem ("Here's what you're adding"), the pad ("± makes it negative"), Check, and **I'm stuck**. The I'm stuck step has no Next button: **the student has to press the real button** (or key S), so they have the memory of pressing it and meet the first support (the party-or-battle question). A last step points at the help ("That's the help. Answer its question, then type the answer yourself"), and Got it ends the tour.
 - **While it runs, the rest of the page is held:** clicks on the dimmed page and typing do nothing, and Enter or a click can't skip past the required press. **Skip tour** (or Esc) leaves at any point. It lights up the actual controls, so it can't drift out of date.
