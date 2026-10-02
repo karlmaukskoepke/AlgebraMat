@@ -1,6 +1,8 @@
 // The palette for light mode (SPEC-SCAFFOLD.md §2): Party and Battle (for the party-or-battle support), I'm stuck,
-// Check, and Flip It's answer pad (± and digits). After a right answer Check becomes Next →. `data-key`: S asks
+// Sound (reading the cloze aloud, on or off), Check, and Flip It's answer pad (± and digits). After a right answer Check becomes Next →. `data-key`: S asks
 // for I'm stuck, P and B choose; Enter is Check, and the keyboard's − presses ±.
+
+import { soundOn, setSound } from './speech.js';
 
 function button(label, action, extra = {}) {
   const b = document.createElement('button');
@@ -20,11 +22,12 @@ export function buildLightControls(root, dispatch) {
   const party = button('Party!', 'choose', { data: { choice: 'party', key: 'p' }, aria: 'Party (key P)' });
   const battle = button('Battle!', 'choose', { data: { choice: 'battle', key: 'b' }, aria: 'Battle (key B)' });
   const stuck = button('I’m stuck', 'stuck', { data: { key: 's' }, aria: 'I’m stuck (key S)' });
+  const sound = button('', 'sound', { aria: 'Read sentences aloud' });
   const check = button('Check ✓', 'check', { cls: 'btn-primary' });
   const choices = document.createElement('div');
   choices.className = 'group';
   choices.append(party, battle);
-  row.append(choices, stuck, check);
+  row.append(choices, stuck, sound, check);
 
   const pad = document.createElement('div');
   pad.className = 'pad';
@@ -33,10 +36,16 @@ export function buildLightControls(root, dispatch) {
   const back = button('⌫', 'backspace', { cls: 'btn-pad', aria: 'Delete' });
   pad.append(toggle, ...digits, back);
   root.append(row, pad);
+  const showSound = () => {
+    sound.textContent = soundOn() ? '🔊 Sound on' : '🔇 Sound off';
+    sound.setAttribute('aria-pressed', String(soundOn()));
+  };
+  showSound();
 
   root.addEventListener('click', (e) => {
     const b = e.target.closest('button[data-action]');
     if (!b || b.disabled) return;
+    if (b.dataset.action === 'sound') { setSound(!soundOn()); showSound(); return; } // a setting, not a move
     const { action, choice, digit } = b.dataset;
     if (action === 'check' && b.dataset.next) return dispatch({ type: 'next' });
     dispatch({ type: action, choice, digit: digit === undefined ? undefined : Number(digit) });

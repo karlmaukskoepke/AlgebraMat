@@ -29,6 +29,12 @@ Add `?seed=123` to the URL to replay a fixed problem set, and `?level=2` to open
 
 ## Changelog
 
+### Scaffold pilot step 3: the sign cloze on the Mat (SPEC-SCAFFOLD.md §4, §8.3)
+- **A sign mistake now gets the cloze** (a dropped or flipped sign in light mode): a sentence with a blank, "The battle of 2 and −4 leaves ____ standing." (or "The party of −4 and −6 has ____ in all."), and four buttons written with the words "negative" and "positive."
+- **Every pick is read aloud** with the browser's built-in speech (offline, so fine on Chromebooks), the whole sentence with the pick in it, and only after the pick. A **Sound on / off** button turns it off; it's remembered on the device, and nothing breaks where speech isn't available.
+- **A wrong pick** says what's off (the sign, or the sizes combined the wrong way) and is crossed out, with no penalty. **The right pick** fills in the sentence, **draws the leftover counters** (− in magenta, + in ink) and goes back to typing; the sentence and counters stay on the Mat while the student types the answer with its sign. **I'm stuck** inside the cloze goes to the full walk.
+- Still behind `?light=1`. Real-browser runs of Levels 1 to 3 at 1280×610 and 1366×657 with a stubbed speech engine: wrong pick, right pick, the two sentences spoken, counters drawn, no page errors, every target at least 44px. 488 tests (3 new).
+
 ### Scaffold pilot step 2: light mode (SPEC-SCAFFOLD.md §2, §4, §8.2)
 - **Light mode for Combine it Levels 1 to 3:** the student types the answer (Flip It's pad: ± and digits) and presses Check. Right on the first try is done and counts as a clean answer. A wrong answer, or **I'm stuck**, brings in a support; an empty or garbled answer is not a wrong try.
 - **Supports so far:** the party-or-battle question (then back to typing), and the full walk (today's Draw → Party or Battle → Cancel → Answer on the same problem) as the last rung. A wrong answer after a support, or a second I'm stuck, goes to the full walk; an answer that matches no known mistake goes straight to it. The step strip shows the one step in light mode and "Party or Battle? → Answer" during the question. **The sign cloze isn't built yet** (the next step), so a sign mistake gets the party-or-battle question for now.
