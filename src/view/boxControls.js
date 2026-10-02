@@ -4,7 +4,7 @@
 // `data-key` names the keyboard key that presses a button (B and C pick the
 // tools, Backspace is Undo or the pad's delete, x, + and − type; Enter is Check).
 
-import { hasRewrite } from '../engine/termSession.js';
+import { hasRewrite, isIntegers } from '../engine/termSession.js';
 
 const BOX_SVG = '<svg viewBox="0 0 26 22" aria-hidden="true"><rect x="2" y="2" width="22" height="18" rx="4"/></svg>';
 const CIRCLE_SVG = '<svg viewBox="0 0 26 22" aria-hidden="true"><rect x="2" y="2" width="22" height="18" rx="9"/></svg>';
@@ -55,7 +55,9 @@ export function buildBoxControls(root, dispatch) {
   const chars = [['x', 'x', 'x'], ['+', '+', 'Plus'], ['−', '-', 'Minus']].map(([label, ch, aria]) =>
     button(label, 'typeChar', { cls: 'btn-pad', data: { ch, key: ch }, aria }));
   const back = button('⌫', 'backspace', { cls: 'btn-pad', aria: 'Delete' });
-  pad.append(...digits, ...chars, back);
+  // Integer problems get Flip It's pad (± and digits); algebra problems type x, + and −.
+  const toggle = button('±', 'toggleSign', { cls: 'btn-pad', data: { key: '-' }, aria: 'Change sign' });
+  pad.append(toggle, ...digits, ...chars, back);
 
   root.append(row, pad);
 
@@ -92,7 +94,10 @@ export function buildBoxControls(root, dispatch) {
       check.disabled = !(boxCircle || drawing || answering) && !(done && s.step === 'done');
       check.innerHTML = done ? 'Next →' : 'Check ✓';
       if (done) check.dataset.next = '1'; else delete check.dataset.next;
-      for (const b of pad.querySelectorAll('button')) b.disabled = !answering;
+      const ints = Boolean(s.problem) && isIntegers(s.problem);
+      toggle.hidden = !ints;
+      for (const b of chars) b.hidden = ints;
+      for (const b of pad.querySelectorAll('button')) b.disabled = !answering || b.hidden; // a hidden key must not catch the keyboard
     },
   };
 }

@@ -1,5 +1,5 @@
 // Combine it Level 4's palette: Party! / Battle!, Add / Subtract, the sign (+ or −), Undo (for circles), Check,
-// and the number pad (digits and a −). Only the current step's buttons are enabled; the rest stay visible but
+// and the number pad (± and digits, as on Flip It). Only the current step's buttons are enabled; the rest stay visible but
 // dimmed. `data-key` names the keyboard key that presses a button: P and B for Party and Battle, A and S for Add
 // and Subtract, + and − for the sign (or, while typing, the pad's −); Enter is Check.
 
@@ -39,9 +39,9 @@ export function buildBigControls(root, dispatch) {
   const pad = document.createElement('div');
   pad.className = 'pad';
   const digits = [1, 2, 3, 4, 5, 6, 7, 8, 9, 0].map((d) => button(String(d), 'digit', { cls: 'btn-pad', data: { digit: d } }));
-  const dash = button('−', 'typeChar', { cls: 'btn-pad', data: { ch: '-', key: '-' }, aria: 'Minus' });
+  const toggle = button('±', 'toggleSign', { cls: 'btn-pad', data: { key: '-' }, aria: 'Change sign' });
   const back = button('⌫', 'backspace', { cls: 'btn-pad', aria: 'Delete' });
-  pad.append(...digits, dash, back);
+  pad.append(toggle, ...digits, back);
 
   root.append(row, pad);
 

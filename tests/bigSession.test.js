@@ -221,3 +221,17 @@ describe('Combine it Level 4 problems', () => {
     }
   });
 });
+
+describe('the ± button on Level 4', () => {
+  it('flips a leading minus while typing the combine or answer', () => {
+    const P = big(-23, 41);
+    let s = { ...newBigSession(P), step: 'answer' };
+    s = run(s, { type: 'toggleSign' }, ...typed('18'));
+    expect(s.entry).toBe('-18');
+    s = run(s, { type: 'toggleSign' });
+    expect(s.entry).toBe('18');
+    const early = newBigSession(P);
+    expect(reduce(early, { type: 'toggleSign' })).toBe(early);
+  });
+});
+
