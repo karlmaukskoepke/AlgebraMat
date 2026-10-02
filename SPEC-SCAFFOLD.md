@@ -8,6 +8,18 @@ Combine it **Levels 1 to 3** (the two-term levels) run **light**: the problem sh
 
 **Success looks like:** a student who gets a problem right takes fewer steps than today (one typed answer instead of Draw, Party or Battle, Cancel, Answer), and a student who makes one of Karl's mistakes gets the support that answers *that* mistake.
 
+## 1b. The first time on a device: a spotlight tour (Karl, 2026-10-02)
+
+The first light problem on a new device opens with a short **guided tour** that spotlights the features, rather than throwing the student at a bare "type the answer." The screen dims and each feature lights up in turn with one line and a **Next** button:
+
+1. **The problem:** "Here's what you're adding."
+2. **The pad:** "Type the answer. ± makes it negative."
+3. **Check:** "Press Check when you're ready."
+4. **I'm stuck:** "Not sure? Press this anytime. No penalty." The tour then asks the student to **press it once**, so they meet the first support (the party-or-battle question) and see counters when they go on to the full walk. That's the "show off the features" part: they see help is real before they need it.
+5. **Back to the problem:** the student finishes it themselves.
+
+The tour can be skipped (**Skip tour**) and replayed from a small **?** button on the light screen. It's remembered per device (`mat.tour.v1`). It spotlights real controls (not a picture of them), so it can't drift out of date.
+
 ## 2. A problem, start to finish
 
 1. **Light.** The expression, `−5 + 3 = ?`, the pad (± and digits), **Check**, and **I'm stuck**.
@@ -54,7 +66,7 @@ After a mistake, the support that answered it is **on** for the next problems, s
 
 While a support is on, a problem answered **right on the first try** counts as a **clean** one. **Three clean** answers in a row turn the support off; a wrong first answer resets the count to three. (Three is a guess to tune in class.) A student who has never made a mistake never sees a support, except by pressing **I'm stuck**.
 
-State is kept per device in `localStorage` under its own key (`mat.skills.v1`): `{ partyBattle: n, sign: n }`, the clean answers still needed. It is **not** in the save code, so a new device starts light. Okay for a pilot; a decision for the teacher-report step.
+State is kept per device in `localStorage` under its own key (`mat.skills.v1`): `{ partyBattle: n, sign: n }`, the clean answers still needed. The tour's "seen" flag is `mat.tour.v1`. It is **not** in the save code, so a new device starts light. Okay for a pilot; a decision for the teacher-report step.
 
 ## 6. The event log (anonymous)
 
@@ -79,10 +91,10 @@ This is what SPEC-JIT.md's pattern-finding and the teacher report will read; the
 2. **Light mode:** the session, the palette, the Mat, **I'm stuck**, and the hand-off to the full walk.
 3. **The cloze on the Mat:** choices, the spoken sentence, the leftover counters.
 4. **Support that stays on, fading, and the event log.**
-5. **Touch audit and real-browser runs** on Combine it Levels 1 to 3, docs.
+5. **The spotlight tour** (§1b), skippable and replayable.
+6. **Touch audit and real-browser runs** on Combine it Levels 1 to 3, docs.
 
 ## 9. Questions for Karl
 
-1. **A brand-new student's first problem.** There's no diagnostic yet, so a student who has never seen counters would meet a bare "type the answer." My default: the very first problem on a device runs as the **full walk** (an intro to the Mat), then light from the second problem on. Okay?
-2. **Per-device only for now.** The on/off counts live on the device and not in the save code. A student on a new Chromebook starts light. Okay for the pilot?
-3. **The cloze's four choices.** Four, with the sign and size mistakes as the wrong choices, as above. Do you want a fifth, "not sure," that goes to the next support? (It's honest, but it may become a way to skip thinking.)
+1. *(Answered: a spotlight tour on the first problem, §1b. Per device only is okay for the pilot, §5.)* **The tour's details:** it's skippable and replayable from a **?** button, and step 4 asks the student to press **I'm stuck** once so they meet the supports. Does a required press feel right, or should the tour only point at it?
+2. **The cloze's four choices.** Four, with the sign and size mistakes as the wrong choices, as above. Do you want a fifth, "not sure," that goes to the next support? (It's honest, but it may become a way to skip thinking.)
