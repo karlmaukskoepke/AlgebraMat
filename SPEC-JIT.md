@@ -27,6 +27,14 @@
 | D2 | **The invisible 1** | `5 − (3x − 4)` | sign of the second term not flipped | write the 1; − groups and Flip |
 | D3 | **The minus isn't connected to the value being distributed** | `5 − 2(3x − 4)` → `5 − 6x − 8` | the second term's sign wrong, the first right | Rewrite as adding the opposite (the magenta note) |
 | D4 | **The outside number is added or subtracted, not "how many groups"** | `2(3x − 4)` → `3x − 4 + 2` | the outside number appears as a loose term | Group It's groups, the lasso |
+| D5 | **Combining A and B before distributing** (`A + B(Cx + D)`) | `3 + 2(x + 4)` → `5(x + 4)` | the answer is the outside number times the whole group plus A added into it | Write it first (open the group), then the Mat: distribute before combining |
+
+## Decisions (2026-10-02)
+
+- **Streaks:** only a wrong *final* answer breaks a streak. Using a support does not.
+- **A mistake that matches no signature:** the full step-by-step walk for that problem.
+- **Catalog the wrong answers, and flag patterns for Karl:** every wrong final answer is logged (anonymously) with the problem, what was typed, and the mistake it matched, or "unmatched." Unmatched ones get automatic features (how far from the right answer, the sign flipped, the size equal to |a| + |b| or |a| − |b|, a term dropped or added) so repeated shapes across students and problems show up as **candidate new mistakes**. This needs many students' data in one place, so it works once the events reach Karl's sheet; until then a single device only sees one student. When Karl asks, Claude can read the sheet (through his Drive connection) and bring back the patterns; it isn't automatic.
+- **Say the word (I3): a cloze, not a button.** After a battle (or party), a sentence with a blank: *"The battle of −5 and 3 left ____ standing,"* with choices. Picking one reads it aloud and shows the leftovers drawn on the Mat. Notes: use **three or four choices**, not two, so it also catches size mistakes ("negative five," "five," "negative eight," "eight"); read it aloud **after** the choice, not before, so the audio doesn't give the answer away; and it's a support, so the student then types the answer. The same idea can fit algebra: "the term −x is a ____ x term" (A2).
 
 ## Skeleton (to be filled in)
 
@@ -40,6 +48,4 @@
 
 ## Open questions
 
-- **"Say the word":** for the sign "tag" problem (I3), do we show the word on the Mat ("negative five"), speak it aloud (the browser can do this offline, which matters on Chromebooks), or both?
-- **Streaks and supports:** does needing a support break a streak, or only a wrong final answer?
-- **Unknown mistakes:** when a wrong answer matches no signature, what's the default support?
+- **The cloze's wording:** one template per situation (battle, party, a subtraction after Rewrite, an algebra term), or one flexible template? To settle with the mixed party-or-battle round, the first build.
