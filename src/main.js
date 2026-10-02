@@ -25,8 +25,9 @@ const $ = (id) => document.getElementById(id);
 // Each pack's play adapter: its steps, session, Mat, controls and messages.
 // A pack can use a different adapter for some levels (Combine it's Level 4 and Flip It's Level 5 run on the
 // integer steps, and Combine it's Level 5 its own), so each entry is the adapter or a function of the level.
-// Light mode for Combine it Levels 1 to 3 (SPEC-SCAFFOLD.md) is opt-in with ?light=1 until the pilot is finished.
-const LIGHT = new URLSearchParams(location.search).get('light') === '1';
+// Light mode is how Combine it Levels 1 to 3 play (SPEC-SCAFFOLD.md): type the answer, with supports that come in when a
+// wrong answer or I'm stuck calls for them. ?light=0 plays them the old step-by-step way instead.
+const LIGHT = new URLSearchParams(location.search).get('light') !== '0';
 const PLAY = {
   combineit: (level) => (level >= 5 ? bigPlay : level === 4 ? integerPlay : LIGHT ? lightPlay : combinePlay),
   flipit: (level) => (level >= 5 ? integerPlay : flipitPlay),

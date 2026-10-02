@@ -29,6 +29,13 @@ Add `?seed=123` to the URL to replay a fixed problem set, and `?level=2` to open
 
 ## Changelog
 
+### Scaffold pilot step 6: light mode is on for Combine it Levels 1 to 3 (SPEC-SCAFFOLD.md §8.6) — the pilot is done
+- **Students now get light mode on Combine it Levels 1, 2 and 3 by default:** type the answer; a wrong answer or **I'm stuck** brings in the party-or-battle question, the sign cloze (read aloud, with the leftover counters) or the full counters walk; the support that answers a mistake stays on and fades after three clean answers; the first light problem on a device opens with the spotlight tour; each finished problem goes in the anonymous on-device log.
+- **`?light=0`** plays those three levels the old step-by-step way instead (handy for projecting the full walk to a class).
+- **Final audit** in a real browser at 1366×657 (and the earlier 1280×610 runs): clicking Combine it Level 1 from the pack map opens light mode with the tour once; Skip is remembered; all three levels play through at both sizes; fading works; the old walk still works with `?light=0`; Boxes & Circles, Groups of Terms, Distribute, then combine (Rounds 3 and 5), Combine it Levels 4 and 5 and Flip It Level 5 all still play through. No page errors, every target at least 44px.
+- **What the pilot built, in one place:** `engine/scaffold.js` (reading a wrong answer, the ladder, the cloze), `engine/lightSession.js` (light mode), `engine/skills.js` and `lightStore.js` (supports that stay on and fade, kept per device), `engine/eventlog.js` (the anonymous log), `engine/tour.js` and `view/tour.js` (the tour), `view/speech.js` (reading aloud).
+- **Not done yet** (SPEC-JIT.md, in Karl's order): the diagnostic before each card's first round, skip-ahead levels with streaks, and the teacher report; and the same light mode for the other cards (Flip It, Boxes & Circles, Groups of Terms, Distribute, then combine), each needing its own mistake catalog entries.
+
 ### Pack map: level buttons fit their cards (fix)
 - With six packs a card is about 400px wide, and once the real fonts (Lexend, Kalam) loaded, three levels to a row squeezed "Level 2" and "Level 3" out of their buttons and added a sideways scrollbar. Levels now go **two to a row** on the six-pack map, a button can shrink below its text without spilling over its neighbor, a long pack name wraps inside its card, and a level list never scrolls sideways.
 - Checked in a real browser at 1300×820, 1366×657, 1280×610, 1100×800 and 900×900 with a wide stand-in font (the sandbox can't load Google Fonts): 35 buttons overflowed before at 1300 and 1100, none after.
