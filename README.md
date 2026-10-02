@@ -29,6 +29,12 @@ Add `?seed=123` to the URL to replay a fixed problem set, and `?level=2` to open
 
 ## Changelog
 
+### Distribute, then combine step 2: Round 1 plays, start to finish (SPEC-DISTRIBUTE.md §3, §7.2)
+- `engine/distributeSession.js`: one session that runs Groups of Terms on the group (Groups → + or − → Fill → Flip → Answer → Check it), then **Write it** (the whole line with the group opened, in `engine/distributeMoves.js`: it says whether the line is already combined, a sign is off, terms are missing, or it's just off), then Boxes & Circles on that line (Box & Circle → Draw → Cancel → Answer). The step strip names the phase, **① distribute** or **② combine**.
+- `play/distributePlay.js` hands each step to the pack that teaches it; both palettes live in the footer, one shown at a time (Next → at Check it goes on to Write it, not to the next problem). The group's Mat shows the whole problem on its left.
+- Round 1 opens from a link only (`?pack=distribute-combine&level=1`); the pack is still a Coming-soon card, and a coming-soon pack takes no room in saved progress. Rounds 2 to 5, the pack card and save code v6 are steps 3 to 5.
+- Real-browser run of all five Round 1 problems at 1280×610 and 1366×657: no page errors, every target at least 44px.
+
 ### The ± button on every integer answer pad
 - Combine it Levels 3 and 4 and Flip It's mixed Level 5 now type negatives with the same ± button and digits as Combine it Levels 1 and 2 (Level 3 had x, + and − keys; Level 4 had a lone − after the digits). ± flips a leading minus on what's typed; the keyboard's − key presses it. Algebra problems keep x, + and −.
 - A hidden pad key is now also disabled, so it can't catch a keyboard press.

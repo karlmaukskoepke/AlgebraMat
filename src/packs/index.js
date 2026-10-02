@@ -5,6 +5,7 @@ import { flipit } from './flipit.js';
 import { generateLassoLevel } from '../engine/generateLasso.js';
 import { generateTermLevel } from '../engine/generateTerms.js';
 import { generateTermGroupsLevel } from '../engine/generateTermGroups.js';
+import { generateDistributeLevel } from '../engine/generateDistribute.js';
 
 // Group It (built as "Lasso"; its id stays 'lasso' so saved progress and
 // save codes from before the rename still work).
@@ -25,8 +26,6 @@ export const lasso = {
   ],
   generate: (level, seed) => generateLassoLevel(level, seed),
 };
-
-const soon = (id, title, subtitle) => ({ id, title, subtitle, levels: 0, comingSoon: true });
 
 // Boxes & Circles: combining like terms with boxes, circles and counters.
 // Each problem carries its level, which tells the session whether it starts with Rewrite.
@@ -52,12 +51,25 @@ export const groupsOfTerms = {
   generate: (level, seed) => generateTermGroupsLevel(level, seed),
 };
 
+// Distribute, then combine (SPEC-DISTRIBUTE.md): still a Coming-soon card while it's built round by round, but
+// a round that's built opens from a link (?pack=distribute-combine&level=1). Round 1 so far.
+export const distributeCombine = {
+  id: 'distribute-combine',
+  title: 'Distribute, then combine',
+  subtitle: 'Distributing, then combining like terms',
+  blurb: 'Open the groups first, then combine like terms.',
+  levels: 1,
+  levelNames: ['A + B(Cx + D)'],
+  comingSoon: true,
+  generate: (level, seed) => generateDistributeLevel(level, seed),
+};
+
 export const PACKS = [
   combineit,
   flipit,
   lasso,
   boxes,
   groupsOfTerms,
-  soon('distribute-combine', 'Distribute, then combine', 'Distributing, then combining like terms'),
+  distributeCombine,
 ];
 export const packById = (id) => PACKS.find((p) => p.id === id);

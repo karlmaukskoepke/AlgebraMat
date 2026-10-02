@@ -8,7 +8,7 @@ export const PROGRESS_VERSION = 1;
 export function newProgress(packs) {
   const out = { v: PROGRESS_VERSION, packs: {} };
   for (const p of packs) {
-    if (p.levels) out.packs[p.id] = { levels: Array(p.levels).fill(false) };
+    if (p.levels && !p.comingSoon) out.packs[p.id] = { levels: Array(p.levels).fill(false) };
   }
   return out;
 }

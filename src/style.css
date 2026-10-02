@@ -1621,3 +1621,74 @@ body {
     font-size: 14px;
   }
 }
+
+/* ---------- Distribute, then combine ---------- */
+
+/* Both packs' palettes live in the footer, one shown at a time: let their rows act as the footer's own. */
+.dist-controls {
+  display: contents;
+}
+
+/* A phase's name leads the step strip: "① distribute", "② combine". */
+.steps[data-phase]::before {
+  content: attr(data-phase);
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  font-weight: 800;
+  color: var(--ink);
+}
+
+/* The whole problem, in the group Mat's left column. */
+.dist-context {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  color: var(--ink);
+  font: 700 24px 'Kalam', cursive;
+  text-align: center;
+}
+.dist-label {
+  font: 600 15px system-ui, sans-serif;
+  color: var(--muted);
+}
+
+/* Write it: the problem, then the line being written. */
+.dist-line {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  color: var(--ink);
+  font: 700 48px 'Kalam', cursive;
+  text-align: center;
+}
+.dist-note {
+  font: 600 22px system-ui, sans-serif;
+  color: var(--muted);
+}
+.dist-opened {
+  display: flex;
+  gap: 16px;
+  align-items: baseline;
+}
+.dist-typed {
+  min-width: 120px;
+  padding: 0 14px;
+  border-bottom: 3px solid var(--ink);
+}
+.dist-typed.is-empty {
+  color: var(--muted);
+}
+
+/* Seven steps and the phase's name fit on one row. */
+.steps[data-phase] {
+  gap: 8px 6px;
+}
+.steps[data-phase] li {
+  padding-right: 8px;
+}
+.steps[data-phase]::before {
+  padding-right: 6px;
+}
