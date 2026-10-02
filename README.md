@@ -29,6 +29,12 @@ Add `?seed=123` to the URL to replay a fixed problem set, and `?level=2` to open
 
 ## Changelog
 
+### Scaffold pilot step 1: signatures and the cloze (SPEC-SCAFFOLD.md §3, §4, §8.1)
+- **Engine only, nothing on screen yet.** `engine/scaffold.js`: `classify(problem, typed)` reads what a student typed against a two-term Combine it problem and names the mistake behind a wrong answer (`sign-dropped`, `wrong-winner`, `battle-as-party`, `party-as-battle`, or `unmatched`; an empty or garbled answer is `unreadable` and isn't a mistake). `firstSupport`, `nextRung` and `skillOf` say which support answers which mistake (the sign cloze, the party-or-battle question, or the full walk) and which skill a mistake belongs to.
+- **The cloze:** `buildCloze` writes the sentence ("The battle of −5 and 3 leaves ____ standing.") with four choices written as words ("negative 2", "positive 2", "negative 8", "positive 8"); the wrong ones are the sign and size mistakes. The order is steady for a problem and varies across problems. `spokenSentence` is what's read aloud after a choice, and `leftover` is what the Mat will draw.
+- Tests cover every signature (including numbers that fit two) and check the cloze on every problem Levels 1 to 3 hand out: four different nonzero choices, the right one is the answer.
+- The spec for the whole pilot (`SPEC-SCAFFOLD.md`, approved) and the notes behind it (`SPEC-JIT.md`) ride along in this PR.
+
 ### Combine it gets a mixed party-or-battle round (SPEC-COMBINE.md §12; first build of SPEC-JIT.md)
 - **New Level 3, "party or battle?":** two-term problems where the student has to decide which it is. Every set has a battle a positive wins, a battle a negative wins, a party of negatives, a party of positives, and one of any kind (numbers 1 to 12, no repeated answers). It plays on the same steps as Levels 1 and 2 (Draw → Party or Battle → Cancel → Answer). Until now each of those levels was all one kind, so the choice never had to be made.
 - **Combine it now has five levels:** the old Level 3 (three or more numbers) is Level 4 and the old Level 4 (big numbers) is Level 5.
