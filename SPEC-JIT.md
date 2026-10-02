@@ -9,7 +9,7 @@
 - **Fade:** a support retires after about three correct problems without it (to be tuned in class).
 - **Levels stay content difficulty; support is a separate dial.** Skip-ahead is allowed; a **streak** counts correct answers in a row within a level, resets on a wrong answer, and the best streak is saved per level.
 - **Diagnostic:** about five typed questions the first time a card opens, mixing its levels; it sets the starting level and which supports start on. Skippable and retakeable.
-- **Build order:** (1) the mixed party-or-battle round in Combine it (**built**, Combine it Level 3), (2) a pilot of the scaffold engine on Combine it, (3) the diagnostic, (4) skip-ahead and streaks, (5) the teacher report.
+- **Build order:** (1) the mixed party-or-battle round in Combine it (**built**, Combine it Level 3), (2) a pilot of the scaffold engine on Combine it (**built**, SPEC-SCAFFOLD.md), (3) the diagnostic, (4) skip-ahead and streaks, (5) the teacher report.
 - **Data:** the app records small anonymous events locally (problem done, tries, support used, mistake detected). Sending them anywhere comes last. Plan for later: students enter a period and a teacher-given student number; each teacher uses a template Google Sheet with an Apps Script endpoint in their own account (the site stays static; no central database). To be checked with the district. Nothing identifying is ever collected.
 
 ## What Karl sees in class (the misconception catalog)

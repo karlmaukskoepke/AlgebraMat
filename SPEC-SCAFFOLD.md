@@ -1,4 +1,4 @@
-# The Mat: the scaffold engine, piloted on Combine it (approved 2026-10-02)
+# The Mat: the scaffold engine, piloted on Combine it (approved 2026-10-02; built 2026-10-02)
 
 *Builds on SPEC-JIT.md (Karl's decisions and the misconception catalog), SPEC-COMBINE.md and SPEC-ROADMAP.md. Only what's new is written here. This is step 2 of Karl's build order: the pilot. The diagnostic, skip-ahead with streaks, and the teacher report come after.*
 
@@ -92,7 +92,7 @@ This is what SPEC-JIT.md's pattern-finding and the teacher report will read; the
 3. **The cloze on the Mat** (**built**): choices, the spoken sentence, the leftover counters, and a Sound on/off button.
 4. **Support that stays on, fading, and the event log** (**built**).
 5. **The spotlight tour** (§1b), skippable and replayable (**built**).
-6. **Touch audit and real-browser runs** on Combine it Levels 1 to 3, docs.
+6. **Light mode on by default** for Combine it Levels 1 to 3 (`?light=0` for the old walk), the touch audit and real-browser runs, docs (**built**: the pilot is done).
 
 ## 9. Decisions (Karl, 2026-10-02)
 
