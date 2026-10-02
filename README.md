@@ -29,6 +29,13 @@ Add `?seed=123` to the URL to replay a fixed problem set, and `?level=2` to open
 
 ## Changelog
 
+### Distribute, then combine step 4: Rounds 4 and 5, the supports fade (SPEC-DISTRIBUTE.md §2, §5, §7.4)
+- No drawing: **Open it** (type the line with every group opened, none combined) then **Answer** (type the combined result). `engine/distributeTyped.js` is its own small session; the Mat shows the problem, then each typed line under it.
+- Help is a hint after 3 wrong tries on a step: **Open it** shows each group's number times each term inside (`−7 · (−3x) = 21x`), **Answer** shows each kind added up (`boxes: 6 − 1 = 5`). A hint shows the move and never makes it, and a new step starts a fresh count.
+- **Round 4** adds a **Show me** button (key S) that asks for that same help early; **Round 5** has hints only and no button. Round 5 mixes in two loose terms, groups either side of a term, number-first insides and `B(Cx + D) − A`.
+- Show me shows the worked products, not a drawing, because Round 4's numbers are too big to draw (up to 9 groups of 15 pieces). If we want a drawing later, it can open a smaller version of the same problem.
+- The pack has all five rounds now, still opened from a link (`?pack=distribute-combine&level=4`) until step 5 adds the pack card and save code v6. Every generated Round 4 and 5 problem walks through in the tests, and in a real browser at 1280×610 and 1366×657 with every target at least 44px.
+
 ### Distribute, then combine step 3: Rounds 2 and 3, the invisible 1 and the subtracted group (SPEC-DISTRIBUTE.md §3, §4, §7.3)
 - **Round 2** (`A + (Bx + C)`, `A − (Bx + C)`): the student writes the invisible 1 first (a positive single group hides its 1 too now, as `−(B)` did), then the Groups of Terms steps. A subtracted group is an opposite group, so Flip runs inside ①.
 - **Round 3** (`A − B(Cx + D)`): the sign trap. The group is `−B` groups, flipped, then Write it asks for the line with the right signs (`5 − 4x + 6`); a wrong sign is named.

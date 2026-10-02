@@ -14,6 +14,7 @@ import { lassoPlay } from './play/lassoPlay.js';
 import { termGroupPlay } from './play/termGroupPlay.js';
 import { boxPlay } from './play/boxPlay.js';
 import { distributePlay } from './play/distributePlay.js';
+import { distributeTypedPlay } from './play/distributeTypedPlay.js';
 import { renderPackMap, renderLevelDone } from './view/packmap.js';
 import { showSaveCode, askForCode } from './view/codes.js';
 
@@ -28,7 +29,7 @@ const PLAY = {
   lasso: lassoPlay,
   boxes: boxPlay,
   'groups-of-terms': termGroupPlay,
-  'distribute-combine': distributePlay,
+  'distribute-combine': (level) => (level >= 4 ? distributeTypedPlay : distributePlay),
 };
 const adapterFor = (packId, level) => (typeof PLAY[packId] === 'function' ? PLAY[packId](level) : PLAY[packId]);
 const newSeed = () => Math.floor(Math.random() * 2 ** 32);

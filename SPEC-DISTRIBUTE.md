@@ -15,7 +15,7 @@ A term's sign is the operation in front of it, **whether or not it's rewritten a
 | 1 | `A + B(Cx + D)` and `B(Cx + D) + A` (group first is not harder: it puts the distributing first, so students start there) | Full: lasso, deal-out and arrows check, then Boxes & Circles |
 | 2 | `A + (Bx + C)` and `A − (Bx + C)` | Full, plus the invisible 1 (§3) |
 | 3 | `A − B(Cx + D)`: B negative, integer A, C, D | Full; the sign trap |
-| 4 | Mixed forms of rounds 1 to 3, larger values | Fading: type the distributed line and the answer; the Mat is optional (a **Show me** button opens the drawing), supports come as hints |
+| 4 | Mixed forms of rounds 1 to 3, larger values | Fading: type the distributed line and the answer; a **Show me** button asks for the worked products early (the values are too big to draw), supports come as hints |
 | 5 | Mixed forms, larger values, `B(Cx + D) − A`, groups on both sides of a term | Type only; supports show up as hints only |
 
 - 5 problems per round, a fresh seed each play, no repeated answers in a set.
