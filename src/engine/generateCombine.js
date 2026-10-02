@@ -1,4 +1,4 @@
-// Seeded problem sets for the Combine it pack's 4 levels (SPEC-COMBINE.md §2) and Flip It's
+// Seeded problem sets for the Combine it pack's 5 levels (SPEC-COMBINE.md §2, §12) and Flip It's
 // mixed Level 5 (§4). Same machinery and rules as the other packs: candidates are shuffled with
 // a seeded RNG and picked into required groups without repeating an answer.
 
@@ -8,11 +8,11 @@ import { formatExpression } from './terms.js';
 import { sumExpression, intTerm, total, counterTotal, subtracted, combineFirst, meeting } from './combine.js';
 import { makeExpression } from './terms.js';
 
-export const COMBINE_LEVEL_COUNT = 4;
+export const COMBINE_LEVEL_COUNT = 5;
 export const MAX_SMALL = 12;       // Levels 1 and 2: the numbers 1 to 12
-export const MAX_MANY = 9;         // Level 3 and Flip It's Level 5: the numbers 1 to 9 on 3 or 4 terms
+export const MAX_MANY = 9;         // Level 4 and Flip It's Level 5: the numbers 1 to 9 on 3 or 4 terms
 export const MAX_COUNTERS = 20;    // counters drawn for 3 or 4 terms
-export const BIG_MIN = 11;         // Level 4: 11 to 60
+export const BIG_MIN = 11;         // Level 5: 11 to 60
 export const BIG_MAX = 60;
 
 const CANDIDATES = 4000;
@@ -35,7 +35,7 @@ function twoTerms(keep) {
   return out;
 }
 
-// ---------- Levels 3, 4 and Flip It's Level 5: longer expressions, sampled ----------
+// ---------- Levels 4, 5 and Flip It's Level 5: longer expressions, sampled ----------
 
 const pick = (rng, list) => list[Math.floor(rng() * list.length)];
 const signed = (rng, lo, hi) => (rng() < 0.5 ? -1 : 1) * (lo + Math.floor(rng() * (hi - lo + 1)));
@@ -85,6 +85,8 @@ const bigThree = (rng) => {
   values.splice(at, 0, odd);
   return sumExpression(values);
 };
+// A two-term Flip It problem: the numbers meet in a battle when their signs differ.
+const isBattleTwo = (p) => meeting(p.left.value, p.right.value) === 'battle';
 const isParty = (e) => termCount(e) === 2 && meeting(e.terms[0].value, e.terms[1].value) === 'party';
 const isBattle = (e) => termCount(e) === 2 && meeting(e.terms[0].value, e.terms[1].value) === 'battle';
 
@@ -123,8 +125,26 @@ export const COMBINE_LEVELS = {
     answerOf: evaluateTwo,
   },
 
-  3: { answerOf: total, sampled: LEVEL_3 },
-  4: { answerOf: total, sampled: LEVEL_4 },
+  // Party or battle, mixed: the student has to decide which it is (SPEC-COMBINE.md §12). Two-term problems
+  // with the numbers 1 to 12: a battle that a positive wins, a battle that a negative wins, a party of
+  // negatives, a party of positives, and one of any kind.
+  3: {
+    weight: preferSmall,
+    build: () => ({
+      candidates: twoTerms((a, b) => a + b !== 0),
+      groups: [
+        { test: (p) => isBattleTwo(p) && evaluateTwo(p) > 0, count: 1 },
+        { test: (p) => isBattleTwo(p) && evaluateTwo(p) < 0, count: 1 },
+        { test: (p) => !isBattleTwo(p) && p.left.value < 0, count: 1 },
+        { test: (p) => !isBattleTwo(p) && p.left.value > 0, count: 1 },
+        { test: any, count: 1 },
+      ],
+    }),
+    answerOf: evaluateTwo,
+  },
+
+  4: { answerOf: total, sampled: LEVEL_3 },
+  5: { answerOf: total, sampled: LEVEL_4 },
 };
 
 export function generateCombineLevel(level, seed) {

@@ -114,3 +114,12 @@ A **Level 5** on the Flip It pack, so both operations show up as the final chall
 - **Touch:** every target at least 44px at 1366 × 657 and 1280 × 610 (circled terms 57px or more, palette buttons 44px).
 - **Pack list:** Combine it now lists all four levels (names: *positive + negative*, *negative + negative*, *three or more numbers*, *big numbers, no counters*).
 
+## 12. The mixed party-or-battle round (added 2026-10-02)
+
+Karl: Levels 1 and 2 are all battles, then all parties, so students never practice *deciding* which it is. A mixed round comes after them.
+
+- **Combine it has five levels:** 1 positive + negative (battles), 2 negative + negative (parties), **3 party or battle? (mixed)**, 4 three or more numbers (was 3), 5 big numbers (was 4).
+- **Level 3 problems:** two terms, numbers 1 to 12, written as in Levels 1 and 2. A set of five has a battle a positive wins, a battle a negative wins, a party of negatives, a party of positives, and one of any kind; no repeated answers, no zero answers.
+- **Steps:** the same as Levels 1 and 2 (Draw → Party or Battle → Cancel → Answer; a party skips Cancel).
+- **Old saves:** a save from before this has four Combine it levels; the new Level 3 counts as done once the old Level 3 (now Level 4) was. Save code v7 holds the five levels; v1 to v6 codes still decode.
+
