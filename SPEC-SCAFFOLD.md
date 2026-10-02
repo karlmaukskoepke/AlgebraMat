@@ -89,7 +89,7 @@ This is what SPEC-JIT.md's pattern-finding and the teacher report will read; the
 
 1. **Signatures and the cloze** (**built**): `classify`, the cloze builder and the ladder, with tests of every row of §3 (including numbers that fit two signatures at once).
 2. **Light mode** (**built**, behind `?light=1` until step 6): the session, the palette, the Mat, **I'm stuck**, and the hand-off to the full walk. The party-or-battle question is the only support so far; the cloze is step 3.
-3. **The cloze on the Mat:** choices, the spoken sentence, the leftover counters.
+3. **The cloze on the Mat** (**built**): choices, the spoken sentence, the leftover counters, and a Sound on/off button.
 4. **Support that stays on, fading, and the event log.**
 5. **The spotlight tour** (§1b), skippable and replayable.
 6. **Touch audit and real-browser runs** on Combine it Levels 1 to 3, docs.

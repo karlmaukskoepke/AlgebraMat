@@ -1748,3 +1748,55 @@ body {
   color: var(--muted);
   font: 600 24px 'Kalam', cursive;
 }
+
+/* ---------- Light mode: the sign cloze (SPEC-SCAFFOLD.md §4) ---------- */
+
+.light-line {
+  gap: 12px;
+}
+.cloze-sentence {
+  font: 700 30px 'Kalam', cursive;
+  color: var(--ink);
+}
+.cloze-sentence.is-said {
+  font-size: 26px;
+  color: var(--muted);
+}
+.cloze-choices {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  justify-content: center;
+  margin-top: 8px;
+}
+.cloze-choice {
+  min-width: 190px;
+  min-height: 56px;
+  font-size: 22px;
+}
+.cloze-choice.is-tried {
+  opacity: 0.45;
+  text-decoration: line-through;
+}
+/* The counters left over after the right choice: a + or − in a circle, magenta when negative. */
+.cloze-left {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  max-width: 700px;
+}
+.light-counter {
+  display: inline-grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border: 2.5px solid var(--ink);
+  border-radius: 50%;
+  font: 700 22px/1 system-ui, sans-serif;
+  color: var(--ink);
+}
+.light-counter.is-neg {
+  border-color: var(--opposite);
+  color: var(--opposite);
+}

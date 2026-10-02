@@ -8,9 +8,13 @@ import { buildLightControls } from '../view/lightControls.js';
 import { renderLightMat } from '../view/lightMat.js';
 import { lightFeedbackText } from '../view/lightFeedback.js';
 import { formatProblem } from '../engine/expr.js';
+import { speak } from '../view/speech.js';
 
 const LIGHT_STEPS = [{ id: 'answer', label: 'Answer' }];
-const SUPPORT_STEPS = [{ id: 'partyBattle', label: 'Party or Battle?' }, { id: 'answer', label: 'Answer' }];
+const SUPPORT_STEPS = {
+  partyBattle: [{ id: 'partyBattle', label: 'Party or Battle?' }, { id: 'answer', label: 'Answer' }],
+  cloze: [{ id: 'cloze', label: 'Say it' }, { id: 'answer', label: 'Answer' }],
+};
 
 // Both palettes live in the footer, one shown at a time: light mode's, or the full walk's.
 export function buildLightPlayControls(root, dispatch) {
@@ -35,18 +39,21 @@ export function buildLightPlayControls(root, dispatch) {
 }
 
 export const lightPlay = {
-  steps: (s) => (s.stage === 'walk' ? combinePlay.steps() : s.stage === 'support' ? SUPPORT_STEPS : LIGHT_STEPS),
+  steps: (s) => (s.stage === 'walk' ? combinePlay.steps() : s.stage === 'support' ? SUPPORT_STEPS[s.support] : LIGHT_STEPS),
   newSession: newLightSession,
   reduce: reduceLight,
   feedbackText: lightFeedbackText,
   buildControls: buildLightPlayControls,
   effects(before, s) {
+    // A picked choice is read aloud (once: the id changes each time).
+    if (before && s.spoken && s.spoken.id !== before.spoken?.id) speak(s.spoken.text);
     if (s.stage !== 'walk') return { hint: null };
     return combinePlay.effects(before?.stage === 'walk' ? before.walk : null, s.walk);
   },
   renderMat(s, fx = {}) {
     if (s.stage === 'walk') return combinePlay.renderMat(s.walk, fx);
-    return renderLightMat({ problemText: formatProblem(s.problem), typed: s.entry, done: s.stage === 'done' });
+    const cloze = s.stage === 'support' && s.cloze ? s.cloze : null;
+    return renderLightMat({ problemText: formatProblem(s.problem), typed: s.entry, done: s.stage === 'done', cloze, said: s.said });
   },
-  matAction: (d) => combinePlay.matAction(d),
+  matAction: (d) => (d.action === 'choice' ? { type: 'pickChoice', index: Number(d.index) } : combinePlay.matAction(d)),
 };

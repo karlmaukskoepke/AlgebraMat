@@ -102,9 +102,54 @@ describe('light mode', () => {
     expect(run(s, stuck)).toBe(s);                                    // nothing after the full walk
   });
 
-  it('sign mistakes use the party-or-battle question for now (the cloze is next)', () => {
+  it('a sign mistake brings in the cloze, with the step bar to match', () => {
     const s = run(newLightSession(P(-5, 3)), ...answer(2));            // the sign dropped
-    expect(s).toMatchObject({ stage: 'support', support: 'partyBattle', tag: 'sign-dropped' });
+    expect(s).toMatchObject({ stage: 'support', support: 'cloze', step: 'cloze', tag: 'sign-dropped', entry: '' });
+    expect(s.cloze.sentence).toBe('The battle of −5 and 3 leaves ____ standing.');
+    expect(s.cloze.choices.map((c) => c.text).sort()).toEqual(['negative 2', 'negative 8', 'positive 2', 'positive 8']);
+    expect(lightPlay.steps(s).map((t) => t.label)).toEqual(['Say it', 'Answer']);
+    expect(lightFeedbackText(s.feedback)).toMatch(/who is left standing/);
+    expect(reduce(s, { type: 'digit', digit: 1 })).toBe(s);          // no typing during the cloze
+    expect(run(newLightSession(P(5, -3)), ...answer(-2)).support).toBe('cloze');   // wrong-winner too
+  });
+
+  it('every pick is read aloud, a wrong pick says what is off and is crossed out, with no penalty', () => {
+    let s = run(newLightSession(P(-5, 3)), ...answer(2));
+    const wrongSign = s.cloze.choices.find((c) => c.mistake === 'sign');
+    const wrongSize = s.cloze.choices.find((c) => c.mistake === 'size');
+    s = run(s, { type: 'pickChoice', index: wrongSign.index });
+    expect(s.spoken).toEqual({ id: 1, text: 'The battle of negative five and three leaves positive two standing.' });
+    expect(s).toMatchObject({ stage: 'support', wrongs: 1, feedback: { key: 'clozeSign', bad: true } });   // wrongs: the typed answer only
+    expect(s.cloze.tried).toEqual([wrongSign.index]);
+    expect(run(s, { type: 'pickChoice', index: wrongSign.index })).toBe(s);   // a crossed-out choice can't be picked again
+    s = run(s, { type: 'pickChoice', index: wrongSize.index });
+    expect(s.spoken.id).toBe(2);
+    expect(s.feedback.key).toBe('clozeSize');
+    expect(lightFeedbackText(s.feedback)).toMatch(/battle the two sides cancel/);
+    expect(reduce(s, { type: 'pickChoice', index: 9 })).toBe(s);
+  });
+
+  it('the right pick shows what is left over, goes back to typing, and keeps it on the Mat', () => {
+    let s = run(newLightSession(P(-5, 3)), ...answer(2));
+    const right = s.cloze.choices.find((c) => c.right);
+    s = run(s, { type: 'pickChoice', index: right.index });
+    expect(s).toMatchObject({
+      stage: 'light', step: 'answer', support: null, cloze: null,
+      said: { sentence: 'The battle of −5 and 3 leaves negative 2 standing.', leftover: { sign: '-', count: 2 } },
+      feedback: { key: 'lightClozeRight' },
+    });
+    expect(s.spoken.text).toBe('The battle of negative five and three leaves negative two standing.');
+    expect(lightFeedbackText(s.feedback)).toBe('Yes, negative 2! Now type the answer, with its sign.');
+    s = run(s, ...answer(-2));
+    expect(s).toMatchObject({ stage: 'done', clean: false });
+  });
+
+  it('a party gets its own sentence, and being stuck again in the cloze goes to the full walk', () => {
+    let s = run(newLightSession(P(-4, -6)), ...answer(10));            // a negative party answered positive
+    expect(s.cloze.sentence).toBe('The party of −4 and −6 has ____ in all.');
+    expect(lightFeedbackText(s.feedback)).toMatch(/party worth/);
+    s = run(s, stuck);
+    expect(s).toMatchObject({ stage: 'walk', stuck: 1 });
   });
 
   it('a right answer after being stuck is done but not clean', () => {

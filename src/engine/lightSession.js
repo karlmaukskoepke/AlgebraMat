@@ -5,19 +5,18 @@
 //   support→ the party-or-battle question    (then back to typing)
 //   walk   → today's Draw → Party or Battle → Cancel → Answer, on the same problem
 //
-// The cloze (the sign support) comes in the next build; until then a sign mistake gets the party-or-battle
-// question, the smallest support.
+// A sign mistake gets the cloze: a sentence with a blank and four word-choices, read aloud once one is picked.
 
 import { evaluate } from './expr.js';
 import { newCombineSession } from './combineSession.js';
 import { reduce as reduceWalk } from './session.js';
 import { validatePartyBattle } from './moves.js';
-import { classify, firstSupport, nextRung } from './scaffold.js';
+import { classify, firstSupport, nextRung, buildCloze, spokenSentence, leftover, clozeFeedbackKey } from './scaffold.js';
 
 export const MAX_LIGHT_LENGTH = 4;
 
 // Supports built so far. Others fall back to the party-or-battle question.
-const BUILT = new Set(['partyBattle', 'fullWalk']);
+const BUILT = new Set(['cloze', 'partyBattle', 'fullWalk']);
 const resolve = (kind) => (BUILT.has(kind) ? kind : 'partyBattle');
 
 export function newLightSession(problem) {
@@ -27,7 +26,10 @@ export function newLightSession(problem) {
     step: 'answer',            // the step bar's current step
     skipped: [],
     entry: '',
-    support: null,             // the support showing now: 'partyBattle' | null
+    support: null,             // the support showing now: 'cloze' | 'partyBattle' | null
+    cloze: null,               // the cloze, while it's showing: { sentence, choices, tried }
+    said: null,                // once the right choice is picked: { sentence, leftover }, kept while the student types
+    spoken: null,              // what to read aloud now: { id, text } (the view speaks it when the id changes)
     lastSupport: null,         // the last rung used on this problem
     wrongs: 0,                 // wrong answers typed
     tag: null,                 // what the latest wrong answer looked like (engine/scaffold.js)
@@ -55,6 +57,12 @@ function bringIn(s, tag) {
   }
   s.stage = 'support';
   s.support = kind;
+  if (kind === 'cloze') {
+    const { sentence, choices, kind: situation } = buildCloze(s.problem);
+    s.cloze = { sentence, choices, situation, tried: [] };
+    s.step = 'cloze';
+    return say(s, 'lightCloze', { situation });
+  }
   s.step = 'partyBattle';
   return say(s, 'lightPartyBattle', { a: s.problem.left.value, b: s.problem.right.value });
 }
@@ -117,6 +125,25 @@ export function reduceLight(state, action) {
       s.stuck += 1;
       s.entry = '';
       return bringIn(s, s.tag);
+    }
+
+    // The cloze: a pick reads the whole sentence aloud. The right one shows what's left over and goes back to typing;
+    // a wrong one says what's off and stays picked (no penalty).
+    case 'pickChoice': {
+      if (s.stage !== 'support' || s.support !== 'cloze') return state;
+      const choice = s.cloze.choices[action.index];
+      if (!choice || s.cloze.tried.includes(choice.index)) return state;
+      s.spoken = { id: (s.spoken?.id ?? 0) + 1, text: spokenSentence(s.problem, choice) };
+      if (!choice.right) {
+        s.cloze.tried.push(choice.index);
+        return say(s, clozeFeedbackKey(choice), { situation: s.cloze.situation, word: choice.text }, true);
+      }
+      s.said = { sentence: s.cloze.sentence.replace('____', choice.text), leftover: leftover(choice) };
+      s.cloze = null;
+      s.stage = 'light';
+      s.support = null;
+      s.step = 'answer';
+      return say(s, 'lightClozeRight', { word: choice.text });
     }
 
     // The party-or-battle question, as a support.
