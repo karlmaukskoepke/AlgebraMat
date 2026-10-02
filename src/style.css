@@ -1434,6 +1434,37 @@ body {
   }
 }
 
+/* With six packs a card is about 400px wide, so levels go two to a row (three squeezed "Level 2" out of its button once
+   the real fonts loaded), a button can shrink below its text without spilling over its neighbor, and a level list
+   never scrolls sideways. */
+@media (min-width: 761px) {
+  .pack-grid.packs-6 .level-list,
+  .pack-grid.packs-6 .level-list.many {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+  .pack-grid.packs-6 .btn.level-btn {
+    min-width: 0;
+    padding: 8px 12px;
+    overflow-wrap: anywhere;
+  }
+  .pack-grid.packs-6 .pack-head h2 {
+    font-size: 24px;
+    min-width: 0;
+    overflow-wrap: anywhere;   /* a long name wraps inside its card instead of running past the edge */
+  }
+  .pack-grid.packs-6 .level-num {
+    font-size: 22px;
+  }
+  .pack-grid.packs-6 .level-name {
+    font-size: 15px;
+    line-height: 1.2;
+  }
+  .pack-grid .level-scroll {
+    overflow-x: hidden;
+  }
+}
+
 /* Four packs across a Chromebook leave each card about 290px wide: two levels to a row. */
 @media (min-width: 1100px) {
   .pack-grid.packs-4 .pack-head {
