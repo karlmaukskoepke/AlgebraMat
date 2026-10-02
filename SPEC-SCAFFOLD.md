@@ -94,7 +94,7 @@ This is what SPEC-JIT.md's pattern-finding and the teacher report will read; the
 5. **The spotlight tour** (§1b), skippable and replayable.
 6. **Touch audit and real-browser runs** on Combine it Levels 1 to 3, docs.
 
-## 9. Questions for Karl
+## 9. Open question for Karl
 
 1. *(Answered: a spotlight tour on the first problem, §1b. Per device only is okay for the pilot, §5.)* **The tour's details:** it's skippable and replayable from a **?** button, and step 4 asks the student to press **I'm stuck** once so they meet the supports. Does a required press feel right, or should the tour only point at it?
-2. **The cloze's four choices.** Four, with the sign and size mistakes as the wrong choices, as above. Do you want a fifth, "not sure," that goes to the next support? (It's honest, but it may become a way to skip thinking.)
+*(Decided: the cloze has four choices and no "not sure.")*
