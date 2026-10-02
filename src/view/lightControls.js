@@ -3,6 +3,7 @@
 // for I'm stuck, P and B choose; Enter is Check, and the keyboard's − presses ±.
 
 import { soundOn, setSound } from './speech.js';
+import { startTour } from './tour.js';
 
 function button(label, action, extra = {}) {
   const b = document.createElement('button');
@@ -23,11 +24,12 @@ export function buildLightControls(root, dispatch) {
   const battle = button('Battle!', 'choose', { data: { choice: 'battle', key: 'b' }, aria: 'Battle (key B)' });
   const stuck = button('I’m stuck', 'stuck', { data: { key: 's' }, aria: 'I’m stuck (key S)' });
   const sound = button('', 'sound', { aria: 'Read sentences aloud' });
+  const tourButton = button('?', 'tour', { cls: 'btn-tour', aria: 'Show me around' });
   const check = button('Check ✓', 'check', { cls: 'btn-primary' });
   const choices = document.createElement('div');
   choices.className = 'group';
   choices.append(party, battle);
-  row.append(choices, stuck, sound, check);
+  row.append(choices, stuck, sound, tourButton, check);
 
   const pad = document.createElement('div');
   pad.className = 'pad';
@@ -46,6 +48,7 @@ export function buildLightControls(root, dispatch) {
     const b = e.target.closest('button[data-action]');
     if (!b || b.disabled) return;
     if (b.dataset.action === 'sound') { setSound(!soundOn()); showSound(); return; } // a setting, not a move
+    if (b.dataset.action === 'tour') { startTour({ first: false }); return; }      // a look around, not a move
     const { action, choice, digit } = b.dataset;
     if (action === 'check' && b.dataset.next) return dispatch({ type: 'next' });
     dispatch({ type: action, choice, digit: digit === undefined ? undefined : Number(digit) });
@@ -57,6 +60,7 @@ export function buildLightControls(root, dispatch) {
       const typing = stage === 'light';
       party.disabled = battle.disabled = stage !== 'support';
       stuck.disabled = !(typing || stage === 'support');
+      tourButton.disabled = !(typing || stage === 'support');
       for (const b of pad.querySelectorAll('button')) b.disabled = !typing;
       const done = stage === 'done';
       check.disabled = !typing && !done;

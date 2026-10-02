@@ -28,3 +28,16 @@ export function recordProblem(session, meta) {
   writeJson(LOG_KEY, appendRecord(loadLog(), makeRecord(session, { t: Date.now(), ...meta })));
   return skills;
 }
+
+// ---------- The tour (SPEC-SCAFFOLD.md §1b) ----------
+
+export const TOUR_KEY = 'mat.tour.v1';
+
+// Has this device seen the spotlight tour? (A blocked store means it shows each visit, which is harmless.)
+export function tourSeen() {
+  try { return localStorage.getItem(TOUR_KEY) === 'seen'; } catch { return false; }
+}
+
+export function markTourSeen() {
+  try { localStorage.setItem(TOUR_KEY, 'seen'); } catch { /* storage blocked */ }
+}

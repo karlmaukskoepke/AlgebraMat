@@ -18,6 +18,7 @@ import { distributePlay } from './play/distributePlay.js';
 import { distributeTypedPlay } from './play/distributeTypedPlay.js';
 import { renderPackMap, renderLevelDone } from './view/packmap.js';
 import { showSaveCode, askForCode } from './view/codes.js';
+import { endTour } from './view/tour.js';
 
 const $ = (id) => document.getElementById(id);
 
@@ -100,6 +101,7 @@ function showScreen(name) {
 const STORAGE_NOTE = 'Progress won’t be remembered on this device. Use Save code to keep it.';
 
 function goHome() {
+  endTour();
   clearTimeout(nextTimer);
   play = null;
   persist();
@@ -124,6 +126,7 @@ function restoreFromCode(text) {
 
 // resume = { seed, index } picks up a level after a reload.
 function startLevel(packId, level, resume = null) {
+  endTour();
   clearTimeout(nextTimer);
   const pack = packById(packId);
   const adapter = adapterFor(pack.id, level);

@@ -10,6 +10,7 @@ import { lightFeedbackText } from '../view/lightFeedback.js';
 import { formatProblem } from '../engine/expr.js';
 import { speak } from '../view/speech.js';
 import { loadSkills, recordProblem } from '../lightStore.js';
+import { startTourIfFirst } from '../view/tour.js';
 import { readInteger } from '../engine/scaffold.js';
 
 const LIGHT_STEPS = [{ id: 'answer', label: 'Answer' }];
@@ -54,6 +55,8 @@ export const lightPlay = {
   feedbackText: lightFeedbackText,
   buildControls: buildLightPlayControls,
   effects(before, s) {
+    // The first light problem on a device opens with the spotlight tour (once the Mat is on the screen).
+    if (!before && s.stage !== 'done') startTourIfFirst();
     // A finished problem updates which supports are on and goes in the log (once: the step turns to done once).
     if (before && before.step !== 'done' && s.step === 'done') {
       recordProblem(s, { pack: 'combineit', level: s.problem.level ?? null, problem: formatProblem(s.problem) });
