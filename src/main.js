@@ -8,6 +8,7 @@ import { createStore } from './storage.js';
 import { PACKS, packById } from './packs/index.js';
 import { flipitPlay } from './play/flipitPlay.js';
 import { combinePlay } from './play/combinePlay.js';
+import { lightPlay } from './play/lightPlay.js';
 import { integerPlay } from './play/integerPlay.js';
 import { bigPlay } from './play/bigPlay.js';
 import { lassoPlay } from './play/lassoPlay.js';
@@ -23,8 +24,10 @@ const $ = (id) => document.getElementById(id);
 // Each pack's play adapter: its steps, session, Mat, controls and messages.
 // A pack can use a different adapter for some levels (Combine it's Level 4 and Flip It's Level 5 run on the
 // integer steps, and Combine it's Level 5 its own), so each entry is the adapter or a function of the level.
+// Light mode for Combine it Levels 1 to 3 (SPEC-SCAFFOLD.md) is opt-in with ?light=1 until the pilot is finished.
+const LIGHT = new URLSearchParams(location.search).get('light') === '1';
 const PLAY = {
-  combineit: (level) => (level >= 5 ? bigPlay : level === 4 ? integerPlay : combinePlay),
+  combineit: (level) => (level >= 5 ? bigPlay : level === 4 ? integerPlay : LIGHT ? lightPlay : combinePlay),
   flipit: (level) => (level >= 5 ? integerPlay : flipitPlay),
   lasso: lassoPlay,
   boxes: boxPlay,

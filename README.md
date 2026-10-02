@@ -29,6 +29,13 @@ Add `?seed=123` to the URL to replay a fixed problem set, and `?level=2` to open
 
 ## Changelog
 
+### Scaffold pilot step 2: light mode (SPEC-SCAFFOLD.md §2, §4, §8.2)
+- **Light mode for Combine it Levels 1 to 3:** the student types the answer (Flip It's pad: ± and digits) and presses Check. Right on the first try is done and counts as a clean answer. A wrong answer, or **I'm stuck**, brings in a support; an empty or garbled answer is not a wrong try.
+- **Supports so far:** the party-or-battle question (then back to typing), and the full walk (today's Draw → Party or Battle → Cancel → Answer on the same problem) as the last rung. A wrong answer after a support, or a second I'm stuck, goes to the full walk; an answer that matches no known mistake goes straight to it. The step strip shows the one step in light mode and "Party or Battle? → Answer" during the question. **The sign cloze isn't built yet** (the next step), so a sign mistake gets the party-or-battle question for now.
+- **Behind a switch:** light mode opens with `?light=1` (for example `?pack=combineit&level=3&light=1`). Students still get today's walk by default until the pilot is finished.
+- `engine/lightSession.js` is the pure reducer; it hands the full walk to Combine it's own session (now `engine/combineSession.js`). `play/lightPlay.js` shows both palettes in the footer, one at a time.
+- Real-browser runs of Levels 1 to 3 (a wrong answer then the question, a wrong choice, I'm stuck, stuck twice into the full walk) at 1280×610 and 1366×657: no page errors, every target at least 44px. 12 new tests, 485 in all.
+
 ### Scaffold pilot step 1: signatures and the cloze (SPEC-SCAFFOLD.md §3, §4, §8.1)
 - **Engine only, nothing on screen yet.** `engine/scaffold.js`: `classify(problem, typed)` reads what a student typed against a two-term Combine it problem and names the mistake behind a wrong answer (`sign-dropped`, `wrong-winner`, `battle-as-party`, `party-as-battle`, or `unmatched`; an empty or garbled answer is `unreadable` and isn't a mistake). `firstSupport`, `nextRung` and `skillOf` say which support answers which mistake (the sign cloze, the party-or-battle question, or the full walk) and which skill a mistake belongs to.
 - **The cloze:** `buildCloze` writes the sentence ("The battle of −5 and 3 leaves ____ standing.") with four choices written as words ("negative 2", "positive 2", "negative 8", "positive 8"); the wrong ones are the sign and size mistakes. The order is steady for a problem and varies across problems. `spokenSentence` is what's read aloud after a choice, and `leftover` is what the Mat will draw.
