@@ -1,4 +1,4 @@
-# The Mat: Distribute, then combine pack (draft 2026-10-02, awaiting approval)
+# The Mat: Distribute, then combine pack (approved 2026-10-02)
 
 *Builds on SPEC-GROUPS-OF-TERMS.md (the lasso, deal-out and arrows check), SPEC-BOXES.md (Boxes & Circles) and SPEC-COMBINE.md: same shell, rules (no timers, no penalties, hints after 3 wrong tries), storage and keyboard quick-keys. Only what's new is written here. Source: SPEC-ROADMAP.md and Karl's answers of 2026-10-02.*
 

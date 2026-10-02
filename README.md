@@ -29,6 +29,11 @@ Add `?seed=123` to the URL to replay a fixed problem set, and `?level=2` to open
 
 ## Changelog
 
+### Distribute, then combine step 1: model and generators (SPEC-DISTRIBUTE.md §2, §7.1)
+- `engine/distribute.js`: a problem is a list of parts (groups and loose terms) in written order. It writes the problem (`2(3x − 4) − x + 5`), opens the groups into Boxes & Circles terms with the sign on the operation and nothing to rewrite (`6x − 8 − x + 5`), and finds the answer (`5x − 3`). A subtracted group turns into an opposite count for Groups of Terms' arrows check.
+- `engine/generateDistribute.js`: five rounds. Rounds 1 to 3 enumerate small problems (at most 20 pieces drawn, answers always have an x part and a number); rounds 4 and 5 sample larger ones with the seeded RNG (hidden 1s, leading minus, number-first insides, two loose terms, groups on both sides of a term). No repeated answers in a set.
+- No UI yet: steps 2 to 5 add the Mat, the rounds, the pack card and save code v6.
+
 ### Combine it step 4: Level 4, big numbers with no counters (SPEC-COMBINE.md §6.4, §11)
 
 - **Combine it is complete:** Level 4 has numbers from 11 to 60 and no counters. Circle each number with its sign in front, then say **Party or Battle**, **Add or Subtract**, the **Sign**, and type the answer. Your reasoning builds up above the problem as you go (`battle`, `subtract: 41 − 38`, `sign: +`).
