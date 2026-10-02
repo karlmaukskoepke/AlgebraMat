@@ -29,6 +29,12 @@ Add `?seed=123` to the URL to replay a fixed problem set, and `?level=2` to open
 
 ## Changelog
 
+### Scaffold pilot step 5: the spotlight tour (SPEC-SCAFFOLD.md §1b, §8.5)
+- **The first light problem on a device opens with a guided tour.** The page dims and each real control lights up in turn with a yellow ring and a caption: the problem ("Here's what you're adding"), the pad ("± makes it negative"), Check, and **I'm stuck**. The I'm stuck step has no Next button: **the student has to press the real button** (or key S), so they have the memory of pressing it and meet the first support (the party-or-battle question). A last step points at the help ("That's the help. Answer its question, then type the answer yourself"), and Got it ends the tour.
+- **While it runs, the rest of the page is held:** clicks on the dimmed page and typing do nothing, and Enter or a click can't skip past the required press. **Skip tour** (or Esc) leaves at any point. It lights up the actual controls, so it can't drift out of date.
+- **Once per device** (`mat.tour.v1`), however it ends. A small **?** button in the palette replays it (it only points at I'm stuck; no required press), and going back to the pack map ends it.
+- `engine/tour.js` is the pure state machine; `view/tour.js` is the overlay. Still behind `?light=1`. Real-browser run at 1280×610 and 1366×657: the five steps, typing and clicking away blocked, the real press, the flag saved, no tour after a reload, the ? replay, Skip; no page errors, every button at least 44px. 509 tests (7 new).
+
 ### Scaffold pilot step 4: supports that stay on and fade, and the anonymous log (SPEC-SCAFFOLD.md §5, §6, §8.4)
 - **A mistake turns its support on for the next problems; three clean answers in a row turn it off.** A clean answer is right on the first try, never stuck. A wrong first answer starts the count again (for every support that was on), and being stuck without a wrong answer changes nothing. `engine/skills.js` holds the rules (pure); `lightStore.js` keeps `{ partyBattle, sign }` in this device's `localStorage` (`mat.skills.v1`), so a new device starts light.
 - **Party-or-battle on:** the question comes first, before the student types. Stuck while it's up, or a wrong answer after it, goes to the full walk.
