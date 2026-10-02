@@ -1406,6 +1406,34 @@ body {
   }
 }
 
+/* Six packs: three across, two rows (we can't keep going wider). The title takes a line of its own, so a
+   long name never pushes the dots out of the card, and the blurb is left out to keep the cards short. */
+@media (min-width: 1100px) {
+  .pack-grid.packs-6 {
+    gap: 14px;
+  }
+  .pack-grid.packs-6 .pack-head {
+    flex-wrap: wrap;
+    gap: 4px 8px;
+  }
+  .pack-grid.packs-6 .pack-head h2 {
+    font-size: 26px;
+    flex-basis: 100%;
+  }
+  .pack-grid.packs-6 .dots {
+    margin-left: 0;
+  }
+  .pack-grid.packs-6 .subtitle {
+    min-height: 2.6em;      /* two lines, so every card's levels start at the same height */
+  }
+  .pack-grid.packs-6 .blurb {
+    display: none;
+  }
+  .pack-grid.packs-6 .level-scroll {
+    max-height: 214px;      /* two rows of levels show; the next one peeks out and says "scroll" */
+  }
+}
+
 /* Four packs across a Chromebook leave each card about 290px wide: two levels to a row. */
 @media (min-width: 1100px) {
   .pack-grid.packs-4 .pack-head {

@@ -67,9 +67,12 @@ export function renderPackMap(root, progress, packs, { onPlay, onSaveCode, onEnt
     h('p', { class: 'home-note', role: 'status', hidden: !note }, note ?? ''),
     h('div', { class: `pack-grid packs-${packs.filter((p) => !p.comingSoon).length}` },
       ...packs.filter((p) => !p.comingSoon).map((p) => packCard(progress, p))),
-    h('section', { class: 'soon', 'aria-label': 'Coming soon' },
-      h('h2', { class: 'soon-head' }, 'Coming soon'),
-      h('div', { class: 'soon-grid' }, ...packs.filter((p) => p.comingSoon).map(soonCard))),
+    // Packs still being built show as cards under "Coming soon"; there are none to show right now.
+    packs.some((p) => p.comingSoon)
+      ? h('section', { class: 'soon', 'aria-label': 'Coming soon' },
+        h('h2', { class: 'soon-head' }, 'Coming soon'),
+        h('div', { class: 'soon-grid' }, ...packs.filter((p) => p.comingSoon).map(soonCard)))
+      : null,
   );
   root.onclick = (e) => {
     const b = e.target.closest('button[data-level]');

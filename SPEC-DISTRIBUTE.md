@@ -1,4 +1,4 @@
-# The Mat: Distribute, then combine pack (approved 2026-10-02)
+# The Mat: Distribute, then combine pack (approved 2026-10-02; built 2026-10-02)
 
 *Builds on SPEC-GROUPS-OF-TERMS.md (the lasso, deal-out and arrows check), SPEC-BOXES.md (Boxes & Circles) and SPEC-COMBINE.md: same shell, rules (no timers, no penalties, hints after 3 wrong tries), storage and keyboard quick-keys. Only what's new is written here. Source: SPEC-ROADMAP.md and Karl's answers of 2026-10-02.*
 
@@ -48,7 +48,7 @@ Scaffolding falls away slowly; the supports become internalized and appear as hi
 
 ## 6. Pack map and save code
 
-- **Pack map:** six open cards; **three over three** at the Chromebook sizes, equal-size cards, with scrolling in cards that have many levels (Karl: we can't keep going wider). The `packs-6` class replaces `packs-5`.
+- **Pack map:** six open cards; **three over three** at the Chromebook sizes, equal-size cards, with scrolling in cards that have many levels (Karl: we can't keep going wider). The `packs-6` class replaces `packs-5`; the title takes its own line and the blurb is left out. The page scrolls a little to reach the second row.
 - **Save code v6:** `MAT-8`, one more symbol for Distribute (5 levels). v1 to v5 codes still decode. Id: `distribute-combine`.
 
 ## 7. Build order (one step per Go)

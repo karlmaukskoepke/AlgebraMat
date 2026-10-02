@@ -78,10 +78,12 @@ export function mergeProgress(a, b) {
 //   v1: 2 data symbols (961 values):    Flip It (4 bits)          → MAT-XXXX
 //   v2: 3 data symbols (29,791 values): Flip It (4) + Group It (7)   → MAT-XXXXX
 //   v3: 4 data symbols (923,521 values): + Boxes & Circles (5)      → MAT-XXXXXX
+//   v4: + Groups of Terms (8);  v5: Flip It 5 levels, + Combine it (4)
+//   v6: 7 data symbols (about 34.7 bits): + Distribute, then combine (5)  → MAT-XXXXXXXXX (34 bits in use)
 //
-// New codes are always v3; v1 and v2 codes (written down earlier) still work.
-// (Group It's pack id is still `lasso`.) v3 holds 16 of about 19.8 bits, so
-// there is room for one more small pack before a v4 is needed.
+// New codes are always v6; older codes (written down earlier) still work.
+// (Group It's pack id is still `lasso`.) v6 uses 34 of about 34.7 bits, so
+// the next pack needs a v7.
 
 export const CODE_ALPHABET = '23456789ABCDEFGHJKMNPQRSTUVWXYZ';
 export const CODE_PREFIX = 'MAT';
@@ -101,8 +103,15 @@ const LAYOUTS = {
       { id: 'groups-of-terms', levels: 8 }, { id: 'combineit', levels: 4 },
     ],
   },
+  6: {
+    data: 7,
+    packs: [
+      { id: 'flipit', levels: 5 }, { id: 'lasso', levels: 7 }, { id: 'boxes', levels: 5 },
+      { id: 'groups-of-terms', levels: 8 }, { id: 'combineit', levels: 4 }, { id: 'distribute-combine', levels: 5 },
+    ],
+  },
 };
-export const CODE_VERSION = 5;
+export const CODE_VERSION = 6;
 
 // Weighted sum mod 31. Weights 2, 3, 4, … are all nonzero mod 31 and differ
 // by 1 between neighbors, so any single typo or neighbor swap is caught.
