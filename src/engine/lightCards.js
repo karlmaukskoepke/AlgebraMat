@@ -8,7 +8,7 @@ import { validateAnswer as validateTerms } from './termMoves.js';
 import { validateAnswer as validateGroupTerms } from './termGroupMoves.js';
 import { validateCount } from './lassoMoves.js';
 import { evaluateGroups, formatGroups, groupTotal, isFraction } from './groups.js';
-import { formatTermGroups, evaluateTermGroups } from './termGroups.js';
+import { formatTermGroups, evaluateTermGroups, isFraction as isTermFraction, isNumberFirst } from './termGroups.js';
 import { formatDistribute, distributedExpression } from './distribute.js';
 import { readInteger, classify } from './scaffold.js';
 import { evaluate as evaluateProblem, formatProblem } from './expr.js';
@@ -57,6 +57,36 @@ function checkGroups(problem, text) {
   // 1/3 of 12 answered 8: the parts left behind were counted instead of the part taken.
   if (isFraction(problem) && Math.abs(t) === Math.abs(problem.inside.value - groupTotal(problem)) && Math.abs(t) !== Math.abs(r)) return { correct: false, tag: 'removed-part' };
   return { correct: false, tag: 'unmatched' };
+}
+
+// What a wrong typed answer to a Groups of Terms problem looked like (Karl, 2026-10-03), for whole-number groups:
+//   neg-first         −(2x + 5) answered −2x + 5: the minus went only to the first term (the hidden 1 was never written)
+//   dist-one          2(4x + 1) answered 8x + 1: the number out front reached only one of the two terms
+//   inside-sign-lost  −3(2x − 1) answered −6x − 3: the sign of a negative term inside was ignored
+//   outer-as-term     2(2x + 3) answered 2x + 5: the number out front was added, not used as groups
+// anything else is told apart as for any terms (tagTerms). Fractions of a group are left to the walk.
+export function tagTermGroups(problem, read) {
+  if (!read.ok) return 'unreadable';
+  const generic = tagTerms(evaluateTermGroups(problem), read);
+  if (generic === 'zero-term' || isTermFraction(problem)) return generic;
+  const k = problem.count.neg ? -problem.count.n : problem.count.n;
+  const xv = problem.inside.find((x) => x.kind === 'x').value;
+  const nv = problem.inside.find((x) => x.kind === 'int').value;
+  const firstOnly = isNumberFirst(problem) ? read.n === k * nv && read.x === xv : read.x === k * xv && read.n === nv;
+  const oneOnly = (read.x === k * xv && read.n === nv) || (read.x === xv && read.n === k * nv);
+  if (problem.hidden1 && problem.count.neg && firstOnly) return 'neg-first';
+  if (oneOnly) return 'dist-one';
+  if ((xv < 0 || nv < 0) && read.x === k * Math.abs(xv) && read.n === k * Math.abs(nv)) return 'inside-sign-lost';
+  if ((read.x === xv && read.n === nv + k) || (read.n === nv && read.x === xv + k)) return 'outer-as-term';
+  return generic;
+}
+
+// A checker for Groups of Terms: the pack's own validator, with the tags above.
+function checkTermGroups(problem, text) {
+  const res = validateGroupTerms(problem, text);
+  if (res.ok) return { correct: true, tag: null };
+  if (UNREADABLE.has(res.feedbackKey)) return { correct: false, tag: 'unreadable' };
+  return { correct: false, tag: tagTermGroups(problem, parseAnswer(text)) };
 }
 
 // What the minus in front of a group problem means, as a closed passage (Karl, 2026-10-03): −1/2(−4) means ____. Four
@@ -117,7 +147,7 @@ export const CARDS = {
     pad: 'algebra',
     problemText: formatTermGroups,
     answerText: (p) => formatAnswer(evaluateTermGroups(p)),
-    check: termsChecker((p) => evaluateTermGroups(p), validateGroupTerms),
+    check: checkTermGroups,
   },
   distribute: {
     pad: 'algebra',

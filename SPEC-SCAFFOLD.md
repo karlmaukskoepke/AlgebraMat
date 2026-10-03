@@ -181,3 +181,35 @@ Two slips get their own words (`engine/lightCards.js` tags): **`0x + 13`** is ri
 **The lasso.** A press anywhere on the Mat starts a drag; a dashed line (a box for the box tool, a pill for the circle) follows it from where the press began, and the parts under its horizontal span are highlighted; a drag that doesn't cross the row of the expression takes nothing. Release snaps a shape around whole terms as before. The first time a lasso is asked for on a device, a pointer shows how (once, `box-drag` in the tips store).
 
 **Asked and not built yet** (waiting on Karl): a Round 2 of Boxes & Circles that shows a picture of boxes and counters and has the student write the expression (it would renumber the levels and the save code), and what the "language" piece would be. **Phone optimization** is queued next: the problems on the Mat look small next to the prompts, and the pad at the very bottom is crowded by the browser's own buttons (move it up).
+
+## 14. Read the model, and phones (Karl, 2026-10-03; built)
+
+**Boxes & Circles Level 2: read the model** (`engine/generateModel.js`, `engine/boxModel.js`, `play/boxModelPlay.js`)
+- Some students draw the model well but can't read one back, so this round goes the other way. The Mat shows **columns of boxes, negative boxes and counters** (no expression), with the key (□ = x, −□ = −x); the student types the expression it shows. Three columns most of the time (two or four now and then), at least one box column and one counter column, at least one negative in every picture, an answer with both an x and a number, and no repeated answer in a set; two pictures each have negative boxes and negative counters.
+- **Any expression worth the same is right**: in column order (`2x − 3 − x + 1`), reordered, or combined (`x − 2`). A zero term left in (`0x`) asks to take it out, not wrong.
+- **No walk.** A wrong answer says the key (*a box is x, a box with a dash is −x, a + counter is +1, a − counter is −1*); a second wrong answer **labels each column with what it is worth and reads the model aloud** ("Column one: two boxes, that's two x. …", with Sound on). I'm stuck goes the same way; Teach me step-by-step labels the columns at once. Each of these counts as help (no streak).
+- The old Levels 2–5 are now **Levels 3–6** (each problem keeps its original `level`, which decides whether it starts with Rewrite). **Save code v8** has six Boxes & Circles bits (36 of about 39.6); older codes and saves still work, the new level counting as done once the old Level 2 was; a level the diagnostic opened and a saved level in play shift with it. The diagnostic's Boxes & Circles problems are now Levels 3 and 5 (the old 2 and 4).
+- **The language piece (suggestion; Karl asked for one):** the labels read aloud *are* the first version of it. Next could be a fill-in-the-sentence like Group It's ("Column one is ____ boxes: how many, and positive or negative?") or the reverse, hearing "three negative boxes and two positive counters" and building it. Not built; pick when you've heard the read-aloud.
+
+**Phones**
+- **The problem comes out bigger.** A phone scales the 860-wide drawing to its width, so the problem was tiny next to the prompt. On a narrow screen the drawing's width is cropped to what's in it (never shrinking again within one problem, so it doesn't zoom back and forth), light mode's drawing is narrower to begin with, and the prompt is smaller (19px).
+- **The answer pad moves up.** The page uses the visible height (`100dvh`, the height with the browser's own bars in) and leaves **72px under the last row** (plus the device's safe area), so the pad isn't under the browser's bottom bar, which was stealing taps. The header takes three lines instead of four, and the palette's buttons go two to a row.
+- **The pack map fits a phone**: one wide card was widening the whole column past the screen, so the card's right side was cut off. The diagnostic button wraps.
+- Checked at 390×664 and 360×600 in a real browser with phone emulation (touch, mobile viewport). The browser's actual bottom bar can't be emulated, so what I could check is that the pad sits well above the bottom edge; Karl's phone is the real test.
+
+## 15. Groups of Terms in light mode: what a wrong answer says (Karl, 2026-10-03; built)
+
+Typing comes first, and what a wrong answer looks like (`tagTermGroups`, whole-number groups) decides what happens (`engine/termGroupLight.js`, `play/termGroupLightPlay.js`):
+
+| Wrong answer | Tag | What happens first |
+|---|---|---|
+| `2(4x + 1)` → `8x + 1` | `dist-one` (the number reached one term only) | **Arrows** from the 2 to each term appear above the problem, "2 distributes to both terms: each arrow is a multiplication." Then straight back to typing. |
+| `−3(2x − 1)` → `−6x − 3` | `inside-sign-lost` | **Box and circle** the x term and the number inside the parentheses (the sign in front goes with its number); Check; then the arrows, and typing. |
+| `−(2x + 5)` → `−2x + 5` | `neg-first` (the minus reached the first term only) | **Write the hidden 1** (the dashed gap, *how many groups?*), so it reads `−1(…)`; then the arrows, and typing. |
+| `2(2x + 3)` → `2x + 5` | `outer-as-term` (the 2 was added) | **Straight to the groups walk**: "the number out front isn't a term to add, it says how many groups." |
+| anything else, or a **second** wrong answer after a support | | The groups walk (Groups, + or −, Fill, Flip, Answer, Check it); if the 1 was written it stays written. |
+
+- I'm stuck shows the arrows first (a second one opens the walk); Teach me step-by-step opens the walk at once. Fractions of a group have no targeted supports yet and go to the walk.
+- Arrows draw themselves in once, then stay still while the student types.
+- If a typed answer is right with a zero term left in (`0x + 2`), it asks to take it out (nothing wrong).
+- **Distribute, then combine** has the same slips in its first stage but still uses the generic type-first layer; say the word and it gets the same supports.

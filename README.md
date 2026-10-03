@@ -29,6 +29,18 @@ Add `?seed=123` to the URL to replay a fixed problem set, and `?level=2` to open
 
 ## Changelog
 
+### Groups of Terms: what a wrong answer says (SPEC-SCAFFOLD.md §15)
+- **`2(4x + 1)` answered `8x + 1`:** the arrows appear above the problem ("2 distributes to both terms…") and the student answers again; a second wrong answer opens the groups.
+- **`−3(2x − 1)` answered `−6x − 3`:** box and circle the x term and the number inside, then the arrows, then answer again.
+- **`−(2x + 5)` answered `−2x + 5`:** write the hidden −1 first, then the arrows, then answer again.
+- **`2(2x + 3)` answered `2x + 5`** (the 2 added as a term): straight to drawing the groups.
+- I'm stuck shows the arrows; Teach me step-by-step opens the groups. Checked in a real browser at both Chromebook sizes and a phone (all four slips, then the full walk to the level panel); no page errors, every target at least 44px.
+
+### Boxes & Circles: read the model; and the phone pass (SPEC-SCAFFOLD.md §14)
+- **New Boxes & Circles Level 2: read the model.** A picture of columns of boxes, negative boxes and counters; type the expression it shows (any expression worth the same is right). A wrong answer says the key (a box is x, a box with a dash is −x…); a second one labels each column with what it's worth and **reads the model aloud**. The old Levels 2 to 5 are now Levels 3 to 6; **save codes are version 8**, and old codes and saves still work (the new level counts as done once the old Level 2 was).
+- **Phones:** the problem comes out bigger (the drawing is cropped to what's in it), the prompt is smaller, the page uses the visible height and leaves 72px under the answer pad so the browser's bottom bar doesn't cover it, the header takes three lines instead of four, the palette's buttons go two to a row, and the pack map no longer runs off the right edge of the screen (one wide card was widening the column).
+- **Checked** in a real browser: the model round (wrong, key, labels with the spoken text, right, all five problems, level panel); phone emulation at 390×664 and 360×600 on the pack map, the walks, light mode, the model round, the quiz screens; desktop at 1366×657 and 1280×610 again; no page errors, every target at least 44px.
+
 ### Boxes & Circles: light mode, the lasso, and a clearer x (SPEC-SCAFFOLD.md §13)
 - **Boxes & Circles starts with typing the answer.** Two buttons are there any time: **Draw boxes & circles** (the Box & Circle step, then back to typing, the shapes kept) and **Rewrite subtractions** (tap the − in front and the number's sign, for as many subtractions as you like, then Done; a dashed line shows what's being flipped).
 - **A wrong answer asks for boxes and circles first**, then you retype; only a **second** wrong answer opens the counters (Draw, Cancel, Answer). **Teach me step-by-step** is the whole walk at once.

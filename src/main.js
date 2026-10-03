@@ -10,9 +10,12 @@ import { flipitPlay } from './play/flipitPlay.js';
 import { combinePlay } from './play/combinePlay.js';
 import { lightPlay, flipLightPlay } from './play/lightPlay.js';
 import {
-  combineIntegerLightPlay, flipIntegerLightPlay, bigLightPlay, lassoLightPlay, termGroupLightPlay, distributeLightPlay,
+  combineIntegerLightPlay, flipIntegerLightPlay, bigLightPlay, lassoLightPlay, distributeLightPlay,
 } from './play/walkLightPlay.js';
 import { boxLightPlay } from './play/boxLightPlay.js';
+import { boxModelPlay } from './play/boxModelPlay.js';
+import { termGroupLightPlay } from './play/termGroupLightPlay.js';
+import { boxPlay } from './play/boxPlay.js';
 import { afterAnswer } from './engine/streak.js';
 import { loadBests, saveBest } from './lightStore.js';
 import { bestFor } from './engine/streak.js';
@@ -20,7 +23,6 @@ import { integerPlay } from './play/integerPlay.js';
 import { bigPlay } from './play/bigPlay.js';
 import { lassoPlay } from './play/lassoPlay.js';
 import { termGroupPlay } from './play/termGroupPlay.js';
-import { boxPlay } from './play/boxPlay.js';
 import { distributePlay } from './play/distributePlay.js';
 import { distributeTypedPlay } from './play/distributeTypedPlay.js';
 import { renderPackMap, renderLevelDone } from './view/packmap.js';
@@ -52,7 +54,7 @@ const PLAY = {
     : LIGHT ? lightPlay : combinePlay),
   flipit: (level) => (level >= 5 ? (LIGHT ? flipIntegerLightPlay : integerPlay) : LIGHT ? flipLightPlay : flipitPlay),
   lasso: LIGHT ? lassoLightPlay : lassoPlay,
-  boxes: LIGHT ? boxLightPlay : boxPlay,
+  boxes: (level) => (level === 2 ? boxModelPlay : LIGHT ? boxLightPlay : boxPlay),   // Level 2 reads a model (no walk)
   'groups-of-terms': LIGHT ? termGroupLightPlay : termGroupPlay,
   'distribute-combine': (level) => (level >= 4 ? distributeTypedPlay : LIGHT ? distributeLightPlay : distributePlay),
 };
@@ -71,8 +73,9 @@ const fixedSeed = Number.isInteger(urlSeed) && urlSeed > 0 ? urlSeed : null;
 // Progress and the level in play are saved under one key (SPEC §7). If
 // storage is blocked, everything still works from memory for this visit.
 // Combine it gained a level in the middle (the mixed party-or-battle round), so a level in play that was
-// saved before that (no `layout`) means a different level now and isn't resumed.
-const SAVE_LAYOUT = 2;
+// saved before that (no `layout`) means a different level now and isn't resumed. Boxes & Circles gained its
+// "read the model" level (layout 3) the same way.
+const SAVE_LAYOUT = 3;
 const store = createStore('mat.v1');
 const saved = store.load();
 let progress = normalizeProgress(saved, PACKS);
@@ -282,6 +285,7 @@ function nextProblem() {
   }
   play.index += 1;
   play.session = play.adapter.newSession(play.problems[play.index]);
+  play.fit = null;
   persist();
   render();
 }
@@ -313,6 +317,7 @@ function startPractice() {
   play.problems = levelled(play.pack.generate(play.level, play.seed), play.level);
   play.index = 0;
   play.session = play.adapter.newSession(play.problems[0]);
+  play.fit = null;
   persist();
   render();
 }
@@ -371,6 +376,27 @@ function renderDots() {
   $('dots').setAttribute('aria-label', `Problem ${Math.min(index + 1, PROBLEMS_PER_LEVEL)} of ${PROBLEMS_PER_LEVEL}`);
 }
 
+// On a phone the Mat is scaled to the screen's width, and a drawing built for a wide screen has a lot of empty space
+// at its sides, so the problem comes out small. Crop the drawing's width to what's in it (never shrinking again within
+// one problem, so it doesn't zoom back and forth as the student works).
+const phoneWidth = () => window.matchMedia('(max-width: 600px)').matches;
+function fitMatToPhone(svg) {
+  if (!svg || !phoneWidth() || !svg.viewBox?.baseVal?.width) return;
+  const vb = svg.viewBox.baseVal;
+  let box;
+  try { box = svg.getBBox(); } catch { return; }
+  if (!box.width) return;
+  const PAD = 14;
+  const fit = play.fit = {
+    x0: Math.min(play.fit?.x0 ?? Infinity, box.x - PAD),
+    x1: Math.max(play.fit?.x1 ?? -Infinity, box.x + box.width + PAD),
+  };
+  const x0 = Math.max(vb.x, fit.x0);
+  const x1 = Math.min(vb.x + vb.width, fit.x1);
+  if (x1 - x0 < 200 || x1 - x0 >= vb.width) return;
+  svg.setAttribute('viewBox', `${x0} ${vb.y} ${x1 - x0} ${vb.height}`);
+}
+
 function render(before) {
   const { session, finished } = play;
   const { adapter } = play;
@@ -388,6 +414,7 @@ function render(before) {
   if (finished) return;
 
   matRoot.replaceChildren(adapter.renderMat(session, fx));
+  fitMatToPhone(matRoot.firstElementChild);
   hintLine.textContent = fx.hint ? `Hint: ${adapter.feedbackText(fx.hint)}` : '';
   feedback.textContent = adapter.feedbackText(session.feedback);
   // restart the shake/celebrate animation on repeated messages
@@ -449,7 +476,8 @@ $('save-code').addEventListener('click', () => showSaveCode(encodeProgress(progr
 function savedCurrent() {
   const c = saved?.current;
   if (!c || typeof c !== 'object') return null;
-  if (c.pack === 'combineit' && saved.layout !== SAVE_LAYOUT) return null;
+  if (c.pack === 'combineit' && !(saved.layout >= 2)) return null;
+  if (c.pack === 'boxes' && !(saved.layout >= 3)) return null;
   const pack = packById(c.pack);
   const ok = pack && !pack.comingSoon && isLevelUnlocked(progress, pack.id, c.level)
     && Number.isInteger(c.seed) && c.seed >= 0

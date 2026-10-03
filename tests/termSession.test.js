@@ -400,12 +400,15 @@ describe('Boxes & Circles session: Rewrite (Levels 4–5)', () => {
     expect(s).toMatchObject({ step: 'done', finalText: '6x + 3' });
   });
 
-  it('the pack\'s generator hands each problem its level, and every Level 4–5 set plays through', () => {
-    for (const level of [4, 5]) {
-      for (const e of boxes.generate(level, 11)) {
+  it('the pack\'s generator hands each problem its level (the old numbering, a level behind the pack\'s from Level 3 on), and every rewrite set plays through', () => {
+    // Boxes & Circles gained a read-the-model Level 2, so the pack's Levels 5 and 6 are the walk's Levels 4 and 5.
+    for (const [packLevel, level] of [[5, 4], [6, 5]]) {
+      for (const e of boxes.generate(packLevel, 11)) {
         expect(e.level).toBe(level);
         expect(newTermSession(e).step).toBe('rewrite');
       }
     }
+    expect(boxes.generate(1, 11).every((e) => e.level === 1)).toBe(true);
+    expect(boxes.generate(3, 11).every((e) => e.level === 2)).toBe(true);
   });
 });

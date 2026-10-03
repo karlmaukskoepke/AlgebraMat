@@ -85,7 +85,7 @@ describe('the readout', () => {
     const s = answerAll(() => true);
     const r = readout(SEED, s.answers, ITEMS);
     expect(r.map((x) => x.standing)).toEqual(Array(6).fill('strong'));
-    expect(r.map((x) => [x.pack, x.rec])).toEqual([['combineit', 5], ['flipit', 5], ['lasso', 6], ['boxes', 5], ['groups-of-terms', 6], ['distribute-combine', 4]]);
+    expect(r.map((x) => [x.pack, x.rec])).toEqual([['combineit', 5], ['flipit', 5], ['lasso', 6], ['boxes', 6], ['groups-of-terms', 6], ['distribute-combine', 4]]);
     expect(r[0].problems).toHaveLength(2);
     expect(r[0].problems.every((p) => p.right && p.text && p.answer)).toBe(true);
   });
@@ -100,9 +100,9 @@ describe('the readout', () => {
   it('only the easier one right: the level after it; only the harder: back to the easier', () => {
     const items = ITEMS;
     const easier = readout(SEED, answerAll((it) => it.level === PROBES.find((p) => p.pack === it.pack).levels[0]).answers, items);
-    expect(easier.map((x) => [x.standing, x.rec])).toEqual([['growing', 3], ['growing', 3], ['growing', 3], ['growing', 3], ['growing', 3], ['growing', 2]]);
+    expect(easier.map((x) => [x.standing, x.rec])).toEqual([['growing', 3], ['growing', 3], ['growing', 3], ['growing', 4], ['growing', 3], ['growing', 2]]);
     const harder = readout(SEED, answerAll((it) => it.level === PROBES.find((p) => p.pack === it.pack).levels[1]).answers, items);
-    expect(harder.map((x) => x.rec)).toEqual([2, 2, 2, 2, 2, 1]);
+    expect(harder.map((x) => x.rec)).toEqual([2, 2, 2, 3, 2, 1]);
   });
 
   it('shows what was typed, and the right answer, for each problem', () => {
@@ -133,7 +133,7 @@ describe('opening levels', () => {
     let p = openLevels(base(), 'boxes', 4);
     p = openLevels(p, 'boxes', 2);
     expect(isLevelUnlocked(p, 'boxes', 4)).toBe(true);
-    expect(openLevels(base(), 'boxes', 99).packs.boxes.open).toBe(5);
+    expect(openLevels(base(), 'boxes', 99).packs.boxes.open).toBe(6);
     expect(openLevels(base(), 'boxes', 1).packs.boxes.open).toBeUndefined();
     expect(openLevels(base(), 'nope', 3)).toEqual(base());
   });

@@ -7,6 +7,8 @@
 //     pieces:   [[piece, ...], ...],          one column of pieces per term
 //     answer:   { text, done } | null,        the typed line after "="
 //     key: boolean,                           show the mystery-box key (Draw step)
+//     hideText: boolean,                      draw only the pieces (the "read the model" round)
+//     columnLabels: [text, ...] | null,       what each column is worth, under it (with hideText)
 //     selected: { term, index } | null,       a piece picked to cancel
 //     tap: 'parts' | 'zones' | 'pieces' | null,
 //     fx: { hint } }
@@ -143,18 +145,26 @@ export function renderBoxMat(s) {
 
   // Shapes, then the text on top.
   (s.shapes ?? []).forEach((shape, i) => svg.append(shapeNode(layout, shape, fx.shape === i)));
-  const selected = (i) => s.selecting && i >= Math.min(s.selecting.from, s.selecting.to) && i <= Math.max(s.selecting.from, s.selecting.to);
-  for (const p of layout.parts) {
-    svg.append(el('text', {
-      x: p.cx, y: ROW_Y, 'text-anchor': 'middle',
-      class: `bm-text ${p.part === 'op' ? 'is-op' : 'is-num'}${selected(p.index) || (s.picked ?? []).includes(p.term) ? ' is-selecting' : ''}${s.flipped?.includes(p.index) ? ' is-flipped' : ''}${fx.flipped?.includes(p.index) ? ' flip-in' : ''}${hint.parts?.includes(p.index) ? ' hint-flip' : ''}${hint.terms?.includes(p.term) ? ' hint-blink-text' : ''}`,
-      'data-part': p.index,
-    }, [p.text]));
-    if (s.tap === 'parts') {
-      svg.append(el('rect', {
-        x: p.hitLeft, y: ROW_Y - HIT_H + 18, width: p.hitRight - p.hitLeft, height: HIT_H, class: 'bm-parthit tappable',
-        'data-action': 'part', 'data-part': p.index,
-      }));
+  const selected = (i) => s.selecting && s.selecting.from !== null && s.selecting.from !== undefined
+    && i >= Math.min(s.selecting.from, s.selecting.to) && i <= Math.max(s.selecting.from, s.selecting.to);
+  if (s.hideText) {
+    // The model round: the pieces stand alone; each column's worth shows under it only when it has been asked for.
+    (s.columnLabels ?? []).forEach((text, i) => {
+      svg.append(el('text', { x: layout.columns[i].cx, y: ROW_Y, 'text-anchor': 'middle', class: 'bm-text is-num is-label' }, [text]));
+    });
+  } else {
+    for (const p of layout.parts) {
+      svg.append(el('text', {
+        x: p.cx, y: ROW_Y, 'text-anchor': 'middle',
+        class: `bm-text ${p.part === 'op' ? 'is-op' : 'is-num'}${selected(p.index) || (s.picked ?? []).includes(p.term) ? ' is-selecting' : ''}${s.flipped?.includes(p.index) ? ' is-flipped' : ''}${fx.flipped?.includes(p.index) ? ' flip-in' : ''}${hint.parts?.includes(p.index) ? ' hint-flip' : ''}${hint.terms?.includes(p.term) ? ' hint-blink-text' : ''}`,
+        'data-part': p.index,
+      }, [p.text]));
+      if (s.tap === 'parts') {
+        svg.append(el('rect', {
+          x: p.hitLeft, y: ROW_Y - HIT_H + 18, width: p.hitRight - p.hitLeft, height: HIT_H, class: 'bm-parthit tappable',
+          'data-action': 'part', 'data-part': p.index,
+        }));
+      }
     }
   }
 

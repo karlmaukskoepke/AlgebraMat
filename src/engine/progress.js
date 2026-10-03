@@ -67,8 +67,14 @@ export function normalizeProgress(raw, packs) {
     // Progress saved before Combine it's mixed party-or-battle round (4 levels): the round slots in at Level 3,
     // counted as done once the old Level 3 (three or more numbers, now Level 4) was.
     if (id === 'combineit' && levels.length === 4) levels = [levels[0], levels[1], levels[2], levels[2], levels[3]];
+    // Progress saved before Boxes & Circles' "read the model" round (5 levels): the round slots in at Level 2, counted as
+    // done once the old Level 2 was, and a level the diagnostic opened shifts with the levels after it.
+    let open = src[id]?.open;
+    if (id === 'boxes' && levels.length === 5) {
+      levels = [levels[0], levels[1], levels[1], levels[2], levels[3], levels[4]];
+      if (Number.isInteger(open) && open >= 2) open += 1;
+    }
     entry.levels = entry.levels.map((_, i) => levels[i] === true);
-    const open = src[id]?.open;
     if (Number.isInteger(open) && open > 1) entry.open = Math.min(open, entry.levels.length);
   }
   return out;
@@ -99,10 +105,11 @@ export function mergeProgress(a, b) {
 //   v4: + Groups of Terms (8);  v5: Flip It 5 levels, + Combine it (4)
 //   v6: 7 data symbols (about 34.7 bits): + Distribute, then combine (5)  → MAT-XXXXXXXXX (34 bits in use)
 //   v7: 8 data symbols (about 39.6 bits): Combine it gains a level (5), 35 bits in use
+//   v8: Boxes & Circles gains a level (6), 36 bits in use
 //
-// New codes are always v7; older codes (written down earlier) still work, and a code from before Combine it's
-// mixed round brings its levels back in the right places (see normalizeProgress).
-// (Group It's pack id is still `lasso`.) v7 uses 35 of about 39.6 bits.
+// New codes are always v8; older codes (written down earlier) still work, and a code from before Combine it's
+// mixed round (or Boxes & Circles' read-the-model round) brings its levels back in the right places (see
+// normalizeProgress). (Group It's pack id is still `lasso`.) v8 uses 36 of about 39.6 bits.
 
 export const CODE_ALPHABET = '23456789ABCDEFGHJKMNPQRSTUVWXYZ';
 export const CODE_PREFIX = 'MAT';
@@ -136,8 +143,15 @@ const LAYOUTS = {
       { id: 'groups-of-terms', levels: 8 }, { id: 'combineit', levels: 5 }, { id: 'distribute-combine', levels: 5 },
     ],
   },
+  8: {
+    data: 8,
+    packs: [
+      { id: 'flipit', levels: 5 }, { id: 'lasso', levels: 7 }, { id: 'boxes', levels: 6 },
+      { id: 'groups-of-terms', levels: 8 }, { id: 'combineit', levels: 5 }, { id: 'distribute-combine', levels: 5 },
+    ],
+  },
 };
-export const CODE_VERSION = 7;
+export const CODE_VERSION = 8;
 
 // Weighted sum mod 31. Weights 2, 3, 4, … are all nonzero mod 31 and differ
 // by 1 between neighbors, so any single typo or neighbor swap is caught.
