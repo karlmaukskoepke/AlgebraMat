@@ -8,6 +8,8 @@ const PIECE_NEG_BOX = '<svg viewBox="-21 -13 40 26" aria-hidden="true"><rect x="
 const PLUS_SVG = '<svg viewBox="-16 -16 32 32" aria-hidden="true"><line x1="-11" y1="0" x2="11" y2="0"/><line x1="0" y1="-11" x2="0" y2="11"/></svg>';
 const MINUS_SVG = '<svg viewBox="-16 -16 32 32" aria-hidden="true"><line x1="-11" y1="0" x2="11" y2="0"/></svg>';
 
+import { padGroup } from './walkLightControls.js';
+
 function button(label, action, extra = {}) {
   const b = document.createElement('button');
   b.type = 'button';
@@ -51,7 +53,7 @@ export function buildTermGroupControls(root, dispatch) {
   const chars = [['x', 'x', 'x'], ['+', '+', 'Plus'], ['−', '-', 'Minus']].map(([label, ch, aria]) =>
     button(label, 'typeChar', { cls: 'btn-pad', data: { ch, key: ch }, aria }));
   const back = button('⌫', 'backspace', { cls: 'btn-pad', aria: 'Delete' });
-  pad.append(...digits, ...chars, back);
+  pad.append(...digits, padGroup('variable', chars[0]), padGroup('sign', chars[1], chars[2]), back);
 
   root.append(row, pad);
 

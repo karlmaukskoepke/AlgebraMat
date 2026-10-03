@@ -1,6 +1,8 @@
 // The palette for Rounds 4 and 5 (SPEC-DISTRIBUTE.md §5): Show me (Round 4 only), Check, and the answer pad
 // (digits, x, + and −). `data-key`: S asks for Show me; Enter is Check. After a right answer Check becomes Next →.
 
+import { padGroup } from './walkLightControls.js';
+
 function button(label, action, extra = {}) {
   const b = document.createElement('button');
   b.type = 'button';
@@ -26,7 +28,7 @@ export function buildTypedControls(root, dispatch) {
   const chars = [['x', 'x', 'x'], ['+', '+', 'Plus'], ['−', '-', 'Minus']].map(([label, ch, aria]) =>
     button(label, 'typeChar', { cls: 'btn-pad', data: { ch, key: ch }, aria }));
   const back = button('⌫', 'backspace', { cls: 'btn-pad', aria: 'Delete' });
-  pad.append(...digits, ...chars, back);
+  pad.append(...digits, padGroup('variable', chars[0]), padGroup('sign', chars[1], chars[2]), back);
   root.append(row, pad);
 
   root.addEventListener('click', (e) => {

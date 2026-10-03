@@ -6,7 +6,7 @@ import { startTour as newTour, tipTour, currentStep, advance } from '../engine/t
 import { tourSeen, markTourSeen, tipSeen, markTipSeen } from '../lightStore.js';
 
 const TARGETS = {
-  problem: () => document.querySelector('.light-mat .dist-original'),
+  problem: () => document.querySelector('.light-mat .dist-original') ?? document.querySelector('.box-mat'),
   pad: () => document.querySelector('.dist-controls:not([hidden]) .pad'),
   check: () => document.querySelector('.dist-controls:not([hidden]) button[data-action="check"]'),
   stuck: () => document.querySelector('.dist-controls:not([hidden]) button[data-action="stuck"]'),
@@ -43,7 +43,7 @@ export function endTour() {
 // The pad step says what the lit-up pad actually has: ± for a number, x + and − for terms.
 function textFor(step, target) {
   if (step.id === 'pad' && target.querySelector('[data-action="typeChar"]')) return 'Type the answer here. x, + and − are for terms like 2x + 3.';
-  if (step.id === 'help' && !document.querySelector('.light-mat')) return 'That’s the help: the step-by-step way. Finish it, and the next problem is yours to type again.';
+  if (step.id === 'help' && !document.querySelector('.light-mat')) return 'That’s the help. Follow what it asks, then type the answer yourself.';
   return step.text;
 }
 

@@ -95,7 +95,7 @@ export function renderBoxMat(s) {
   const hint = s.fx?.hint?.show ?? {};
 
   // The live selection sits behind the text.
-  if (s.selecting) {
+  if (s.selecting && s.selecting.from !== null && s.selecting.from !== undefined) {
     const b = shapeBounds(layout, s.selecting.from, s.selecting.to);
     svg.append(el('rect', { x: b.x, y: b.y + 4, width: b.width, height: b.height - 8, rx: 8, class: 'bm-selecting' }));
   }
@@ -133,6 +133,14 @@ export function renderBoxMat(s) {
     });
   });
 
+  // Rewrite (light mode's support): a dashed line round the − and round the number of a term being rewritten.
+  for (const term of s.rings ?? []) {
+    for (const part of layout.columns[term].parts) {
+      const b = shapeBounds(layout, part.index, part.index);
+      svg.append(el('rect', { x: b.x, y: b.y, width: b.width, height: b.height, rx: 12, class: 'bm-ring-dash' }));
+    }
+  }
+
   // Shapes, then the text on top.
   (s.shapes ?? []).forEach((shape, i) => svg.append(shapeNode(layout, shape, fx.shape === i)));
   const selected = (i) => s.selecting && i >= Math.min(s.selecting.from, s.selecting.to) && i <= Math.max(s.selecting.from, s.selecting.to);
@@ -159,6 +167,18 @@ export function renderBoxMat(s) {
         'data-action': 'term', 'data-term': col.term,
       }));
     });
+  }
+
+  // The lasso while dragging: a dashed box (or pill, for the circle tool) from where the press began to where it is now.
+  const lasso = s.selecting?.rect;
+  if (lasso) {
+    const x = Math.min(lasso.x0, lasso.x1);
+    const y = Math.min(lasso.y0, lasso.y1);
+    const width = Math.abs(lasso.x1 - lasso.x0);
+    const height = Math.abs(lasso.y1 - lasso.y0);
+    svg.append(el('rect', {
+      x, y, width, height, rx: s.tool === 'circle' ? Math.min(width, height) / 2 : 10, class: `bm-lasso is-${s.tool ?? 'box'}`,
+    }));
   }
 
   // What the student has worked out so far, a line a step above the expression (Combine it's Level 4).

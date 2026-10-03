@@ -25,6 +25,20 @@ function button(label, action, extra = {}) {
   return b;
 }
 
+// A captioned group of pad keys ("variable" over x), so x isn't read as a times sign next to + and −.
+const padGroup = (caption, ...keys) => {
+  const g = document.createElement('div');
+  g.className = 'pad-group';
+  const cap = document.createElement('span');
+  cap.className = 'pad-cap';
+  cap.textContent = caption;
+  const row = document.createElement('div');
+  row.className = 'pad-group-keys';
+  row.append(...keys);
+  g.append(cap, row);
+  return g;
+};
+
 const group = (...items) => {
   const g = document.createElement('div');
   g.className = 'group';
@@ -54,6 +68,10 @@ export function buildBoxControls(root, dispatch) {
     button(String(d), 'digit', { cls: 'btn-pad', data: { digit: d } }));
   const chars = [['x', 'x', 'x'], ['+', '+', 'Plus'], ['−', '-', 'Minus']].map(([label, ch, aria]) =>
     button(label, 'typeChar', { cls: 'btn-pad', data: { ch, key: ch }, aria }));
+  // x is the variable, not a times sign: it sits in a group of its own with a caption, apart from + and −.
+  const [xKey, plusKey, minusKey] = chars;
+  const varGroup = padGroup('variable', xKey);
+  const signGroup = padGroup('sign', plusKey, minusKey);
   const back = button('⌫', 'backspace', { cls: 'btn-pad', aria: 'Delete' });
   // Integer problems get Flip It's pad (± and digits); algebra problems type x, + and −.
   const toggle = button('±', 'toggleSign', { cls: 'btn-pad', data: { key: '-' }, aria: 'Change sign' });
@@ -97,7 +115,8 @@ export function buildBoxControls(root, dispatch) {
       const ints = Boolean(s.problem) && isIntegers(s.problem);
       toggle.hidden = !ints;
       for (const b of chars) b.hidden = ints;
-      for (const b of pad.querySelectorAll('button')) b.disabled = !answering || b.hidden; // a hidden key must not catch the keyboard
+      varGroup.hidden = signGroup.hidden = ints;
+      for (const b of pad.querySelectorAll('button')) b.disabled = !answering || Boolean(b.closest('[hidden]')); // a hidden key must not catch the keyboard
     },
   };
 }

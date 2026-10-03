@@ -47,6 +47,7 @@ export function bigViewState(s) {
     expr: s.problem,
     shapes: s.shapes.map((shape) => ({ ...shape, complete: shapeComplete(s.problem, shape) })),
     selecting: s.selecting,
+    tool: s.tool,
     rewritten: [],
     flipped: [],
     pieces: s.pieces,

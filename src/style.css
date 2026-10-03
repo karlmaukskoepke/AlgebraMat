@@ -1967,3 +1967,329 @@ body {
 .light-mat .dist-rewritten {
   color: var(--opposite);
 }
+
+/* ---------- The diagnostic and the fluency challenges ---------- */
+
+.diag-bar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin: 0 0 12px;
+  padding: 8px 14px;
+  border: 2px solid var(--ink);
+  border-radius: 12px;
+}
+.diag-bar .diag-start {
+  flex: none;
+}
+.diag-blurb {
+  margin: 0;
+  font-size: 15px;
+}
+
+.fluency-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 8px;
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 2px dashed var(--ink);
+}
+.fluency-btn {
+  padding: 0 10px;
+  font-size: 15px;
+  white-space: nowrap;
+}
+.fluency-best {
+  color: var(--groups);
+}
+
+/* The quiz screens (fluency challenge, diagnostic) share the play screen's frame. */
+.is-quiz .quiz-top .quiz-stats {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  margin-left: auto;
+  font-weight: 600;
+  font-size: 22px;
+}
+.quiz-timer.is-low {
+  color: var(--opposite);
+}
+.quiz-bar {
+  height: 10px;
+  border: 2px solid var(--ink);
+  border-radius: 999px;
+  overflow: hidden;
+}
+.quiz-bar-fill {
+  height: 100%;
+  background: var(--ink);
+  transition: width 0.12s linear;
+}
+.quiz-stage {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  overflow-y: auto;
+}
+.quiz-play {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+.quiz-tier {
+  min-height: 24px;
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--groups);
+}
+.quiz-problem {
+  font: 700 clamp(48px, 9vh, 84px) 'Kalam', cursive;
+  letter-spacing: 0.02em;
+}
+.quiz-answer {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  font: 700 clamp(40px, 8vh, 68px) 'Kalam', cursive;
+}
+.quiz-typed {
+  min-width: 140px;
+  padding: 0 14px;
+  border-bottom: 4px solid var(--ink);
+  text-align: center;
+}
+.quiz-typed.is-empty {
+  color: #8a92a0;
+}
+.quiz-flash {
+  padding: 6px 16px;
+  border: 3px solid var(--opposite);
+  border-radius: 12px;
+  color: var(--opposite);
+  font: 700 28px 'Kalam', cursive;
+}
+.quiz-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  max-width: 640px;
+  text-align: center;
+}
+.quiz-panel h2 {
+  margin: 0;
+  font-size: 36px;
+}
+.quiz-blurb {
+  margin: 0;
+  font-size: 19px;
+}
+.quiz-final {
+  font: 700 88px 'Kalam', cursive;
+  line-height: 1;
+}
+.quiz-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+.scores {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+.score-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+}
+.score-tab {
+  font-size: 15px;
+  padding: 0 12px;
+}
+.score-tab.is-on {
+  background: var(--ink);
+  color: var(--paper);
+}
+.score-list {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 4px 18px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 17px;
+}
+.score-list li {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+}
+.score-n {
+  font: 700 26px 'Kalam', cursive;
+}
+.score-none {
+  margin: 0;
+  font-size: 16px;
+}
+
+.diag-dots {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+}
+.diag-results {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-bottom: 12px;
+}
+.diag-results h2 {
+  margin: 0;
+  text-align: center;
+}
+.diag-results > .quiz-blurb {
+  text-align: center;
+}
+.diag-row {
+  border: 2px solid var(--ink);
+  border-radius: 12px;
+  padding: 8px 14px;
+}
+.diag-row-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.diag-row h3 {
+  margin: 0;
+  font-size: 20px;
+}
+.diag-chip {
+  padding: 2px 12px;
+  border: 2px solid var(--ink);
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 15px;
+}
+.diag-row.is-strong .diag-chip {
+  background: var(--ink);
+  color: var(--paper);
+}
+.diag-problems {
+  margin: 6px 0;
+  padding: 0;
+  list-style: none;
+  font-size: 17px;
+}
+.diag-problems li {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+  align-items: baseline;
+}
+.diag-mark {
+  font-weight: 700;
+}
+.diag-problems .is-wrong .diag-mark {
+  color: var(--opposite);
+}
+.diag-typed {
+  color: var(--opposite);
+  font-size: 15px;
+}
+.diag-go {
+  width: 100%;
+  text-align: left;
+}
+.is-quiz .pad-host {
+  display: contents;
+}
+
+/* The answer pad's x is a variable, not a times sign: it sits apart from + and −, with a caption over each group. */
+.pad {
+  align-items: flex-end;
+}
+.pad-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 0 10px;
+}
+.pad-group-keys {
+  display: flex;
+  gap: 8px;
+}
+.pad-cap {
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.1;
+  color: #4a5160;
+}
+
+/* Rewriting a subtraction as adding the opposite: a dashed line round each part being flipped. */
+.box-mat .bm-ring-dash {
+  fill: none;
+  stroke: var(--opposite);
+  stroke-width: 3;
+  stroke-dasharray: 8 7;
+  pointer-events: none;
+}
+
+/* The lasso: a dashed line that follows the drag, box-shaped for the box tool and pill-shaped for the circle. */
+.box-mat .bm-lasso {
+  fill: rgba(255, 224, 70, 0.16);
+  stroke: var(--ink);
+  stroke-width: 3;
+  stroke-dasharray: 9 7;
+  stroke-linecap: round;
+  pointer-events: none;
+}
+
+/* The drag demonstration (a pointer pressing and dragging across the first term). */
+.drag-demo {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  pointer-events: none;
+}
+.drag-demo-ring {
+  position: absolute;
+  border: 3px dashed var(--ink);
+  background: rgba(255, 224, 70, 0.22);
+}
+.drag-demo-ring.is-box {
+  border-radius: 10px;
+}
+.drag-demo-ring.is-circle {
+  border-radius: 999px;
+}
+.drag-demo-cursor {
+  position: absolute;
+}
+.drag-demo-caption {
+  position: absolute;
+  width: 340px;
+  padding: 6px 10px;
+  border: 2px solid var(--ink);
+  border-radius: 10px;
+  background: var(--paper);
+  font: 600 17px 'Lexend', system-ui, sans-serif;
+  text-align: center;
+}

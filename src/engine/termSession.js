@@ -83,6 +83,8 @@ const note = (s, key, params) => { s.feedback = { key, params }; return s; };
 export const shapeComplete = (problem, shape) => shapeInfo(problem, shape).complete;
 
 const sameRange = (a, b) => a && b && a.from === b.from && a.to === b.to;
+const sameRect = (a, b) => (!a && !b) || (a && b && a.x0 === b.x0 && a.y0 === b.y0 && a.x1 === b.x1 && a.y1 === b.y1);
+const sameSelection = (a, b) => sameRange(a, b) && sameRect(a?.rect, b?.rect);
 
 // What the answer line shows: what's been typed, set out the way it reads.
 export const answerText = (s) => prettyAnswer(s.entry);
@@ -144,7 +146,8 @@ export function reduceTerms(state, action) {
       return note(s, action.tool === 'box' ? 'boxToolOn' : 'circleToolOn');
     }
 
-    // The drag in progress: highlight what's under it (nothing is drawn yet).
+    // The drag in progress: highlight what's under it and keep the lasso's rectangle (nothing is drawn yet).
+    // `rect` is the dragged rectangle in the drawing's units; a drag that covers no part has a rect and no range.
     case 'selecting': {
       if (s.step !== 'boxcircle') return state;
       if (action.clear) {
@@ -152,9 +155,12 @@ export function reduceTerms(state, action) {
         s.selecting = null;
         return s;
       }
-      if (!validPart(action.from) || !validPart(action.to)) return state;
-      const next = { from: Math.min(action.from, action.to), to: Math.max(action.from, action.to) };
-      if (sameRange(s.selecting, next)) return state;
+      const ranged = validPart(action.from) && validPart(action.to);
+      const rect = action.rect && ['x0', 'y0', 'x1', 'y1'].every((k) => Number.isFinite(action.rect[k])) ? { ...action.rect } : null;
+      if (!ranged && !rect) return state;
+      const next = ranged ? { from: Math.min(action.from, action.to), to: Math.max(action.from, action.to) } : { from: null, to: null };
+      if (rect) next.rect = rect;
+      if (sameSelection(s.selecting, next)) return state;
       s.selecting = next;
       return s;
     }

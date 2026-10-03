@@ -112,6 +112,8 @@ export function reduceWalkLight(state, action, card) {
       if (s.stage !== 'light') return state;
       const { correct, tag } = card.check(s.problem, s.entry);
       if (tag === 'unreadable') return say(s, s.entry === '' ? 'typeAnswer' : 'answerUnreadable', { pad: card.pad }, true);
+      // 0x + 13 is right with a zero term left in: take it out and type it again. Not a wrong answer.
+      if (tag === 'zero-term') return say(s, 'wlZeroTerm', undefined, true);
       if (correct) {
         s.step = 'done';
         s.clean = s.wrongs === 0 && s.stuck === 0 && !s.helped;

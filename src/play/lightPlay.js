@@ -28,8 +28,9 @@ const SUPPORT_STEPS = {
 
 // Both palettes live in the footer, one shown at a time: light mode's, or the full walk's. `idleWalk(problem)` gives
 // the walk's palette a session to draw while light mode is showing (it's hidden, and all its buttons are off, so a
-// key can't reach it); without it a bare "off" session does, which the two-term palettes accept.
-export function buildLightPlayControls(root, dispatch, buildWalkControls = buildCombineControls, buildPalette = buildLightControls, idleWalk = null) {
+// key can't reach it); without it a bare "off" session does, which the two-term palettes accept. `walkOf(s)` is the
+// walk's session inside a light session (`s.walk`, or `s.ts` for Boxes & Circles).
+export function buildLightPlayControls(root, dispatch, buildWalkControls = buildCombineControls, buildPalette = buildLightControls, idleWalk = null, walkOf = (s) => s.walk) {
   root.innerHTML = '';
   const lightRoot = document.createElement('div');
   const walkRoot = document.createElement('div');
@@ -48,7 +49,7 @@ export function buildLightPlayControls(root, dispatch, buildWalkControls = build
       light.update(walking ? { ...OFF } : s);
       if (walking) {
         walkButtons().forEach((b) => { b.disabled = false; });
-        walk.update(s.walk, hint);
+        walk.update(walkOf(s), hint);
       } else {
         walk.update(idleWalk ? idleWalk(s.problem) : { ...OFF }, null);
         if (idleWalk) walkButtons().forEach((b) => { b.disabled = true; });

@@ -145,4 +145,39 @@ This is what SPEC-JIT.md's pattern-finding and the teacher report will read; the
 - Text on the Mat can't be selected by dragging or double-clicking.
 - **Streaks:** *I'm stuck* and *Teach me* leave the streak where it is (neither add nor break); only a wrong typed answer breaks it. (The first build reset it on I'm stuck; fixed.)
 
-**Queued next (Karl's order, before anything else on the list)**: the **Uber diagnostic** and the **fluency challenges** (SPEC-ROADMAP.md).
+
+
+## 12. The Uber diagnostic and the fluency challenges (Karl, 2026-10-03; built)
+
+**The diagnostic** (`engine/diagnostic.js`, `view/diagnostic.js`, `diagStore.js`)
+- A button across the top of the pack map: *Take the diagnostic to find your levels* (then *Continue the diagnostic (n of 12 done)*, then *See my diagnostic results*).
+- **Twelve problems, two per card**, adding and subtracting first, then groups, then the algebra cards (Combine it L2 and L4, Flip It L2 and L5, Group It L2 and L5, Boxes & Circles L2 and L4, Groups of Terms L2 and L5, Distribute then combine L1 and L3). Typed with the same pad as light mode; **nothing says right or wrong** until the end; *I don't know* skips.
+- **Stopping part way saves the place** (`mat.diag.v1`: the seed and the answers) but it isn't done until the twelfth.
+- **The readout** gives each card a standing and a level to start at: both right → *Strong*, start the level after the harder one; the easier right → *Getting there*, start after it; otherwise *Start here*, Level 1. Each problem shows what was typed and the right answer.
+- **It recommends AND opens**: the recommended level and all before it open on that card (`packs[id].open` in the saved progress; not marked done, and not part of a save code yet). A retake can only open more.
+
+**Fluency challenges** (`engine/fluency.js`, `engine/highscores.js`, `view/fluency.js`, `fluencyStore.js`)
+- Each card's last item is a row of challenges on the pack map: Combine it: Adding; Flip It: Subtracting, Add & subtract; Group It: Multiplying (concepts), Big multiplying; Distribute then combine: Everything (all of them mixed).
+- **60 seconds**, type the answer and Check (Enter). **A wrong answer flashes the right one and pauses typing for 2.5 seconds while the clock keeps running**: it costs time, not points.
+- **Difficulty climbs with the number correct, a step every 5.** Add and subtract: numbers up to 9, 15, 25, 40, 60, and a third number from step 4. Multiplying (concepts): positive multipliers → **negative multipliers after 5** → **unit fractions after 10** → **other fractions, either sign, after 15**, with small numbers. Big multiplying: the same ramp with multipliers 2 to 12 (leaning 6 to 12) and fractions with denominators up to 8 of numbers up to 36. Easier kinds stay in the mix.
+- **High scores**: this month, this school year (September 1 to September 1) and all time, tabs on the start and end screens, kept on this device (`mat.fluency.v1`, newest 300 runs). A shared list (a spreadsheet, teachers with accounts and sign-in codes for their students) is a later build.
+
+## 13. Boxes & Circles in light mode, and the lasso (Karl, 2026-10-03; built)
+
+**Every problem starts with typing the answer** (`engine/boxLight.js`, `view/boxLightControls.js`, `play/boxLightPlay.js`). Two supports are buttons to ask for at any time (they count as help: no streak, but nothing is wrong), and a wrong answer brings the first one in:
+
+| | |
+|---|---|
+| **Draw boxes & circles** | The walk's own Box & Circle step (box tool for x terms, circle tool for numbers, Check), then back to typing with the shapes kept on the Mat. |
+| **Rewrite subtractions** | Tap the − in front and the number's sign, for as many subtractions as you like (`− 3` and `− (−3)` alike), then **Done rewriting**. A half-flipped term can't be finished (*flip both*); a dashed magenta line shows the − and the number being flipped. Rewritten terms stay rewritten in the walk. |
+| **First wrong answer** | Draw boxes and circles first, then try again. |
+| **Second wrong answer** (or I'm stuck after that) | The walk, from where the student is: the counters above (Draw), Cancel, Answer. If the boxes and circles were already drawn, a wrong answer goes straight to the walk. |
+| **Teach me step-by-step** | The whole walk at once. |
+
+Two slips get their own words (`engine/lightCards.js` tags): **`0x + 13`** is right with a zero term left in, so it asks to take it out and retype, *not* a wrong answer (also on the other typing cards); **`x − 8x` typed as `−8x`** tells the student a lone x has an invisible 1, once, before any support (`invisible-one`).
+
+**The pad's x is a variable.** On every pad that types terms, x sits in its own group captioned *variable*, apart from the *sign* group (+ and −), so it doesn't read as a times sign.
+
+**The lasso.** A press anywhere on the Mat starts a drag; a dashed line (a box for the box tool, a pill for the circle) follows it from where the press began, and the parts under its horizontal span are highlighted; a drag that doesn't cross the row of the expression takes nothing. Release snaps a shape around whole terms as before. The first time a lasso is asked for on a device, a pointer shows how (once, `box-drag` in the tips store).
+
+**Asked and not built yet** (waiting on Karl): a Round 2 of Boxes & Circles that shows a picture of boxes and counters and has the student write the expression (it would renumber the levels and the save code), and what the "language" piece would be. **Phone optimization** is queued next: the problems on the Mat look small next to the prompts, and the pad at the very bottom is crowded by the browser's own buttons (move it up).

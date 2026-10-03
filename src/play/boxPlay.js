@@ -9,6 +9,7 @@ import { termHintFor } from '../engine/termHints.js';
 import { buildBoxControls } from '../view/boxControls.js';
 import { termFeedbackText } from '../view/termFeedback.js';
 import { bindBoxMat } from '../view/boxPointer.js';
+import { maybeShowDragDemo } from '../view/dragDemo.js';
 
 // The session, as the Mat draws it: shapes know whether they're finished.
 export function boxViewState(s) {
@@ -19,6 +20,7 @@ export function boxViewState(s) {
     expr: s.problem,
     shapes: s.shapes.map((shape) => ({ ...shape, complete: shapeComplete(s.problem, shape) })),
     selecting: s.selecting,
+    tool: s.tool,
     rewritten,
     flipped,
     pieces: s.pieces,
@@ -39,6 +41,8 @@ export const boxPlay = {
   // View-only effects for one render: the hint, and what just changed (to animate it).
   effects(before, session) {
     const fx = { hint: termHintFor(session), added: [], canceled: [], flipped: [], shape: null };
+    // The first time a problem asks for a lasso, a pointer shows how (once per device).
+    if (!before && session.step === 'boxcircle') maybeShowDragDemo(session.problem.terms[0].kind === 'x' ? 'box' : 'circle');
     if (!before) return fx; // `before` is only passed for a move within the same problem
     session.pieces.forEach((col, term) => col.forEach((p, index) => {
       const was = before.pieces[term][index];
