@@ -2362,3 +2362,9 @@ body {
 .light-group-mat .light-answer.is-done {
   fill: var(--ink);
 }
+
+/* Boxes & Circles, read the model: "Column 1 has ____" and its four choices, in the pad's place. */
+.say-choices { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px; margin-top: 8px; }
+.say-choices[hidden] { display: none; }
+.say-choice { min-height: 48px; font-size: 1.05rem; font-weight: 700; }
+.pad[hidden] { display: none; }

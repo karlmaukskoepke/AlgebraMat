@@ -133,7 +133,7 @@ describe('Groups of Terms in light mode', () => {
     it('Check with both terms shaped draws the arrows and goes back to typing; Check too soon says what is missing', () => {
       let s = run(newTermGroupLight(SIGN), ...answer('-6x-3'));
       s = run(s, { type: 'pickTool', tool: 'box' }, { type: 'drawShape', from: 0, to: 0 }, { type: 'check' });
-      expect(s).toMatchObject({ stage: 'support', feedback: { src: 'ts', bad: true } });
+      expect(s).toMatchObject({ stage: 'support', feedback: { src: 'bc', bad: true } });
       s = insideDone(run(newTermGroupLight(SIGN), ...answer('-6x-3')));
       expect(s).toMatchObject({ stage: 'light', step: 'answer', arrows: true, support: null, ts: null });
       expect(termGroupLightFeedbackText(s.feedback)).toBe('Boxed and circled, signs and all. Now −3 distributes to both terms: each arrow is a multiplication. Try the answer again.');

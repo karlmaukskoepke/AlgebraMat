@@ -17,7 +17,7 @@ export const LASSO_FEEDBACK = {
   writeOne: () => 'Type the hidden 1 first, then Check.',
   writeOneFirst: () => 'Type the hidden 1 first — the arrow points to where it goes.',
   typeOne: () => 'Type the number 1 for the gap, then Check.',
-  notOne: () => '−(…) means the opposite of 1 group. Type the number 1 in the gap.',
+  notOne: () => 'The hidden number in front of the ( is 1. Type the number 1 in the gap.',
   oneWritten: () => 'Yes, the hidden number is 1! Now make one group for each group in the problem: tap Add group, then Check.',
   tooManyGroups: () => 'That’s more groups than any problem needs. Tap one to erase it.',
   groupCount: ({ n, have }) => `The number of groups is ${n} — you have ${groups(have)}.`,
@@ -73,7 +73,7 @@ export const LASSO_FEEDBACK = {
   countTaken: () => 'Count the counters in the groups you took.',
 
   // Hints (after 3 wrong tries on a step)
-  hintWriteOne: () => '−(…) means the opposite of 1 group. Type the number 1 for the blinking gap, then Check.',
+  hintWriteOne: () => 'The hidden number in front of the ( is 1. Type the number 1 for the blinking gap, then Check.',
   hintGroups: ({ n, have }) => (have > n
     ? `The number in front is ${n}. Tap the blinking groups to erase them.`
     : `The number in front is ${n}, so make ${n} group${n === 1 ? '' : 's'}: tap Add group until there are ${n}.`),

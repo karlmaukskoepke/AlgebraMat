@@ -213,3 +213,10 @@ Typing comes first, and what a wrong answer looks like (`tagTermGroups`, whole-n
 - Arrows draw themselves in once, then stay still while the student types.
 - If a typed answer is right with a zero term left in (`0x + 2`), it asks to take it out (nothing wrong).
 - **Distribute, then combine** has the same slips in its first stage but still uses the generic type-first layer; say the word and it gets the same supports.
+
+## 16. Distribute's supports and the language piece (Karl, 2026-10-03; built)
+
+**Distribute, Levels 1 to 3** use the same ladder as §15 (`engine/groupLight.js`, one factory behind both cards). Tags for a one-group problem, from the loose terms plus the group: `dist-one` (the number reached one term), `inside-sign-lost`, `neg-first` (a subtracted hidden 1), `outer-as-term`. Supports: arrows (`dist-one`), Box & Circle on the inside then arrows (`inside-sign-lost`), write the −1 then arrows (`neg-first`), straight to the groups walk (`outer-as-term`, or any second wrong answer). Problems with two groups, and Levels 4 and 5, keep the typed or full-walk behaviour.
+
+**The language piece** (Boxes & Circles, read the model). Wrong 1: the key. Wrong 2 or Teach me: per column, "Column n has ____" with four choices: right, sign slip, box vs counter, count off by one (the right one's place moves by column). A wrong pick says why and isn't counted as a wrong answer; a right pick is read aloud and puts the column's label on the Mat (dashed ring on the current column). After the last column the labels stay and the student types the expression. I'm stuck or Teach me while saying shows every label at once. Step bar: Say it, Answer. Misses are kept on the session (`misses`) for the teacher report later.
+

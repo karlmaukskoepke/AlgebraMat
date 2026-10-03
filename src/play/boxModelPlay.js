@@ -5,18 +5,20 @@ import { newBoxModel, reduceBoxModel, columnLabels } from '../engine/boxModel.js
 import { piecesForExpression } from '../engine/termPieces.js';
 import { formatExpression, prettyAnswer } from '../engine/terms.js';
 import { renderBoxMat } from '../view/boxMat.js';
-import { buildWalkLightControls } from '../view/walkLightControls.js';
+import { buildBoxModelControls } from '../view/boxModelControls.js';
 import { boxModelFeedbackText } from '../view/boxModelFeedback.js';
 import { speak } from '../view/speech.js';
 import { recordProblem } from '../lightStore.js';
 import { startIntro } from '../view/tour.js';
 
 export const boxModelPlay = {
-  steps: () => [{ id: 'answer', label: 'Write the expression' }],
+  steps: (s) => (s?.hint >= 2
+    ? [{ id: 'say', label: 'Say it' }, { id: 'answer', label: 'Answer' }]
+    : [{ id: 'answer', label: 'Write the expression' }]),
   newSession: newBoxModel,
   reduce: reduceBoxModel,
   feedbackText: boxModelFeedbackText,
-  buildControls: (root, dispatch) => buildWalkLightControls(root, dispatch, 'algebra'),
+  buildControls: buildBoxModelControls,
   effects(before, s) {
     if (!before && s.stage !== 'done') startIntro({ algebra: true });
     if (before && before.step !== 'done' && s.step === 'done') {
@@ -29,7 +31,8 @@ export const boxModelPlay = {
   // The picture only: the columns of pieces, with the expression left out until the labels are asked for.
   renderMat: (s, fx = {}) => renderBoxMat({
     expr: s.problem, shapes: [], selecting: null, rewritten: [], flipped: [], pieces: piecesForExpression(s.problem),
-    key: true, tap: null, selected: null, hideText: true, columnLabels: s.hint >= 2 ? columnLabels(s.problem) : null,
+    key: true, tap: null, selected: null, hideText: true, columnLabels: s.said?.length ? columnLabels(s.problem).map((t, i) => (s.said.includes(i) ? t : null)) : null,
+    columnFocus: s.stage === 'cloze' ? s.col : null,
     answer: { text: s.stage === 'done' ? s.finalText : prettyAnswer(s.entry), done: s.stage === 'done' }, fx,
   }),
   matAction: () => null,
