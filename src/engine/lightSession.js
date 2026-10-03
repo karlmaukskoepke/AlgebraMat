@@ -119,7 +119,7 @@ function bringIn(s, tag, force = null) {
   if (kind === 'rewrite') {
     s.rewrite = newFlipWalk(s.problem);
     s.step = 'rewrite';
-    s.feedback = { ...s.rewrite.feedback, src: 'rewrite' };
+    s.feedback = { key: 'lightRewriteIntro', src: 'rewrite' };
     return s;
   }
   if (kind === 'cloze') {
@@ -184,7 +184,8 @@ export function reduceLight(state, action) {
       done.rewritten = true;
       return backToTyping(done, 'lightRewriteDone', { to: formatProblem(rewrite_(done.problem)) });
     }
-    s.feedback = { ...rewrite.feedback, src: 'rewrite' };
+    // a half-done rewrite keeps Flip It's nudge ("flip both"); the intro stays this support's own
+    s.feedback = rewrite.feedback?.key === 'rewriteIntro' ? { key: 'lightRewriteIntro', src: 'rewrite' } : { ...rewrite.feedback, src: 'rewrite' };
     return s;
   }
 

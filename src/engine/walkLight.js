@@ -49,7 +49,9 @@ function bringInWalk(s, card, why) {
   s.step = s.walk.step;
   s.skipped = s.walk.skipped;
   s.entry = '';
-  return say(s, why);
+  // The walk's own first instruction, led by why it's here ("Not quite.", "No problem.").
+  s.feedback = { ...s.walk.feedback, src: 'walk', lead: why };
+  return s;
 }
 
 export function reduceWalkLight(state, action, card) {

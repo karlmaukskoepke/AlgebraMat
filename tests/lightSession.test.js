@@ -213,6 +213,14 @@ describe('light mode on Flip It\'s subtractions', () => {
     expect(s.walk.step).toBe('draw');
   });
 
+  it('the walk after a rewrite plays on to the end: draw, party or battle, answer', () => {
+    let s = run(newLightSession(S(3, -5)), ...answer(2), flip('op'), flip('sign'), ...answer(1));
+    s = run(s, { type: 'pickSign', sign: '+' }, ...Array(3).fill({ type: 'tapZone', zone: 0 }), ...Array(5).fill({ type: 'tapZone', zone: 1 }), check);
+    expect(s.walk.step).toBe('partyBattle');
+    s = run(s, { type: 'choose', choice: 'party' }, ...answer(8));
+    expect(s).toMatchObject({ stage: 'walk', step: 'done', clean: false, wrongs: 2 });
+  });
+
   it('I\'m stuck in the rewrite goes to the full walk, from the start of Rewrite', () => {
     const s = run(newLightSession(S(3, -5)), ...answer(2), stuck);
     expect(s).toMatchObject({ stage: 'walk', stuck: 1 });

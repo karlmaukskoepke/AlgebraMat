@@ -25,6 +25,7 @@ export const LIGHT_FEEDBACK = {
   lightClozeRight: ({ word }) => `Yes, ${word}! Now type the answer, with its sign.`,
   lightWalk: () => 'Let’s work it out with counters.',
   lightCircled: () => 'Each number is circled with its sign in front. Look at the signs, then type the answer again.',
+  lightRewriteIntro: () => 'Subtracting is adding the opposite. Tap the minus to turn it into a plus, then tap the number’s sign to change it to its opposite.',
   lightRewriteDone: ({ to }) => `Now it’s an addition: ${to}. Try the answer again.`,
   typeAnswer: () => 'Type your answer with the pad, then Check.',
   answerUnreadable: () => 'I can’t read that. Type just a number, like −2 or 7.',
@@ -32,7 +33,7 @@ export const LIGHT_FEEDBACK = {
 
 export function lightFeedbackText(fb) {
   if (!fb) return '';
-  if (fb.src === 'walk' || fb.src === 'rewrite') return walkText(fb);   // Flip It's messages (its Rewrite step too)
+  if (fb.src === 'walk' || (fb.src === 'rewrite' && fb.key !== 'lightRewriteIntro')) return walkText(fb);   // Flip It's messages (its Rewrite step too)
   if (fb.src === 'circle') return bigFeedbackText(fb);                  // Combine it's circling messages
   const f = LIGHT_FEEDBACK[fb.key];
   return f ? f(fb.params ?? {}) : '';

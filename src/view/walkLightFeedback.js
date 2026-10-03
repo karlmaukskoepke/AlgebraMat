@@ -20,7 +20,7 @@ const WL = {
 
 export function walkLightFeedbackText(fb, walkText) {
   if (!fb) return '';
-  if (fb.src === 'walk') return walkText(fb);
+  if (fb.src === 'walk') return fb.lead ? `${WL[fb.lead]()} ${walkText(fb)}` : walkText(fb);
   const f = WL[fb.key];
   return f ? f(fb.params ?? {}) : '';
 }

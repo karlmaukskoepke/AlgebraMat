@@ -29,6 +29,16 @@ Add `?seed=123` to the URL to replay a fixed problem set, and `?level=2` to open
 
 ## Changelog
 
+### Karl's first round of play-test changes (SPEC-SCAFFOLD.md §11)
+- **Combine it:** a sign mistake now gets *circle the numbers with their signs* first (the Boxes & Circles drag), then you type again; a second miss gets the sentence to finish, a third the full walk. **Party! and Battle! now sit on the Mat**, right under *Same signs?* and *Different signs?*.
+- **Flip It:** any wrong answer on a subtraction goes straight to **rewriting it**: tap the minus to make it a plus, tap the number's sign to change it (this includes `3 − 8`). The rewritten line stays on the Mat, you try again, and only a second miss opens the counters.
+- **Group It:** the − groups button says *opposite*; the wording is "positive groups, or opposite (negative) groups"; the hidden 1 is a dashed gap with an arrow labelled *how many groups?*; the fraction button reads *Add part of group*; two new fraction misconception messages (the whole group's number put in every part, with a bracket on the whole group; counting the parts left behind instead of the part taken); a sign mistake gets *"−1/2(−4) means ____"* with four choices.
+- **Bigger fractions, with eighths:** thirds up to 18, fourths 24, fifths 30, sixths 24, eighths 24 (halves 16); a fraction bar can have eight parts.
+- **Teach me step-by-step** on every card: the full walk at once.
+- **Text on the Mat can't be selected** by dragging or double-clicking.
+- **Streak fix:** *I'm stuck* and *Teach me* no longer reset the streak (my first build did; only a wrong typed answer breaks it).
+- **Checked in a real browser at 1366×657 and 1280×610:** the circling drag, Party!/Battle! on the Mat (clicks and keys), the rewrite clicks and retry, the Group It cloze and both misconception messages, the hidden-1 label, text selection, every card's walk played through; no page errors, every target at least 44px.
+
 ### Light mode on every card, streaks, and keep practicing (SPEC-SCAFFOLD.md §10)
 - **Light mode is now how nearly every level plays:** Flip It (all five levels), Combine it Levels 4–5, Group It, Boxes & Circles, Groups of Terms and Distribute, then combine Rounds 1–3. The student types the answer; a wrong answer or **I'm stuck** opens that card's full step-by-step walk on the same problem. (`?light=0` still plays everything the old way.)
 - **Flip It's subtractions get the pilot's supports:** typing the numbers' sum with the minus kept (`5 − (−3) = 2`) is its own mistake signature, answered by the party-or-battle question after showing the subtraction as the addition it becomes; the walk starts at Rewrite.

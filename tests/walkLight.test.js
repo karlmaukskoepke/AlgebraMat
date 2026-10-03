@@ -109,7 +109,8 @@ describe('light mode around a card\'s walk', () => {
 
   it('a wrong answer opens the full walk on the same problem, and is logged with what it looked like', () => {
     const s = run(card, start(), { type: 'digit', digit: 1 }, { type: 'check' });
-    expect(s).toMatchObject({ stage: 'walk', helped: true, wrongs: 1, entry: '', supportsShown: ['fullWalk'], feedback: { key: 'wlWalk' } });
+    expect(s).toMatchObject({ stage: 'walk', helped: true, wrongs: 1, entry: '', supportsShown: ['fullWalk'], feedback: { src: 'walk', lead: 'wlWalk' } });
+    expect(walkLightFeedbackText(s.feedback, () => 'Tap the box.')).toBe('Not quite. Let’s go step by step. Tap the box.');
     expect(s.tags).toHaveLength(1);
     expect(s.answers).toEqual([{ typed: '1', tag: s.tag }]);
     expect(s.walk.problem).toEqual(problem);   // (the session keeps its own copy)
@@ -118,7 +119,7 @@ describe('light mode around a card\'s walk', () => {
 
   it('I\'m stuck opens the walk without a wrong answer', () => {
     const s = run(card, start(), { type: 'stuck' });
-    expect(s).toMatchObject({ stage: 'walk', stuck: 1, wrongs: 0, helped: true, feedback: { key: 'wlStuck' } });
+    expect(s).toMatchObject({ stage: 'walk', stuck: 1, wrongs: 0, helped: true, feedback: { src: 'walk', lead: 'wlStuck' } });
     expect(s.tags).toEqual([]);
   });
 
@@ -166,8 +167,8 @@ describe('Teach me step-by-step on every card', () => {
     const card = cardOf('boxes');
     const problem = packById('boxes').generate(1, 5)[0];
     const s = run(card, newWalkLight(problem, card), { type: 'teach' });
-    expect(s).toMatchObject({ stage: 'walk', helped: true, taught: 1, wrongs: 0, supportsShown: ['fullWalk'], feedback: { key: 'wlTeach' } });
-    expect(walkLightFeedbackText(s.feedback, () => 'x')).toMatch(/step-by-step/);
+    expect(s).toMatchObject({ stage: 'walk', helped: true, taught: 1, wrongs: 0, supportsShown: ['fullWalk'], feedback: { src: 'walk', lead: 'wlTeach' } });
+    expect(walkLightFeedbackText(s.feedback, () => 'Tap the box.')).toMatch(/step-by-step way.*Tap the box/);
   });
 });
 
