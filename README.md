@@ -29,6 +29,12 @@ Add `?seed=123` to the URL to replay a fixed problem set, and `?level=2` to open
 
 ## Changelog
 
+### Distribute gets the same supports; the model round gets the language piece (SPEC-SCAFFOLD.md §16)
+- **Distribute, then combine (Levels 1 to 3)** now answers the four slips like Groups of Terms: the number reaching one term only gets the arrows; a lost inside sign gets Box & Circle on the terms inside, then the arrows; a subtracted hidden 1 (`A − (x + 2)`) asks for the −1 first; the number added as a term goes to the groups. A second wrong answer opens the full walk. The two cards share one engine (`engine/groupLight.js`).
+- **Boxes & Circles, read the model:** a first wrong answer gives the key; a second (or Teach me) starts "Column 1 has ____" with four choices per column (the right phrase, a sign slip, box-vs-counter, a count off by one), each wrong pick saying why. A right pick is read aloud and labels that column (−3x); after the last, the labels stay and the student types the expression. I'm stuck while saying shows every label at once.
+- A hidden-1 hint no longer says "the opposite of 1 group" on a plus group.
+- Checked in a real browser at both Chromebook sizes and a phone: all four slips on Distribute Levels 1 to 3, the full walk, the language piece column by column; no page errors, every target at least 44px.
+
 ### Groups of Terms: what a wrong answer says (SPEC-SCAFFOLD.md §15)
 - **`2(4x + 1)` answered `8x + 1`:** the arrows appear above the problem ("2 distributes to both terms…") and the student answers again; a second wrong answer opens the groups.
 - **`−3(2x − 1)` answered `−6x − 3`:** box and circle the x term and the number inside, then the arrows, then answer again.

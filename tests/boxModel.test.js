@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { generateModelLevel, MAX_COLUMN, MAX_PIECES } from '../src/engine/generateModel.js';
-import { newBoxModel, reduceBoxModel, checkModel, columnLabels, spokenModel, modelAnswer } from '../src/engine/boxModel.js';
+import { newBoxModel, reduceBoxModel, checkModel, columnLabels, columnChoices, spokenModel, modelAnswer } from '../src/engine/boxModel.js';
 import { evaluate, makeTerm, makeExpression, formatAnswer } from '../src/engine/terms.js';
 import { piecesForExpression } from '../src/engine/termPieces.js';
 import { boxModelFeedbackText } from '../src/view/boxModelFeedback.js';
@@ -114,26 +114,56 @@ describe('reading a model', () => {
     expect(run(newBoxModel(MODEL), ...answer('+'))).toMatchObject({ wrongs: 0 });
   });
 
-  it('a wrong answer brings the key; a second labels each column, read aloud; nothing else', () => {
+  it('a wrong answer brings the key; a second starts saying the columns; nothing is typed meanwhile', () => {
     let s = run(newBoxModel(MODEL), ...answer('3x'));
     expect(s).toMatchObject({ stage: 'light', wrongs: 1, hint: 1, helped: true, entry: '', spoken: null, feedback: { key: 'bmKeyWrong' } });
     expect(boxModelFeedbackText(s.feedback)).toMatch(/A box is x\. A box with a dash is −x/);
     s = run(s, ...answer('3x'));
-    expect(s).toMatchObject({ wrongs: 2, hint: 2, feedback: { key: 'bmLabels' }, spoken: { id: 1 } });
-    expect(s.spoken.text).toBe(spokenModel(MODEL));
-    s = run(s, ...answer('3x'));
-    expect(s).toMatchObject({ wrongs: 3, hint: 2, spoken: { id: 1 } });         // already said: not repeated
+    expect(s).toMatchObject({ stage: 'cloze', step: 'say', wrongs: 2, hint: 2, col: 0, said: [], feedback: { key: 'bmSay' } });
+    expect(boxModelPlay.steps(s).map((t) => t.label)).toEqual(['Say it', 'Answer']);
+    expect(run(s, ...typed('2'))).toBe(s);
+    expect(run(s, { type: 'check' })).toBe(s);
+  });
+
+  it('each column has four choices: the right one, a sign slip, box vs counter, and the count', () => {
+    for (let col = 0; col < MODEL.terms.length; col++) {
+      const list = columnChoices(MODEL, col);
+      expect(list).toHaveLength(4);
+      expect(list.filter((c) => c.ok)).toHaveLength(1);
+      expect(new Set(list.map((c) => c.text)).size).toBe(4);
+      expect(list.filter((c) => !c.ok).every((c) => c.why)).toBe(true);
+    }
+    expect(columnChoices(MODEL, 0).find((c) => c.ok).text).toBe('2 boxes');
+    expect(columnChoices(MODEL, 1).find((c) => c.ok).text).toBe('3 negative counters');
+    expect(columnChoices(MODEL, 2).find((c) => c.ok).text).toBe('1 negative box');
+    expect(columnChoices(MODEL, 3).find((c) => c.ok).text).toBe('1 positive counter');
+  });
+
+  it('a right pick is read aloud and labels the column; a wrong pick says why; the last one goes back to typing', () => {
+    const pick = (s, ok) => run(s, { type: 'pick', digit: columnChoices(s.problem, s.col).findIndex((c) => c.ok === ok) });
+    let s = run(newBoxModel(MODEL), { type: 'stuck' }, { type: 'stuck' });
+    expect(s).toMatchObject({ stage: 'cloze', stuck: 2 });
+    const bad = pick(s, false);
+    expect(bad).toMatchObject({ stage: 'cloze', col: 0, said: [], feedback: { key: 'bmPickWrong', bad: true } });
+    expect(bad.misses).toHaveLength(1);
+    expect(boxModelFeedbackText(bad.feedback)).toMatch(/^Not that one\. /);
+    s = pick(s, true);
+    expect(s).toMatchObject({ col: 1, said: [0], feedback: { key: 'bmSayNext' }, spoken: { id: 1 } });
+    expect(s.spoken.text).toBe("Column one: two boxes, that's two x.");
+    expect(boxModelFeedbackText(s.feedback)).toBe('Yes: 2 boxes, that’s 2x. Column 2 has ____: pick what the picture shows.');
+    s = pick(pick(pick(s, true), true), true);
+    expect(s).toMatchObject({ stage: 'light', step: 'answer', hint: 3, said: [0, 1, 2, 3], feedback: { key: 'bmLabels' } });
     expect(run(s, ...answer('x-2'))).toMatchObject({ stage: 'done', clean: false });
   });
 
-  it('I\'m stuck goes the same way, and Teach me step-by-step labels the columns at once', () => {
-    let s = run(newBoxModel(MODEL), { type: 'stuck' });
-    expect(s).toMatchObject({ stuck: 1, wrongs: 0, hint: 1, feedback: { key: 'bmKey' } });
+  it('I\'m stuck or Teach me while saying shows every label at once; Teach me from the start begins the saying', () => {
+    let s = run(newBoxModel(MODEL), { type: 'stuck' }, { type: 'stuck' });
     s = run(s, { type: 'stuck' });
-    expect(s).toMatchObject({ hint: 2, spoken: { id: 1 } });
+    expect(s).toMatchObject({ stage: 'light', hint: 3, said: [0, 1, 2, 3], feedback: { key: 'bmLabels' }, spoken: { id: 1 } });
+    expect(s.spoken.text).toBe(spokenModel(MODEL));
     const t = run(newBoxModel(MODEL), { type: 'teach' });
-    expect(t).toMatchObject({ taught: 1, hint: 2, feedback: { key: 'bmLabels' }, spoken: { id: 1 } });
-    expect(run(t, ...answer('x-2'))).toMatchObject({ stage: 'done', clean: false });
+    expect(t).toMatchObject({ taught: 1, stage: 'cloze', hint: 2, feedback: { key: 'bmSay' } });
+    expect(run(t, { type: 'teach' })).toMatchObject({ stage: 'light', hint: 3 });
   });
 
   it('every generated model can be answered both ways', () => {

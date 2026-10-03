@@ -1,11 +1,11 @@
 // Messages for light mode on Groups of Terms (Karl, 2026-10-03). While a step of the card's own walk is showing the
-// walk's messages show (`src: 'tg'`, view/termGroupFeedback.js; `src: 'ts'` for Box & Circle, view/termFeedback.js),
+// walk's messages show (`src: 'tg'`, view/termGroupFeedback.js; `src: 'bc'` for Box & Circle, view/termFeedback.js),
 // led by why it's there when the session says so.
 
 import { termGroupFeedbackText } from './termGroupFeedback.js';
 import { termFeedbackText } from './termFeedback.js';
 
-const TG = {
+export const TG_LIGHT = {
   tgIntro: () => 'Type the answer: the number out front multiplies everything inside the parentheses. Then Check.',
   tgCorrect: ({ answer }) => `Yes! The answer is ${answer}.`,
   tgArrows: ({ outer }) => `${outer} distributes to both terms: each arrow is a multiplication. Try the answer again.`,
@@ -25,10 +25,10 @@ const TG = {
 
 export function termGroupLightFeedbackText(fb) {
   if (!fb) return '';
-  if (fb.src === 'tg' || fb.src === 'ts') {
-    const base = fb.src === 'ts' ? termFeedbackText(fb) : termGroupFeedbackText(fb);
-    return fb.lead ? `${TG[fb.lead]()} ${base}` : base;
+  if (fb.src === 'tg' || fb.src === 'bc') {
+    const base = fb.src === 'bc' ? termFeedbackText(fb) : termGroupFeedbackText(fb);
+    return fb.lead ? `${TG_LIGHT[fb.lead]()} ${base}` : base;
   }
-  const f = TG[fb.key];
+  const f = TG_LIGHT[fb.key];
   return f ? f(fb.params ?? {}) : termGroupFeedbackText(fb);       // hints are the walk's
 }
