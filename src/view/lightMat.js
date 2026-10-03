@@ -25,14 +25,16 @@ function html(tag, cls, ...children) {
 export function renderLightMat({ problemText, circled, rewritten, choices, typed, shown: shownText, done, cloze, said, readback }) {
   const svg = document.createElementNS(SVG_NS, 'svg');
   svg.setAttribute('class', 'mat dist-mat light-mat');
-  svg.setAttribute('viewBox', '0 0 860 340');
+  // On a phone the drawing is narrower, so the problem comes out bigger (it's scaled to the screen's width).
+  const width = window.matchMedia?.('(max-width: 600px)').matches ? 460 : 860;
+  svg.setAttribute('viewBox', `0 0 ${width} 340`);
   svg.setAttribute('role', 'group');
   svg.setAttribute('aria-label', cloze ? 'Finish the sentence' : 'Type the answer');
   const fo = document.createElementNS(SVG_NS, 'foreignObject');
   fo.setAttribute('x', '0');
   const tall = Boolean(cloze || said || choices);
   fo.setAttribute('y', tall ? '20' : '70');
-  fo.setAttribute('width', '860');
+  fo.setAttribute('width', String(width));
   fo.setAttribute('height', tall ? '300' : '230');
   const shown = shownText ?? typed.replace('-', MINUS);
   const parts = [circled

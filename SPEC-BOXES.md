@@ -211,3 +211,8 @@ My calls, open to change:
 
 - In Draw, **when the mouse is over a zone you can tap** (the column above a term), a dashed rounded outline and a faint tint show the whole zone. It's mouse-only (`@media (hover: hover)`), so touch screens don't get a stuck outline.
 
+
+
+## Update, 2026-10-03: a model-reading round, and light mode
+
+Boxes & Circles now has **six levels**: 1 only + terms, **2 read the model** (a picture of boxes and counters; write the expression), 3 subtracting numbers, 4 negative x terms, 5 subtracting a negative, 6 everything mixed. The walk described above is Levels 1 and 3 to 6, played as **light mode** (type the answer; Draw boxes & circles and Rewrite subtractions are there to ask for; the first wrong answer asks for boxes and circles, the second opens the counters). See SPEC-SCAFFOLD.md §13 and §14.

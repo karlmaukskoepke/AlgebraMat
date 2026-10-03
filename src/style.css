@@ -94,7 +94,7 @@ body {
 @media (max-width: 760px) {
   .pack-grid,
   .soon-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);   /* not 1fr: that lets one wide card widen the whole column past the screen */
   }
 }
 
@@ -650,6 +650,52 @@ body {
   }
 }
 
+/* Phones, tighter: Packs and Save code share the first line, the title the second, the streak and the dots the third
+   (the header took four lines), and the palette's buttons go two to a row. */
+@media (max-width: 600px) {
+  .screen .topbar #back { order: 1; }
+  .screen .topbar #save-code { order: 2; margin-left: auto; }
+  .screen .topbar #next-level { order: 2; }
+  .screen .topbar .title { order: 3; width: 100%; }
+  .screen .topbar .streak { order: 4; }
+  .screen .topbar .dots { order: 5; width: auto; margin: 0 0 0 auto; }
+  .palette-row {
+    gap: 8px;
+  }
+  .palette-row > .btn:not(.btn-tour):not(.btn-primary):not([data-action="sound"]),
+  .palette-row > .group {
+    flex: 1 1 calc(50% - 8px);
+  }
+  .palette-row > .group > .btn {
+    flex: 1;
+  }
+  /* The map: a pack's level dots are not the play header's (they shouldn't take the whole line and push the card wider
+     than the screen), and a long pack name wraps. */
+  .pack-head {
+    flex-wrap: wrap;
+    gap: 4px 12px;
+  }
+  .pack-head .dots {
+    order: 0;
+    width: auto;
+    margin: 0;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+  }
+  /* The map: the diagnostic button takes the full width and its words may wrap (a long button was widening the page). */
+  .diag-bar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 6px;
+  }
+  .diag-bar .diag-start {
+    white-space: normal;
+    min-height: 52px;
+    padding-top: 6px;
+    padding-bottom: 6px;
+  }
+}
+
 /* ---------- Motion (kept small; none if the viewer prefers less) ---------- */
 
 @keyframes shake {
@@ -895,9 +941,20 @@ body {
   .screen {
     height: auto;
     min-height: 100vh;
+    min-height: 100dvh;           /* the height you can actually see, with the browser's own bars in */
+    /* The answer pad is the last thing on the page: keep it well above the browser's bottom bar, which covers
+       (and steals taps from) whatever sits at the very bottom edge of a phone. */
+    padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px));
   }
   .mat {
     height: auto;
+  }
+  /* The prompt shouldn't dwarf the problem. */
+  .feedback {
+    font-size: 19px;
+  }
+  .quiz-flash {
+    font-size: 22px;
   }
 }
 

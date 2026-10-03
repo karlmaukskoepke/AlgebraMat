@@ -284,6 +284,7 @@ function nextProblem() {
   }
   play.index += 1;
   play.session = play.adapter.newSession(play.problems[play.index]);
+  play.fit = null;
   persist();
   render();
 }
@@ -315,6 +316,7 @@ function startPractice() {
   play.problems = levelled(play.pack.generate(play.level, play.seed), play.level);
   play.index = 0;
   play.session = play.adapter.newSession(play.problems[0]);
+  play.fit = null;
   persist();
   render();
 }
@@ -373,6 +375,27 @@ function renderDots() {
   $('dots').setAttribute('aria-label', `Problem ${Math.min(index + 1, PROBLEMS_PER_LEVEL)} of ${PROBLEMS_PER_LEVEL}`);
 }
 
+// On a phone the Mat is scaled to the screen's width, and a drawing built for a wide screen has a lot of empty space
+// at its sides, so the problem comes out small. Crop the drawing's width to what's in it (never shrinking again within
+// one problem, so it doesn't zoom back and forth as the student works).
+const phoneWidth = () => window.matchMedia('(max-width: 600px)').matches;
+function fitMatToPhone(svg) {
+  if (!svg || !phoneWidth() || !svg.viewBox?.baseVal?.width) return;
+  const vb = svg.viewBox.baseVal;
+  let box;
+  try { box = svg.getBBox(); } catch { return; }
+  if (!box.width) return;
+  const PAD = 14;
+  const fit = play.fit = {
+    x0: Math.min(play.fit?.x0 ?? Infinity, box.x - PAD),
+    x1: Math.max(play.fit?.x1 ?? -Infinity, box.x + box.width + PAD),
+  };
+  const x0 = Math.max(vb.x, fit.x0);
+  const x1 = Math.min(vb.x + vb.width, fit.x1);
+  if (x1 - x0 < 200 || x1 - x0 >= vb.width) return;
+  svg.setAttribute('viewBox', `${x0} ${vb.y} ${x1 - x0} ${vb.height}`);
+}
+
 function render(before) {
   const { session, finished } = play;
   const { adapter } = play;
@@ -390,6 +413,7 @@ function render(before) {
   if (finished) return;
 
   matRoot.replaceChildren(adapter.renderMat(session, fx));
+  fitMatToPhone(matRoot.firstElementChild);
   hintLine.textContent = fx.hint ? `Hint: ${adapter.feedbackText(fx.hint)}` : '';
   feedback.textContent = adapter.feedbackText(session.feedback);
   // restart the shake/celebrate animation on repeated messages
