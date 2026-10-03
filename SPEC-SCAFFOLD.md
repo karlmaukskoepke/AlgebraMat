@@ -196,3 +196,20 @@ Two slips get their own words (`engine/lightCards.js` tags): **`0x + 13`** is ri
 - **The answer pad moves up.** The page uses the visible height (`100dvh`, the height with the browser's own bars in) and leaves **72px under the last row** (plus the device's safe area), so the pad isn't under the browser's bottom bar, which was stealing taps. The header takes three lines instead of four, and the palette's buttons go two to a row.
 - **The pack map fits a phone**: one wide card was widening the whole column past the screen, so the card's right side was cut off. The diagnostic button wraps.
 - Checked at 390×664 and 360×600 in a real browser with phone emulation (touch, mobile viewport). The browser's actual bottom bar can't be emulated, so what I could check is that the pad sits well above the bottom edge; Karl's phone is the real test.
+
+## 15. Groups of Terms in light mode: what a wrong answer says (Karl, 2026-10-03; built)
+
+Typing comes first, and what a wrong answer looks like (`tagTermGroups`, whole-number groups) decides what happens (`engine/termGroupLight.js`, `play/termGroupLightPlay.js`):
+
+| Wrong answer | Tag | What happens first |
+|---|---|---|
+| `2(4x + 1)` → `8x + 1` | `dist-one` (the number reached one term only) | **Arrows** from the 2 to each term appear above the problem, "2 distributes to both terms: each arrow is a multiplication." Then straight back to typing. |
+| `−3(2x − 1)` → `−6x − 3` | `inside-sign-lost` | **Box and circle** the x term and the number inside the parentheses (the sign in front goes with its number); Check; then the arrows, and typing. |
+| `−(2x + 5)` → `−2x + 5` | `neg-first` (the minus reached the first term only) | **Write the hidden 1** (the dashed gap, *how many groups?*), so it reads `−1(…)`; then the arrows, and typing. |
+| `2(2x + 3)` → `2x + 5` | `outer-as-term` (the 2 was added) | **Straight to the groups walk**: "the number out front isn't a term to add, it says how many groups." |
+| anything else, or a **second** wrong answer after a support | | The groups walk (Groups, + or −, Fill, Flip, Answer, Check it); if the 1 was written it stays written. |
+
+- I'm stuck shows the arrows first (a second one opens the walk); Teach me step-by-step opens the walk at once. Fractions of a group have no targeted supports yet and go to the walk.
+- Arrows draw themselves in once, then stay still while the student types.
+- If a typed answer is right with a zero term left in (`0x + 2`), it asks to take it out (nothing wrong).
+- **Distribute, then combine** has the same slips in its first stage but still uses the generic type-first layer; say the word and it gets the same supports.

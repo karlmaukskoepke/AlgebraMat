@@ -2350,3 +2350,15 @@ body {
   font: 600 17px 'Lexend', system-ui, sans-serif;
   text-align: center;
 }
+
+/* Groups of Terms in light mode: the answer line under the problem. */
+.light-group-mat .light-answer {
+  fill: var(--ink);
+  font: 700 56px 'Kalam', cursive;
+}
+.light-group-mat .light-answer.is-empty {
+  fill: #8a92a0;
+}
+.light-group-mat .light-answer.is-done {
+  fill: var(--ink);
+}

@@ -19,7 +19,9 @@ function button(label, action, extra = {}) {
   return b;
 }
 
-export function buildBoxLightControls(root, dispatch) {
+// `asks: false` leaves out the two supports to ask for and Done rewriting (Groups of Terms uses the rest: its Box and
+// Circle tools while it asks for them, and the pad, which also types the hidden 1).
+export function buildBoxLightControls(root, dispatch, { asks = true } = {}) {
   root.innerHTML = '';
   const row = document.createElement('div');
   row.className = 'palette-row box-palette';
@@ -36,7 +38,7 @@ export function buildBoxLightControls(root, dispatch) {
   const tools = document.createElement('div');
   tools.className = 'group';
   tools.append(box, circle, undo);
-  row.append(stuck, teach, draw, rewrite, tools, done, tourButton, check);
+  row.append(stuck, teach, ...(asks ? [draw, rewrite] : []), tools, ...(asks ? [done] : []), tourButton, check);
 
   const pad = document.createElement('div');
   pad.className = 'pad';
@@ -60,7 +62,8 @@ export function buildBoxLightControls(root, dispatch) {
     update(s) {
       const stage = s.step === 'levelDone' ? 'levelDone' : s.stage;
       const typing = stage === 'light';
-      const drawing = stage === 'support' && s.support === 'boxcircle';
+      const drawing = stage === 'support' && (s.support === 'boxcircle' || s.support === 'inside');
+      const entering = stage === 'support' && s.support === 'one';   // the hidden 1 is typed with the pad
       const rewriting = stage === 'support' && s.support === 'rewrite';
       stuck.disabled = teach.disabled = !(typing || stage === 'support');
       draw.disabled = rewrite.disabled = !typing;
@@ -73,10 +76,12 @@ export function buildBoxLightControls(root, dispatch) {
       done.hidden = !rewriting;
       done.disabled = !rewriting;
       tourButton.disabled = !typing;
-      for (const b of pad.querySelectorAll('button')) b.disabled = !typing;
+      for (const b of pad.querySelectorAll('button')) {
+        b.disabled = !(typing || (entering && ['digit', 'backspace'].includes(b.dataset.action)));
+      }
       const finished = stage === 'done';
       check.hidden = rewriting;
-      check.disabled = !typing && !drawing && !finished;
+      check.disabled = !typing && !drawing && !entering && !finished;
       check.innerHTML = finished ? 'Next →' : 'Check ✓';
       if (finished) check.dataset.next = '1'; else delete check.dataset.next;
     },
