@@ -46,8 +46,9 @@ const PLAY = {
 };
 const adapterFor = (packId, level) => (typeof PLAY[packId] === 'function' ? PLAY[packId](level) : PLAY[packId]);
 const newSeed = () => Math.floor(Math.random() * 2 ** 32);
-// Every problem knows its level (the anonymous log says which level a problem was from).
-const levelled = (problems, level) => problems.map((p) => (p.level ? p : { ...p, level }));
+// Every problem knows which level it was played at, for the anonymous log. (Not `level`: a few packs read that to
+// decide how a problem plays, such as whether it starts with Rewrite.)
+const levelled = (problems, level) => problems.map((p) => ({ ...p, logLevel: level }));
 
 // ?seed=123 replays a fixed set (handy for projecting the same problems to a
 // class). ?level=2 (with or without a seed) opens that level directly.

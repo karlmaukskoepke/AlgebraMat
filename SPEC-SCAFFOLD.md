@@ -99,3 +99,26 @@ This is what SPEC-JIT.md's pattern-finding and the teacher report will read; the
 - A spotlight tour on a new device's first problem, with a **required** press of **I'm stuck** (§1b).
 - On/off counts and the tour flag are **per device** for the pilot (§5).
 - The cloze has **four choices and no "not sure"** (§4).
+
+## 10. Light mode on every card, and streaks (Karl, 2026-10-03; built)
+
+**Light mode is the default nearly everywhere** (`?light=0` still plays the old step-by-step walks):
+
+| Card | Light mode |
+|---|---|
+| Combine it L1–3 | Pilot (§1–§9): party-or-battle question, cloze, full walk |
+| Flip It L1–4 | The same two-term light mode on subtractions. Typing the numbers' sum with the minus kept (`5 − (−3) = 2`) is its own signature, `minus-as-minus`, answered by the party-or-battle question, which first shows the subtraction as the addition it becomes. The full walk is Flip It's, starting at Rewrite. |
+| Combine it L4–5, Flip It L5, Group It, Boxes & Circles, Groups of Terms, Distribute then combine R1–3 | **Type first, full walk as the answer to a miss.** A wrong answer or **I'm stuck** hands the same problem to the card's own walk. No targeted support yet; each wrong answer is logged with a tag (`engine/lightCards.js`: `uncombined`, `sign-flipped`, `sign-dropped`, `wrong-winner`, `n-off`, `x-off`, `unmatched`) so the log says which supports to build next. |
+| Distribute R4–5 | Already typed; unchanged. |
+
+- Number cards use the ± pad; terms cards (Boxes, Groups of Terms, Distribute) type with digits, **x**, **+**, **−**.
+- The **tour** (§1b) still runs once per device, on the first light problem anywhere; its pad step names whichever pad is lit. A card whose pad brings **new controls** (x, +, −) gets a **one-step tip** the first time, once per device (`mat.tips.v1`), unless the tour already showed that pad.
+- Code: `engine/walkLight.js` (reducer around a card's walk), `engine/lightCards.js` (per-card problem text, answer check, mistake tag), `play/walkLightPlay.js` (the adapters), `view/walkLightControls.js` and `view/walkLightFeedback.js`.
+
+### Streaks and keep practicing
+
+- A **streak** is problems in a row with no wrong typed answer (a *clean* answer: right the first time). **I'm stuck does not break it**; a wrong typed answer does. Finishing the walk after a miss is not a clean answer.
+- The header shows **Streak n · Best m**. The **best streak per card and level** is kept on the device (`mat.streaks.v1`). The five dots stay for a level's first pass.
+- When a level's five are done, the panel says the next level is open and offers **Next level →**, **Keep practicing** and the pack map.
+- **Keep practicing** plays the same level endlessly in fresh sets of five; the dots give way to the streak, and a **Next level →** button stays in the header the whole time.
+- Not built (parked): a diagnostic before each card's first round, skip-ahead to later levels, the teacher report.

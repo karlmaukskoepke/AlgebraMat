@@ -72,7 +72,7 @@ function makeLightPlay({ packId, walkPlay, buildWalkControls }) {
       if (!before && s.stage !== 'done') startTourIfFirst();
       // A finished problem updates which supports are on and goes in the log (once: the step turns to done once).
       if (before && before.step !== 'done' && s.step === 'done') {
-        recordProblem(s, { pack: packId, level: s.problem.level ?? null, problem: formatProblem(s.problem) });
+        recordProblem(s, { pack: packId, level: s.problem.logLevel ?? s.problem.level ?? null, problem: formatProblem(s.problem) });
       }
       // A picked choice is read aloud (once: the id changes each time).
       if (before && s.spoken && s.spoken.id !== before.spoken?.id) speak(s.spoken.text);

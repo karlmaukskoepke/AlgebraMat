@@ -43,6 +43,7 @@ export function endTour() {
 // The pad step says what the lit-up pad actually has: ± for a number, x + and − for terms.
 function textFor(step, target) {
   if (step.id === 'pad' && target.querySelector('[data-action="typeChar"]')) return 'Type the answer here. x, + and − are for terms like 2x + 3.';
+  if (step.id === 'help' && !document.querySelector('.light-mat')) return 'That’s the help: the step-by-step way. Finish it, and the next problem is yours to type again.';
   return step.text;
 }
 
@@ -84,7 +85,7 @@ function place(step) {
   skip.type = 'button';
   skip.textContent = 'Skip tour';
   skip.addEventListener('click', () => move('skip'));
-  buttons.append(skip);
+  if (!tipId) buttons.append(skip);
   if (step.needs === 'next') {
     const next = el('btn btn-primary tour-next', 'button');
     next.type = 'button';

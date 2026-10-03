@@ -29,7 +29,7 @@ export function makeWalkLightPlay({ packId, cardId, walkPlay }) {
       if (!before && s.stage !== 'done') startIntro({ algebra: base.pad === 'algebra' });
       // A finished problem goes in the log (once: the step turns to done once).
       if (before && before.step !== 'done' && s.step === 'done') {
-        recordProblem(s, { pack: packId, level: s.problem.level ?? null, problem: base.problemText(s.problem) });
+        recordProblem(s, { pack: packId, level: s.problem.logLevel ?? s.problem.level ?? null, problem: base.problemText(s.problem) });
       }
       if (s.stage !== 'walk') return { hint: null };
       return walkPlay.effects(before?.stage === 'walk' ? before.walk : null, s.walk);
