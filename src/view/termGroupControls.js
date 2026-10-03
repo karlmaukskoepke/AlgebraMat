@@ -33,7 +33,7 @@ export function buildTermGroupControls(root, dispatch) {
 
   const addGroup = button('Add group', 'addGroup');
   const plusGroups = button('+ groups', 'chooseSign', { data: { sign: '+' } });
-  const minusGroups = button('<span class="opp-word">−</span> groups', 'chooseSign', { data: { sign: '-' }, aria: 'Minus groups (opposite)' });
+  const minusGroups = button('<span class="opp-word">−</span> groups<span class="btn-sub">opposite</span>', 'chooseSign', { data: { sign: '-' }, aria: 'Minus groups (opposite groups)' });
   const boxPlus = button(PIECE_BOX, 'pickPiece', { cls: 'btn-sign', data: { pieceType: 'box', sign: '+' }, aria: 'Box (x)' });
   const boxMinus = button(PIECE_NEG_BOX, 'pickPiece', { cls: 'btn-sign', data: { pieceType: 'box', sign: '-' }, aria: 'Negative box (minus x)' });
   const plus = button(PLUS_SVG, 'pickPiece', { cls: 'btn-sign', data: { pieceType: 'counter', sign: '+' }, aria: 'Plus counter' });
@@ -69,6 +69,7 @@ export function buildTermGroupControls(root, dispatch) {
       const pulse = hint?.show?.button;
       const named = (b) => [b.dataset.action, b.dataset.pieceType, b.dataset.sign].filter(Boolean).join(':');
       for (const b of row.querySelectorAll('button')) b.classList.toggle('hint-pulse', Boolean(pulse) && (named(b) === pulse || b.dataset.action === pulse));
+      if (s.script) addGroup.textContent = s.script === 'fraction' ? 'Add part of group' : 'Add group'; // a fraction bar is built from parts
       addGroup.disabled = step !== 'groups' || Boolean(s.problem?.hidden1 && !s.wroteOne);
       plusGroups.disabled = minusGroups.disabled = step !== 'sign';
       const filling = step === 'fill';

@@ -2,7 +2,13 @@
 // on the first try; pressing I'm stuck doesn't break it, a wrong answer does). The best streak is kept per card and
 // level, on this device. Pure logic, no DOM or storage.
 
-export const afterAnswer = (streak, clean) => (clean ? streak + 1 : 0);
+// After a finished problem: a clean answer adds one; a wrong typed answer breaks it; asking for help without a wrong
+// answer (I'm stuck, Teach me) leaves it where it is. `session` is { clean, wrongs }; a session with no `wrongs` count
+// that wasn't clean is treated as having had one.
+export function afterAnswer(streak, session) {
+  if (session.clean) return streak + 1;
+  return (session.wrongs ?? 1) > 0 ? 0 : streak;
+}
 
 // Whatever was saved, as { pack: { level: n } } with whole numbers only.
 export function readBests(raw) {

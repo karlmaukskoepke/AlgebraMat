@@ -5,7 +5,7 @@ import {
 } from '../src/engine/groups.js';
 import {
   generateLassoLevel, LASSO_LEVEL_COUNT, MAX_GROUPS, MAX_IN_GROUP, MAX_COUNTERS, MAX_SINGLE_GROUP,
-  MAX_DEAL, MAX_DENOMINATOR, PROBLEMS_PER_LEVEL,
+  MAX_DEAL_BY_DENOMINATOR, DENOMINATORS, PROBLEMS_PER_LEVEL,
 } from '../src/engine/generateLasso.js';
 
 describe('group problems: A(B) means A groups of B', () => {
@@ -129,12 +129,12 @@ describe('Lasso level rules (SPEC-LASSO.md §4)', () => {
       expect(p.count.neg).toBe(neg);
       expect(p.count.n).toBe(1);
       expect(p.count.d).toBeGreaterThanOrEqual(2);
-      expect(p.count.d).toBeLessThanOrEqual(MAX_DENOMINATOR);
+      expect(DENOMINATORS).toContain(p.count.d);
       expect(Math.abs(p.inside.value) % p.count.d).toBe(0);
-      expect(Math.abs(p.inside.value)).toBeLessThanOrEqual(MAX_DEAL);
+      expect(Math.abs(p.inside.value)).toBeLessThanOrEqual(MAX_DEAL_BY_DENOMINATOR[p.count.d]);
       seen.add(p.count.d);
     }
-    expect(seen).toEqual(new Set([2, 3, 4, 5, 6]));
+    expect(seen).toEqual(new Set([2, 3, 4, 5, 6, 8]));
   });
 
   it.each([[6, false], [7, true]])('level %i: non-unit fractions (opposite: %s)', (level, neg) => {
@@ -143,13 +143,13 @@ describe('Lasso level rules (SPEC-LASSO.md §4)', () => {
       expect(p.count.neg).toBe(neg);
       expect(p.count.n).toBeGreaterThan(1);
       expect(p.count.n).toBeLessThan(p.count.d);
-      expect(p.count.d).toBeLessThanOrEqual(MAX_DENOMINATOR);
+      expect(DENOMINATORS).toContain(p.count.d);
       expect(Math.abs(p.inside.value) % p.count.d).toBe(0);
-      expect(Math.abs(p.inside.value)).toBeLessThanOrEqual(MAX_DEAL);
+      expect(Math.abs(p.inside.value)).toBeLessThanOrEqual(MAX_DEAL_BY_DENOMINATOR[p.count.d]);
       seen.add(`${p.count.n}/${p.count.d}`);
     }
-    // every friendly fraction up to sixths shows up somewhere
-    expect(seen).toEqual(new Set(['2/3', '3/4', '2/5', '3/5', '4/5', '5/6'])); // lowest terms only
+    // every friendly fraction up to eighths shows up somewhere
+    expect(seen).toEqual(new Set(['2/3', '3/4', '2/5', '3/5', '4/5', '5/6', '3/8', '5/8', '7/8'])); // lowest terms only
   });
 
   it('levels 1–2 lean toward small totals', () => {
@@ -167,5 +167,22 @@ describe('Lasso level rules (SPEC-LASSO.md §4)', () => {
 
   it('rejects unknown levels', () => {
     expect(() => generateLassoLevel(8, 1)).toThrow();
+  });
+});
+
+describe('how big a number a fraction can be taken of (Karl, 2026-10-03)', () => {
+  it('thirds to 18, fourths to 24, fifths to 30, sixths and eighths to 24, with the eighths in', () => {
+    expect(MAX_DEAL_BY_DENOMINATOR).toEqual({ 2: 16, 3: 18, 4: 24, 5: 30, 6: 24, 8: 24 });
+    const biggest = {};
+    for (const level of [4, 5, 6, 7]) {
+      for (let seed = 1; seed <= 400; seed++) {
+        for (const p of generateLassoLevel(level, seed)) {
+          biggest[p.count.d] = Math.max(biggest[p.count.d] ?? 0, Math.abs(p.inside.value));
+        }
+      }
+    }
+    expect(biggest[3]).toBeGreaterThan(12);          // bigger than before
+    expect(biggest[5]).toBeGreaterThan(20);
+    expect(biggest[8]).toBeGreaterThan(12);
   });
 });

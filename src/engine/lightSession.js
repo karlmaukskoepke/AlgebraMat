@@ -8,8 +8,11 @@
 // A sign mistake gets the cloze: a sentence with a blank and four word-choices, read aloud once one is picked.
 
 import { evaluate, rewrite, formatProblem } from './expr.js';
+
+const rewrite_ = rewrite;   // (the support below has a `rewrite` session of its own)
 import { newCombineSession } from './combineSession.js';
 import { reduce as reduceWalk, newSession as newFlipWalk } from './session.js';
+import { newBigSession, reduceBig } from './bigSession.js';
 import { validatePartyBattle } from './moves.js';
 import { classify, firstSupport, nextRung, buildCloze, spokenSentence, leftover, clozeFeedbackKey } from './scaffold.js';
 import { emptySkills, whichOn } from './skills.js';
@@ -29,7 +32,13 @@ function partyBattleMessage(problem) {
 }
 
 // Supports built so far. Others fall back to the party-or-battle question.
-const BUILT = new Set(['cloze', 'partyBattle', 'fullWalk']);
+const BUILT = new Set(['circle', 'rewrite', 'cloze', 'partyBattle', 'fullWalk']);
+
+// The two numbers as a circling problem: each with the sign in front of it, like Combine it's big-number circle step.
+const circleProblem = (problem) => ({
+  mode: 'integers-big',
+  terms: [{ kind: 'int', op: '+', value: problem.left.value }, { kind: 'int', op: '+', value: problem.right.value }],
+});
 const resolve = (kind) => (BUILT.has(kind) ? kind : 'partyBattle');
 
 // `skills` are the supports that are on for this student (engine/skills.js): the party-or-battle question comes first
@@ -52,6 +61,11 @@ export function newLightSession(problem, skills = emptySkills()) {
     tags: [],                  // every wrong answer's tag, for the log
     stuck: 0,                  // times I'm stuck was pressed
     walk: null,                // Flip It's session, when the full walk is on
+    circle: null,              // the circling session, while the circle support is showing
+    circled: false,            // the numbers were circled with their signs (kept on the Mat while the student types)
+    rewrite: null,             // Flip It's rewrite step, while the rewrite support is showing
+    rewritten: false,          // the subtraction was rewritten as an addition (kept on the Mat while the student types)
+    taught: 0,                 // times Teach me step-by-step was pressed
     helped: false,             // a support was brought in by a wrong answer or I'm stuck
     clean: false,              // right on the first try with no help: counts toward fading a support
     on,                        // which supports were on when the problem began: { partyBattle, sign }
@@ -75,21 +89,39 @@ export function newLightSession(problem, skills = emptySkills()) {
 
 const say = (s, key, params, bad = false) => { s.feedback = { key, params, bad }; return s; };
 
-// Bring in the next support: the first for this mistake, or the next rung once one has been used.
-function bringIn(s, tag) {
-  const kind = resolve(s.lastSupport ? nextRung(s.lastSupport) : firstSupport(tag));
+// Bring in the next support: the first for this mistake, or the next rung once one has been used. `force` names one
+// (Teach me step-by-step goes straight to the full walk).
+function bringIn(s, tag, force = null) {
+  const kind = force ?? resolve(s.lastSupport ? nextRung(s.lastSupport) : firstSupport(tag, s.problem));
   s.lastSupport = kind;
   s.helped = true;
   s.supportsShown.push(kind);
+  s.cloze = null;
+  s.circle = null;
+  s.rewrite = null;
   if (kind === 'fullWalk') {
     s.stage = 'walk';
     s.walk = startWalk(s.problem);
+    // A subtraction that was already rewritten starts the walk with that done.
+    if (s.rewritten && s.problem.op === '-') for (const part of ['op', 'sign']) s.walk = reduceWalk(s.walk, { type: 'flip', part });
     s.step = s.walk.step;
     s.skipped = s.walk.skipped;
     return say(s, 'lightWalk', undefined);
   }
   s.stage = 'support';
   s.support = kind;
+  if (kind === 'circle') {
+    s.circle = newBigSession(circleProblem(s.problem));
+    s.step = 'circle';
+    s.feedback = { key: s.circle.feedback.key, src: 'circle' };
+    return s;
+  }
+  if (kind === 'rewrite') {
+    s.rewrite = newFlipWalk(s.problem);
+    s.step = 'rewrite';
+    s.feedback = { ...s.rewrite.feedback, src: 'rewrite' };
+    return s;
+  }
   if (kind === 'cloze') {
     const { sentence, choices, kind: situation } = buildCloze(s.problem);
     s.cloze = { sentence, choices, situation, tried: [] };
@@ -99,6 +131,16 @@ function bringIn(s, tag) {
   s.step = 'partyBattle';
   const m = partyBattleMessage(s.problem);
   return say(s, m.key, m.params);
+}
+
+// Back to typing once a support is done.
+function backToTyping(s, key, params) {
+  s.stage = 'light';
+  s.support = null;
+  s.step = 'answer';
+  s.circle = null;
+  s.rewrite = null;
+  return say(s, key, params);
 }
 
 export function reduceLight(state, action) {
@@ -113,6 +155,38 @@ export function reduceLight(state, action) {
     return s;
   }
   if (state.stage === 'done') return state;
+
+  // The circle support: the numbers are circled with their signs (Boxes & Circles' drag), then back to typing.
+  if (state.stage === 'support' && state.support === 'circle' && !['stuck', 'teach'].includes(action.type)) {
+    let circle = reduceBig(state.circle, action);
+    if (circle === state.circle) return state;
+    // Every number circled: that's the step. Checked on its own (no Check button here), so a circle that leaves out
+    // the sign is told so right away; with a number still to circle, nothing is said yet.
+    if (action.type === 'drawShape' && circle.shapes.length >= circle.problem.terms.length) circle = reduceBig(circle, { type: 'check' });
+    const s = { ...state, circle };
+    if (circle.step !== 'boxcircle') {
+      const done = structuredClone(s);
+      done.circled = true;
+      return backToTyping(done, 'lightCircled');
+    }
+    s.feedback = { ...circle.feedback, src: 'circle' };
+    return s;
+  }
+
+  // The rewrite support: click the minus and the number's sign (Flip It's Rewrite step), then back to typing.
+  if (state.stage === 'support' && state.support === 'rewrite' && !['stuck', 'teach'].includes(action.type)) {
+    if (action.type !== 'flip') return state;
+    const rewrite = reduceWalk(state.rewrite, action);
+    if (rewrite === state.rewrite) return state;
+    const s = { ...state, rewrite };
+    if (rewrite.step !== 'rewrite') {
+      const done = structuredClone(s);
+      done.rewritten = true;
+      return backToTyping(done, 'lightRewriteDone', { to: formatProblem(rewrite_(done.problem)) });
+    }
+    s.feedback = { ...rewrite.feedback, src: 'rewrite' };
+    return s;
+  }
 
   const s = structuredClone(state);
   switch (action.type) {
@@ -152,6 +226,14 @@ export function reduceLight(state, action) {
       s.answers.push({ typed: s.entry, tag });
       s.entry = '';
       return bringIn(s, tag);
+    }
+
+    // Teach me step-by-step: straight to the full walk.
+    case 'teach': {
+      if (s.stage !== 'light' && s.stage !== 'support') return state;
+      s.taught += 1;
+      s.entry = '';
+      return bringIn(s, s.tag, 'fullWalk');
     }
 
     // I'm stuck: the smallest support first, then the next rung each time.

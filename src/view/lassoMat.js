@@ -88,8 +88,9 @@ function problemText(s) {
   else if (s.wroteOne) parts.push(html('span', 'groups written', '1'));
   else if (s.oneOpen) {
     // The hidden 1: an arrow points at the gap; the student types the number.
-    const slot = html('span', `one-slot${s.fx?.hint?.show?.slot ? ' hint-pulse' : ''}`, s.oneText || '?');
-    slot.setAttribute('aria-label', 'The hidden number: type a 1');
+    const slot = html('span', `one-slot${s.fx?.hint?.show?.slot ? ' hint-pulse' : ''}`, s.oneText || '');
+    slot.setAttribute('aria-label', 'How many groups? Write the number here: it is 1');
+    slot.append(html('span', 'slot-label', 'how many groups?'));
     slot.append(el('svg', { class: 'slot-arrow', viewBox: '0 0 24 34', 'aria-hidden': 'true' }, [
       el('path', { d: 'M12 33 V6 M4 14 L12 5 L20 14' }),
     ]));
@@ -204,9 +205,10 @@ function fractionScript(svg, s) {
   const w = groupWidth(Math.max(2, each));
   const cols = fractionColumns(w, s.opposite);
   const H = LASSO_VIEW.height;
+  const PH = Math.min(PART_HEIGHT, Math.floor((H - 12) / Math.max(1, s.problem.count.d))); // eight parts squeeze to fit
   const d = s.groups.length;
-  const top = (H - d * PART_HEIGHT) / 2;
-  const yOf = (i) => top + i * PART_HEIGHT;
+  const top = (H - d * PH) / 2;
+  const yOf = (i) => top + i * PH;
   const anyTaken = s.groups.some((g) => g.taken);
   const cx = cols.left + w / 2;
 
@@ -217,12 +219,19 @@ function fractionScript(svg, s) {
       tap ? 'tappable' : '', hinted(s, i) && !part.flipped ? 'hint-blink-group' : '']
       .filter(Boolean).join(' ');
     const g = el('g', { class: cls, 'data-part': i, 'data-action': tap ? 'group' : null, 'data-index': tap ? i : null });
-    g.append(el('rect', { x: cols.left, y: yOf(i), width: w, height: PART_HEIGHT, class: 'bar-part' }));
-    if (next) g.append(el('rect', { x: cols.left + 4, y: yOf(i) + 4, width: w - 8, height: PART_HEIGHT - 8, rx: 6, class: 'next-ring' }));
-    g.append(counterRow(part.terms, cx, yOf(i) + PART_HEIGHT / 2, { width: w, base }));
+    g.append(el('rect', { x: cols.left, y: yOf(i), width: w, height: PH, class: 'bar-part' }));
+    if (next) g.append(el('rect', { x: cols.left + 4, y: yOf(i) + 4, width: w - 8, height: PH - 8, rx: 6, class: 'next-ring' }));
+    g.append(counterRow(part.terms, cx, yOf(i) + PH / 2, { width: w, base }));
     svg.append(g);
   });
-  if (d) svg.append(el('rect', { x: cols.left, y: top, width: w, height: d * PART_HEIGHT, rx: 4, class: 'bar-outline' }));
+  if (d) svg.append(el('rect', { x: cols.left, y: top, width: w, height: d * PH, rx: 4, class: 'bar-outline' }));
+
+  // The whole group's bracket, when its number was put in every part instead of shared between them.
+  if (d && s.feedback?.key === 'dealEach') {
+    const total = signed(s.problem.inside.value);
+    svg.append(el('path', { d: `M ${cols.bx - 8} ${top + 3} H ${cols.bx} V ${top + d * PH - 3} H ${cols.bx - 8}`, class: 'take-bracket whole-bracket' }));
+    svg.append(el('text', { x: cols.bx + 10, y: top + (d * PH) / 2 + 8, class: 'take-label whole-label' }, [`whole group: ${total}`]));
+  }
 
   // The "take n" bracket beside each run of taken parts.
   const runs = takenRuns(s.groups.map((g) => g.taken));
@@ -246,23 +255,23 @@ function fractionScript(svg, s) {
         svg.append(arrow(cols.arrow[0], cols.arrow[1], y, 'is-opposite', Boolean(s.fx?.justFlipped?.length)));
         // The parts taken, redrawn as opposites in a bar of their own.
         const n = taken.length;
-        const top2 = Math.max(2, Math.min(H - n * PART_HEIGHT - 2, y - (n * PART_HEIGHT) / 2));
+        const top2 = Math.max(2, Math.min(H - n * PH - 2, y - (n * PH) / 2));
         const cx2 = cols.redrawLeft + w / 2;
         taken.forEach((idx, k) => {
           const g = el('g', { class: `part redrawn${hinted(s, idx) ? ' hint-blink-group' : ''}`, 'data-redrawn': idx });
-          g.append(el('rect', { x: cols.redrawLeft, y: top2 + k * PART_HEIGHT, width: w, height: PART_HEIGHT, class: 'bar-part' }));
-          g.append(counterRow(opposites(s.groups[idx].terms), cx2, top2 + k * PART_HEIGHT + PART_HEIGHT / 2,
+          g.append(el('rect', { x: cols.redrawLeft, y: top2 + k * PH, width: w, height: PH, class: 'bar-part' }));
+          g.append(counterRow(opposites(s.groups[idx].terms), cx2, top2 + k * PH + PH / 2,
             { width: w, base, magenta: true, turning: Boolean(s.fx?.justFlipped?.includes(idx)) }));
           svg.append(g);
         });
-        svg.append(el('rect', { x: cols.redrawLeft, y: top2, width: w, height: n * PART_HEIGHT, rx: 4, class: 'bar-outline' }));
-        svg.append(chain(s, cols.chainX, top2 + (n * PART_HEIGHT) / 2 + 8));
+        svg.append(el('rect', { x: cols.redrawLeft, y: top2, width: w, height: n * PH, rx: 4, class: 'bar-outline' }));
+        svg.append(chain(s, cols.chainX, top2 + (n * PH) / 2 + 8));
       }
     }
   }
 
   // One − for the whole bar. Flipping it flips the groups taken.
-  if (s.opposite && d) svg.append(oppMark(s, cols.markX, top + (d * PART_HEIGHT) / 2, { index: 0, flipped }));
+  if (s.opposite && d) svg.append(oppMark(s, cols.markX, top + (d * PH) / 2, { index: 0, flipped }));
   return cols.width;
 }
 

@@ -1,6 +1,7 @@
 // Light mode's messages (SPEC-SCAFFOLD.md). Messages from the full walk are Flip It's; the session tags them `src: 'walk'`.
 
 import { feedbackText as walkText } from './feedback.js';
+import { bigFeedbackText } from './bigFeedback.js';
 import { MINUS } from '../engine/expr.js';
 
 const term = (v) => (v < 0 ? `${MINUS}${-v}` : `${v}`);
@@ -23,13 +24,16 @@ export const LIGHT_FEEDBACK = {
     : 'Not that size. In a party the two sides join together. Try another.'),
   lightClozeRight: ({ word }) => `Yes, ${word}! Now type the answer, with its sign.`,
   lightWalk: () => 'Let’s work it out with counters.',
+  lightCircled: () => 'Each number is circled with its sign in front. Look at the signs, then type the answer again.',
+  lightRewriteDone: ({ to }) => `Now it’s an addition: ${to}. Try the answer again.`,
   typeAnswer: () => 'Type your answer with the pad, then Check.',
   answerUnreadable: () => 'I can’t read that. Type just a number, like −2 or 7.',
 };
 
 export function lightFeedbackText(fb) {
   if (!fb) return '';
-  if (fb.src === 'walk') return walkText(fb);
+  if (fb.src === 'walk' || fb.src === 'rewrite') return walkText(fb);   // Flip It's messages (its Rewrite step too)
+  if (fb.src === 'circle') return bigFeedbackText(fb);                  // Combine it's circling messages
   const f = LIGHT_FEEDBACK[fb.key];
   return f ? f(fb.params ?? {}) : '';
 }

@@ -244,9 +244,9 @@ describe('Group It session: fraction groups', () => {
     expect(nextPart(s)).toBe(1);
   });
 
-  it('caps parts at 7', () => {
-    const s = run(newLassoSession(p23m6), ...times(9, { type: 'addGroup' }));
-    expect(s.groups).toHaveLength(7);
+  it('caps parts at 8', () => {
+    const s = run(newLassoSession(p23m6), ...times(10, { type: 'addGroup' }));
+    expect(s.groups).toHaveLength(8);
     expect(s.feedback.key).toBe('tooManyGroups');
   });
 });
@@ -277,5 +277,45 @@ describe('Group It feedback table', async () => {
     expect(lassoFeedbackText({ key: 'groupCount', params: { n: 3, have: 2 } })).toBe('The number of groups is 3 — you have 2 groups.');
     expect(lassoFeedbackText({ key: 'needGroupType', params: { b: -2, count: 2, sign: '-' } })).toBe('Each group is −2, so each group needs 2 negatives.');
     expect(lassoFeedbackText({ key: 'groupCountAgain', params: { b: -2, have: 3, index: 1 } })).toBe('The second group has 3 — each group is −2.');
+  });
+});
+
+describe('Group It: the fraction misconceptions (Karl, 2026-10-03)', async () => {
+  const { makeGroups } = await import('../src/engine/groups.js');
+  const { validateDeal, validateCount } = await import('../src/engine/lassoMoves.js');
+  const { LASSO_FEEDBACK } = await import('../src/view/lassoFeedback.js');
+  const part = (n, sign = '+') => ({ terms: Array.from({ length: n }, () => ({ kind: 'int', sign })), taken: false, flipped: false });
+
+  it('1/2 of 2 with two counters in each part: the whole group\'s number belongs to the whole group', () => {
+    const half = makeGroups({ n: 1, d: 2 }, 2);
+    expect(validateDeal(half, [part(2), part(2)])).toMatchObject({ ok: false, feedbackKey: 'dealEach', params: { b: 2, d: 2 } });
+    expect(validateDeal(half, [part(1), part(1)]).ok).toBe(true);
+    expect(LASSO_FEEDBACK.dealEach({ b: 2, d: 2 })).toBe('The whole group has a total value of 2. Share the 2 between the 2 parts: don’t put 2 in each part.');
+    const thirds = makeGroups({ n: 1, d: 3 }, -6);
+    expect(validateDeal(thirds, [part(6, '-'), part(6, '-'), part(6, '-')]).feedbackKey).toBe('dealEach');
+  });
+
+  it('other deal mistakes keep their own messages', () => {
+    const half = makeGroups({ n: 1, d: 2 }, 4);
+    expect(validateDeal(half, [part(1), part(1)]).feedbackKey).toBe('dealCount');
+    expect(validateDeal(half, [part(3), part(2)]).feedbackKey).toBe('dealCount');
+  });
+
+  it('1/3 of 12 answered 8: the parts left behind were counted, not the part taken', () => {
+    const third = makeGroups({ n: 1, d: 3 }, 12);
+    expect(validateCount(third, 8)).toMatchObject({ ok: false, feedbackKey: 'countRemoved' });
+    expect(validateCount(third, 4).ok).toBe(true);
+    expect(validateCount(third, 5).feedbackKey).toBe('countTaken');
+    const twoThirds = makeGroups({ n: 2, d: 3 }, 12);
+    expect(validateCount(twoThirds, 4).feedbackKey).toBe('countRemoved');
+    const opposite = makeGroups({ neg: true, n: 1, d: 3 }, 12);
+    expect(validateCount(opposite, -8).feedbackKey).toBe('countRemoved');
+    expect(validateCount(makeGroups({ n: 1, d: 2 }, 4), -2).feedbackKey).toBe('countTaken');   // half of 4: what's left is the same size
+    expect(LASSO_FEEDBACK.countRemoved()).toMatch(/didn’t take/);
+  });
+
+  it('the wording asks for positive or opposite (negative) groups', () => {
+    expect(LASSO_FEEDBACK.groupsDone()).toBe('Are these positive groups, or opposite (negative) groups?');
+    expect(LASSO_FEEDBACK.lookAtSign()).toMatch(/opposite \(negative\) groups/);
   });
 });

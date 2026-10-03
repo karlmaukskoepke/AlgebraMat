@@ -11,8 +11,11 @@ export const MAX_GROUPS = 5;        // whole-number lassos
 export const MAX_IN_GROUP = 5;      // counters per lasso (Levels 1 and 3)
 export const MAX_COUNTERS = 20;     // |A·B| for whole-number groups
 export const MAX_SINGLE_GROUP = 8;  // Level 2's one lasso: B up to ±8
-export const MAX_DEAL = 12;         // counters to deal out in fraction problems
-export const MAX_DENOMINATOR = 6;
+// What a fraction can be taken of, by denominator (Karl, 2026-10-03): the number is shared between the parts, so it
+// can be bigger than the parts' counters would suggest. Thirds up to 18, fourths 24, fifths 30, sixths 24, eighths 24.
+export const MAX_DEAL_BY_DENOMINATOR = { 2: 16, 3: 18, 4: 24, 5: 30, 6: 24, 8: 24 };
+export const DENOMINATORS = Object.keys(MAX_DEAL_BY_DENOMINATOR).map(Number);
+export const MAX_DEAL = Math.max(...Object.values(MAX_DEAL_BY_DENOMINATOR)); // counters to deal out in fraction problems
 
 const range = (lo, hi) => Array.from({ length: hi - lo + 1 }, (_, i) => lo + i);
 const signedRange = (max) => [...range(1, max).map((v) => -v), ...range(1, max)];
@@ -47,11 +50,11 @@ function wholeGroups(neg) {
 
 function fractionGroups(neg, unit) {
   const out = [];
-  for (const d of range(2, MAX_DENOMINATOR)) {
+  for (const d of DENOMINATORS) {
     // Lowest terms only (2/3, not 4/6): the friendly fractions from the notes.
     const numerators = unit ? [1] : range(2, d - 1).filter((n) => gcd(n, d) === 1);
     for (const n of numerators) {
-      for (const b of signedRange(MAX_DEAL)) {
+      for (const b of signedRange(MAX_DEAL_BY_DENOMINATOR[d])) {
         if (b % d === 0) out.push(makeGroups({ neg, n, d }, b));
       }
     }

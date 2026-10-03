@@ -1907,3 +1907,63 @@ body {
   padding: 0 14px;
   border-radius: 999px;
 }
+
+/* Text on the Mat isn't for selecting: a drag or a double-click across it shouldn't highlight the problem. */
+.mat-wrap,
+.mat-wrap * {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+/* The hidden 1: a label by the arrow says what goes in the gap. */
+.one-slot .slot-label {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  margin: 10px 0 0 22px;
+  font: 600 17px 'Lexend', sans-serif;
+  white-space: nowrap;
+  color: var(--groups);
+}
+
+/* A button's small second line (the − groups button says "opposite"). */
+.btn .btn-sub {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1;
+  color: var(--opposite);
+}
+
+/* Light mode's party-or-battle question: each answer's button sits right under the words that call for it. */
+.light-mat .pb-choices {
+  display: flex;
+  justify-content: center;
+  gap: 48px;
+  margin-top: 14px;
+}
+.light-mat .pb-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+.light-mat .pb-question {
+  font: 700 26px 'Kalam', cursive;
+}
+.light-mat .pb-button {
+  min-width: 140px;
+}
+
+/* Numbers circled with their signs, and a rewritten subtraction. */
+.light-mat .light-term.circled {
+  display: inline-block;
+  padding: 0 14px;
+  margin: 0 6px;
+  border: 3px solid var(--ink);
+  border-radius: 999px;
+}
+.light-mat .dist-rewritten {
+  color: var(--opposite);
+}

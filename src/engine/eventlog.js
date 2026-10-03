@@ -16,6 +16,7 @@ export function makeRecord(session, { t, pack, level, problem }) {
     answers: session.answers.map((a) => ({ typed: a.typed, tag: a.tag })),
     supports: [...session.supportsShown],
     stuck: session.stuck,
+    taught: session.taught ?? 0,
     clean: session.clean,
     on: { ...session.on },
   };

@@ -30,7 +30,7 @@ export function buildLassoControls(root, dispatch) {
 
   const addGroup = button('Add group', 'addGroup');
   const plusGroups = button('+ groups', 'chooseSign', { data: { sign: '+' } });
-  const minusGroups = button('<span class="opp-word">−</span> groups', 'chooseSign', { data: { sign: '-' }, aria: 'Minus groups (opposite)' });
+  const minusGroups = button('<span class="opp-word">−</span> groups<span class="btn-sub">opposite</span>', 'chooseSign', { data: { sign: '-' }, aria: 'Minus groups (opposite groups)' });
   const plus = button(PLUS_SVG, 'pickSign', { cls: 'btn-sign', data: { sign: '+' }, aria: 'Plus counter' });
   const minus = button(MINUS_SVG, 'pickSign', { cls: 'btn-sign', data: { sign: '-' }, aria: 'Minus counter' });
   const undo = button('Undo', 'undo');
@@ -65,6 +65,7 @@ export function buildLassoControls(root, dispatch) {
       for (const b of row.querySelectorAll('button')) {
         b.classList.toggle('hint-pulse', Boolean(pulse) && (named(b) === pulse || b.dataset.action === pulse));
       }
+      if (s.script) addGroup.textContent = s.script === 'fraction' ? 'Add part of group' : 'Add group'; // a fraction bar is built from parts
       addGroup.disabled = step !== 'groups';
       plusGroups.disabled = minusGroups.disabled = step !== 'sign';
       const filling = step === 'fill';

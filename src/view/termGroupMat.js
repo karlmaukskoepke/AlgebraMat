@@ -96,8 +96,9 @@ function problemText(s) {
   else if (s.wroteOne) parts.push(html('span', 'groups written', '1'));
   else if (s.oneOpen) {
     // The hidden 1: an arrow points at the gap; the student types the number.
-    const slot = html('span', `one-slot${s.fx?.hint?.show?.slot ? ' hint-pulse' : ''}`, s.oneText || '?');
-    slot.setAttribute('aria-label', 'The hidden number: type a 1');
+    const slot = html('span', `one-slot${s.fx?.hint?.show?.slot ? ' hint-pulse' : ''}`, s.oneText || '');
+    slot.setAttribute('aria-label', 'How many groups? Write the number here: it is 1');
+    slot.append(html('span', 'slot-label', 'how many groups?'));
     slot.append(el('svg', { class: 'slot-arrow', viewBox: '0 0 24 34', 'aria-hidden': 'true' }, [
       el('path', { d: 'M12 33 V6 M4 14 L12 5 L20 14' }),
     ]));

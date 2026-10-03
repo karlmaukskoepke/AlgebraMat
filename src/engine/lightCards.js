@@ -46,6 +46,31 @@ function checkGroups(problem, text) {
   return { correct: false, tag: 'unmatched' };
 }
 
+// What the minus in front of a group problem means, as a closed passage (Karl, 2026-10-03): −1/2(−4) means ____. Four
+// choices cover the opposite or not, and the number inside as written or with its sign changed; only one is right.
+// Each wrong one says what is off.
+export function groupCloze(problem) {
+  const { neg, n, d } = problem.count;
+  const b = problem.inside.value;
+  const of = d > 1 ? `${n}/${d} of` : `${n} ${n === 1 ? 'group' : 'groups'} of`;
+  const signedNum = (v) => (v < 0 ? `−${-v}` : `${v}`);
+  const make = (opp, flipInside) => {
+    const inner = flipInside ? -b : b;
+    return {
+      opp, flipInside,
+      text: `${opp ? 'the opposite of ' : ''}${of} ${signedNum(inner)}`,
+      right: opp === neg && !flipInside,
+      reason: opp !== neg
+        ? (neg ? 'The minus in front means “the opposite of”.' : 'There’s no minus in front, so nothing is turned into its opposite.')
+        : 'Look at the number in the parentheses: is it positive or negative?',
+    };
+  };
+  const all = [make(true, false), make(false, false), make(true, true), make(false, true)];
+  const turn = (n + Math.abs(b)) % 4;             // the right one doesn't always sit in the same place
+  const choices = all.map((_, i) => all[(i + turn) % 4]).map((c, index) => ({ ...c, index }));
+  return { sentence: `${formatGroups(problem)} means ____.`, choices };
+}
+
 // pad: 'integer' types a number (± and digits); 'algebra' types terms (x, + and − too).
 export const CARDS = {
   // Combine it Levels 4–5 and Flip It Level 5: three or more integers.
@@ -66,6 +91,7 @@ export const CARDS = {
     problemText: formatGroups,
     answerText: (p) => formatAnswer({ x: 0, n: evaluateGroups(p) }),
     check: checkGroups,
+    signCloze: groupCloze,        // a sign mistake gets the closed passage before the full walk
   },
   termGroups: {
     pad: 'algebra',

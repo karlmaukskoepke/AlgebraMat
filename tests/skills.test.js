@@ -79,15 +79,16 @@ describe('light mode with supports on', () => {
 
   it('keeps what the log needs: the wrong answers typed, the supports shown, being stuck', () => {
     let s = newLightSession(P);
-    s = answer(s, 2);                                                              // a dropped sign: the cloze
+    s = answer(s, 2);                                                              // a dropped sign: circle the numbers
+    s = reduceLight(s, { type: 'stuck' });                                          // stuck: the cloze
     s = reduceLight(s, { type: 'stuck' });                                          // stuck inside it: the full walk
     expect(s.answers).toEqual([{ typed: '2', tag: 'sign-dropped' }]);
-    expect(s.supportsShown).toEqual(['cloze', 'fullWalk']);
-    expect(s.stuck).toBe(1);
+    expect(s.supportsShown).toEqual(['circle', 'cloze', 'fullWalk']);
+    expect(s.stuck).toBe(2);
     const rec = makeRecord(s, { t: 5, pack: 'combineit', level: 3, problem: '−5 + 3' });
     expect(rec).toEqual({
       t: 5, pack: 'combineit', level: 3, problem: '−5 + 3', answers: [{ typed: '2', tag: 'sign-dropped' }],
-      supports: ['cloze', 'fullWalk'], stuck: 1, clean: false, on: { partyBattle: false, sign: false },
+      supports: ['circle', 'cloze', 'fullWalk'], stuck: 2, taught: 0, clean: false, on: { partyBattle: false, sign: false },
     });
   });
 });

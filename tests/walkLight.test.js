@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { newWalkLight, reduceWalkLight } from '../src/engine/walkLight.js';
-import { CARDS, tagTerms } from '../src/engine/lightCards.js';
+import { CARDS, tagTerms, groupCloze } from '../src/engine/lightCards.js';
+import { evaluateGroups, formatGroups } from '../src/engine/groups.js';
 import { parseAnswer } from '../src/engine/terms.js';
 import { packById } from '../src/packs/index.js';
 import { boxPlay } from '../src/play/boxPlay.js';
@@ -157,5 +158,66 @@ describe('light mode starts every walk', () => {
     const card = cardOf('integers', bigPlay);
     const problem = packById('combineit').generate(5, 2)[0];
     expect(run(card, newWalkLight(problem, card), { type: 'stuck' }).walk.step).toBe('boxcircle');
+  });
+});
+
+describe('Teach me step-by-step on every card', () => {
+  it('goes straight to the full walk, counts as help, and is not a wrong answer', () => {
+    const card = cardOf('boxes');
+    const problem = packById('boxes').generate(1, 5)[0];
+    const s = run(card, newWalkLight(problem, card), { type: 'teach' });
+    expect(s).toMatchObject({ stage: 'walk', helped: true, taught: 1, wrongs: 0, supportsShown: ['fullWalk'], feedback: { key: 'wlTeach' } });
+    expect(walkLightFeedbackText(s.feedback, () => 'x')).toMatch(/step-by-step/);
+  });
+});
+
+describe('Group It: a sign mistake gets a closed passage first (Karl, 2026-10-03)', () => {
+  const card = cardOf('group');
+  const problem = packById('lasso').generate(7, 3).find((p) => p.count.neg && p.inside.value < 0);   // −n/d(−B)
+  const answer = String(evaluateGroups(problem));
+  const wrongSign = String(-evaluateGroups(problem));
+
+  it('says what the minus means, with four choices and only one right', () => {
+    const { sentence, choices } = groupCloze(problem);
+    expect(sentence).toBe(`${formatGroups(problem)} means ____.`);
+    expect(choices).toHaveLength(4);
+    expect(choices.filter((c) => c.right)).toHaveLength(1);
+    expect(choices.find((c) => c.right).text).toMatch(/^the opposite of \d+\/\d+ of −\d+$/);
+    expect(choices.some((c) => /^\d+\/\d+ of −\d+$/.test(c.text))).toBe(true);   // "one half of −4" without the opposite
+    expect(choices.map((c) => c.index)).toEqual([0, 1, 2, 3]);
+    const plain = groupCloze({ ...problem, count: { n: 3, d: 1, neg: false }, inside: { value: 4 } });
+    expect(plain.choices.find((c) => c.right).text).toBe('3 groups of 4');
+  });
+
+  it('a sign mistake brings it in; a wrong pick says what is off; the right one goes back to typing', () => {
+    let s = run(card, newWalkLight(problem, card), ...keys(wrongSign, 'integer'), { type: 'check' });
+    expect(s).toMatchObject({ stage: 'support', support: 'cloze', step: 'cloze', wrongs: 1, supportsShown: ['cloze'], tag: expect.stringMatching(/sign|winner/) });
+    const bad = s.cloze.choices.find((c) => !c.right);
+    s = run(card, s, { type: 'pickChoice', index: bad.index });
+    expect(s).toMatchObject({ stage: 'support', feedback: { key: 'wlClozeNo', bad: true } });
+    expect(walkLightFeedbackText(s.feedback, () => 'x')).toContain(bad.reason);
+    expect(run(card, s, { type: 'pickChoice', index: bad.index })).toBe(s);          // crossed out
+    expect(run(card, s, { type: 'digit', digit: 1 })).toBe(s);                       // no typing during it
+    const right = s.cloze.choices.find((c) => c.right);
+    s = run(card, s, { type: 'pickChoice', index: right.index });
+    expect(s).toMatchObject({ stage: 'light', step: 'answer', support: null, cloze: null, said: { sentence: expect.stringContaining('the opposite of') } });
+    s = run(card, s, ...keys(answer, 'integer'), { type: 'check' });
+    expect(s).toMatchObject({ stage: 'done', clean: false });
+  });
+
+  it('a second sign mistake, a size mistake, or being stuck goes to the full walk', () => {
+    let s = run(card, newWalkLight(problem, card), ...keys(wrongSign, 'integer'), { type: 'check' });
+    expect(run(card, s, { type: 'stuck' })).toMatchObject({ stage: 'walk', stuck: 1 });
+    s = run(card, s, { type: 'pickChoice', index: s.cloze.choices.find((c) => c.right).index }, ...keys(wrongSign, 'integer'), { type: 'check' });
+    expect(s.stage).toBe('walk');                                                    // the passage is a first rung only
+    const size = run(card, newWalkLight(problem, card), ...keys('1', 'integer'), { type: 'check' });
+    expect(size.stage).toBe('walk');
+  });
+
+  it('the other cards have no closed passage: a sign mistake goes straight to the walk', () => {
+    const c = cardOf('boxes');
+    const p = packById('boxes').generate(3, 5)[0];
+    const s = run(c, newWalkLight(p, c), { type: 'digit', digit: 1 }, { type: 'check' });
+    expect(s.stage).toBe('walk');
   });
 });

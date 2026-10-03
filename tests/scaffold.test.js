@@ -62,13 +62,19 @@ describe('what a wrong answer says: classify', () => {
   });
 
   it('every tag has exactly one first support, and I\'m stuck starts at the smallest', () => {
-    expect(firstSupport('sign-dropped')).toBe('cloze');
-    expect(firstSupport('wrong-winner')).toBe('cloze');
+    expect(firstSupport('sign-dropped')).toBe('circle');
+    expect(firstSupport('wrong-winner')).toBe('circle');
     expect(firstSupport('battle-as-party')).toBe('partyBattle');
     expect(firstSupport('party-as-battle')).toBe('partyBattle');
     expect(firstSupport('unmatched')).toBe('fullWalk');
     expect(firstSupport(null)).toBe('partyBattle');
+    // a subtraction goes straight to rewriting it as an addition, whatever the mistake
+    const sub = { left: { value: 3 }, op: '-', right: { value: -5 } };
+    for (const tag of ['sign-dropped', 'wrong-winner', 'battle-as-party', 'minus-as-minus', 'unmatched', null]) expect(firstSupport(tag, sub)).toBe('rewrite');
+    expect(firstSupport('sign-dropped', { left: { value: 3 }, op: '+', right: { value: -5 } })).toBe('circle');
+    expect(nextRung('circle')).toBe('cloze');          // a sign mistake: circle the numbers, then the sentence, then the walk
     expect(nextRung('cloze')).toBe('fullWalk');
+    expect(nextRung('rewrite')).toBe('fullWalk');
     expect(nextRung('partyBattle')).toBe('fullWalk');
     expect(nextRung('fullWalk')).toBeNull();
     expect(['sign-dropped', 'wrong-winner', 'battle-as-party', 'party-as-battle', 'unmatched'].map(skillOf))

@@ -13,12 +13,13 @@ import { recordProblem } from '../lightStore.js';
 import { startIntro } from '../view/tour.js';
 
 const LIGHT_STEPS = [{ id: 'answer', label: 'Answer' }];
+const CLOZE_STEPS = [{ id: 'cloze', label: 'Say it' }, { id: 'answer', label: 'Answer' }];
 
 export function makeWalkLightPlay({ packId, cardId, walkPlay }) {
   const base = CARDS[cardId];
   const card = { ...base, newWalk: walkPlay.newSession, reduceWalk: walkPlay.reduce };
   return {
-    steps: (s) => (s.stage === 'walk' ? walkPlay.steps(s.walk) : LIGHT_STEPS),
+    steps: (s) => (s.stage === 'walk' ? walkPlay.steps(s.walk) : s.stage === 'support' ? CLOZE_STEPS : LIGHT_STEPS),
     phaseLabel: (s) => (s.stage === 'walk' ? walkPlay.phaseLabel?.(s.walk) : null),
     newSession: (problem) => newWalkLight(problem, card),
     reduce: (state, action) => reduceWalkLight(state, action, card),
@@ -38,12 +39,14 @@ export function makeWalkLightPlay({ packId, cardId, walkPlay }) {
       if (s.stage === 'walk') return walkPlay.renderMat(s.walk, fx);
       return renderLightMat({
         problemText: base.problemText(s.problem),
+        cloze: s.stage === 'support' ? s.cloze : null,
+        said: s.said,
         typed: s.entry,
         shown: base.pad === 'algebra' ? prettyAnswer(s.entry) : undefined,
         done: s.stage === 'done',
       });
     },
-    matAction: (d) => walkPlay.matAction(d),
+    matAction: (d) => (d.action === 'choice' ? { type: 'pickChoice', index: Number(d.index) } : walkPlay.matAction(d)),
     // The walk's pointer handling (Box & Circle is dragged) sees the walk's session, or an idle one before it starts.
     bindMat: walkPlay.bindMat && ((root, dispatch, getSession) => walkPlay.bindMat(root, dispatch, () => {
       const s = getSession();

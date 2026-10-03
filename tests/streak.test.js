@@ -13,10 +13,12 @@ beforeEach(() => {
 });
 
 describe('streaks', () => {
-  it('a clean answer adds one, any other answer goes back to zero', () => {
-    expect(afterAnswer(0, true)).toBe(1);
-    expect(afterAnswer(4, true)).toBe(5);
-    expect(afterAnswer(4, false)).toBe(0);
+  it('a clean answer adds one, a wrong typed answer goes back to zero, and asking for help leaves it', () => {
+    expect(afterAnswer(0, { clean: true })).toBe(1);
+    expect(afterAnswer(4, { clean: true, wrongs: 0 })).toBe(5);
+    expect(afterAnswer(4, { clean: false, wrongs: 1 })).toBe(0);
+    expect(afterAnswer(4, { clean: false, wrongs: 0, stuck: 1 })).toBe(4);     // I'm stuck, then right: no change
+    expect(afterAnswer(4, { clean: false })).toBe(0);                          // no count of wrongs: treated as a miss
   });
 
   it('keeps the best per card and level, and only ever raises it', () => {
