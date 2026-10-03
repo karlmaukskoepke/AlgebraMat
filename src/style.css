@@ -332,23 +332,43 @@ body {
 
 .topbar {
   display: flex;
+  flex-wrap: wrap;           /* a long title with the streak and Next level wraps rather than overflows */
   align-items: center;
-  gap: 16px;
+  gap: 4px 12px;
   padding-bottom: 8px;
   border-bottom: 2px solid var(--ink);
+}
+
+.topbar .btn {
+  white-space: nowrap;
+  flex: none;
 }
 
 .title {
   white-space: nowrap;
   font-weight: 600;
-  font-size: 20px;
-  letter-spacing: 0.04em;
+  font-size: 18px;
+  letter-spacing: 0.03em;
 }
 
 .dots {
   display: flex;
   gap: 8px;
   margin-left: auto;
+}
+
+/* Streak: problems in a row with no wrong typed answer, and the best on this level. The dots follow it. */
+.streak {
+  margin-left: auto;
+  font-weight: 600;
+  font-size: 15px;
+  white-space: nowrap;
+}
+.streak:not([hidden]) + .dots {
+  margin-left: 0;
+}
+.level-best {
+  font-weight: 600;
 }
 
 .dot {
@@ -613,6 +633,10 @@ body {
   .title {
     white-space: nowrap;
     font-size: 17px;
+  }
+  .streak {
+    margin-left: 0;
+    font-size: 16px;
   }
   .dots {
     order: 3;

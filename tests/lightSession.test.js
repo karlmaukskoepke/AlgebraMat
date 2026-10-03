@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { newLightSession, reduceLight as reduce } from '../src/engine/lightSession.js';
+import { classify, firstSupport } from '../src/engine/scaffold.js';
 import { lightPlay } from '../src/play/lightPlay.js';
 import { lightFeedbackText } from '../src/view/lightFeedback.js';
 import { makeProblem, evaluate, partyOrBattle } from '../src/engine/expr.js';
@@ -168,5 +169,32 @@ describe('light mode', () => {
         }
       }
     }
+  });
+});
+
+describe('light mode on Flip It\'s subtractions', () => {
+  const S = (a, b) => makeProblem(a, '-', b);
+
+  it('typing the sum of the numbers (the minus kept as a minus) is its own mistake', () => {
+    expect(classify(S(5, -3), '2')).toEqual({ correct: false, tag: 'minus-as-minus' });
+    expect(classify(S(5, -3), '8')).toEqual({ correct: true, tag: null });
+    expect(classify(S(-5, -3), '-8')).toEqual({ correct: false, tag: 'minus-as-minus' });
+    expect(firstSupport('minus-as-minus')).toBe('partyBattle');
+  });
+
+  it('shows the subtraction as the addition it becomes before asking party or battle', () => {
+    const s = run(newLightSession(S(5, -3)), ...answer(2));
+    expect(s).toMatchObject({ stage: 'support', support: 'partyBattle', feedback: { key: 'lightPartyBattleSub' } });
+    expect(lightFeedbackText(s.feedback)).toMatch(/Subtracting is adding the opposite/);
+    expect(lightFeedbackText(s.feedback)).toMatch(/5 − \(−3\) is 5 \+ 3/);
+  });
+
+  it('a subtraction\'s full walk is Flip It\'s, starting at Rewrite', () => {
+    let s = newLightSession(S(5, -3));
+    s = run(s, ...answer(2));      // partyBattle
+    s = run(s, { type: 'stuck' }); // next rung: the cloze
+    s = run(s, { type: 'stuck' }); // full walk
+    expect(s.stage).toBe('walk');
+    expect(s.walk.step).toBe('rewrite');
   });
 });

@@ -84,28 +84,29 @@ export function renderPackMap(root, progress, packs, { onPlay, onSaveCode, onEnt
 }
 
 // Shown in place of the Mat when the fifth problem of a level is solved.
-export function renderLevelDone(root, { pack, level, packComplete, nextPack, onNext, onMap, onReplay }) {
+export function renderLevelDone(root, { pack, level, packComplete, nextPack, best = 0, onNext, onMap, onPractice }) {
   const hasNext = level < pack.levels;
   const buttons = h('div', { class: 'level-done-actions' });
   if (hasNext) buttons.append(h('button', { type: 'button', class: 'btn btn-primary', 'data-go': 'next' }, `Level ${level + 1} →`));
-  else buttons.append(h('button', { type: 'button', class: 'btn', 'data-go': 'replay' }, `Play Level ${level} again`));
-  buttons.append(h('button', { type: 'button', class: hasNext ? 'btn' : 'btn btn-primary', 'data-go': 'map' }, 'Pack map'));
+  buttons.append(h('button', { type: 'button', class: hasNext ? 'btn' : 'btn btn-primary', 'data-go': 'practice' }, 'Keep practicing'));
+  buttons.append(h('button', { type: 'button', class: 'btn', 'data-go': 'map' }, 'Pack map'));
 
   const panel = h('section', { class: 'level-done', 'aria-live': 'polite' },
     h('h2', {}, `Level ${level} complete!`),
     h('p', {}, hasNext
-      ? `Level ${level + 1} is open.`
+      ? `Level ${level + 1} is open. Move on, or keep practicing this level as long as you like.`
       : packComplete && nextPack?.comingSoon
         ? `You finished ${pack.title}! ${nextPack.title} is coming soon.`
         : packComplete && nextPack ? `You finished ${pack.title}! Next up: ${nextPack.title}, on the pack map.`
           : packComplete ? `You finished ${pack.title}!`
             : `That’s the last ${pack.title} level! Finish the others to complete the pack.`),
+    best > 0 ? h('p', { class: 'level-best' }, `Best streak on this level: ${best}`) : null,
     buttons);
   panel.addEventListener('click', (e) => {
     const go = e.target.closest('[data-go]')?.dataset.go;
     if (go === 'next') onNext();
     if (go === 'map') onMap();
-    if (go === 'replay') onReplay();
+    if (go === 'practice') onPractice();
   });
   root.replaceChildren(panel);
   panel.querySelector('.btn-primary')?.focus();

@@ -30,6 +30,8 @@ export function newTypedSession(problem) {
     openedText: null,      // the opened line, once it's right
     finalText: null,       // the answer, once it's right
     asked: false,          // Show me was pressed on this step
+    everAsked: false,      // Show me was pressed on any step
+    clean: false,          // right with no wrong try and no Show me (counts toward the streak)
     tries: {},
     feedback: { key: 'typedOpenIntro', src: 'dist' },
   };
@@ -56,6 +58,7 @@ export function reduceTyped(state, action) {
     case 'showMe':
       if (!typing || !canShowMe(s.problem) || s.asked) return state;
       s.asked = true;
+      s.everAsked = true;
       return s;
     case 'check': {
       if (s.step === 'open') {
@@ -78,6 +81,7 @@ export function reduceTyped(state, action) {
         }
         s.finalText = prettyAnswer(s.entry);
         s.step = 'done';
+        s.clean = !s.tries.open && !s.tries.answer && !s.everAsked;
         return say(s, res, 'ts');
       }
       return state;

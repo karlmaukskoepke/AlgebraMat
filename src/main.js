@@ -8,7 +8,13 @@ import { createStore } from './storage.js';
 import { PACKS, packById } from './packs/index.js';
 import { flipitPlay } from './play/flipitPlay.js';
 import { combinePlay } from './play/combinePlay.js';
-import { lightPlay } from './play/lightPlay.js';
+import { lightPlay, flipLightPlay } from './play/lightPlay.js';
+import {
+  combineIntegerLightPlay, flipIntegerLightPlay, bigLightPlay, lassoLightPlay, boxLightPlay, termGroupLightPlay, distributeLightPlay,
+} from './play/walkLightPlay.js';
+import { afterAnswer } from './engine/streak.js';
+import { loadBests, saveBest } from './lightStore.js';
+import { bestFor } from './engine/streak.js';
 import { integerPlay } from './play/integerPlay.js';
 import { bigPlay } from './play/bigPlay.js';
 import { lassoPlay } from './play/lassoPlay.js';
@@ -25,19 +31,24 @@ const $ = (id) => document.getElementById(id);
 // Each pack's play adapter: its steps, session, Mat, controls and messages.
 // A pack can use a different adapter for some levels (Combine it's Level 4 and Flip It's Level 5 run on the
 // integer steps, and Combine it's Level 5 its own), so each entry is the adapter or a function of the level.
-// Light mode is how Combine it Levels 1 to 3 play (SPEC-SCAFFOLD.md): type the answer, with supports that come in when a
-// wrong answer or I'm stuck calls for them. ?light=0 plays them the old step-by-step way instead.
+// Light mode is how nearly every level plays (SPEC-SCAFFOLD.md): type the answer, with supports that come in when a
+// wrong answer or I'm stuck calls for them, and the card's full walk as the last rung. ?light=0 plays the old
+// step-by-step way instead. (Distribute's typed Rounds 4 and 5 were already typed.)
 const LIGHT = new URLSearchParams(location.search).get('light') !== '0';
 const PLAY = {
-  combineit: (level) => (level >= 5 ? bigPlay : level === 4 ? integerPlay : LIGHT ? lightPlay : combinePlay),
-  flipit: (level) => (level >= 5 ? integerPlay : flipitPlay),
-  lasso: lassoPlay,
-  boxes: boxPlay,
-  'groups-of-terms': termGroupPlay,
-  'distribute-combine': (level) => (level >= 4 ? distributeTypedPlay : distributePlay),
+  combineit: (level) => (level >= 5 ? (LIGHT ? bigLightPlay : bigPlay) : level === 4 ? (LIGHT ? combineIntegerLightPlay : integerPlay)
+    : LIGHT ? lightPlay : combinePlay),
+  flipit: (level) => (level >= 5 ? (LIGHT ? flipIntegerLightPlay : integerPlay) : LIGHT ? flipLightPlay : flipitPlay),
+  lasso: LIGHT ? lassoLightPlay : lassoPlay,
+  boxes: LIGHT ? boxLightPlay : boxPlay,
+  'groups-of-terms': LIGHT ? termGroupLightPlay : termGroupPlay,
+  'distribute-combine': (level) => (level >= 4 ? distributeTypedPlay : LIGHT ? distributeLightPlay : distributePlay),
 };
 const adapterFor = (packId, level) => (typeof PLAY[packId] === 'function' ? PLAY[packId](level) : PLAY[packId]);
 const newSeed = () => Math.floor(Math.random() * 2 ** 32);
+// Every problem knows which level it was played at, for the anonymous log. (Not `level`: a few packs read that to
+// decide how a problem plays, such as whether it starts with Rewrite.)
+const levelled = (problems, level) => problems.map((p) => ({ ...p, logLevel: level }));
 
 // ?seed=123 replays a fixed set (handy for projecting the same problems to a
 // class). ?level=2 (with or without a seed) opens that level directly.
@@ -132,9 +143,12 @@ function startLevel(packId, level, resume = null) {
   const pack = packById(packId);
   const adapter = adapterFor(pack.id, level);
   const seed = resume?.seed ?? fixedSeed ?? newSeed();
-  const problems = pack.generate(level, seed);
+  const problems = levelled(pack.generate(level, seed), level);
   const index = resume?.index ?? 0;
-  play = { pack, adapter, level, seed, problems, index, session: adapter.newSession(problems[index]), finished: false };
+  play = {
+    pack, adapter, level, seed, problems, index, session: adapter.newSession(problems[index]), finished: false,
+    practicing: false, streak: 0, best: bestFor(loadBests(), pack.id, level),
+  };
   useControls(adapter);
   useMat(adapter);
   $('title').textContent = `${pack.title.toUpperCase()} · Level ${level}`;
@@ -153,7 +167,12 @@ function dispatch(action) {
 
 function nextProblem() {
   clearTimeout(nextTimer);
-  if (play.index + 1 >= PROBLEMS_PER_LEVEL) return finishLevel();
+  if (play.index + 1 >= PROBLEMS_PER_LEVEL) {
+    if (!play.practicing) return finishLevel();
+    play.seed = newSeed();                // practice goes on with a fresh set, for as long as the student likes
+    play.problems = levelled(play.pack.generate(play.level, play.seed), play.level);
+    play.index = -1;
+  }
   play.index += 1;
   play.session = play.adapter.newSession(play.problems[play.index]);
   persist();
@@ -171,10 +190,38 @@ function finishLevel() {
     pack, level,
     packComplete: isPackComplete(progress, pack.id),
     nextPack: PACKS[PACKS.indexOf(pack) + 1],
+    best: play.best,
     onNext: () => startLevel(pack.id, level + 1),
     onMap: goHome,
-    onReplay: () => startLevel(pack.id, level),
+    onPractice: startPractice,
   });
+}
+
+// "Keep practicing": the same level, as many problems as the student likes (fresh sets, the streak going), with a
+// Next level button in the header the whole time.
+function startPractice() {
+  play.practicing = true;
+  play.finished = false;
+  play.seed = newSeed();
+  play.problems = levelled(play.pack.generate(play.level, play.seed), play.level);
+  play.index = 0;
+  play.session = play.adapter.newSession(play.problems[0]);
+  persist();
+  render();
+}
+
+// The header's streak and Next level button. A streak is problems in a row with no wrong typed answer; only the
+// modes that type the answer have one.
+function renderStreak() {
+  const { session, streak, best, practicing, pack, level } = play;
+  const has = session && 'clean' in session;
+  $('streak').hidden = !has;
+  if (has) {
+    $('streak').textContent = `Streak ${streak} · Best ${Math.max(best, streak)}`;
+    $('streak').setAttribute('aria-label', `Streak ${streak}, best ${Math.max(best, streak)}`);
+  }
+  $('dots').hidden = practicing;
+  $('next-level').hidden = !(practicing && level < pack.levels && isLevelUnlocked(progress, pack.id, level + 1));
 }
 
 // The step bar is the pack's (and, in Group It, the problem's) list of steps.
@@ -221,8 +268,14 @@ function render(before) {
   const { session, finished } = play;
   const { adapter } = play;
   const fx = adapter.effects(before, session);
+  // A problem just finished: the streak grows with a clean answer and goes back to zero after any other.
+  if (session.step === 'done' && before && before.step !== 'done' && 'clean' in session) {
+    play.streak = afterAnswer(play.streak, session.clean);
+    if (play.streak > play.best) play.best = saveBest(play.pack.id, play.level, play.streak);
+  }
   renderSteps(session);
   renderDots();
+  renderStreak();
   controls.update(finished ? { ...session, step: 'levelDone' } : session, fx.hint);
   hintLine.hidden = finished || !fx.hint;
   if (finished) return;
@@ -281,6 +334,7 @@ document.addEventListener('keydown', (e) => {
 });
 
 $('back').addEventListener('click', goHome);
+$('next-level').addEventListener('click', () => startLevel(play.pack.id, play.level + 1));
 $('save-code').addEventListener('click', () => showSaveCode(encodeProgress(progress)));
 
 // A saved level in play, if it still makes sense to resume.

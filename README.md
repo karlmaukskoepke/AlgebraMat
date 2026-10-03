@@ -29,6 +29,16 @@ Add `?seed=123` to the URL to replay a fixed problem set, and `?level=2` to open
 
 ## Changelog
 
+### Light mode on every card, streaks, and keep practicing (SPEC-SCAFFOLD.md §10)
+- **Light mode is now how nearly every level plays:** Flip It (all five levels), Combine it Levels 4–5, Group It, Boxes & Circles, Groups of Terms and Distribute, then combine Rounds 1–3. The student types the answer; a wrong answer or **I'm stuck** opens that card's full step-by-step walk on the same problem. (`?light=0` still plays everything the old way.)
+- **Flip It's subtractions get the pilot's supports:** typing the numbers' sum with the minus kept (`5 − (−3) = 2`) is its own mistake signature, answered by the party-or-battle question after showing the subtraction as the addition it becomes; the walk starts at Rewrite.
+- **Terms cards type with x, + and −.** The first time a card's pad brings those, a one-step spotlight tip points at them (once per device); the first-time tour names whichever pad is lit.
+- **Every wrong answer on the new cards is logged with what it looked like** (uncombined, sign flipped, sign dropped, x or number off…), so the on-device log shows which targeted supports to build next.
+- **Streaks:** problems in a row with no wrong typed answer (I'm stuck doesn't break it). The header shows *Streak n · Best m*; the best per card and level is kept on the device.
+- **Keep practicing:** when a level's five are done, the panel says the next level is open and offers **Next level →**, **Keep practicing** and the pack map. Keep practicing plays fresh sets of the same level endlessly, with **Next level →** in the header the whole time.
+- **Header:** the title is slightly smaller, the buttons never wrap their words, and a long title with the streak wraps to a second line instead of overflowing.
+- **Checked in a real browser at 1366×657 and 1280×610:** every card's light mode (right answer, wrong answer into the walk, streak), every card's walk played to the level panel from I'm stuck (Boxes, Combine it 5, Groups of Terms, Distribute then combine, Group It), the tour and tip, practice mode; no page errors, every target at least 44px. One catch on the way: giving every problem a `level` made Combine it Level 5's walk start with Rewrite, so the level for the log now travels under its own name.
+
 ### Scaffold pilot step 6: light mode is on for Combine it Levels 1 to 3 (SPEC-SCAFFOLD.md §8.6) — the pilot is done
 - **Students now get light mode on Combine it Levels 1, 2 and 3 by default:** type the answer; a wrong answer or **I'm stuck** brings in the party-or-battle question, the sign cloze (read aloud, with the leftover counters) or the full counters walk; the support that answers a mistake stays on and fades after three clean answers; the first light problem on a device opens with the spotlight tour; each finished problem goes in the anonymous on-device log.
 - **`?light=0`** plays those three levels the old step-by-step way instead (handy for projecting the full walk to a class).

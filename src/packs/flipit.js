@@ -18,5 +18,5 @@ export const flipit = {
   // Level 5 is three or four integers, adding and subtracting (SPEC-COMBINE.md §4): it runs on the integer steps.
   generate: (level, seed) => (level === 5
     ? generateFlipMixed(seed).map((p) => ({ ...p, mode: 'integers-flip' }))
-    : generateLevel(level, seed)),
+    : generateLevel(level, seed).map((p) => ({ ...p, level }))),
 };
