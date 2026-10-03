@@ -4,6 +4,7 @@ import { combineit } from './combineit.js';
 import { flipit } from './flipit.js';
 import { generateLassoLevel } from '../engine/generateLasso.js';
 import { generateTermLevel } from '../engine/generateTerms.js';
+import { generateModelLevel } from '../engine/generateModel.js';
 import { generateTermGroupsLevel } from '../engine/generateTermGroups.js';
 import { generateDistributeLevel } from '../engine/generateDistribute.js';
 
@@ -27,16 +28,19 @@ export const lasso = {
   generate: (level, seed) => generateLassoLevel(level, seed),
 };
 
-// Boxes & Circles: combining like terms with boxes, circles and counters.
-// Each problem carries its level, which tells the session whether it starts with Rewrite.
+// Boxes & Circles: combining like terms with boxes, circles and counters. Level 2 goes the other way: read a model
+// (a picture of boxes and counters) and write the expression. The other levels are the old 2 to 5, a level later; each
+// of their problems carries its original level (`level`), which tells the session whether it starts with Rewrite.
 export const boxes = {
   id: 'boxes',
   title: 'Boxes & Circles',
   subtitle: 'Combining like terms',
   blurb: 'Box the x terms, circle the numbers, draw, cancel pairs, then type what’s left.',
-  levels: 5,
-  levelNames: ['only + terms', 'subtracting numbers', 'negative x terms', 'subtracting a negative', 'everything mixed'],
-  generate: (level, seed) => generateTermLevel(level, seed).map((expr) => ({ ...expr, level })),
+  levels: 6,
+  levelNames: ['only + terms', 'read the model', 'subtracting numbers', 'negative x terms', 'subtracting a negative', 'everything mixed'],
+  generate: (level, seed) => (level === 2
+    ? generateModelLevel(seed)
+    : generateTermLevel(level > 2 ? level - 1 : level, seed).map((expr) => ({ ...expr, level: level > 2 ? level - 1 : level }))),
 };
 
 // Groups of Terms: the distributive property, A groups of B where B has two terms.

@@ -13,7 +13,7 @@ export const PROBES = [
   { pack: 'combineit', levels: [2, 4] },
   { pack: 'flipit', levels: [2, 5] },
   { pack: 'lasso', levels: [2, 5] },
-  { pack: 'boxes', levels: [2, 4] },
+  { pack: 'boxes', levels: [3, 5] },
   { pack: 'groups-of-terms', levels: [2, 5] },
   { pack: 'distribute-combine', levels: [1, 3] },
 ];

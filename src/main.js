@@ -13,6 +13,8 @@ import {
   combineIntegerLightPlay, flipIntegerLightPlay, bigLightPlay, lassoLightPlay, termGroupLightPlay, distributeLightPlay,
 } from './play/walkLightPlay.js';
 import { boxLightPlay } from './play/boxLightPlay.js';
+import { boxModelPlay } from './play/boxModelPlay.js';
+import { boxPlay } from './play/boxPlay.js';
 import { afterAnswer } from './engine/streak.js';
 import { loadBests, saveBest } from './lightStore.js';
 import { bestFor } from './engine/streak.js';
@@ -20,7 +22,6 @@ import { integerPlay } from './play/integerPlay.js';
 import { bigPlay } from './play/bigPlay.js';
 import { lassoPlay } from './play/lassoPlay.js';
 import { termGroupPlay } from './play/termGroupPlay.js';
-import { boxPlay } from './play/boxPlay.js';
 import { distributePlay } from './play/distributePlay.js';
 import { distributeTypedPlay } from './play/distributeTypedPlay.js';
 import { renderPackMap, renderLevelDone } from './view/packmap.js';
@@ -52,7 +53,7 @@ const PLAY = {
     : LIGHT ? lightPlay : combinePlay),
   flipit: (level) => (level >= 5 ? (LIGHT ? flipIntegerLightPlay : integerPlay) : LIGHT ? flipLightPlay : flipitPlay),
   lasso: LIGHT ? lassoLightPlay : lassoPlay,
-  boxes: LIGHT ? boxLightPlay : boxPlay,
+  boxes: (level) => (level === 2 ? boxModelPlay : LIGHT ? boxLightPlay : boxPlay),   // Level 2 reads a model (no walk)
   'groups-of-terms': LIGHT ? termGroupLightPlay : termGroupPlay,
   'distribute-combine': (level) => (level >= 4 ? distributeTypedPlay : LIGHT ? distributeLightPlay : distributePlay),
 };
@@ -71,8 +72,9 @@ const fixedSeed = Number.isInteger(urlSeed) && urlSeed > 0 ? urlSeed : null;
 // Progress and the level in play are saved under one key (SPEC §7). If
 // storage is blocked, everything still works from memory for this visit.
 // Combine it gained a level in the middle (the mixed party-or-battle round), so a level in play that was
-// saved before that (no `layout`) means a different level now and isn't resumed.
-const SAVE_LAYOUT = 2;
+// saved before that (no `layout`) means a different level now and isn't resumed. Boxes & Circles gained its
+// "read the model" level (layout 3) the same way.
+const SAVE_LAYOUT = 3;
 const store = createStore('mat.v1');
 const saved = store.load();
 let progress = normalizeProgress(saved, PACKS);
@@ -449,7 +451,8 @@ $('save-code').addEventListener('click', () => showSaveCode(encodeProgress(progr
 function savedCurrent() {
   const c = saved?.current;
   if (!c || typeof c !== 'object') return null;
-  if (c.pack === 'combineit' && saved.layout !== SAVE_LAYOUT) return null;
+  if (c.pack === 'combineit' && !(saved.layout >= 2)) return null;
+  if (c.pack === 'boxes' && !(saved.layout >= 3)) return null;
   const pack = packById(c.pack);
   const ok = pack && !pack.comingSoon && isLevelUnlocked(progress, pack.id, c.level)
     && Number.isInteger(c.seed) && c.seed >= 0

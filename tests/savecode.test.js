@@ -5,12 +5,12 @@ import {
 import { PACKS } from '../src/packs/index.js';
 
 const bitsOf = (n, count, shift = 0) => Array.from({ length: count }, (_, i) => Boolean(n & (1 << (shift + i))));
-// Flip It has five levels and Combine it five now; shorter lists (older saves) are filled out with unfinished levels.
+// Flip It has five levels, Combine it five and Boxes & Circles six now; shorter lists (older saves) are filled out with unfinished levels.
 const pad = (levels, n) => [...levels, ...Array(Math.max(0, n - levels.length)).fill(false)];
-const state = (flipit, lasso = Array(7).fill(false), boxes = Array(5).fill(false), terms = Array(8).fill(false), combine = Array(5).fill(false), distribute = Array(5).fill(false)) => ({
+const state = (flipit, lasso = Array(7).fill(false), boxes = Array(6).fill(false), terms = Array(8).fill(false), combine = Array(5).fill(false), distribute = Array(5).fill(false)) => ({
   v: 1,
   packs: {
-    combineit: { levels: pad(combine, 5) }, flipit: { levels: pad(flipit, 5) }, lasso: { levels: lasso }, boxes: { levels: boxes },
+    combineit: { levels: pad(combine, 5) }, flipit: { levels: pad(flipit, 5) }, lasso: { levels: lasso }, boxes: { levels: pad(boxes, 6) },
     'groups-of-terms': { levels: terms }, 'distribute-combine': { levels: distribute },
   },
 });
@@ -25,7 +25,11 @@ const allStates3 = Array.from({ length: 2 ** 16 }, (_, n) => state3(bitsOf(n, 4)
 // A spread of them for the slower typo checks.
 const sample = allStates3.filter((_, n) => n % 997 === 0 || n === 65535 || n === 15);
 
-describe('save code v7', () => {
+// What a code from before Boxes & Circles' read-the-model round (5 levels) comes back as: the round slots in at Level 2,
+// counted as done once the old Level 2 was.
+const fromFive = (p) => { const b = pad(p.packs.boxes.levels, 6).slice(0, 5); return { ...p, packs: { ...p.packs, boxes: { levels: [b[0], b[1], b[1], b[2], b[3], b[4]] } } }; };
+
+describe('save code v8', () => {
   it('uses no look-alike characters', () => {
     expect(CODE_ALPHABET).toHaveLength(31);
     for (const ch of '01OIL') expect(CODE_ALPHABET).not.toContain(ch);
@@ -36,7 +40,7 @@ describe('save code v7', () => {
     const codes = new Set();
     for (const p of allStates3) {
       const code = encodeProgress(p);
-      expect(code).toMatch(/^MAT-9[2-9A-HJKMNP-Z]{9}$/); // "9" is version 7
+      expect(code).toMatch(/^MAT-A[2-9A-HJKMNP-Z]{9}$/); // "A" is version 8
       expect(decodeProgress(code, WITH_BOXES)).toEqual(p);
       codes.add(code);
     }
@@ -48,7 +52,7 @@ describe('save code v7', () => {
     expect(decodeProgress(encodeProgress(p), PACKS)).toEqual(p);
     const without = PACKS.filter((q) => q.id !== 'groups-of-terms');
     expect(decodeProgress(encodeProgress(p), without)).toEqual({ ...p, packs: { ...p.packs, 'groups-of-terms': undefined } });
-    const all = state(Array(5).fill(true), Array(7).fill(true), Array(5).fill(true), Array(8).fill(true), Array(4).fill(true), Array(5).fill(true));
+    const all = state(Array(5).fill(true), Array(7).fill(true), Array(6).fill(true), Array(8).fill(true), Array(4).fill(true), Array(5).fill(true));
     expect(decodeProgress(encodeProgress(all), PACKS)).toEqual(all);
   });
 
@@ -62,13 +66,13 @@ describe('save code v7', () => {
     const old = state(bitsOf(0b1010, 4), bitsOf(0b11, 7), [true, false, false, false, false], Array(8).fill(false), [true, true, false, true, false]);
     const v5 = encodeProgress(old, 5);
     expect(v5).toMatch(/^MAT-7[2-9A-HJKMNP-Z]{7}$/);
-    expect(decodeProgress(v5, PACKS)).toEqual({ ...old, packs: { ...old.packs, combineit: { levels: [true, true, false, false, true] } } });
+    expect(decodeProgress(v5, PACKS)).toEqual({ ...fromFive(old), packs: { ...fromFive(old).packs, combineit: { levels: [true, true, false, false, true] } } });
   });
 
   it('brings Combine it\'s old four levels (v6 and earlier) into the five-level pack', () => {
     // Old levels: 1 battles, 2 parties, 3 three numbers, 4 big numbers. New: 1, 2, 3 mixed, 4 three numbers, 5 big.
     const at = (old) => {
-      const p = state([], Array(7).fill(false), Array(5).fill(false), Array(8).fill(false), old.concat([false]));
+      const p = state([], Array(7).fill(false), Array(6).fill(false), Array(8).fill(false), old.concat([false]));
       return decodeProgress(encodeProgress(p, 6), PACKS).packs.combineit.levels;
     };
     expect(at([true, true, false, false])).toEqual([true, true, false, false, false]);   // the mixed round is still ahead
@@ -93,7 +97,7 @@ describe('save code v7', () => {
     const p = state(bitsOf(0b0110, 4), bitsOf(0b1011, 7), [true, true, false, false, false], [true, false, true, false, false, false, false, false]);
     const v4 = encodeProgress(p, 4);
     expect(v4).toMatch(/^MAT-6[2-9A-HJKMNP-Z]{6}$/);
-    expect(decodeProgress(v4, PACKS)).toEqual(p);
+    expect(decodeProgress(v4, PACKS)).toEqual(fromFive(p));
     expect(decodeProgress(v4, PACKS).packs.combineit).toEqual({ levels: Array(5).fill(false) });
   });
 
@@ -101,13 +105,31 @@ describe('save code v7', () => {
     const p = state3(bitsOf(0b0110, 4), bitsOf(0b1011, 7), [true, true, true, false, false]);
     const v3 = encodeProgress(p, 3);
     expect(v3).toMatch(/^MAT-5[2-9A-HJKMNP-Z]{5}$/);
-    expect(decodeProgress(v3, PACKS)).toEqual(p);
+    expect(decodeProgress(v3, PACKS)).toEqual(fromFive(p));
     expect(decodeProgress(v3, PACKS).packs['groups-of-terms']).toEqual({ levels: Array(8).fill(false) });
   });
 
   it('carries Boxes & Circles progress', () => {
-    const p = state3(bitsOf(0b1010, 4), bitsOf(0b11, 7), [true, true, false, false, false]);
+    const p = state3(bitsOf(0b1010, 4), bitsOf(0b11, 7), [true, true, false, false, false, true]);
     expect(decodeProgress(encodeProgress(p), PACKS)).toEqual(p);
+  });
+
+  it('brings Boxes & Circles\' old five levels (v7 and earlier) into the six-level pack, with the new Level 2 in the middle', () => {
+    // Old: 1 + terms, 2 subtracting numbers, 3 negative x, 4 subtracting a negative, 5 mixed. New: 1, 2 read the model, 3..6 the old 2..5.
+    const at = (old) => {
+      const p = state([], Array(7).fill(false), old);
+      return decodeProgress(encodeProgress(p, 7), PACKS).packs.boxes.levels;
+    };
+    expect(at([true, false, false, false, false])).toEqual([true, false, false, false, false, false]);   // the model round is still ahead
+    expect(at([true, true, false, false, false])).toEqual([true, true, true, false, false, false]);      // old Level 2 done: the model round counts as done
+    expect(at([true, true, true, true, true])).toEqual([true, true, true, true, true, true]);
+    expect(at([false, false, false, false, false])).toEqual(Array(6).fill(false));
+    // What was saved on the device (5 levels) and what a diagnostic opened shift the same way.
+    const saved = normalizeProgress({ packs: { boxes: { levels: [true, true, false, false, false], open: 4 } } }, PACKS);
+    expect(saved.packs.boxes).toEqual({ levels: [true, true, true, false, false, false], open: 5 });
+    expect(normalizeProgress({ packs: { boxes: { levels: [true, false, false, false, false], open: 1 } } }, PACKS).packs.boxes.open).toBeUndefined();
+    // New saves have six levels and are left alone.
+    expect(normalizeProgress({ packs: { boxes: { levels: [true, false, true, false, false, false] } } }, PACKS).packs.boxes.levels).toEqual([true, false, true, false, false, false]);
   });
 
   it('is forgiving about case, spaces, dashes and the prefix', () => {
@@ -163,7 +185,7 @@ describe('v2 codes (before Boxes & Circles) still work', () => {
       const v2 = encodeProgress(p, 2);
       expect(v2).toMatch(/^MAT-4[2-9A-HJKMNP-Z]{4}$/); // "4" is version 2
       expect(decodeProgress(v2, PACKS)).toEqual(p);
-      expect(decodeProgress(v2, WITH_BOXES)).toEqual({ ...p, packs: { ...p.packs, boxes: { levels: Array(5).fill(false) } } });
+      expect(decodeProgress(v2, WITH_BOXES)).toEqual({ ...p, packs: { ...p.packs, boxes: { levels: Array(6).fill(false) } } });
     }
   });
 });
