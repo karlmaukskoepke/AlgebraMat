@@ -20,9 +20,10 @@ export function buildWalkLightControls(root, dispatch, pad) {
   const row = document.createElement('div');
   row.className = 'palette-row';
   const stuck = button('I’m stuck', 'stuck', { data: { key: 's' }, aria: 'I’m stuck (key S)' });
+  const teach = button('Teach me step-by-step', 'teach', { data: { key: 't' }, aria: 'Teach me step-by-step (key T)' });
   const tourButton = button('?', 'tour', { cls: 'btn-tour', aria: 'Show me around' });
   const check = button('Check ✓', 'check', { cls: 'btn-primary' });
-  row.append(stuck, tourButton, check);
+  row.append(stuck, teach, tourButton, check);
 
   const keys = document.createElement('div');
   keys.className = 'pad';
@@ -50,7 +51,8 @@ export function buildWalkLightControls(root, dispatch, pad) {
     update(s) {
       const stage = s.step === 'levelDone' ? 'levelDone' : s.stage;
       const typing = stage === 'light';
-      stuck.disabled = tourButton.disabled = !typing;
+      stuck.disabled = teach.disabled = !(typing || stage === 'support');
+      tourButton.disabled = !typing;
       for (const b of keys.querySelectorAll('button')) b.disabled = !typing;
       const done = stage === 'done';
       check.disabled = !typing && !done;

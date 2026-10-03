@@ -270,7 +270,7 @@ function render(before) {
   const fx = adapter.effects(before, session);
   // A problem just finished: the streak grows with a clean answer and goes back to zero after any other.
   if (session.step === 'done' && before && before.step !== 'done' && 'clean' in session) {
-    play.streak = afterAnswer(play.streak, session.clean);
+    play.streak = afterAnswer(play.streak, session);
     if (play.streak > play.best) play.best = saveBest(play.pack.id, play.level, play.streak);
   }
   renderSteps(session);
@@ -326,7 +326,8 @@ document.addEventListener('keydown', (e) => {
   if (!candidates.length) return;
   // Of the buttons that exist, the first enabled one wins (Backspace is the
   // pad's delete while typing and Undo otherwise).
-  const found = candidates.flatMap((sel) => [...$('controls').querySelectorAll(sel)]);
+  // (The Mat has keys of its own too: Party! and Battle! under the words that call for them.)
+  const found = candidates.flatMap((sel) => [...$('controls').querySelectorAll(sel), ...matRoot.querySelectorAll(sel)]);
   const b = found.find((x) => !x.disabled) ?? found[0];
   if (!b && letter) return; // a letter nothing uses: leave it alone
   e.preventDefault(); // a focused pad button shouldn't also press itself

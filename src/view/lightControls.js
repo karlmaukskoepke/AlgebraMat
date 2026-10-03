@@ -1,6 +1,6 @@
-// The palette for light mode (SPEC-SCAFFOLD.md §2): Party and Battle (for the party-or-battle support), I'm stuck,
+// The palette for light mode (SPEC-SCAFFOLD.md §2): I'm stuck, Teach me step-by-step (the full walk at once),
 // Sound (reading the cloze aloud, on or off), Check, and Flip It's answer pad (± and digits). After a right answer Check becomes Next →. `data-key`: S asks
-// for I'm stuck, P and B choose; Enter is Check, and the keyboard's − presses ±.
+// for I'm stuck, T for the full walk; Enter is Check, and the keyboard's − presses ±.
 
 import { soundOn, setSound } from './speech.js';
 import { startTour } from './tour.js';
@@ -20,16 +20,12 @@ export function buildLightControls(root, dispatch) {
   root.innerHTML = '';
   const row = document.createElement('div');
   row.className = 'palette-row';
-  const party = button('Party!', 'choose', { data: { choice: 'party', key: 'p' }, aria: 'Party (key P)' });
-  const battle = button('Battle!', 'choose', { data: { choice: 'battle', key: 'b' }, aria: 'Battle (key B)' });
   const stuck = button('I’m stuck', 'stuck', { data: { key: 's' }, aria: 'I’m stuck (key S)' });
+  const teach = button('Teach me step-by-step', 'teach', { data: { key: 't' }, aria: 'Teach me step-by-step (key T)' });
   const sound = button('', 'sound', { aria: 'Read sentences aloud' });
   const tourButton = button('?', 'tour', { cls: 'btn-tour', aria: 'Show me around' });
   const check = button('Check ✓', 'check', { cls: 'btn-primary' });
-  const choices = document.createElement('div');
-  choices.className = 'group';
-  choices.append(party, battle);
-  row.append(choices, stuck, sound, tourButton, check);
+  row.append(stuck, teach, sound, tourButton, check);
 
   const pad = document.createElement('div');
   pad.className = 'pad';
@@ -49,17 +45,16 @@ export function buildLightControls(root, dispatch) {
     if (!b || b.disabled) return;
     if (b.dataset.action === 'sound') { setSound(!soundOn()); showSound(); return; } // a setting, not a move
     if (b.dataset.action === 'tour') { startTour({ first: false }); return; }      // a look around, not a move
-    const { action, choice, digit } = b.dataset;
+    const { action, digit } = b.dataset;
     if (action === 'check' && b.dataset.next) return dispatch({ type: 'next' });
-    dispatch({ type: action, choice, digit: digit === undefined ? undefined : Number(digit) });
+    dispatch({ type: action, digit: digit === undefined ? undefined : Number(digit) });
   });
 
   return {
     update(s) {
       const stage = s.step === 'levelDone' ? 'levelDone' : s.stage;
       const typing = stage === 'light';
-      party.disabled = battle.disabled = stage !== 'support';
-      stuck.disabled = !(typing || stage === 'support');
+      stuck.disabled = teach.disabled = !(typing || stage === 'support');
       tourButton.disabled = !(typing || stage === 'support');
       for (const b of pad.querySelectorAll('button')) b.disabled = !typing;
       const done = stage === 'done';

@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { newLightSession, reduceLight as reduce } from '../src/engine/lightSession.js';
 import { classify, firstSupport } from '../src/engine/scaffold.js';
-import { lightPlay } from '../src/play/lightPlay.js';
+import { lightPlay, flipLightPlay } from '../src/play/lightPlay.js';
 import { lightFeedbackText } from '../src/view/lightFeedback.js';
 import { makeProblem, evaluate, partyOrBattle } from '../src/engine/expr.js';
 import { generateCombineLevel } from '../src/engine/generateCombine.js';
@@ -12,6 +12,8 @@ const stuck = { type: 'stuck' };
 const typed = (n) => [...(n < 0 ? [{ type: 'toggleSign' }] : []), ...[...String(Math.abs(n))].map((d) => ({ type: 'digit', digit: Number(d) }))];
 const answer = (n) => [...typed(n), check];
 const P = (a, b) => makeProblem(a, '+', b);
+// A sign mistake, then stuck inside the circling: the cloze (a sign mistake's second rung).
+const toCloze = (problem, typedWrong) => run(newLightSession(problem), ...answer(typedWrong), stuck);
 
 // Do the full walk's work for a problem (counters, party or battle, cancel, answer).
 function finishWalk(s) {
@@ -103,19 +105,19 @@ describe('light mode', () => {
     expect(run(s, stuck)).toBe(s);                                    // nothing after the full walk
   });
 
-  it('a sign mistake brings in the cloze, with the step bar to match', () => {
-    const s = run(newLightSession(P(-5, 3)), ...answer(2));            // the sign dropped
+  it('a second miss on a sign brings in the cloze, with the step bar to match', () => {
+    const s = toCloze(P(-5, 3), 2);                                    // the sign dropped, then stuck in the circling
     expect(s).toMatchObject({ stage: 'support', support: 'cloze', step: 'cloze', tag: 'sign-dropped', entry: '' });
     expect(s.cloze.sentence).toBe('The battle of −5 and 3 leaves ____ standing.');
     expect(s.cloze.choices.map((c) => c.text).sort()).toEqual(['negative 2', 'negative 8', 'positive 2', 'positive 8']);
     expect(lightPlay.steps(s).map((t) => t.label)).toEqual(['Say it', 'Answer']);
     expect(lightFeedbackText(s.feedback)).toMatch(/who is left standing/);
     expect(reduce(s, { type: 'digit', digit: 1 })).toBe(s);          // no typing during the cloze
-    expect(run(newLightSession(P(5, -3)), ...answer(-2)).support).toBe('cloze');   // wrong-winner too
+    expect(toCloze(P(5, -3), -2).support).toBe('cloze');   // wrong-winner too
   });
 
   it('every pick is read aloud, a wrong pick says what is off and is crossed out, with no penalty', () => {
-    let s = run(newLightSession(P(-5, 3)), ...answer(2));
+    let s = toCloze(P(-5, 3), 2);
     const wrongSign = s.cloze.choices.find((c) => c.mistake === 'sign');
     const wrongSize = s.cloze.choices.find((c) => c.mistake === 'size');
     s = run(s, { type: 'pickChoice', index: wrongSign.index });
@@ -131,7 +133,7 @@ describe('light mode', () => {
   });
 
   it('the right pick shows what is left over, goes back to typing, and keeps it on the Mat', () => {
-    let s = run(newLightSession(P(-5, 3)), ...answer(2));
+    let s = toCloze(P(-5, 3), 2);
     const right = s.cloze.choices.find((c) => c.right);
     s = run(s, { type: 'pickChoice', index: right.index });
     expect(s).toMatchObject({
@@ -146,11 +148,11 @@ describe('light mode', () => {
   });
 
   it('a party gets its own sentence, and being stuck again in the cloze goes to the full walk', () => {
-    let s = run(newLightSession(P(-4, -6)), ...answer(10));            // a negative party answered positive
+    let s = toCloze(P(-4, -6), 10);                                   // a negative party answered positive
     expect(s.cloze.sentence).toBe('The party of −4 and −6 has ____ in all.');
     expect(lightFeedbackText(s.feedback)).toMatch(/party worth/);
     s = run(s, stuck);
-    expect(s).toMatchObject({ stage: 'walk', stuck: 1 });
+    expect(s).toMatchObject({ stage: 'walk', stuck: 2 });             // (stuck once in the circling, once in the cloze)
   });
 
   it('a right answer after being stuck is done but not clean', () => {
@@ -174,27 +176,94 @@ describe('light mode', () => {
 
 describe('light mode on Flip It\'s subtractions', () => {
   const S = (a, b) => makeProblem(a, '-', b);
+  const flip = (part) => ({ type: 'flip', part });
 
   it('typing the sum of the numbers (the minus kept as a minus) is its own mistake', () => {
     expect(classify(S(5, -3), '2')).toEqual({ correct: false, tag: 'minus-as-minus' });
     expect(classify(S(5, -3), '8')).toEqual({ correct: true, tag: null });
     expect(classify(S(-5, -3), '-8')).toEqual({ correct: false, tag: 'minus-as-minus' });
-    expect(firstSupport('minus-as-minus')).toBe('partyBattle');
   });
 
-  it('shows the subtraction as the addition it becomes before asking party or battle', () => {
-    const s = run(newLightSession(S(5, -3)), ...answer(2));
-    expect(s).toMatchObject({ stage: 'support', support: 'partyBattle', feedback: { key: 'lightPartyBattleSub' } });
-    expect(lightFeedbackText(s.feedback)).toMatch(/Subtracting is adding the opposite/);
-    expect(lightFeedbackText(s.feedback)).toMatch(/5 − \(−3\) is 5 \+ 3/);
+  it('any wrong answer goes straight to rewriting: click the minus, then the number\'s sign', () => {
+    for (const [a, b, typedWrong] of [[3, -5, 2], [3, 8, 5], [-4, -9, -13], [6, 2, 99]]) {
+      const s = run(newLightSession(S(a, b)), ...answer(typedWrong));
+      expect(s, `${a} - ${b}`).toMatchObject({ stage: 'support', support: 'rewrite', step: 'rewrite', wrongs: 1, entry: '' });
+      expect(s.rewrite.step).toBe('rewrite');
+      expect(flipLightPlay.steps(s).map((t) => t.label)).toEqual(['Rewrite', 'Answer']);
+      expect(run(s, { type: 'digit', digit: 1 })).toBe(s);          // no typing while rewriting
+    }
   });
 
-  it('a subtraction\'s full walk is Flip It\'s, starting at Rewrite', () => {
-    let s = newLightSession(S(5, -3));
-    s = run(s, ...answer(2));      // partyBattle
-    s = run(s, { type: 'stuck' }); // next rung: the cloze
-    s = run(s, { type: 'stuck' }); // full walk
-    expect(s.stage).toBe('walk');
+  it('a subtraction of a larger number (3 − 8) is rewritten too: the minus becomes a plus and the 8 a negative', () => {
+    let s = run(newLightSession(S(3, 8)), ...answer(5));
+    s = run(s, flip('op'));
+    expect(s.stage).toBe('support');                                  // half done: still rewriting
+    s = run(s, flip('sign'));
+    expect(s).toMatchObject({ stage: 'light', step: 'answer', rewritten: true, support: null, rewrite: null });
+    expect(lightFeedbackText(s.feedback)).toMatch(/Now it’s an addition: 3 \+ \(\+8\)|Now it’s an addition: 3 \+ \(−8\)|Now it’s an addition/);
+    s = run(s, ...answer(-5));
+    expect(s).toMatchObject({ stage: 'done', clean: false });
+  });
+
+  it('after rewriting, a second wrong answer opens the counters walk with the rewrite already done', () => {
+    let s = run(newLightSession(S(3, -5)), ...answer(2), flip('op'), flip('sign'));
+    expect(s.rewritten).toBe(true);
+    s = run(s, ...answer(1));
+    expect(s).toMatchObject({ stage: 'walk', wrongs: 2, supportsShown: ['rewrite', 'fullWalk'] });
+    expect(s.walk.step).toBe('draw');
+  });
+
+  it('the walk after a rewrite plays on to the end: draw, party or battle, answer', () => {
+    let s = run(newLightSession(S(3, -5)), ...answer(2), flip('op'), flip('sign'), ...answer(1));
+    s = run(s, { type: 'pickSign', sign: '+' }, ...Array(3).fill({ type: 'tapZone', zone: 0 }), ...Array(5).fill({ type: 'tapZone', zone: 1 }), check);
+    expect(s.walk.step).toBe('partyBattle');
+    s = run(s, { type: 'choose', choice: 'party' }, ...answer(8));
+    expect(s).toMatchObject({ stage: 'walk', step: 'done', clean: false, wrongs: 2 });
+  });
+
+  it('I\'m stuck in the rewrite goes to the full walk, from the start of Rewrite', () => {
+    const s = run(newLightSession(S(3, -5)), ...answer(2), stuck);
+    expect(s).toMatchObject({ stage: 'walk', stuck: 1 });
     expect(s.walk.step).toBe('rewrite');
+  });
+});
+
+describe('light mode on additions: a sign mistake circles the numbers first', () => {
+  const draw = (from, to) => ({ type: 'drawShape', from, to });
+
+  it('brings in the circle support with the step bar to match, and circles come from Boxes & Circles\' drag', () => {
+    const s = run(newLightSession(P(-11, 2)), ...answer(9));
+    expect(s).toMatchObject({ stage: 'support', support: 'circle', step: 'circle', tag: 'sign-dropped', entry: '' });
+    expect(lightPlay.steps(s).map((t) => t.label)).toEqual(['Circle', 'Answer']);
+    expect(s.circle.problem.terms.map((t) => t.value)).toEqual([-11, 2]);
+    expect(lightFeedbackText(s.feedback)).toMatch(/Circle each number/);
+    expect(run(s, { type: 'digit', digit: 1 })).toBe(s);
+  });
+
+  it('circling both numbers (each with its sign) goes back to typing, with the circles kept on the Mat', () => {
+    let s = run(newLightSession(P(-11, 2)), ...answer(9));
+    s = run(s, draw(0, 0));
+    expect(s.stage).toBe('support');                                  // one number circled
+    s = run(s, draw(1, 2));                                           // + 2: the sign and the number
+    expect(s).toMatchObject({ stage: 'light', step: 'answer', circled: true, support: null, circle: null });
+    expect(lightFeedbackText(s.feedback)).toMatch(/circled with its sign/);
+    s = run(s, ...answer(-9));
+    expect(s).toMatchObject({ stage: 'done', clean: false });
+  });
+
+  it('a circle that leaves out the sign is told so, and stays in the circling', () => {
+    let s = run(newLightSession(P(5, -3)), ...answer(-2));            // the winner's sign wrong
+    s = run(s, draw(0, 0), draw(2, 2));                                // the 3 without the + in front of it
+    expect(s.stage).toBe('support');
+    expect(s.circle.shapes).toHaveLength(2);
+    expect(s.feedback).toMatchObject({ src: 'circle', bad: true });
+  });
+
+  it('Teach me step-by-step goes straight to the full walk from anywhere, and counts as help', () => {
+    for (const s0 of [newLightSession(P(-5, 3)), run(newLightSession(P(-5, 3)), ...answer(2))]) {
+      const s = run(s0, { type: 'teach' });
+      expect(s).toMatchObject({ stage: 'walk', helped: true, taught: 1, supportsShown: expect.arrayContaining(['fullWalk']) });
+    }
+    expect(run(run(newLightSession(P(-5, 3)), { type: 'teach' }), ...answer(-2)).stage).toBe('walk');
   });
 });

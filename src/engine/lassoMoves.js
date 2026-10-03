@@ -2,7 +2,7 @@
 // { ok, feedbackKey, params? }; the wording lives in view/lassoFeedback.js.
 // Pure logic, no DOM.
 
-import { lassoCount, evaluateGroups, isOpposite, isFraction } from './groups.js';
+import { lassoCount, evaluateGroups, groupTotal, isOpposite, isFraction } from './groups.js';
 
 const pass = (feedbackKey, params) => ({ ok: true, feedbackKey, params });
 const fail = (feedbackKey, params) => ({ ok: false, feedbackKey, params });
@@ -12,9 +12,9 @@ export const MAX_PER_GROUP = 12;
 // Groups a student can make (the most is 5; one extra so "too many" can happen).
 export const MAX_GROUPS_MADE = 6;
 // Parts of a fraction bar (sixths are the most; one extra so "too many" can happen).
-export const MAX_PARTS = 7;
+export const MAX_PARTS = 8;
 // Counters dealt into a fraction bar (|B| is at most 12; room to overshoot).
-export const MAX_DEALT = 14;
+export const MAX_DEALT = 30;
 
 const signOf = (v) => (v > 0 ? '+' : '-');
 
@@ -76,6 +76,10 @@ export function validateDeal(problem, groups) {
   const count = Math.abs(b);
   const terms = groups.flatMap((g) => g.terms);
   if (terms.length === 0 || terms.some((t) => t.sign !== sign)) return fail('dealType', { b, count, sign });
+  // The whole group's counters put in every part (½ × 2 with two counters in each part): the number belongs to the
+  // whole group, shared between the parts.
+  const d = problem.count.d;
+  if (d > 1 && terms.length === count * d && groups.every((g) => g.terms.length === count)) return fail('dealEach', { b, d });
   if (terms.length !== count) return fail('dealCount', { b, have: terms.length });
   return pass('dealDone', { n: problem.count.n, size: b / problem.count.d });
 }
@@ -91,6 +95,11 @@ export function validateTake(problem, groups) {
 // Count: the total after any flip — the answer.
 export function validateCount(problem, value) {
   if (noValue(value)) return fail('typeAnswer');
-  if (value !== evaluateGroups(problem)) return fail(isFraction(problem) ? 'countTaken' : 'countAll');
+  if (value !== evaluateGroups(problem)) {
+    // 1/3 of 12 answered 8: the parts left behind were counted instead of the part taken.
+    const left = Math.abs(problem.inside.value - groupTotal(problem));
+    if (isFraction(problem) && left !== Math.abs(groupTotal(problem)) && Math.abs(value) === left) return fail('countRemoved');
+    return fail(isFraction(problem) ? 'countTaken' : 'countAll');
+  }
   return pass('correct', { answer: value });
 }

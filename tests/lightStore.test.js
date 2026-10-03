@@ -28,7 +28,7 @@ describe('light mode\'s per-device memory', () => {
 
   it('a mistake turns a support on for the next problem, and three clean answers turn it off', () => {
     // a dropped sign, then a right answer after the cloze
-    let s = run(newLightSession(P, loadSkills()), ...type(2));
+    let s = run(newLightSession(P, loadSkills()), ...type(2), { type: 'stuck' });   // circle, then (stuck) the cloze
     const right = s.cloze.choices.find((c) => c.right);
     s = run(s, { type: 'pickChoice', index: right.index }, ...type(-2));
     recordProblem(s, { pack: 'combineit', level: 3, problem: '−5 + 3' });
@@ -42,7 +42,7 @@ describe('light mode\'s per-device memory', () => {
     expect(newLightSession(P, loadSkills()).on.sign).toBe(false);
     const log = loadLog();
     expect(log).toHaveLength(4);
-    expect(log[0]).toMatchObject({ pack: 'combineit', level: 3, answers: [{ typed: '2', tag: 'sign-dropped' }], supports: ['cloze'], clean: false });
+    expect(log[0]).toMatchObject({ pack: 'combineit', level: 3, answers: [{ typed: '2', tag: 'sign-dropped' }], supports: ['circle', 'cloze'], clean: false });
     expect(log[1]).toMatchObject({ answers: [], supports: [], clean: true, on: { sign: true } });
   });
 

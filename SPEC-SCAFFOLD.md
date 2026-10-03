@@ -122,3 +122,27 @@ This is what SPEC-JIT.md's pattern-finding and the teacher report will read; the
 - When a level's five are done, the panel says the next level is open and offers **Next level →**, **Keep practicing** and the pack map.
 - **Keep practicing** plays the same level endlessly in fresh sets of five; the dots give way to the streak, and a **Next level →** button stays in the header the whole time.
 - Not built (parked): a diagnostic before each card's first round, skip-ahead to later levels, the teacher report.
+
+## 11. Karl's first round of play-test changes (2026-10-03; built)
+
+**Combine it**
+- A sign mistake (`sign-dropped`, `wrong-winner`) now gets **circle the numbers** first: the Boxes & Circles drag, each number with its sign in front, checked as soon as every number has a circle. Then back to typing, with the numbers kept in circles on the Mat. A second miss gets the cloze; a third the full walk (`circle → cloze → fullWalk`).
+- **Party! and Battle! sit on the Mat**, each under the words that call for it: *Same signs?* above Party!, *Different signs?* above Battle!. They are gone from the palette (keys P and B still work).
+
+**Flip It**
+- Any wrong answer on a subtraction goes **straight to rewriting**: tap the minus to turn it into a plus, then tap the number's sign. This includes a smaller number minus a larger (`3 − 8`: the 8 becomes −8). The rewritten line (magenta) stays on the Mat while the student types again. A second miss opens the counters walk with the rewrite already done.
+
+**Group It**
+- The − groups button says **opposite** under the −; the words are "positive groups, or opposite (negative) groups". Groups of Terms got the button too.
+- The hidden 1: an empty dashed gap with an arrow and the label **how many groups?** (no "?" in the box).
+- Fractions: the add button reads **Add part of group**; denominators now include **eighths** (halves to 16, thirds 18, fourths 24, fifths 30, sixths 24, eighths 24) and a bar can have eight parts.
+- Misconception **whole group put in every part** (½ × 2 with two counters in each part): a bracket labelled *whole group: 2* and "Share the 2 between the 2 parts: don't put 2 in each part."
+- Misconception **taking away instead of taking** (⅓ of 12 answered 8): "That's what's left in the parts you didn't take…"; logged as `removed-part` for typed answers.
+- A sign mistake gets a **closed passage** first: "−1/2(−4) means ____" with four choices (the opposite of 1/2 of −4, 1/2 of −4, and the two with the inside sign changed). Each wrong choice says what is off.
+
+**Everywhere**
+- **Teach me step-by-step** (next to I'm stuck): the full walk at once, on every card. It counts as help.
+- Text on the Mat can't be selected by dragging or double-clicking.
+- **Streaks:** *I'm stuck* and *Teach me* leave the streak where it is (neither add nor break); only a wrong typed answer breaks it. (The first build reset it on I'm stuck; fixed.)
+
+**Queued next (Karl's order, before anything else on the list)**: the **Uber diagnostic** and the **fluency challenges** (SPEC-ROADMAP.md).

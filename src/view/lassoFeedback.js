@@ -11,9 +11,9 @@ const nth = (i) => ORDINAL[i] ?? `number ${i + 1}`;
 
 export const LASSO_FEEDBACK = {
   // ① Groups
-  groupsIntroHidden: () => 'There’s a hidden 1 in front of the ( — type the number 1 for the gap the arrow points to, then Check.',
+  groupsIntroHidden: () => 'There’s a hidden 1 in front of the ( — write the number of groups in the gap the arrow points to (it’s 1), then Check.',
   groupsIntro: () => 'Make one group for each group in the problem: tap Add group, then Check.',
-  partsIntro: ({ d }) => `The bottom number is ${d}: tap Add group to make ${d} equal groups in one bar, then Check.`,
+  partsIntro: ({ d }) => `The bottom number is ${d}: tap Add part of group to make ${d} equal parts in one bar, then Check.`,
   writeOne: () => 'Type the hidden 1 first, then Check.',
   writeOneFirst: () => 'Type the hidden 1 first — the arrow points to where it goes.',
   typeOne: () => 'Type the number 1 for the gap, then Check.',
@@ -22,12 +22,12 @@ export const LASSO_FEEDBACK = {
   tooManyGroups: () => 'That’s more groups than any problem needs. Tap one to erase it.',
   groupCount: ({ n, have }) => `The number of groups is ${n} — you have ${groups(have)}.`,
   partCount: ({ d, have }) => `The bottom number is ${d}, so make ${d} groups — you have ${have}.`,
-  groupsDone: () => 'Are these + groups, or − groups (the opposite)?',
-  partsDone: () => 'Is this bar + or − (the opposite)?',
+  groupsDone: () => 'Are these positive groups, or opposite (negative) groups?',
+  partsDone: () => 'Is this bar positive, or opposite (negative)?',
 
   // ② + or −
-  lookAtSign: () => 'Look at the sign in front of the groups.',
-  lookAtFractionSign: () => 'Look at the sign in front of the fraction.',
+  lookAtSign: () => 'Not quite. Are these positive groups, or opposite (negative) groups? Look at the sign in front of the groups.',
+  lookAtFractionSign: () => 'Not quite. Is this bar positive, or opposite (negative)? Look at the sign in front of the fraction.',
   plusGroups: ({ fraction }) => (fraction
     ? 'Plus! Pick + or −, then tap the lit-up group to deal the first counter.'
     : 'Plus groups! Pick + or −, then tap any group to add a counter.'),
@@ -50,6 +50,7 @@ export const LASSO_FEEDBACK = {
   dealIntro: () => 'Keep going: tap the lit-up group. Deal one at a time, top to bottom, then around again.',
   dealHere: () => 'Deal in order — the next counter goes in the lit-up group.',
   dealType: ({ b, count, sign }) => `The whole group is ${signed(b)}, so deal ${kind(sign, count)}.`,
+  dealEach: ({ b, d }) => `The whole group has a total value of ${signed(b)}. Share the ${Math.abs(b)} between the ${d} parts: don’t put ${Math.abs(b)} in each part.`,
   dealCount: ({ b, have }) => `You dealt ${have} — the whole group is ${signed(b)}.`,
   dealDone: ({ n }) => `Equal groups! Now take ${n} — tap each group you take.`,
 
@@ -78,7 +79,7 @@ export const LASSO_FEEDBACK = {
     : `The number in front is ${n}, so make ${n} group${n === 1 ? '' : 's'}: tap Add group until there are ${n}.`),
   hintParts: ({ n, have }) => (have > n
     ? `The bottom number is ${n}. Tap the blinking groups to erase them.`
-    : `The bottom number is ${n}, so the bar needs ${n} groups: tap Add group until there are ${n}.`),
+    : `The bottom number is ${n}, so the bar needs ${n} parts: tap Add part of group until there are ${n}.`),
   hintSign: ({ sign, fraction }) => (sign === '-'
     ? `There’s a − in front of the ${fraction ? 'fraction' : 'groups'}: that means opposite. Tap − groups.`
     : `Nothing in front of the ${fraction ? 'fraction' : 'groups'} says opposite. Tap + groups.`),
@@ -88,6 +89,7 @@ export const LASSO_FEEDBACK = {
   hintCount: ({ sign }) => `Count every counter in the blinking groups. They’re all ${sign === '+' ? 'positive' : 'negative'}, so the answer is ${sign === '+' ? 'positive' : 'negative'}.`,
   hintCountTaken: ({ sign }) => `Count only the counters in the groups you took (they blink). They’re ${sign === '+' ? 'positive' : 'negative'}, so the answer is ${sign === '+' ? 'positive' : 'negative'}.`,
 
+  countRemoved: () => 'That’s what’s left in the parts you didn’t take. Taking a part means keeping it: count only the counters in the part you took.',
   typeAnswer: () => 'Type a number first.',
   correct: ({ answer }) => `Yes! The answer is ${signed(answer)}.`,
 };

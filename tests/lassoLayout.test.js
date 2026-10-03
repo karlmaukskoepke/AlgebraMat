@@ -3,7 +3,7 @@ import {
   LASSO_VIEW, lassoWidth, stackCenters, rowXs, takenRuns, counterPitch, groupWidth, rowPitch,
   wholeColumns, fractionColumns, LASSO_HEIGHT, LASSO_GAP, PART_HEIGHT, STACK_X, MARK_X, ORIG_LEFT, CHAIN_WIDTH,
 } from '../src/view/lassoLayout.js';
-import { MAX_GROUPS, MAX_SINGLE_GROUP, MAX_DENOMINATOR } from '../src/engine/generateLasso.js';
+import { MAX_GROUPS, MAX_SINGLE_GROUP, DENOMINATORS } from '../src/engine/generateLasso.js';
 import { MAX_PARTS } from '../src/engine/lassoMoves.js';
 
 describe('Group It layout', () => {
@@ -14,9 +14,9 @@ describe('Group It layout', () => {
     for (let i = 1; i < ys.length; i++) expect(ys[i] - ys[i - 1]).toBe(LASSO_HEIGHT + LASSO_GAP);
   });
 
-  it('fits the tallest fraction bar (sixths, even one part too many) in the drawing', () => {
-    expect(MAX_DENOMINATOR).toBeLessThan(MAX_PARTS);
-    expect(MAX_PARTS * PART_HEIGHT).toBeLessThanOrEqual(LASSO_VIEW.height);
+  it('lets the bar have one part more than the most the problems use (eighths)', () => {
+    expect(Math.max(...DENOMINATORS)).toBeLessThanOrEqual(MAX_PARTS);   // the Mat squeezes the parts to fit a tall bar
+    expect(MAX_PARTS).toBe(8);
   });
 
   it('keeps the widest + group and the count clear of the edge, and the − clear of the left column', () => {

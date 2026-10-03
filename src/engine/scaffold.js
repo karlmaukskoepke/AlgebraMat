@@ -43,22 +43,29 @@ export function classify(problem, typed) {
 
 // ---------- Which support answers which mistake ----------
 
-export const SUPPORTS = ['cloze', 'partyBattle', 'fullWalk'];
+export const SUPPORTS = ['circle', 'rewrite', 'cloze', 'partyBattle', 'fullWalk'];
 
 const FIRST_SUPPORT = {
-  'sign-dropped': 'cloze',
-  'wrong-winner': 'cloze',
+  'sign-dropped': 'circle',          // circle each number with its sign, then try again
+  'wrong-winner': 'circle',
   'battle-as-party': 'partyBattle',
   'party-as-battle': 'partyBattle',
   'minus-as-minus': 'partyBattle',   // that question first shows the subtraction as adding the opposite
   unmatched: 'fullWalk',
 };
 
-// The first support for a mistake. With no mistake yet (I'm stuck), the smallest one: the party-or-battle question.
-export const firstSupport = (tag) => (tag == null ? 'partyBattle' : FIRST_SUPPORT[tag] ?? 'fullWalk');
+// The first support for a mistake. A subtraction goes straight to rewriting it as an addition (click the minus and
+// the number's sign), whatever the mistake; with no mistake yet (I'm stuck) an addition gets the smallest support:
+// the party-or-battle question.
+export function firstSupport(tag, problem = null) {
+  if (problem?.op === '-') return 'rewrite';
+  return tag == null ? 'partyBattle' : FIRST_SUPPORT[tag] ?? 'fullWalk';
+}
 
-// The next rung: another wrong answer, or I'm stuck again, goes to the full walk; there's nothing after that.
-export const nextRung = (kind) => (kind === 'fullWalk' ? null : 'fullWalk');
+// The next rung: another wrong answer, or I'm stuck again. A sign mistake goes circle → cloze → full walk; the rest
+// go to the full walk; there's nothing after that.
+const NEXT_RUNG = { circle: 'cloze', cloze: 'fullWalk', rewrite: 'fullWalk', partyBattle: 'fullWalk', fullWalk: null };
+export const nextRung = (kind) => NEXT_RUNG[kind] ?? null;
 
 // Which skill a mistake belongs to, for the support that stays on (SPEC-SCAFFOLD.md §5).
 const SKILL = {

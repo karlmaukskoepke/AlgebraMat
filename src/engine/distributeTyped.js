@@ -31,6 +31,7 @@ export function newTypedSession(problem) {
     finalText: null,       // the answer, once it's right
     asked: false,          // Show me was pressed on this step
     everAsked: false,      // Show me was pressed on any step
+    wrongs: 0,             // wrong tries, once it's done
     clean: false,          // right with no wrong try and no Show me (counts toward the streak)
     tries: {},
     feedback: { key: 'typedOpenIntro', src: 'dist' },
@@ -81,7 +82,8 @@ export function reduceTyped(state, action) {
         }
         s.finalText = prettyAnswer(s.entry);
         s.step = 'done';
-        s.clean = !s.tries.open && !s.tries.answer && !s.everAsked;
+        s.wrongs = (s.tries.open ?? 0) + (s.tries.answer ?? 0);
+        s.clean = s.wrongs === 0 && !s.everAsked;
         return say(s, res, 'ts');
       }
       return state;

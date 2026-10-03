@@ -15,7 +15,7 @@ export const MAX_ENTRY = { integer: 4, algebra: 20 };
 export function newWalkLight(problem, card) {
   return {
     problem,
-    stage: 'light',           // 'light' | 'walk'
+    stage: 'light',           // 'light' | 'support' | 'walk'
     step: 'answer',           // the step bar's current step
     skipped: [],
     entry: '',
@@ -23,7 +23,12 @@ export function newWalkLight(problem, card) {
     tag: null,
     tags: [],                 // every wrong answer's tag, for the log
     stuck: 0,                 // times I'm stuck was pressed
+    taught: 0,                // times Teach me step-by-step was pressed
     walk: null,               // the card's session, once the full walk is on
+    support: null,            // the support showing now: 'cloze' (a sign mistake, on cards that have one) | null
+    cloze: null,              // { sentence, choices: [{ text, right, reason, index }], tried: [index] }
+    said: null,               // once the right choice is picked: { sentence }, kept while the student types
+    clozeUsed: false,         // the closed passage is a first rung only
     helped: false,            // the walk was brought in by a wrong answer or I'm stuck
     clean: false,             // right on the first try with no help (counts toward the streak)
     on: { ...emptySkills(), partyBattle: false, sign: false },
@@ -44,7 +49,9 @@ function bringInWalk(s, card, why) {
   s.step = s.walk.step;
   s.skipped = s.walk.skipped;
   s.entry = '';
-  return say(s, why);
+  // The walk's own first instruction, led by why it's here ("Not quite.", "No problem.").
+  s.feedback = { ...s.walk.feedback, src: 'walk', lead: why };
+  return s;
 }
 
 export function reduceWalkLight(state, action, card) {
@@ -62,6 +69,7 @@ export function reduceWalkLight(state, action, card) {
   if (state.stage === 'done') return state;
   const s = structuredClone(state);
   const max = MAX_ENTRY[card.pad];
+  if (state.stage === 'support' && !['pickChoice', 'stuck', 'teach'].includes(action.type)) return state;
   switch (action.type) {
     case 'digit':
       if (!Number.isInteger(action.digit) || action.digit < 0 || action.digit > 9) return state;
@@ -82,7 +90,26 @@ export function reduceWalkLight(state, action, card) {
       s.entry = s.entry.slice(0, -1);
       return s;
 
+    // The closed passage (a sign mistake on a card that has one): a wrong pick says what is off and is crossed out;
+    // the right one goes back to typing.
+    case 'pickChoice': {
+      if (s.stage !== 'support' || s.support !== 'cloze') return state;
+      const choice = s.cloze.choices[action.index];
+      if (!choice || s.cloze.tried.includes(choice.index)) return state;
+      if (!choice.right) {
+        s.cloze.tried.push(choice.index);
+        return say(s, 'wlClozeNo', { reason: choice.reason }, true);
+      }
+      s.said = { sentence: s.cloze.sentence.replace('____', choice.text) };
+      s.cloze = null;
+      s.stage = 'light';
+      s.support = null;
+      s.step = 'answer';
+      return say(s, 'wlClozeRight', { text: choice.text });
+    }
+
     case 'check': {
+      if (s.stage !== 'light') return state;
       const { correct, tag } = card.check(s.problem, s.entry);
       if (tag === 'unreadable') return say(s, s.entry === '' ? 'typeAnswer' : 'answerUnreadable', { pad: card.pad }, true);
       if (correct) {
@@ -96,12 +123,32 @@ export function reduceWalkLight(state, action, card) {
       s.tag = tag;
       s.tags.push(tag);
       s.answers.push({ typed: s.entry, tag });
+      // A sign mistake on a card with a closed passage gets it first; any other miss (or a second one) the full walk.
+      if (card.signCloze && !s.clozeUsed && (tag === 'sign-dropped' || tag === 'wrong-winner')) {
+        const { sentence, choices } = card.signCloze(s.problem);
+        s.clozeUsed = true;
+        s.helped = true;
+        s.supportsShown.push('cloze');
+        s.stage = 'support';
+        s.support = 'cloze';
+        s.cloze = { sentence, choices, tried: [] };
+        s.step = 'cloze';
+        s.entry = '';
+        return say(s, 'wlCloze');
+      }
       return bringInWalk(s, card, 'wlWalk');
     }
 
     case 'stuck':
+      if (s.stage === 'support') s.cloze = null;
       s.stuck += 1;
       return bringInWalk(s, card, 'wlStuck');
+
+    // Teach me step-by-step: the full walk at once.
+    case 'teach':
+      s.cloze = null;
+      s.taught += 1;
+      return bringInWalk(s, card, 'wlTeach');
 
     default:
       return state;
