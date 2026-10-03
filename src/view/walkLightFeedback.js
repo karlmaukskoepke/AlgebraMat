@@ -9,6 +9,7 @@ const WL = {
   wlWalk: () => 'Not quite. Let’s go step by step.',
   wlStuck: () => 'No problem. Let’s go step by step.',
   wlTeach: () => 'Here’s the step-by-step way. Take it one step at a time.',
+  wlZeroTerm: () => 'One of those terms is zero (0x, or 0 on its own), so it isn’t really there. Take it out and type what’s left.',
   wlCloze: () => 'Let’s read what the problem means. Pick the words that finish the sentence.',
   wlClozeNo: ({ reason }) => `${reason} Try another.`,
   wlClozeRight: ({ text }) => `Yes: ${text}. Work out the group first, then take the opposite if it says so. Type the answer again.`,

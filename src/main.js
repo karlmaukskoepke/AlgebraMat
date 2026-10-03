@@ -10,8 +10,9 @@ import { flipitPlay } from './play/flipitPlay.js';
 import { combinePlay } from './play/combinePlay.js';
 import { lightPlay, flipLightPlay } from './play/lightPlay.js';
 import {
-  combineIntegerLightPlay, flipIntegerLightPlay, bigLightPlay, lassoLightPlay, boxLightPlay, termGroupLightPlay, distributeLightPlay,
+  combineIntegerLightPlay, flipIntegerLightPlay, bigLightPlay, lassoLightPlay, termGroupLightPlay, distributeLightPlay,
 } from './play/walkLightPlay.js';
+import { boxLightPlay } from './play/boxLightPlay.js';
 import { afterAnswer } from './engine/streak.js';
 import { loadBests, saveBest } from './lightStore.js';
 import { bestFor } from './engine/streak.js';
@@ -25,6 +26,7 @@ import { distributeTypedPlay } from './play/distributeTypedPlay.js';
 import { renderPackMap, renderLevelDone } from './view/packmap.js';
 import { showSaveCode, askForCode } from './view/codes.js';
 import { endTour } from './view/tour.js';
+import { endDragDemo } from './view/dragDemo.js';
 import { newFluency, reduceFluency } from './engine/fluency.js';
 import { createFluencyView } from './view/fluency.js';
 import { loadRuns, saveRun } from './fluencyStore.js';
@@ -139,6 +141,7 @@ function diagStatus() {
 
 function goHome() {
   endTour();
+  endDragDemo();
   endQuiz();
   clearTimeout(nextTimer);
   play = null;
@@ -171,6 +174,7 @@ function restoreFromCode(text) {
 // resume = { seed, index } picks up a level after a reload.
 function startLevel(packId, level, resume = null) {
   endTour();
+  endDragDemo();
   endQuiz();
   clearTimeout(nextTimer);
   const pack = packById(packId);
@@ -194,6 +198,7 @@ function startLevel(packId, level, resume = null) {
 
 function startFluency(id) {
   endTour();
+  endDragDemo();
   endQuiz();
   clearTimeout(nextTimer);
   play = null;
@@ -227,6 +232,7 @@ function startFluency(id) {
 
 function startDiagnostic(retake = false) {
   endTour();
+  endDragDemo();
   endQuiz();
   clearTimeout(nextTimer);
   play = null;

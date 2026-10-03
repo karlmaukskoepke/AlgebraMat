@@ -15,6 +15,20 @@ function button(label, action, extra = {}) {
   return b;
 }
 
+// A captioned group of pad keys ("variable" over x), so x isn't read as a times sign next to + and −.
+export function padGroup(caption, ...keys) {
+  const g = document.createElement('div');
+  g.className = 'pad-group';
+  const cap = document.createElement('span');
+  cap.className = 'pad-cap';
+  cap.textContent = caption;
+  const row = document.createElement('div');
+  row.className = 'pad-group-keys';
+  row.append(...keys);
+  g.append(cap, row);
+  return g;
+}
+
 export function buildWalkLightControls(root, dispatch, pad) {
   root.innerHTML = '';
   const row = document.createElement('div');
@@ -32,7 +46,7 @@ export function buildWalkLightControls(root, dispatch, pad) {
   if (pad === 'algebra') {
     const chars = [['x', 'x', 'x'], ['+', '+', 'Plus'], ['−', '-', 'Minus']].map(([label, ch, aria]) =>
       button(label, 'typeChar', { cls: 'btn-pad', data: { ch, key: ch }, aria }));
-    keys.append(...digits, ...chars, back);
+    keys.append(...digits, padGroup('variable', chars[0]), padGroup('sign', chars[1], chars[2]), back);
   } else {
     keys.append(button('±', 'toggleSign', { cls: 'btn-pad', aria: 'Change sign' }), ...digits, back);
   }

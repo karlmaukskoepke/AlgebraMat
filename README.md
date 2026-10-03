@@ -29,6 +29,15 @@ Add `?seed=123` to the URL to replay a fixed problem set, and `?level=2` to open
 
 ## Changelog
 
+### Boxes & Circles: light mode, the lasso, and a clearer x (SPEC-SCAFFOLD.md §13)
+- **Boxes & Circles starts with typing the answer.** Two buttons are there any time: **Draw boxes & circles** (the Box & Circle step, then back to typing, the shapes kept) and **Rewrite subtractions** (tap the − in front and the number's sign, for as many subtractions as you like, then Done; a dashed line shows what's being flipped).
+- **A wrong answer asks for boxes and circles first**, then you retype; only a **second** wrong answer opens the counters (Draw, Cancel, Answer). **Teach me step-by-step** is the whole walk at once.
+- **`0x + 13` is no longer wrong:** it's right with a zero term left in, so it says take the zero term out and retype it. (Same on the other typing cards.)
+- **`x − 8x` typed as `−8x`:** a lone x has an invisible 1, said once.
+- **The x on the pad is labelled *variable*** and sits apart from the + and − (captioned *sign*), so it doesn't look like a times sign.
+- **A real lasso:** press anywhere and drag; a dashed line follows (a box for x terms, a pill for numbers) and the terms it covers light up. The first time on a device, a pointer shows how.
+- **Checked in a real browser at 1366×657 and 1280×610:** typing, the boxes-and-circles support with real drags, the rewrite support, the walk played to the level panel from Teach me, the lasso drag, the first-time demonstration, the tour on the Boxes Mat; no page errors, every target at least 44px.
+
 ### The Uber diagnostic and the fluency challenges (SPEC-SCAFFOLD.md §12)
 - **Diagnostic:** a button across the top of the pack map. Twelve problems, two per card at an early and a later level, typed with no support, **nothing marked until the end**, *I don't know* to skip. Stopping part way saves the place on this device. The readout rates each card (Strong / Getting there / Start here) with every problem's typed answer and the right one, recommends a level, and **opens those levels**.
 - **Fluency challenges:** the last item on four cards: Adding, Subtracting, Add & subtract, Multiplying, Big multiplying, and Everything. Sixty seconds, typed answers, a wrong answer flashes the right one and **pauses you for a moment** (time, not points). Every 5 correct makes the problems harder: bigger numbers; for multiplying, negative multipliers after 5, unit fractions after 10, other fractions after 15 (big multiplying: multipliers to 12, bigger denominators).

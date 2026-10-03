@@ -20,9 +20,10 @@ const padButton = (label, data, aria) => h('button', { type: 'button', class: 'b
 export function buildPad(onKey, pad = 'integer') {
   const digits = [1, 2, 3, 4, 5, 6, 7, 8, 9, 0].map((d) => padButton(String(d), { type: 'digit', digit: String(d) }));
   const back = padButton('⌫', { type: 'backspace' }, 'Delete');
+  const group = (caption, ...btns) => h('div', { class: 'pad-group' }, h('span', { class: 'pad-cap' }, caption), h('div', { class: 'pad-group-keys' }, ...btns));
   const keys = pad === 'algebra'
-    ? [...digits, padButton('x', { type: 'typeChar', ch: 'x' }, 'x'), padButton('+', { type: 'typeChar', ch: '+' }, 'Plus'),
-      padButton(MINUS, { type: 'typeChar', ch: '-' }, 'Minus'), back]
+    ? [...digits, group('variable', padButton('x', { type: 'typeChar', ch: 'x' }, 'x')),
+      group('sign', padButton('+', { type: 'typeChar', ch: '+' }, 'Plus'), padButton(MINUS, { type: 'typeChar', ch: '-' }, 'Minus')), back]
     : [padButton('±', { type: 'toggleSign' }, 'Change sign'), ...digits, back];
   const el = h('div', { class: 'pad' }, ...keys);
   el.addEventListener('click', (e) => {

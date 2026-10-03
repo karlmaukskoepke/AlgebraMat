@@ -7,7 +7,7 @@ import { formatExpression, formatAnswer, evaluate, parseAnswer } from './terms.j
 import { validateAnswer as validateTerms } from './termMoves.js';
 import { validateAnswer as validateGroupTerms } from './termGroupMoves.js';
 import { validateCount } from './lassoMoves.js';
-import { evaluateGroups, formatGroups } from './groups.js';
+import { evaluateGroups, formatGroups, groupTotal, isFraction } from './groups.js';
 import { formatTermGroups, evaluateTermGroups } from './termGroups.js';
 import { formatDistribute, distributedExpression } from './distribute.js';
 import { readInteger, classify } from './scaffold.js';
@@ -15,26 +15,36 @@ import { evaluate as evaluateProblem, formatProblem } from './expr.js';
 
 const UNREADABLE = new Set(['typeAnswer', 'answerUnreadable']);
 
-// What a wrong typed answer looked like, from the numbers: `want` and the parsed `read` are { x, n }.
-export function tagTerms(want, read) {
+// What a wrong typed answer looked like, from the numbers: `want` and the parsed `read` are { x, n }. `terms` (optional)
+// are the problem's terms, for the lone-x slip.
+export function tagTerms(want, read, terms = []) {
   if (!read.ok) return 'unreadable';
+  // 0x + 13: right, with a term that is zero left in. Not a wrong answer: take it out and type it again.
+  if (read.terms.some((t) => t.value === 0) && read.x === want.x && read.n === want.n) return 'zero-term';
   if (!read.combined && read.x === want.x && read.n === want.n) return 'uncombined';
   if (read.x === -want.x && read.n === -want.n) {
     if (want.x === 0) return want.n < 0 ? 'sign-dropped' : 'wrong-winner';
     return 'sign-flipped';
   }
+  // x − 8x typed as −8x: the lone x (an invisible 1 in front) was left out of the count.
+  const lone = terms.filter((t) => t.kind === 'x' && Math.abs(t.value) === 1).reduce((sum, t) => sum + effectiveOf(t), 0);
+  if (lone !== 0 && read.n === want.n && read.x === want.x - lone) return 'invisible-one';
   if (read.x === want.x) return 'n-off';
   if (read.n === want.n) return 'x-off';
   return 'unmatched';
 }
 
-// A checker built on a pack's own answer validator: { correct, tag, unreadable }.
-function termsChecker(want, validate) {
+// What a term is worth with its sign: − 3x is −3, + x is 1.
+const effectiveOf = (t) => (t.op === '-' ? -t.value : t.value);
+
+// A checker built on a pack's own answer validator: { correct, tag, unreadable }. `termsOf(problem)` lists the terms
+// the problem is made of (for the lone-x slip).
+function termsChecker(want, validate, termsOf = () => []) {
   return (problem, text) => {
     const res = validate(problem, text);
     if (res.ok) return { correct: true, tag: null };
     if (UNREADABLE.has(res.feedbackKey)) return { correct: false, tag: 'unreadable' };
-    return { correct: false, tag: tagTerms(want(problem), parseAnswer(text)) };
+    return { correct: false, tag: tagTerms(want(problem), parseAnswer(text), termsOf(problem)) };
   };
 }
 
@@ -44,6 +54,8 @@ function checkGroups(problem, text) {
   const r = evaluateGroups(problem);
   if (validateCount(problem, t).ok) return { correct: true, tag: null };
   if (t === -r) return { correct: false, tag: r < 0 ? 'sign-dropped' : 'wrong-winner' };
+  // 1/3 of 12 answered 8: the parts left behind were counted instead of the part taken.
+  if (isFraction(problem) && Math.abs(t) === Math.abs(problem.inside.value - groupTotal(problem)) && Math.abs(t) !== Math.abs(r)) return { correct: false, tag: 'removed-part' };
   return { correct: false, tag: 'unmatched' };
 }
 
@@ -92,7 +104,7 @@ export const CARDS = {
     pad: 'algebra',
     problemText: formatExpression,
     answerText: (p) => formatAnswer(evaluate(p)),
-    check: termsChecker(evaluate, validateTerms),
+    check: termsChecker(evaluate, validateTerms, (p) => p.terms),
   },
   group: {
     pad: 'integer',
@@ -111,7 +123,7 @@ export const CARDS = {
     pad: 'algebra',
     problemText: formatDistribute,
     answerText: (p) => formatAnswer(evaluate(distributedExpression(p))),
-    check: termsChecker((p) => evaluate(distributedExpression(p)), (p, text) => validateTerms(distributedExpression(p), text)),
+    check: termsChecker((p) => evaluate(distributedExpression(p)), (p, text) => validateTerms(distributedExpression(p), text), (p) => distributedExpression(p).terms),
   },
 };
 

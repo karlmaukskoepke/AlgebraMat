@@ -66,6 +66,5 @@ export const combineIntegerLightPlay = makeWalkLightPlay({ packId: 'combineit', 
 export const flipIntegerLightPlay = makeWalkLightPlay({ packId: 'flipit', cardId: 'integers', walkPlay: integerPlay });
 export const bigLightPlay = makeWalkLightPlay({ packId: 'combineit', cardId: 'integers', walkPlay: bigPlay });
 export const lassoLightPlay = makeWalkLightPlay({ packId: 'lasso', cardId: 'group', walkPlay: lassoPlay });
-export const boxLightPlay = makeWalkLightPlay({ packId: 'boxes', cardId: 'boxes', walkPlay: boxPlay });
 export const termGroupLightPlay = makeWalkLightPlay({ packId: 'groups-of-terms', cardId: 'termGroups', walkPlay: termGroupPlay });
 export const distributeLightPlay = makeWalkLightPlay({ packId: 'distribute-combine', cardId: 'distribute', walkPlay: distributePlay });
