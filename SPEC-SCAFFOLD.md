@@ -145,4 +145,19 @@ This is what SPEC-JIT.md's pattern-finding and the teacher report will read; the
 - Text on the Mat can't be selected by dragging or double-clicking.
 - **Streaks:** *I'm stuck* and *Teach me* leave the streak where it is (neither add nor break); only a wrong typed answer breaks it. (The first build reset it on I'm stuck; fixed.)
 
-**Queued next (Karl's order, before anything else on the list)**: the **Uber diagnostic** and the **fluency challenges** (SPEC-ROADMAP.md).
+
+
+## 12. The Uber diagnostic and the fluency challenges (Karl, 2026-10-03; built)
+
+**The diagnostic** (`engine/diagnostic.js`, `view/diagnostic.js`, `diagStore.js`)
+- A button across the top of the pack map: *Take the diagnostic to find your levels* (then *Continue the diagnostic (n of 12 done)*, then *See my diagnostic results*).
+- **Twelve problems, two per card**, adding and subtracting first, then groups, then the algebra cards (Combine it L2 and L4, Flip It L2 and L5, Group It L2 and L5, Boxes & Circles L2 and L4, Groups of Terms L2 and L5, Distribute then combine L1 and L3). Typed with the same pad as light mode; **nothing says right or wrong** until the end; *I don't know* skips.
+- **Stopping part way saves the place** (`mat.diag.v1`: the seed and the answers) but it isn't done until the twelfth.
+- **The readout** gives each card a standing and a level to start at: both right → *Strong*, start the level after the harder one; the easier right → *Getting there*, start after it; otherwise *Start here*, Level 1. Each problem shows what was typed and the right answer.
+- **It recommends AND opens**: the recommended level and all before it open on that card (`packs[id].open` in the saved progress; not marked done, and not part of a save code yet). A retake can only open more.
+
+**Fluency challenges** (`engine/fluency.js`, `engine/highscores.js`, `view/fluency.js`, `fluencyStore.js`)
+- Each card's last item is a row of challenges on the pack map: Combine it: Adding; Flip It: Subtracting, Add & subtract; Group It: Multiplying (concepts), Big multiplying; Distribute then combine: Everything (all of them mixed).
+- **60 seconds**, type the answer and Check (Enter). **A wrong answer flashes the right one and pauses typing for 2.5 seconds while the clock keeps running**: it costs time, not points.
+- **Difficulty climbs with the number correct, a step every 5.** Add and subtract: numbers up to 9, 15, 25, 40, 60, and a third number from step 4. Multiplying (concepts): positive multipliers → **negative multipliers after 5** → **unit fractions after 10** → **other fractions, either sign, after 15**, with small numbers. Big multiplying: the same ramp with multipliers 2 to 12 (leaning 6 to 12) and fractions with denominators up to 8 of numbers up to 36. Easier kinds stay in the mix.
+- **High scores**: this month, this school year (September 1 to September 1) and all time, tabs on the start and end screens, kept on this device (`mat.fluency.v1`, newest 300 runs). A shared list (a spreadsheet, teachers with accounts and sign-in codes for their students) is a later build.

@@ -10,7 +10,8 @@ import { validateCount } from './lassoMoves.js';
 import { evaluateGroups, formatGroups } from './groups.js';
 import { formatTermGroups, evaluateTermGroups } from './termGroups.js';
 import { formatDistribute, distributedExpression } from './distribute.js';
-import { readInteger } from './scaffold.js';
+import { readInteger, classify } from './scaffold.js';
+import { evaluate as evaluateProblem, formatProblem } from './expr.js';
 
 const UNREADABLE = new Set(['typeAnswer', 'answerUnreadable']);
 
@@ -73,6 +74,13 @@ export function groupCloze(problem) {
 
 // pad: 'integer' types a number (± and digits); 'algebra' types terms (x, + and − too).
 export const CARDS = {
+  // Combine it Levels 1–3 and Flip It Levels 1–4: two numbers, joined by + or −.
+  twoTerm: {
+    pad: 'integer',
+    problemText: formatProblem,
+    answerText: (p) => String(evaluateProblem(p)).replace('-', '−'),
+    check: (p, text) => classify(p, text),
+  },
   // Combine it Levels 4–5 and Flip It Level 5: three or more integers.
   integers: {
     pad: 'integer',
@@ -108,3 +116,10 @@ export const CARDS = {
 };
 
 
+
+// Which card config plays a pack's level (light mode and the diagnostic use the same one).
+export function cardIdFor(packId, level) {
+  if (packId === 'combineit') return level <= 3 ? 'twoTerm' : 'integers';
+  if (packId === 'flipit') return level <= 4 ? 'twoTerm' : 'integers';
+  return { lasso: 'group', boxes: 'boxes', 'groups-of-terms': 'termGroups', 'distribute-combine': 'distribute' }[packId] ?? null;
+}

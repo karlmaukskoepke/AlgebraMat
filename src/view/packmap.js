@@ -1,5 +1,6 @@
 // The home screen: one card per pack with its level dots and level buttons.
 import { isLevelDone, isLevelUnlocked, isPackComplete } from '../engine/progress.js';
+import { CARD_CHALLENGES, challengeById } from '../engine/fluency.js';
 
 const h = (tag, attrs = {}, ...children) => {
   const el = document.createElement(tag);
@@ -29,7 +30,17 @@ function soonCard(pack) {
     h('p', { class: 'subtitle' }, pack.subtitle));
 }
 
-function packCard(progress, pack) {
+// A card's last item: its fluency challenges, with the best score on this device.
+function fluencyRow(pack, bests) {
+  const ids = CARD_CHALLENGES[pack.id];
+  if (!ids) return null;
+  return h('div', { class: 'fluency-row' },
+    ...ids.map((id) => h('button', { type: 'button', class: 'btn fluency-btn', dataset: { fluency: id }, 'aria-label': `${challengeById(id).title} fluency challenge${bests[id] ? `, best ${bests[id]}` : ''}` },
+      `⏱ ${challengeById(id).title}`,
+      bests[id] ? h('span', { class: 'fluency-best' }, ` · ${bests[id]}`) : null)));
+}
+
+function packCard(progress, pack, bests) {
   const complete = isPackComplete(progress, pack.id);
   const levels = h('div', { class: `level-list${pack.levels > 4 ? ' many' : ''}` });
   for (let l = 1; l <= pack.levels; l++) {
@@ -52,11 +63,24 @@ function packCard(progress, pack) {
     h('p', { class: 'blurb' }, pack.blurb),
     // The scroll box is a plain wrapper, so the grid inside sizes its rows to their text
     // (a grid with a fixed height squeezes its rows and clips the level names).
-    h('div', { class: 'level-scroll' }, levels));
+    h('div', { class: 'level-scroll' }, levels),
+    fluencyRow(pack, bests));
 }
 
-export function renderPackMap(root, progress, packs, { onPlay, onSaveCode, onEnterCode, note }) {
-  root.replaceChildren(
+// The diagnostic button across the top: take it, pick it up where it was left, or see the results.
+function diagnosticBar(diag) {
+  const label = diag.status === 'done' ? 'See my diagnostic results'
+    : diag.status === 'partial' ? `Continue the diagnostic (${diag.index} of ${diag.total} done)`
+      : 'Take the diagnostic to find your levels';
+  return h('section', { class: `diag-bar${diag.status === 'done' ? ' is-done' : ''}`, 'aria-label': 'Diagnostic' },
+    h('button', { type: 'button', class: 'btn btn-primary diag-start', 'data-home': 'diagnostic' }, label),
+    h('p', { class: 'diag-blurb' }, diag.status === 'done'
+      ? 'The levels you showed you’re ready for are open.'
+      : 'About 12 problems, adding to algebra. Nothing is marked until the end, and it opens the levels you’re ready for.'));
+}
+
+export function renderPackMap(root, progress, packs, { onPlay, onSaveCode, onEnterCode, onDiagnostic, onFluency, diag = { status: 'none', index: 0, total: 12 }, bests = {}, note }) {
+  root.replaceChildren(...[
     h('header', { class: 'home-head' },
       h('div', {},
         h('h1', {}, 'The Mat'),
@@ -65,21 +89,25 @@ export function renderPackMap(root, progress, packs, { onPlay, onSaveCode, onEnt
         h('button', { type: 'button', class: 'btn', 'data-home': 'save' }, 'Save code'),
         h('button', { type: 'button', class: 'btn', 'data-home': 'enter' }, 'Enter code'))),
     h('p', { class: 'home-note', role: 'status', hidden: !note }, note ?? ''),
+    diagnosticBar(diag),
     h('div', { class: `pack-grid packs-${packs.filter((p) => !p.comingSoon).length}` },
-      ...packs.filter((p) => !p.comingSoon).map((p) => packCard(progress, p))),
+      ...packs.filter((p) => !p.comingSoon).map((p) => packCard(progress, p, bests))),
     // Packs still being built show as cards under "Coming soon"; there are none to show right now.
     packs.some((p) => p.comingSoon)
       ? h('section', { class: 'soon', 'aria-label': 'Coming soon' },
         h('h2', { class: 'soon-head' }, 'Coming soon'),
         h('div', { class: 'soon-grid' }, ...packs.filter((p) => p.comingSoon).map(soonCard)))
       : null,
-  );
+  ].filter(Boolean));
   root.onclick = (e) => {
     const b = e.target.closest('button[data-level]');
     if (b && !b.disabled) return onPlay(b.dataset.pack, Number(b.dataset.level));
+    const f = e.target.closest('button[data-fluency]');
+    if (f) return onFluency(f.dataset.fluency);
     const act = e.target.closest('[data-home]')?.dataset.home;
     if (act === 'save') onSaveCode();
     if (act === 'enter') onEnterCode();
+    if (act === 'diagnostic') onDiagnostic();
   };
 }
 

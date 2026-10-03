@@ -29,6 +29,13 @@ Add `?seed=123` to the URL to replay a fixed problem set, and `?level=2` to open
 
 ## Changelog
 
+### The Uber diagnostic and the fluency challenges (SPEC-SCAFFOLD.md §12)
+- **Diagnostic:** a button across the top of the pack map. Twelve problems, two per card at an early and a later level, typed with no support, **nothing marked until the end**, *I don't know* to skip. Stopping part way saves the place on this device. The readout rates each card (Strong / Getting there / Start here) with every problem's typed answer and the right one, recommends a level, and **opens those levels**.
+- **Fluency challenges:** the last item on four cards: Adding, Subtracting, Add & subtract, Multiplying, Big multiplying, and Everything. Sixty seconds, typed answers, a wrong answer flashes the right one and **pauses you for a moment** (time, not points). Every 5 correct makes the problems harder: bigger numbers; for multiplying, negative multipliers after 5, unit fractions after 10, other fractions after 15 (big multiplying: multipliers to 12, bigger denominators).
+- **High scores** this month / this school year / all time, on this device for now.
+- **Fix:** the pack map showed the word "null" at the bottom of the page.
+- Checked in a real browser at 1366×657 and 1280×610: both flows end to end (fluency with a wrong answer and the clock running out; the diagnostic stopped and resumed, finished, levels opened on the map); no page errors, every target at least 44px.
+
 ### Karl's first round of play-test changes (SPEC-SCAFFOLD.md §11)
 - **Combine it:** a sign mistake now gets *circle the numbers with their signs* first (the Boxes & Circles drag), then you type again; a second miss gets the sentence to finish, a third the full walk. **Party! and Battle! now sit on the Mat**, right under *Same signs?* and *Different signs?*.
 - **Flip It:** any wrong answer on a subtraction goes straight to **rewriting it**: tap the minus to make it a plus, tap the number's sign to change it (this includes `3 − 8`). The rewritten line stays on the Mat, you try again, and only a second miss opens the counters.

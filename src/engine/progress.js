@@ -17,11 +17,22 @@ const levelsOf = (progress, packId) => progress.packs[packId]?.levels ?? [];
 
 export const isLevelDone = (progress, packId, level) => levelsOf(progress, packId)[level - 1] === true;
 
-// Level 1 is always open; each later level opens when the one before is done.
+// Level 1 is always open; each later level opens when the one before is done, or when the diagnostic opened it
+// (`open` is the highest level the diagnostic opened for that pack; the levels below it are open too).
 export function isLevelUnlocked(progress, packId, level) {
   const levels = levelsOf(progress, packId);
   if (level < 1 || level > levels.length) return false;
-  return level === 1 || levels[level - 2] === true;
+  return level === 1 || levels[level - 2] === true || level <= (progress.packs[packId]?.open ?? 0);
+}
+
+// The diagnostic opens levels up to `level` in a pack (never closing any that were already open).
+export function openLevels(progress, packId, level) {
+  const out = structuredClone(progress);
+  const entry = out.packs[packId];
+  if (!entry) return out;
+  entry.open = Math.max(entry.open ?? 0, Math.min(level, entry.levels.length));
+  if (entry.open <= 1) delete entry.open;
+  return out;
 }
 
 export function isPackComplete(progress, packId) {
@@ -57,6 +68,8 @@ export function normalizeProgress(raw, packs) {
     // counted as done once the old Level 3 (three or more numbers, now Level 4) was.
     if (id === 'combineit' && levels.length === 4) levels = [levels[0], levels[1], levels[2], levels[2], levels[3]];
     entry.levels = entry.levels.map((_, i) => levels[i] === true);
+    const open = src[id]?.open;
+    if (Number.isInteger(open) && open > 1) entry.open = Math.min(open, entry.levels.length);
   }
   return out;
 }
@@ -67,6 +80,8 @@ export function mergeProgress(a, b) {
   for (const [id, entry] of Object.entries(out.packs)) {
     const other = b.packs[id]?.levels ?? [];
     entry.levels = entry.levels.map((done, i) => done || other[i] === true);
+    const open = Math.max(entry.open ?? 0, b.packs[id]?.open ?? 0);
+    if (open > 1) entry.open = open;
   }
   return out;
 }

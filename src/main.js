@@ -25,6 +25,16 @@ import { distributeTypedPlay } from './play/distributeTypedPlay.js';
 import { renderPackMap, renderLevelDone } from './view/packmap.js';
 import { showSaveCode, askForCode } from './view/codes.js';
 import { endTour } from './view/tour.js';
+import { newFluency, reduceFluency } from './engine/fluency.js';
+import { createFluencyView } from './view/fluency.js';
+import { loadRuns, saveRun } from './fluencyStore.js';
+import { bestScore } from './engine/highscores.js';
+import { CHALLENGES } from './engine/fluency.js';
+import {
+  diagnosticItems, newDiagnostic, reduceDiagnostic, readout, applyReadout, TOTAL as DIAG_TOTAL,
+} from './engine/diagnostic.js';
+import { createDiagnosticView } from './view/diagnostic.js';
+import { loadDiag, saveDiag, clearDiag } from './diagStore.js';
 
 const $ = (id) => document.getElementById(id);
 
@@ -104,20 +114,42 @@ function useMat(adapter) {
   matBoundFor = adapter;
 }
 
+// The fluency challenge or the diagnostic, while one is on the screen: { kind, view, timer?, state, ... }.
+let quiz = null;
+function endQuiz() {
+  if (!quiz) return;
+  clearInterval(quiz.timer);
+  quiz.view.destroy();
+  quiz = null;
+}
+
 function showScreen(name) {
   $('home').hidden = name !== 'home';
   $('play').hidden = name !== 'play';
+  $('quiz').hidden = name !== 'quiz';
   window.scrollTo(0, 0);
 }
 
 const STORAGE_NOTE = 'Progress won’t be remembered on this device. Use Save code to keep it.';
 
+function diagStatus() {
+  const d = loadDiag();
+  return { status: !d ? 'none' : d.done ? 'done' : d.index > 0 ? 'partial' : 'none', index: d?.index ?? 0, total: DIAG_TOTAL };
+}
+
 function goHome() {
   endTour();
+  endQuiz();
   clearTimeout(nextTimer);
   play = null;
   persist();
+  const runs = loadRuns();
+  const now = Date.now();
   renderPackMap($('home'), progress, PACKS, {
+    diag: diagStatus(),
+    bests: Object.fromEntries(CHALLENGES.map((c) => [c.id, bestScore(runs, c.id, 'all', now)])),
+    onDiagnostic: () => startDiagnostic(),
+    onFluency: startFluency,
     onPlay: startLevel,
     onSaveCode: () => showSaveCode(encodeProgress(progress)),
     onEnterCode: () => askForCode(restoreFromCode),
@@ -139,6 +171,7 @@ function restoreFromCode(text) {
 // resume = { seed, index } picks up a level after a reload.
 function startLevel(packId, level, resume = null) {
   endTour();
+  endQuiz();
   clearTimeout(nextTimer);
   const pack = packById(packId);
   const adapter = adapterFor(pack.id, level);
@@ -155,6 +188,74 @@ function startLevel(packId, level, resume = null) {
   persist();
   showScreen('play');
   render();
+}
+
+// ---------- Fluency challenges and the diagnostic ----------
+
+function startFluency(id) {
+  endTour();
+  endQuiz();
+  clearTimeout(nextTimer);
+  play = null;
+  let state = newFluency(id, newSeed());
+  let previousBest = 0;
+  const view = createFluencyView($('quiz'), {
+    challenge: id,
+    getRuns: loadRuns,
+    onBack: goHome,
+    onAction: (a) => send(a),
+  });
+  quiz = { kind: 'fluency', view, timer: null };
+  const send = (a) => {
+    const was = state.status;
+    if (a.type === 'start') a = { ...a, seed: newSeed() };
+    state = reduceFluency(state, { ...a, now: Date.now() });
+    if (was !== 'playing' && state.status === 'playing') {
+      previousBest = bestScore(loadRuns(), id, 'all', Date.now());
+      clearInterval(quiz.timer);
+      quiz.timer = setInterval(() => send({ type: 'tick' }), 100);
+    }
+    if (was === 'playing' && state.status === 'ended') {
+      clearInterval(quiz.timer);
+      saveRun({ c: id, s: state.correct, t: Date.now(), tier: state.topTier });
+    }
+    view.render(state, { previousBest });
+  };
+  showScreen('quiz');
+  view.render(state);
+}
+
+function startDiagnostic(retake = false) {
+  endTour();
+  endQuiz();
+  clearTimeout(nextTimer);
+  play = null;
+  if (retake) clearDiag();
+  let state = loadDiag() ?? newDiagnostic(newSeed());
+  const items = diagnosticItems(state.seed);
+  const finish = () => {
+    const rows = readout(state.seed, state.answers, items);
+    progress = applyReadout(progress, rows);
+    persist();
+    view.render(state, items, rows, 'I opened the levels you’re ready for. Start where it says, or pick any open level on the pack map.');
+  };
+  const view = createDiagnosticView($('quiz'), {
+    onAction: (a) => {
+      const next = reduceDiagnostic(state, a, items);
+      if (next === state) return;
+      const answered = next.answers.length !== state.answers.length;
+      state = next;
+      if (answered) saveDiag(state);
+      if (state.done) finish(); else view.render(state, items);
+    },
+    onStop: goHome,
+    onMap: goHome,
+    onPlay: startLevel,
+    onRetake: () => startDiagnostic(true),
+  });
+  quiz = { kind: 'diagnostic', view };
+  showScreen('quiz');
+  if (state.done) finish(); else view.render(state, items);
 }
 
 function dispatch(action) {
