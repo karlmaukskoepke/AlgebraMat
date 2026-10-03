@@ -4,6 +4,7 @@
 
 import { emptySkills, readSkills, afterProblem } from './engine/skills.js';
 import { makeRecord, appendRecord } from './engine/eventlog.js';
+import { readBests, withBest, bestFor } from './engine/streak.js';
 
 export const SKILLS_KEY = 'mat.skills.v1';
 export const LOG_KEY = 'mat.events.v1';
@@ -40,4 +41,33 @@ export function tourSeen() {
 
 export function markTourSeen() {
   try { localStorage.setItem(TOUR_KEY, 'seen'); } catch { /* storage blocked */ }
+}
+
+// ---------- One-step tips (SPEC-SCAFFOLD.md §8): shown once per device each ----------
+
+export const TIPS_KEY = 'mat.tips.v1';
+
+export function tipSeen(id) {
+  const seen = readJson(TIPS_KEY);
+  return Array.isArray(seen) && seen.includes(id);
+}
+
+export function markTipSeen(id) {
+  const seen = readJson(TIPS_KEY);
+  const list = Array.isArray(seen) ? seen : [];
+  if (!list.includes(id)) writeJson(TIPS_KEY, [...list, id]);
+}
+
+// ---------- Streaks (SPEC-SCAFFOLD.md §9): the best run of clean answers, per card and level, on this device ----------
+
+export const STREAKS_KEY = 'mat.streaks.v1';
+
+export const loadBests = () => readBests(readJson(STREAKS_KEY));
+
+// A streak just ended or grew: keep it if it beats the best. Returns the best for that level.
+export function saveBest(pack, level, n) {
+  const bests = loadBests();
+  const next = withBest(bests, pack, level, n);
+  if (next !== bests) writeJson(STREAKS_KEY, next);
+  return bestFor(next, pack, level);
 }

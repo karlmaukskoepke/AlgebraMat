@@ -7,14 +7,26 @@
 //
 // A sign mistake gets the cloze: a sentence with a blank and four word-choices, read aloud once one is picked.
 
-import { evaluate } from './expr.js';
+import { evaluate, rewrite, formatProblem } from './expr.js';
 import { newCombineSession } from './combineSession.js';
-import { reduce as reduceWalk } from './session.js';
+import { reduce as reduceWalk, newSession as newFlipWalk } from './session.js';
 import { validatePartyBattle } from './moves.js';
 import { classify, firstSupport, nextRung, buildCloze, spokenSentence, leftover, clozeFeedbackKey } from './scaffold.js';
 import { emptySkills, whichOn } from './skills.js';
 
 export const MAX_LIGHT_LENGTH = 4;
+
+// The walk for a problem: Flip It's own (it starts at Rewrite) for a subtraction, Combine it's (no Rewrite) for an addition.
+const startWalk = (problem) => (problem.op === '-' ? newFlipWalk(problem) : newCombineSession(problem));
+
+// The party-or-battle question's message. A subtraction is shown as the addition it becomes first (adding the opposite).
+function partyBattleMessage(problem) {
+  const added = rewrite(problem);
+  const params = { a: added.left.value, b: added.right.value };
+  return problem.op === '-'
+    ? { key: 'lightPartyBattleSub', params: { ...params, from: formatProblem(problem), to: formatProblem(added) } }
+    : { key: 'lightPartyBattle', params };
+}
 
 // Supports built so far. Others fall back to the party-or-battle question.
 const BUILT = new Set(['cloze', 'partyBattle', 'fullWalk']);
@@ -56,7 +68,7 @@ export function newLightSession(problem, skills = emptySkills()) {
     s.step = 'partyBattle';
     s.lastSupport = 'partyBattle';
     s.upfront = true;
-    s.feedback = { key: 'lightPartyBattle', params: { a: problem.left.value, b: problem.right.value } };
+    s.feedback = partyBattleMessage(problem);
   }
   return s;
 }
@@ -71,7 +83,7 @@ function bringIn(s, tag) {
   s.supportsShown.push(kind);
   if (kind === 'fullWalk') {
     s.stage = 'walk';
-    s.walk = newCombineSession(s.problem);
+    s.walk = startWalk(s.problem);
     s.step = s.walk.step;
     s.skipped = s.walk.skipped;
     return say(s, 'lightWalk', undefined);
@@ -85,7 +97,8 @@ function bringIn(s, tag) {
     return say(s, 'lightCloze', { situation });
   }
   s.step = 'partyBattle';
-  return say(s, 'lightPartyBattle', { a: s.problem.left.value, b: s.problem.right.value });
+  const m = partyBattleMessage(s.problem);
+  return say(s, m.key, m.params);
 }
 
 export function reduceLight(state, action) {

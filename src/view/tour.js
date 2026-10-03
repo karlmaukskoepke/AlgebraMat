@@ -2,8 +2,8 @@
 // caption, and each step moves on with Next (or, for I'm stuck, by pressing the real button). It lights up the
 // actual controls, so it can't drift out of date. State is engine/tour.js.
 
-import { startTour as newTour, currentStep, advance } from '../engine/tour.js';
-import { tourSeen, markTourSeen } from '../lightStore.js';
+import { startTour as newTour, tipTour, currentStep, advance } from '../engine/tour.js';
+import { tourSeen, markTourSeen, tipSeen, markTipSeen } from '../lightStore.js';
 
 const TARGETS = {
   problem: () => document.querySelector('.light-mat .dist-original'),
@@ -16,6 +16,7 @@ const TARGETS = {
 let tour = null;
 let root = null;
 let required = false;
+let tipId = null;
 let onKey = null;
 let onPress = null;
 let onResize = null;
@@ -28,6 +29,8 @@ export const touring = () => tour !== null;
 export function endTour() {
   if (!tour) return;
   if (required) markTourSeen();
+  if (tipId) markTipSeen(tipId);
+  tipId = null;
   tour = null;
   root?.remove();
   root = null;
@@ -35,6 +38,12 @@ export function endTour() {
   document.removeEventListener('click', onPress, true);
   window.removeEventListener('resize', onResize);
   document.body.classList.remove('touring');
+}
+
+// The pad step says what the lit-up pad actually has: ± for a number, x + and − for terms.
+function textFor(step, target) {
+  if (step.id === 'pad' && target.querySelector('[data-action="typeChar"]')) return 'Type the answer here. x, + and − are for terms like 2x + 3.';
+  return step.text;
 }
 
 function place(step) {
@@ -69,7 +78,7 @@ function place(step) {
   caption.setAttribute('role', 'dialog');
   caption.setAttribute('aria-live', 'polite');
   const text = el('tour-text', 'p');
-  text.textContent = step.text;
+  text.textContent = textFor(step, target);
   const buttons = el('tour-buttons');
   const skip = el('btn tour-skip', 'button');
   skip.type = 'button';
@@ -106,12 +115,12 @@ function move(event) {
   setTimeout(show, 60);   // let the screen settle first (pressing I'm stuck changes it)
 }
 
-// Start the tour: `first` is the required, first-time one; otherwise it's a replay from the ? button.
-export function startTour({ first = false } = {}) {
+// Begin a tour state: the first-time tour, a replay (the ? button), or a one-step tip.
+function begin(state, { remember = false, tip = null } = {}) {
   endTour();
-  if (first && tourSeen()) return;
-  required = first;
-  tour = newTour(first);
+  required = remember;
+  tipId = tip;
+  tour = state;
   root = el('tour-root');
   document.body.append(root);
   document.body.classList.add('touring');
@@ -134,8 +143,32 @@ export function startTour({ first = false } = {}) {
   setTimeout(show, 0);
 }
 
+// Start the tour: `first` is the required, first-time one; otherwise it's a replay from the ? button.
+export function startTour({ first = false } = {}) {
+  if (first && tourSeen()) return;
+  begin(newTour(first), { remember: first });
+}
+
+// A one-step tip, once per device.
+export function startTip(id) {
+  if (tipSeen(id)) return;
+  begin(tipTour(id), { tip: id });
+}
+
 // The first light problem on a device starts the tour (once the Mat is on the screen).
 export function startTourIfFirst() {
   if (touring() || tourSeen()) return;
   setTimeout(() => startTour({ first: true }), 120);
+}
+
+// What a light problem opens with: the tour on a new device, else a one-step tip when this card's pad is new to the
+// student (the tour itself already covers an algebra pad if that's where it starts).
+export function startIntro({ algebra = false } = {}) {
+  if (touring()) return;
+  if (!tourSeen()) {
+    if (algebra) markTipSeen('algebra-pad');
+    startTourIfFirst();
+  } else if (algebra && !tipSeen('algebra-pad')) {
+    setTimeout(() => startTip('algebra-pad'), 120);
+  }
 }

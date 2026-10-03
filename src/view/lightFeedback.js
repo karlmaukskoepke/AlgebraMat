@@ -10,6 +10,7 @@ export const LIGHT_FEEDBACK = {
   lightIntroSign: () => 'Type the answer, with its sign. I’ll say it back in words as you type.',
   lightCorrect: ({ answer }) => `Yes! The answer is ${String(answer).replace('-', MINUS)}.`,
   lightPartyBattle: ({ a, b }) => `Let’s look at ${term(a)} and ${term(b)}. Same signs, or different signs?`,
+  lightPartyBattleSub: ({ a, b, from, to }) => `Subtracting is adding the opposite: ${from} is ${to}. Now look at ${term(a)} and ${term(b)}. Same signs, or different signs?`,
   lightSameOrDifferent: () => 'Look at the signs again: are they the same or different?',
   lightPartyOk: () => 'Party! Same signs join together. Now type the answer.',
   lightBattleOk: () => 'Battle! Different signs: the bigger side wins. Now type the answer.',

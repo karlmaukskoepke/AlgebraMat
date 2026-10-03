@@ -13,12 +13,13 @@ function html(tag, cls, ...children) {
   return node;
 }
 
-// view: { problemText, typed, done, cloze, said, readback }
+// view: { problemText, typed, shown, done, cloze, said, readback }
+//   shown  the typed text as it should read, when it isn't just the typed text with a real minus (terms: "2x + 3")
 //   typed  what's been typed (with the keyboard's "-"), done says it's right
 //   cloze  while the cloze is showing: { sentence, choices: [{ text, index }], tried: [index] }
 //   readback  the typed answer in words ("negative 2"), under the answer, when the sign support is on
 //   said   once the right choice is picked: { sentence, leftover: { sign, count } }, kept while the student types
-export function renderLightMat({ problemText, typed, done, cloze, said, readback }) {
+export function renderLightMat({ problemText, typed, shown: shownText, done, cloze, said, readback }) {
   const svg = document.createElementNS(SVG_NS, 'svg');
   svg.setAttribute('class', 'mat dist-mat light-mat');
   svg.setAttribute('viewBox', '0 0 860 340');
@@ -29,7 +30,7 @@ export function renderLightMat({ problemText, typed, done, cloze, said, readback
   fo.setAttribute('y', cloze || said ? '20' : '70');
   fo.setAttribute('width', '860');
   fo.setAttribute('height', cloze || said ? '300' : '230');
-  const shown = typed.replace('-', MINUS);
+  const shown = shownText ?? typed.replace('-', MINUS);
   const parts = [html('div', 'dist-row dist-original', problemText)];
   if (cloze) {
     parts.push(html('div', 'cloze-sentence', cloze.sentence));

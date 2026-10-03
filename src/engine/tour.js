@@ -5,7 +5,7 @@
 // Each step names the feature it lights up (view/tour.js finds it) and what moves it on: 'next' is the Next button,
 // 'press' is the student pressing the lit-up control.
 const STEPS = [
-  { id: 'problem', target: 'problem', needs: 'next', text: 'Here’s what you’re adding.' },
+  { id: 'problem', target: 'problem', needs: 'next', text: 'Here’s the problem.' },
   { id: 'pad', target: 'pad', needs: 'next', text: 'Type the answer here. ± makes it negative.' },
   { id: 'check', target: 'check', needs: 'next', text: 'Press Check when you’re ready.' },
   { id: 'stuck', target: 'stuck', needs: 'press', text: 'Not sure? Press “I’m stuck” any time. There’s no penalty. Try it now!' },
@@ -35,3 +35,13 @@ export function advance(tour, event) {
   const index = tour.index + 1;
   return index >= tour.steps.length ? { ...tour, index, done: true } : { ...tour, index };
 }
+
+// A one-step tip, the first time a card brings controls the tour didn't show (SPEC-SCAFFOLD.md §8).
+export const TIPS = {
+  'algebra-pad': {
+    id: 'algebra-pad', target: 'pad', needs: 'next',
+    text: 'New here: x, + and − are on the pad, for typing terms like 2x + 3. Combine like terms to finish.',
+  },
+};
+
+export const tipTour = (id) => ({ steps: [TIPS[id]], index: 0, done: false });

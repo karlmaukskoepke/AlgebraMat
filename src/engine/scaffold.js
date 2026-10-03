@@ -2,7 +2,7 @@
 // what a wrong answer says about the mistake behind it, which support answers that mistake, and the
 // cloze that makes a student say the sign. Pure logic, no DOM.
 
-import { evaluate, partyOrBattle, MINUS } from './expr.js';
+import { evaluate, partyOrBattle, rewrite, MINUS } from './expr.js';
 
 // ---------- Reading what was typed ----------
 
@@ -20,6 +20,8 @@ export function readInteger(text) {
 //   wrong-winner     the size is right and the sign is the opposite                       (I3, I5)
 //   battle-as-party  a battle answered as if the sizes were added                         (I1)
 //   party-as-battle  a party answered as if the smaller size were taken from the larger   (I1)
+//   minus-as-minus   a subtraction answered as if the subtracted number's own sign didn't count: 5 − (−3) typed as 2,
+//                    the double negative dropped (Flip It; I1 and I2)
 //   unmatched        none of these: the full walk
 // classify returns { correct, tag }. `tag` is null when correct, and 'unreadable' when nothing usable was typed
 // (an empty or garbled answer isn't a mistake, so it isn't a wrong try).
@@ -30,6 +32,7 @@ export function classify(problem, typed) {
   const b = problem.right.value;
   const r = evaluate(problem);
   if (t === r) return { correct: true, tag: null };
+  if (problem.op === '-' && t === a + b) return { correct: false, tag: 'minus-as-minus' };
   if (r < 0 && t === -r) return { correct: false, tag: 'sign-dropped' };
   if (t === -r) return { correct: false, tag: 'wrong-winner' };
   const battle = partyOrBattle(problem) === 'battle';
@@ -47,6 +50,7 @@ const FIRST_SUPPORT = {
   'wrong-winner': 'cloze',
   'battle-as-party': 'partyBattle',
   'party-as-battle': 'partyBattle',
+  'minus-as-minus': 'partyBattle',   // that question first shows the subtraction as adding the opposite
   unmatched: 'fullWalk',
 };
 
@@ -57,7 +61,10 @@ export const firstSupport = (tag) => (tag == null ? 'partyBattle' : FIRST_SUPPOR
 export const nextRung = (kind) => (kind === 'fullWalk' ? null : 'fullWalk');
 
 // Which skill a mistake belongs to, for the support that stays on (SPEC-SCAFFOLD.md §5).
-const SKILL = { 'sign-dropped': 'sign', 'wrong-winner': 'sign', 'battle-as-party': 'partyBattle', 'party-as-battle': 'partyBattle' };
+const SKILL = {
+  'sign-dropped': 'sign', 'wrong-winner': 'sign', 'battle-as-party': 'partyBattle', 'party-as-battle': 'partyBattle',
+  'minus-as-minus': 'partyBattle',
+};
 export const skillOf = (tag) => SKILL[tag] ?? null;
 
 // ---------- Saying numbers ----------
@@ -99,9 +106,11 @@ function orderFor(problem) {
   return base.map((_, i) => base[(i + rotate) % 4]);
 }
 
+// A subtraction is read as the addition it becomes (adding the opposite): 5 − (−3) is the party of 5 and 3.
 export function buildCloze(problem) {
-  const a = problem.left.value;
-  const b = problem.right.value;
+  const added = rewrite(problem);
+  const a = added.left.value;
+  const b = added.right.value;
   const r = evaluate(problem);
   const battle = partyOrBattle(problem) === 'battle';
   const size = Math.abs(r);
@@ -124,8 +133,9 @@ export function buildCloze(problem) {
 
 // What gets read aloud once a choice is picked (never before): the whole sentence with the choice in it.
 export function spokenSentence(problem, choice) {
-  const a = spokenNumber(problem.left.value);
-  const b = spokenNumber(problem.right.value);
+  const added = rewrite(problem);
+  const a = spokenNumber(added.left.value);
+  const b = spokenNumber(added.right.value);
   const said = `${choice.value < 0 ? 'negative' : 'positive'} ${numberWords(choice.value)}`;
   return partyOrBattle(problem) === 'battle'
     ? `The battle of ${a} and ${b} leaves ${said} standing.`

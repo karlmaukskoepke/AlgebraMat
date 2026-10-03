@@ -351,6 +351,20 @@ body {
   margin-left: auto;
 }
 
+/* Streak: problems in a row with no wrong typed answer, and the best on this level. The dots follow it. */
+.streak {
+  margin-left: auto;
+  font-weight: 600;
+  font-size: 18px;
+  white-space: nowrap;
+}
+.streak:not([hidden]) + .dots {
+  margin-left: 0;
+}
+.level-best {
+  font-weight: 600;
+}
+
 .dot {
   width: 16px;
   height: 16px;
@@ -613,6 +627,10 @@ body {
   .title {
     white-space: nowrap;
     font-size: 17px;
+  }
+  .streak {
+    margin-left: 0;
+    font-size: 16px;
   }
   .dots {
     order: 3;
