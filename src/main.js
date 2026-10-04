@@ -10,11 +10,12 @@ import { flipitPlay } from './play/flipitPlay.js';
 import { combinePlay } from './play/combinePlay.js';
 import { lightPlay, flipLightPlay } from './play/lightPlay.js';
 import {
-  combineIntegerLightPlay, flipIntegerLightPlay, bigLightPlay, lassoLightPlay, distributeLightPlay,
+  combineIntegerLightPlay, flipIntegerLightPlay, bigLightPlay, lassoLightPlay,
 } from './play/walkLightPlay.js';
 import { boxLightPlay } from './play/boxLightPlay.js';
 import { boxModelPlay } from './play/boxModelPlay.js';
 import { termGroupLightPlay } from './play/termGroupLightPlay.js';
+import { distributeLightPlay } from './play/distributeLightPlay.js';
 import { boxPlay } from './play/boxPlay.js';
 import { afterAnswer } from './engine/streak.js';
 import { loadBests, saveBest } from './lightStore.js';

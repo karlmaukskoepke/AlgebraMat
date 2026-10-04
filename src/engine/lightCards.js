@@ -9,7 +9,7 @@ import { validateAnswer as validateGroupTerms } from './termGroupMoves.js';
 import { validateCount } from './lassoMoves.js';
 import { evaluateGroups, formatGroups, groupTotal, isFraction } from './groups.js';
 import { formatTermGroups, evaluateTermGroups, isFraction as isTermFraction, isNumberFirst } from './termGroups.js';
-import { formatDistribute, distributedExpression } from './distribute.js';
+import { formatDistribute, distributedExpression, groupParts, looseTerms } from './distribute.js';
 import { readInteger, classify } from './scaffold.js';
 import { evaluate as evaluateProblem, formatProblem } from './expr.js';
 
@@ -79,6 +79,34 @@ export function tagTermGroups(problem, read) {
   if ((xv < 0 || nv < 0) && read.x === k * Math.abs(xv) && read.n === k * Math.abs(nv)) return 'inside-sign-lost';
   if ((read.x === xv && read.n === nv + k) || (read.n === nv && read.x === xv + k)) return 'outer-as-term';
   return generic;
+}
+
+// The same slips in a Distribute, then combine problem with one group in it (`5 + 2(4x + 1)`, `5 − 2(2x − 3)`,
+// `3 − (x + 2)`): each slip is the answer you'd get with that slip in the group, plus the loose terms.
+export function tagDistribute(problem, read) {
+  if (!read.ok) return 'unreadable';
+  const generic = tagTerms(evaluate(distributedExpression(problem)), read);
+  const groups = groupParts(problem);
+  if (generic === 'zero-term' || groups.length !== 1) return generic;
+  const [group] = groups;
+  const loose = looseTerms(problem).reduce((sum, term) => ({ ...sum, [term.kind === 'x' ? 'x' : 'n']: sum[term.kind === 'x' ? 'x' : 'n'] + (term.op === '-' ? -term.value : term.value) }), { x: 0, n: 0 });
+  const k = (group.op === '-' ? -1 : 1) * group.n;
+  const xv = group.inside.find((t) => t.kind === 'x').value;
+  const nv = group.inside.find((t) => t.kind === 'int').value;
+  const total = (gx, gn) => read.x === loose.x + gx && read.n === loose.n + gn;
+  const numberFirst = group.inside[0].kind === 'int';
+  if (group.hiddenOne && group.op === '-' && (numberFirst ? total(xv, k * nv) : total(k * xv, nv))) return 'neg-first';
+  if (total(k * xv, nv) || total(xv, k * nv)) return 'dist-one';
+  if ((xv < 0 || nv < 0) && total(k * Math.abs(xv), k * Math.abs(nv))) return 'inside-sign-lost';
+  if (total(xv, nv + k) || total(xv + k, nv)) return 'outer-as-term';
+  return generic;
+}
+
+function checkDistribute(problem, text) {
+  const res = validateTerms(distributedExpression(problem), text);
+  if (res.ok) return { correct: true, tag: null };
+  if (UNREADABLE.has(res.feedbackKey)) return { correct: false, tag: 'unreadable' };
+  return { correct: false, tag: tagDistribute(problem, parseAnswer(text)) };
 }
 
 // A checker for Groups of Terms: the pack's own validator, with the tags above.
@@ -153,7 +181,7 @@ export const CARDS = {
     pad: 'algebra',
     problemText: formatDistribute,
     answerText: (p) => formatAnswer(evaluate(distributedExpression(p))),
-    check: termsChecker((p) => evaluate(distributedExpression(p)), (p, text) => validateTerms(distributedExpression(p), text), (p) => distributedExpression(p).terms),
+    check: checkDistribute,
   },
 };
 

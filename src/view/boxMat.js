@@ -8,7 +8,8 @@
 //     answer:   { text, done } | null,        the typed line after "="
 //     key: boolean,                           show the mystery-box key (Draw step)
 //     hideText: boolean,                      draw only the pieces (the "read the model" round)
-//     columnLabels: [text, ...] | null,       what each column is worth, under it (with hideText)
+//     columnLabels: [text | null, ...] | null, what each column is worth, under it (with hideText); null: not yet
+//     columnFocus: n | null,                  a dashed ring round column n (the one being said)
 //     selected: { term, index } | null,       a piece picked to cancel
 //     tap: 'parts' | 'zones' | 'pieces' | null,
 //     fx: { hint } }
@@ -135,6 +136,11 @@ export function renderBoxMat(s) {
     });
   });
 
+  if (s.columnFocus !== null && s.columnFocus !== undefined && layout.columns[s.columnFocus]) {
+    const col = layout.columns[s.columnFocus];
+    svg.append(el('rect', { x: col.left, y: view.y + 4, width: col.width, height: SHAPE_TOP - 8 - view.y, rx: 12, class: 'bm-ring-dash' }));
+  }
+
   // Rewrite (light mode's support): a dashed line round the − and round the number of a term being rewritten.
   for (const term of s.rings ?? []) {
     for (const part of layout.columns[term].parts) {
@@ -150,6 +156,7 @@ export function renderBoxMat(s) {
   if (s.hideText) {
     // The model round: the pieces stand alone; each column's worth shows under it only when it has been asked for.
     (s.columnLabels ?? []).forEach((text, i) => {
+      if (text === null) return;
       svg.append(el('text', { x: layout.columns[i].cx, y: ROW_Y, 'text-anchor': 'middle', class: 'bm-text is-num is-label' }, [text]));
     });
   } else {
