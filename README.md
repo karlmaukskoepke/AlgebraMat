@@ -34,6 +34,7 @@ Add `?seed=123` to the URL to replay a fixed problem set, and `?level=2` to open
 - **Long pack names** on the map ("Distribute, then combine") wrap and shrink instead of running off the card.
 - **Landscape phone:** the play screen scrolls like portrait, with tighter spacing; the Mat is cropped to its contents there too and is redrawn when you turn the phone.
 - **A "Go full screen" bar** on the phone's pack map (not shown on a computer, or once installed, or after "Not now"): one tap on Android; on iPhone it shows the two taps.
+- **Saved progress:** the site now asks the browser to keep it (it can still be lost in a private tab, or when the home-screen app starts fresh: an iPhone home-screen app has its own storage, so the bar tells you to use Save code, then Enter code).
 - **Full screen:** a phone can't hide Safari's bars from a web page, but **Add to Home Screen** (Share, then Add to Home Screen) now opens The Mat with no browser bars at all (manifest and icons added).
 
 ### Distribute gets the same supports; the model round gets the language piece (SPEC-SCAFFOLD.md §16)

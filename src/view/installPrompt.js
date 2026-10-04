@@ -21,7 +21,7 @@ const onPhone = () => window.matchMedia('(pointer: coarse)').matches && window.m
 export function installBar(h) {
   if (installed() || !onPhone() || read()) return null;
   const steps = h('p', { class: 'install-steps', hidden: true },
-    'In Safari, tap the Share button, then “Add to Home Screen”. Open The Mat from your home screen and the browser’s bars are gone.');
+    'In Safari, tap the Share button, then “Add to Home Screen”. Open The Mat from your home screen and the browser’s bars are gone. The home-screen app keeps its own progress, so tap Save code here first and use Enter code there.');
   const bar = h('section', { class: 'install-bar', 'aria-label': 'Full screen' },
     h('p', { class: 'install-text' }, 'Want more room? Put The Mat on your home screen to use the whole screen.'),
     h('div', { class: 'install-actions' },

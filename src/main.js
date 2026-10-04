@@ -82,6 +82,10 @@ const saved = store.load();
 let progress = normalizeProgress(saved, PACKS);
 let homeNote = null;
 
+// Ask the browser not to clear this site's saved progress when it's short on space or the site hasn't been opened in a
+// while (Safari does that after about a week). It may say no; nothing else changes either way.
+try { navigator.storage?.persist?.(); } catch { /* not supported: nothing to do */ }
+
 let play = null; // { pack, adapter, level, seed, problems, index, session, finished }
 
 function persist() {
