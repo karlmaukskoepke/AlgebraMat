@@ -9,9 +9,22 @@ export const MAX_SENT = 200;          // problems (and, separately, runs) in one
 
 export const cleanId = (v) => String(v ?? '').trim().toUpperCase();
 const ID = /^[A-Z0-9]{1,12}$/;
-export const validAuth = (a) => Boolean(a) && ID.test(cleanId(a.period)) && ID.test(cleanId(a.number));
-export const authOf = (a) => ({ period: cleanId(a.period), number: cleanId(a.number) });
-export const studentLabel = (a) => `${cleanId(a.period)}-${cleanId(a.number)}`;
+// Three ways to be a student: a period and a number; a Google ID token with a period and a number (the first time); or
+// the device token the sheet gave back after that ({ mode: 'device', id, token, label }).
+const numbers = (a) => ID.test(cleanId(a.period)) && ID.test(cleanId(a.number));
+export function validAuth(a) {
+  if (!a || typeof a !== 'object') return false;
+  if (a.mode === 'device') return typeof a.id === 'string' && a.id !== '' && typeof a.token === 'string' && a.token !== '';
+  if (a.mode === 'google') return typeof a.idToken === 'string' && a.idToken !== '' && numbers(a);
+  return numbers(a);
+}
+// What is sent: only what the sheet needs (the label stays on the device).
+export function authOf(a) {
+  if (a.mode === 'device') return { mode: 'device', id: a.id, token: a.token };
+  if (a.mode === 'google') return { mode: 'google', idToken: a.idToken, period: cleanId(a.period), number: cleanId(a.number) };
+  return { period: cleanId(a.period), number: cleanId(a.number) };
+}
+export const studentLabel = (a) => (a.mode === 'device' ? (a.label || a.id) : `${cleanId(a.period)}-${cleanId(a.number)}`);
 
 // A class link (the whole https://script.google.com/macros/s/…/exec address) or just its long id, as the address to use.
 export function normalizeEndpoint(text) {

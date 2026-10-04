@@ -2420,3 +2420,5 @@ body {
 .value-mat .vm-answer { font: 700 60px 'Kalam', 'Lexend', system-ui, sans-serif; fill: var(--ink); }
 .value-mat .vm-answer.is-empty { fill: var(--muted, #888); }
 .value-mat .vm-rule { stroke: var(--ink); stroke-width: 3; }
+
+.google-holder { margin: 12px 0; min-height: 44px; }

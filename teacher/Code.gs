@@ -18,9 +18,20 @@ var TABS = {
 };
 var LIMITS = { events: 300, runs: 300, text: 200, levels: 20, packs: 30 };
 var PROTOCOL = 1;
+var DEVICES = { name: 'Devices', head: ['StudentID', 'TokenHash', 'Created'] };
 
+// Settings live in Project Settings > Script properties (see SETUP.md), not in the code:
+//   GOOGLE_CLIENT_ID     the OAuth client ID. Set: students sign in with Google.
+//   ALLOWED_DOMAIN       optional, such as yourdistrict.org: only accounts of that domain are accepted.
+//   ALLOW_NUMBER_SIGNIN  "yes" keeps the period-and-number sign-in working alongside Google's. (Without a client ID it always works.)
+function setting(name) {
+  return PropertiesService.getScriptProperties().getProperty(name) || '';
+}
+
+// What the app asks first: is Google sign-in on, and may a student still sign in with only a number?
 function doGet() {
-  return json({ ok: true, app: 'The Mat class sheet', protocol: PROTOCOL });
+  var client = setting('GOOGLE_CLIENT_ID');
+  return json({ ok: true, app: 'The Mat class sheet', protocol: PROTOCOL, google: client || null, numberSignin: !client || setting('ALLOW_NUMBER_SIGNIN') === 'yes' });
 }
 
 function doPost(e) {
@@ -30,7 +41,7 @@ function doPost(e) {
     var req = JSON.parse(e.postData.contents);
     return json(handle(req, SpreadsheetApp.getActiveSpreadsheet()));
   } catch (err) {
-    return json({ ok: false, error: String(err && err.message ? err.message : err) });
+    return json({ ok: false, error: String(err && err.message ? err.message : err), code: err && err.code ? err.code : undefined });
   } finally {
     lock.releaseLock();
   }
@@ -42,14 +53,95 @@ function json(obj) {
 
 // ---------- The request ----------
 
-// Who this is: a period and a student number, cleaned up. (A Google sign-in would go here: verify the ID token, hash its
-// "sub" with a salt, and use that as the id. Not built.)
-function identify(auth) {
+function idPart(v, what) {
+  var t = clean(v, 12).toUpperCase();
+  if (!/^[A-Z0-9]{1,12}$/.test(t)) throw new Error('Use letters and numbers only for the ' + what);
+  return t;
+}
+
+// Who this is. Three ways in:
+//   number  a period and a student number (the id is "3-12"); allowed when Google sign-in is off, or ALLOW_NUMBER_SIGNIN is yes.
+//   google  a Google ID token, checked with Google. Only the opaque account id ("sub") is used, hashed with a secret salt, as the
+//           id ("G-1a2b3c4d5e"); no email or name is kept. The student also gives a period and number (so you can tell who is
+//           who), and gets a device token back so the phone doesn't need Google again for every sync.
+//   device  that token, from then on.
+function identify(auth, ss) {
   if (!auth || typeof auth !== 'object') throw new Error('Missing sign-in');
-  var period = clean(auth.period, 12).toUpperCase();
-  var number = clean(auth.number, 12).toUpperCase();
-  if (!/^[A-Z0-9]{1,12}$/.test(period) || !/^[A-Z0-9]{1,12}$/.test(number)) throw new Error('Use letters and numbers only for the period and the student number');
-  return { id: period + '-' + number, period: period, number: number };
+  var mode = auth.mode || 'number';
+  if (mode === 'number') {
+    if (setting('GOOGLE_CLIENT_ID') && setting('ALLOW_NUMBER_SIGNIN') !== 'yes') throw authError('This class signs in with Google.');
+    var period = idPart(auth.period, 'period and the student number');
+    var number = idPart(auth.number, 'period and the student number');
+    return { id: period + '-' + number, period: period, number: number };
+  }
+  if (mode === 'google') {
+    var info = verifyGoogle(auth.idToken);
+    return { id: 'G-' + hmacHex(info.sub).slice(0, 10), period: idPart(auth.period, 'period and the student number'), number: idPart(auth.number, 'period and the student number'), newDevice: true };
+  }
+  if (mode === 'device') {
+    var id = clean(auth.id, 20);
+    if (!id || !checkDevice(ss, id, clean(auth.token, 100))) throw authError('Please sign in again.');
+    return { id: id, period: '', number: '' };
+  }
+  throw new Error('Unknown sign-in');
+}
+
+function authError(message) {
+  var e = new Error(message);
+  e.code = 'auth';
+  return e;
+}
+
+function toHex(bytes) {
+  return bytes.map(function (b) { return ('0' + (b < 0 ? b + 256 : b).toString(16)).slice(-2); }).join('');
+}
+function sha256Hex(text) {
+  return toHex(Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, text, Utilities.Charset.UTF_8));
+}
+// The secret that keeps a student's hashed id from being worked out from their Google account id. Made once, kept in
+// the script's properties. Don't delete it: ids would change.
+function salt() {
+  var props = PropertiesService.getScriptProperties();
+  var value = props.getProperty('ID_SALT');
+  if (!value) { value = Utilities.getUuid() + Utilities.getUuid(); props.setProperty('ID_SALT', value); }
+  return value;
+}
+function hmacHex(text) {
+  return toHex(Utilities.computeHmacSha256Signature(text, salt()));
+}
+
+// Ask Google whether this ID token is real, for this app, and not out of date. Returns { sub }.
+function verifyGoogle(idToken) {
+  var client = setting('GOOGLE_CLIENT_ID');
+  if (!client) throw new Error('Google sign-in is not set up for this class');
+  if (typeof idToken !== 'string' || idToken.length < 20 || idToken.length > 4000) throw authError('Google sign-in did not work. Try again.');
+  var res = UrlFetchApp.fetch('https://oauth2.googleapis.com/tokeninfo?id_token=' + encodeURIComponent(idToken), { muteHttpExceptions: true });
+  if (res.getResponseCode() !== 200) throw authError('Google sign-in did not work. Try again.');
+  var info = JSON.parse(res.getContentText());
+  var domain = setting('ALLOWED_DOMAIN').toLowerCase();
+  if (info.aud !== client || !info.sub || Number(info.exp) * 1000 < Date.now()
+    || (info.iss !== 'accounts.google.com' && info.iss !== 'https://accounts.google.com')) throw authError('Google sign-in did not work. Try again.');
+  if (domain && String(info.hd || '').toLowerCase() !== domain) throw authError('Please sign in with your school account.');
+  return { sub: String(info.sub) };
+}
+
+// ---------- Device tokens ----------
+
+function checkDevice(ss, id, token) {
+  if (!token) return false;
+  var sheet = tab(ss, DEVICES);
+  var last = sheet.getLastRow();
+  if (last < 2) return false;
+  var hash = sha256Hex(token);
+  var rows = sheet.getRange(2, 1, last - 1, 2).getValues();
+  for (var i = 0; i < rows.length; i++) if (rows[i][0] === id && rows[i][1] === hash) return true;
+  return false;
+}
+
+function newDevice(ss, id, now) {
+  var token = Utilities.getUuid().replace(/-/g, '') + Utilities.getUuid().replace(/-/g, '');
+  tab(ss, DEVICES).appendRow([id, sha256Hex(token), now]);
+  return token;
 }
 
 function clean(v, max) {
@@ -64,13 +156,14 @@ function safe(v) {
 
 function handle(req, ss) {
   if (!req || req.v !== PROTOCOL) throw new Error('This app and this sheet are not the same version');
-  var who = identify(req.auth);
+  var who = identify(req.auth, ss);
   var now = new Date().toISOString();
+  var device = who.newDevice ? { id: who.id, token: newDevice(ss, who.id, now) } : undefined;
   touchStudent(ss, who, now);
   var merged = syncProgress(ss, who, req.progress, now);
   var logged = addEvents(ss, who, req.events);
   var runs = addRuns(ss, who, req.runs);
-  return { ok: true, progress: merged, added: { events: logged, runs: runs }, now: now };
+  return { ok: true, progress: merged, added: { events: logged, runs: runs }, now: now, device: device };
 }
 
 // ---------- Sheets ----------
@@ -101,8 +194,11 @@ function findRow(sheet, id) {
 function touchStudent(ss, who, now) {
   var sheet = tab(ss, TABS.students);
   var row = findRow(sheet, who.id);
-  if (row) sheet.getRange(row, 5).setValue(now);
-  else sheet.appendRow([who.id, who.period, who.number, now, now]);
+  if (row) {
+    sheet.getRange(row, 5).setValue(now);
+    if (who.period) { sheet.getRange(row, 2).setValue(who.period); sheet.getRange(row, 3).setValue(who.number); }
+    else { var known = sheet.getRange(row, 2, 1, 2).getValues()[0]; who.period = known[0]; who.number = known[1]; }
+  } else sheet.appendRow([who.id, who.period, who.number, now, now]);
 }
 
 // ---------- Progress ----------

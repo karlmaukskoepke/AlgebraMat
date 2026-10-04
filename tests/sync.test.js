@@ -182,3 +182,83 @@ describe('syncing with the class sheet', () => {
     expect(await d.sync.now()).toMatchObject({ ok: false });
   });
 });
+
+// ---------- Google sign-in, from the app's side ----------
+import { makeScript } from './helpers/fakeSheet.js';
+import { validAuth as valid2 } from '../src/engine/sync.js';
+
+const CLIENT = '1234567890-abc.apps.googleusercontent.com';
+const TOKEN = 'G'.repeat(40);
+const info = (sub = '1099') => ({ aud: CLIENT, sub, iss: 'https://accounts.google.com', exp: String(Math.floor(Date.now() / 1000) + 3000) });
+
+function gphone(book, script, extra = {}) {
+  const device = { progress: newProgress(PACKS), events: [], runs: [], store: { endpoint: null, auth: null, cursor: newCursor(), lastSync: null } };
+  device.sync = createSync({
+    load: () => device.store, save: (s) => { device.store = s; },
+    getProgress: () => device.progress, setProgress: (p) => { device.progress = p; },
+    getEvents: () => device.events, getRuns: () => device.runs, packs: PACKS,
+    // like doPost: a refusal comes back as { ok: false, error, code }
+    send: async (_u, req) => { try { return script.handle(JSON.parse(JSON.stringify(req)), book); } catch (e) { return { ok: false, error: e.message, code: e.code }; } },
+    getInfo: async () => { const g = JSON.parse(script.doGet().text); return { google: g.google, numberSignin: g.numberSignin }; },
+    ...extra,
+  });
+  return device;
+}
+
+describe('signing in with Google, from the app', () => {
+  it('knows the three kinds of sign-in', () => {
+    expect(valid2({ mode: 'google', idToken: 'abc', period: '3', number: '1' })).toBe(true);
+    expect(valid2({ mode: 'google', idToken: '', period: '3', number: '1' })).toBe(false);
+    expect(valid2({ mode: 'google', idToken: 'abc', period: '3', number: '' })).toBe(false);
+    expect(valid2({ mode: 'device', id: 'G-1', token: 't' })).toBe(true);
+    expect(valid2({ mode: 'device', id: 'G-1' })).toBe(false);
+    expect(authOf({ mode: 'device', id: 'G-1', token: 't', label: '3-1' })).toEqual({ mode: 'device', id: 'G-1', token: 't' });
+    expect(studentLabel({ mode: 'device', id: 'G-1', token: 't', label: '3-1' })).toBe('3-1');
+  });
+
+  it('asks the class what it offers, signs in once with Google, then syncs with the device token alone', async () => {
+    const script = makeScript({ properties: { GOOGLE_CLIENT_ID: CLIENT }, tokens: { [TOKEN]: info() } });
+    const book = new FakeBook();
+    const d = gphone(book, script);
+    d.sync.setEndpoint(URL_);
+    expect(d.sync.classInfo()).toBe(null);
+    expect(await d.sync.probe()).toEqual({ google: CLIENT, numberSignin: false });
+    d.progress.packs.value.levels[0] = true;
+    d.events.push(ev(1));
+    expect(await d.sync.signIn({ mode: 'google', idToken: TOKEN, period: '3', number: '12' })).toMatchObject({ ok: true });
+    expect(d.store.auth).toMatchObject({ mode: 'device', label: '3-12' });
+    expect(d.store.auth.id).toMatch(/^G-/);
+    expect(JSON.stringify(d.store)).not.toContain(TOKEN);            // the Google token is not kept
+    expect(d.sync.status()).toMatchObject({ state: 'ready', label: '3-12' });
+    d.events.push(ev(2));
+    expect(await d.sync.now()).toMatchObject({ ok: true });
+    expect(book.sheets.Log.rows).toHaveLength(3);
+
+    // a second phone, same Google account: levels come back
+    const second = gphone(book, script);
+    second.sync.setEndpoint(URL_);
+    await second.sync.signIn({ mode: 'google', idToken: TOKEN, period: '3', number: '12' });
+    expect(second.progress.packs.value.levels[0]).toBe(true);
+  });
+
+  it('a refused Google sign-in keeps nothing, and says so', async () => {
+    const script = makeScript({ properties: { GOOGLE_CLIENT_ID: CLIENT }, tokens: {} });
+    const d = gphone(new FakeBook(), script);
+    d.sync.setEndpoint(URL_);
+    expect(await d.sync.signIn({ mode: 'google', idToken: TOKEN, period: '3', number: '12' })).toMatchObject({ ok: false, error: expect.stringMatching(/Google sign-in did not work/) });
+    expect(d.store.auth).toBe(null);
+    expect(await d.sync.signIn({ period: '3', number: '12' })).toMatchObject({ ok: false, error: expect.stringMatching(/signs in with Google/) });
+  });
+
+  it('when the sheet no longer knows the device, the student is signed out with a reason', async () => {
+    const script = makeScript({ properties: { GOOGLE_CLIENT_ID: CLIENT }, tokens: { [TOKEN]: info() } });
+    const book = new FakeBook();
+    const d = gphone(book, script);
+    d.sync.setEndpoint(URL_);
+    await d.sync.signIn({ mode: 'google', idToken: TOKEN, period: '3', number: '12' });
+    book.sheets.Devices.rows.length = 1;                           // the teacher cleared the devices
+    expect(await d.sync.now()).toMatchObject({ ok: false, error: expect.stringMatching(/sign in again/i) });
+    expect(d.sync.status().state).toBe('signed-out');
+    expect(d.store.auth).toBe(null);
+  });
+});

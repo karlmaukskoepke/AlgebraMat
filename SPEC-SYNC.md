@@ -5,7 +5,7 @@
 ## 1. What Karl decided
 - Progress saved by **signing in**; a **Google Sheet in the teacher's own Drive** (his district is on Google Workspace for Education) with data going back and forth **anonymous**.
 - In the meantime: a spreadsheet template and script, set up by the teacher (`teacher/`).
-- Next: sign in with a Google account (below), then the landing page, then the solving-equations cards.
+- Next: the landing page, then the solving-equations cards.
 
 ## 2. Who a student is
 A **period** and a **student number** the teacher hands out (letters and digits, up to 12 each, capital letters). The sheet's id is `period-number` (`3-12`). No names or emails exist anywhere.
@@ -20,12 +20,19 @@ A **period** and a **student number** the teacher hands out (letters and digits,
 ## 4. What the script does (`teacher/Code.gs`)
 Merges progress (never un-finishes a level), adds each problem and run **once** (a key per row), makes each cell safe (nothing that starts with `=`, `+`, `-` or `@` is left as a formula), limits sizes, and adds columns for new pack levels. It is tested against an in-memory stand-in for the sheet (`tests/classSheet.test.js`); what is **not** tested here is the Google side (deploying, permissions, the real sheet).
 
-## 5. Not built (next)
-- **Google sign-in.** Students sign in with their school Google account (Google Identity Services). The app sends the ID token; the script verifies it with Google, takes only the opaque account id (`sub`), hashes it with a secret salt, and uses that as the student's id. No email or name is stored. The teacher links the hash to a student number once (a first-sign-in step). It needs a Google Cloud "OAuth client ID" created by the teacher's district account. It would replace the number guessing risk below.
+## 5. Google sign-in (built; needs the teacher's OAuth client ID, see teacher/SETUP.md Part 4)
+- The class sheet's `doGet` says whether Google sign-in is on (script property `GOOGLE_CLIENT_ID`) and whether a bare number still works (`ALLOW_NUMBER_SIGNIN`). The app asks before showing the Sign in form.
+- The student types a period and a number (so the teacher can tell who is who), then taps Google's button (Google Identity Services, loaded only then). Google gives the page an **ID token**; the page sends it to the script **once**.
+- The script checks it with Google (`oauth2.googleapis.com/tokeninfo`): right app (`aud`), not expired, from Google, and (optionally) from the district's domain (`ALLOWED_DOMAIN`, the `hd` claim). It keeps **only the opaque account id (`sub`), hashed with a secret salt** (HMAC-SHA-256, first 10 hex characters, `G-…`) as the student's id. **No email or name is read into the sheet or the app.** The salt is made on first use (`ID_SALT`).
+- It answers with a **device token** (random, kept in the app; only its SHA-256 hash is kept in a Devices tab). From then on that token is the sign-in, so a student isn't asked for Google every hour. Deleting a Devices row signs that phone out (it is told to sign in again). A second phone with the same Google account is the same student and gets its own token.
+- With Google on and `ALLOW_NUMBER_SIGNIN` not `yes`, a bare number is refused, which removes the guessing risk in §6.
+- Honest limit: the ID token (which contains the email) passes through the teacher's own script once to be checked; the script does not store it, but it is the teacher's script.
+
+## 6. Not built (next)
 - The class **high-score list**, from the Fluency tab, shown in the app.
 - The **diagnostic result** and the **skills/streaks** in the sync (the diagnostic's opened levels already ride in progress).
 - A teacher-facing page that reads the sheet (the Summary and Slips tabs are the first version of the teacher report).
 
-## 6. Known limits
-- Anyone with the class link and a guessed period and number can add to that student's progress (never remove). Fine for a classroom; Google sign-in fixes it.
+## 7. Known limits
+- With number-only sign-in, anyone with the class link and a guessed period and number can add to that student's progress (never remove). Google sign-in without `ALLOW_NUMBER_SIGNIN` fixes it.
 - The class link is a secret in a URL: if it leaks, redeploy the script as a new web app.

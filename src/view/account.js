@@ -1,3 +1,5 @@
+import { showGoogleButton } from '../googleSignIn.js';
+
 // The class-sheet dialog (SPEC-SYNC.md): paste the class link (once), then sign in with a period and a student number.
 // Signed in, it shows who and when it last saved. No names anywhere.
 
@@ -38,15 +40,22 @@ export function showAccount(sync, onDone = () => {}) {
           <div class="dialog-actions"><button type="button" class="btn" data-close>Cancel</button><button type="submit" class="btn btn-primary">Next</button></div>
         </form>`;
     } else if (s.state === 'signed-out') {
-      body = `
-        <form class="code-form" data-form="who">
-          <h2>Sign in</h2>
+      const info = sync.classInfo();
+      const google = info?.google;
+      const numbers = !google || info?.numberSignin;
+      const fields = `
           <label for="who-period">Period</label>
           <input id="who-period" name="period" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="12" inputmode="text" />
           <label for="who-number">Student number</label>
-          <input id="who-number" name="number" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="12" inputmode="text" />
+          <input id="who-number" name="number" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="12" inputmode="text" />`;
+      body = `
+        <form class="code-form" data-form="who">
+          <h2>Sign in</h2>
+          ${google ? '<p>Type your period and student number, then sign in with your school Google account. Your name and email are not saved.</p>' : ''}
+          ${fields}
+          ${google ? '<div class="google-holder" data-google></div>' : ''}
           <p class="code-error" role="alert" ${message ? '' : 'hidden'}>${esc(message)}</p>
-          <div class="dialog-actions"><button type="button" class="btn" data-close>Cancel</button><button type="submit" class="btn btn-primary">Sign in</button></div>
+          <div class="dialog-actions"><button type="button" class="btn" data-close>Cancel</button>${numbers ? `<button type="submit" class="btn ${google ? '' : 'btn-primary'}">${google ? 'Sign in with only my number' : 'Sign in'}</button>` : ''}</div>
         </form>`;
     } else {
       body = `
@@ -69,6 +78,16 @@ export function showAccount(sync, onDone = () => {}) {
         if (sync.setEndpoint(form.link.value)) { changed = true; draw(); } else draw('That doesn’t look like the class link. Paste the whole thing.', true);
       };
     }
+    const holder = d.querySelector('[data-google]');
+    if (holder) {
+      showGoogleButton(holder, sync.classInfo().google, async (idToken) => {
+        const period = form.period.value;
+        const number = form.number.value;
+        holder.textContent = 'Signing in…';
+        const res = await sync.signIn({ mode: 'google', idToken, period, number });
+        if (res.ok) { changed = true; draw(); } else draw(res.error, true);
+      }).catch((e) => { holder.textContent = e.message; });
+    }
     if (form?.dataset.form === 'who') {
       form.onsubmit = async (e) => {
         e.preventDefault();
@@ -90,8 +109,11 @@ export function showAccount(sync, onDone = () => {}) {
     d.querySelector('input')?.focus();
   };
 
-  draw();
   d.showModal();
+  if (status.state === 'signed-out' && !sync.classInfo()) {
+    d.innerHTML = '<p>Checking with your class…</p>';
+    sync.probe().then(() => draw());
+  } else draw();
   d.addEventListener('close', () => { if (changed) onDone(); }, { once: true });
   return status;
 }

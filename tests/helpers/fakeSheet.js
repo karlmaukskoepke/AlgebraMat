@@ -24,5 +24,36 @@ export class FakeBook {
 }
 
 
+import { createHash, createHmac, randomUUID } from 'node:crypto';
+
 const code = readFileSync(new URL('../../teacher/Code.gs', import.meta.url), 'utf8');
-export const gs = new Function(`${code}; return { handle, identify, safe, splitKey, doGet, doPost };`)();
+
+// The script with Google's services stood in for: script properties, URL fetching (Google's token check) and hashing.
+// `tokens` maps an ID token to what Google would say about it; `properties` are the script properties.
+export function makeScript({ properties = {}, tokens = {} } = {}) {
+  const props = { ...properties };
+  const bytes = (buf) => [...buf].map((b) => (b > 127 ? b - 256 : b));
+  const stubs = {
+    PropertiesService: { getScriptProperties: () => ({ getProperty: (k) => props[k] ?? null, setProperty: (k, v) => { props[k] = v; } }) },
+    UrlFetchApp: {
+      fetch: (url) => {
+        const token = decodeURIComponent(url.split('id_token=')[1]);
+        const info = tokens[token];
+        return { getResponseCode: () => (info ? 200 : 400), getContentText: () => JSON.stringify(info ?? { error: 'invalid_token' }) };
+      },
+    },
+    ContentService: { MimeType: { JSON: 'json' }, createTextOutput: (text) => ({ text, setMimeType() { return this; } }) },
+    LockService: { getScriptLock: () => ({ waitLock() {}, releaseLock() {} }) },
+    Utilities: {
+      DigestAlgorithm: { SHA_256: 'sha256' }, Charset: { UTF_8: 'utf8' },
+      computeDigest: (algo, text) => bytes(createHash('sha256').update(text, 'utf8').digest()),
+      computeHmacSha256Signature: (text, key) => bytes(createHmac('sha256', key).update(text, 'utf8').digest()),
+      getUuid: () => randomUUID(),
+    },
+  };
+  const names = Object.keys(stubs);
+  const script = new Function(...names, `${code}; return { handle, identify, safe, splitKey, doGet, doPost };`)(...names.map((n) => stubs[n]));
+  return { ...script, props };
+}
+
+export const gs = makeScript();
