@@ -82,6 +82,10 @@ const saved = store.load();
 let progress = normalizeProgress(saved, PACKS);
 let homeNote = null;
 
+// Ask the browser not to clear this site's saved progress when it's short on space or the site hasn't been opened in a
+// while (Safari does that after about a week). It may say no; nothing else changes either way.
+try { navigator.storage?.persist?.(); } catch { /* not supported: nothing to do */ }
+
 let play = null; // { pack, adapter, level, seed, problems, index, session, finished }
 
 function persist() {
@@ -380,7 +384,7 @@ function renderDots() {
 // On a phone the Mat is scaled to the screen's width, and a drawing built for a wide screen has a lot of empty space
 // at its sides, so the problem comes out small. Crop the drawing's width to what's in it (never shrinking again within
 // one problem, so it doesn't zoom back and forth as the student works).
-const phoneWidth = () => window.matchMedia('(max-width: 600px)').matches;
+const phoneWidth = () => window.matchMedia('(max-width: 600px)').matches || window.matchMedia('(orientation: landscape) and (max-height: 520px)').matches;
 function fitMatToPhone(svg) {
   if (!svg || !phoneWidth() || !svg.viewBox?.baseVal?.width) return;
   const vb = svg.viewBox.baseVal;
@@ -397,6 +401,14 @@ function fitMatToPhone(svg) {
   if (x1 - x0 < 200 || x1 - x0 >= vb.width) return;
   svg.setAttribute('viewBox', `${x0} ${vb.y} ${x1 - x0} ${vb.height}`);
 }
+
+// Turning the phone: the Mat was cropped (or not) for the old shape, so draw it again for the new one.
+window.matchMedia('(orientation: portrait)').addEventListener('change', () => {
+  if (!play || play.finished || document.getElementById('play').hidden) return;
+  play.fit = null;
+  matRoot.replaceChildren(play.adapter.renderMat(play.session, {}));
+  fitMatToPhone(matRoot.firstElementChild);
+});
 
 function render(before) {
   const { session, finished } = play;

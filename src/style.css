@@ -675,6 +675,11 @@ body {
     flex-wrap: wrap;
     gap: 4px 12px;
   }
+  .pack-head h2 {
+    white-space: normal;
+    overflow-wrap: anywhere;
+    font-size: clamp(24px, 8vw, 38px);
+  }
   .pack-head .dots {
     order: 0;
     width: auto;
@@ -2368,3 +2373,30 @@ body {
 .say-choices[hidden] { display: none; }
 .say-choice { min-height: 48px; font-size: 1.05rem; font-weight: 700; }
 .pad[hidden] { display: none; }
+
+/* A phone turned sideways: the browser's own bars take a third of the height, so the page scrolls (as on a portrait
+   phone) and everything is tighter. The tour's caption is smaller too. */
+@media (orientation: landscape) and (max-height: 520px) {
+  .screen {
+    height: auto;
+    min-height: 100dvh;
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+  }
+  .mat { height: auto; max-height: 62dvh; }
+  .topbar { padding-bottom: 0; }
+  .topbar .title { font-size: 16px; }
+  .steps { margin-top: 0; font-size: 14px; }
+  .steps li { min-height: 32px; }
+  .feedback { font-size: 18px; margin: 0; }
+  .hint { font-size: 16px; }
+  .tour-caption { padding: 10px 14px; }
+  .tour-text { font-size: 17px; margin-bottom: 8px; }
+  .pack-grid { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* "Go full screen" on a phone's pack map. */
+.install-bar { margin: 0 0 12px; padding: 12px 14px; border: 2px dashed var(--ink); border-radius: 14px; }
+.install-text { margin: 0 0 8px; font-weight: 700; font-size: 18px; }
+.install-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.install-steps { margin: 10px 0 0; font-size: 17px; }
+.install-steps[hidden] { display: none; }

@@ -95,11 +95,15 @@ function place(step) {
   }
   caption.append(text, buttons);
   root.append(caption);
-  // Below the lit-up control if there's room, otherwise above it.
+  // Below the lit-up control if there's more room there, otherwise above it; and always fully on screen (a phone is
+  // narrower than the 460px caption, and a landscape phone is short).
   const tall = caption.offsetHeight;
-  const below = window.innerHeight - (y + h) >= tall + 20;
-  caption.style.top = `${below ? y + h + 12 : Math.max(8, y - tall - 12)}px`;
-  caption.style.left = `${Math.min(Math.max(8, x + w / 2 - 230), window.innerWidth - 468)}px`;
+  const wide = Math.min(460, window.innerWidth - 16);
+  const roomBelow = window.innerHeight - (y + h);
+  const below = roomBelow >= tall + 20 || roomBelow >= y;
+  const top = below ? y + h + 12 : y - tall - 12;
+  caption.style.top = `${Math.min(Math.max(8, top), Math.max(8, window.innerHeight - tall - 8))}px`;
+  caption.style.left = `${Math.min(Math.max(8, x + w / 2 - wide / 2), window.innerWidth - wide - 8)}px`;
   return true;
 }
 
