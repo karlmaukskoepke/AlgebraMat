@@ -2393,3 +2393,10 @@ body {
   .tour-text { font-size: 17px; margin-bottom: 8px; }
   .pack-grid { grid-template-columns: minmax(0, 1fr); }
 }
+
+/* "Go full screen" on a phone's pack map. */
+.install-bar { margin: 0 0 12px; padding: 12px 14px; border: 2px dashed var(--ink); border-radius: 14px; }
+.install-text { margin: 0 0 8px; font-weight: 700; font-size: 18px; }
+.install-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.install-steps { margin: 10px 0 0; font-size: 17px; }
+.install-steps[hidden] { display: none; }

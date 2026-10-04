@@ -1,5 +1,6 @@
 // The home screen: one card per pack with its level dots and level buttons.
 import { isLevelDone, isLevelUnlocked, isPackComplete } from '../engine/progress.js';
+import { installBar } from './installPrompt.js';
 import { CARD_CHALLENGES, challengeById } from '../engine/fluency.js';
 
 const h = (tag, attrs = {}, ...children) => {
@@ -89,6 +90,7 @@ export function renderPackMap(root, progress, packs, { onPlay, onSaveCode, onEnt
         h('button', { type: 'button', class: 'btn', 'data-home': 'save' }, 'Save code'),
         h('button', { type: 'button', class: 'btn', 'data-home': 'enter' }, 'Enter code'))),
     h('p', { class: 'home-note', role: 'status', hidden: !note }, note ?? ''),
+    installBar(h),
     diagnosticBar(diag),
     h('div', { class: `pack-grid packs-${packs.filter((p) => !p.comingSoon).length}` },
       ...packs.filter((p) => !p.comingSoon).map((p) => packCard(progress, p, bests))),
