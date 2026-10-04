@@ -213,8 +213,13 @@ body {
 
 .home-actions {
   display: flex;
-  gap: 12px;
+  flex-wrap: wrap;
+  gap: 8px 12px;
   padding-top: 12px;
+}
+.home-actions .btn,
+.dialog-actions .btn {
+  white-space: nowrap;
 }
 
 .home-note {
@@ -284,8 +289,9 @@ body {
 
 .dialog-actions {
   display: flex;
+  flex-wrap: wrap;
   justify-content: flex-end;
-  gap: 12px;
+  gap: 8px 12px;
 }
 
 /* ---------- Level complete ---------- */

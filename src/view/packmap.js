@@ -1,6 +1,7 @@
 // The home screen: one card per pack with its level dots and level buttons.
 import { isLevelDone, isLevelUnlocked, isPackComplete } from '../engine/progress.js';
 import { installBar } from './installPrompt.js';
+import { accountLabel } from './account.js';
 import { CARD_CHALLENGES, challengeById } from '../engine/fluency.js';
 
 const h = (tag, attrs = {}, ...children) => {
@@ -80,13 +81,14 @@ function diagnosticBar(diag) {
       : 'About 12 problems, adding to algebra. Nothing is marked until the end, and it opens the levels you’re ready for.'));
 }
 
-export function renderPackMap(root, progress, packs, { onPlay, onSaveCode, onEnterCode, onDiagnostic, onFluency, diag = { status: 'none', index: 0, total: 12 }, bests = {}, note }) {
+export function renderPackMap(root, progress, packs, { onPlay, onSaveCode, onEnterCode, onDiagnostic, onFluency, onAccount, account = { state: 'off' }, diag = { status: 'none', index: 0, total: 12 }, bests = {}, note }) {
   root.replaceChildren(...[
     h('header', { class: 'home-head' },
       h('div', {},
         h('h1', {}, 'The Mat'),
         h('p', { class: 'tagline' }, 'Pick a pack and a level.')),
       h('div', { class: 'home-actions' },
+        onAccount ? h('button', { type: 'button', class: 'btn', 'data-home': 'account' }, accountLabel(account)) : null,
         h('button', { type: 'button', class: 'btn', 'data-home': 'save' }, 'Save code'),
         h('button', { type: 'button', class: 'btn', 'data-home': 'enter' }, 'Enter code'))),
     h('p', { class: 'home-note', role: 'status', hidden: !note }, note ?? ''),
@@ -107,6 +109,7 @@ export function renderPackMap(root, progress, packs, { onPlay, onSaveCode, onEnt
     const f = e.target.closest('button[data-fluency]');
     if (f) return onFluency(f.dataset.fluency);
     const act = e.target.closest('[data-home]')?.dataset.home;
+    if (act === 'account') onAccount();
     if (act === 'save') onSaveCode();
     if (act === 'enter') onEnterCode();
     if (act === 'diagnostic') onDiagnostic();

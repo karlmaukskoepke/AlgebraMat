@@ -29,6 +29,12 @@ Add `?seed=123` to the URL to replay a fixed problem set, and `?level=2` to open
 
 ## Changelog
 
+### Class sheet sync: sign in with a period and a student number (SPEC-SYNC.md)
+- **Sign in** on the pack map (a period and a student number you hand out; no names): levels, the anonymous problem log and fluency runs are saved to a Google Sheet in the teacher's Drive, a few seconds after each problem or run. A student who signs in on another device (or after clearing the browser) gets their levels back; a level finished anywhere stays finished. Offline is fine: the next try catches up.
+- **`teacher/`:** `The-Mat-class-sheet.xlsx` (the template: Students, Progress, Log, Fluency, Summary and Slips tabs), `Code.gs` (the Apps Script that receives the data) and `SETUP.md` (about 10 minutes, once). The class link is `…/AlgebraMat/?class=<web app URL>`.
+- Tested end to end against a stand-in sheet (the script's merging, de-duplication and clean-up; the app's side with a failing and a working connection; a real-browser sign-in on two phones). **Not tested:** the Google side (deploying, permissions): that needs your account.
+- Next: sign in with a Google account (an opaque, hashed id; no email or name stored), then the class high-score list.
+
 ### Value it: evaluate an expression for a value of x (SPEC-VALUE.md)
 - **A new card, three levels:** positive values, negative values, everything mixed (`2x + 6, x = 4`; `5 − 2x, x = −3`). Type the answer; light mode only.
 - **Supports, one rung per wrong answer:** x replaced by its value *in parentheses* (the main slip is a missing parenthesis: `2x`, x = 4 read as 24); then every box filled with the value's counters and what each term comes to; then the sum. Teach me goes straight to the last.
