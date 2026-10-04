@@ -2400,3 +2400,17 @@ body {
 .install-actions { display: flex; flex-wrap: wrap; gap: 8px; }
 .install-steps { margin: 10px 0 0; font-size: 17px; }
 .install-steps[hidden] { display: none; }
+
+/* ---------- The Value it Mat ---------- */
+.value-mat .vm-problem { font: 700 72px 'Kalam', 'Lexend', system-ui, sans-serif; fill: var(--ink); }
+.value-mat .vm-given { font: 600 40px 'Lexend', system-ui, sans-serif; fill: var(--muted, #555); }
+.value-mat .vm-sub { fill: #0072b2; font-weight: 800; }
+.value-mat .vm-box { fill: none; stroke: var(--ink); stroke-width: 3.5; }
+.value-mat .vm-dash { stroke: var(--ink); stroke-width: 3.5; stroke-linecap: round; }
+.value-mat .mark { stroke: var(--ink); stroke-width: 3.5; stroke-linecap: round; }
+.value-mat .vm-worth { font: 700 40px 'Lexend', system-ui, sans-serif; fill: var(--ink); }
+.value-mat .vm-plus { font: 700 44px 'Lexend', system-ui, sans-serif; fill: var(--muted, #555); }
+.value-mat .vm-sum { font: 700 52px 'Kalam', 'Lexend', system-ui, sans-serif; fill: var(--ink); }
+.value-mat .vm-answer { font: 700 60px 'Kalam', 'Lexend', system-ui, sans-serif; fill: var(--ink); }
+.value-mat .vm-answer.is-empty { fill: var(--muted, #888); }
+.value-mat .vm-rule { stroke: var(--ink); stroke-width: 3; }

@@ -29,6 +29,12 @@ Add `?seed=123` to the URL to replay a fixed problem set, and `?level=2` to open
 
 ## Changelog
 
+### Value it: evaluate an expression for a value of x (SPEC-VALUE.md)
+- **A new card, three levels:** positive values, negative values, everything mixed (`2x + 6, x = 4`; `5 − 2x, x = −3`). Type the answer; light mode only.
+- **Supports, one rung per wrong answer:** x replaced by its value *in parentheses* (the main slip is a missing parenthesis: `2x`, x = 4 read as 24); then every box filled with the value's counters and what each term comes to; then the sum. Teach me goes straight to the last.
+- The slips named: no parentheses, multiplication read as addition, a negative times a negative left negative, a dropped or flipped sign.
+- **Save code v9** carries it (with room for its later levels). Not built yet: fractional coefficients, and the fraction-over-fraction level.
+
 ### Phone fixes from Karl's own phone: tour boxes, long pack names, landscape, full screen
 - **The tour's boxes** no longer run off the left edge of a phone (they're as wide as the screen allows), sit on whichever side of the lit-up control has more room, and are smaller on a landscape phone.
 - **Long pack names** on the map ("Distribute, then combine") wrap and shrink instead of running off the card.

@@ -92,7 +92,7 @@ export function renderPackMap(root, progress, packs, { onPlay, onSaveCode, onEnt
     h('p', { class: 'home-note', role: 'status', hidden: !note }, note ?? ''),
     installBar(h),
     diagnosticBar(diag),
-    h('div', { class: `pack-grid packs-${packs.filter((p) => !p.comingSoon).length}` },
+    h('div', { class: `pack-grid packs-${Math.min(6, packs.filter((p) => !p.comingSoon).length)}` },
       ...packs.filter((p) => !p.comingSoon).map((p) => packCard(progress, p, bests))),
     // Packs still being built show as cards under "Coming soon"; there are none to show right now.
     packs.some((p) => p.comingSoon)
