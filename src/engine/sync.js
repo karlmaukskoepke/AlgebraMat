@@ -9,22 +9,26 @@ export const MAX_SENT = 200;          // problems (and, separately, runs) in one
 
 export const cleanId = (v) => String(v ?? '').trim().toUpperCase();
 const ID = /^[A-Z0-9]{1,12}$/;
-// Three ways to be a student: a period and a number; a Google ID token with a period and a number (the first time); or
-// the device token the sheet gave back after that ({ mode: 'device', id, token, label }).
+// Three ways to be a student: a period and a number (only when the teacher leaves that on); a Google ID token from the
+// school account (the first time: the sheet finds the student ID in the school email, so nothing is typed); or the
+// device token the sheet gave back after that ({ mode: 'device', id, token, label }).
 const numbers = (a) => ID.test(cleanId(a.period)) && ID.test(cleanId(a.number));
 export function validAuth(a) {
   if (!a || typeof a !== 'object') return false;
   if (a.mode === 'device') return typeof a.id === 'string' && a.id !== '' && typeof a.token === 'string' && a.token !== '';
-  if (a.mode === 'google') return typeof a.idToken === 'string' && a.idToken !== '' && numbers(a);
+  if (a.mode === 'google') return typeof a.idToken === 'string' && a.idToken !== '';
   return numbers(a);
 }
 // What is sent: only what the sheet needs (the label stays on the device).
 export function authOf(a) {
   if (a.mode === 'device') return { mode: 'device', id: a.id, token: a.token };
-  if (a.mode === 'google') return { mode: 'google', idToken: a.idToken, period: cleanId(a.period), number: cleanId(a.number) };
+  if (a.mode === 'google') return { mode: 'google', idToken: a.idToken };
   return { period: cleanId(a.period), number: cleanId(a.number) };
 }
-export const studentLabel = (a) => (a.mode === 'device' ? (a.label || a.id) : `${cleanId(a.period)}-${cleanId(a.number)}`);
+export const studentLabel = (a) => (a.mode === 'device' ? (a.label || 'Signed in') : a.mode === 'google' ? 'Signed in' : `${cleanId(a.period)}-${cleanId(a.number)}`);
+
+// The button's label for a period the sheet reports: "P3", or "Test" for a teacher's test account.
+export const periodLabel = (period) => (period === 'TEST' ? 'Test' : period ? `P${period}` : 'Signed in');
 
 // A class link (the whole https://script.google.com/macros/s/…/exec address) or just its long id, as the address to use.
 export function normalizeEndpoint(text) {

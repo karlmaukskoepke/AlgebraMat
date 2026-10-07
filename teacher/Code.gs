@@ -3,7 +3,12 @@
  *
  * Paste this into the Apps Script editor of a Google Sheet made from "The Mat class sheet" template
  * (Extensions > Apps Script), then Deploy > New deployment > Web app: Execute as "Me", Who has access "Anyone".
- * See SETUP.md. Students are anonymous: a period and a student number you hand out. Nothing else is stored.
+ * See SETUP.md.
+ *
+ * Students sign in with their school Google account, and nothing else: the script reads the account's email only to find
+ * the student ID in it (such as s1234567@yourdistrict.org), scrambles that ID with a secret key, and keeps only the scrambled
+ * version. No name, email or real ID is ever stored here. The roster file (private, yours) holds the same key, so only you
+ * can match a scrambled ID to a name.
  *
  * What it does, and all it does: a student's phone POSTs its progress, recent problems and fluency runs; this merges the
  * progress with what the sheet already has (a level finished anywhere stays finished), adds the new problems and runs
@@ -19,19 +24,29 @@ var TABS = {
 var LIMITS = { events: 300, runs: 300, text: 200, levels: 20, packs: 30 };
 var PROTOCOL = 1;
 var DEVICES = { name: 'Devices', head: ['StudentID', 'TokenHash', 'Created'] };
+var DIRECTORY = { name: 'Directory', head: ['StudentID', 'Period'] };   // scrambled ids and periods, written by the roster file
 
 // Settings live in Project Settings > Script properties (see SETUP.md), not in the code:
 //   GOOGLE_CLIENT_ID     the OAuth client ID. Set: students sign in with Google.
-//   ALLOWED_DOMAIN       optional, such as yourdistrict.org: only accounts of that domain are accepted.
-//   ALLOW_NUMBER_SIGNIN  "yes" keeps the period-and-number sign-in working alongside Google's. (Without a client ID it always works.)
+//   ALLOWED_DOMAIN       the district's email domain (pcsdny.org): only accounts of that domain are accepted.
+//   ID_KEY               a long secret you make up (30+ random characters), the SAME one in the roster file. It scrambles student IDs.
+//   ID_EMAIL_PREFIX      the letter before the student ID in the email (default "s").
+//   TEST_EMAILS          optional: teacher emails (comma separated) allowed to sign in to test; they are kept apart as "TEST".
+//   RETIRE_ON            optional: a date (2028-06-30). After it the sheet stops taking data, and says so.
+//   ALLOW_NUMBER_SIGNIN  "yes" keeps a period-and-number sign-in alongside Google's. (Without a client ID it always works.)
 function setting(name) {
   return PropertiesService.getScriptProperties().getProperty(name) || '';
 }
 
-// What the app asks first: is Google sign-in on, and may a student still sign in with only a number?
+function isRetired(now) {
+  var on = setting('RETIRE_ON');
+  return /^\d{4}-\d{2}-\d{2}$/.test(on) && (now || new Date()).toISOString().slice(0, 10) > on;
+}
+
+// What the app asks first: is Google sign-in on, may a student still sign in with only a number, has this retired?
 function doGet() {
   var client = setting('GOOGLE_CLIENT_ID');
-  return json({ ok: true, app: 'The Mat class sheet', protocol: PROTOCOL, google: client || null, numberSignin: !client || setting('ALLOW_NUMBER_SIGNIN') === 'yes' });
+  return json({ ok: true, app: 'The Mat class sheet', protocol: PROTOCOL, google: client || null, numberSignin: !client || setting('ALLOW_NUMBER_SIGNIN') === 'yes', retired: isRetired() });
 }
 
 function doPost(e) {
@@ -75,13 +90,14 @@ function identify(auth, ss) {
     return { id: period + '-' + number, period: period, number: number };
   }
   if (mode === 'google') {
-    var info = verifyGoogle(auth.idToken);
-    return { id: 'G-' + hmacHex(info.sub).slice(0, 10), period: idPart(auth.period, 'period and the student number'), number: idPart(auth.number, 'period and the student number'), newDevice: true };
+    var who = studentFromGoogle(verifyGoogle(auth.idToken), ss);
+    who.newDevice = true;
+    return who;
   }
   if (mode === 'device') {
     var id = clean(auth.id, 20);
     if (!id || !checkDevice(ss, id, clean(auth.token, 100))) throw authError('Please sign in again.');
-    return { id: id, period: '', number: '' };
+    return { id: id, period: id.charAt(0) === 'S' ? classPeriod(ss, id) : 'TEST', number: '' };
   }
   throw new Error('Unknown sign-in');
 }
@@ -98,19 +114,22 @@ function toHex(bytes) {
 function sha256Hex(text) {
   return toHex(Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, text, Utilities.Charset.UTF_8));
 }
-// The secret that keeps a student's hashed id from being worked out from their Google account id. Made once, kept in
-// the script's properties. Don't delete it: ids would change.
-function salt() {
-  var props = PropertiesService.getScriptProperties();
-  var value = props.getProperty('ID_SALT');
-  if (!value) { value = Utilities.getUuid() + Utilities.getUuid(); props.setProperty('ID_SALT', value); }
-  return value;
+// The secret key that scrambles a student ID: the same text in the roster file's script properties. Without it an id
+// cannot be turned back into a student (school ids are short numbers, so they could be guessed without a key).
+function idKey() {
+  var key = setting('ID_KEY');
+  if (key.length < 20) throw new Error('The class sheet is not finished being set up (ID_KEY). Tell your teacher.');
+  return key;
 }
 function hmacHex(text) {
-  return toHex(Utilities.computeHmacSha256Signature(text, salt()));
+  return toHex(Utilities.computeHmacSha256Signature(text, idKey()));
+}
+// A student's id in this sheet: S- and 10 characters of the scrambled school id. (The roster file makes the same one.)
+function studentKey(schoolId) {
+  return 'S-' + hmacHex(String(schoolId)).slice(0, 10);
 }
 
-// Ask Google whether this ID token is real, for this app, and not out of date. Returns { sub }.
+// Ask Google whether this ID token is real, for this app, and not out of date. Returns { email, verified, domain }.
 function verifyGoogle(idToken) {
   var client = setting('GOOGLE_CLIENT_ID');
   if (!client) throw new Error('Google sign-in is not set up for this class');
@@ -118,11 +137,39 @@ function verifyGoogle(idToken) {
   var res = UrlFetchApp.fetch('https://oauth2.googleapis.com/tokeninfo?id_token=' + encodeURIComponent(idToken), { muteHttpExceptions: true });
   if (res.getResponseCode() !== 200) throw authError('Google sign-in did not work. Try again.');
   var info = JSON.parse(res.getContentText());
-  var domain = setting('ALLOWED_DOMAIN').toLowerCase();
   if (info.aud !== client || !info.sub || Number(info.exp) * 1000 < Date.now()
     || (info.iss !== 'accounts.google.com' && info.iss !== 'https://accounts.google.com')) throw authError('Google sign-in did not work. Try again.');
-  if (domain && String(info.hd || '').toLowerCase() !== domain) throw authError('Please sign in with your school account.');
-  return { sub: String(info.sub) };
+  return { email: String(info.email || '').toLowerCase(), verified: info.email_verified === true || info.email_verified === 'true', domain: String(info.hd || '').toLowerCase() };
+}
+
+// Who a verified Google account is: the student ID in a school email like s1234567@yourdistrict.org, scrambled; or a
+// teacher's test account. The email is looked at here and then forgotten.
+function studentFromGoogle(info, ss) {
+  var domain = setting('ALLOWED_DOMAIN').toLowerCase();
+  if (!domain) throw new Error('The class sheet is not finished being set up (ALLOWED_DOMAIN). Tell your teacher.');
+  if (!info.verified || info.domain !== domain || info.email.slice(-(domain.length + 1)) !== '@' + domain) throw authError('Please sign in with your school account.');
+  var prefix = (setting('ID_EMAIL_PREFIX') || 's').toLowerCase();
+  var local = info.email.slice(0, info.email.length - domain.length - 1);
+  var m = local.indexOf(prefix) === 0 ? /^\d{3,12}$/.exec(local.slice(prefix.length)) : null;
+  if (m) {
+    var id = studentKey(m[0]);
+    var period = classPeriod(ss, id);
+    return { id: id, period: period, number: '' };
+  }
+  var tests = setting('TEST_EMAILS').toLowerCase().split(',').map(function (t) { return t.trim(); });
+  if (tests.indexOf(info.email) >= 0) return { id: 'T-' + hmacHex(info.email).slice(0, 10), period: 'TEST', number: '' };
+  throw authError('Please sign in with your student account.');
+}
+
+// The period of a student in the class list the roster file keeps here ("Directory": scrambled id, period). A student
+// who isn't on it can't sign in.
+function classPeriod(ss, id) {
+  var sheet = tab(ss, DIRECTORY);
+  var last = sheet.getLastRow();
+  if (last < 2) throw authError('Your teacher has not set up the class list yet.');
+  var rows = sheet.getRange(2, 1, last - 1, 2).getValues();
+  for (var i = 0; i < rows.length; i++) if (rows[i][0] === id) return clean(rows[i][1], 12).toUpperCase();
+  throw authError('Your account is not on the class list. Ask your teacher.');
 }
 
 // ---------- Device tokens ----------
@@ -156,6 +203,7 @@ function safe(v) {
 
 function handle(req, ss) {
   if (!req || req.v !== PROTOCOL) throw new Error('This app and this sheet are not the same version');
+  if (isRetired()) throw Object.assign(new Error('This class sheet has been retired. Your progress is still saved on this device.'), { code: 'retired' });
   var who = identify(req.auth, ss);
   var now = new Date().toISOString();
   var device = who.newDevice ? { id: who.id, token: newDevice(ss, who.id, now) } : undefined;
@@ -163,7 +211,7 @@ function handle(req, ss) {
   var merged = syncProgress(ss, who, req.progress, now);
   var logged = addEvents(ss, who, req.events);
   var runs = addRuns(ss, who, req.runs);
-  return { ok: true, progress: merged, added: { events: logged, runs: runs }, now: now, device: device };
+  return { ok: true, progress: merged, added: { events: logged, runs: runs }, now: now, device: device, period: who.period };
 }
 
 // ---------- Sheets ----------

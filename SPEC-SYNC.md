@@ -5,10 +5,10 @@
 ## 1. What Karl decided
 - Progress saved by **signing in**; a **Google Sheet in the teacher's own Drive** (his district is on Google Workspace for Education) with data going back and forth **anonymous**.
 - In the meantime: a spreadsheet template and script, set up by the teacher (`teacher/`).
-- Next: the landing page, then the solving-equations cards.
+- Done since: the landing page. Next: the solving-equations cards.
 
 ## 2. Who a student is
-A **period** and a **student number** the teacher hands out (letters and digits, up to 12 each, capital letters). The sheet's id is `period-number` (`3-12`). No names or emails exist anywhere.
+**Their school Google account.** A school email holds the student ID (`s1234567@pcsdny.org`). The class sheet's script checks the Google ID token with Google (right app, not expired, the district's domain, email verified), takes the ID out of the email, and makes the student's id in the sheet: `S-` and 10 characters of an HMAC-SHA-256 of the ID with a **secret key** (`ID_KEY`) only the teacher has. The email and the real ID are looked at and forgotten; no name, email or real ID is ever stored in the class sheet. Nothing is typed. (The older period-and-number sign-in is still in the script, and is refused whenever Google sign-in is on unless `ALLOW_NUMBER_SIGNIN` is yes.)
 
 ## 3. What the app does (`engine/sync.js`, `sync.js`, `syncStore.js`, `view/account.js`)
 - The class address is the Apps Script web app URL, from the class link (`?class=…`) or pasted into the Sign in dialog (a link, or just its long id). Kept on the device (`mat.sync.v1`).
@@ -20,13 +20,13 @@ A **period** and a **student number** the teacher hands out (letters and digits,
 ## 4. What the script does (`teacher/Code.gs`)
 Merges progress (never un-finishes a level), adds each problem and run **once** (a key per row), makes each cell safe (nothing that starts with `=`, `+`, `-` or `@` is left as a formula), limits sizes, and adds columns for new pack levels. It is tested against an in-memory stand-in for the sheet (`tests/classSheet.test.js`); what is **not** tested here is the Google side (deploying, permissions, the real sheet).
 
-## 5. Google sign-in (built; needs the teacher's OAuth client ID, see teacher/SETUP.md Part 4)
-- The class sheet's `doGet` says whether Google sign-in is on (script property `GOOGLE_CLIENT_ID`) and whether a bare number still works (`ALLOW_NUMBER_SIGNIN`). The app asks before showing the Sign in form.
-- The student types a period and a number (so the teacher can tell who is who), then taps Google's button (Google Identity Services, loaded only then). Google gives the page an **ID token**; the page sends it to the script **once**.
-- The script checks it with Google (`oauth2.googleapis.com/tokeninfo`): right app (`aud`), not expired, from Google, and (optionally) from the district's domain (`ALLOWED_DOMAIN`, the `hd` claim). It keeps **only the opaque account id (`sub`), hashed with a secret salt** (HMAC-SHA-256, first 10 hex characters, `G-…`) as the student's id. **No email or name is read into the sheet or the app.** The salt is made on first use (`ID_SALT`).
-- It answers with a **device token** (random, kept in the app; only its SHA-256 hash is kept in a Devices tab). From then on that token is the sign-in, so a student isn't asked for Google every hour. Deleting a Devices row signs that phone out (it is told to sign in again). A second phone with the same Google account is the same student and gets its own token.
-- With Google on and `ALLOW_NUMBER_SIGNIN` not `yes`, a bare number is refused, which removes the guessing risk in §6.
-- Honest limit: the ID token (which contains the email) passes through the teacher's own script once to be checked; the script does not store it, but it is the teacher's script.
+## 5. The roster, and the class list (built)
+- A second, **private** file (`teacher/The-Mat-roster.xlsx` + `RosterSync.gs`) reads the teacher's master list (First, Last, Period, StudentID) and writes (1) its own Roster tab (names, periods, real IDs, each scrambled id), and (2) the class sheet's **Directory** tab: scrambled id and period, no names, no real IDs. It holds the same `ID_KEY`, so both make the same scrambled id for a student (tested). A daily trigger keeps it current.
+- The Directory is what tells the class sheet a student's **period**, and who may sign in: an account whose ID isn't on the list is refused ("not on the class list"). A student who changes period is moved by the next sync: nothing to do, and their progress stays (the scrambled id doesn't depend on the period).
+- A teacher's own account can sign in for testing only if listed in `TEST_EMAILS`; it is kept apart (`T-…`, period TEST).
+- After the first Google sign-in the sheet answers with a **device token** (random; only its hash is kept, in the Devices tab). From then on that token is the sign-in, so Google isn't needed on every sync. Deleting a Devices row signs that phone out. A second phone with the same account is the same student and gets its own token.
+- **Retiring:** `RETIRE_ON` (a date). After it the sheet refuses new data with a message the app shows, and its `doGet` says `retired`. Progress stays on each device (Save code still works).
+- Honest limit: the ID token (which holds the email) passes through the teacher's own script to be checked, and its ID is used for the scrambled id; the script doesn't store either.
 
 ## 6. Not built (next)
 - The class **high-score list**, from the Fluency tab, shown in the app.

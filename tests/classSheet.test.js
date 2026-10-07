@@ -80,86 +80,129 @@ describe('the class sheet script', () => {
   });
 });
 
-// ---------- Google sign-in ----------
+// ---------- Google sign-in with the school account ----------
 import { makeScript } from './helpers/fakeSheet.js';
 
 const CLIENT = '1234567890-abc.apps.googleusercontent.com';
-const good = (sub, extra = {}) => ({ aud: CLIENT, sub, iss: 'https://accounts.google.com', exp: String(Math.floor(Date.now() / 1000) + 3000), hd: 'school.org', email: 'kid@school.org', ...extra });
+const KEY = 'a-long-secret-the-teacher-made-up-0123456789';
+const good = (email, extra = {}) => ({ aud: CLIENT, sub: '1099', iss: 'https://accounts.google.com', exp: String(Math.floor(Date.now() / 1000) + 3000), hd: 'school.org', email, email_verified: 'true', ...extra });
 const TOKEN = 'T'.repeat(40);
-const google = (extra = {}) => ({ mode: 'google', idToken: TOKEN, period: '3', number: '12', ...extra });
+const PROPS = { GOOGLE_CLIENT_ID: CLIENT, ALLOWED_DOMAIN: 'school.org', ID_KEY: KEY };
+const google = (token = TOKEN) => ({ mode: 'google', idToken: token });
+const setup = (props = {}, tokens = { [TOKEN]: good('s1234567@school.org') }, directory = [['1234567', '3'], ['7654321', '5']]) => {
+  const script = makeScript({ properties: { ...PROPS, ...props }, tokens });
+  const book = new FakeBook();
+  const dir = book.insertSheet('Directory');
+  dir.appendRow(['StudentID', 'Period']);
+  for (const [id, period] of directory) dir.appendRow([script.studentKey(id), period]);
+  return { script, book };
+};
 
-describe('Google sign-in', () => {
-  const setup = (props = {}, tokens = { [TOKEN]: good('1099') }) => makeScript({ properties: { GOOGLE_CLIENT_ID: CLIENT, ...props }, tokens });
-
-  it('tells the app whether Google sign-in is on, and whether a number alone still works', () => {
-    expect(JSON.parse(makeScript().doGet().text)).toMatchObject({ ok: true, google: null, numberSignin: true });
-    expect(JSON.parse(setup().doGet().text)).toMatchObject({ google: CLIENT, numberSignin: false });
-    expect(JSON.parse(setup({ ALLOW_NUMBER_SIGNIN: 'yes' }).doGet().text)).toMatchObject({ google: CLIENT, numberSignin: true });
+describe('Google sign-in with the school account', () => {
+  it('tells the app whether Google sign-in is on, whether a number alone still works, and whether this has retired', () => {
+    expect(JSON.parse(makeScript().doGet().text)).toMatchObject({ ok: true, google: null, numberSignin: true, retired: false });
+    expect(JSON.parse(setup().script.doGet().text)).toMatchObject({ google: CLIENT, numberSignin: false });
+    expect(JSON.parse(setup({ ALLOW_NUMBER_SIGNIN: 'yes' }).script.doGet().text)).toMatchObject({ google: CLIENT, numberSignin: true });
+    expect(JSON.parse(setup({ RETIRE_ON: '2020-01-01' }).script.doGet().text).retired).toBe(true);
   });
 
-  it('answers a first sign-in with a device token, and the student is a hashed id with no email anywhere', () => {
-    const g = setup();
-    const book = new FakeBook();
-    const res = g.handle({ v: 1, auth: google(), progress: { packs: { flipit: { levels: [true] } } } }, book);
+  it('finds the student ID in the email, takes the period from the class list, and keeps only a scrambled id', () => {
+    const { script, book } = setup();
+    const res = script.handle({ v: 1, auth: google(), progress: { packs: { flipit: { levels: [true] } } } }, book);
     expect(res.ok).toBe(true);
-    expect(res.device.id).toMatch(/^G-[0-9a-f]{10}$/);
+    expect(res.period).toBe('3');
+    expect(res.device.id).toBe(script.studentKey('1234567'));
+    expect(res.device.id).toMatch(/^S-[0-9a-f]{10}$/);
     expect(res.device.token).toHaveLength(64);
-    expect(book.sheets.Students.rows[1].slice(0, 3)).toEqual([res.device.id, '3', '12']);
-    const everything = JSON.stringify([...Object.values(book.sheets).map((s) => s.rows), g.props]);
-    expect(everything).not.toContain('kid@school.org');
-    expect(everything).not.toContain('1099');
-    expect(everything).not.toContain(res.device.token);                   // only its hash is kept
-    expect(g.props.ID_SALT).toBeTruthy();
+    expect(book.sheets.Students.rows[1].slice(0, 3)).toEqual([res.device.id, '3', '']);
+    const everything = JSON.stringify([...Object.values(book.sheets).map((s) => s.rows)]);
+    for (const secret of ['s1234567', '1234567', '@school.org', '1099', res.device.token]) expect(everything, secret).not.toContain(secret);
   });
 
-  it('the same Google account is the same student on any device, and a different account is another', () => {
-    const g = setup({}, { [TOKEN]: good('1099'), [`${TOKEN}2`]: good('1099'), [`${TOKEN}3`]: good('2200') });
-    const book = new FakeBook();
-    const a = g.handle({ v: 1, auth: google(), progress: { packs: { flipit: { levels: [true] } } } }, book);
-    const b = g.handle({ v: 1, auth: google({ idToken: `${TOKEN}2` }), progress: { packs: {} } }, book);
-    const c = g.handle({ v: 1, auth: google({ idToken: `${TOKEN}3`, number: '13' }), progress: { packs: {} } }, book);
+  it('the same student is the same on any device, and another student is another', () => {
+    const { script, book } = setup({}, { [TOKEN]: good('s1234567@school.org'), [`${TOKEN}2`]: good('s1234567@school.org'), [`${TOKEN}3`]: good('s7654321@school.org', { sub: '2200' }) });
+    const a = script.handle({ v: 1, auth: google(), progress: { packs: { flipit: { levels: [true] } } } }, book);
+    const b = script.handle({ v: 1, auth: google(`${TOKEN}2`), progress: { packs: {} } }, book);
+    const c = script.handle({ v: 1, auth: google(`${TOKEN}3`), progress: { packs: {} } }, book);
     expect(b.device.id).toBe(a.device.id);
     expect(b.progress.packs.flipit.levels).toEqual([true]);
     expect(c.device.id).not.toBe(a.device.id);
+    expect(c.period).toBe('5');
     expect(c.progress.packs.flipit.levels.some(Boolean)).toBe(false);
-    expect(b.device.token).not.toBe(a.device.token);                      // each device has its own
+    expect(b.device.token).not.toBe(a.device.token);
   });
 
-  it('after that the device token is enough, and a wrong one is refused as an auth problem', () => {
-    const g = setup();
-    const book = new FakeBook();
-    const first = g.handle({ v: 1, auth: google(), progress: { packs: {} } }, book);
-    const again = g.handle({ v: 1, auth: { mode: 'device', ...first.device }, progress: { packs: { value: { levels: [true] } } }, events: [ev(5)] }, book);
+  it('a student who changes period gets the new one from the class list, keeping their progress', () => {
+    const { script, book } = setup();
+    const first = script.handle({ v: 1, auth: google(), progress: { packs: { flipit: { levels: [true] } } } }, book);
+    book.sheets.Directory.rows[1][1] = '6';                                       // the roster file wrote the new period
+    const again = script.handle({ v: 1, auth: { mode: 'device', ...first.device }, progress: { packs: {} } }, book);
+    expect(again.period).toBe('6');
+    expect(again.progress.packs.flipit.levels).toEqual([true]);
+    expect(book.sheets.Students.rows[1].slice(0, 2)).toEqual([first.device.id, '6']);
+  });
+
+  it('after the first sign-in the device token is enough; a wrong one is an auth problem; a student removed from the list is refused', () => {
+    const { script, book } = setup();
+    const first = script.handle({ v: 1, auth: google(), progress: { packs: {} } }, book);
+    const again = script.handle({ v: 1, auth: { mode: 'device', ...first.device }, progress: { packs: { value: { levels: [true] } } }, events: [ev(5)] }, book);
     expect(again.ok).toBe(true);
     expect(again.device).toBeUndefined();
     expect(again.progress.packs.value.levels).toEqual([true]);
-    expect(book.sheets.Students.rows[1].slice(0, 3)).toEqual([first.device.id, '3', '12']);   // still known, not blanked
-    expect(book.sheets.Progress.rows[1].slice(0, 3)).toEqual([first.device.id, '3', '12']);
-    expect(() => g.handle({ v: 1, auth: { mode: 'device', id: first.device.id, token: 'nope' } }, book)).toThrow(/sign in again/);
-    expect(() => g.handle({ v: 1, auth: { mode: 'device', id: 'G-0000000000', token: first.device.token } }, book)).toThrow();
-    try { g.handle({ v: 1, auth: { mode: 'device', id: first.device.id, token: 'nope' } }, book); } catch (e) { expect(e.code).toBe('auth'); }
+    expect(() => script.handle({ v: 1, auth: { mode: 'device', id: first.device.id, token: 'nope' } }, book)).toThrow(/sign in again/);
+    try { script.handle({ v: 1, auth: { mode: 'device', id: first.device.id, token: 'nope' } }, book); } catch (e) { expect(e.code).toBe('auth'); }
+    book.sheets.Directory.rows.length = 1;
+    book.sheets.Directory.appendRow([script.studentKey('7654321'), '5']);
+    expect(() => script.handle({ v: 1, auth: { mode: 'device', ...first.device } }, book)).toThrow(/not on the class list/);
   });
 
-  it('refuses a token Google does not know, one for another app, an expired one, and (when asked) another school', () => {
-    const book = new FakeBook();
-    const bad = (tokens, props = {}) => () => makeScript({ properties: { GOOGLE_CLIENT_ID: CLIENT, ...props }, tokens }).handle({ v: 1, auth: google() }, book);
-    expect(bad({})).toThrow(/did not work/);
-    expect(bad({ [TOKEN]: good('1', { aud: 'someone-else' }) })).toThrow(/did not work/);
-    expect(bad({ [TOKEN]: good('1', { exp: '1000' }) })).toThrow(/did not work/);
-    expect(bad({ [TOKEN]: good('1', { iss: 'evil.example' }) })).toThrow(/did not work/);
-    expect(bad({ [TOKEN]: good('1', { hd: 'other.org' }) }, { ALLOWED_DOMAIN: 'school.org' })).toThrow(/school account/);
-    expect(bad({ [TOKEN]: good('1') }, { ALLOWED_DOMAIN: 'School.org' })).not.toThrow();
-    expect(() => makeScript().handle({ v: 1, auth: google() }, book)).toThrow(/not set up/);
+  it('refuses a token Google does not know, one for another app, an expired one, another school, and an unverified email', () => {
+    const attempt = (tokens, props = {}) => () => { const { script, book } = setup(props, tokens); return script.handle({ v: 1, auth: google() }, book); };
+    expect(attempt({})).toThrow(/did not work/);
+    expect(attempt({ [TOKEN]: good('s1234567@school.org', { aud: 'someone-else' }) })).toThrow(/did not work/);
+    expect(attempt({ [TOKEN]: good('s1234567@school.org', { exp: '1000' }) })).toThrow(/did not work/);
+    expect(attempt({ [TOKEN]: good('s1234567@school.org', { iss: 'evil.example' }) })).toThrow(/did not work/);
+    expect(attempt({ [TOKEN]: good('s1234567@other.org', { hd: 'other.org' }) })).toThrow(/school account/);
+    expect(attempt({ [TOKEN]: good('s1234567@school.org', { email_verified: 'false' }) })).toThrow(/school account/);
+    expect(attempt({ [TOKEN]: good('s1234567@school.org') }, { ALLOWED_DOMAIN: 'School.org' })).not.toThrow();
+    expect(() => makeScript().handle({ v: 1, auth: google() }, new FakeBook())).toThrow(/not set up/);
   });
 
-  it('wants a period and a number with the Google sign-in, so the teacher can tell who is who', () => {
-    const g = setup();
-    expect(() => g.handle({ v: 1, auth: google({ number: '' }) }, new FakeBook())).toThrow(/letters and numbers/);
+  it('refuses an account that is not a student ID email, one not on the class list, and an empty class list', () => {
+    const attempt = (token, props, directory) => () => { const { script, book } = setup(props, { [TOKEN]: token }, directory); return script.handle({ v: 1, auth: google() }, book); };
+    expect(attempt(good('kmauk@school.org'))).toThrow(/student account/);
+    expect(attempt(good('s12@school.org'))).toThrow(/student account/);
+    expect(attempt(good('x1234567@school.org'))).toThrow(/student account/);
+    expect(attempt(good('s9999999@school.org'))).toThrow(/not on the class list/);
+    expect(attempt(good('s1234567@school.org'), {}, [])).toThrow(/not set up the class list/);
+  });
+
+  it('lets a listed teacher account in for testing, kept apart as TEST', () => {
+    const { script, book } = setup({ TEST_EMAILS: 'Kmauk@school.org, other@school.org' }, { [TOKEN]: good('kmauk@school.org') });
+    const res = script.handle({ v: 1, auth: google() }, book);
+    expect(res.period).toBe('TEST');
+    expect(res.device.id).toMatch(/^T-[0-9a-f]{10}$/);
+    expect(JSON.stringify(book.sheets.Students.rows)).not.toContain('kmauk');
+    const again = script.handle({ v: 1, auth: { mode: 'device', ...res.device }, progress: { packs: {} } }, book);
+    expect(again.period).toBe('TEST');
+  });
+
+  it('needs the secret key, and uses the email prefix the teacher sets', () => {
+    expect(() => { const { script, book } = setup({ ID_KEY: '' }); return script.handle({ v: 1, auth: google() }, book); }).toThrow(/ID_KEY/);
+    const { script, book } = setup({ ID_EMAIL_PREFIX: 'stu' }, { [TOKEN]: good('stu1234567@school.org') });
+    expect(script.handle({ v: 1, auth: google() }, book).device.id).toBe(script.studentKey('1234567'));
   });
 
   it('with Google on, a number alone is refused unless ALLOW_NUMBER_SIGNIN is yes', () => {
     const book = new FakeBook();
-    expect(() => setup().handle({ v: 1, auth: { period: '3', number: '12' } }, book)).toThrow(/signs in with Google/);
-    expect(setup({ ALLOW_NUMBER_SIGNIN: 'yes' }).handle({ v: 1, auth: { period: '3', number: '12' } }, book).ok).toBe(true);
+    expect(() => setup().script.handle({ v: 1, auth: { period: '3', number: '12' } }, book)).toThrow(/signs in with Google/);
+    expect(setup({ ALLOW_NUMBER_SIGNIN: 'yes' }).script.handle({ v: 1, auth: { period: '3', number: '12' } }, book).ok).toBe(true);
+  });
+
+  it('stops taking data once it has retired, with a reason the app can show', () => {
+    const { script, book } = setup({ RETIRE_ON: '2020-01-01' });
+    try { script.handle({ v: 1, auth: google() }, book); expect.unreachable(); } catch (e) { expect(e.code).toBe('retired'); expect(e.message).toMatch(/retired/); }
+    expect(script.isRetired(new Date('2019-12-31'))).toBe(false);
+    expect(script.isRetired(new Date('2020-01-02'))).toBe(true);
   });
 });

@@ -48,11 +48,14 @@ export function showAccount(sync, onDone = () => {}) {
           <input id="who-period" name="period" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="12" inputmode="text" />
           <label for="who-number">Student number</label>
           <input id="who-number" name="number" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="12" inputmode="text" />`;
-      body = `
+      body = info?.retired ? `
+        <h2>This class sheet has retired</h2>
+        <p>Your progress is still saved on this device. Use <b>Save code</b> to keep a copy.</p>
+        <div class="dialog-actions"><button type="button" class="btn btn-primary" data-close>OK</button></div>` : `
         <form class="code-form" data-form="who">
           <h2>Sign in</h2>
-          ${google ? '<p>Type your period and student number, then sign in with your school Google account. Your name and email are not saved.</p>' : ''}
-          ${fields}
+          ${google ? '<p>Sign in with your school Google account. That is all: nothing to type. Your name and email are not saved.</p>' : ''}
+          ${numbers ? fields : ''}
           ${google ? '<div class="google-holder" data-google></div>' : ''}
           <p class="code-error" role="alert" ${message ? '' : 'hidden'}>${esc(message)}</p>
           <div class="dialog-actions"><button type="button" class="btn" data-close>Cancel</button>${numbers ? `<button type="submit" class="btn ${google ? '' : 'btn-primary'}">${google ? 'Sign in with only my number' : 'Sign in'}</button>` : ''}</div>
@@ -81,10 +84,8 @@ export function showAccount(sync, onDone = () => {}) {
     const holder = d.querySelector('[data-google]');
     if (holder) {
       showGoogleButton(holder, sync.classInfo().google, async (idToken) => {
-        const period = form.period.value;
-        const number = form.number.value;
         holder.textContent = 'Signing in…';
-        const res = await sync.signIn({ mode: 'google', idToken, period, number });
+        const res = await sync.signIn({ mode: 'google', idToken });
         if (res.ok) { changed = true; draw(); } else draw(res.error, true);
       }).catch((e) => { holder.textContent = e.message; });
     }
