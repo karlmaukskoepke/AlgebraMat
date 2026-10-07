@@ -307,6 +307,30 @@ describe('signing in with Google, from the app', () => {
   });
 });
 
+describe('after a refused sign-in', () => {
+  it('the button goes back to Sign in (it does not stay on a warning), and nothing is kept in memory or on the device', async () => {
+    const script = makeClass({}, {});                               // Google refuses the token
+    const seen = [];
+    const d = gphone(classBook(script), script, { onChange: (status) => seen.push(status.state) });
+    d.sync.setEndpoint(URL_);
+    const res = await d.sync.signIn({ mode: 'google', idToken: TOKEN });
+    expect(res.ok).toBe(false);
+    expect(seen.at(-1)).toBe('signed-out');
+    expect(d.sync.status().state).toBe('signed-out');
+    expect(d.store.auth).toBe(null);
+    expect(d.store.cursor).toEqual({ eventsT: 0, runsT: 0 });
+  });
+
+  it('a sign-in that works ends ready, and the button shows the period', async () => {
+    const script = makeClass();
+    const seen = [];
+    const d = gphone(classBook(script), script, { onChange: (status) => seen.push(`${status.state}:${status.label ?? ''}`) });
+    d.sync.setEndpoint(URL_);
+    await d.sync.signIn({ mode: 'google', idToken: TOKEN });
+    expect(seen.at(-1)).toBe('ready:P3');
+  });
+});
+
 describe('the built-in class address', () => {
   it('is a real class sheet address, or empty (students then need the class link)', async () => {
     const { DEFAULT_CLASS } = await import('../src/syncConfig.js');
