@@ -2,7 +2,7 @@
 // a test can give it a fake sheet. One request at a time; a request asked for during another follows it.
 
 import {
-  PROTOCOL, validAuth, authOf, studentLabel, buildRequest, advance, moreToSend, takeFromSheet, progressChanged, normalizeEndpoint,
+  PROTOCOL, validAuth, authOf, studentLabel, periodLabel, buildRequest, advance, moreToSend, takeFromSheet, progressChanged, normalizeEndpoint,
 } from './engine/sync.js';
 
 const TIMEOUT_MS = 15000;
@@ -24,7 +24,8 @@ export function createSync({ load, save, getProgress, setProgress, getEvents, ge
     const res = await send(state.endpoint, request);
     if (!res?.ok) throw Object.assign(new Error(res?.error || 'The class sheet said no'), { userMessage: res?.error || 'The class sheet said no.', code: res?.code });
     // A first Google sign-in is answered with this device's own token: from now on that is the sign-in.
-    if (res.device?.token) set({ auth: { mode: 'device', id: res.device.id, token: res.device.token, label: studentLabel(state.auth) } });
+    if (res.device?.token) set({ auth: { mode: 'device', id: res.device.id, token: res.device.token, label: periodLabel(res.period) } });
+    else if (state.auth?.mode === 'device' && res.period !== undefined && state.auth.label !== periodLabel(res.period)) set({ auth: { ...state.auth, label: periodLabel(res.period) } });   // their period changed
     const before = getProgress();
     const merged = takeFromSheet(before, res.progress, packs);
     if (progressChanged(before, merged)) setProgress(merged);
@@ -105,7 +106,7 @@ async function defaultInfo(endpoint) {
   const res = await fetch(endpoint, { method: 'GET' });
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   const body = await res.json();
-  return { google: typeof body.google === 'string' ? body.google : null, numberSignin: body.numberSignin !== false };
+  return { google: typeof body.google === 'string' ? body.google : null, numberSignin: body.numberSignin !== false, retired: body.retired === true };
 }
 
 async function defaultSend(endpoint, request) {

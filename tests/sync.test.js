@@ -185,11 +185,20 @@ describe('syncing with the class sheet', () => {
 
 // ---------- Google sign-in, from the app's side ----------
 import { makeScript } from './helpers/fakeSheet.js';
-import { validAuth as valid2 } from '../src/engine/sync.js';
+import { validAuth as valid2, periodLabel } from '../src/engine/sync.js';
 
 const CLIENT = '1234567890-abc.apps.googleusercontent.com';
+const KEY = 'a-long-secret-the-teacher-made-up-0123456789';
 const TOKEN = 'G'.repeat(40);
-const info = (sub = '1099') => ({ aud: CLIENT, sub, iss: 'https://accounts.google.com', exp: String(Math.floor(Date.now() / 1000) + 3000) });
+const info = (email = 's1234567@school.org') => ({ aud: CLIENT, sub: '1099', iss: 'https://accounts.google.com', exp: String(Math.floor(Date.now() / 1000) + 3000), hd: 'school.org', email, email_verified: 'true' });
+const classBook = (script, ids = [['1234567', '3']]) => {
+  const book = new FakeBook();
+  const dir = book.insertSheet('Directory');
+  dir.appendRow(['StudentID', 'Period']);
+  for (const [id, period] of ids) dir.appendRow([script.studentKey(id), period]);
+  return book;
+};
+const makeClass = (props = {}, tokens = { [TOKEN]: info() }) => makeScript({ properties: { GOOGLE_CLIENT_ID: CLIENT, ALLOWED_DOMAIN: 'school.org', ID_KEY: KEY, ...props }, tokens });
 
 function gphone(book, script, extra = {}) {
   const device = { progress: newProgress(PACKS), events: [], runs: [], store: { endpoint: null, auth: null, cursor: newCursor(), lastSync: null } };
@@ -199,66 +208,108 @@ function gphone(book, script, extra = {}) {
     getEvents: () => device.events, getRuns: () => device.runs, packs: PACKS,
     // like doPost: a refusal comes back as { ok: false, error, code }
     send: async (_u, req) => { try { return script.handle(JSON.parse(JSON.stringify(req)), book); } catch (e) { return { ok: false, error: e.message, code: e.code }; } },
-    getInfo: async () => { const g = JSON.parse(script.doGet().text); return { google: g.google, numberSignin: g.numberSignin }; },
+    getInfo: async () => { const g = JSON.parse(script.doGet().text); return { google: g.google, numberSignin: g.numberSignin, retired: g.retired }; },
     ...extra,
   });
   return device;
 }
 
 describe('signing in with Google, from the app', () => {
-  it('knows the three kinds of sign-in', () => {
-    expect(valid2({ mode: 'google', idToken: 'abc', period: '3', number: '1' })).toBe(true);
-    expect(valid2({ mode: 'google', idToken: '', period: '3', number: '1' })).toBe(false);
-    expect(valid2({ mode: 'google', idToken: 'abc', period: '3', number: '' })).toBe(false);
-    expect(valid2({ mode: 'device', id: 'G-1', token: 't' })).toBe(true);
-    expect(valid2({ mode: 'device', id: 'G-1' })).toBe(false);
-    expect(authOf({ mode: 'device', id: 'G-1', token: 't', label: '3-1' })).toEqual({ mode: 'device', id: 'G-1', token: 't' });
-    expect(studentLabel({ mode: 'device', id: 'G-1', token: 't', label: '3-1' })).toBe('3-1');
+  it('knows the three kinds of sign-in; Google needs only the token, nothing typed', () => {
+    expect(valid2({ mode: 'google', idToken: 'abc' })).toBe(true);
+    expect(valid2({ mode: 'google', idToken: '' })).toBe(false);
+    expect(valid2({ mode: 'device', id: 'S-1', token: 't' })).toBe(true);
+    expect(valid2({ mode: 'device', id: 'S-1' })).toBe(false);
+    expect(authOf({ mode: 'google', idToken: 'abc', period: '3' })).toEqual({ mode: 'google', idToken: 'abc' });
+    expect(authOf({ mode: 'device', id: 'S-1', token: 't', label: 'P3' })).toEqual({ mode: 'device', id: 'S-1', token: 't' });
+    expect(studentLabel({ mode: 'device', id: 'S-1', token: 't', label: 'P3' })).toBe('P3');
+    expect(studentLabel({ mode: 'device', id: 'S-1', token: 't' })).toBe('Signed in');
+    expect([periodLabel('3'), periodLabel('B'), periodLabel('TEST'), periodLabel('')]).toEqual(['P3', 'PB', 'Test', 'Signed in']);
   });
 
   it('asks the class what it offers, signs in once with Google, then syncs with the device token alone', async () => {
-    const script = makeScript({ properties: { GOOGLE_CLIENT_ID: CLIENT }, tokens: { [TOKEN]: info() } });
-    const book = new FakeBook();
+    const script = makeClass();
+    const book = classBook(script);
     const d = gphone(book, script);
     d.sync.setEndpoint(URL_);
     expect(d.sync.classInfo()).toBe(null);
-    expect(await d.sync.probe()).toEqual({ google: CLIENT, numberSignin: false });
+    expect(await d.sync.probe()).toEqual({ google: CLIENT, numberSignin: false, retired: false });
     d.progress.packs.value.levels[0] = true;
     d.events.push(ev(1));
-    expect(await d.sync.signIn({ mode: 'google', idToken: TOKEN, period: '3', number: '12' })).toMatchObject({ ok: true });
-    expect(d.store.auth).toMatchObject({ mode: 'device', label: '3-12' });
-    expect(d.store.auth.id).toMatch(/^G-/);
+    expect(await d.sync.signIn({ mode: 'google', idToken: TOKEN })).toMatchObject({ ok: true });
+    expect(d.store.auth).toMatchObject({ mode: 'device', label: 'P3' });
+    expect(d.store.auth.id).toMatch(/^S-/);
     expect(JSON.stringify(d.store)).not.toContain(TOKEN);            // the Google token is not kept
-    expect(d.sync.status()).toMatchObject({ state: 'ready', label: '3-12' });
+    expect(d.sync.status()).toMatchObject({ state: 'ready', label: 'P3' });
     d.events.push(ev(2));
     expect(await d.sync.now()).toMatchObject({ ok: true });
     expect(book.sheets.Log.rows).toHaveLength(3);
 
-    // a second phone, same Google account: levels come back
+    // a second phone, same school account: levels come back
     const second = gphone(book, script);
     second.sync.setEndpoint(URL_);
-    await second.sync.signIn({ mode: 'google', idToken: TOKEN, period: '3', number: '12' });
+    await second.sync.signIn({ mode: 'google', idToken: TOKEN });
     expect(second.progress.packs.value.levels[0]).toBe(true);
   });
 
-  it('a refused Google sign-in keeps nothing, and says so', async () => {
-    const script = makeScript({ properties: { GOOGLE_CLIENT_ID: CLIENT }, tokens: {} });
-    const d = gphone(new FakeBook(), script);
+  it('the label follows the student when the class list moves them to another period', async () => {
+    const script = makeClass();
+    const book = classBook(script);
+    const d = gphone(book, script);
     d.sync.setEndpoint(URL_);
-    expect(await d.sync.signIn({ mode: 'google', idToken: TOKEN, period: '3', number: '12' })).toMatchObject({ ok: false, error: expect.stringMatching(/Google sign-in did not work/) });
-    expect(d.store.auth).toBe(null);
+    await d.sync.signIn({ mode: 'google', idToken: TOKEN });
+    expect(d.sync.status().label).toBe('P3');
+    book.sheets.Directory.rows[1][1] = '6';
+    await d.sync.now();
+    expect(d.sync.status().label).toBe('P6');
+  });
+
+  it('a refused Google sign-in keeps nothing and says so: not a school account, not on the class list, not set up', async () => {
+    const refused = async (script, book) => {
+      const d = gphone(book, script);
+      d.sync.setEndpoint(URL_);
+      const res = await d.sync.signIn({ mode: 'google', idToken: TOKEN });
+      expect(d.store.auth).toBe(null);
+      return res;
+    };
+    let script = makeClass({}, {});
+    expect(await refused(script, classBook(script))).toMatchObject({ ok: false, error: expect.stringMatching(/Google sign-in did not work/) });
+    script = makeClass({}, { [TOKEN]: info('s9999999@school.org') });
+    expect(await refused(script, classBook(script))).toMatchObject({ ok: false, error: expect.stringMatching(/not on the class list/) });
+    script = makeClass({}, { [TOKEN]: info('someone@gmail.com') });
+    expect(await refused(script, classBook(script))).toMatchObject({ ok: false, error: expect.stringMatching(/school account/) });
+    script = makeClass();
+    expect(await refused(script, new FakeBook())).toMatchObject({ ok: false, error: expect.stringMatching(/class list/) });
+    const d = gphone(classBook(script), script);
+    d.sync.setEndpoint(URL_);
     expect(await d.sync.signIn({ period: '3', number: '12' })).toMatchObject({ ok: false, error: expect.stringMatching(/signs in with Google/) });
   });
 
   it('when the sheet no longer knows the device, the student is signed out with a reason', async () => {
-    const script = makeScript({ properties: { GOOGLE_CLIENT_ID: CLIENT }, tokens: { [TOKEN]: info() } });
-    const book = new FakeBook();
+    const script = makeClass();
+    const book = classBook(script);
     const d = gphone(book, script);
     d.sync.setEndpoint(URL_);
-    await d.sync.signIn({ mode: 'google', idToken: TOKEN, period: '3', number: '12' });
+    await d.sync.signIn({ mode: 'google', idToken: TOKEN });
     book.sheets.Devices.rows.length = 1;                           // the teacher cleared the devices
     expect(await d.sync.now()).toMatchObject({ ok: false, error: expect.stringMatching(/sign in again/i) });
     expect(d.sync.status().state).toBe('signed-out');
     expect(d.store.auth).toBe(null);
+  });
+
+  it('after the sheet retires, it says so, and the device keeps everything', async () => {
+    const script = makeClass({ RETIRE_ON: '2020-01-01' });
+    const d = gphone(classBook(script), script);
+    d.sync.setEndpoint(URL_);
+    expect(await d.sync.probe()).toMatchObject({ retired: true });
+    expect(await d.sync.signIn({ mode: 'google', idToken: TOKEN })).toMatchObject({ ok: false, error: expect.stringMatching(/retired/) });
+    expect(d.progress.packs.flipit.levels.some(Boolean)).toBe(false);
+  });
+});
+
+describe('the built-in class address', () => {
+  it('is a real class sheet address, or empty (students then need the class link)', async () => {
+    const { DEFAULT_CLASS } = await import('../src/syncConfig.js');
+    expect(DEFAULT_CLASS === '' || normalizeEndpoint(DEFAULT_CLASS) === DEFAULT_CLASS).toBe(true);
   });
 });

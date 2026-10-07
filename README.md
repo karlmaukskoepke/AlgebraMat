@@ -29,6 +29,12 @@ Add `?seed=123` to the URL to replay a fixed problem set, and `?level=2` to open
 
 ## Changelog
 
+### Sign in with the school account only: nothing to type (SPEC-SYNC.md §2, §5)
+- **Students tap Sign in and the Google button, and that is all.** The class sheet takes the student ID out of the school email (`s1234567@…`), scrambles it with a secret key only the teacher has (HMAC-SHA-256), and keeps only the scrambled id: no name, email or real ID. The period comes from the class list the roster file writes (the Directory tab), so a student who changes period is moved automatically; an account not on the list can't sign in.
+- **The roster file** (`teacher/The-Mat-roster.xlsx`, `RosterSync.gs`) now fills itself from the master list and writes that class list; no student numbers or slips. A teacher's own account signs in for testing if it is in `TEST_EMAILS`.
+- **Retiring:** a `RETIRE_ON` date after which the class sheet stops taking data (progress stays on each device).
+- The button shows the student's period (`✓ P3`). Tested against stand-ins for Google and the sheet, including that the roster and the class sheet make the same scrambled id and that no email, real ID or Google token is ever stored. **Not tested:** the real Google side.
+
 ### The home screen: Count it, Build it, Solve it (SPEC-HOME.md)
 - **Three sections**, in pastels (blue, green, light red), on the panels, the bar and the cards. The first screen is three big panels with the cards in small and your progress; tap one and it opens, with the three titles in a bar across the top (the open one wide). Your section is remembered; tapping **The Mat** goes back to the panels. Solve it shows its equation cards as "soon".
 - **A diagnostic for each section** (Count it: 6 problems; Build it: 8, now with Value it). An old saved diagnostic is split between them.

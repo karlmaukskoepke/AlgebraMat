@@ -1,17 +1,22 @@
-// teacher/RosterSync.gs: the master list becomes stable student numbers. (Only the planning is tested here: the sheet
-// reading and writing around it needs Google.)
+// teacher/RosterSync.gs: the master list becomes a private roster and a class list of scrambled ids. (Only the planning
+// is tested here: the sheet reading and writing around it needs Google.)
 import { describe, it, expect } from 'vitest';
-import { roster } from './helpers/fakeSheet.js';
+import { roster, makeScript, FakeBook } from './helpers/fakeSheet.js';
 
+const KEY = 'a-long-secret-the-teacher-made-up-0123456789';
 const HEAD = ['First', 'Last', 'Period', 'StudentID'];
 const master = (...rows) => [HEAD, ...rows];
-const sync = (rows, before = [], day = '2026-10-08') => roster.planSync(roster.readMaster(rows), before, day);
-const numbers = (list) => Object.fromEntries(list.map((a) => [`${a.id}@${a.period}`, a.number]));
 
 describe('the master list', () => {
-  it('reads First, Last, Period and StudentID by their names, in any order, and ignores unfinished rows and repeats', () => {
-    const rows = [['StudentID', 'Period', 'Last', 'First', 'Extra'], ['s1', ' 3 ', 'Rivera', 'Alex', 'x'], ['', '3', 'No', 'Id', ''], ['s2', '', 'No', 'Period', ''], ['s1', '3', 'Rivera', 'Alex', ''], ['s3', 'b', 'Lee', 'Sam', '']];
-    expect(roster.readMaster(rows)).toEqual([{ id: 's1', period: '3', name: 'Alex Rivera' }, { id: 's3', period: 'B', name: 'Sam Lee' }]);
+  it('reads First, Last, Period and StudentID by their names, in any order, and ignores unfinished rows', () => {
+    const rows = [['StudentID', 'Period', 'Last', 'First', 'Extra'], ['1234567', ' 3 ', 'Rivera', 'Alex', 'x'], ['', '3', 'No', 'Id', ''], ['2', '', 'No', 'Period', ''], ['7654321', 'b', 'Lee', 'Sam', '']];
+    expect([...roster.readMaster(rows)]).toEqual([{ id: '1234567', period: '3', name: 'Alex Rivera' }, { id: '7654321', period: 'B', name: 'Sam Lee' }]);
+  });
+
+  it('keeps a student listed twice once (the first), and says how many repeats', () => {
+    const students = roster.readMaster(master(['Alex', 'Rivera', '3', '1'], ['Alex', 'Rivera', '5', '1'], ['Bo', 'Chen', '3', '2']));
+    expect([...students].map((s) => [s.id, s.period])).toEqual([['1', '3'], ['2', '3']]);
+    expect(students.repeats).toBe(1);
   });
 
   it('says what is wrong when a column is missing or the tab is empty', () => {
@@ -20,50 +25,38 @@ describe('the master list', () => {
   });
 });
 
-describe('numbering', () => {
-  const FIRST = master(['Alex', 'Rivera', '3', 'a'], ['Bo', 'Chen', '3', 'b'], ['Cy', 'Diaz', '5', 'c'], ['Di', 'Evans', '3', 'd']);
+describe('the roster and the scrambled ids', () => {
+  const students = roster.readMaster(master(['Di', 'Evans', '3', '1000004'], ['Alex', 'Rivera', '3', '1000001'], ['Cy', 'Diaz', '5', '1000003'], ['Bo', 'Chen', '3', '1000002']));
 
-  it('numbers each period from 1, once', () => {
-    const a = sync(FIRST);
-    expect(numbers(a)).toEqual({ 'a@3': 1, 'b@3': 2, 'c@5': 1, 'd@3': 3 });
-    expect(a.every((x) => x.active && x.printed === '' && x.firstSeen === '2026-10-08')).toBe(true);
+  it('lists current students by period, then last name, each with a scrambled id and no way to read the school ID from it', () => {
+    const list = roster.buildRoster(students, KEY);
+    expect(list.map((r) => `${r.period}:${r.name}`)).toEqual(['3:Bo Chen', '3:Di Evans', '3:Alex Rivera', '5:Cy Diaz']);
+    for (const r of list) expect(r.key).toMatch(/^S-[0-9a-f]{10}$/);
+    expect(new Set(list.map((r) => r.key)).size).toBe(4);
+    expect(list.map((r) => r.key).join('')).not.toContain('1000001');
   });
 
-  it('never changes a number: a student added in the middle gets the next free one', () => {
-    const before = sync(FIRST);
-    const after = sync(master(['Alex', 'Rivera', '3', 'a'], ['Ann', 'Baker', '3', 'new'], ['Bo', 'Chen', '3', 'b'], ['Cy', 'Diaz', '5', 'c'], ['Di', 'Evans', '3', 'd']), before, '2026-11-01');
-    expect(numbers(after)).toEqual({ 'a@3': 1, 'b@3': 2, 'c@5': 1, 'd@3': 3, 'new@3': 4 });
-    expect(after.find((x) => x.id === 'new').firstSeen).toBe('2026-11-01');
-    expect(after.find((x) => x.id === 'a').firstSeen).toBe('2026-10-08');
+  it('makes the SAME id as the class sheet script for the same student and key (that is how the two files meet)', () => {
+    const script = makeScript({ properties: { ID_KEY: KEY } });
+    for (const r of roster.buildRoster(students, KEY)) expect(r.key).toBe(script.studentKey(r.id));
   });
 
-  it('a student who leaves keeps their number, and nobody takes it', () => {
-    const before = sync(FIRST);
-    const gone = sync(master(['Alex', 'Rivera', '3', 'a'], ['Cy', 'Diaz', '5', 'c'], ['Di', 'Evans', '3', 'd']), before);
-    expect(gone.find((x) => x.id === 'b')).toMatchObject({ number: 2, active: false });
-    const newer = sync(master(['Alex', 'Rivera', '3', 'a'], ['Cy', 'Diaz', '5', 'c'], ['Di', 'Evans', '3', 'd'], ['Eve', 'Fox', '3', 'e']), gone);
-    expect(newer.find((x) => x.id === 'e').number).toBe(4);
-    const back = sync(FIRST, newer);
-    expect(back.find((x) => x.id === 'b')).toMatchObject({ number: 2, active: true });     // coming back gets the same number
+  it('another key makes other ids, and a missing or short key is an error', () => {
+    expect(roster.studentKey('1000001', KEY)).not.toBe(roster.studentKey('1000001', `${KEY}x`));
+    expect(() => roster.studentKey('1000001', '')).toThrow(/ID_KEY/);
+    expect(() => roster.studentKey('1000001', 'short')).toThrow(/ID_KEY/);
   });
 
-  it('a student who changes period gets a new number there; the old one is kept', () => {
-    const before = sync(FIRST);
-    const moved = sync(master(['Alex', 'Rivera', '5', 'a'], ['Bo', 'Chen', '3', 'b'], ['Cy', 'Diaz', '5', 'c'], ['Di', 'Evans', '3', 'd']), before);
-    expect(moved.filter((x) => x.id === 'a').map((x) => [x.period, x.number, x.active])).toEqual([['3', 1, false], ['5', 2, true]]);
-    expect(roster.currentRoster(moved).map((x) => [x.name, x.period, x.number])).toEqual([['Bo Chen', '3', 2], ['Di Evans', '3', 3], ['Cy Diaz', '5', 1], ['Alex Rivera', '5', 2]]);
-  });
-
-  it('keeps the printed date, updates a changed name, and does not touch the list it was given', () => {
-    const before = sync(FIRST).map((x) => (x.id === 'a' ? { ...x, printed: '2026-10-09' } : x));
-    const frozen = JSON.stringify(before);
-    const after = sync(master(['Alexandra', 'Rivera', '3', 'a'], ['Bo', 'Chen', '3', 'b'], ['Cy', 'Diaz', '5', 'c'], ['Di', 'Evans', '3', 'd']), before);
-    expect(JSON.stringify(before)).toBe(frozen);
-    expect(after.find((x) => x.id === 'a')).toMatchObject({ name: 'Alexandra Rivera', printed: '2026-10-09', number: 1 });
-  });
-
-  it('the roster lists current students by period, then last name', () => {
-    const a = sync(FIRST);
-    expect(roster.currentRoster(a).map((x) => `${x.period}:${x.name}`)).toEqual(['3:Bo Chen', '3:Di Evans', '3:Alex Rivera', '5:Cy Diaz']);
+  it('ties together: a student on the class list can sign in, and gets the period the roster gave', () => {
+    const script = makeScript({
+      properties: { ID_KEY: KEY, GOOGLE_CLIENT_ID: 'c', ALLOWED_DOMAIN: 'school.org' },
+      tokens: { [`${'T'.repeat(40)}`]: { aud: 'c', sub: '1', iss: 'https://accounts.google.com', exp: String(Math.floor(Date.now() / 1000) + 3000), hd: 'school.org', email: 's1000003@school.org', email_verified: 'true' } },
+    });
+    const book = new FakeBook();
+    const dir = book.insertSheet('Directory');
+    dir.appendRow(['StudentID', 'Period']);
+    for (const r of roster.buildRoster(students, KEY)) dir.appendRow([r.key, r.period]);
+    const res = script.handle({ v: 1, auth: { mode: 'google', idToken: 'T'.repeat(40) }, progress: { packs: {} } }, book);
+    expect(res.period).toBe('5');
   });
 });

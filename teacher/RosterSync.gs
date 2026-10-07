@@ -4,26 +4,22 @@
  * Paste this into Extensions > Apps Script of "The Mat roster" (a Google Sheet made from The-Mat-roster.xlsx), save, and
  * reload the sheet: a "The Mat" menu appears. See SETUP.md, Part 5.
  *
- * It reads your master list (columns First, Last, Period, StudentID: nothing else is looked at) and keeps a Numbers tab:
- * every student gets a number in their period ONCE, and keeps it for good (a student who leaves keeps theirs, a new one gets
- * the next free number). A student who changes period gets a new number in the new period; the old one is kept. The
- * Roster tab is then written from it (sorted, current students only), and a "New students" tab lists whose slip hasn't
- * been printed yet. Student names live only in this file.
+ * It reads your master list (columns First, Last, Period, StudentID: nothing else is looked at) and does two things:
+ *   1. writes the Roster tab (names, periods, IDs, and each student's scrambled id), here, privately;
+ *   2. writes the class list (scrambled id and period, no names, no real IDs) into the Directory tab of the class sheet,
+ *      which is how the class sheet knows a student's period and who is allowed to sign in.
+ * The scrambled id is made with the secret key in this file's Script properties (ID_KEY), the SAME key as in the class
+ * sheet's script, so both make the same id for the same student. Students sign in with their school Google account; they
+ * type nothing.
  */
 
-var SHEETS = {
-  settings: 'Settings',
-  roster: 'Roster',
-  numbers: 'Numbers',
-  fresh: 'New students',
-};
-var NUMBERS_HEAD = ['StudentID', 'Period', 'Number', 'Name', 'FirstSeen', 'Printed', 'Active'];
-var ROSTER_HEAD = ['Name', 'Period', 'Student number', 'StudentID'];
+var SHEETS = { settings: 'Settings', roster: 'Roster' };
+var ROSTER_HEAD = ['Name', 'Period', 'StudentID', 'Key'];
+var DIRECTORY_HEAD = ['StudentID', 'Period'];
 
 function onOpen() {
   SpreadsheetApp.getUi().createMenu('The Mat')
     .addItem('Sync from my master list', 'syncRoster')
-    .addItem('Mark the new slips as printed', 'markPrinted')
     .addSeparator()
     .addItem('Turn on automatic daily sync', 'turnOnDailySync')
     .addItem('Turn off automatic sync', 'turnOffDailySync')
@@ -35,7 +31,18 @@ function onOpen() {
 function clean(v) { return String(v === undefined || v === null ? '' : v).replace(/\s+/g, ' ').trim(); }
 function periodOf(v) { return clean(v).toUpperCase().replace(/[^A-Z0-9]/g, ''); }
 
-// The master list's rows ([First, Last, Period, StudentID], any order of columns found by name) as clean students.
+function toHex(bytes) {
+  return bytes.map(function (b) { return ('0' + (b < 0 ? b + 256 : b).toString(16)).slice(-2); }).join('');
+}
+
+// A student's scrambled id: S- and 10 characters of an HMAC of the school ID. The class sheet's script makes the same one.
+function studentKey(schoolId, secret) {
+  if (!secret || secret.length < 20) throw new Error('Set ID_KEY in this file\'s Script properties (the same long secret as in the class sheet\'s script).');
+  return 'S-' + toHex(Utilities.computeHmacSha256Signature(String(schoolId), secret)).slice(0, 10);
+}
+
+// The master list's rows (columns found by their names, in any order) as clean students. A blank row is skipped; a
+// student listed twice is kept once (the first), and counted in `repeats`.
 function readMaster(rows) {
   if (!rows.length) throw new Error('The master list tab is empty.');
   var head = rows[0].map(function (h) { return clean(h).toLowerCase(); });
@@ -45,84 +52,47 @@ function readMaster(rows) {
     if (col[name] < 0) throw new Error('I could not find a "' + name + '" column in the master list (first row should have First, Last, Period, StudentID).');
   });
   var seen = {};
-  var out = [];
+  var students = [];
+  var repeats = 0;
   rows.slice(1).forEach(function (r) {
     var id = clean(r[col.studentid]);
     var period = periodOf(r[col.period]);
-    if (!id || !period) return;                          // a blank or unfinished row
-    var key = id + '|' + period;
-    if (seen[key]) return;                               // the same student listed twice
-    seen[key] = true;
-    out.push({ id: id, period: period, name: (clean(r[col.first]) + ' ' + clean(r[col.last])).trim() });
+    if (!id || !period) return;
+    if (seen[id]) { repeats++; return; }
+    seen[id] = true;
+    students.push({ id: id, period: period, name: (clean(r[col.first]) + ' ' + clean(r[col.last])).trim() });
   });
-  return out;
+  students.repeats = repeats;
+  return students;
 }
 
-// assignments: [{ id, period, number, name, firstSeen, printed, active }]. Returns the updated list. New students get
-// the next free number in their period; students no longer in the master list become inactive but keep their number.
-function planSync(students, assignments, today) {
-  var next = assignments.map(function (a) { return Object.assign({}, a); });
-  var byKey = {};
-  var highest = {};
-  next.forEach(function (a) {
-    byKey[a.id + '|' + a.period] = a;
-    highest[a.period] = Math.max(highest[a.period] || 0, Number(a.number) || 0);
-  });
-  var present = {};
-  students.forEach(function (s) {
-    var key = s.id + '|' + s.period;
-    present[key] = true;
-    var a = byKey[key];
-    if (a) { a.name = s.name; a.active = true; return; }
-    highest[s.period] = (highest[s.period] || 0) + 1;
-    a = { id: s.id, period: s.period, number: highest[s.period], name: s.name, firstSeen: today, printed: '', active: true };
-    byKey[key] = a;
-    next.push(a);
-  });
-  next.forEach(function (a) { if (!present[a.id + '|' + a.period]) a.active = false; });
-  return next;
-}
-
-// A student who now has an active place in another period is shown only there (their old number is kept, not listed).
-function currentRoster(assignments) {
-  var active = assignments.filter(function (a) { return a.active === true; });
-  return active.sort(function (a, b) {
-    return a.period.localeCompare(b.period, undefined, { numeric: true })
-      || lastName(a.name).localeCompare(lastName(b.name)) || a.name.localeCompare(b.name);
-  });
-}
 function lastName(name) { var p = clean(name).split(' '); return p[p.length - 1] || ''; }
+
+// The roster: current students by period, then last name, each with their scrambled id.
+function buildRoster(students, secret) {
+  return students.map(function (s) { return { name: s.name, period: s.period, id: s.id, key: studentKey(s.id, secret) }; })
+    .sort(function (a, b) {
+      return a.period.localeCompare(b.period, undefined, { numeric: true })
+        || lastName(a.name).localeCompare(lastName(b.name)) || a.name.localeCompare(b.name);
+    });
+}
 
 // ---------- The sheets ----------
 
-function sheet(name, head) {
-  var ss = SpreadsheetApp.getActiveSpreadsheet();
-  var s = ss.getSheetByName(name) || ss.insertSheet(name);
-  if (head && s.getLastRow() === 0) s.getRange(1, 1, 1, head.length).setValues([head]);
-  return s;
-}
-
 function setting(label) {
-  var s = sheet(SHEETS.settings);
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var s = ss.getSheetByName(SHEETS.settings);
+  if (!s) return '';
   var rows = s.getRange(1, 1, Math.max(s.getLastRow(), 1), 2).getValues();
   for (var i = 0; i < rows.length; i++) if (clean(rows[i][0]).toLowerCase() === label.toLowerCase()) return clean(rows[i][1]);
   return '';
 }
 
-function loadAssignments() {
-  var s = sheet(SHEETS.numbers, NUMBERS_HEAD);
-  var last = s.getLastRow();
-  if (last < 2) return [];
-  return s.getRange(2, 1, last - 1, NUMBERS_HEAD.length).getValues().filter(function (r) { return clean(r[0]); }).map(function (r) {
-    return { id: clean(r[0]), period: periodOf(r[1]), number: Number(r[2]), name: clean(r[3]), firstSeen: clean(r[4]), printed: clean(r[5]), active: r[6] === true || r[6] === 'TRUE' };
-  });
-}
-
-function writeRows(s, head, rows) {
-  var last = s.getLastRow();
-  if (last > 1) s.getRange(2, 1, last - 1, Math.max(head.length, s.getLastColumn())).clearContent();
-  s.getRange(1, 1, 1, head.length).setValues([head]);
-  if (rows.length) s.getRange(2, 1, rows.length, head.length).setValues(rows);
+function writeRows(sheet, head, rows) {
+  var last = sheet.getLastRow();
+  if (last > 0) sheet.getRange(1, 1, last, Math.max(head.length, sheet.getLastColumn())).clearContent();
+  sheet.getRange(1, 1, 1, head.length).setValues([head]);
+  if (rows.length) sheet.getRange(2, 1, rows.length, head.length).setValues(rows);
 }
 
 function syncRoster() {
@@ -132,28 +102,21 @@ function syncRoster() {
   var source = SpreadsheetApp.openByUrl(url).getSheetByName(tabName);
   if (!source) throw new Error('The master list has no tab called "' + tabName + '".');
   var students = readMaster(source.getDataRange().getValues());
-  var today = new Date().toISOString().slice(0, 10);
-  var assignments = planSync(students, loadAssignments(), today);
+  var roster = buildRoster(students, PropertiesService.getScriptProperties().getProperty('ID_KEY') || '');
 
-  writeRows(sheet(SHEETS.numbers, NUMBERS_HEAD), NUMBERS_HEAD,
-    assignments.map(function (a) { return [a.id, a.period, a.number, a.name, a.firstSeen, a.printed, a.active]; }));
-  var roster = currentRoster(assignments);
-  writeRows(sheet(SHEETS.roster, ROSTER_HEAD), ROSTER_HEAD, roster.map(function (a) { return [a.name, a.period, a.number, a.id]; }));
-  var fresh = roster.filter(function (a) { return !a.printed; });
-  writeRows(sheet(SHEETS.fresh, ROSTER_HEAD), ROSTER_HEAD, fresh.map(function (a) { return [a.name, a.period, a.number, a.id]; }));
-  return { students: students.length, added: fresh.length };
-}
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  writeRows(ss.getSheetByName(SHEETS.roster) || ss.insertSheet(SHEETS.roster), ROSTER_HEAD,
+    roster.map(function (r) { return [r.name, r.period, r.id, r.key]; }));
 
-// After you print the "Slips (new)" tab: those students no longer count as new.
-function markPrinted() {
-  var s = sheet(SHEETS.numbers, NUMBERS_HEAD);
-  var last = s.getLastRow();
-  if (last < 2) return;
-  var today = new Date().toISOString().slice(0, 10);
-  var rows = s.getRange(2, 1, last - 1, NUMBERS_HEAD.length).getValues();
-  rows.forEach(function (r) { if (r[6] === true && !clean(r[5])) r[5] = today; });
-  s.getRange(2, 1, rows.length, NUMBERS_HEAD.length).setValues(rows);
-  syncRoster();
+  var classUrl = setting('Class sheet web address');
+  var sent = 0;
+  if (classUrl) {
+    var classBook = SpreadsheetApp.openByUrl(classUrl);
+    var dir = classBook.getSheetByName('Directory') || classBook.insertSheet('Directory');
+    writeRows(dir, DIRECTORY_HEAD, roster.map(function (r) { return [r.key, r.period]; }));
+    sent = roster.length;
+  }
+  return { students: roster.length, repeats: students.repeats, sentToClassSheet: sent };
 }
 
 function turnOnDailySync() {

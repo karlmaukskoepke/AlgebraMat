@@ -52,12 +52,15 @@ export function makeScript({ properties = {}, tokens = {} } = {}) {
     },
   };
   const names = Object.keys(stubs);
-  const script = new Function(...names, `${code}; return { handle, identify, safe, splitKey, doGet, doPost };`)(...names.map((n) => stubs[n]));
+  const script = new Function(...names, `${code}; return { handle, identify, safe, splitKey, doGet, doPost, studentKey, isRetired };`)(...names.map((n) => stubs[n]));
   return { ...script, props };
 }
 
 export const gs = makeScript();
 
-// The roster script (teacher/RosterSync.gs): its planning functions need no Google services.
+// The roster script (teacher/RosterSync.gs): its planning functions need only hashing.
 const rosterCode = readFileSync(new URL('../../teacher/RosterSync.gs', import.meta.url), 'utf8');
-export const roster = new Function(`${rosterCode}; return { readMaster, planSync, currentRoster, periodOf, clean };`)();
+const hashing = {
+  computeHmacSha256Signature: (text, key) => [...createHmac('sha256', key).update(text, 'utf8').digest()].map((b) => (b > 127 ? b - 256 : b)),
+};
+export const roster = new Function('Utilities', `${rosterCode}; return { readMaster, buildRoster, studentKey, periodOf, clean };`)(hashing);
