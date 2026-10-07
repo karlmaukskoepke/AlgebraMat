@@ -30,6 +30,7 @@ Add `?seed=123` to the URL to replay a fixed problem set, and `?level=2` to open
 ## Changelog
 
 ### Sign-in fixes
+- **Level buttons never run past their edge** ("Level 3" overflowing its box): they now fit as many to a row as the card allows, each wide enough for "✓ Level 3", at every screen width and browser zoom (checked from 360 to 1920 wide, and at 125% zoom).
 - When the class sheet can't be reached, the app now says **why** (it took too long; the browser was blocked or offline; it answered with a web page instead of data, which usually means the web app isn't shared with "Anyone" or isn't published as a new version; an HTTP error), and the sign-in dialog shows that with **Try again** instead of falling back to a form that can't work. The wait before giving up is 30 seconds (a sheet that hasn't been used for a while can be slow to wake).
 - After a refused sign-in the button goes back to **Sign in** (it used to stay on a warning, as if signed in), and a successful sign-in closes the dialog by itself.
 

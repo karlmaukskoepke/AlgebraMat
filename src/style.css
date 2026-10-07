@@ -2523,3 +2523,19 @@ body {
   .home-actions .btn { flex: 1 1 0; min-width: 0; padding: 8px 6px; font-size: 16px; }
 }
 .home-title { min-height: 44px; min-width: 44px; }
+
+/* Level buttons never run past their edge, however wide the card or the screen's zoom: as many as fit, each at least
+   as wide as "✓ Level 3" at its size, and the long names wrap inside. (The extra selectors win over the older per-count
+   rules above.) */
+.home .pack-grid[class] .level-list[class] {
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 156px), 1fr));
+  gap: 10px;
+}
+.home .pack-grid[class] .btn.level-btn {
+  min-width: 0;
+  padding-left: 14px;
+  padding-right: 14px;
+  overflow-wrap: anywhere;
+}
+.home .pack-grid[class] .level-num { font-size: 24px; white-space: nowrap; }
+.home .pack-grid[class] .level-name { font-size: 16px; }
