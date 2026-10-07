@@ -96,7 +96,7 @@ describe('the problems', () => {
   it('are a pack of three levels, at the end of the map', () => {
     const pack = packById('value');
     expect(pack).toMatchObject({ levels: 3, title: 'Value it' });
-    expect(PACKS[PACKS.length - 1]).toBe(pack);
+    expect(PACKS.filter((p) => !p.comingSoon).pop()).toBe(pack);
     expect(pack.generate(2, 5)).toEqual(generateValueLevel(2, 5));
   });
 });

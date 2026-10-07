@@ -2,8 +2,8 @@
 // recommended level for each card. Built once; `render(...)` updates it.
 
 import { h, buildPad, bindKeys, shown } from './quiz.js';
-import { TOTAL, itemText, itemPad, STANDING, packTitle } from '../engine/diagnostic.js';
-import { packById } from '../packs/index.js';
+import { itemText, itemPad, STANDING, packTitle } from '../engine/diagnostic.js';
+import { packById, sectionById } from '../packs/index.js';
 
 export function createDiagnosticView(root, { onAction, onStop, onPlay, onMap, onRetake }) {
   let items = [];
@@ -15,7 +15,7 @@ export function createDiagnosticView(root, { onAction, onStop, onPlay, onMap, on
   const title = h('div', { class: 'title' }, 'DIAGNOSTIC');
   const count = h('div', { class: 'quiz-stats' });
   const top = h('header', { class: 'topbar quiz-top' }, stop, title, count);
-  const dots = h('div', { class: 'diag-dots', 'aria-hidden': 'true' }, ...Array.from({ length: TOTAL }, () => h('span', { class: 'dot' })));
+  const dots = h('div', { class: 'diag-dots', 'aria-hidden': 'true' });
 
   const cardName = h('div', { class: 'quiz-tier' });
   const problem = h('div', { class: 'quiz-problem' });
@@ -61,7 +61,7 @@ export function createDiagnosticView(root, { onAction, onStop, onPlay, onMap, on
             `Start at Level ${r.rec}: ${pack.levelNames[r.rec - 1]}`));
       }),
       h('div', { class: 'quiz-actions' },
-        h('button', { type: 'button', class: 'btn btn-primary', dataset: { go: 'map' } }, 'Back to the pack map'),
+        h('button', { type: 'button', class: 'btn btn-primary', dataset: { go: 'map' } }, 'Back to the cards'),
         h('button', { type: 'button', class: 'btn', dataset: { go: 'retake' } }, 'Retake the diagnostic')));
   }
 
@@ -75,7 +75,9 @@ export function createDiagnosticView(root, { onAction, onStop, onPlay, onMap, on
       results.hidden = taking;
       skip.hidden = next.hidden = !taking;
       footer.hidden = !taking;
-      title.textContent = taking ? 'DIAGNOSTIC' : 'DIAGNOSTIC · RESULTS';
+      const name = sectionById(s.section)?.title.toUpperCase();
+      title.textContent = `DIAGNOSTIC${name ? ` · ${name}` : ''}${taking ? '' : ' · RESULTS'}`;
+      if (dots.children.length !== items.length) dots.replaceChildren(...items.map(() => h('span', { class: 'dot' })));
       stop.textContent = taking ? '← Stop for now' : '← Pack map';
       stop.dataset.go = taking ? 'stop' : 'map';
       dots.hidden = !taking;
@@ -87,7 +89,7 @@ export function createDiagnosticView(root, { onAction, onStop, onPlay, onMap, on
         return;
       }
       const item = items[s.index];
-      count.textContent = `${s.index + 1} of ${TOTAL}`;
+      count.textContent = `${s.index + 1} of ${items.length}`;
       dots.querySelectorAll('.dot').forEach((d, i) => { d.classList.toggle('done', i < s.index); d.classList.toggle('current', i === s.index); });
       const kind = itemPad(item);
       if (!pad || kind !== padKind) {
@@ -99,7 +101,7 @@ export function createDiagnosticView(root, { onAction, onStop, onPlay, onMap, on
       problem.textContent = itemText(item);
       answer.textContent = '';
       answer.append(h('span', { class: 'dist-eq' }, '='), h('span', { class: `quiz-typed${s.entry ? '' : ' is-empty'}` }, shown(s.entry) || '?'));
-      next.textContent = s.index === TOTAL - 1 ? 'Finish ✓' : 'Next →';
+      next.textContent = s.index === items.length - 1 ? 'Finish ✓' : 'Next →';
       next.disabled = s.entry === '';
     },
     destroy() { unbind(); root.classList.remove('is-quiz'); root.onclick = null; },

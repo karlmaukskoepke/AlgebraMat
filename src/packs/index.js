@@ -81,6 +81,9 @@ export const valueIt = {
   generate: (level, seed) => generateValueLevel(level, seed),
 };
 
+// Equations are still to come: they show as cards under Solve it, with no levels (so they take no room in saves).
+const soon = (id, title, subtitle) => ({ id, title, subtitle, comingSoon: true, levels: 0, levelNames: [] });
+
 export const PACKS = [
   combineit,
   flipit,
@@ -89,5 +92,17 @@ export const PACKS = [
   groupsOfTerms,
   distributeCombine,
   valueIt,
+  soon('one-step', 'One-step equations', 'Adding, subtracting, multiplying and dividing'),
+  soon('two-step', 'Two-step equations', 'Undoing two operations'),
+  soon('multi-step', 'Multi-step equations', 'Variables on both sides'),
 ];
+
+// The home screen's three sections (Karl, 2026-10-04): which cards live under each, and its color (a pastel).
+export const SECTIONS = [
+  { id: 'count', title: 'Count it', blurb: 'Adding, subtracting and multiplying numbers', packs: ['combineit', 'flipit', 'lasso'] },
+  { id: 'build', title: 'Build it', blurb: 'Expressions, with boxes, circles and groups', packs: ['boxes', 'groups-of-terms', 'distribute-combine', 'value'] },
+  { id: 'solve', title: 'Solve it', blurb: 'Solving equations', packs: ['one-step', 'two-step', 'multi-step'] },
+];
+export const sectionById = (id) => SECTIONS.find((s) => s.id === id);
+export const sectionOf = (packId) => SECTIONS.find((s) => s.packs.includes(packId));
 export const packById = (id) => PACKS.find((p) => p.id === id);

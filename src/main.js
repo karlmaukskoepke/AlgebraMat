@@ -5,7 +5,7 @@ import {
   encodeProgress, decodeProgress,
 } from './engine/progress.js';
 import { createStore } from './storage.js';
-import { PACKS, packById } from './packs/index.js';
+import { PACKS, SECTIONS, packById, sectionById } from './packs/index.js';
 import { flipitPlay } from './play/flipitPlay.js';
 import { combinePlay } from './play/combinePlay.js';
 import { lightPlay, flipLightPlay } from './play/lightPlay.js';
@@ -22,6 +22,7 @@ import { afterAnswer } from './engine/streak.js';
 import { loadBests, saveBest, loadLog } from './lightStore.js';
 import { createSync } from './sync.js';
 import { loadSync, saveSync } from './syncStore.js';
+import { DEFAULT_CLASS } from './syncConfig.js';
 import { showAccount, accountLabel } from './view/account.js';
 import { bestFor } from './engine/streak.js';
 import { integerPlay } from './play/integerPlay.js';
@@ -40,7 +41,7 @@ import { loadRuns, saveRun } from './fluencyStore.js';
 import { bestScore } from './engine/highscores.js';
 import { CHALLENGES } from './engine/fluency.js';
 import {
-  diagnosticItems, newDiagnostic, reduceDiagnostic, readout, applyReadout, TOTAL as DIAG_TOTAL,
+  diagnosticItems, newDiagnostic, reduceDiagnostic, readout, applyReadout, totalOf, DIAGNOSTIC_SECTIONS,
 } from './engine/diagnostic.js';
 import { createDiagnosticView } from './view/diagnostic.js';
 import { loadDiag, saveDiag, clearDiag } from './diagStore.js';
@@ -118,6 +119,7 @@ const sync = createSync({
 });
 // A class link in the address (?class=…) is remembered.
 if (params.get('class')) sync.setEndpoint(params.get('class'));
+else if (DEFAULT_CLASS && !sync.endpoint()) sync.setEndpoint(DEFAULT_CLASS);
 document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') sync.request(); });
 window.addEventListener('online', () => sync.request());
 let nextTimer = null;
@@ -168,12 +170,17 @@ function showScreen(name) {
 
 const STORAGE_NOTE = 'Progress won’t be remembered on this device. Use Save code to keep it.';
 
-function diagStatus() {
-  const d = loadDiag();
-  return { status: !d ? 'none' : d.done ? 'done' : d.index > 0 ? 'partial' : 'none', index: d?.index ?? 0, total: DIAG_TOTAL };
+function diagStatus(section) {
+  const d = loadDiag(section);
+  return { status: !d ? 'none' : d.done ? 'done' : d.index > 0 ? 'partial' : 'none', index: d?.index ?? 0, total: totalOf(section) };
 }
 
-function goHome() {
+// Which section of the home screen is open: remembered on this device (mat.section.v1). None: the three big panels.
+const SECTION_KEY = 'mat.section.v1';
+const loadSection = () => { try { const id = localStorage.getItem(SECTION_KEY); return sectionById(id) ? id : null; } catch { return null; } };
+const saveSection = (id) => { try { if (id) localStorage.setItem(SECTION_KEY, id); else localStorage.removeItem(SECTION_KEY); } catch { /* storage blocked */ } };
+
+function goHome(section = loadSection()) {
   endTour();
   endDragDemo();
   endQuiz();
@@ -183,9 +190,12 @@ function goHome() {
   const runs = loadRuns();
   const now = Date.now();
   renderPackMap($('home'), progress, PACKS, {
-    diag: diagStatus(),
+    sections: SECTIONS,
+    open: section,
+    onSection: (id) => { saveSection(id); goHome(id); },
+    diags: Object.fromEntries(DIAGNOSTIC_SECTIONS.map((id) => [id, diagStatus(id)])),
     bests: Object.fromEntries(CHALLENGES.map((c) => [c.id, bestScore(runs, c.id, 'all', now)])),
-    onDiagnostic: () => startDiagnostic(),
+    onDiagnostic: (id) => startDiagnostic(id),
     onFluency: startFluency,
     onPlay: startLevel,
     onSaveCode: () => showSaveCode(encodeProgress(progress)),
@@ -267,17 +277,18 @@ function startFluency(id) {
   view.render(state);
 }
 
-function startDiagnostic(retake = false) {
+function startDiagnostic(section, retake = false) {
   endTour();
   endDragDemo();
   endQuiz();
   clearTimeout(nextTimer);
   play = null;
-  if (retake) clearDiag();
-  let state = loadDiag() ?? newDiagnostic(newSeed());
-  const items = diagnosticItems(state.seed);
+  if (retake) clearDiag(section);
+  let state = loadDiag(section) ?? newDiagnostic(newSeed(), section);
+  const items = diagnosticItems(state.seed, section);
+  const back = () => { saveSection(section); goHome(section); };
   const finish = () => {
-    const rows = readout(state.seed, state.answers, items);
+    const rows = readout(state.seed, state.answers, items, section);
     progress = applyReadout(progress, rows);
     persist();
     view.render(state, items, rows, 'I opened the levels you’re ready for. Start where it says, or pick any open level on the pack map.');
@@ -291,10 +302,10 @@ function startDiagnostic(retake = false) {
       if (answered) saveDiag(state);
       if (state.done) finish(); else view.render(state, items);
     },
-    onStop: goHome,
-    onMap: goHome,
+    onStop: back,
+    onMap: back,
     onPlay: startLevel,
-    onRetake: () => startDiagnostic(true),
+    onRetake: () => startDiagnostic(section, true),
   });
   quiz = { kind: 'diagnostic', view };
   showScreen('quiz');

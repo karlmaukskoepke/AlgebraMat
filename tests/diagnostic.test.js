@@ -1,8 +1,8 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import {
-  PROBES, TOTAL, diagnosticItems, newDiagnostic, reduceDiagnostic, readout, applyReadout, itemAnswer, itemText, itemPad, isRight, STANDING,
+  PROBES, TOTAL, DIAGNOSTIC_SECTIONS, probesOf, totalOf, diagnosticItems, newDiagnostic, reduceDiagnostic, readout, applyReadout, itemAnswer, itemText, itemPad, isRight, STANDING,
 } from '../src/engine/diagnostic.js';
-import { loadDiag, saveDiag, clearDiag, readDiag, DIAG_KEY } from '../src/diagStore.js';
+import { loadDiag, saveDiag, clearDiag, readDiag, splitOldDiag, DIAG_KEY, OLD_DIAG_KEY } from '../src/diagStore.js';
 import { PACKS } from '../src/packs/index.js';
 import { newProgress, normalizeProgress, mergeProgress, isLevelUnlocked, openLevels, completeLevel } from '../src/engine/progress.js';
 import { cardIdFor } from '../src/engine/lightCards.js';
@@ -18,17 +18,17 @@ const answerAll = (right) => {
 };
 
 describe('the diagnostic', () => {
-  it('has about two problems from each of the six cards, adding and subtracting first', () => {
-    expect(PROBES.map((p) => p.pack)).toEqual(['combineit', 'flipit', 'lasso', 'boxes', 'groups-of-terms', 'distribute-combine']);
+  it('has about two problems from each of the seven cards, adding and subtracting first', () => {
+    expect(PROBES.map((p) => p.pack)).toEqual(['combineit', 'flipit', 'lasso', 'boxes', 'groups-of-terms', 'distribute-combine', 'value']);
     expect(PROBES.every((p) => p.levels.length === 2 && p.levels[0] < p.levels[1])).toBe(true);
-    expect(TOTAL).toBe(12);
+    expect(TOTAL).toBe(14);
     const items = diagnosticItems(SEED);
-    expect(items).toHaveLength(12);
+    expect(items).toHaveLength(14);
     expect(items.map((i) => i.pack)).toEqual(PROBES.flatMap((p) => [p.pack, p.pack]));
     for (const p of PROBES) for (const level of p.levels) expect(level).toBeLessThanOrEqual(PACKS.find((x) => x.id === p.pack).levels);
   });
 
-  it('is seeded: the same seed gives the same twelve problems, another seed others', () => {
+  it('is seeded: the same seed gives the same problems, another seed others', () => {
     const text = (seed) => diagnosticItems(seed).map(itemText);
     expect(text(SEED)).toEqual(text(SEED));
     expect(text(SEED)).not.toEqual(text(SEED + 1));
@@ -67,7 +67,7 @@ describe('the diagnostic', () => {
     for (let i = 0; i < items.length - 1; i++) s = run(s, { type: 'next' });
     expect(s.done).toBe(false);
     s = run(s, { type: 'next' });
-    expect(s).toMatchObject({ done: true, index: 12 });
+    expect(s).toMatchObject({ done: true, index: 14 });
     expect(run(s, { type: 'digit', digit: 1 })).toBe(s);
   });
 
@@ -84,25 +84,25 @@ describe('the readout', () => {
   it('all right: every card strong, recommending the level after the harder one', () => {
     const s = answerAll(() => true);
     const r = readout(SEED, s.answers, ITEMS);
-    expect(r.map((x) => x.standing)).toEqual(Array(6).fill('strong'));
-    expect(r.map((x) => [x.pack, x.rec])).toEqual([['combineit', 5], ['flipit', 5], ['lasso', 6], ['boxes', 6], ['groups-of-terms', 6], ['distribute-combine', 4]]);
+    expect(r.map((x) => x.standing)).toEqual(Array(7).fill('strong'));
+    expect(r.map((x) => [x.pack, x.rec])).toEqual([['combineit', 5], ['flipit', 5], ['lasso', 6], ['boxes', 6], ['groups-of-terms', 6], ['distribute-combine', 4], ['value', 3]]);
     expect(r[0].problems).toHaveLength(2);
     expect(r[0].problems.every((p) => p.right && p.text && p.answer)).toBe(true);
   });
 
   it('none right: start at the beginning', () => {
     const r = readout(SEED, answerAll(() => false).answers, ITEMS);
-    expect(r.map((x) => x.standing)).toEqual(Array(6).fill('start'));
-    expect(r.map((x) => x.rec)).toEqual(Array(6).fill(1));
+    expect(r.map((x) => x.standing)).toEqual(Array(7).fill('start'));
+    expect(r.map((x) => x.rec)).toEqual(Array(7).fill(1));
     expect(r[0].problems.every((p) => p.skipped && !p.right)).toBe(true);
   });
 
   it('only the easier one right: the level after it; only the harder: back to the easier', () => {
     const items = ITEMS;
     const easier = readout(SEED, answerAll((it) => it.level === PROBES.find((p) => p.pack === it.pack).levels[0]).answers, items);
-    expect(easier.map((x) => [x.standing, x.rec])).toEqual([['growing', 3], ['growing', 3], ['growing', 3], ['growing', 4], ['growing', 3], ['growing', 2]]);
+    expect(easier.map((x) => [x.standing, x.rec])).toEqual([['growing', 3], ['growing', 3], ['growing', 3], ['growing', 4], ['growing', 3], ['growing', 2], ['growing', 2]]);
     const harder = readout(SEED, answerAll((it) => it.level === PROBES.find((p) => p.pack === it.pack).levels[1]).answers, items);
-    expect(harder.map((x) => x.rec)).toEqual([2, 2, 2, 3, 2, 1]);
+    expect(harder.map((x) => x.rec)).toEqual([2, 2, 2, 3, 2, 1, 1]);
   });
 
   it('shows what was typed, and the right answer, for each problem', () => {
@@ -138,7 +138,7 @@ describe('opening levels', () => {
     expect(openLevels(base(), 'nope', 3)).toEqual(base());
   });
 
-  it('is kept when progress is read back or merged, and the readout applies to all six cards', () => {
+  it('is kept when progress is read back or merged, and the readout applies to all seven cards', () => {
     const p = openLevels(base(), 'flipit', 3);
     expect(normalizeProgress(JSON.parse(JSON.stringify(p)), PACKS).packs.flipit.open).toBe(3);
     expect(normalizeProgress({ packs: { flipit: { levels: [], open: 99 } } }, PACKS).packs.flipit.open).toBe(5);
@@ -158,24 +158,70 @@ describe('the diagnostic\'s saved place', () => {
   });
 
   it('saves the seed and the answers, and picks up where it left off', () => {
-    expect(loadDiag()).toBeNull();
+    expect(loadDiag('all')).toBeNull();
     let s = run(newDiagnostic(SEED), ...typed('4'), { type: 'next' }, { type: 'skip' });
     saveDiag(s);
-    expect(JSON.parse(localStorage.getItem(DIAG_KEY))).toEqual({ seed: SEED, answers: [{ typed: '4', skipped: false }, { typed: '', skipped: true }] });
-    expect(loadDiag()).toMatchObject({ seed: SEED, index: 2, entry: '', done: false });
-    clearDiag();
-    expect(loadDiag()).toBeNull();
+    expect(JSON.parse(localStorage.getItem(DIAG_KEY))).toEqual({ all: { seed: SEED, answers: [{ typed: '4', skipped: false }, { typed: '', skipped: true }] } });
+    expect(loadDiag('all')).toMatchObject({ seed: SEED, index: 2, entry: '', done: false });
+    clearDiag('all');
+    expect(loadDiag('all')).toBeNull();
   });
 
   it('is done only when every problem is answered; bad data is ignored', () => {
     const full = { seed: 5, answers: Array(TOTAL).fill({ typed: '1', skipped: false }) };
     expect(readDiag(full).done).toBe(true);
-    expect(readDiag({ seed: 5, answers: full.answers.slice(0, 11) }).done).toBe(false);
+    expect(readDiag({ seed: 5, answers: full.answers.slice(0, TOTAL - 1) }).done).toBe(false);
     expect(readDiag({ seed: 'x', answers: [] })).toBeNull();
     expect(readDiag(null)).toBeNull();
     expect(readDiag({ seed: 5, answers: [{ typed: 5 }, null] }).answers).toEqual([{ typed: '', skipped: false }, { typed: '', skipped: false }]);
     globalThis.localStorage = { getItem() { throw new Error('blocked'); }, setItem() { throw new Error('blocked'); }, removeItem() { throw new Error('blocked'); } };
-    expect(loadDiag()).toBeNull();
-    expect(() => saveDiag(newDiagnostic(1))).not.toThrow();
+    expect(loadDiag('count')).toBeNull();
+    expect(() => saveDiag(newDiagnostic(1, 'count'))).not.toThrow();
+  });
+});
+
+describe('a diagnostic for each section (Karl, 2026-10-04)', () => {
+  beforeEach(() => {
+    const store = new Map();
+    globalThis.localStorage = { getItem: (k) => (store.has(k) ? store.get(k) : null), setItem: (k, v) => { store.set(k, String(v)); }, removeItem: (k) => { store.delete(k); } };
+  });
+
+  it('splits the cards between Count it (six problems) and Build it (eight), and together they are the whole list', () => {
+    expect(DIAGNOSTIC_SECTIONS).toEqual(['count', 'build']);
+    expect(probesOf('count').map((p) => p.pack)).toEqual(['combineit', 'flipit', 'lasso']);
+    expect(probesOf('build').map((p) => p.pack)).toEqual(['boxes', 'groups-of-terms', 'distribute-combine', 'value']);
+    expect([totalOf('count'), totalOf('build')]).toEqual([6, 8]);
+    const all = diagnosticItems(SEED).map(itemText);
+    expect([...diagnosticItems(SEED, 'count'), ...diagnosticItems(SEED, 'build')].map(itemText)).toEqual(all);   // same problems, same seed
+  });
+
+  it('keeps each section\'s place apart, and reads its own readout', () => {
+    saveDiag(run(newDiagnostic(SEED, 'count'), { type: 'skip' }));
+    saveDiag(run(newDiagnostic(SEED + 1, 'build'), { type: 'skip' }, { type: 'skip' }));
+    expect(loadDiag('count')).toMatchObject({ seed: SEED, section: 'count', index: 1 });
+    expect(loadDiag('build')).toMatchObject({ seed: SEED + 1, section: 'build', index: 2 });
+    clearDiag('count');
+    expect(loadDiag('count')).toBeNull();
+    expect(loadDiag('build')).not.toBeNull();
+    const items = diagnosticItems(SEED, 'build');
+    let s = newDiagnostic(SEED, 'build');
+    for (let i = 0; i < items.length; i++) s = reduceDiagnostic(s, { type: 'skip' }, items);
+    expect(s).toMatchObject({ done: true, index: 8 });
+    expect(readout(SEED, s.answers, items, 'build').map((r) => r.pack)).toEqual(['boxes', 'groups-of-terms', 'distribute-combine', 'value']);
+  });
+
+  it('splits an old single diagnostic between the sections, keeping every problem the same', () => {
+    const old = { seed: SEED, answers: Array.from({ length: 12 }, (_, i) => ({ typed: String(i), skipped: false })) };
+    localStorage.setItem(OLD_DIAG_KEY, JSON.stringify(old));
+    const count = loadDiag('count');
+    const build = loadDiag('build');
+    expect(count).toMatchObject({ seed: SEED, done: true, index: 6 });
+    expect(count.answers.map((a) => a.typed)).toEqual(['0', '1', '2', '3', '4', '5']);
+    expect(build).toMatchObject({ seed: SEED, done: false, index: 6 });          // Value it's two are new
+    expect(build.answers.map((a) => a.typed)).toEqual(['6', '7', '8', '9', '10', '11']);
+    expect(splitOldDiag(null)).toEqual({});
+    expect(splitOldDiag({ seed: SEED, answers: [{ typed: '1' }] })).toEqual({ count: { seed: SEED, answers: [{ typed: '1' }] } });
+    saveDiag({ ...build, answers: [...build.answers, { typed: '3', skipped: false }] });                                 // the new place wins
+    expect(loadDiag('build').index).toBe(7);
   });
 });

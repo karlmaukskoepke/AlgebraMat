@@ -8,21 +8,27 @@ import { typeInto, isTyping } from './entry.js';
 import { openLevels } from './progress.js';
 
 // Adding and subtracting first, then groups, then the algebra cards (the pack map's order). Two levels each: one
-// early, one later.
+// early, one later. Each card belongs to a section of the home screen (Count it, Build it), which has its own
+// diagnostic: a section's problems are the ones its cards contribute to the full list (so a problem keeps its seed).
 export const PROBES = [
-  { pack: 'combineit', levels: [2, 4] },
-  { pack: 'flipit', levels: [2, 5] },
-  { pack: 'lasso', levels: [2, 5] },
-  { pack: 'boxes', levels: [3, 5] },
-  { pack: 'groups-of-terms', levels: [2, 5] },
-  { pack: 'distribute-combine', levels: [1, 3] },
+  { pack: 'combineit', levels: [2, 4], section: 'count' },
+  { pack: 'flipit', levels: [2, 5], section: 'count' },
+  { pack: 'lasso', levels: [2, 5], section: 'count' },
+  { pack: 'boxes', levels: [3, 5], section: 'build' },
+  { pack: 'groups-of-terms', levels: [2, 5], section: 'build' },
+  { pack: 'distribute-combine', levels: [1, 3], section: 'build' },
+  { pack: 'value', levels: [1, 3], section: 'build' },
 ];
 
+// The sections that have a diagnostic ('all' is every probe, in order).
+export const DIAGNOSTIC_SECTIONS = ['count', 'build'];
+export const probesOf = (section = 'all') => PROBES.filter((p) => section === 'all' || p.section === section);
+
 // The problems for a seed: [{ pack, level, problem }], in order.
-export function diagnosticItems(seed) {
-  return PROBES.flatMap(({ pack, levels }, p) => levels.map((level, i) => ({
-    pack, level, problem: packById(pack).generate(level, (seed + p * 7 + i * 13) >>> 0)[0],
-  })));
+export function diagnosticItems(seed, section = 'all') {
+  return PROBES.flatMap(({ pack, levels, section: of }, p) => (section === 'all' || of === section
+    ? levels.map((level, i) => ({ pack, level, problem: packById(pack).generate(level, (seed + p * 7 + i * 13) >>> 0)[0] }))
+    : []));
 }
 
 export const itemCard = (item) => CARDS[cardIdFor(item.pack, item.level)];
@@ -33,14 +39,15 @@ export const isRight = (item, typed) => Boolean(typed) && itemCard(item).check(i
 
 // ---------- Taking it ----------
 
-export function newDiagnostic(seed) {
-  return { seed, index: 0, entry: '', answers: [], done: false };   // answers: [{ typed, skipped }]
+export function newDiagnostic(seed, section = 'all') {
+  return { seed, section, index: 0, entry: '', answers: [], done: false };   // answers: [{ typed, skipped }]
 }
 
-export const TOTAL = PROBES.reduce((n, p) => n + p.levels.length, 0);
+export const totalOf = (section = 'all') => probesOf(section).reduce((n, p) => n + p.levels.length, 0);
+export const TOTAL = totalOf();
 
 // Pure: type, Next (records the entry), "I don't know" (records a skip). Nothing says whether it was right.
-export function reduceDiagnostic(state, action, items = diagnosticItems(state.seed)) {
+export function reduceDiagnostic(state, action, items = diagnosticItems(state.seed, state.section)) {
   if (state.done) return state;
   if (isTyping(action)) {
     const entry = typeInto(state.entry, action, itemPad(items[state.index]));
@@ -59,8 +66,8 @@ export function reduceDiagnostic(state, action, items = diagnosticItems(state.se
 
 // How each card went, and the level to start at: both right → the level after the harder one; the easier one right →
 // the level after it; otherwise from the start.
-export function readout(seed, answers, items = diagnosticItems(seed)) {
-  return PROBES.map(({ pack, levels }) => {
+export function readout(seed, answers, items = diagnosticItems(seed), section = 'all') {
+  return probesOf(section).map(({ pack, levels }) => {
     const mine = items.map((it, i) => ({ it, a: answers[i], i })).filter((x) => x.it.pack === pack);
     const right = mine.map((x) => isRight(x.it, x.a?.typed));
     const total = packById(pack).levels;
