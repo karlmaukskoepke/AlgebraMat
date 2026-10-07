@@ -5,7 +5,7 @@ import {
   PROTOCOL, validAuth, authOf, studentLabel, periodLabel, buildRequest, advance, moreToSend, takeFromSheet, progressChanged, normalizeEndpoint,
 } from './engine/sync.js';
 
-const TIMEOUT_MS = 15000;
+const TIMEOUT_MS = 30000;      // a class sheet that hasn't been used for a while can take a while to wake up
 const DELAY_MS = 4000;
 
 export function createSync({ load, save, getProgress, setProgress, getEvents, getRuns, packs, send = defaultSend, getInfo = defaultInfo, onChange = () => {}, setTimer = setTimeout, clearTimer = clearTimeout }) {
@@ -15,6 +15,7 @@ export function createSync({ load, save, getProgress, setProgress, getEvents, ge
   let timer = null;
   let error = null;
   let info = null;            // what the class sheet says about itself: { google, numberSignin }
+  let probeError = null;      // why it couldn't be asked, if it couldn't
 
   const set = (patch) => { state = { ...state, ...patch }; save(state); };
   const changed = () => onChange(api.status());
@@ -73,10 +74,11 @@ export function createSync({ load, save, getProgress, setProgress, getEvents, ge
     // What the class sheet offers: { google: client id or null, numberSignin }. Null if it can't be reached.
     async probe() {
       if (!state.endpoint) return null;
-      try { info = await getInfo(state.endpoint); } catch { info = null; }
+      try { info = await getInfo(state.endpoint); probeError = null; } catch (e) { info = null; probeError = e?.userMessage ?? explainFailure(e); }
       return info;
     },
     classInfo: () => info,
+    probeError: () => probeError,
     // Sign in as a period and a number, or with a Google ID token plus a period and number. Nothing is kept unless the
     // sheet takes it.
     async signIn(auth) {
@@ -102,11 +104,31 @@ export function createSync({ load, save, getProgress, setProgress, getEvents, ge
   return api;
 }
 
+// Why a request to the class sheet failed, in words a teacher can act on. (`error` is whatever fetch or our checks threw.)
+export function explainFailure(error) {
+  const base = 'Couldn’t reach the class sheet';
+  const name = error?.name;
+  const text = String(error?.message ?? '');
+  let why;
+  if (name === 'AbortError') why = 'it took too long to answer';
+  else if (/^HTTP \d+/.test(text)) why = `it answered ${text}`;
+  else if (name === 'SyntaxError') why = 'it answered with a web page, not data: check the web app is shared with “Anyone”, and published as a new version';
+  else if (name === 'TypeError') why = 'the browser was blocked or offline: check the connection, that the web app is shared with “Anyone”, and that the network allows script.google.com';
+  else why = text || 'unknown problem';
+  return `${base} (${why}). Your progress is still saved on this device.`;
+}
+
+const asUserError = (error) => Object.assign(error instanceof Error ? error : new Error(String(error)), { userMessage: explainFailure(error) });
+
 async function defaultInfo(endpoint) {
-  const res = await fetch(endpoint, { method: 'GET' });
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  const body = await res.json();
-  return { google: typeof body.google === 'string' ? body.google : null, numberSignin: body.numberSignin !== false, retired: body.retired === true };
+  try {
+    const res = await fetch(endpoint, { method: 'GET' });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const body = await res.json();
+    return { google: typeof body.google === 'string' ? body.google : null, numberSignin: body.numberSignin !== false, retired: body.retired === true };
+  } catch (e) {
+    throw asUserError(e);
+  }
 }
 
 async function defaultSend(endpoint, request) {
@@ -117,6 +139,8 @@ async function defaultSend(endpoint, request) {
     const res = await fetch(endpoint, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(request), signal: ctl.signal });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     return await res.json();
+  } catch (e) {
+    throw asUserError(e);
   } finally {
     clearTimeout(timer);
   }

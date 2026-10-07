@@ -337,3 +337,25 @@ describe('the built-in class address', () => {
     expect(DEFAULT_CLASS === '' || normalizeEndpoint(DEFAULT_CLASS) === DEFAULT_CLASS).toBe(true);
   });
 });
+
+describe('saying why the class sheet could not be reached', () => {
+  it('names the reason in words a teacher can act on', async () => {
+    const { explainFailure } = await import('../src/sync.js');
+    const abort = Object.assign(new Error('x'), { name: 'AbortError' });
+    expect(explainFailure(abort)).toMatch(/took too long/);
+    expect(explainFailure(new Error('HTTP 403'))).toMatch(/answered HTTP 403/);
+    expect(explainFailure(new SyntaxError('Unexpected token <'))).toMatch(/web page, not data.*Anyone/);
+    expect(explainFailure(new TypeError('Failed to fetch'))).toMatch(/blocked or offline.*Anyone.*script\.google\.com/);
+    expect(explainFailure(new Error('weird'))).toMatch(/\(weird\)/);
+    for (const e of [abort, new TypeError('x'), new Error('HTTP 500')]) expect(explainFailure(e)).toMatch(/still saved on this device/);
+  });
+
+  it('the sign-in dialog hears why the first check failed, and a failed check is not read as "no Google"', async () => {
+    const script = makeClass();
+    const d = gphone(classBook(script), script, { getInfo: async () => { throw Object.assign(new Error('boom'), { userMessage: 'Couldn’t reach the class sheet (HTTP 403).' }); } });
+    d.sync.setEndpoint(URL_);
+    expect(await d.sync.probe()).toBe(null);
+    expect(d.sync.classInfo()).toBe(null);
+    expect(d.sync.probeError()).toBe('Couldn’t reach the class sheet (HTTP 403).');
+  });
+});
