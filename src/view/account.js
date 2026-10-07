@@ -41,6 +41,16 @@ export function showAccount(sync, onDone = () => {}) {
         </form>`;
     } else if (s.state === 'signed-out') {
       const info = sync.classInfo();
+      if (!info) {
+        // The class sheet couldn't be asked: say why, instead of offering a sign-in that can't work.
+        d.innerHTML = `
+          <h2>Can’t reach your class sheet</h2>
+          <p class="code-error" role="alert">${esc(sync.probeError() ?? 'Couldn’t reach the class sheet.')}</p>
+          <div class="dialog-actions"><button type="button" class="btn" data-close>Cancel</button><button type="button" class="btn btn-primary" data-retry>Try again</button></div>`;
+        d.querySelector('[data-close]').onclick = close;
+        d.querySelector('[data-retry]').onclick = () => { d.innerHTML = '<p>Checking with your class…</p>'; sync.probe().then(() => draw()); };
+        return;
+      }
       const google = info?.google;
       const numbers = !google || info?.numberSignin;
       const fields = `
