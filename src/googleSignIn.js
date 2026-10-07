@@ -19,9 +19,17 @@ export function loadGoogle() {
   return loading;
 }
 
-// Draw the button in `holder`; `onToken(idToken)` runs when the student has signed in with Google.
-export async function showGoogleButton(holder, clientId, onToken) {
+// Google wants its sign-in set up once per page: the callback is kept here and swapped for the current dialog's.
+let onToken = null;
+let initializedFor = null;
+
+// Draw the button in `holder`; `handler(idToken)` runs when the student has signed in with Google.
+export async function showGoogleButton(holder, clientId, handler) {
   const google = await loadGoogle();
-  google.accounts.id.initialize({ client_id: clientId, callback: (response) => onToken(response.credential), cancel_on_tap_outside: false });
+  onToken = handler;
+  if (initializedFor !== clientId) {
+    google.accounts.id.initialize({ client_id: clientId, callback: (response) => onToken?.(response.credential), cancel_on_tap_outside: false });
+    initializedFor = clientId;
+  }
   google.accounts.id.renderButton(holder, { theme: 'outline', size: 'large', text: 'signin_with', shape: 'pill', width: 260 });
 }
