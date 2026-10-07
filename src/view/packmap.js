@@ -69,38 +69,71 @@ function packCard(progress, pack, bests) {
     fluencyRow(pack, bests));
 }
 
-// The diagnostic button across the top: take it, pick it up where it was left, or see the results.
-function diagnosticBar(diag) {
-  const label = diag.status === 'done' ? 'See my diagnostic results'
-    : diag.status === 'partial' ? `Continue the diagnostic (${diag.index} of ${diag.total} done)`
-      : 'Take the diagnostic to find your levels';
-  return h('section', { class: `diag-bar${diag.status === 'done' ? ' is-done' : ''}`, 'aria-label': 'Diagnostic' },
-    h('button', { type: 'button', class: 'btn btn-primary diag-start', 'data-home': 'diagnostic' }, label),
+// A section's diagnostic button: take it, pick it up where it was left, or see the results.
+function diagnosticBar(section, diag) {
+  const label = diag.status === 'done' ? `See my ${section.title} diagnostic results`
+    : diag.status === 'partial' ? `Continue the ${section.title} diagnostic (${diag.index} of ${diag.total} done)`
+      : `Take the ${section.title} diagnostic to find your levels`;
+  return h('section', { class: `diag-bar${diag.status === 'done' ? ' is-done' : ''}`, 'aria-label': `${section.title} diagnostic` },
+    h('button', { type: 'button', class: 'btn btn-primary diag-start', 'data-home': 'diagnostic', 'data-section': section.id }, label),
     h('p', { class: 'diag-blurb' }, diag.status === 'done'
       ? 'The levels you showed you’re ready for are open.'
-      : 'About 12 problems, adding to algebra. Nothing is marked until the end, and it opens the levels you’re ready for.'));
+      : `About ${diag.total} problems. Nothing is marked until the end, and it opens the levels you’re ready for.`));
 }
 
-export function renderPackMap(root, progress, packs, { onPlay, onSaveCode, onEnterCode, onDiagnostic, onFluency, onAccount, account = { state: 'off' }, diag = { status: 'none', index: 0, total: 12 }, bests = {}, note }) {
+// The three sections as big panels (the first screen): each shows its cards, small, with how far along you are.
+function landing(sections, packs, progress) {
+  return h('nav', { class: 'landing', 'aria-label': 'Sections' },
+    ...sections.map((sec) => h('button', { type: 'button', class: `section-panel sec-${sec.id}`, 'data-section': sec.id, 'aria-label': `${sec.title}: ${sec.blurb}` },
+      h('span', { class: 'section-title' }, sec.title),
+      h('span', { class: 'section-blurb' }, sec.blurb),
+      h('span', { class: 'mini-cards' }, ...sec.packs.map((id) => {
+        const pack = packs.find((p) => p.id === id);
+        const done = pack.comingSoon ? 0 : Array.from({ length: pack.levels }, (_, i) => isLevelDone(progress, pack.id, i + 1)).filter(Boolean).length;
+        return h('span', { class: `mini-card${pack.comingSoon ? ' is-soon' : ''}` },
+          h('span', { class: 'mini-name' }, pack.title),
+          h('span', { class: 'mini-progress' }, pack.comingSoon ? 'soon' : `${done}/${pack.levels}`));
+      })))));
+}
+
+// The three titles in a bar across the top: the open one is wide, the others small beside it.
+function sectionBar(sections, open) {
+  return h('nav', { class: 'section-bar', 'aria-label': 'Sections' },
+    ...sections.map((sec) => h('button', {
+      type: 'button', class: `section-tab sec-${sec.id}${sec.id === open ? ' is-open' : ''}`, 'data-section': sec.id,
+      'aria-current': sec.id === open ? 'true' : null,
+    }, sec.title)));
+}
+
+export function renderPackMap(root, progress, packs, {
+  onPlay, onSaveCode, onEnterCode, onDiagnostic, onFluency, onAccount, onSection, sections = [], open = null,
+  account = { state: 'off' }, diags = {}, bests = {}, note,
+}) {
+  const section = sections.find((s) => s.id === open) ?? null;
+  const mine = section ? section.packs.map((id) => packs.find((p) => p.id === id)).filter(Boolean) : [];
+  const playable = mine.filter((p) => !p.comingSoon);
+  const soon = mine.filter((p) => p.comingSoon);
+  const diag = section ? diags[section.id] : null;
+  root.className = `home${section ? ` in-${section.id} sec-${section.id}` : ""}`;
   root.replaceChildren(...[
     h('header', { class: 'home-head' },
       h('div', {},
-        h('h1', {}, 'The Mat'),
-        h('p', { class: 'tagline' }, 'Pick a pack and a level.')),
+        h('h1', {}, h('button', { type: 'button', class: 'home-title', 'data-section': '', 'aria-label': 'The Mat: all sections' }, 'The Mat')),
+        h('p', { class: 'tagline' }, section ? section.blurb : 'Pick a section.')),
       h('div', { class: 'home-actions' },
         onAccount ? h('button', { type: 'button', class: 'btn', 'data-home': 'account' }, accountLabel(account)) : null,
         h('button', { type: 'button', class: 'btn', 'data-home': 'save' }, 'Save code'),
         h('button', { type: 'button', class: 'btn', 'data-home': 'enter' }, 'Enter code'))),
     h('p', { class: 'home-note', role: 'status', hidden: !note }, note ?? ''),
     installBar(h),
-    diagnosticBar(diag),
-    h('div', { class: `pack-grid packs-${Math.min(6, packs.filter((p) => !p.comingSoon).length)}` },
-      ...packs.filter((p) => !p.comingSoon).map((p) => packCard(progress, p, bests))),
-    // Packs still being built show as cards under "Coming soon"; there are none to show right now.
-    packs.some((p) => p.comingSoon)
-      ? h('section', { class: 'soon', 'aria-label': 'Coming soon' },
-        h('h2', { class: 'soon-head' }, 'Coming soon'),
-        h('div', { class: 'soon-grid' }, ...packs.filter((p) => p.comingSoon).map(soonCard)))
+    section ? sectionBar(sections, open) : landing(sections, packs, progress),
+    section && diag ? diagnosticBar(section, diag) : null,
+    section && playable.length ? h('div', { class: `pack-grid packs-${Math.min(6, playable.length)} sec-${section.id}` },
+      ...playable.map((p) => packCard(progress, p, bests))) : null,
+    section && soon.length
+      ? h('section', { class: `soon sec-${section.id}`, 'aria-label': 'Coming soon' },
+        h('h2', { class: 'soon-head' }, playable.length ? 'Coming soon' : 'On the way'),
+        h('div', { class: 'soon-grid' }, ...soon.map(soonCard)))
       : null,
   ].filter(Boolean));
   root.onclick = (e) => {
@@ -108,11 +141,13 @@ export function renderPackMap(root, progress, packs, { onPlay, onSaveCode, onEnt
     if (b && !b.disabled) return onPlay(b.dataset.pack, Number(b.dataset.level));
     const f = e.target.closest('button[data-fluency]');
     if (f) return onFluency(f.dataset.fluency);
+    const sec = e.target.closest('[data-section]');
+    if (sec && !sec.dataset.home) return onSection(sec.dataset.section || null);
     const act = e.target.closest('[data-home]')?.dataset.home;
     if (act === 'account') onAccount();
     if (act === 'save') onSaveCode();
     if (act === 'enter') onEnterCode();
-    if (act === 'diagnostic') onDiagnostic();
+    if (act === 'diagnostic') onDiagnostic(e.target.closest('[data-home]').dataset.section);
   };
 }
 

@@ -29,6 +29,13 @@ Add `?seed=123` to the URL to replay a fixed problem set, and `?level=2` to open
 
 ## Changelog
 
+### The home screen: Count it, Build it, Solve it (SPEC-HOME.md)
+- **Three sections**, in pastels (blue, green, light red), on the panels, the bar and the cards. The first screen is three big panels with the cards in small and your progress; tap one and it opens, with the three titles in a bar across the top (the open one wide). Your section is remembered; tapping **The Mat** goes back to the panels. Solve it shows its equation cards as "soon".
+- **A diagnostic for each section** (Count it: 6 problems; Build it: 8, now with Value it). An old saved diagnostic is split between them.
+- **Phones:** a smaller title and the three buttons on one row, so the choice is on the first screen.
+- **Roster and slips** (`teacher/The-Mat-roster.xlsx`, SETUP.md Part 5): a private file for names, with student numbers made for you, printable plain-text slips (period, number, the site address and what to do), and a Named results tab that reads your class sheet's Summary. **Not tested:** the file's formulas (no spreadsheet recalculation here) or IMPORTRANGE; please try it with a few names first.
+- `src/syncConfig.js` can hold your class address so students never need a link (left empty until you say so).
+
 ### Class sheet sync: sign in with a period and a student number (SPEC-SYNC.md)
 - **Sign in** on the pack map (a period and a student number you hand out; no names): levels, the anonymous problem log and fluency runs are saved to a Google Sheet in the teacher's Drive, a few seconds after each problem or run. A student who signs in on another device (or after clearing the browser) gets their levels back; a level finished anywhere stays finished. Offline is fine: the next try catches up.
 - **`teacher/`:** `The-Mat-class-sheet.xlsx` (the template: Students, Progress, Log, Fluency, Summary and Slips tabs), `Code.gs` (the Apps Script that receives the data) and `SETUP.md` (about 10 minutes, once). The class link is `…/AlgebraMat/?class=<web app URL>`.

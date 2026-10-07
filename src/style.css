@@ -2422,3 +2422,104 @@ body {
 .value-mat .vm-rule { stroke: var(--ink); stroke-width: 3; }
 
 .google-holder { margin: 12px 0; min-height: 44px; }
+
+/* ---------- The home screen's sections: Count it, Build it, Solve it (Karl, 2026-10-04) ---------- */
+/* Pastels, on the cards and on the bar. The ink stays dark, so text is as readable as ever. */
+.sec-count { --sec: #cfe3f8; --sec-soft: #eaf3fc; --sec-line: #5c93cf; }
+.sec-build { --sec: #cfebd3; --sec-soft: #eaf6ec; --sec-line: #5aa56a; }
+.sec-solve { --sec: #f9d3cd; --sec-soft: #fdeceb; --sec-line: #cf7a6e; }
+
+.home-title {
+  appearance: none; background: none; border: 0; padding: 0; margin: 0; color: inherit; font: inherit; cursor: pointer;
+}
+.home-title:focus-visible { outline: 3px solid var(--ink); outline-offset: 4px; border-radius: 6px; }
+
+/* The first screen: three big panels, each with its cards in small. */
+.landing {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 16px;
+}
+.section-panel {
+  appearance: none;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  min-height: clamp(300px, 62vh, 560px);
+  padding: 22px 24px 24px;
+  text-align: left;
+  color: var(--ink);
+  font: inherit;
+  background: var(--sec);
+  border: 3px solid var(--ink);
+  border-radius: 20px;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.section-panel:hover,
+.section-panel:focus-visible { transform: translateY(-3px); box-shadow: 0 6px 0 var(--sec-line); }
+.section-title { font-size: 40px; font-weight: 800; line-height: 1.1; }
+.section-blurb { font-size: 20px; line-height: 1.25; }
+.mini-cards { display: flex; flex-direction: column; gap: 6px; width: 100%; margin-top: auto; }
+.mini-card {
+  display: flex; justify-content: space-between; gap: 10px;
+  padding: 8px 12px; font-size: 18px; font-weight: 600;
+  background: rgba(255, 255, 255, 0.7); border: 2px solid var(--sec-line); border-radius: 10px;
+}
+.mini-card.is-soon { border-style: dashed; color: #555; font-weight: 400; }
+.mini-progress { font-variant-numeric: tabular-nums; }
+
+/* Once a section is open: the three titles in a bar, the open one wide, the others small beside it. */
+.section-bar { display: flex; gap: 8px; margin: 12px 0 16px; }
+.section-tab {
+  appearance: none; flex: 1 1 0; min-width: 0; min-height: 48px; padding: 8px 12px;
+  color: var(--ink); font: inherit; font-size: 20px; font-weight: 600;
+  background: var(--sec); border: 2px solid var(--sec-line); border-radius: 14px; cursor: pointer;
+  transition: flex-grow 0.25s ease;
+}
+.section-tab.is-open { flex-grow: 3; font-size: 26px; font-weight: 800; border: 3px solid var(--ink); }
+.section-tab:focus-visible { outline: 3px solid var(--ink); outline-offset: 2px; }
+
+/* The open section's cards take its color. */
+.pack-grid.sec-count .pack-card, .pack-grid.sec-build .pack-card, .pack-grid.sec-solve .pack-card,
+.soon.sec-count .pack-card, .soon.sec-build .pack-card, .soon.sec-solve .pack-card { background: var(--sec-soft); border-color: var(--sec-line); }
+.home.in-count .diag-bar, .home.in-build .diag-bar, .home.in-solve .diag-bar { border-color: var(--sec-line); }
+
+/* The sections open with a short slide, unless the student asked for less movement. */
+@media (prefers-reduced-motion: no-preference) {
+  .landing .section-panel { animation: section-in 0.35s ease both; }
+  .landing .section-panel:nth-child(2) { animation-delay: 0.06s; }
+  .landing .section-panel:nth-child(3) { animation-delay: 0.12s; }
+  .section-bar ~ .pack-grid, .section-bar ~ .soon, .section-bar ~ .diag-bar { animation: section-in 0.3s ease both; }
+  @keyframes section-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+}
+
+@media (max-width: 760px) {
+  .landing { grid-template-columns: minmax(0, 1fr); }
+  .section-panel { min-height: 0; padding: 16px 18px 18px; }
+  .section-title { font-size: 32px; }
+  .section-blurb { font-size: 18px; }
+  .mini-card { font-size: 16px; }
+  .section-tab { font-size: 16px; padding: 8px 6px; }
+  .section-tab.is-open { font-size: 19px; flex-grow: 2; }
+}
+
+/* Four cards in a section (Build it): two across, so each is wide enough for its title and its level buttons. */
+@media (min-width: 761px) {
+  .pack-grid.packs-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+  .pack-grid.packs-4 .level-list, .pack-grid.packs-4 .level-list.many { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+  .pack-grid.packs-4 .btn.level-btn { min-width: 0; padding: 8px 12px; overflow-wrap: anywhere; }
+}
+
+/* A phone's first screen is for choosing: a smaller title, no tagline, and the three buttons in one row. */
+@media (max-width: 600px) {
+  .home { padding-top: 16px; }
+  .home-head { gap: 6px 12px; }
+  .home-head h1 { font-size: 34px; }
+  .home-head .tagline { display: none; }
+  .home-actions { padding-top: 0; flex-wrap: nowrap; gap: 8px; width: 100%; }
+  .home-actions .btn { flex: 1 1 0; min-width: 0; padding: 8px 6px; font-size: 16px; }
+}
+.home-title { min-height: 44px; min-width: 44px; }

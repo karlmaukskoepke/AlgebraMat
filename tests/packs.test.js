@@ -9,7 +9,7 @@ describe('pack list', () => {
 
   it('opens Combine it, Flip It, Group It, Boxes & Circles, Groups of Terms and Distribute, then combine and Value it, in order', () => {
     expect(PACKS.filter((p) => !p.comingSoon).map((p) => p.id)).toEqual(['combineit', 'flipit', 'lasso', 'boxes', 'groups-of-terms', 'distribute-combine', 'value']);
-    expect(PACKS.filter((p) => p.comingSoon)).toEqual([]);
+    expect(PACKS.filter((p) => p.comingSoon).map((p) => p.id)).toEqual(['one-step', 'two-step', 'multi-step']);
     expect(packById('distribute-combine')).toMatchObject({ levels: 5 });
   });
 
@@ -35,5 +35,19 @@ describe('pack list', () => {
   it('finds packs by id', () => {
     expect(packById('lasso').title).toBe('Group It');
     expect(packById('nope')).toBeUndefined();
+  });
+});
+
+describe('the home screen\'s sections', () => {
+  it('put every card in exactly one of Count it, Build it and Solve it, in the pack map\'s order', async () => {
+    const { SECTIONS, sectionOf, sectionById } = await import('../src/packs/index.js');
+    expect(SECTIONS.map((s) => s.title)).toEqual(['Count it', 'Build it', 'Solve it']);
+    const ids = SECTIONS.flatMap((s) => s.packs);
+    expect(ids.sort()).toEqual(PACKS.map((p) => p.id).sort());
+    expect(new Set(ids).size).toBe(ids.length);
+    expect(sectionOf('flipit').id).toBe('count');
+    expect(sectionOf('value').id).toBe('build');
+    expect(sectionById('solve').packs.every((id) => packById(id).comingSoon)).toBe(true);
+    expect(sectionById('nope')).toBeUndefined();
   });
 });

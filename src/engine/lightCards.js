@@ -12,6 +12,7 @@ import { formatTermGroups, evaluateTermGroups, isFraction as isTermFraction, isN
 import { formatDistribute, distributedExpression, groupParts, looseTerms } from './distribute.js';
 import { readInteger, classify } from './scaffold.js';
 import { evaluate as evaluateProblem, formatProblem } from './expr.js';
+import { formatValue, answerText as answerValueText, checkValue } from './value.js';
 
 const UNREADABLE = new Set(['typeAnswer', 'answerUnreadable']);
 
@@ -177,6 +178,12 @@ export const CARDS = {
     answerText: (p) => formatAnswer(evaluateTermGroups(p)),
     check: checkTermGroups,
   },
+  value: {
+    pad: 'integer',
+    problemText: formatValue,
+    answerText: answerValueText,
+    check: checkValue,
+  },
   distribute: {
     pad: 'algebra',
     problemText: formatDistribute,
@@ -191,5 +198,5 @@ export const CARDS = {
 export function cardIdFor(packId, level) {
   if (packId === 'combineit') return level <= 3 ? 'twoTerm' : 'integers';
   if (packId === 'flipit') return level <= 4 ? 'twoTerm' : 'integers';
-  return { lasso: 'group', boxes: 'boxes', 'groups-of-terms': 'termGroups', 'distribute-combine': 'distribute' }[packId] ?? null;
+  return { lasso: 'group', boxes: 'boxes', 'groups-of-terms': 'termGroups', 'distribute-combine': 'distribute', value: 'value' }[packId] ?? null;
 }

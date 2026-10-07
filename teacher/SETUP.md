@@ -38,8 +38,15 @@ This needs an "OAuth client ID" from Google Cloud. Use your **school Google acco
 
 If the Google button doesn't appear: the class link is missing the `?class=…` part, or `GOOGLE_CLIENT_ID` has a typo. If Google says "origin not allowed": the JavaScript origin in step 3 is not exactly `https://karlmaukskoepke.github.io`.
 
+## Part 5. Names, numbers and slips (the roster file)
+`The-Mat-roster.xlsx` is a second, **private** file: it is the only place student names and their numbers meet (the class sheet never has names).
+1. Upload it to Drive and **File > Save as Google Sheets**. Keep it to yourself.
+2. **Roster** tab: paste your class list into the yellow columns, Name and Period. Student numbers fill in (1, 2, 3 … within each period). After you hand out slips, don't sort the Roster: freeze the numbers (copy column C, then Edit > Paste special > Values only).
+3. **Slips** tab: one slip per student, two across, plain text. **File > Print**, "Current sheet", Letter, portrait, narrow margins, fit to width; choose the pages you need. Cut along the dashed lines.
+4. **Settings** tab: the site address on the slips is already there. For named results, paste your class sheet's browser address into B2, then on the **Imported** tab click cell A1 and choose **Allow access** (once). The **Named results** tab then shows each student's levels, problems, % clean, stuck presses and fluency runs next to their name.
+
 ## What students do
-Open the class link once on their phone (it is remembered), tap **Sign in**, type their period and number, and tap the Google button. After that, their progress is saved a few seconds after each problem or fluency run, and when the phone is back online. Signing in on a second device (or after clearing the browser) brings their levels back.
+Open The Mat, tap **Sign in**, type the period and student number from their slip, and tap the Google button. (If the class address has not been built into the site yet, they open the class link once first; it is remembered.) After that, their progress is saved a few seconds after each problem or fluency run, and when the phone is back online. Signing in on a second device (or after clearing the browser) brings their levels back.
 
 ## What you see
 - **Students**: who has signed in, with period and number, first and last sync. Google students have ids starting `G-`.
