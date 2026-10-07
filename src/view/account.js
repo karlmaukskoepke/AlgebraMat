@@ -86,7 +86,7 @@ export function showAccount(sync, onDone = () => {}) {
       showGoogleButton(holder, sync.classInfo().google, async (idToken) => {
         holder.textContent = 'Signing in…';
         const res = await sync.signIn({ mode: 'google', idToken });
-        if (res.ok) { changed = true; draw(); } else draw(res.error, true);
+        if (res.ok) { changed = true; d.close(); } else draw(res.error, true);   // signed in: the dialog closes by itself
       }).catch((e) => { holder.textContent = e.message; });
     }
     if (form?.dataset.form === 'who') {
@@ -96,7 +96,7 @@ export function showAccount(sync, onDone = () => {}) {
         button.disabled = true;
         button.textContent = 'Signing in…';
         const res = await sync.signIn({ period: form.period.value, number: form.number.value });
-        if (res.ok) { changed = true; draw(); } else draw(res.error, true);
+        if (res.ok) { changed = true; d.close(); } else draw(res.error, true);
       };
     }
     d.querySelector('[data-signout]')?.addEventListener('click', () => { sync.signOut(); changed = true; draw(); });

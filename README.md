@@ -29,6 +29,9 @@ Add `?seed=123` to the URL to replay a fixed problem set, and `?level=2` to open
 
 ## Changelog
 
+### Sign-in fixes
+- After a refused sign-in the button goes back to **Sign in** (it used to stay on a warning, as if signed in), and a successful sign-in closes the dialog by itself.
+
 ### Sign in with the school account only: nothing to type (SPEC-SYNC.md §2, §5)
 - **Students tap Sign in and the Google button, and that is all.** The class sheet takes the student ID out of the school email (`s1234567@…`), scrambles it with a secret key only the teacher has (HMAC-SHA-256), and keeps only the scrambled id: no name, email or real ID. The period comes from the class list the roster file writes (the Directory tab), so a student who changes period is moved automatically; an account not on the list can't sign in.
 - **The roster file** (`teacher/The-Mat-roster.xlsx`, `RosterSync.gs`) now fills itself from the master list and writes that class list; no student numbers or slips. A teacher's own account signs in for testing if it is in `TEST_EMAILS`.

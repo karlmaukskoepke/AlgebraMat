@@ -85,7 +85,7 @@ export function createSync({ load, save, getProgress, setProgress, getEvents, ge
       const before = state;
       state = { ...state, auth: authOf(auth), cursor: { eventsT: 0, runsT: 0 } };
       const res = await run();
-      if (!res.ok) { state = before; return res; }
+      if (!res.ok) { state = before; save(state); changed(); return res; }   // nothing is kept, and the button goes back to Sign in
       save(state);
       changed();
       return res;
