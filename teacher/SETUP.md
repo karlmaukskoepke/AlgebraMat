@@ -38,12 +38,19 @@ This needs an "OAuth client ID" from Google Cloud. Use your **school Google acco
 
 If the Google button doesn't appear: the class link is missing the `?class=…` part, or `GOOGLE_CLIENT_ID` has a typo. If Google says "origin not allowed": the JavaScript origin in step 3 is not exactly `https://karlmaukskoepke.github.io`.
 
-## Part 5. Names, numbers and slips (the roster file)
-`The-Mat-roster.xlsx` is a second, **private** file: it is the only place student names and their numbers meet (the class sheet never has names).
-1. Upload it to Drive and **File > Save as Google Sheets**. Keep it to yourself.
-2. **Roster** tab: paste your class list into the yellow columns, Name and Period. Student numbers fill in (1, 2, 3 … within each period). After you hand out slips, don't sort the Roster: freeze the numbers (copy column C, then Edit > Paste special > Values only).
-3. **Slips** tab: one slip per student, two across, plain text. **File > Print**, "Current sheet", Letter, portrait, narrow margins, fit to width; choose the pages you need. Cut along the dashed lines.
-4. **Settings** tab: the site address on the slips is already there. For named results, paste your class sheet's browser address into B2, then on the **Imported** tab click cell A1 and choose **Allow access** (once). The **Named results** tab then shows each student's levels, problems, % clean, stuck presses and fluency runs next to their name.
+## Part 5. Names, numbers and slips (the roster file, filled from your master list)
+`The-Mat-roster.xlsx` is a second, **private** file: the only place student names and their numbers meet (the class sheet never has names). It fills itself from your master list (the file with First, Last, Period and StudentID).
+1. Upload `The-Mat-roster.xlsx` to Drive and **File > Save as Google Sheets**. Keep it to yourself.
+2. **Settings** tab: next to **Master list web address**, paste the web address of your master list (open it and copy the address from the browser bar). The tab name `Roster Import` is already filled in. (To use Named results later, also paste your class sheet's address next to **Class sheet web address**.)
+3. **Extensions > Apps Script**: delete what is there, paste in all of `RosterSync.gs`, **Save**, then reload the roster sheet. A **The Mat** menu appears at the top.
+4. **The Mat > Sync from my master list**. The first time, Google asks to allow it: choose your account, **Advanced**, **Go to (project name)**, **Allow**. Then the **Roster**, **Numbers** and **New students** tabs fill in.
+5. **The Mat > Turn on automatic daily sync**: new students appear each morning without you doing anything.
+6. **Slips (new)** shows slips only for students not printed yet; **Slips (all)** has everyone. **File > Print**, "Current sheet", Letter, portrait, narrow margins, fit to width; choose the pages you need and cut on the dashed lines. Afterward, **The Mat > Mark the new slips as printed**.
+7. **Named results** (optional): on the **Imported** tab click cell A1 and choose **Allow access** (once). The tab then shows each student's levels, problems, % clean, stuck presses and fluency runs next to their name.
+
+How the numbers behave: each student gets a number in their period **once** and keeps it for good. A student who leaves keeps theirs (nobody else is given it); a new student gets the next free number in their period. A student who changes period gets a new number in the new period (the old one is kept). A student's progress follows their **Google account**, so a changed period or number never loses anything: the period and number they typed are just the labels you see. If a student keeps using their old period and number, that works too; they can type the new ones the next time they sign in with Google to update the label.
+
+The script reads only the First, Last, Period and StudentID columns of the master list. Nothing in it is changed.
 
 ## What students do
 Open The Mat, tap **Sign in**, type the period and student number from their slip, and tap the Google button. (If the class address has not been built into the site yet, they open the class link once first; it is remembered.) After that, their progress is saved a few seconds after each problem or fluency run, and when the phone is back online. Signing in on a second device (or after clearing the browser) brings their levels back.

@@ -57,3 +57,7 @@ export function makeScript({ properties = {}, tokens = {} } = {}) {
 }
 
 export const gs = makeScript();
+
+// The roster script (teacher/RosterSync.gs): its planning functions need no Google services.
+const rosterCode = readFileSync(new URL('../../teacher/RosterSync.gs', import.meta.url), 'utf8');
+export const roster = new Function(`${rosterCode}; return { readMaster, planSync, currentRoster, periodOf, clean };`)();
