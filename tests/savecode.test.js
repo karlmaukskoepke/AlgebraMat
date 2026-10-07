@@ -11,7 +11,7 @@ const state = (flipit, lasso = Array(7).fill(false), boxes = Array(6).fill(false
   v: 1,
   packs: {
     combineit: { levels: pad(combine, 5) }, flipit: { levels: pad(flipit, 5) }, lasso: { levels: lasso }, boxes: { levels: pad(boxes, 6) },
-    'groups-of-terms': { levels: terms }, 'distribute-combine': { levels: distribute },
+    'groups-of-terms': { levels: terms }, 'distribute-combine': { levels: distribute }, value: { levels: [false, false, false] },
   },
 });
 const state3 = state;
@@ -29,7 +29,7 @@ const sample = allStates3.filter((_, n) => n % 997 === 0 || n === 65535 || n ===
 // counted as done once the old Level 2 was.
 const fromFive = (p) => { const b = pad(p.packs.boxes.levels, 6).slice(0, 5); return { ...p, packs: { ...p.packs, boxes: { levels: [b[0], b[1], b[1], b[2], b[3], b[4]] } } }; };
 
-describe('save code v8', () => {
+describe('save code v9', () => {
   it('uses no look-alike characters', () => {
     expect(CODE_ALPHABET).toHaveLength(31);
     for (const ch of '01OIL') expect(CODE_ALPHABET).not.toContain(ch);
@@ -40,7 +40,7 @@ describe('save code v8', () => {
     const codes = new Set();
     for (const p of allStates3) {
       const code = encodeProgress(p);
-      expect(code).toMatch(/^MAT-A[2-9A-HJKMNP-Z]{9}$/); // "A" is version 8
+      expect(code).toMatch(/^MAT-B[2-9A-HJKMNP-Z]{10}$/); // "B" is version 9
       expect(decodeProgress(code, WITH_BOXES)).toEqual(p);
       codes.add(code);
     }

@@ -7,6 +7,7 @@ import { generateTermLevel } from '../engine/generateTerms.js';
 import { generateModelLevel } from '../engine/generateModel.js';
 import { generateTermGroupsLevel } from '../engine/generateTermGroups.js';
 import { generateDistributeLevel } from '../engine/generateDistribute.js';
+import { generateValueLevel } from '../engine/generateValue.js';
 
 // Group It (built as "Lasso"; its id stays 'lasso' so saved progress and
 // save codes from before the rename still work).
@@ -68,6 +69,18 @@ export const distributeCombine = {
   generate: (level, seed) => generateDistributeLevel(level, seed).map((p) => ({ ...p, level })),
 };
 
+// Value it (SPEC-VALUE.md): evaluate an expression for a value of x. Light mode only; the supports are the problem with
+// x in parentheses, then boxes filled with the value's counters, then the sum.
+export const valueIt = {
+  id: 'value',
+  title: 'Value it',
+  subtitle: 'Evaluating expressions',
+  blurb: 'Put the value in for x, then work it out.',
+  levels: 3,
+  levelNames: ['positive values', 'negative values', 'everything mixed'],
+  generate: (level, seed) => generateValueLevel(level, seed),
+};
+
 export const PACKS = [
   combineit,
   flipit,
@@ -75,5 +88,6 @@ export const PACKS = [
   boxes,
   groupsOfTerms,
   distributeCombine,
+  valueIt,
 ];
 export const packById = (id) => PACKS.find((p) => p.id === id);

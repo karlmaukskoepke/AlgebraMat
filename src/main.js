@@ -16,9 +16,13 @@ import { boxLightPlay } from './play/boxLightPlay.js';
 import { boxModelPlay } from './play/boxModelPlay.js';
 import { termGroupLightPlay } from './play/termGroupLightPlay.js';
 import { distributeLightPlay } from './play/distributeLightPlay.js';
+import { valueLightPlay } from './play/valueLightPlay.js';
 import { boxPlay } from './play/boxPlay.js';
 import { afterAnswer } from './engine/streak.js';
-import { loadBests, saveBest } from './lightStore.js';
+import { loadBests, saveBest, loadLog } from './lightStore.js';
+import { createSync } from './sync.js';
+import { loadSync, saveSync } from './syncStore.js';
+import { showAccount, accountLabel } from './view/account.js';
 import { bestFor } from './engine/streak.js';
 import { integerPlay } from './play/integerPlay.js';
 import { bigPlay } from './play/bigPlay.js';
@@ -57,6 +61,7 @@ const PLAY = {
   lasso: LIGHT ? lassoLightPlay : lassoPlay,
   boxes: (level) => (level === 2 ? boxModelPlay : LIGHT ? boxLightPlay : boxPlay),   // Level 2 reads a model (no walk)
   'groups-of-terms': LIGHT ? termGroupLightPlay : termGroupPlay,
+  value: valueLightPlay,
   'distribute-combine': (level) => (level >= 4 ? distributeTypedPlay : LIGHT ? distributeLightPlay : distributePlay),
 };
 const adapterFor = (packId, level) => (typeof PLAY[packId] === 'function' ? PLAY[packId](level) : PLAY[packId]);
@@ -88,12 +93,33 @@ try { navigator.storage?.persist?.(); } catch { /* not supported: nothing to do 
 
 let play = null; // { pack, adapter, level, seed, problems, index, session, finished }
 
-function persist() {
+function saveProgress() {
   const current = play && !play.finished
     ? { pack: play.pack.id, level: play.level, seed: play.seed, index: play.index }
     : null;
   store.save({ ...progress, current, layout: SAVE_LAYOUT });
 }
+function persist() {
+  saveProgress();
+  sync.request();            // soon, if signed in to a class sheet
+}
+
+// The class sheet (SPEC-SYNC.md): signed in, progress, problems and runs go to the teacher's sheet, and levels finished
+// on another device come back.
+const sync = createSync({
+  load: loadSync, save: saveSync,
+  getProgress: () => progress,
+  setProgress: (p) => { progress = p; saveProgress(); if (!$('home').hidden) goHome(); },
+  getEvents: loadLog, getRuns: loadRuns, packs: PACKS,
+  onChange: (status) => {
+    const b = document.querySelector('[data-home="account"]');
+    if (b) b.textContent = accountLabel(status);
+  },
+});
+// A class link in the address (?class=…) is remembered.
+if (params.get('class')) sync.setEndpoint(params.get('class'));
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') sync.request(); });
+window.addEventListener('online', () => sync.request());
 let nextTimer = null;
 
 const matRoot = $('mat');
@@ -164,6 +190,8 @@ function goHome() {
     onPlay: startLevel,
     onSaveCode: () => showSaveCode(encodeProgress(progress)),
     onEnterCode: () => askForCode(restoreFromCode),
+    onAccount: () => showAccount(sync, () => { if (!$('home').hidden) goHome(); }),
+    account: sync.status(),
     note: homeNote ?? (store.available ? null : STORAGE_NOTE),
   });
   showScreen('home');
@@ -231,6 +259,7 @@ function startFluency(id) {
     if (was === 'playing' && state.status === 'ended') {
       clearInterval(quiz.timer);
       saveRun({ c: id, s: state.correct, t: Date.now(), tier: state.topTier });
+      sync.request();
     }
     view.render(state, { previousBest });
   };
@@ -501,6 +530,7 @@ function savedCurrent() {
 // ?level=N opens a Flip It level; ?pack=groupit&level=N opens a Group It level
 // (?pack=lasso, its id from before the rename, still works); ?pack=boxes&level=N
 // opens a Boxes & Circles level.
+sync.request();   // signed in to a class sheet? catch up
 const urlLevel = Number(params.get('level'));
 const urlPack = packById(params.get('pack') === 'groupit' ? 'lasso' : params.get('pack') ?? 'flipit');
 const resume = savedCurrent();

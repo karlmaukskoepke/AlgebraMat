@@ -7,8 +7,8 @@ describe('pack list', () => {
     for (const p of PACKS) expect(p.subtitle, p.id).toMatch(/\w/);
   });
 
-  it('opens Combine it, Flip It, Group It, Boxes & Circles, Groups of Terms and Distribute, then combine, in order', () => {
-    expect(PACKS.filter((p) => !p.comingSoon).map((p) => p.id)).toEqual(['combineit', 'flipit', 'lasso', 'boxes', 'groups-of-terms', 'distribute-combine']);
+  it('opens Combine it, Flip It, Group It, Boxes & Circles, Groups of Terms and Distribute, then combine and Value it, in order', () => {
+    expect(PACKS.filter((p) => !p.comingSoon).map((p) => p.id)).toEqual(['combineit', 'flipit', 'lasso', 'boxes', 'groups-of-terms', 'distribute-combine', 'value']);
     expect(PACKS.filter((p) => p.comingSoon)).toEqual([]);
     expect(packById('distribute-combine')).toMatchObject({ levels: 5 });
   });
@@ -23,7 +23,7 @@ describe('pack list', () => {
   it('keeps coming-soon packs out of progress and save codes', () => {
     const soon = { id: 'later', title: 'Later', subtitle: '', levels: 3, comingSoon: true };   // nothing is coming soon right now
     const fresh = newProgress([...PACKS, soon]);
-    expect(Object.keys(fresh.packs)).toEqual(['combineit', 'flipit', 'lasso', 'boxes', 'groups-of-terms', 'distribute-combine']);
+    expect(Object.keys(fresh.packs)).toEqual(['combineit', 'flipit', 'lasso', 'boxes', 'groups-of-terms', 'distribute-combine', 'value']);
     expect(isLevelUnlocked(fresh, 'lasso', 1)).toBe(true);
     let p = fresh;
     for (let l = 1; l <= 4; l++) p = completeLevel(p, 'flipit', l);
