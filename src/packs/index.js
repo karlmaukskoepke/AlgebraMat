@@ -76,8 +76,8 @@ export const valueIt = {
   title: 'Value it',
   subtitle: 'Evaluating expressions',
   blurb: 'Put the value in for x, then work it out.',
-  levels: 3,
-  levelNames: ['positive values', 'negative values', 'everything mixed'],
+  levels: 4,
+  levelNames: ['positive values', 'negative values', 'everything mixed', 'fractions of x'],
   generate: (level, seed) => generateValueLevel(level, seed),
 };
 

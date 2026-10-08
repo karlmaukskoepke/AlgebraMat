@@ -2,7 +2,7 @@
 // rung at a time: the problem with x replaced by its value in parentheses; then the filled-box model, each box holding
 // the value's counters, with what each term comes to; then the sum to finish. Teach me goes straight to the last.
 
-import { checkValue, answerText, answerOf } from './value.js';
+import { checkValue, answerText, answerOf, hasFraction } from './value.js';
 import { typeInto, isTyping } from './entry.js';
 import { emptySkills } from './skills.js';
 
@@ -36,7 +36,7 @@ function moreHelp(s, lead, tag) {
   s.rung = rung;
   if (fresh && SUPPORTS[rung] && !s.supportsShown.includes(SUPPORTS[rung])) s.supportsShown.push(SUPPORTS[rung]);
   if (rung === 1) return say(s, lead === 'wrong' ? `vTag_${String(tag).replace(/-/g, '_')}` : 'vSubstitute', { sub: true });
-  if (rung === 2) return say(s, lead === 'wrong' ? 'vModelWrong' : 'vModel');
+  if (rung === 2) return say(s, `${lead === 'wrong' ? 'vModelWrong' : 'vModel'}${hasFraction(s.problem) ? 'Frac' : ''}`);
   return say(s, lead === 'teach' ? 'vTeach' : 'vWork');
 }
 

@@ -117,7 +117,7 @@ describe('syncing with the class sheet', () => {
     const second = phone(book);
     second.sync.setEndpoint(URL_);
     await second.sync.signIn({ period: '3', number: '1' });
-    expect(second.progress.packs.value.levels).toEqual([true, true, false]);
+    expect(second.progress.packs.value.levels).toEqual([true, true, false, false]);
     second.progress.packs.flipit.levels[0] = true;
     await second.sync.now();
     await first.sync.now();

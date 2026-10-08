@@ -85,7 +85,7 @@ describe('the readout', () => {
     const s = answerAll(() => true);
     const r = readout(SEED, s.answers, ITEMS);
     expect(r.map((x) => x.standing)).toEqual(Array(7).fill('strong'));
-    expect(r.map((x) => [x.pack, x.rec])).toEqual([['combineit', 5], ['flipit', 5], ['lasso', 6], ['boxes', 6], ['groups-of-terms', 6], ['distribute-combine', 4], ['value', 3]]);
+    expect(r.map((x) => [x.pack, x.rec])).toEqual([['combineit', 5], ['flipit', 5], ['lasso', 6], ['boxes', 6], ['groups-of-terms', 6], ['distribute-combine', 4], ['value', 4]]);
     expect(r[0].problems).toHaveLength(2);
     expect(r[0].problems.every((p) => p.right && p.text && p.answer)).toBe(true);
   });

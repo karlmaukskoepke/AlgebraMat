@@ -2539,3 +2539,7 @@ body {
 }
 .home .pack-grid[class] .level-num { font-size: 24px; white-space: nowrap; }
 .home .pack-grid[class] .level-name { font-size: 16px; }
+
+/* Value it Level 4: a box split into equal parts; the parts taken are solid and lightly filled, the rest dashed. */
+.value-mat .vm-part { fill: none; stroke: var(--ink); stroke-width: 2.5; stroke-dasharray: 7 6; }
+.value-mat .vm-part.is-taken { fill: #fff6b8; stroke-dasharray: none; }

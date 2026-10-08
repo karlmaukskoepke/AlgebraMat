@@ -11,7 +11,7 @@ const state = (flipit, lasso = Array(7).fill(false), boxes = Array(6).fill(false
   v: 1,
   packs: {
     combineit: { levels: pad(combine, 5) }, flipit: { levels: pad(flipit, 5) }, lasso: { levels: lasso }, boxes: { levels: pad(boxes, 6) },
-    'groups-of-terms': { levels: terms }, 'distribute-combine': { levels: distribute }, value: { levels: [false, false, false] },
+    'groups-of-terms': { levels: terms }, 'distribute-combine': { levels: distribute }, value: { levels: [false, false, false, false] },
   },
 });
 const state3 = state;
