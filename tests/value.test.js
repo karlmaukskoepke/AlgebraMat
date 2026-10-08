@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import {
-  makeValue, xTerm, numTerm, answerOf, answerText, formatValue, formatSubstituted, termWorths, tagValue, checkValue,
+  makeValue, xTerm, numTerm, den, hasFraction, formatValueExpr, answerOf, answerText, formatValue, formatSubstituted, termWorths, tagValue, checkValue,
 } from '../src/engine/value.js';
 import { generateValueLevel, MAX_BOXES, MAX_COUNTERS } from '../src/engine/generateValue.js';
 import { newValueLight, reduceValueLight } from '../src/engine/valueLight.js';
@@ -93,9 +93,9 @@ describe('the problems', () => {
     }
   });
 
-  it('are a pack of three levels, at the end of the map', () => {
+  it('are a pack of four levels, at the end of the map', () => {
     const pack = packById('value');
-    expect(pack).toMatchObject({ levels: 3, title: 'Value it' });
+    expect(pack).toMatchObject({ levels: 4, title: 'Value it' });
     expect(PACKS.filter((p) => !p.comingSoon).pop()).toBe(pack);
     expect(pack.generate(2, 5)).toEqual(generateValueLevel(2, 5));
   });
@@ -175,10 +175,76 @@ describe('the filled-box model', () => {
 describe('save code v9', () => {
   it('carries Value it progress, and v8 codes still read', () => {
     const progress = newProgress(PACKS);
-    progress.packs.value.levels = [true, false, true];
+    progress.packs.value.levels = [true, false, true, true];
     const code = encodeProgress(progress);
     expect(code).toMatch(/^MAT-B/);
-    expect(decodeProgress(code, PACKS).packs.value.levels).toEqual([true, false, true]);
-    expect(decodeProgress(encodeProgress(newProgress(PACKS), 8), PACKS).packs.value.levels).toEqual([false, false, false]);
+    expect(decodeProgress(code, PACKS).packs.value.levels).toEqual([true, false, true, true]);
+    expect(decodeProgress(encodeProgress(newProgress(PACKS), 8), PACKS).packs.value.levels).toEqual([false, false, false, false]);
+  });
+});
+
+// ---------- Level 4: fractional coefficients ----------
+const F1 = makeValue([xTerm('+', 3, 4), numTerm('-', 2)], 8);          // (3/4)x − 2, x = 8 → 4
+const F2 = makeValue([numTerm('+', 5), xTerm('-', 1, 2)], -6);         // 5 − (1/2)x, x = −6 → 8
+const F3 = makeValue([xTerm('+', -2, 3), numTerm('+', 1)], 9);         // −(2/3)x + 1, x = 9 → −5
+
+describe('fractional coefficients', () => {
+  it('are written as (top/bottom)x, worked out exactly, and need an x that is a multiple of the bottom number', () => {
+    expect([F1, F2, F3].map(formatValue)).toEqual(['(3/4)x − 2, x = 8', '5 − (1/2)x, x = −6', '−(2/3)x + 1, x = 9']);
+    expect([F1, F2, F3].map(answerText)).toEqual(['4', '8', '−5']);
+    expect([F1, F2, F3].map(formatSubstituted)).toEqual(['(3/4)(8) − 2', '5 − (1/2)(−6)', '−(2/3)(9) + 1']);
+    expect(termWorths(F1).map((w) => [w.coef, w.d, w.worth])).toEqual([[3, 4, 6], [-2, 1, -2]]);
+    expect(hasFraction(F1)).toBe(true);
+    expect(hasFraction(A)).toBe(false);
+    expect(den(F1.expr.terms[0])).toBe(4);
+    expect(formatValueExpr(F2)).toBe('5 − (1/2)x');
+    expect(() => makeValue([xTerm('+', 3, 4)], 6)).toThrow(/multiple of 4/);
+  });
+
+  it('name the slips: only the top number, only the bottom number, upside down, and the sign ones', () => {
+    expect(tagValue(F1, 22)).toBe('top-only');         // 3 × 8 − 2
+    expect(tagValue(F1, 0)).toBe('bottom-only');       // 8 ÷ 4 − 2
+    expect(tagValue(makeValue([xTerm('+', 2, 3), numTerm('+', 1)], 6), 10)).toBe('upside-down');   // 3/2 × 6 + 1
+    expect(tagValue(F2, 2)).toBe('neg-neg');           // − (1/2)(−6) is +3, read as −3: 5 − 3
+    expect(tagValue(F1, -4)).toBe('sign-flipped');
+    expect(tagValue(F1, 4)).toBe(null);
+    expect(tagValue(F1, 99)).toBe('unmatched');
+  });
+
+  it('are the pack\'s Level 4: five problems, every x a multiple of the bottom number, whole-number answers, drawable', () => {
+    for (let seed = 1; seed <= 120; seed++) {
+      const set = generateValueLevel(4, seed);
+      expect(set).toHaveLength(5);
+      expect(generateValueLevel(4, seed)).toEqual(set);
+      expect(new Set(set.map(answerText)).size).toBe(5);
+      for (const p of set) {
+        const t = p.expr.terms.find((x) => x.kind === 'x');
+        expect(den(t)).toBeGreaterThan(1);
+        expect(t.value % den(t) === 0).toBe(false);      // a proper fraction
+        expect(p.x % den(t) === 0).toBe(true);
+        expect(Math.abs(p.x)).toBeLessThanOrEqual(MAX_COUNTERS);
+        expect(Number.isInteger(answerOf(p))).toBe(true);
+      }
+      expect(set.some((p) => p.x < 0)).toBe(true);
+      expect(set.some((p) => p.x > 0 && p.expr.terms.some((t) => t.kind === 'x' && t.op === '-' || t.value < 0))).toBe(true);
+    }
+  });
+
+  it('draw as one box split into equal parts, the top number of them taken; the second rung says so', () => {
+    const g = modelLayout(F1).groups[0];
+    expect(g).toMatchObject({ type: 'parts', parts: 4, count: 3, worth: 6 });
+    expect(g.part).toEqual(boxShape(2));
+    for (let seed = 1; seed <= 40; seed++) {
+      for (const p of generateValueLevel(4, seed)) {
+        const { groups, width } = modelLayout(p);
+        for (const gr of groups) { expect(gr.x).toBeGreaterThanOrEqual(0); expect(gr.x + gr.width).toBeLessThanOrEqual(width); }
+      }
+    }
+    expect(run(newValueLight(F1), ...answer('22')).feedback.key).toBe('vTag_top_only');
+    const second = run(newValueLight(F1), ...answer('22'), ...answer('22'));
+    expect(second.feedback.key).toBe('vModelWrongFrac');
+    expect(valueFeedbackText(second.feedback)).toMatch(/equal parts/);
+    expect(run(newValueLight(A), ...answer('30'), ...answer('30')).feedback.key).toBe('vModelWrong');
+    expect(run(newValueLight(F1), { type: 'stuck' }, { type: 'stuck' }).feedback.key).toBe('vModelFrac');
   });
 });

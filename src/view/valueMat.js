@@ -3,8 +3,7 @@
 // holds the opposite), and then the sum. Inline SVG; the layout is a pure function so it can be tested.
 
 import { MINUS } from '../engine/expr.js';
-import { formatExpression } from '../engine/terms.js';
-import { substituteSegments, termWorths } from '../engine/value.js';
+import { formatValueExpr, substituteSegments, termWorths } from '../engine/value.js';
 
 const SVG_NS = 'http://www.w3.org/2000/svg';
 function el(name, attrs = {}, children = []) {
@@ -29,10 +28,16 @@ export function boxShape(n) {
 }
 
 // Where everything sits in the model: one group per term, left to right. An x term is |coefficient| boxes, each holding
-// |x| counters of x's sign (a negative box has the dash); a number is its counters in a small grid.
+// |x| counters of x's sign (a negative box has the dash); a fraction of x is ONE box holding the |x| counters in d equal
+// parts, the top number of them taken; a number is its counters in a small grid.
 export function modelLayout(problem) {
   const worths = termWorths(problem);
   const groups = worths.map((w, i) => {
+    if (w.x && w.d > 1) {
+      const part = boxShape(Math.abs(problem.x) / w.d);
+      const width = w.d * part.width + (w.coef < 0 ? 14 : 0);
+      return { ...w, term: i, type: 'parts', count: Math.abs(w.coef), parts: w.d, part, shape: { ...part, width: w.d * part.width }, width, height: part.height };
+    }
     if (w.x) {
       const shape = boxShape(Math.abs(problem.x));
       const count = Math.abs(w.coef);
@@ -82,7 +87,7 @@ export function renderValueMat({ problem, rung = 0, typed = '', done = false, fi
       line.append(t);
     }
   } else {
-    line.append(el('tspan', {}, [formatExpression(problem.expr)]));
+    line.append(el('tspan', {}, [formatValueExpr(problem)]));
   }
   svg.append(line);
   svg.append(el('text', { x: mid, y: 150, 'text-anchor': 'middle', class: 'vm-given' }, [
@@ -101,6 +106,17 @@ export function renderValueMat({ problem, rung = 0, typed = '', done = false, fi
           if (dash) svg.append(el('line', { x1: bx - 12, y1: baseY + g.shape.height / 2, x2: bx, y2: baseY + g.shape.height / 2, class: 'mark vm-dash' }));
           counterGrid(svg, bx, baseY, g.shape, Math.abs(problem.x), problem.x < 0 ? '-' : '+', PAD);
         }
+      } else if (g.type === 'parts') {
+        // One box, split into equal parts: the parts taken have a solid outline and a light fill, the rest are dashed.
+        const dash = g.coef < 0 ? 14 : 0;
+        const bx = g.x + dash;
+        for (let k = 0; k < g.parts; k++) {
+          const taken = k < g.count;
+          svg.append(el('rect', { x: bx + k * g.part.width, y: baseY, width: g.part.width, height: g.part.height, class: `vm-part${taken ? ' is-taken' : ''}` }));
+          counterGrid(svg, bx + k * g.part.width, baseY, g.part, Math.abs(problem.x) / g.parts, problem.x < 0 ? '-' : '+', PAD);
+        }
+        svg.append(el('rect', { x: bx, y: baseY, width: g.parts * g.part.width, height: g.part.height, rx: 6, class: 'vm-box' }));
+        if (dash) svg.append(el('line', { x1: bx - 12, y1: baseY + g.part.height / 2, x2: bx, y2: baseY + g.part.height / 2, class: 'mark vm-dash' }));
       } else {
         counterGrid(svg, g.x, baseY, g.shape, g.count, g.coef < 0 ? '-' : '+', 0);
       }
