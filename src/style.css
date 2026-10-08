@@ -2474,12 +2474,11 @@ body {
 /* Once a section is open: the three titles in a bar, the open one wide, the others small beside it. */
 .section-bar { display: flex; gap: 8px; margin: 12px 0 16px; }
 .section-tab {
-  appearance: none; flex: 1 1 0; min-width: 0; min-height: 48px; padding: 8px 12px;
+  appearance: none; flex: 1 1 auto; min-width: 0; min-height: 48px; padding: 8px 12px;
   color: var(--ink); font: inherit; font-size: 20px; font-weight: 600;
   background: var(--sec); border: 2px solid var(--sec-line); border-radius: 14px; cursor: pointer;
-  transition: flex-grow 0.25s ease;
 }
-.section-tab.is-open { flex-grow: 3; font-size: 26px; font-weight: 800; border: 3px solid var(--ink); }
+.section-tab.is-open { font-size: 26px; font-weight: 800; border: 3px solid var(--ink); }
 .section-tab:focus-visible { outline: 3px solid var(--ink); outline-offset: 2px; }
 
 /* The open section's cards take its color. */
@@ -2543,3 +2542,44 @@ body {
 /* Value it Level 4: a box split into equal parts; the parts taken are solid and lightly filled, the rest dashed. */
 .value-mat .vm-part { fill: none; stroke: var(--ink); stroke-width: 2.5; stroke-dasharray: 7 6; }
 .value-mat .vm-part.is-taken { fill: #fff6b8; stroke-dasharray: none; }
+
+/* ---------- The top menu's dropdowns (Karl, 2026-10-08) ---------- */
+.section-bar { position: relative; z-index: 20; }
+.section-menu { flex: 1 1 0; min-width: 0; display: flex; transition: flex-grow 0.25s ease; }
+.section-menu.is-current { flex-grow: 3; }
+
+.dropdown {
+  position: absolute; left: 0; right: 0; top: 100%; margin-top: -2px; z-index: 30;
+  padding: 12px 14px 14px;
+  background: var(--sec-soft); border: 2px solid var(--sec-line); border-radius: 14px;
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.18);
+  visibility: hidden; opacity: 0; transform: translateY(-4px);
+  /* leaving waits a moment, so crossing the gap to the next title doesn't flicker */
+  transition: opacity 0.15s ease, transform 0.15s ease, visibility 0s linear 0.25s;
+}
+.section-menu.is-expanded .dropdown { visibility: visible; opacity: 1; transform: none; transition-delay: 0s; }
+@media (hover: hover) {
+  .section-menu:hover .dropdown, .section-menu:focus-within .dropdown { visibility: visible; opacity: 1; transform: none; transition-delay: 0s; }
+}
+.dropdown-open {
+  appearance: none; background: none; border: 0; padding: 0 4px; min-height: 44px; color: var(--ink);
+  font: inherit; font-size: 18px; font-weight: 800; cursor: pointer; text-decoration: underline;
+}
+.dropdown-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 10px 16px; }
+.dropdown-card { display: flex; flex-direction: column; gap: 6px; padding: 8px 10px; background: rgba(255, 255, 255, 0.7); border: 2px solid var(--sec-line); border-radius: 10px; }
+.dropdown-card.is-soon { border-style: dashed; color: #555; }
+.dropdown-name { font-size: 18px; font-weight: 800; }
+.dropdown-soon { font-size: 16px; }
+.dropdown-levels { display: flex; flex-wrap: wrap; gap: 6px; }
+.menu-pill {
+  appearance: none; min-width: 44px; min-height: 44px; padding: 0 8px; color: var(--ink); font: inherit; font-size: 18px; font-weight: 800;
+  background: #fff; border: 2px solid var(--ink); border-radius: 10px; cursor: pointer;
+}
+.menu-pill.is-done { border-width: 3.5px; }
+.menu-pill.is-locked { color: #999; border: 2px dashed #aaa; background: transparent; cursor: default; }
+.menu-pill:not(.is-locked):hover, .menu-pill:focus-visible { background: #fff6b8; outline: none; }
+.dropdown-open:focus-visible { outline: 3px solid var(--ink); outline-offset: 2px; }
+@media (max-width: 600px) {
+  .dropdown { padding: 10px; }
+  .dropdown-cards { grid-template-columns: minmax(0, 1fr); }
+}

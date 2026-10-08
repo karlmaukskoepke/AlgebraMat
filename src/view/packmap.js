@@ -2,6 +2,7 @@
 import { isLevelDone, isLevelUnlocked, isPackComplete } from '../engine/progress.js';
 import { installBar } from './installPrompt.js';
 import { accountLabel } from './account.js';
+import { menuEntries } from '../engine/menu.js';
 import { CARD_CHALLENGES, challengeById } from '../engine/fluency.js';
 
 const h = (tag, attrs = {}, ...children) => {
@@ -96,13 +97,28 @@ function landing(sections, packs, progress) {
       })))));
 }
 
-// The three titles in a bar across the top: the open one is wide, the others small beside it.
-function sectionBar(sections, open) {
+// The three titles in a bar across the top. Over a title (or a tap on a touch screen) a dropdown lists that section's
+// cards, each with its level buttons, so any open level is one click away; moving off collapses it again. The open
+// section's title is wide and bold, the others small beside it.
+function sectionBar(sections, open, packs, progress) {
+  const entries = menuEntries(sections, packs, progress);
   return h('nav', { class: 'section-bar', 'aria-label': 'Sections' },
-    ...sections.map((sec) => h('button', {
-      type: 'button', class: `section-tab sec-${sec.id}${sec.id === open ? ' is-open' : ''}`, 'data-section': sec.id,
-      'aria-current': sec.id === open ? 'true' : null,
-    }, sec.title)));
+    ...entries.map((entry) => h('div', { class: `section-menu sec-${entry.id}${entry.id === open ? ' is-current' : ''}` },
+      h('button', {
+        type: 'button', class: `section-tab sec-${entry.id}${entry.id === open ? ' is-open' : ''}`, 'data-section': entry.id,
+        'aria-current': entry.id === open ? 'true' : null, 'aria-haspopup': 'true',
+      }, entry.title),
+      h('div', { class: 'dropdown', role: 'group', 'aria-label': `${entry.title} cards` },
+        h('button', { type: 'button', class: 'dropdown-open', 'data-section': entry.id }, `Open all of ${entry.title} →`),
+        h('div', { class: 'dropdown-cards' }, ...entry.cards.map((card) => h('div', { class: `dropdown-card${card.soon ? ' is-soon' : ''}` },
+          h('span', { class: 'dropdown-name' }, card.title),
+          card.soon
+            ? h('span', { class: 'dropdown-soon' }, 'soon')
+            : h('span', { class: 'dropdown-levels' }, ...card.levels.map((lv) => h('button', {
+              type: 'button', class: `menu-pill${lv.done ? ' is-done' : ''}${lv.open ? '' : ' is-locked'}`, disabled: !lv.open,
+              'data-level': lv.level, 'data-pack': card.id,
+              'aria-label': `${card.title}, level ${lv.level}${lv.open ? `: ${lv.name}` : ', locked'}${lv.done ? ', finished' : ''}`,
+            }, `${lv.done ? '✓' : ''}${lv.level}`))))))))));
 }
 
 export function renderPackMap(root, progress, packs, {
@@ -126,7 +142,8 @@ export function renderPackMap(root, progress, packs, {
         h('button', { type: 'button', class: 'btn', 'data-home': 'enter' }, 'Enter code'))),
     h('p', { class: 'home-note', role: 'status', hidden: !note }, note ?? ''),
     installBar(h),
-    section ? sectionBar(sections, open) : landing(sections, packs, progress),
+    sectionBar(sections, open, packs, progress),
+    section ? null : landing(sections, packs, progress),
     section && diag ? diagnosticBar(section, diag) : null,
     section && playable.length ? h('div', { class: `pack-grid packs-${Math.min(6, playable.length)} sec-${section.id}` },
       ...playable.map((p) => packCard(progress, p, bests))) : null,
@@ -136,11 +153,27 @@ export function renderPackMap(root, progress, packs, {
         h('div', { class: 'soon-grid' }, ...soon.map(soonCard)))
       : null,
   ].filter(Boolean));
+  // A tap outside the open dropdown, or Escape, closes it.
+  const closeMenus = () => root.querySelectorAll('.section-menu.is-expanded').forEach((m) => m.classList.remove('is-expanded'));
+  if (!root.dataset.menuBound) {
+    root.dataset.menuBound = '1';
+    document.addEventListener('click', (e) => { if (!e.target.closest?.('.section-menu')) closeMenus(); });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { closeMenus(); document.activeElement?.blur?.(); } });
+  }
   root.onclick = (e) => {
     const b = e.target.closest('button[data-level]');
     if (b && !b.disabled) return onPlay(b.dataset.pack, Number(b.dataset.level));
     const f = e.target.closest('button[data-fluency]');
     if (f) return onFluency(f.dataset.fluency);
+    const tab = e.target.closest('.section-tab');
+    if (tab && matchMedia('(hover: none)').matches) {
+      // No hover on a touch screen: a tap opens that dropdown (and closes any other); "Open all of …" goes in.
+      const menu = tab.closest('.section-menu');
+      const was = menu.classList.contains('is-expanded');
+      root.querySelectorAll('.section-menu.is-expanded').forEach((m) => m.classList.remove('is-expanded'));
+      if (!was) menu.classList.add('is-expanded');
+      return;
+    }
     const sec = e.target.closest('[data-section]');
     if (sec && !sec.dataset.home) return onSection(sec.dataset.section || null);
     const act = e.target.closest('[data-home]')?.dataset.home;

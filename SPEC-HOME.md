@@ -15,5 +15,8 @@
 - **Count it:** 6 problems (Combine it, Flip It, Group It, two each). **Build it:** 8 (Boxes & Circles, Groups of Terms, Distribute then combine, Value it, two each). Solve it gets one when it has cards. Each opens the levels it recommends, as before.
 - Saved separately (`mat.diag.v2`). The old single diagnostic is split between the two the first time: every answer keeps its problem (same seed), and the two new Value it problems show as "6 of 8 done".
 
+## 5. Dropdown menus (Karl, 2026-10-08; built)
+The section bar is on the home screen at all times. Over a title a dropdown shows that section's cards, each with a small button per level (done = check, locked = dashed and disabled; coming-soon cards say "soon"). Moving off folds it. Touch screens (no hover): a tap on a title opens or closes it, a tap elsewhere or Escape closes it. "Open all of X" opens the section. Only on the home screen, not inside a level. The three landing panels remain the first screen.
+
 ## 4. Not built
 - A teacher-chosen order or hiding of sections; section-level fluency; a sign-in prompt on the first screen.
