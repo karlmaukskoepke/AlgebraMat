@@ -2583,3 +2583,15 @@ body {
   .dropdown { padding: 10px; }
   .dropdown-cards { grid-template-columns: minmax(0, 1fr); }
 }
+
+/* ---------- Solve it: the One-step equations Mat ---------- */
+.solve-mat .sv-x { font: 700 36px 'Kalam', 'Lexend', system-ui, sans-serif; fill: var(--ink); stroke: #fffdf2; stroke-width: 7px; paint-order: stroke; stroke-linejoin: round; }
+.solve-mat .sv-label { font: 600 26px 'Lexend', system-ui, sans-serif; fill: var(--muted, #555); }
+.solve-mat .sv-check { font: 700 52px 'Kalam', 'Lexend', system-ui, sans-serif; fill: var(--ink); }
+.solve-mat .sv-verdict { font: 700 36px 'Lexend', system-ui, sans-serif; }
+.solve-mat .sv-verdict.is-good { fill: #1b6e3a; }
+.solve-mat .sv-verdict.is-bad { fill: #a3281b; }
+.solve-mat .sv-struck .mark { opacity: 0.3; }
+.solve-mat .sv-slash { stroke: #a3281b; stroke-width: 3; stroke-linecap: round; }
+.solve-mat .sv-added .mark { stroke: #0072b2; }
+.solve-mat .sv-group { fill: none; stroke: var(--ink); stroke-width: 2; stroke-dasharray: 6 5; }

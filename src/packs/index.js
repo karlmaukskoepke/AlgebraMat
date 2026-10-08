@@ -8,6 +8,7 @@ import { generateModelLevel } from '../engine/generateModel.js';
 import { generateTermGroupsLevel } from '../engine/generateTermGroups.js';
 import { generateDistributeLevel } from '../engine/generateDistribute.js';
 import { generateValueLevel } from '../engine/generateValue.js';
+import { generateSolveLevel } from '../engine/generateSolve.js';
 
 // Group It (built as "Lasso"; its id stays 'lasso' so saved progress and
 // save codes from before the rename still work).
@@ -81,7 +82,19 @@ export const valueIt = {
   generate: (level, seed) => generateValueLevel(level, seed),
 };
 
-// Equations are still to come: they show as cards under Solve it, with no levels (so they take no room in saves).
+// One-step equations (SPEC-SOLVE.md): find x in x + a = b, x − a = b, ax = b, x/a = b. Light mode only; the supports are
+// your answer put back in (does it balance?), then the equation as a balance of a box and counters, then the undo.
+export const oneStep = {
+  id: 'one-step',
+  title: 'One-step equations',
+  subtitle: 'Adding, subtracting, multiplying and dividing',
+  blurb: 'Undo the one thing stuck to x.',
+  levels: 5,
+  levelNames: ['x + a = b', 'x − a = b', 'ax = b', 'x / a = b', 'all four mixed'],
+  generate: (level, seed) => generateSolveLevel(level, seed),
+};
+
+// The rest of the equations are still to come: they show as cards under Solve it, with no levels (so they take no room in saves).
 const soon = (id, title, subtitle) => ({ id, title, subtitle, comingSoon: true, levels: 0, levelNames: [] });
 
 export const PACKS = [
@@ -92,7 +105,7 @@ export const PACKS = [
   groupsOfTerms,
   distributeCombine,
   valueIt,
-  soon('one-step', 'One-step equations', 'Adding, subtracting, multiplying and dividing'),
+  oneStep,
   soon('two-step', 'Two-step equations', 'Undoing two operations'),
   soon('multi-step', 'Multi-step equations', 'Variables on both sides'),
 ];

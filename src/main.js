@@ -17,6 +17,7 @@ import { boxModelPlay } from './play/boxModelPlay.js';
 import { termGroupLightPlay } from './play/termGroupLightPlay.js';
 import { distributeLightPlay } from './play/distributeLightPlay.js';
 import { valueLightPlay } from './play/valueLightPlay.js';
+import { solveLightPlay } from './play/solveLightPlay.js';
 import { boxPlay } from './play/boxPlay.js';
 import { afterAnswer } from './engine/streak.js';
 import { loadBests, saveBest, loadLog } from './lightStore.js';
@@ -63,6 +64,7 @@ const PLAY = {
   boxes: (level) => (level === 2 ? boxModelPlay : LIGHT ? boxLightPlay : boxPlay),   // Level 2 reads a model (no walk)
   'groups-of-terms': LIGHT ? termGroupLightPlay : termGroupPlay,
   value: valueLightPlay,
+  'one-step': solveLightPlay,
   'distribute-combine': (level) => (level >= 4 ? distributeTypedPlay : LIGHT ? distributeLightPlay : distributePlay),
 };
 const adapterFor = (packId, level) => (typeof PLAY[packId] === 'function' ? PLAY[packId](level) : PLAY[packId]);
