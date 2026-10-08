@@ -96,7 +96,7 @@ describe('the problems', () => {
   it('are a pack of four levels, after Distribute, then combine', () => {
     const pack = packById('value');
     expect(pack).toMatchObject({ levels: 4, title: 'Value it' });
-    expect(PACKS.filter((p) => !p.comingSoon).at(-2)).toBe(pack);
+    expect(PACKS.filter((p) => !p.comingSoon).at(-3)).toBe(pack);
     expect(pack.generate(2, 5)).toEqual(generateValueLevel(2, 5));
   });
 });
@@ -172,12 +172,12 @@ describe('the filled-box model', () => {
   });
 });
 
-describe('save code v10', () => {
+describe('save code v11', () => {
   it('carries Value it progress, and v8 codes still read', () => {
     const progress = newProgress(PACKS);
     progress.packs.value.levels = [true, false, true, true];
     const code = encodeProgress(progress);
-    expect(code).toMatch(/^MAT-C/);
+    expect(code).toMatch(/^MAT-D/);
     expect(decodeProgress(code, PACKS).packs.value.levels).toEqual([true, false, true, true]);
     expect(decodeProgress(encodeProgress(newProgress(PACKS), 8), PACKS).packs.value.levels).toEqual([false, false, false, false]);
   });

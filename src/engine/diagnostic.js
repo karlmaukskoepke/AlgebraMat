@@ -19,6 +19,7 @@ export const PROBES = [
   { pack: 'distribute-combine', levels: [1, 3], section: 'build' },
   { pack: 'value', levels: [1, 3], section: 'build' },
   { pack: 'one-step', levels: [2, 4], section: 'solve' },   // x − a = b, and x / a = b
+  { pack: 'two-step', levels: [2, 5], section: 'solve' },   // ax − b = c, and b − ax = c (a negative coefficient)
 ];
 
 // The sections that have a diagnostic ('all' is every probe, in order).

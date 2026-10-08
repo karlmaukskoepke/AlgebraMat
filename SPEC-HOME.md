@@ -12,7 +12,7 @@
 - Hover is only decoration; everything works by tap or click.
 
 ## 3. A diagnostic for each section
-- **Count it:** 6 problems (Combine it, Flip It, Group It, two each). **Build it:** 8 (Boxes & Circles, Groups of Terms, Distribute then combine, Value it, two each). **Solve it:** 2 problems, from One-step equations (`x − a = b` and `x / a = b`; the answer line reads "x ="); it grows as the Two-step and Multi-step cards arrive. Each opens the levels it recommends, as before.
+- **Count it:** 6 problems (Combine it, Flip It, Group It, two each). **Build it:** 8 (Boxes & Circles, Groups of Terms, Distribute then combine, Value it, two each). **Solve it:** 4 problems, two each from One-step equations (`x − a = b` and `x / a = b`) and Two-step equations (`ax − b = c` and `b − ax = c`); the answer line reads "x =". It grows as the Multi-step card arrives. Each opens the levels it recommends, as before.
 - Saved separately (`mat.diag.v2`). The old single diagnostic is split between the two the first time: every answer keeps its problem (same seed), and the two new Value it problems show as "6 of 8 done".
 
 ## 5. Dropdown menus (Karl, 2026-10-08; built)

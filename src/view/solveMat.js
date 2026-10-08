@@ -3,7 +3,8 @@
 // to both sides and what's left. Inline SVG; the pictures are plain data (`balanceRows`) so they can be tested.
 
 import { MINUS } from '../engine/expr.js';
-import { formatEquation, substituteSegments, balanceOf, leftOf } from '../engine/solve.js';
+import { formatEquation, substituteSegments, balanceOf } from '../engine/equation.js';
+import { twoStepRows } from './solve2Rows.js';
 import { boxShape, CELL } from './valueMat.js';
 
 const SVG_NS = 'http://www.w3.org/2000/svg';
@@ -72,6 +73,7 @@ function undone(p) {
 }
 
 export function balanceRows(p, rung) {
+  if (p.kind === 'solve2') return twoStepRows(p, rung);
   if (rung < 2) return [];
   if (rung === 2) return [{ label: 'The balance', ...balance(p) }];
   return [
@@ -127,7 +129,7 @@ function drawSide(svg, x, y, h, items) {
         for (let b = 0; b < it.count; b++) {
           const bx = cx + b * (BOX_W + 14);
           svg.append(el('rect', { x: bx, y: by, width: BOX_W, height: BOX_H, rx: 6, class: 'vm-box' }));
-          svg.append(el('text', { x: bx + BOX_W / 2, y: by + BOX_H / 2 + 12, 'text-anchor': 'middle', class: 'sv-x' }, ['x']));
+          svg.append(el('text', { x: bx + BOX_W / 2, y: by + BOX_H / 2 + 12, 'text-anchor': 'middle', class: 'sv-x' }, [it.neg ? `${MINUS}x` : 'x']));
         }
       }
     } else if (it.type === 'counters') {
@@ -136,7 +138,7 @@ function drawSide(svg, x, y, h, items) {
       const gw = boxShape(it.size).cols * CELL;
       for (let g = 0; g < it.count; g++) {
         const gx = cx + g * (gw + 14);
-        drawCounters(svg, gx, y, h, it.size, '+');
+        drawCounters(svg, gx, y, h, it.size, it.sign ?? '+');
         svg.append(el('rect', { x: gx - 3, y: y + (h - boxShape(it.size).rows * CELL) / 2 - 3, width: gw + 6, height: boxShape(it.size).rows * CELL + 6, rx: 6, class: 'sv-group' }));
       }
     }
@@ -171,7 +173,7 @@ export function renderSolveMat({ problem, rung = 0, tried = null, typed = '', do
     svg.append(line);
     const bal = balanceOf(problem, tried);
     svg.append(el('text', { x: W / 2, y: y + 76, 'text-anchor': 'middle', class: `sv-verdict ${bal.balanced ? 'is-good' : 'is-bad'}` },
-      [bal.balanced ? `${bal.text} = ${bal.right}   ✓ balanced` : `${bal.text} ≠ ${bal.right}   ✗ not balanced`]));
+      [`${bal.mirror ? bal.right : bal.text} ${bal.balanced ? '=' : '≠'} ${bal.mirror ? bal.text : bal.right}   ${bal.balanced ? '✓ balanced' : '✗ not balanced'}`]));
     y += 110;
   }
 
@@ -184,4 +186,4 @@ export function renderSolveMat({ problem, rung = 0, tried = null, typed = '', do
   return svg;
 }
 
-export { leftOf, signed };
+export { signed };

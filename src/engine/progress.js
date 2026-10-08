@@ -108,8 +108,9 @@ export function mergeProgress(a, b) {
 //   v8: Boxes & Circles gains a level (6), 36 bits in use
 //   v9: 9 data symbols (about 44.6 bits): + Value it (5, room for its later levels), 41 bits in use
 //   v10: 10 data symbols (about 49.5 bits): + One-step equations (8, room for its later levels), 49 bits in use
+//   v11: 12 data symbols (about 59.4 bits): + Two-step equations (8, room for one more level), 57 bits in use
 //
-// New codes are always v10; older codes (written down earlier) still work, and a code from before Combine it's
+// New codes are always v11; older codes (written down earlier) still work, and a code from before Combine it's
 // mixed round (or Boxes & Circles' read-the-model round) brings its levels back in the right places (see
 // normalizeProgress). (Group It's pack id is still `lasso`.) v8 uses 36 of about 39.6 bits.
 
@@ -170,8 +171,17 @@ const LAYOUTS = {
       { id: 'value', levels: 5 }, { id: 'one-step', levels: 8 },
     ],
   },
+  // Two-step equations, with room for 8 levels (7 now), 57 bits in use.
+  11: {
+    data: 12,
+    packs: [
+      { id: 'flipit', levels: 5 }, { id: 'lasso', levels: 7 }, { id: 'boxes', levels: 6 },
+      { id: 'groups-of-terms', levels: 8 }, { id: 'combineit', levels: 5 }, { id: 'distribute-combine', levels: 5 },
+      { id: 'value', levels: 5 }, { id: 'one-step', levels: 8 }, { id: 'two-step', levels: 8 },
+    ],
+  },
 };
-export const CODE_VERSION = 10;
+export const CODE_VERSION = 11;
 
 // Weighted sum mod 31. Weights 2, 3, 4, … are all nonzero mod 31 and differ
 // by 1 between neighbors, so any single typo or neighbor swap is caught.
