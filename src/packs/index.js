@@ -9,6 +9,7 @@ import { generateTermGroupsLevel } from '../engine/generateTermGroups.js';
 import { generateDistributeLevel } from '../engine/generateDistribute.js';
 import { generateValueLevel } from '../engine/generateValue.js';
 import { generateSolveLevel } from '../engine/generateSolve.js';
+import { generateSolve2Level } from '../engine/generateSolve2.js';
 
 // Group It (built as "Lasso"; its id stays 'lasso' so saved progress and
 // save codes from before the rename still work).
@@ -94,6 +95,17 @@ export const oneStep = {
   generate: (level, seed) => generateSolveLevel(level, seed),
 };
 
+// Two-step equations (SPEC-SOLVE.md §7): undo the number first, then the multiplying. Same supports as One-step.
+export const twoStep = {
+  id: 'two-step',
+  title: 'Two-step equations',
+  subtitle: 'Undoing two operations',
+  blurb: 'Undo the number first, then the multiplying.',
+  levels: 7,
+  levelNames: ['ax + b = c', 'ax − b = c', 'b + ax = c', 'x on the right', 'b − ax = c', 'negative answers', 'all mixed'],
+  generate: (level, seed) => generateSolve2Level(level, seed),
+};
+
 // The rest of the equations are still to come: they show as cards under Solve it, with no levels (so they take no room in saves).
 const soon = (id, title, subtitle) => ({ id, title, subtitle, comingSoon: true, levels: 0, levelNames: [] });
 
@@ -106,7 +118,7 @@ export const PACKS = [
   distributeCombine,
   valueIt,
   oneStep,
-  soon('two-step', 'Two-step equations', 'Undoing two operations'),
+  twoStep,
   soon('multi-step', 'Multi-step equations', 'Variables on both sides'),
 ];
 

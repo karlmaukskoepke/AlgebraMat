@@ -1,9 +1,11 @@
-// One-step equations in light mode as a pure reducer: type x. Check puts the typed answer back into the equation, so a
+// One-step and two-step equations in light mode as a pure reducer: type x. Check puts the typed answer back into the equation, so a
 // wrong answer shows an unbalanced equation (the first support); then, one rung at a time for each wrong answer or
 // I'm stuck: the equation as a balance of boxes and counters, then the undo (the same thing done to both sides), with
 // the answer to finish. Teach me goes straight to the last. A right answer is checked the same way and shows it balances.
 
-import { checkSolve, answerText, answerOf } from './solve.js';
+import { answerOf } from './solve.js';
+import { checkEquation, answerText, isTwoStep } from './equation.js';
+import { messageParams } from './solve2.js';
 import { typeInto, isTyping } from './entry.js';
 import { emptySkills } from './skills.js';
 
@@ -38,10 +40,13 @@ function moreHelp(s, lead, tag) {
   const fresh = rung !== s.rung;
   s.rung = rung;
   if (fresh && SUPPORTS[rung] && !s.supportsShown.includes(SUPPORTS[rung])) s.supportsShown.push(SUPPORTS[rung]);
-  const form = { 'x+a': 'Plus', 'x-a': 'Minus', ax: 'ax', 'x/a': 'Over' }[s.problem.form];
-  if (rung === 1) return say(s, lead === 'wrong' ? `sTag_${String(tag).replace(/-/g, '_')}` : 'sCheck', { form });
-  if (rung === 2) return say(s, lead === 'wrong' ? 'sModelWrong' : 'sModel', { form });
-  return say(s, lead === 'teach' ? 'sTeach' : 'sWork', { form });
+  // One-step: the message depends on the form; two-step ('t' messages): on the equation's own numbers.
+  const two = isTwoStep(s.problem);
+  const p = two ? 't' : 's';
+  const params = two ? messageParams(s.problem) : { form: { 'x+a': 'Plus', 'x-a': 'Minus', ax: 'ax', 'x/a': 'Over' }[s.problem.form] };
+  if (rung === 1) return say(s, lead === 'wrong' ? `${p}Tag_${String(tag).replace(/-/g, '_')}` : `${p}Check`, params);
+  if (rung === 2) return say(s, `${p}${lead === 'wrong' ? 'ModelWrong' : 'Model'}`, params);
+  return say(s, `${p}${lead === 'teach' ? 'Teach' : 'Work'}`, params);
 }
 
 export function reduceSolveLight(state, action) {
@@ -55,7 +60,7 @@ export function reduceSolveLight(state, action) {
   }
   switch (action.type) {
     case 'check': {
-      const { correct, tag, typed, unreadable } = checkSolve(s.problem, s.entry);
+      const { correct, tag, typed, unreadable } = checkEquation(s.problem, s.entry);
       if (unreadable) return say(s, s.entry === '' || s.entry === '-' ? 'typeAnswer' : 'answerUnreadable', undefined, true);
       s.tried = typed;
       if (correct) {

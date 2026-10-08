@@ -1,7 +1,7 @@
-// The play adapter for One-step equations in light mode (engine/solveLight.js): find x.
+// The play adapter for One-step and Two-step equations in light mode (engine/solveLight.js): find x.
 
 import { newSolveLight, reduceSolveLight } from '../engine/solveLight.js';
-import { formatEquation } from '../engine/solve.js';
+import { formatEquation } from '../engine/equation.js';
 import { renderSolveMat } from '../view/solveMat.js';
 import { buildWalkLightControls } from '../view/walkLightControls.js';
 import { solveFeedbackText } from '../view/solveFeedback.js';
@@ -17,7 +17,7 @@ export const solveLightPlay = {
   effects(before, s) {
     if (!before && s.stage !== 'done') startIntro({ algebra: false });
     if (before && before.step !== 'done' && s.step === 'done') {
-      recordProblem(s, { pack: 'one-step', level: s.problem.logLevel ?? null, problem: formatEquation(s.problem) });
+      recordProblem(s, { pack: s.problem.kind === 'solve2' ? 'two-step' : 'one-step', level: s.problem.logLevel ?? null, problem: formatEquation(s.problem) });
     }
     return { hint: null };
   },

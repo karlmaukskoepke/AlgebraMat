@@ -13,7 +13,7 @@ import { formatDistribute, distributedExpression, groupParts, looseTerms } from 
 import { readInteger, classify } from './scaffold.js';
 import { evaluate as evaluateProblem, formatProblem } from './expr.js';
 import { formatValue, answerText as answerValueText, checkValue } from './value.js';
-import { formatEquation, answerText as answerSolveText, checkSolve } from './solve.js';
+import { formatEquation, answerText as answerSolveText, checkEquation } from './equation.js';
 
 const UNREADABLE = new Set(['typeAnswer', 'answerUnreadable']);
 
@@ -190,7 +190,7 @@ export const CARDS = {
     problemText: formatEquation,
     lead: 'x =',                       // the diagnostic's answer line reads "x = …", not "= …"
     answerText: answerSolveText,
-    check: checkSolve,
+    check: checkEquation,
   },
   distribute: {
     pad: 'algebra',
@@ -206,5 +206,5 @@ export const CARDS = {
 export function cardIdFor(packId, level) {
   if (packId === 'combineit') return level <= 3 ? 'twoTerm' : 'integers';
   if (packId === 'flipit') return level <= 4 ? 'twoTerm' : 'integers';
-  return { lasso: 'group', boxes: 'boxes', 'groups-of-terms': 'termGroups', 'distribute-combine': 'distribute', value: 'value', 'one-step': 'solve' }[packId] ?? null;
+  return { lasso: 'group', boxes: 'boxes', 'groups-of-terms': 'termGroups', 'distribute-combine': 'distribute', value: 'value', 'one-step': 'solve', 'two-step': 'solve' }[packId] ?? null;
 }

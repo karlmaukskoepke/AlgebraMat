@@ -28,4 +28,20 @@ Answers are whole numbers and positive for now. Every problem is drawable: at mo
 v10 adds One-step equations with room for 8 levels (5 used, 49 of about 49.5 bits), so the later levels need no new version; Two-step and Multi-step will need v11. v9 and older codes still read.
 
 ## 6. Not built
-A diagnostic for the Solve it section; the "drag a term across" card; negatives and fractions; Two-step and Multi-step equations.
+The "drag a term across" card; negatives and fractions in One-step; Multi-step equations.
+
+## 7. Two-step equations (Karl, 2026-10-08; light build)
+`3x + 6 = 21`, `5 + 4x = 13`, `21 = 3x + 6` (x on the right), `5 − 2x = −3` (a negative coefficient). Same screen as One-step: type x, Check puts the answer back in.
+
+**Levels (7; the save code has room for 8):** 1. `ax + b = c`  2. `ax − b = c`  3. `b + ax = c`  4. the same turned round (`c = ax + b`)  5. `b − ax = c`, **c negative in at least two** (`5 − 2x = −3`)  6. negative answers  7. all mixed. The first four are positive; negatives come in at Level 5. Drawable: a, 2 to 5; b, 1 to 12; |c| at most 30.
+
+**Undo the constants first (Karl).** The picture does it in that order: the number comes off both sides (taken away if the other side has it to give, else its opposite is added to both), then what is left is shared equally among the boxes, then (negative coefficient) both sides are flipped to the opposite: the boxes hold −x, so what the boxes make is −x. A student who divides first is allowed to, but **must divide every term on both sides**, and the messages say so with the equation's own numbers (`3x ÷ 3 = x, 6 ÷ 3 = 2, 21 ÷ 3 = 7`): this reinforces the distributive property of division.
+
+**What a wrong answer looked like (the big one), with A·x + B = C, x = (C − B)/A:**
+- `divided-one-term`: C/A − B (divided the x term and the other side, not the number).
+- `stopped-early`: C − B (undid the number, not the multiplying).
+- `skipped-constant`: C/A. `constant-wrong-way`: (C + B)/A (added when it should take away, or the reverse).
+- `multiplied`: (C − B)·A. `untouched`: C. `sign-flipped` (A > 0) and `sign-lost` (A < 0, the boxes are −x): −x.
+- Only slips that come out as whole numbers can be typed, so only those are tagged.
+
+**Supports:** as One-step: the answer put back in (with the slip named), the balance (a box and counters; negative boxes are labelled −x), then the undo, share, what's left (and flip). **Diagnostic:** Solve it's diagnostic gains `ax − b = c` and `b − ax = c` (4 problems in all). **Save code:** v11 (57 of about 59.4 bits); v10 and older codes still read.

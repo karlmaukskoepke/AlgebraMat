@@ -65,6 +65,7 @@ const PLAY = {
   'groups-of-terms': LIGHT ? termGroupLightPlay : termGroupPlay,
   value: valueLightPlay,
   'one-step': solveLightPlay,
+  'two-step': solveLightPlay,
   'distribute-combine': (level) => (level >= 4 ? distributeTypedPlay : LIGHT ? distributeLightPlay : distributePlay),
 };
 const adapterFor = (packId, level) => (typeof PLAY[packId] === 'function' ? PLAY[packId](level) : PLAY[packId]);
