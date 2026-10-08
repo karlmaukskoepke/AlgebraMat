@@ -19,7 +19,7 @@ var DIRECTORY_HEAD = ['StudentID', 'Period'];
 
 function onOpen() {
   SpreadsheetApp.getUi().createMenu('The Mat')
-    .addItem('Sync from my master list', 'syncRoster')
+    .addItem('Sync from my master list', 'syncFromMenu')
     .addSeparator()
     .addItem('Turn on automatic daily sync', 'turnOnDailySync')
     .addItem('Turn off automatic sync', 'turnOffDailySync')
@@ -36,6 +36,13 @@ function toHex(bytes) {
 }
 
 // A student's scrambled id: S- and 10 characters of an HMAC of the school ID. The class sheet's script makes the same one.
+// A short fingerprint of the key, written next to the class list (Directory, D2) so the class sheet can tell whether the
+// list was made with ITS key. (The class sheet's script makes the same one.)
+function keyFingerprint(secret) {
+  if (!secret || secret.length < 20) throw new Error('Set ID_KEY in this file\'s Script properties (the same long secret as in the class sheet\'s script).');
+  return toHex(Utilities.computeHmacSha256Signature('key-check', secret)).slice(0, 8);
+}
+
 function studentKey(schoolId, secret) {
   if (!secret || secret.length < 20) throw new Error('Set ID_KEY in this file\'s Script properties (the same long secret as in the class sheet\'s script).');
   return 'S-' + toHex(Utilities.computeHmacSha256Signature(String(schoolId), secret)).slice(0, 10);
@@ -114,9 +121,19 @@ function syncRoster() {
     var classBook = SpreadsheetApp.openByUrl(classUrl);
     var dir = classBook.getSheetByName('Directory') || classBook.insertSheet('Directory');
     writeRows(dir, DIRECTORY_HEAD, roster.map(function (r) { return [r.key, r.period]; }));
+    dir.getRange(1, 4, 2, 1).setValues([['KeyCheck'], [keyFingerprint(PropertiesService.getScriptProperties().getProperty('ID_KEY') || '')]]);
     sent = roster.length;
   }
   return { students: roster.length, repeats: students.repeats, sentToClassSheet: sent };
+}
+
+// The menu's version: says what happened (the daily trigger runs syncRoster quietly).
+function syncFromMenu() {
+  var r = syncRoster();
+  var text = r.students + ' students read from the master list'
+    + (r.repeats ? ' (' + r.repeats + ' listed twice, kept once)' : '')
+    + (r.sentToClassSheet ? '; the class list in the class sheet now holds ' + r.sentToClassSheet + '.' : '. The class sheet web address is not set, so nothing was sent there.');
+  SpreadsheetApp.getUi().alert(text);
 }
 
 function turnOnDailySync() {

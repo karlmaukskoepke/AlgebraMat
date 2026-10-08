@@ -47,6 +47,14 @@ describe('the roster and the scrambled ids', () => {
     expect(() => roster.studentKey('1000001', 'short')).toThrow(/ID_KEY/);
   });
 
+  it('writes the same key fingerprint as the class sheet script, and another key makes another', () => {
+    const script = makeScript({ properties: { ID_KEY: KEY } });
+    expect(roster.keyFingerprint(KEY)).toBe(script.keyFingerprint());
+    expect(roster.keyFingerprint(KEY)).toMatch(/^[0-9a-f]{8}$/);
+    expect(roster.keyFingerprint(`${KEY}x`)).not.toBe(roster.keyFingerprint(KEY));
+    expect(() => roster.keyFingerprint('short')).toThrow(/ID_KEY/);
+  });
+
   it('ties together: a student on the class list can sign in, and gets the period the roster gave', () => {
     const script = makeScript({
       properties: { ID_KEY: KEY, GOOGLE_CLIENT_ID: 'c', ALLOWED_DOMAIN: 'school.org' },

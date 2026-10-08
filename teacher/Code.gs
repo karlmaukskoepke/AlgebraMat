@@ -152,23 +152,98 @@ function studentFromGoogle(info, ss) {
   var local = info.email.slice(0, info.email.length - domain.length - 1);
   var m = local.indexOf(prefix) === 0 ? /^\d{3,12}$/.exec(local.slice(prefix.length)) : null;
   if (m) {
-    var id = studentKey(m[0]);
-    var period = classPeriod(ss, id);
-    return { id: id, period: period, number: '' };
+    return listedStudent(ss, m[0]);
   }
   var tests = setting('TEST_EMAILS').toLowerCase().split(',').map(function (t) { return t.trim(); });
   if (tests.indexOf(info.email) >= 0) return { id: 'T-' + hmacHex(info.email).slice(0, 10), period: 'TEST', number: '' };
   throw authError('Please sign in with your student account.');
 }
 
-// The period of a student in the class list the roster file keeps here ("Directory": scrambled id, period). A student
-// who isn't on it can't sign in.
+// A student on the class list (the Directory the roster file keeps here: scrambled id, period). The id in the email is
+// tried as it is, and without leading zeros (a spreadsheet turns an id like 0123456 into the number 123456), so either way
+// the list was written finds the student. A student who isn't on it can't sign in; the refusal carries the scrambled
+// code, so the teacher can look for exactly that one in the roster file's Key column.
+function listedStudent(ss, digits) {
+  var sheet = tab(ss, DIRECTORY);
+  var last = sheet.getLastRow();
+  if (last < 2) throw authError('Your teacher has not set up the class list yet.');
+  var rows = sheet.getRange(2, 1, last - 1, 2).getValues();
+  var tries = [digits];
+  var stripped = digits.replace(/^0+/, '');
+  if (stripped && stripped !== digits) tries.push(stripped);
+  for (var t = 0; t < tries.length; t++) {
+    var id = studentKey(tries[t]);
+    for (var i = 0; i < rows.length; i++) {
+      if (clean(rows[i][0], 40) === id) return { id: id, period: clean(rows[i][1], 12).toUpperCase(), number: '' };
+    }
+  }
+  if (directoryKeyCheck(sheet) === 'different') throw authError('The class list was made with a different secret key (ID_KEY) than this class sheet. Tell your teacher.');
+  throw authError('Your account is not on the class list. Ask your teacher. (Code ' + studentKey(digits).slice(2) + ')');
+}
+
+// A short fingerprint of ID_KEY: the roster file writes the same one next to the class list (Directory, D2), so the two
+// can be compared without showing the key. 'match', 'different', or 'missing' (a class list from before this check).
+function keyFingerprint() {
+  return hmacHex('key-check').slice(0, 8);
+}
+function directoryKeyCheck(sheet) {
+  var written = String(sheet.getRange(2, 4).getValue() || '').trim();
+  if (!written) return 'missing';
+  return written === keyFingerprint() ? 'match' : 'different';
+}
+
+// What a teacher needs to know when a student says they are on the class list but can't sign in: how many students the
+// class list holds, whether it was made with this sheet's key, and (given a student ID number) whether that student is
+// on it. Nothing here is kept or shown to students.
+function classListReport(ss, digits) {
+  var sheet = tab(ss, DIRECTORY);
+  var rows = Math.max(sheet.getLastRow() - 1, 0);
+  var out = { rows: rows, keyCheck: directoryKeyCheck(sheet), listed: null, period: '' };
+  if (digits) {
+    try {
+      var who = listedStudent(ss, String(digits).replace(/\D/g, ''));
+      out.listed = true;
+      out.period = who.period;
+    } catch (e) {
+      out.listed = false;
+    }
+  }
+  return out;
+}
+
+function reportText(r, digits) {
+  var lines = ['The class list holds ' + r.rows + ' students.'];
+  if (r.keyCheck === 'match') lines.push('Its secret key matches this class sheet: good.');
+  else if (r.keyCheck === 'different') lines.push('PROBLEM: it was made with a DIFFERENT secret key (ID_KEY) than this class sheet. Make ID_KEY exactly the same in both scripts, then run The Mat > Sync in the roster file.');
+  else lines.push('It has no key check yet (made before this check existed). Run The Mat > Sync from my master list in the roster file, then check again.');
+  if (digits) lines.push(r.listed ? 'That student IS on the class list (period ' + r.period + ').' : 'That student is NOT on the class list. If they are in your master list, run The Mat > Sync from my master list in the roster file (and check the master list shows their ID with every digit).');
+  return lines.join('\n');
+}
+
+function onOpen() {
+  SpreadsheetApp.getUi().createMenu('The Mat')
+    .addItem('Check the class list', 'checkClassList')
+    .addItem('Check one student by ID number', 'checkOneStudent')
+    .addToUi();
+}
+function checkClassList() {
+  SpreadsheetApp.getUi().alert(reportText(classListReport(SpreadsheetApp.getActiveSpreadsheet())));
+}
+function checkOneStudent() {
+  var ui = SpreadsheetApp.getUi();
+  var answer = ui.prompt('Check one student', 'Type the student ID number (the digits after the s in their email). It is looked up here and not kept.', ui.ButtonSet.OK_CANCEL);
+  if (answer.getSelectedButton() !== ui.Button.OK) return;
+  var digits = String(answer.getResponseText()).replace(/\D/g, '');
+  ui.alert(reportText(classListReport(SpreadsheetApp.getActiveSpreadsheet(), digits), digits));
+}
+
+// The period of a student already known by their scrambled id (a device that signed in before).
 function classPeriod(ss, id) {
   var sheet = tab(ss, DIRECTORY);
   var last = sheet.getLastRow();
   if (last < 2) throw authError('Your teacher has not set up the class list yet.');
   var rows = sheet.getRange(2, 1, last - 1, 2).getValues();
-  for (var i = 0; i < rows.length; i++) if (rows[i][0] === id) return clean(rows[i][1], 12).toUpperCase();
+  for (var i = 0; i < rows.length; i++) if (clean(rows[i][0], 40) === id) return clean(rows[i][1], 12).toUpperCase();
   throw authError('Your account is not on the class list. Ask your teacher.');
 }
 
