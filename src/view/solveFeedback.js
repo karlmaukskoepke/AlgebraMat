@@ -2,8 +2,8 @@
 // ax, Over (x/a).
 
 const UNDO = {
-  Plus: 'x has a number added to it, so take that number away from both sides.',
-  Minus: 'x has a number taken away from it, so add that number to both sides.',
+  Plus: 'x has a number added to it, so add its opposite (the same number, negative) to both sides: the pairs cancel.',
+  Minus: 'x has a number taken away from it, so add its opposite (the same number, positive) to both sides: the pairs cancel.',
   ax: 'x is multiplied by a number, so divide both sides by that number: share the counters equally among the boxes.',
   Over: 'x is divided by a number, so multiply both sides by that number: take that many copies of each side.',
 };
@@ -15,8 +15,8 @@ const DIVIDE_FIRST = 'You can divide first too, but then divide every term on bo
 const T = {
   tTag_divided_one_term: ({ a, divideAll }) => `${NOT} If you divide both sides by ${a}, you must divide every term, including the number${divideAll ? `: ${divideAll}` : ''}. (Undoing the number first is usually easier.) Try again.`,
   tTag_stopped_early: ({ a }) => `${NOT} You undid the number, but x is still multiplied by ${a}. One more step: undo the multiplying on both sides. Try again.`,
-  tTag_skipped_constant: ({ constant, undoWord }) => `${NOT} The number that was ${constant} is still there. Undo it first, on both sides: ${undoWord}. Try again.`,
-  tTag_constant_wrong_way: ({ constant, undoWord }) => `${NOT} Check the direction. The number was ${constant}, so to undo it ${undoWord}, on both sides. Try again.`,
+  tTag_skipped_constant: ({ constant, undoWord }) => `${NOT} The number that was ${constant} is still there. Undo it first: ${undoWord}. Try again.`,
+  tTag_constant_wrong_way: ({ constant, undoWord }) => `${NOT} Check the direction. The number was ${constant}, so to undo it ${undoWord}. Try again.`,
   tTag_multiplied: ({ a }) => `${NOT} x is multiplied by ${a}, so undo it by dividing, not multiplying. Undo the number first, then divide. Try again.`,
   tTag_untouched: () => `${NOT} The other side isn’t x: two things are stuck to x. Undo the number first, on both sides, then the multiplying. Try again.`,
   tTag_sign_flipped: () => `${NOT} You have the opposite of x. Check your signs as you undo each step. Try again.`,

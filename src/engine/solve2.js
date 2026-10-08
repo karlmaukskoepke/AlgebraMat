@@ -105,5 +105,5 @@ export function messageParams(p) {
   const tail = A > 0
     ? `${a}x ÷ ${a} = x, ${signed(B)} ÷ ${a} = ${piece(B, a)}, and ${signed(p.c)} ÷ ${a} = ${piece(p.c, a)}`
     : '';
-  return { a, b: p.b, negative: A < 0, divideAll: tail, constant: B > 0 ? 'added' : 'taken away', undoWord: B > 0 ? 'take it away' : 'add it back' };
+  return { a, b: p.b, negative: A < 0, divideAll: tail, constant: B > 0 ? 'added' : 'taken away', undoWord: `add ${B > 0 ? MINUS : '+'}${Math.abs(B)} to both sides` };
 }

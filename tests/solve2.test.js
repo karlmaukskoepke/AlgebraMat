@@ -168,10 +168,11 @@ describe('the pictures', () => {
     expect(twoStepRows(MIRROR, 2)[0].left[0].n).toBe(21);
   });
 
-  it('take the number away when the other side has it, else add its opposite; then share; then (negative) flip', () => {
+  it('add the opposite of the number to both sides, the pairs cancel; then share; then (negative) flip', () => {
     const [undo, share, left] = twoStepRows(PLUS, 3);
-    expect(undo.left[1].struck).toBe(6);
-    expect(undo.right[0].struck).toBe(6);
+    expect(undo.label).toBe('Add −6 to both sides: the pairs cancel');
+    expect(undo.left.map((i) => [i.type, i.sign, i.n, i.struck, i.added])).toEqual([['box', undefined, undefined, undefined, undefined], ['counters', '+', 6, 6, false], ['counters', '-', 6, 6, true]]);
+    expect(undo.right.map((i) => [i.sign, i.n, i.struck, i.added])).toEqual([['+', 21, 6, false], ['-', 6, 6, true]]);   // 6 of the 21 pair off with the 6 negatives
     expect(share.right[0]).toMatchObject({ type: 'groups', count: 3, size: 5 });
     expect(left.right[0].n).toBe(5);
     expect(left.solved).toBe(true);
@@ -187,7 +188,7 @@ describe('the pictures', () => {
 
   it('a negative coefficient ends with a flip to x', () => {
     const rows = twoStepRows(NEG, 3);
-    expect(rows.map((r) => r.label)).toEqual(['Take 5 away from both sides', 'Share the counters equally: 2 boxes, 2 groups', 'What’s left: the opposite of x', 'Flip both sides to the opposite']);
+    expect(rows.map((r) => r.label)).toEqual(['Add −5 to both sides: the pairs cancel', 'Share the counters equally: 2 boxes, 2 groups', 'What’s left: the opposite of x', 'Flip both sides to the opposite']);
     expect(rows[1].right[0]).toMatchObject({ count: 2, size: 4, sign: '-' });
     expect(rows[3].right[0]).toMatchObject({ n: 4, sign: '+' });
     expect(rows[3].solved).toBe(true);
