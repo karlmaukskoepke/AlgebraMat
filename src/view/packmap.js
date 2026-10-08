@@ -160,17 +160,31 @@ export function renderPackMap(root, progress, packs, {
     document.addEventListener('click', (e) => { if (!e.target.closest?.('.section-menu')) closeMenus(); });
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { closeMenus(); document.activeElement?.blur?.(); } });
   }
+  // On a computer, resting the mouse on a title for half a second opens its dropdown; moving off closes it.
+  root.querySelectorAll('.section-menu').forEach((m) => {
+    let timer = null;
+    m.addEventListener('mouseenter', () => {
+      if (!matchMedia('(hover: hover)').matches) return;
+      timer = setTimeout(() => { closeMenus(); m.classList.add('is-expanded'); }, 500);
+    });
+    m.addEventListener('mouseleave', () => {
+      clearTimeout(timer);
+      if (matchMedia('(hover: hover)').matches) m.classList.remove('is-expanded');
+    });
+  });
   root.onclick = (e) => {
     const b = e.target.closest('button[data-level]');
     if (b && !b.disabled) return onPlay(b.dataset.pack, Number(b.dataset.level));
     const f = e.target.closest('button[data-fluency]');
     if (f) return onFluency(f.dataset.fluency);
     const tab = e.target.closest('.section-tab');
-    if (tab && matchMedia('(hover: none)').matches) {
-      // No hover on a touch screen: a tap opens that dropdown (and closes any other); "Open all of …" goes in.
+    if (tab) {
+      // A click or tap opens that dropdown (and closes any other); "Open all of …" goes in. On a computer, resting the
+      // mouse on a title does the same after half a second (CSS), and moving off closes a click-opened one.
       const menu = tab.closest('.section-menu');
-      const was = menu.classList.contains('is-expanded');
-      root.querySelectorAll('.section-menu.is-expanded').forEach((m) => m.classList.remove('is-expanded'));
+      // (With a mouse a click only ever opens it: the half-second rest may already have.)
+      const was = menu.classList.contains('is-expanded') && matchMedia('(hover: none)').matches;
+      closeMenus();
       if (!was) menu.classList.add('is-expanded');
       return;
     }

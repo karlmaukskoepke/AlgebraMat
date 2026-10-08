@@ -2557,10 +2557,10 @@ body {
   /* leaving waits a moment, so crossing the gap to the next title doesn't flicker */
   transition: opacity 0.15s ease, transform 0.15s ease, visibility 0s linear 0.25s;
 }
+/* Opened by script: a click, or the mouse resting on a title for half a second (see packmap.js); keyboard focus too. */
+.section-menu:has(:focus-visible) .dropdown { visibility: visible; opacity: 1; transform: none; transition-delay: 0s; }
+
 .section-menu.is-expanded .dropdown { visibility: visible; opacity: 1; transform: none; transition-delay: 0s; }
-@media (hover: hover) {
-  .section-menu:hover .dropdown, .section-menu:focus-within .dropdown { visibility: visible; opacity: 1; transform: none; transition-delay: 0s; }
-}
 .dropdown-open {
   appearance: none; background: none; border: 0; padding: 0 4px; min-height: 44px; color: var(--ink);
   font: inherit; font-size: 18px; font-weight: 800; cursor: pointer; text-decoration: underline;

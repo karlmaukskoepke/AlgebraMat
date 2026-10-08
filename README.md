@@ -30,7 +30,7 @@ Add `?seed=123` to the URL to replay a fixed problem set, and `?level=2` to open
 ## Changelog
 
 ### Dropdown menus in the top bar (SPEC-HOME.md §5)
-Hover a section title (Count it, Build it, Solve it) and a dropdown lists its cards with a small button for each level, so any open level is one click away; locked levels are dashed. Move the mouse off and it folds away, leaving the page as it was. On a phone or tablet, tapping a title opens the dropdown (tap elsewhere or press Escape to close); "Open all of ..." goes to the section. The three big panels stay as the first screen.
+Rest the mouse on a section title (Count it, Build it, Solve it) for half a second, or click it, and a dropdown lists its cards with a small button for each level, so any open level is one click away; locked levels are dashed. Move the mouse off and it folds away, leaving the page as it was. On a phone or tablet, a tap opens the dropdown (tap elsewhere or press Escape to close); "Open all of ..." goes to the section. The three big panels stay as the first screen.
 
 ### Value it Level 4: fractions of x
 - **`(3/4)x − 2, x = 8`:** fractional coefficients (bottom numbers 2 to 5), with x always a multiple of the bottom number so every answer is a whole number. The picture for a wrong answer is one box holding x's counters in equal parts (the bottom number), with the top number of parts taken solid and filled. New slips named: only the top number, only the bottom number, the fraction upside down. Level 5 (an expression over a fraction, with simplifying) is still to come.
