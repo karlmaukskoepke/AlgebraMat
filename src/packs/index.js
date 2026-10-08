@@ -10,6 +10,7 @@ import { generateDistributeLevel } from '../engine/generateDistribute.js';
 import { generateValueLevel } from '../engine/generateValue.js';
 import { generateSolveLevel } from '../engine/generateSolve.js';
 import { generateSolve2Level } from '../engine/generateSolve2.js';
+import { generateSwitchLevel } from '../engine/generateSwitch.js';
 
 // Group It (built as "Lasso"; its id stays 'lasso' so saved progress and
 // save codes from before the rename still work).
@@ -95,6 +96,17 @@ export const oneStep = {
   generate: (level, seed) => generateSolveLevel(level, seed),
 };
 
+// Switch sides (SPEC-SOLVE.md §8): the other way to solve it: the number is dragged across the border and switches teams.
+export const switchSides = {
+  id: 'switch',
+  title: 'Switch sides',
+  subtitle: 'Counters cross the border and switch teams',
+  blurb: 'Drag the number across the equals sign: it becomes its opposite.',
+  levels: 6,
+  levelNames: ['x + a = b', 'x − a = b', 'negative answers', 'x on the right', 'two-step', 'two-step, negatives'],
+  generate: (level, seed) => generateSwitchLevel(level, seed),
+};
+
 // Two-step equations (SPEC-SOLVE.md §7): undo the number first, then the multiplying. Same supports as One-step.
 export const twoStep = {
   id: 'two-step',
@@ -118,6 +130,7 @@ export const PACKS = [
   distributeCombine,
   valueIt,
   oneStep,
+  switchSides,
   twoStep,
   soon('multi-step', 'Multi-step equations', 'Variables on both sides'),
 ];
@@ -126,7 +139,7 @@ export const PACKS = [
 export const SECTIONS = [
   { id: 'count', title: 'Count it', blurb: 'Adding, subtracting and multiplying numbers', packs: ['combineit', 'flipit', 'lasso'] },
   { id: 'build', title: 'Build it', blurb: 'Expressions, with boxes, circles and groups', packs: ['boxes', 'groups-of-terms', 'distribute-combine', 'value'] },
-  { id: 'solve', title: 'Solve it', blurb: 'Solving equations', packs: ['one-step', 'two-step', 'multi-step'] },
+  { id: 'solve', title: 'Solve it', blurb: 'Solving equations', packs: ['one-step', 'switch', 'two-step', 'multi-step'] },
 ];
 export const sectionById = (id) => SECTIONS.find((s) => s.id === id);
 export const sectionOf = (packId) => SECTIONS.find((s) => s.packs.includes(packId));

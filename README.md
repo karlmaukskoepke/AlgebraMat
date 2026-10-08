@@ -32,6 +32,9 @@ Add `?seed=123` to the URL to replay a fixed problem set, and `?level=2` to open
 ### Solve it: One-step equations (SPEC-SOLVE.md)
 The first Solve it card, five levels: `x + a = b`, `x − a = b`, `ax = b`, `x / a = b`, then all four mixed. Type x; Check puts your answer back into the equation and shows whether the two sides balance. A wrong answer shows the unbalanced check first, then (if you need more) the equation as a balance of a box and counters, then the undo done to both sides. Save codes are now v10 (older codes still read).
 
+### Solve it: Switch sides (SPEC-SOLVE.md §8)
+A new card between One-step and Two-step, from the class notes: **drag the number across the border and it switches teams** (`x + 4 = −2` → `x = −2 + −4`). Drag or tap the highlighted counters; let go early and they spring back. Six levels: `x + a = b`, `x − a = b`, negative answers, x on the right, two-step, and two-step with negatives. Then add up the other side and type x. Wrong answers are named, and the main slip is "it crossed but didn't switch teams". Save codes are now v12 (older codes still read).
+
 ### Sign-in help for the teacher (teacher/SETUP.md)
 The class sheet now has **The Mat > Check the class list** and **Check one student by ID number**: they say how many students the class list holds, whether it was made with the same secret key (ID_KEY) as the class sheet, and whether one student is on it. The roster file writes a key fingerprint beside the class list so the two can be compared, its sync menu says what it did, and a refused student sees a short code you can search for in the Roster tab. A class list made with a different key now says so instead of "not on the class list". An id that lost its leading zero in the master list is also found. **Paste the new `Code.gs` into the class sheet (then Deploy > Manage deployments > pencil > New version) and the new `RosterSync.gs` into the roster, then sync.**
 

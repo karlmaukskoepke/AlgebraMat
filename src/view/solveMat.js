@@ -63,8 +63,15 @@ function undone(p) {
   }
 }
 
+// A turned-round equation (12 = x + 5) has the sides the other way round.
+const turned = (p, rows) => (p.mirror ? rows.map((r) => ({ ...r, left: r.right, right: r.left })) : rows);
+
 export function balanceRows(p, rung) {
   if (p.kind === 'solve2') return twoStepRows(p, rung);
+  return turned(p, oneStepRows(p, rung));
+}
+
+function oneStepRows(p, rung) {
   if (rung < 2) return [];
   if (rung === 2) return [{ label: 'The balance', ...balance(p) }];
   return [
@@ -94,14 +101,14 @@ function mark(svg, cx, cy, sign, cls) {
   svg.append(g);
 }
 
-function drawCounters(svg, x, y, h, n, sign, struck = 0, added = false) {
+function drawCounters(svg, x, y, h, n, sign, struck = 0, added = false, tone = '') {
   const shape = boxShape(n);
   const top = y + (h - shape.rows * CELL) / 2;
   for (let i = 0; i < n; i++) {
     const cx = x + (i % shape.cols) * CELL + CELL / 2;
     const cy = top + Math.floor(i / shape.cols) * CELL + CELL / 2;
     const out = i >= n - struck;
-    mark(svg, cx, cy, sign, `${added ? 'sv-added' : ''}${out ? ' sv-struck' : ''}`.trim());
+    mark(svg, cx, cy, sign, `${added ? 'sv-added' : ''}${out ? ' sv-struck' : ''}${tone ? ` ${tone}` : ''}`.trim());
     if (out) svg.append(el('line', { x1: cx - 9, y1: cy + 9, x2: cx + 9, y2: cy - 9, class: 'sv-slash' }));
   }
 }
@@ -124,7 +131,16 @@ function drawSide(svg, x, y, h, items) {
         }
       }
     } else if (it.type === 'counters') {
-      drawCounters(svg, cx, y, h, it.n, it.sign, it.struck, it.added);
+      // The counters that can be moved (Switch sides) are one group you can press; ones that have moved are in the crossing color.
+      const group = it.movable
+        ? el('g', { class: 'sw-movable', 'data-move': '1', role: 'button', tabindex: '0', 'aria-label': `Move ${it.sign === '-' ? MINUS : '+'}${it.n} across the border` })
+        : null;
+      drawCounters(group ?? svg, cx, y, h, it.n, it.sign, it.struck, it.added, it.moved ? 'sv-moved' : '');
+      if (group) {
+        const shape = boxShape(it.n);
+        group.prepend(el('rect', { x: cx - 8, y: y + (h - shape.rows * CELL) / 2 - 8, width: shape.cols * CELL + 16, height: shape.rows * CELL + 16, rx: 10, class: 'sw-grab' }));
+        svg.append(group);
+      }
     } else {
       const gw = boxShape(it.size).cols * CELL;
       for (let g = 0; g < it.count; g++) {
@@ -137,28 +153,37 @@ function drawSide(svg, x, y, h, items) {
   }
 }
 
-const rowWidth = (row) => sideWidth(row.left) + MIDDLE + sideWidth(row.right);
+export const rowWidth = (row) => sideWidth(row.left) + MIDDLE + sideWidth(row.right);
 
-function drawRow(svg, row, y, width) {
+export function drawRow(svg, row, y, width) {
   const h = rowHeight(row);
   const x0 = Math.max(10, (width - rowWidth(row)) / 2);
   svg.append(el('text', { x: width / 2, y: y + 22, 'text-anchor': 'middle', class: 'sv-label' }, [row.label]));
   const top = y + 38;
+  if (row.border) {
+    // The border between the two sides (Switch sides): things cross it and switch teams.
+    const bx = x0 + sideWidth(row.left) + MIDDLE / 2;
+    svg.append(el('line', { x1: bx, y1: top - 6, x2: bx, y2: top + h + 10, class: 'sv-border' }));
+    svg.setAttribute('data-border-x', String(bx));
+  }
   drawSide(svg, x0, top, h, row.left);
   svg.append(el('text', { x: x0 + sideWidth(row.left) + MIDDLE / 2, y: top + h / 2 + 16, 'text-anchor': 'middle', class: 'vm-plus' }, ['=']));
   drawSide(svg, x0 + sideWidth(row.left) + MIDDLE, top, h, row.right);
   return top + h + ROW_GAP;
 }
 
-export function renderSolveMat({ problem, rung = 0, tried = null, typed = '', done = false, finalText = '' }) {
-  const rows = balanceRows(problem, rung);
+// `rows` (default: the balance and the undo for this rung), `record` (a line written under the picture, like
+// "x = 12 + −5"), and `showCheck` (the answer put back in) let the Switch sides card draw its own pictures here.
+export function renderSolveMat({
+  problem, rung = 0, tried = null, typed = '', done = false, finalText = '', rows = balanceRows(problem, rung), record = '', showCheck = rung >= 1,
+}) {
   const W = Math.max(VIEW_WIDTH, ...rows.map((r) => rowWidth(r) + 40));
   const svg = el('svg', { class: 'mat value-mat solve-mat', viewBox: `0 0 ${W} 400`, role: 'group', 'aria-label': 'The Solve it Mat' });
   svg.append(el('text', { x: W / 2, y: 80, 'text-anchor': 'middle', class: 'vm-problem' }, [formatEquation(problem)]));
   let y = 130;
 
   // The answer put back in: does it balance?
-  if (tried !== null && (rung >= 1 || done)) {
+  if (tried !== null && (showCheck || done)) {
     const line = el('text', { x: W / 2, y: y + 30, 'text-anchor': 'middle', class: 'sv-check' });
     substituteSegments(problem, tried).forEach((seg, i) => line.append(el('tspan', { class: seg.sub ? 'vm-sub' : null, dx: i === 0 || seg.joined ? 0 : 14 }, [seg.text])));
     svg.append(line);
@@ -169,6 +194,11 @@ export function renderSolveMat({ problem, rung = 0, tried = null, typed = '', do
   }
 
   for (const row of rows) y = drawRow(svg, row, y, W);
+
+  if (record) {
+    svg.append(el('text', { x: W / 2, y: y + 20, 'text-anchor': 'middle', class: 'sv-record' }, [record]));
+    y += 56;
+  }
 
   const text = done ? finalText : typed.replace(/-/g, MINUS);
   svg.append(el('text', { x: W / 2, y: y + 56, 'text-anchor': 'middle', class: `vm-answer${text ? '' : ' is-empty'}${done ? ' is-done' : ''}` }, [`x = ${text || '?'}`]));

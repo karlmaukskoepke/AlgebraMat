@@ -2575,3 +2575,18 @@ body {
 .solve-mat .sv-slash { stroke: #a3281b; stroke-width: 3; stroke-linecap: round; }
 .solve-mat .sv-added .mark { stroke: #0072b2; }
 .solve-mat .sv-group { fill: none; stroke: var(--ink); stroke-width: 2; stroke-dasharray: 6 5; }
+
+/* Switch sides: the border, the group you can move, and the counters that have crossed (the color of "switching teams"). */
+.solve-mat .sv-border { stroke: var(--ink); stroke-width: 3; stroke-dasharray: 9 8; opacity: 0.55; }
+.solve-mat .sw-movable { cursor: grab; touch-action: none; }
+.solve-mat .sw-movable.is-dragging { cursor: grabbing; }
+.solve-mat .sw-grab { fill: #fbe3f1; stroke: #b5368c; stroke-width: 3; stroke-dasharray: 7 5; animation: sw-pulse 1.4s ease-in-out infinite; }
+.solve-mat .sw-movable .mark { stroke: #b5368c; }
+.solve-mat .sv-moved .mark { stroke: #b5368c; }
+.solve-mat .sv-record { font: 700 44px 'Kalam', 'Lexend', system-ui, sans-serif; fill: #8f2b70; }
+@keyframes sw-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.45; } }
+@media (prefers-reduced-motion: reduce) { .solve-mat .sw-grab { animation: none; } }
+@media (prefers-reduced-motion: no-preference) {
+  .solve-mat .sv-moved { animation: sw-land 0.45s ease-out both; transform-box: fill-box; transform-origin: center; }
+  @keyframes sw-land { from { opacity: 0; transform: scale(1.6); } to { opacity: 1; transform: none; } }
+}

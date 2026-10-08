@@ -1,6 +1,7 @@
 // Solve it: one-step equations (SPEC-SOLVE.md). `x + 5 = 12` is 7; `3x = 12` is 4; `x/4 = 3` is 12.
 // A problem is { kind: 'solve', form, a, b, x }: form is 'x+a', 'x-a', 'ax' or 'x/a', `a` the number joined to x,
-// `b` the right-hand side and `x` the solution (always a whole number, so the pad stays the integer pad).
+// `b` the right-hand side and `x` the solution (always a whole number, so the pad stays the integer pad). `mirror: true`
+// turns it round (`12 = x + 5`), for the Switch sides card.
 // Pure logic, no DOM.
 
 import { MINUS } from './expr.js';
@@ -20,12 +21,12 @@ export function leftOf(form, a, v) {
 }
 
 // The problem is built from its solution, so the right side is always right.
-export function makeSolve(form, a, x) {
+export function makeSolve(form, a, x, mirror = false) {
   if (!FORMS.includes(form)) throw new Error(`Unknown form: ${form}`);
   if (!Number.isInteger(a) || a < 1 || !Number.isInteger(x) || x === 0) throw new Error(`Bad equation: ${form}, ${a}, ${x}`);
   const b = leftOf(form, a, x);
   if (!Number.isInteger(b)) throw new Error('x/a needs x to be a multiple of a');
-  return { kind: 'solve', form, a, b, x };
+  return mirror ? { kind: 'solve', form, a, b, x, mirror: true } : { kind: 'solve', form, a, b, x };
 }
 
 export const answerOf = (p) => p.x;
@@ -40,18 +41,21 @@ const leftText = (p, v) => {
     default: return `${v}/${p.a}`;
   }
 };
-export const formatEquation = (p) => `${leftText(p, 'x')} = ${signed(p.b)}`;
+export const formatEquation = (p) => (p.mirror ? `${signed(p.b)} = ${leftText(p, 'x')}` : `${leftText(p, 'x')} = ${signed(p.b)}`);
 
 // The equation with a typed answer put in for x, as segments for the Mat: `x + 5 = 12`, 7 → [(7)] [+ 5 = 12].
 // `sub` marks the value. For ax the value sits beside the number (3(7)), which means multiply.
 export function substituteSegments(p, t) {
   const v = `(${signed(t)})`;
+  const tail = p.mirror ? [] : [{ text: `= ${signed(p.b)}` }];
+  let expr;
   switch (p.form) {
-    case 'x+a': return [{ text: v, sub: true }, { text: `+ ${p.a}` }, { text: `= ${signed(p.b)}` }];
-    case 'x-a': return [{ text: v, sub: true }, { text: `${MINUS} ${p.a}` }, { text: `= ${signed(p.b)}` }];
-    case 'ax': return [{ text: `${p.a}` }, { text: v, sub: true, joined: true }, { text: `= ${signed(p.b)}` }];
-    default: return [{ text: v, sub: true }, { text: `/ ${p.a}` }, { text: `= ${signed(p.b)}` }];
+    case 'x+a': expr = [{ text: v, sub: true }, { text: `+ ${p.a}` }]; break;
+    case 'x-a': expr = [{ text: v, sub: true }, { text: `${MINUS} ${p.a}` }]; break;
+    case 'ax': expr = [{ text: `${p.a}` }, { text: v, sub: true, joined: true }]; break;
+    default: expr = [{ text: v, sub: true }, { text: `/ ${p.a}` }];
   }
+  return p.mirror ? [{ text: `${signed(p.b)} =` }, ...expr] : [...expr, ...tail];
 }
 
 // Does a typed answer balance the equation? `left` is what the left side comes to, written as a number or a fraction.
@@ -59,7 +63,7 @@ export function balanceOf(p, t) {
   const left = leftOf(p.form, p.a, t);
   const balanced = left === p.b;
   const text = Number.isInteger(left) ? signed(left) : `${signed(t)}/${p.a}`;
-  return { left, text, balanced, right: signed(p.b) };
+  return { left, text, balanced, right: signed(p.b), mirror: Boolean(p.mirror) };
 }
 
 // ---------- What a wrong answer looked like ----------
