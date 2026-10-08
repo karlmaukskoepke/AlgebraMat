@@ -2478,20 +2478,18 @@ body {
   color: var(--ink); font: inherit; font-size: 20px; font-weight: 600;
   background: var(--sec); border: 2px solid var(--sec-line); border-radius: 14px; cursor: pointer;
 }
-.section-tab.is-open { font-size: 26px; font-weight: 800; border: 3px solid var(--ink); }
 .section-tab:focus-visible { outline: 3px solid var(--ink); outline-offset: 2px; }
 
-/* The open section's cards take its color. */
+/* A section's cards (in its dropdown) take its color. */
 .pack-grid.sec-count .pack-card, .pack-grid.sec-build .pack-card, .pack-grid.sec-solve .pack-card,
 .soon.sec-count .pack-card, .soon.sec-build .pack-card, .soon.sec-solve .pack-card { background: var(--sec-soft); border-color: var(--sec-line); }
-.home.in-count .diag-bar, .home.in-build .diag-bar, .home.in-solve .diag-bar { border-color: var(--sec-line); }
+.dropdown .diag-bar { border-color: var(--sec-line); margin-top: 0; }
 
 /* The sections open with a short slide, unless the student asked for less movement. */
 @media (prefers-reduced-motion: no-preference) {
   .landing .section-panel { animation: section-in 0.35s ease both; }
   .landing .section-panel:nth-child(2) { animation-delay: 0.06s; }
   .landing .section-panel:nth-child(3) { animation-delay: 0.12s; }
-  .section-bar ~ .pack-grid, .section-bar ~ .soon, .section-bar ~ .diag-bar { animation: section-in 0.3s ease both; }
   @keyframes section-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
 }
 
@@ -2502,7 +2500,6 @@ body {
   .section-blurb { font-size: 18px; }
   .mini-card { font-size: 16px; }
   .section-tab { font-size: 16px; padding: 8px 6px; }
-  .section-tab.is-open { font-size: 19px; flex-grow: 2; }
 }
 
 /* Four cards in a section (Build it): two across, so each is wide enough for its title and its level buttons. */
@@ -2546,7 +2543,6 @@ body {
 /* ---------- The top menu's dropdowns (Karl, 2026-10-08) ---------- */
 .section-bar { position: relative; z-index: 20; }
 .section-menu { flex: 1 1 0; min-width: 0; display: flex; transition: flex-grow 0.25s ease; }
-.section-menu.is-current { flex-grow: 3; }
 
 .dropdown {
   position: absolute; left: 0; right: 0; top: 100%; margin-top: -2px; z-index: 30;
@@ -2554,21 +2550,16 @@ body {
   padding: 14px 14px 10px;
   background: #fffdf2; border: 2px solid var(--sec-line); border-radius: 0 0 16px 16px;
   box-shadow: 0 14px 28px rgba(0, 0, 0, 0.2);
-  /* rolls down from the bar; rolling up leaves a moment after, so crossing a gap doesn't flicker */
+  /* rolls down from the bar; rolling back up is quick, so moving off snaps back to the first screen */
   visibility: hidden; clip-path: inset(0 -30px 100% -30px); opacity: 0;
-  transition: clip-path 0.3s ease, opacity 0.2s ease, visibility 0s linear 0.3s;
+  transition: clip-path 0.12s ease, opacity 0.1s ease, visibility 0s linear 0.12s;
 }
 /* Opened by script: a click, or the mouse resting on a title for half a second (see packmap.js); keyboard focus too. */
 .section-menu:has(:focus-visible) .dropdown, .section-menu.is-expanded .dropdown {
-  visibility: visible; clip-path: inset(0 -30px -40px -30px); opacity: 1; transition-delay: 0s;
+  visibility: visible; clip-path: inset(0 -30px -40px -30px); opacity: 1; transition-delay: 0s; transition-duration: 0.25s, 0.2s, 0s;
 }
 .dropdown .pack-grid { margin: 0; }
 .dropdown .soon-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin-top: 12px; }
-.dropdown-open {
-  appearance: none; display: block; margin: 6px auto 0; background: none; border: 0; padding: 0 12px; min-height: 44px; color: var(--ink);
-  font: inherit; font-size: 18px; font-weight: 800; cursor: pointer; text-decoration: underline;
-}
-.dropdown-open:focus-visible { outline: 3px solid var(--ink); outline-offset: 2px; }
 @media (max-width: 600px) {
   .dropdown { padding: 10px; }
 }

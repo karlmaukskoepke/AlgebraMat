@@ -5,7 +5,7 @@ import {
   encodeProgress, decodeProgress,
 } from './engine/progress.js';
 import { createStore } from './storage.js';
-import { PACKS, SECTIONS, packById, sectionById } from './packs/index.js';
+import { PACKS, SECTIONS, packById } from './packs/index.js';
 import { flipitPlay } from './play/flipitPlay.js';
 import { combinePlay } from './play/combinePlay.js';
 import { lightPlay, flipLightPlay } from './play/lightPlay.js';
@@ -178,12 +178,10 @@ function diagStatus(section) {
   return { status: !d ? 'none' : d.done ? 'done' : d.index > 0 ? 'partial' : 'none', index: d?.index ?? 0, total: totalOf(section) };
 }
 
-// Which section of the home screen is open: remembered on this device (mat.section.v1). None: the three big panels.
-const SECTION_KEY = 'mat.section.v1';
-const loadSection = () => { try { const id = localStorage.getItem(SECTION_KEY); return sectionById(id) ? id : null; } catch { return null; } };
-const saveSection = (id) => { try { if (id) localStorage.setItem(SECTION_KEY, id); else localStorage.removeItem(SECTION_KEY); } catch { /* storage blocked */ } };
+// The home screen is always the three big panels (and the top menu): no section is remembered or left open (Karl, 2026-10-08).
+try { localStorage.removeItem('mat.section.v1'); } catch { /* storage blocked */ }
 
-function goHome(section = loadSection()) {
+function goHome() {
   endTour();
   endDragDemo();
   endQuiz();
@@ -194,8 +192,6 @@ function goHome(section = loadSection()) {
   const now = Date.now();
   renderPackMap($('home'), progress, PACKS, {
     sections: SECTIONS,
-    open: section,
-    onSection: (id) => { saveSection(id); goHome(id); },
     diags: Object.fromEntries(DIAGNOSTIC_SECTIONS.map((id) => [id, diagStatus(id)])),
     bests: Object.fromEntries(CHALLENGES.map((c) => [c.id, bestScore(runs, c.id, 'all', now)])),
     onDiagnostic: (id) => startDiagnostic(id),
@@ -289,7 +285,7 @@ function startDiagnostic(section, retake = false) {
   if (retake) clearDiag(section);
   let state = loadDiag(section) ?? newDiagnostic(newSeed(), section);
   const items = diagnosticItems(state.seed, section);
-  const back = () => { saveSection(section); goHome(section); };
+  const back = () => goHome();
   const finish = () => {
     const rows = readout(state.seed, state.answers, items, section);
     progress = applyReadout(progress, rows);
