@@ -1,5 +1,5 @@
 // The pictures for Two-step equations, as data (drawn by solveMat.js): the equation as a balance of boxes and counters,
-// then the undo done to both sides, constant first (Karl: "undo the constants first"), then the sharing out among the
+// then the undo done to both sides, constant first (Karl: "undo the constants first"), by adding the opposite, then the sharing out among the
 // boxes, then what is left. A negative coefficient (5 − 2x = −3) has boxes of the opposite of x, and ends with a flip.
 //
 // Items: { type: 'box', parts, taken, count, neg }   `neg`: boxes holding the opposite of x (labelled −x)
@@ -7,6 +7,7 @@
 //        { type: 'groups', count, size, sign }
 
 import { coefOf, constOf } from '../engine/solve2.js';
+import { undoConstant } from './undoConstant.js';
 
 const box = (extra = {}) => ({ type: 'box', parts: 1, taken: 0, count: 1, neg: false, ...extra });
 const counters = (n, extra = {}) => ({ type: 'counters', n, sign: '+', struck: 0, added: false, ...extra });
@@ -29,22 +30,8 @@ export function twoStepRows(p, rung) {
   const right = counters(Math.abs(C), { sign: signOf(C) });
   if (rung === 2) return [place(p, { label: 'The balance', left: xSide(p, boxes, [constant]), right: [right] })];
 
-  // 1. undo the number on both sides: take it away if the other side has it to give, else add its opposite to both
-  let undo;
-  if (B > 0 && C >= B) {
-    undo = {
-      label: `Take ${B} away from both sides`,
-      left: xSide(p, boxes, [counters(B, { struck: B })]),
-      right: [counters(C, { struck: B })],
-    };
-  } else {
-    const opposite = (extra) => counters(Math.abs(B), { sign: signOf(-B), added: true, ...extra });
-    undo = {
-      label: B > 0 ? `Take ${B} away from both sides` : `Put ${Math.abs(B)} on both sides`,
-      left: xSide(p, boxes, [counters(Math.abs(B), { sign: signOf(B), struck: Math.abs(B) }), opposite({ struck: Math.abs(B) })]),
-      right: [right, opposite()],
-    };
-  }
+  // 1. undo the number on both sides: add its opposite to both, and the pairs cancel (never "take away")
+  const undo = undoConstant(B, C, (rest) => xSide(p, boxes, rest));
   // 2. share what is left equally among the boxes; 3. what is left
   const share = {
     label: `Share the counters equally: ${p.a} boxes, ${p.a} groups`,

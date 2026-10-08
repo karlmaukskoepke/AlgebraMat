@@ -109,7 +109,7 @@ describe('light mode', () => {
     let s = run(newSolveLight(PLUS), ...answer('17'));
     expect(s).toMatchObject({ stage: 'light', rung: 1, tried: 17, wrongs: 1, tag: 'wrong-op', entry: '' });
     expect(solveFeedbackText(s.feedback)).toMatch(/don’t balance/);
-    expect(solveFeedbackText(s.feedback)).toMatch(/take that number away from both sides/);
+    expect(solveFeedbackText(s.feedback)).toMatch(/add its opposite/);
     s = run(s, ...answer('12'));
     expect(s).toMatchObject({ rung: 2, tried: 12, tag: 'untouched' });
     s = run(s, ...answer('11'));
@@ -150,8 +150,9 @@ describe('the pictures', () => {
     expect(balance.left[1].n).toBe(5);
     expect(balance.right[0].n).toBe(12);
     const [undo, left] = balanceRows(PLUS, 3);
-    expect(undo.left[1].struck).toBe(5);
-    expect(undo.right[0].struck).toBe(5);
+    expect(undo.label).toBe('Add −5 to both sides: the pairs cancel');
+    expect(undo.left.slice(1).map((i) => [i.sign, i.n, i.struck])).toEqual([['+', 5, 5], ['-', 5, 5]]);   // +5 and the −5 added cancel
+    expect(undo.right.map((i) => [i.sign, i.n, i.struck])).toEqual([['+', 12, 5], ['-', 5, 5]]);
     expect(left.right[0].n).toBe(7);
     // subtracting: a negative counters on the left, the same number added to both sides
     const [m, mLeft] = balanceRows(MINUS, 3);

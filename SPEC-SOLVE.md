@@ -14,7 +14,7 @@ Answers are whole numbers and positive for now. Every problem is drawable: at mo
 - **Rung 0:** the equation; type x.
 - **Rung 1: your answer put back in.** Shown automatically after a wrong answer: the equation with the typed value in blue, then whether the sides balance. The message names the slip (§4).
 - **Rung 2: the balance.** x is a **box** (a number we don't know) and counters: `x + a = b` is a box and a counters against b counters; `x − a = b` a box and a negative counters; `ax = b` a boxes against b counters; `x / a = b` one box in a equal parts, one part lit, against b counters.
-- **Rung 3: the undo, done to both sides, and what's left.** Take a away from both sides (struck); put a on both sides (the negative counters cancel); share the counters equally among the boxes; take a copies of each side. Then a box against the answer's counters, and `x = …`.
+- **Rung 3: the undo, done to both sides, and what's left.** **Never "take away" (Karl, 2026-10-08): always add the opposite to both sides** (`x + 5 = 12`: add −5 to both sides, and the pairs cancel; `x − 3 = 6`: add +3), so students see negatives cancel positives in pairs. Then share the counters equally among the boxes; or take a copies of each side. Then a box against the answer's counters, and `x = …`.
 - **Teach me step-by-step** goes straight to rung 3; I'm stuck before anything is typed skips rung 1. A streak counts only clean answers (as everywhere).
 
 ## 4. What a wrong answer looked like (`tagSolve`)
@@ -35,7 +35,7 @@ The "drag a term across" card; negatives and fractions in One-step; Multi-step e
 
 **Levels (7; the save code has room for 8):** 1. `ax + b = c`  2. `ax − b = c`  3. `b + ax = c`  4. the same turned round (`c = ax + b`)  5. `b − ax = c`, **c negative in at least two** (`5 − 2x = −3`)  6. negative answers  7. all mixed. The first four are positive; negatives come in at Level 5. Drawable: a, 2 to 5; b, 1 to 12; |c| at most 30.
 
-**Undo the constants first (Karl).** The picture does it in that order: the number comes off both sides (taken away if the other side has it to give, else its opposite is added to both), then what is left is shared equally among the boxes, then (negative coefficient) both sides are flipped to the opposite: the boxes hold −x, so what the boxes make is −x. A student who divides first is allowed to, but **must divide every term on both sides**, and the messages say so with the equation's own numbers (`3x ÷ 3 = x, 6 ÷ 3 = 2, 21 ÷ 3 = 7`): this reinforces the distributive property of division.
+**Undo the constants first (Karl).** The picture does it in that order: the opposite of the number is added to both sides and the pairs cancel (never "take away"), then what is left is shared equally among the boxes, then (negative coefficient) both sides are flipped to the opposite: the boxes hold −x, so what the boxes make is −x. A student who divides first is allowed to, but **must divide every term on both sides**, and the messages say so with the equation's own numbers (`3x ÷ 3 = x, 6 ÷ 3 = 2, 21 ÷ 3 = 7`): this reinforces the distributive property of division.
 
 **What a wrong answer looked like (the big one), with A·x + B = C, x = (C − B)/A:**
 - `divided-one-term`: C/A − B (divided the x term and the other side, not the number).

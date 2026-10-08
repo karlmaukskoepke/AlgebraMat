@@ -5,6 +5,7 @@
 import { MINUS } from '../engine/expr.js';
 import { formatEquation, substituteSegments, balanceOf } from '../engine/equation.js';
 import { twoStepRows } from './solve2Rows.js';
+import { undoConstant } from './undoConstant.js';
 import { boxShape, CELL } from './valueMat.js';
 
 const SVG_NS = 'http://www.w3.org/2000/svg';
@@ -45,18 +46,8 @@ function balance(p) {
 // The same thing with the undo done to both sides, and then what is left (a box on one side, counters on the other).
 function undone(p) {
   switch (p.form) {
-    case 'x+a':
-      return {
-        label: `Take ${p.a} away from both sides`,
-        left: [box(), counters(p.a, { struck: p.a })],
-        right: [counters(p.b, { struck: p.a })],
-      };
-    case 'x-a':
-      return {
-        label: `Put ${p.a} on both sides`,
-        left: [box(), counters(p.a, { sign: '-', struck: p.a }), counters(p.a, { added: true, struck: p.a })],
-        right: [counters(p.b), counters(p.a, { added: true })],
-      };
+    case 'x+a': return undoConstant(p.a, p.b, (rest) => [box(), ...rest]);
+    case 'x-a': return undoConstant(-p.a, p.b, (rest) => [box(), ...rest]);
     case 'ax':
       return {
         label: `Share the counters equally: ${p.a} boxes, ${p.a} groups`,

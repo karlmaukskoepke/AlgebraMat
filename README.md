@@ -32,6 +32,9 @@ Add `?seed=123` to the URL to replay a fixed problem set, and `?level=2` to open
 ### Solve it: One-step equations (SPEC-SOLVE.md)
 The first Solve it card, five levels: `x + a = b`, `x − a = b`, `ax = b`, `x / a = b`, then all four mixed. Type x; Check puts your answer back into the equation and shows whether the two sides balance. A wrong answer shows the unbalanced check first, then (if you need more) the equation as a balance of a box and counters, then the undo done to both sides. Save codes are now v10 (older codes still read).
 
+### Undoing a number means adding its opposite (SPEC-SOLVE.md §3)
+One-step and Two-step pictures no longer "take away from both sides". They add the opposite to both sides (`x + 5 = 12`: add −5 to both) and strike the pairs that cancel, so students see negatives cancel positives, as in the class notes.
+
 ### Solve it: Two-step equations (SPEC-SOLVE.md §7)
 Seven levels: `ax + b = c`, `ax − b = c`, `b + ax = c`, the same with x on the right, `b − ax = c` (negative coefficient, `5 − 2x = −3`), negative answers, then all mixed. The picture undoes the number first, then shares the rest among the boxes; wrong answers are named (divided only one term, stopped early, undid the number the wrong way, ...) and the messages show how to divide *every* term. The Solve it diagnostic now has four problems. Save codes are now v11 (older codes still read).
 
