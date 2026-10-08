@@ -2,7 +2,7 @@
 // recommended level for each card. Built once; `render(...)` updates it.
 
 import { h, buildPad, bindKeys, shown } from './quiz.js';
-import { itemText, itemPad, STANDING, packTitle } from '../engine/diagnostic.js';
+import { itemText, itemPad, itemLead, STANDING, packTitle } from '../engine/diagnostic.js';
 import { packById, sectionById } from '../packs/index.js';
 
 export function createDiagnosticView(root, { onAction, onStop, onPlay, onMap, onRetake }) {
@@ -55,7 +55,7 @@ export function createDiagnosticView(root, { onAction, onStop, onPlay, onMap, on
             h('span', { class: 'diag-chip' }, STANDING[r.standing])),
           h('ul', { class: 'diag-problems' }, ...r.problems.map((p) => h('li', { class: p.right ? 'is-right' : 'is-wrong' },
             h('span', { class: 'diag-mark', 'aria-label': p.right ? 'right' : 'not right' }, p.right ? '✓' : '✗'),
-            h('span', { class: 'diag-text' }, `${p.text} = ${p.answer}`),
+            h('span', { class: 'diag-text' }, p.lead === '=' ? `${p.text} = ${p.answer}` : `${p.text}, ${p.lead} ${p.answer}`),
             p.right ? null : h('span', { class: 'diag-typed' }, p.skipped ? 'skipped' : `you typed ${shown(p.typed)}`)))),
           h('button', { type: 'button', class: 'btn diag-go', dataset: { play: '1', pack: r.pack, level: String(r.rec) } },
             `Start at Level ${r.rec}: ${pack.levelNames[r.rec - 1]}`));
@@ -100,7 +100,7 @@ export function createDiagnosticView(root, { onAction, onStop, onPlay, onMap, on
       cardName.textContent = packTitle(item.pack);
       problem.textContent = itemText(item);
       answer.textContent = '';
-      answer.append(h('span', { class: 'dist-eq' }, '='), h('span', { class: `quiz-typed${s.entry ? '' : ' is-empty'}` }, shown(s.entry) || '?'));
+      answer.append(h('span', { class: 'dist-eq' }, itemLead(item)), h('span', { class: `quiz-typed${s.entry ? '' : ' is-empty'}` }, shown(s.entry) || '?'));
       next.textContent = s.index === items.length - 1 ? 'Finish ✓' : 'Next →';
       next.disabled = s.entry === '';
     },

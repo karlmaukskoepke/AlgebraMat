@@ -32,6 +32,9 @@ Add `?seed=123` to the URL to replay a fixed problem set, and `?level=2` to open
 ### Solve it: One-step equations (SPEC-SOLVE.md)
 The first Solve it card, five levels: `x + a = b`, `x − a = b`, `ax = b`, `x / a = b`, then all four mixed. Type x; Check puts your answer back into the equation and shows whether the two sides balance. A wrong answer shows the unbalanced check first, then (if you need more) the equation as a balance of a box and counters, then the undo done to both sides. Save codes are now v10 (older codes still read).
 
+### Solve it diagnostic (SPEC-HOME.md §3)
+Two problems from One-step equations (`x − a = b`, then `x / a = b`), typed with nothing marked until the end, opening the levels you're ready for.
+
 ### Dropdown menus in the top bar (SPEC-HOME.md §5)
 Rest the mouse on a section title (Count it, Build it, Solve it) for half a second, or click it, and that section's full cards roll down, the same cards as in the section, so any open level is one click away. Move the mouse off (far left or right, or back to the top) and they roll back up; move to another title and that one rolls down instead. On a phone or tablet, a tap opens it and a tap on the title again closes it. The three big panels stay as the first screen.
 
