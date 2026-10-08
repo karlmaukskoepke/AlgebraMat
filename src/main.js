@@ -18,6 +18,7 @@ import { termGroupLightPlay } from './play/termGroupLightPlay.js';
 import { distributeLightPlay } from './play/distributeLightPlay.js';
 import { valueLightPlay } from './play/valueLightPlay.js';
 import { solveLightPlay } from './play/solveLightPlay.js';
+import { switchPlay } from './play/switchPlay.js';
 import { boxPlay } from './play/boxPlay.js';
 import { afterAnswer } from './engine/streak.js';
 import { loadBests, saveBest, loadLog } from './lightStore.js';
@@ -66,6 +67,7 @@ const PLAY = {
   value: valueLightPlay,
   'one-step': solveLightPlay,
   'two-step': solveLightPlay,
+  switch: switchPlay,
   'distribute-combine': (level) => (level >= 4 ? distributeTypedPlay : LIGHT ? distributeLightPlay : distributePlay),
 };
 const adapterFor = (packId, level) => (typeof PLAY[packId] === 'function' ? PLAY[packId](level) : PLAY[packId]);
