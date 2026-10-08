@@ -96,76 +96,66 @@ function landing(sections, packs, progress) {
       })))));
 }
 
-// The three titles in a bar across the top. Resting the mouse on a title (or a click or tap) rolls down that section's
-// full cards, the same ones as in the section itself, so any open level is one click away; moving off rolls them back
-// up, and moving to another title rolls that one down instead. The open section's title is wide, the others small.
+// The three titles in a bar across the top. Resting the mouse on a title for a moment (or a click or tap) rolls down that
+// section's full cards, with its diagnostic, so any open level is one click away; moving off rolls them back up and the
+// first screen is as it was. Moving to another title rolls that one down instead. No section is ever left open.
 let lastClose = 0;   // when a dropdown last rolled up (see the hover handling in renderPackMap)
-function sectionBar(sections, open, packs, progress, bests) {
+const HOVER_DELAY = 200;
+function sectionBar(sections, packs, progress, bests, diags) {
   return h('nav', { class: 'section-bar', 'aria-label': 'Sections' },
     ...sections.map((sec) => {
       const mine = sec.packs.map((id) => packs.find((p) => p.id === id)).filter(Boolean);
       const playable = mine.filter((p) => !p.comingSoon);
       const soon = mine.filter((p) => p.comingSoon);
-      return h('div', { class: `section-menu sec-${sec.id}${sec.id === open ? ' is-current' : ''}` },
-        h('button', {
-          type: 'button', class: `section-tab sec-${sec.id}${sec.id === open ? ' is-open' : ''}`, 'data-section': sec.id,
-          'aria-current': sec.id === open ? 'true' : null, 'aria-haspopup': 'true',
-        }, sec.title),
+      const diag = diags[sec.id];
+      return h('div', { class: `section-menu sec-${sec.id}` },
+        h('button', { type: 'button', class: `section-tab sec-${sec.id}`, 'data-section': sec.id, 'aria-haspopup': 'true' }, sec.title),
         h('div', { class: 'dropdown', role: 'group', 'aria-label': `${sec.title} cards` },
+          diag ? diagnosticBar(sec, diag) : null,
           playable.length ? h('div', { class: `pack-grid packs-${Math.min(6, playable.length)} sec-${sec.id}` },
             ...playable.map((p) => packCard(progress, p, bests))) : null,
-          soon.length ? h('div', { class: `soon-grid sec-${sec.id}` }, ...soon.map(soonCard)) : null,
-          h('button', { type: 'button', class: 'dropdown-open', 'data-section': sec.id }, `Open all of ${sec.title} →`)));
+          soon.length ? h('div', { class: `soon-grid sec-${sec.id}` }, ...soon.map(soonCard)) : null));
     }));
 }
 
 export function renderPackMap(root, progress, packs, {
-  onPlay, onSaveCode, onEnterCode, onDiagnostic, onFluency, onAccount, onSection, sections = [], open = null,
+  onPlay, onSaveCode, onEnterCode, onDiagnostic, onFluency, onAccount, sections = [],
   account = { state: 'off' }, diags = {}, bests = {}, note,
 }) {
-  const section = sections.find((s) => s.id === open) ?? null;
-  const mine = section ? section.packs.map((id) => packs.find((p) => p.id === id)).filter(Boolean) : [];
-  const playable = mine.filter((p) => !p.comingSoon);
-  const soon = mine.filter((p) => p.comingSoon);
-  const diag = section ? diags[section.id] : null;
-  root.className = `home${section ? ` in-${section.id} sec-${section.id}` : ""}`;
+  root.className = 'home';
   root.replaceChildren(...[
     h('header', { class: 'home-head' },
       h('div', {},
-        h('h1', {}, h('button', { type: 'button', class: 'home-title', 'data-section': '', 'aria-label': 'The Mat: all sections' }, 'The Mat')),
-        h('p', { class: 'tagline' }, section ? section.blurb : 'Pick a section.')),
+        h('h1', {}, h('button', { type: 'button', class: 'home-title', 'aria-label': 'The Mat: all sections' }, 'The Mat')),
+        h('p', { class: 'tagline' }, 'Pick a section.')),
       h('div', { class: 'home-actions' },
         onAccount ? h('button', { type: 'button', class: 'btn', 'data-home': 'account' }, accountLabel(account)) : null,
         h('button', { type: 'button', class: 'btn', 'data-home': 'save' }, 'Save code'),
         h('button', { type: 'button', class: 'btn', 'data-home': 'enter' }, 'Enter code'))),
     h('p', { class: 'home-note', role: 'status', hidden: !note }, note ?? ''),
     installBar(h),
-    sectionBar(sections, open, packs, progress, bests),
-    section ? null : landing(sections, packs, progress),
-    section && diag ? diagnosticBar(section, diag) : null,
-    section && playable.length ? h('div', { class: `pack-grid packs-${Math.min(6, playable.length)} sec-${section.id}` },
-      ...playable.map((p) => packCard(progress, p, bests))) : null,
-    section && soon.length
-      ? h('section', { class: `soon sec-${section.id}`, 'aria-label': 'Coming soon' },
-        h('h2', { class: 'soon-head' }, playable.length ? 'Coming soon' : 'On the way'),
-        h('div', { class: 'soon-grid' }, ...soon.map(soonCard)))
-      : null,
+    sectionBar(sections, packs, progress, bests, diags),
+    landing(sections, packs, progress),
   ].filter(Boolean));
   // A tap outside the open dropdown, or Escape, closes it.
   const closeMenus = () => root.querySelectorAll('.section-menu.is-expanded').forEach((m) => m.classList.remove('is-expanded'));
   if (!root.dataset.menuBound) {
     root.dataset.menuBound = '1';
-    document.addEventListener('click', (e) => { if (!e.target.closest?.('.section-menu')) closeMenus(); });
+    document.addEventListener('click', (e) => { if (!e.target.closest?.('.section-menu, .section-panel')) closeMenus(); });
+    // With a mouse, a dropdown opened by a click goes when the pointer leaves it (moving onto anything that isn't the menu).
+    document.addEventListener('mousemove', (e) => {
+      if (matchMedia('(hover: hover)').matches && !e.target.closest?.('.section-menu')) closeMenus();
+    });
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { closeMenus(); document.activeElement?.blur?.(); } });
   }
-  // On a computer, resting the mouse on a title for half a second rolls its cards down; moving off rolls them back up.
+  // On a computer, resting the mouse on a title for a moment rolls its cards down; moving off rolls them back up at once.
   // Moving straight on to another title (while one is open, or just closed) rolls that one down without the wait.
   root.querySelectorAll('.section-menu').forEach((m) => {
     let timer = null;
     m.addEventListener('mouseenter', () => {
       if (!matchMedia('(hover: hover)').matches) return;
       const switching = root.querySelector('.section-menu.is-expanded') || Date.now() - lastClose < 400;
-      timer = setTimeout(() => { closeMenus(); m.classList.add('is-expanded'); }, switching ? 0 : 500);
+      timer = setTimeout(() => { closeMenus(); m.classList.add('is-expanded'); }, switching ? 0 : HOVER_DELAY);
     });
     m.addEventListener('mouseleave', () => {
       clearTimeout(timer);
@@ -179,19 +169,17 @@ export function renderPackMap(root, progress, packs, {
     if (b && !b.disabled) return onPlay(b.dataset.pack, Number(b.dataset.level));
     const f = e.target.closest('button[data-fluency]');
     if (f) return onFluency(f.dataset.fluency);
-    const tab = e.target.closest('.section-tab');
-    if (tab) {
-      // A click or tap opens that dropdown (and closes any other); "Open all of …" goes in. On a computer, resting the
-      // mouse on a title does the same after half a second (CSS), and moving off closes a click-opened one.
-      const menu = tab.closest('.section-menu');
-      // (With a mouse a click only ever opens it: the half-second rest may already have.)
+    const opener = e.target.closest('.section-tab, .section-panel');
+    if (opener) {
+      // A click or tap on a title (or on its big panel) opens that dropdown, closing any other. With a mouse a click only
+      // ever opens it (the short rest may already have); on a touch screen it toggles.
+      const menu = root.querySelector(`.section-menu.sec-${opener.dataset.section}`);
       const was = menu.classList.contains('is-expanded') && matchMedia('(hover: none)').matches;
       closeMenus();
       if (!was) menu.classList.add('is-expanded');
       return;
     }
-    const sec = e.target.closest('[data-section]');
-    if (sec && !sec.dataset.home) return onSection(sec.dataset.section || null);
+    if (e.target.closest('.home-title')) return closeMenus();
     const act = e.target.closest('[data-home]')?.dataset.home;
     if (act === 'account') onAccount();
     if (act === 'save') onSaveCode();
