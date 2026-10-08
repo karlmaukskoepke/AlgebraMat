@@ -177,6 +177,45 @@ describe('Google sign-in with the school account', () => {
     expect(attempt(good('s1234567@school.org'), {}, [])).toThrow(/not set up the class list/);
   });
 
+  it('finds a student whose id lost its leading zero in the master list, and keeps one id for them', () => {
+    // the email says s0123456; the spreadsheet stored 123456 (a number), so the class list was made from "123456"
+    const asZeroed = setup({}, { [TOKEN]: good('s0123456@school.org') }, [['123456', '4']]);
+    const res = asZeroed.script.handle({ v: 1, auth: google() }, asZeroed.book);
+    expect(res.period).toBe('4');
+    expect(res.device.id).toBe(asZeroed.script.studentKey('123456'));
+    // ...and if the list kept the zero, that works as it always did
+    const kept = setup({}, { [TOKEN]: good('s0123456@school.org') }, [['0123456', '4']]);
+    expect(kept.script.handle({ v: 1, auth: google() }, kept.book).device.id).toBe(kept.script.studentKey('0123456'));
+  });
+
+  it('says which scrambled code was not found, so the teacher can look for it in the roster file', () => {
+    const { script, book } = setup({}, { [TOKEN]: good('s9999999@school.org') });
+    let message = '';
+    try { script.handle({ v: 1, auth: google() }, book); } catch (e) { message = e.message; }
+    expect(message).toMatch(/not on the class list/);
+    expect(message).toContain(`(Code ${script.studentKey('9999999').slice(2)})`);
+    expect(message).not.toContain('9999999');
+  });
+
+  it('tells the teacher why a student can\'t get in: the key, the count, and whether that student is listed', () => {
+    const { script, book } = setup();
+    // a class list from before the key check existed
+    expect(script.classListReport(book, '1234567')).toEqual({ rows: 2, keyCheck: 'missing', listed: true, period: '3' });
+    expect(script.classListReport(book, '0000001')).toMatchObject({ listed: false });
+    expect(script.classListReport(book)).toMatchObject({ rows: 2, listed: null });
+    // written by the roster file with this key, and with another
+    const dir = book.getSheetByName('Directory');
+    dir.getRange(1, 4, 2, 1).setValues([['KeyCheck'], [script.keyFingerprint()]]);
+    expect(script.classListReport(book).keyCheck).toBe('match');
+    dir.getRange(2, 4).setValue('deadbeef');
+    expect(script.classListReport(book).keyCheck).toBe('different');
+    expect(script.reportText(script.classListReport(book, '1234567'), '1234567')).toMatch(/DIFFERENT secret key/);
+    // and a student refused for a different key hears so, instead of "not on the class list"
+    const other = setup({}, { [TOKEN]: good('s9999999@school.org') });
+    other.book.getSheetByName('Directory').getRange(2, 4).setValue('deadbeef');
+    expect(() => other.script.handle({ v: 1, auth: google() }, other.book)).toThrow(/different secret key/);
+  });
+
   it('lets a listed teacher account in for testing, kept apart as TEST', () => {
     const { script, book } = setup({ TEST_EMAILS: 'Kmauk@school.org, other@school.org' }, { [TOKEN]: good('kmauk@school.org') });
     const res = script.handle({ v: 1, auth: google() }, book);

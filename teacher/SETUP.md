@@ -56,6 +56,14 @@ After changing the class sheet's **script** (not its properties), publish it aga
 2. When `DEFAULT_CLASS` in `src/syncConfig.js` holds your Web app URL, you don't need the class link at all: students just open The Mat.
 3. Tell students: **open The Mat, tap Sign in, tap the Google button, use your school account.** Their button then shows ✓ and their period (like `✓ P3`).
 
+## A student says they're on the list but can't sign in
+"Your account is not on the class list" means the scrambled id made from their email isn't in the **Directory** tab. Check, in this order:
+1. In the **class sheet**: **The Mat > Check the class list** (reload the sheet once so the menu appears). It says how many students the list holds and whether it was made with this sheet's secret key. If it says **different secret key**, make `ID_KEY` exactly the same in both scripts (copy and paste it; no spaces), then sync again.
+2. **The Mat > Check one student by ID number**: type the digits after the `s` in their email. It says whether that student is on the list, and in which period. The number is looked up and not kept.
+3. If the student isn't on it, in the **roster** file run **The Mat > Sync from my master list**. It now tells you how many students it read and how many it sent to the class sheet. If the number is short, the student's row in the master list is missing a Period or StudentID (those rows are skipped).
+4. **The Mat > Turn on automatic daily sync** (roster file) keeps it current every morning, so a student added today can sign in tomorrow. Sync by hand if they need to sign in today.
+A student who really isn't listed also sees a short code in the message: it's the scrambled id, and it matches the **Key** column in the roster file's Roster tab (search for it there to see which student it is).
+
 ## What you see
 - **Students**: scrambled id, period, first and last sync. **Directory**: the class list the roster file wrote.
 - **Progress**: a row per student, a column per level (TRUE = finished); columns ending `-open` are levels the diagnostic opened.

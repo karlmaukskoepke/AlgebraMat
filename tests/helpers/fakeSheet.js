@@ -52,7 +52,7 @@ export function makeScript({ properties = {}, tokens = {} } = {}) {
     },
   };
   const names = Object.keys(stubs);
-  const script = new Function(...names, `${code}; return { handle, identify, safe, splitKey, doGet, doPost, studentKey, isRetired };`)(...names.map((n) => stubs[n]));
+  const script = new Function(...names, `${code}; return { handle, identify, safe, splitKey, doGet, doPost, studentKey, isRetired, classListReport, keyFingerprint, reportText };`)(...names.map((n) => stubs[n]));
   return { ...script, props };
 }
 
@@ -63,4 +63,4 @@ const rosterCode = readFileSync(new URL('../../teacher/RosterSync.gs', import.me
 const hashing = {
   computeHmacSha256Signature: (text, key) => [...createHmac('sha256', key).update(text, 'utf8').digest()].map((b) => (b > 127 ? b - 256 : b)),
 };
-export const roster = new Function('Utilities', `${rosterCode}; return { readMaster, buildRoster, studentKey, periodOf, clean };`)(hashing);
+export const roster = new Function('Utilities', `${rosterCode}; return { readMaster, buildRoster, studentKey, periodOf, clean, keyFingerprint };`)(hashing);
