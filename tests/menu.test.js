@@ -9,7 +9,7 @@ describe('the top menu\'s dropdowns', () => {
     expect(entries.map((e) => e.title)).toEqual(['Count it', 'Build it', 'Solve it']);
     expect(entries[0].cards.map((c) => c.id)).toEqual(['combineit', 'flipit', 'lasso']);
     expect(entries[1].cards.map((c) => [c.id, c.levels.length])).toEqual([['boxes', 6], ['groups-of-terms', 8], ['distribute-combine', 5], ['value', 4]]);
-    expect(entries[2].cards.every((c) => c.soon && c.levels.length === 0)).toBe(true);
+    expect(entries[2].cards.map((c) => [c.id, c.soon, c.levels.length])).toEqual([['one-step', false, 5], ['two-step', true, 0], ['multi-step', true, 0]]);
   });
 
   it('show which levels are finished and which are open (the first, the one after a finished one, and any the diagnostic opened)', () => {
