@@ -2,7 +2,6 @@
 import { isLevelDone, isLevelUnlocked, isPackComplete } from '../engine/progress.js';
 import { installBar } from './installPrompt.js';
 import { accountLabel } from './account.js';
-import { menuEntries } from '../engine/menu.js';
 import { CARD_CHALLENGES, challengeById } from '../engine/fluency.js';
 
 const h = (tag, attrs = {}, ...children) => {
@@ -97,28 +96,27 @@ function landing(sections, packs, progress) {
       })))));
 }
 
-// The three titles in a bar across the top. Over a title (or a tap on a touch screen) a dropdown lists that section's
-// cards, each with its level buttons, so any open level is one click away; moving off collapses it again. The open
-// section's title is wide and bold, the others small beside it.
-function sectionBar(sections, open, packs, progress) {
-  const entries = menuEntries(sections, packs, progress);
+// The three titles in a bar across the top. Resting the mouse on a title (or a click or tap) rolls down that section's
+// full cards, the same ones as in the section itself, so any open level is one click away; moving off rolls them back
+// up, and moving to another title rolls that one down instead. The open section's title is wide, the others small.
+let lastClose = 0;   // when a dropdown last rolled up (see the hover handling in renderPackMap)
+function sectionBar(sections, open, packs, progress, bests) {
   return h('nav', { class: 'section-bar', 'aria-label': 'Sections' },
-    ...entries.map((entry) => h('div', { class: `section-menu sec-${entry.id}${entry.id === open ? ' is-current' : ''}` },
-      h('button', {
-        type: 'button', class: `section-tab sec-${entry.id}${entry.id === open ? ' is-open' : ''}`, 'data-section': entry.id,
-        'aria-current': entry.id === open ? 'true' : null, 'aria-haspopup': 'true',
-      }, entry.title),
-      h('div', { class: 'dropdown', role: 'group', 'aria-label': `${entry.title} cards` },
-        h('button', { type: 'button', class: 'dropdown-open', 'data-section': entry.id }, `Open all of ${entry.title} →`),
-        h('div', { class: 'dropdown-cards' }, ...entry.cards.map((card) => h('div', { class: `dropdown-card${card.soon ? ' is-soon' : ''}` },
-          h('span', { class: 'dropdown-name' }, card.title),
-          card.soon
-            ? h('span', { class: 'dropdown-soon' }, 'soon')
-            : h('span', { class: 'dropdown-levels' }, ...card.levels.map((lv) => h('button', {
-              type: 'button', class: `menu-pill${lv.done ? ' is-done' : ''}${lv.open ? '' : ' is-locked'}`, disabled: !lv.open,
-              'data-level': lv.level, 'data-pack': card.id,
-              'aria-label': `${card.title}, level ${lv.level}${lv.open ? `: ${lv.name}` : ', locked'}${lv.done ? ', finished' : ''}`,
-            }, `${lv.done ? '✓' : ''}${lv.level}`))))))))));
+    ...sections.map((sec) => {
+      const mine = sec.packs.map((id) => packs.find((p) => p.id === id)).filter(Boolean);
+      const playable = mine.filter((p) => !p.comingSoon);
+      const soon = mine.filter((p) => p.comingSoon);
+      return h('div', { class: `section-menu sec-${sec.id}${sec.id === open ? ' is-current' : ''}` },
+        h('button', {
+          type: 'button', class: `section-tab sec-${sec.id}${sec.id === open ? ' is-open' : ''}`, 'data-section': sec.id,
+          'aria-current': sec.id === open ? 'true' : null, 'aria-haspopup': 'true',
+        }, sec.title),
+        h('div', { class: 'dropdown', role: 'group', 'aria-label': `${sec.title} cards` },
+          playable.length ? h('div', { class: `pack-grid packs-${Math.min(6, playable.length)} sec-${sec.id}` },
+            ...playable.map((p) => packCard(progress, p, bests))) : null,
+          soon.length ? h('div', { class: `soon-grid sec-${sec.id}` }, ...soon.map(soonCard)) : null,
+          h('button', { type: 'button', class: 'dropdown-open', 'data-section': sec.id }, `Open all of ${sec.title} →`)));
+    }));
 }
 
 export function renderPackMap(root, progress, packs, {
@@ -142,7 +140,7 @@ export function renderPackMap(root, progress, packs, {
         h('button', { type: 'button', class: 'btn', 'data-home': 'enter' }, 'Enter code'))),
     h('p', { class: 'home-note', role: 'status', hidden: !note }, note ?? ''),
     installBar(h),
-    sectionBar(sections, open, packs, progress),
+    sectionBar(sections, open, packs, progress, bests),
     section ? null : landing(sections, packs, progress),
     section && diag ? diagnosticBar(section, diag) : null,
     section && playable.length ? h('div', { class: `pack-grid packs-${Math.min(6, playable.length)} sec-${section.id}` },
@@ -160,16 +158,20 @@ export function renderPackMap(root, progress, packs, {
     document.addEventListener('click', (e) => { if (!e.target.closest?.('.section-menu')) closeMenus(); });
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { closeMenus(); document.activeElement?.blur?.(); } });
   }
-  // On a computer, resting the mouse on a title for half a second opens its dropdown; moving off closes it.
+  // On a computer, resting the mouse on a title for half a second rolls its cards down; moving off rolls them back up.
+  // Moving straight on to another title (while one is open, or just closed) rolls that one down without the wait.
   root.querySelectorAll('.section-menu').forEach((m) => {
     let timer = null;
     m.addEventListener('mouseenter', () => {
       if (!matchMedia('(hover: hover)').matches) return;
-      timer = setTimeout(() => { closeMenus(); m.classList.add('is-expanded'); }, 500);
+      const switching = root.querySelector('.section-menu.is-expanded') || Date.now() - lastClose < 400;
+      timer = setTimeout(() => { closeMenus(); m.classList.add('is-expanded'); }, switching ? 0 : 500);
     });
     m.addEventListener('mouseleave', () => {
       clearTimeout(timer);
-      if (matchMedia('(hover: hover)').matches) m.classList.remove('is-expanded');
+      if (!matchMedia('(hover: hover)').matches) return;
+      if (m.classList.contains('is-expanded')) lastClose = Date.now();
+      m.classList.remove('is-expanded');
     });
   });
   root.onclick = (e) => {

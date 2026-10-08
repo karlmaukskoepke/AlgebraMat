@@ -18,10 +18,11 @@ export const PROBES = [
   { pack: 'groups-of-terms', levels: [2, 5], section: 'build' },
   { pack: 'distribute-combine', levels: [1, 3], section: 'build' },
   { pack: 'value', levels: [1, 3], section: 'build' },
+  { pack: 'one-step', levels: [2, 4], section: 'solve' },   // x − a = b, and x / a = b
 ];
 
 // The sections that have a diagnostic ('all' is every probe, in order).
-export const DIAGNOSTIC_SECTIONS = ['count', 'build'];
+export const DIAGNOSTIC_SECTIONS = ['count', 'build', 'solve'];
 export const probesOf = (section = 'all') => PROBES.filter((p) => section === 'all' || p.section === section);
 
 // The problems for a seed: [{ pack, level, problem }], in order.
@@ -35,6 +36,7 @@ export const itemCard = (item) => CARDS[cardIdFor(item.pack, item.level)];
 export const itemText = (item) => itemCard(item).problemText(item.problem);
 export const itemAnswer = (item) => itemCard(item).answerText(item.problem);
 export const itemPad = (item) => itemCard(item).pad;
+export const itemLead = (item) => itemCard(item).lead ?? '=';
 export const isRight = (item, typed) => Boolean(typed) && itemCard(item).check(item.problem, typed).correct;
 
 // ---------- Taking it ----------
@@ -77,7 +79,7 @@ export function readout(seed, answers, items = diagnosticItems(seed), section = 
     const standing = right.every(Boolean) ? 'strong' : right.some(Boolean) ? 'growing' : 'start';
     return {
       pack, rec, standing,
-      problems: mine.map((x, k) => ({ level: x.it.level, text: itemText(x.it), answer: itemAnswer(x.it), typed: x.a?.typed ?? '', skipped: Boolean(x.a?.skipped), right: right[k] })),
+      problems: mine.map((x, k) => ({ lead: itemLead(x.it), level: x.it.level, text: itemText(x.it), answer: itemAnswer(x.it), typed: x.a?.typed ?? '', skipped: Boolean(x.a?.skipped), right: right[k] })),
     };
   });
 }
