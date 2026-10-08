@@ -16,7 +16,7 @@
 - Saved separately (`mat.diag.v2`). The old single diagnostic is split between the two the first time: every answer keeps its problem (same seed), and the two new Value it problems show as "6 of 8 done".
 
 ## 5. Dropdown menus (Karl, 2026-10-08; built)
-The section bar is on the home screen at all times. Resting the mouse on a title for half a second, or a click or tap on it, opens a dropdown that shows that section's cards, each with a small button per level (done = check, locked = dashed and disabled; coming-soon cards say "soon"). Moving off folds it. Touch screens (no hover): a tap on a title opens or closes it, a tap elsewhere or Escape closes it. "Open all of X" opens the section. Only on the home screen, not inside a level. The three landing panels remain the first screen.
+The section bar is on the home screen at all times. Resting the mouse on a title for half a second, or a click or tap on it, rolls down that section's **full cards** (the same cards, level buttons and fluency challenges as in the section; coming-soon cards beneath), "big and beautiful", not small buttons. Moving off (far left or right, or back to the top) rolls them back up; moving to another title rolls that one down instead, without the wait. Touch screens (no hover): a tap on a title opens or closes it; Escape closes it. "Open all of X" opens the section. Only on the home screen, not inside a level. The three landing panels remain the first screen.
 
 ## 4. Not built
 - A teacher-chosen order or hiding of sections; section-level fluency; a sign-in prompt on the first screen.
