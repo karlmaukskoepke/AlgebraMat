@@ -30,6 +30,16 @@ export const addBothPlay = {
       case 'cross': return { type: 'cross', id: d.id };
       case 'flipSign': return { type: 'flipSign', id: d.id };
       case 'dropValue': return { type: 'dropValue' };
+      case 'choose': return { type: 'choose', move: d.move };
+      case 'addTo': return { type: 'addTo', side: d.side };
+      case 'go': return { type: 'go' };
+      case 'kind': return { type: 'kind', value: d.value };
+      case 'crossOff': return { type: 'crossOff' };
+      case 'abandon': return { type: 'abandon' };
+      case 'nextLine': return { type: 'nextLine' };
+      case 'pickPiece': return { type: 'pickPiece', piece: d.piece };
+      case 'zone': return { type: 'zone', side: d.side };
+      case 'buildRemove': return { type: 'buildRemove', side: d.side, what: d.what };
       case 'buildTap': return { type: 'buildTap', group: d.group, sign: d.sign, remove: Boolean(d.remove) };
       default: return null;
     }

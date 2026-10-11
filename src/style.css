@@ -2637,3 +2637,56 @@ body {
 .btn-party { background: #eaf4ff; } .btn-battle { background: #fdebe8; }
 
 .addboth-mat .sv-x { font: 700 36px 'Kalam', 'Lexend', system-ui, sans-serif; fill: var(--ink); stroke: #fffdf2; stroke-width: 7px; paint-order: stroke; stroke-linejoin: round; }
+
+/* ---------- Add to both sides, second look: the balance, the board, the tray and the Balancing moves panel ---------- */
+.ab-game { width: 100%; display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 16px; align-items: start; }
+.ab-main { min-width: 0; display: flex; flex-direction: column; align-items: center; }
+.ab-main .addboth-mat { width: 100%; height: auto; max-height: 56vh; }
+@media (max-width: 760px) { .ab-game { grid-template-columns: 1fr; gap: 8px; } .ab-main .addboth-mat { max-height: none; } }
+.addboth-mat .ab-readout { font: 700 34px 'Lexend', system-ui, sans-serif; fill: var(--ink); }
+.addboth-mat .ab-pivot { fill: var(--ink); }
+.addboth-mat .ab-beam { transform-box: view-box; transform-origin: 0 0; }
+.addboth-mat .ab-beam-bar { stroke: var(--ink); stroke-width: 8; stroke-linecap: round; }
+.addboth-mat .ab-beam-end { fill: #fff; stroke: var(--ink); stroke-width: 4; }
+.addboth-mat .sv-border { stroke: var(--ink); stroke-width: 4; stroke-dasharray: 10 8; }
+.addboth-mat .ab-zone-box { fill: none; stroke: #bdb7a4; stroke-width: 2; stroke-dasharray: 6 6; }
+.addboth-mat .ab-zone.is-on .ab-zone-box { stroke: #0072b2; stroke-width: 3; fill: rgba(0, 114, 178, 0.05); }
+.addboth-mat .ab-zone.is-on { cursor: pointer; }
+.addboth-mat .ab-zone.is-drop-over .ab-zone-box { fill: rgba(0, 114, 178, 0.18); stroke-width: 5; }
+.addboth-mat .ab-drophere { font: 600 24px 'Lexend', system-ui, sans-serif; fill: #a9a38e; }
+.addboth-mat .ab-eq { font: 700 46px 'Kalam', 'Lexend', system-ui, sans-serif; fill: var(--ink); }
+.addboth-mat .ab-group, .addboth-mat .ab-token { touch-action: none; }
+.ab-tray { margin: 6px 0 2px; text-align: center; }
+.ab-tray-note { margin: 0 0 6px; font: 600 18px 'Lexend', system-ui, sans-serif; color: var(--muted, #555); }
+.ab-tray-row { display: flex; gap: 12px; justify-content: center; }
+.ab-piece { min-width: 72px; min-height: 64px; padding: 0 18px; border: 3px solid var(--ink); border-radius: 14px; background: #fff; color: var(--ink); font: 800 38px 'Lexend', system-ui, sans-serif; cursor: grab; touch-action: none; }
+.ab-piece.is-box { font-family: 'Kalam', 'Lexend', system-ui, sans-serif; border-radius: 8px; }
+.ab-piece.is-picked { background: #fff6b8; border-width: 5px; }
+.ab-piece.is-answer { background: #fff6b8; border-color: #0072b2; min-width: 88px; }
+.ab-ghost { position: fixed; left: 0; top: 0; z-index: 99; width: 56px; height: 56px; border-radius: 28px; display: grid; place-items: center; background: #fff6b8; border: 3px solid #0072b2; font: 800 28px 'Lexend', system-ui, sans-serif; pointer-events: none; opacity: 0.92; }
+.ab-panel { border: 3px solid var(--ink); border-radius: 16px; padding: 10px 12px 12px; background: #fffdf2; }
+.ab-panel-title { margin: 0 0 8px; font: 800 22px 'Lexend', system-ui, sans-serif; letter-spacing: 0.02em; }
+.ab-moves { display: flex; flex-direction: column; gap: 8px; }
+.ab-move { min-height: 52px; width: 100%; justify-content: center; text-align: center; font-size: 18px; padding: 0 8px; white-space: nowrap; }
+.ab-blank { display: inline-block; min-width: 3ch; margin: 0 4px; padding: 0 8px; border-bottom: 3px solid var(--ink); text-align: center; font-weight: 800; }
+.ab-blank.is-empty { color: #a9a38e; }
+.ab-blank.is-active { background: #fff6b8; border-radius: 6px 6px 0 0; }
+.ab-blank.is-drop-over { background: #cfe8f7; }
+.ab-sub { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+.ab-sub .btn { flex: 1 1 110px; min-height: 48px; }
+.ab-goals { list-style: none; margin: 12px 0 0; padding: 10px 0 0; border-top: 2px dashed #bdb7a4; display: flex; flex-direction: column; gap: 8px; }
+.ab-goal { display: flex; align-items: center; gap: 10px; font: 600 20px 'Lexend', system-ui, sans-serif; }
+.ab-goal.is-off .ab-goal-label { color: #9a9a9a; }
+.ab-checkbox { width: 30px; height: 30px; flex: none; display: grid; place-items: center; border: 3px solid var(--ink); border-radius: 6px; background: #fff; font: 800 20px 'Lexend', system-ui, sans-serif; line-height: 1; }
+.ab-checkbox.is-green { background: #3aa76d; border-color: #1b6e3a; color: #fff; }
+.ab-checkbox.is-red { background: #d9534f; border-color: #a3281b; color: #fff; }
+.ab-checkbox.is-neutral { background: #ececec; color: var(--ink); }
+.ab-checkbox.is-off { border-style: dashed; border-color: #9a9a9a; }
+@media (max-width: 760px) {
+  .ab-panel { padding: 8px 10px 10px; }
+  .ab-moves { flex-direction: row; flex-wrap: wrap; }
+  .ab-move { flex: 1 1 140px; width: auto; }
+  .ab-goals { flex-direction: row; flex-wrap: wrap; gap: 6px 18px; }
+}
+.addboth-mat .ab-equals { stroke: #fffdf2; stroke-width: 10px; paint-order: stroke; }
+.addboth-mat .ab-drophere, .addboth-mat .ab-plus, .addboth-mat .ab-eq, .addboth-mat .ab-readout { pointer-events: none; }

@@ -21,8 +21,14 @@ const slip = (p) => (SLIP[p.tag] ?? SLIP.unmatched)(p);
 
 const M = {
   // building the equation (L1–L2)
-  aBuild: (p) => `Build the equation from counters: tap + or − to add one counter to a group. Make ${p.mirror ? p.other : `x + ${p.con}`} on the left and the other side to match.`,
-  aBuilding: () => 'Keep going: tap a counter to take one back off.',
+  aBuild: (p) => `Build the equation up above: drag the □, the + and the − up onto the sides (or tap one, then tap a side). ${p.mirror ? `The □ goes on the right.` : `The □ goes on the left.`}`,
+  aBuilding: () => 'Keep going. Tap a counter to take one back off.',
+  aPickFirst: () => 'Pick a piece first (□, + or −), then tap the side to put it on.',
+  aBuildXSide: (p) => `The □ goes on the ${p.xside} side in this equation.`,
+  aBuildXHave: () => 'The □ is already up. Tap it to take it back off.',
+  aChooseMoveFirst: () => 'Choose “Add ___ to both sides” first.',
+  aChipSign: (p) => `The blank says ${p.amount}, so it takes a ${p.chip === 'minus' ? '−' : '+'} counter, not a ${p.chip === 'minus' ? '+' : '−'}. Drag the matching one.`,
+  aAmountSet: (p) => `The blank says ${p.amount}. Is that what you need to add to cancel? Change it with the pad (±) if not.`,
   aBuildOneSign: () => 'A group is all one sign. Tap a counter to take one off first.',
   aBuilt: () => 'That is the equation. Now choose a move.',
   // the first moves
