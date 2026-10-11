@@ -175,6 +175,7 @@ function climb(s) {
 export function reduceAddBoth(state, action) {
   if (state.stage === 'done') return state;
   const s = structuredClone(state);
+  s.anim = null;
   const level = s.level;
 
   // ----- typing: the amount while the move menu is open and no add has started, otherwise the answer -----
@@ -387,6 +388,7 @@ export function reduceAddBoth(state, action) {
     st.lights = lights;
     st.earnedFewer = earnedFewer;
     st.prevBoard = st.board;
+    st.anim = 'trade';
     return say(st, boardAnswer(st.board) !== null ? 'aTradedSolved' : 'aTraded');
   }
 
