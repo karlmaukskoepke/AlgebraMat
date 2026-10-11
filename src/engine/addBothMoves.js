@@ -94,7 +94,7 @@ export function newAddBoth(problem, { level = 1 } = {}) {
   return say({
     problem, level,
     stage: level <= 2 ? 'build' : 'moves',     // L1–L2: the student builds the equation from counters first
-    built: { constant: 0, other: 0 },
+    built: { constant: 0, other: 0, x: false }, pick: null,
     step: level <= 2 ? 'build' : 'moves',
     board, base: board, history: [], resolving: false,
     menu: null, amountEntry: '', pending: null,
@@ -175,6 +175,7 @@ function climb(s) {
 export function reduceAddBoth(state, action) {
   if (state.stage === 'done') return state;
   const s = structuredClone(state);
+  s.anim = null;
   const level = s.level;
 
   // ----- typing: the amount while the move menu is open and no add has started, otherwise the answer -----
@@ -202,21 +203,47 @@ export function reduceAddBoth(state, action) {
     // ----- L1–L2: build the equation from counters (a group at a time; a group is all one sign) -----
     case 'buildTap': {
       if (s.stage !== 'build') return state;
-      const group = action.group === 'other' ? 'other' : 'constant';
-      const target = group === 'other' ? s.problem.b : constantOf(s.problem);
-      const cur = s.built[group];
-      const sign = action.sign === '-' ? -1 : 1;
-      if (action.remove) { if (cur === 0) return state; s.built[group] = cur - Math.sign(cur); } else {
-        if (cur !== 0 && Math.sign(cur) !== sign) return say(s, 'aBuildOneSign', { group }, true);
-        if (Math.abs(cur) >= 15) return state;
-        s.built[group] = cur + sign;
+      return buildStep(s, buildChange(s, action.group === 'other' ? 'other' : 'constant', action.sign === '-' ? -1 : 1, Boolean(action.remove)));
+    }
+    // Build it's way: pick a piece (□, + or −) and tap a side, or drag it up onto that side. The x box goes on x's side;
+    // counters go on a side as one group (a side's counters are all one sign).
+    case 'pickPiece': {
+      if (s.stage !== 'build' || !['x', '+', '-'].includes(action.piece)) return state;
+      s.pick = s.pick === action.piece ? null : action.piece;
+      return s;
+    }
+    case 'buildRemove': {
+      if (s.stage !== 'build') return state;
+      const side = action.side === 'right' ? 'right' : 'left';
+      if (action.what === 'x') { if (!s.built.x) return state; s.built.x = false; return buildStep(s, null); }
+      return buildStep(s, buildChange(s, side === xSideName(s) ? 'constant' : 'other', 1, true));
+    }
+    case 'zone':
+    case 'drop': {
+      const piece = action.type === 'zone' ? s.pick : action.piece;
+      const side = action.side === 'right' ? 'right' : 'left';
+      if (s.stage === 'build') {
+        if (!['x', '+', '-'].includes(piece)) return say(s, 'aPickFirst', {}, true);
+        if (piece === 'x') {
+          if (side !== xSideName(s)) return say(s, 'aBuildXSide', { xside: xSideName(s) }, true);
+          if (s.built.x) return say(s, 'aBuildXHave', {}, true);
+          s.built.x = true;
+          return buildStep(s, null);
+        }
+        return buildStep(s, buildChange(s, side === xSideName(s) ? 'constant' : 'other', piece === '-' ? -1 : 1, false));
       }
-      if (s.built.constant === constantOf(s.problem) && s.built.other === s.problem.b) {
-        s.stage = 'moves';
-        s.step = 'moves';
-        return say(s, 'aBuilt');
+      if (s.stage === 'moves' && (!s.early || s.early.step === 'move')) {
+        if (s.menu !== 'add') return say(s, 'aChooseMoveFirst', {}, true);
+        return reduceAddBoth(state, { type: 'addTo', side, chip: action.type === 'drop' ? piece : undefined });
       }
-      return say(s, 'aBuilding', { group, have: s.built[group], need: target });
+      return state;
+    }
+    // A number dragged up into the blank of "Add ___ to both sides" fills it (the student still decides its sign).
+    case 'setAmount': {
+      if (s.stage !== 'moves' || (s.pending && !s.pending.second) || s.early?.step === 'drag' || s.combining || !Number.isInteger(action.value)) return state;
+      s.menu = 'add';
+      s.amountEntry = String(action.value);
+      return say(s, 'aAmountSet', { amount: signed(action.value) });
     }
 
     // ----- the menu -----
@@ -234,6 +261,7 @@ export function reduceAddBoth(state, action) {
       const side = action.side === 'right' ? 'right' : 'left';
       const amount = action.amount ?? amountOf(s.amountEntry);
       if (amount === null || amount === 0) return say(s, 'aAmountZero', {}, true);
+      if (action.chip && (action.chip === '-') !== (amount < 0)) return say(s, 'aChipSign', { amount: signed(amount), chip: action.chip === '-' ? 'minus' : 'plus' }, true);
       if (Math.abs(amount) > 15) return say(s, 'aAmountBig', {}, true);
       if (s.forced && amount !== oppositeOf(s.problem)) return say(s, 'aForced', { amount: signed(oppositeOf(s.problem)) }, true);
       if (s.pending && s.pending.side === side) return say(s, 'aOtherSide', {}, true);
@@ -387,6 +415,7 @@ export function reduceAddBoth(state, action) {
     st.lights = lights;
     st.earnedFewer = earnedFewer;
     st.prevBoard = st.board;
+    st.anim = 'trade';
     return say(st, boardAnswer(st.board) !== null ? 'aTradedSolved' : 'aTraded');
   }
 
@@ -397,6 +426,33 @@ export function reduceAddBoth(state, action) {
     if (unresolved(st.board)) return say(st, 'aCombined');
     return resolve(st);
   }
+}
+
+
+const xSideName = (s) => (s.problem.mirror ? 'right' : 'left');
+
+// Change a group of counters while building: returns a message to say (a mistake), or null when it worked.
+function buildChange(s, group, sign, remove) {
+  const cur = s.built[group];
+  if (remove) { if (cur === 0) return 'none'; s.built[group] = cur - Math.sign(cur); return null; }
+  if (cur !== 0 && Math.sign(cur) !== sign) return say(s, 'aBuildOneSign', { group }, true);
+  if (Math.abs(cur) >= 15) return 'none';
+  s.built[group] = cur + sign;
+  return null;
+}
+
+// After a build change: finished (the box and both groups match the equation) or keep going.
+function buildStep(s, problem) {
+  if (problem === 'none') return s;
+  if (problem) return problem;
+  const p = s.problem;
+  if (s.built.x && s.built.constant === constantOf(p) && s.built.other === p.b) {
+    s.stage = 'moves';
+    s.step = 'moves';
+    s.pick = null;
+    return say(s, 'aBuilt');
+  }
+  return say(s, 'aBuilding', { have: s.built.constant, other: s.built.other });
 }
 
 const combineTerms2 = (s) => ({ a: find(s.board, s.combining.a), b: find(s.board, s.combining.b) });

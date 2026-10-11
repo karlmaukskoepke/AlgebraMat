@@ -1,10 +1,8 @@
-// The controls for Add to both sides: the moves menu, the amount and Add to left / Add to right / Go, Party or Battle for
-// two groups being combined, the steps of the early-answer check, Undo and Start over, I'm stuck, Teach me, Check, and the
-// pad. Which rows show follows the session (the engine says what is going on); the pad types the amount, the count of a
+// The controls for Add to both sides: Undo and Start over, I'm stuck, Teach me, Check, and the pad. (The moves, Add to left /
+// right / Go, Party or Battle and the checkboxes live on the Mat, in the Balancing moves panel.) Which rows show follows the session (the engine says what is going on); the pad types the amount, the count of a
 // combination, or the answer, as the engine decides, and a line above it says which.
 
 import { startTour } from './tour.js';
-import { MOVES_BY_LEVEL } from '../engine/addBothMoves.js';
 import { MINUS } from '../engine/expr.js';
 
 function button(label, action, extra = {}) {
@@ -31,21 +29,6 @@ export function buildAddBothControls(root, dispatch) {
   typing.className = 'ab-typing';
   typing.setAttribute('aria-live', 'polite');
 
-  const menu = row('ab-menu',
-    button('Add ___ to both sides', 'choose', { data: { move: 'add' }, cls: 'btn-move' }),
-    button('Trade places', 'choose', { data: { move: 'trade' }, cls: 'btn-move' }),
-    button('Cross the border', 'choose', { data: { move: 'cross' }, cls: 'btn-move' }));
-  const add = row('ab-add',
-    button('Add to left', 'addTo', { data: { side: 'left' } }),
-    button('Add to right', 'addTo', { data: { side: 'right' } }),
-    button('Go ▶', 'go', { cls: 'btn-primary' }));
-  const combine = row('ab-combine',
-    button('Party!', 'kind', { data: { value: 'party' }, cls: 'btn-party' }),
-    button('Battle!', 'kind', { data: { value: 'battle' }, cls: 'btn-battle' }),
-    button('Cross off for me', 'crossOff'),
-    button('Never mind', 'abandon', { cls: 'btn-quiet' }));
-  const earlyRow = row('ab-early', button('Next ▸', 'nextLine', { cls: 'btn-primary' }));
-
   const undo = button('↶ Undo', 'undo', { cls: 'btn-quiet', data: { key: 'u' } });
   const startOver = button('Start over', 'startOver', { cls: 'btn-quiet' });
   const stuck = button('I’m stuck', 'stuck', { data: { key: 's' }, aria: 'I’m stuck (key S)' });
@@ -59,7 +42,7 @@ export function buildAddBothControls(root, dispatch) {
   const digits = [1, 2, 3, 4, 5, 6, 7, 8, 9, 0].map((d) => button(String(d), 'digit', { cls: 'btn-pad', data: { digit: d } }));
   keys.append(button('±', 'toggleSign', { cls: 'btn-pad', aria: 'Change sign' }), ...digits, button('⌫', 'backspace', { cls: 'btn-pad', aria: 'Delete' }));
 
-  root.append(typing, menu, add, combine, earlyRow, palette, keys);
+  root.append(typing, palette, keys);
 
   root.addEventListener('click', (e) => {
     const b = e.target.closest('button[data-action]');
@@ -77,8 +60,6 @@ export function buildAddBothControls(root, dispatch) {
       const building = stage === 'build';
       const combining = Boolean(s.combining);
       const checking = s.early?.step === 'drag' || s.early?.step === 'check';
-      const mid = Boolean(s.pending);
-      const choosing = !building && !done && !combining && !mid && !checking;
 
       // what the pad is typing right now
       const amountMode = s.menu === 'add' && (!s.pending || s.pending.second);
@@ -87,27 +68,6 @@ export function buildAddBothControls(root, dispatch) {
       else if (amountMode) typing.textContent = `Typing: the amount to add = ${s.amountEntry ? s.amountEntry.replace('-', MINUS) : '?'}`;
       else typing.textContent = 'Typing: your answer for x';
 
-      const allowed = MOVES_BY_LEVEL(s.level);
-      menu.hidden = !choosing || stage !== 'moves';
-      for (const b of menu.querySelectorAll('button')) {
-        b.hidden = !allowed.includes(b.dataset.move);
-        b.classList.toggle('is-on', s.menu === b.dataset.move);
-      }
-      const crossing = s.pending?.kind === 'cross';
-      add.hidden = !(s.menu === 'add' || crossing) || combining || done || (!choosing && !mid);
-      const [toLeft, toRight, go] = add.querySelectorAll('button');
-      toLeft.hidden = toRight.hidden = crossing;
-      toLeft.disabled = Boolean(mid && s.pending.side === 'left');
-      toRight.disabled = Boolean(mid && s.pending.side === 'right');
-      go.disabled = !(mid && s.pending.both) || s.leftDelta !== s.rightDelta;
-      combine.hidden = !combining;
-      if (combining) {
-        const [party, battle, cross] = combine.querySelectorAll('button');
-        const inKind = s.combining.step === 'kind';
-        party.hidden = battle.hidden = !inKind;
-        cross.hidden = inKind || s.combining.crossed || s.combining.kind !== 'battle';
-      }
-      earlyRow.hidden = s.early?.step !== 'check';
       undo.hidden = building || done || !s.history.length;
       startOver.hidden = !s.startOver || done;
       const helpOk = !done && !building;

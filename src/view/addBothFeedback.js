@@ -21,8 +21,14 @@ const slip = (p) => (SLIP[p.tag] ?? SLIP.unmatched)(p);
 
 const M = {
   // building the equation (L1–L2)
-  aBuild: (p) => `Build the equation from counters: tap + or − to add one counter to a group. Make ${p.mirror ? p.other : `x + ${p.con}`} on the left and the other side to match.`,
-  aBuilding: () => 'Keep going: tap a counter to take one back off.',
+  aBuild: (p) => `Build the equation up above: drag the □, the + and the − up onto the sides (or tap one, then tap a side). ${p.mirror ? `The □ goes on the right.` : `The □ goes on the left.`}`,
+  aBuilding: () => 'Keep going. Tap a counter to take one back off.',
+  aPickFirst: () => 'Pick a piece first (□, + or −), then tap the side to put it on.',
+  aBuildXSide: (p) => `The □ goes on the ${p.xside} side in this equation.`,
+  aBuildXHave: () => 'The □ is already up. Tap it to take it back off.',
+  aChooseMoveFirst: () => 'Choose “Add ___ to both sides” first.',
+  aChipSign: (p) => `The blank says ${p.amount}, so it takes a ${p.chip === 'minus' ? '−' : '+'} counter, not a ${p.chip === 'minus' ? '+' : '−'}. Drag the matching one.`,
+  aAmountSet: (p) => `The blank says ${p.amount}. Is that what you need to add to cancel? Change it with the pad (±) if not.`,
   aBuildOneSign: () => 'A group is all one sign. Tap a counter to take one off first.',
   aBuilt: () => 'That is the equation. Now choose a move.',
   // the first moves
@@ -89,6 +95,46 @@ const M = {
   typeAnswer: () => 'Type your answer with the pad, then Check.',
   answerUnreadable: () => 'I can’t read that. Type a whole number, with − if it’s negative.',
 };
+
+
+// ---------- the tutorials (SPEC-ADD-TO-BOTH-SIDES.md §3A–§3C): the move justified on numbers, and the quiz ----------
+const TU = {
+  tuIntro_add: () => 'The = sign is a border: both sides must hold the same amount. Add a number to one side and watch the readout.',
+  tuIntro_trade: () => 'Tap Trade places and watch both sides: does the balance hold?',
+  tuIntro_trade2: () => 'Another one. Trade places again.',
+  tuIntro_cross: () => 'Tap a number to send it across the border. Watch the readout.',
+  tuPickAmount: () => 'Pick an amount with the pad (not 0), then add it to a side.',
+  tuAmountZero: () => 'Pick an amount that is not 0.',
+  tuAmountBig: () => 'Try a smaller amount.',
+  tuOtherSide: () => 'You added to this side already. Now add the same to the other side.',
+  tuAddedOne: (p) => `${p.amount} on the ${p.side}: ${p.readout}. One side got more than the other.`,
+  tuBalanced: (p) => `${p.amount} on both sides: ${p.readout}. Tap Go.`,
+  tuUnbalanced: (p) => `Not the same amount: ${p.readout}. Both sides must hold the same amount.`,
+  tuGoNotYet: () => 'Go works when both sides are balanced.',
+  tuTryMore: (p) => `${p.amount} on both sides kept the balance: ${p.readout}. Try another amount.`,
+  tuTryMoreDone: (p) => `${p.amount} on both sides kept the balance: ${p.readout}. Try one more, or tap Continue for a quick quiz.`,
+  tuUndone: () => 'Undone.',
+  tuNotYet: () => 'Try a bit more first.',
+  tuTraded: (p) => `${p.equation}: ${p.readout}. Trading places keeps the balance.`,
+  tuTradeDone: (p) => `${p.equation}: ${p.readout}. Same amount on each side, just traded. Tap Continue for a quick quiz.`,
+  tuCrossedBare: (p) => `${p.number} crossed the border and stayed ${p.number}: ${p.readout}. It did not balance. Tap it to switch teams.`,
+  tuSwitched: (p) => `It switched teams: ${p.readout}. It balances again. Tap Go.`,
+  tuUpset: (p) => `Changing just one sign: ${p.readout}. That upsets the balance.`,
+  tuCrossed: (p) => `Crossed and switched teams: ${p.readout}. Try another, or tap Change every sign.`,
+  tuCrossDone: (p) => `Crossed and switched teams: ${p.readout}. Tap Continue for a quick quiz.`,
+  tuFlipAll: (p) => `Every sign on both sides: ${p.readout}. That keeps the balance.`,
+  tuFlipModeOn: () => 'Tap any number to change its sign.',
+  tuFlipModeOff: () => 'Tap a number to send it across the border.',
+  tuQuizIntro: (p) => `Quick quiz. ${p.say}: does it keep the balance or upset it?`,
+  tuQuizRight: (p) => `Yes! Next: ${p.say}. Keep or upset?`,
+  tuQuizWrong: (p) => `Not quite. ${p.say} ${p.correct === 'keeps' ? 'keeps' : 'upsets'} the balance. Compare the two: then try again.`,
+  tuQuizPassed: () => 'Quiz done! Tap Continue.',
+  tuAllDone: () => 'Nice. On to the real thing.',
+  tuBoxIntro: () => 'Now with a box. The box is x: we don\u2019t know what is in it. Add the same to both sides and combine the groups to get x alone.',
+  tuSymbolsIntro: () => 'Same equation with symbols only. Try it again.',
+  tuBack: () => 'Back to your problem.',
+};
+Object.assign(M, TU);
 
 export function addBothFeedbackText(fb) {
   const f = fb && M[fb.key];

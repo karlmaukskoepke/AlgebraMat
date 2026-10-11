@@ -329,13 +329,40 @@ describe('building the equation from counters (L1–L2)', () => {
     expect([s.stage, s.feedback.key]).toEqual(['build', 'aBuild']);
     expect(run(s, ...typed('5')).entry).toBe('');                                         // no answer pad while building
     s = run(s, { type: 'buildTap', group: 'constant', sign: '+' }, { type: 'buildTap', group: 'constant', sign: '+' });
-    expect(s.built).toEqual({ constant: 2, other: 0 });
+    expect(s.built).toEqual({ constant: 2, other: 0, x: false });
     expect(run(s, { type: 'buildTap', group: 'constant', sign: '-' }).feedback.key).toBe('aBuildOneSign');
     s = run(s, { type: 'buildTap', group: 'other', sign: '+' }, { type: 'buildTap', group: 'other', sign: '+' }, { type: 'buildTap', group: 'other', remove: true });
     expect([s.stage, s.built.other]).toEqual(['build', 1]);                              // one taken back off
     s = run(s, { type: 'buildTap', group: 'other', sign: '+' }, { type: 'buildTap', group: 'other', sign: '+' });
+    expect(s.stage).toBe('build');                                                        // the x box is not on the board yet
+    s = run(s, { type: 'drop', piece: 'x', side: 'right' });
+    expect(s.feedback.key).toBe('aBuildXSide');                                           // x belongs on the left in x + 2 = 3
+    s = run(s, { type: 'pickPiece', piece: 'x' }, { type: 'zone', side: 'left' });
     expect([s.stage, s.step, s.feedback.key]).toEqual(['moves', 'moves', 'aBuilt']);
     expect(run(newAddBoth(P('x+a', 2, 3), { level: 3 })).stage).toBe('moves');
     expect(formatAddBoth(s.problem)).toBe('x + 2 = 3');
+  });
+});
+
+describe('the new build and add interactions', () => {
+  it('drops pieces on sides, one sign per side, x on its own side, and removes with a tap', () => {
+    let s = newAddBoth(P('x-a', 3, -2), { level: 2 });                                    // x − 3 = −2 (x on the left, constant −3)
+    s = run(s, { type: 'drop', piece: '-', side: 'left' }, { type: 'drop', piece: '-', side: 'left' });
+    expect(s.built.constant).toBe(-2);
+    expect(run(s, { type: 'drop', piece: '+', side: 'left' }).feedback.key).toBe('aBuildOneSign');
+    expect(run(s, { type: 'zone', side: 'left' }).feedback.key).toBe('aPickFirst');
+    s = run(s, { type: 'buildRemove', side: 'left' }, { type: 'drop', piece: '-', side: 'left' }, { type: 'drop', piece: '-', side: 'left' });
+    s = run(s, { type: 'drop', piece: '-', side: 'right' }, { type: 'drop', piece: '-', side: 'right' }, { type: 'drop', piece: 'x', side: 'left' });
+    expect(s.stage).toBe('moves');
+  });
+  it('adding a counter checks its sign against the blank, and a number can fill the blank', () => {
+    let s = newAddBoth(P('x+a', 3, -6), { level: 3 });
+    s = run(s, { type: 'setAmount', value: -3 });
+    expect([s.menu, s.amountEntry]).toEqual(['add', '-3']);
+    expect(run(s, { type: 'drop', piece: '+', side: 'left' }).feedback.key).toBe('aChipSign');
+    s = run(s, { type: 'drop', piece: '-', side: 'left' });
+    expect(s.pending.side).toBe('left');
+    s = run(s, { type: 'zone', side: 'right' });
+    expect(s.pending.both).toBe(true);
   });
 });
