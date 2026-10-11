@@ -2590,3 +2590,50 @@ body {
   .solve-mat .sv-moved { animation: sw-land 0.45s ease-out both; transform-box: fill-box; transform-origin: center; }
   @keyframes sw-land { from { opacity: 0; transform: scale(1.6); } to { opacity: 1; transform: none; } }
 }
+
+/* ---------- Add to both sides (SPEC-ADD-TO-BOTH-SIDES.md) ---------- */
+.addboth-mat .ab-problem { font-size: 56px; }
+.addboth-mat .ab-readout { font: 700 30px 'Lexend', system-ui, sans-serif; }
+.addboth-mat .ab-readout.is-good { fill: #1b6e3a; }
+.addboth-mat .ab-readout.is-bad { fill: #a3281b; }
+.addboth-mat .ab-lamp-dot { fill: #fff; stroke: var(--ink); stroke-width: 2.5; stroke-dasharray: 4 3; }
+.addboth-mat .ab-lamp.is-green .ab-lamp-dot { fill: #3aa76d; stroke-dasharray: none; }
+.addboth-mat .ab-lamp.is-red .ab-lamp-dot { fill: #d9534f; stroke-dasharray: none; }
+.addboth-mat .ab-lamp.is-neutral .ab-lamp-dot { fill: #d8d8d8; stroke-dasharray: none; }
+.addboth-mat .ab-lamp-glyph { font: 800 18px 'Lexend', system-ui, sans-serif; fill: #fff; }
+.addboth-mat .ab-lamp.is-neutral .ab-lamp-glyph { fill: var(--ink); }
+.addboth-mat .ab-lamp-label { font: 600 22px 'Lexend', system-ui, sans-serif; fill: var(--ink); }
+.addboth-mat .ab-lamp.is-off .ab-lamp-label { fill: #9a9a9a; }
+.addboth-mat .ab-group-box, .addboth-mat .ab-token-box { fill: #fff; stroke: var(--ink); stroke-width: 2.5; }
+.addboth-mat .ab-group, .addboth-mat .ab-token, .addboth-mat .ab-x.is-target { cursor: pointer; }
+.addboth-mat .ab-group .mark { stroke: var(--ink); stroke-width: 3.5; stroke-linecap: round; }
+.addboth-mat .ab-group.is-negative .ab-group-box { stroke-dasharray: 8 5; }
+.addboth-mat .is-selected .ab-group-box, .addboth-mat .is-selected .ab-token-box { fill: #fff6b8; stroke-width: 4; }
+.addboth-mat .is-combining .ab-group-box, .addboth-mat .is-combining .ab-token-box { fill: #fbe3f1; stroke: #b5368c; stroke-width: 4; }
+.addboth-mat .is-hint .ab-group-box, .addboth-mat .is-hint .ab-token-box { stroke: #0072b2; stroke-width: 4; animation: sw-pulse 1.4s ease-in-out infinite; }
+.addboth-mat .is-crossing .ab-group-box, .addboth-mat .is-crossing .ab-token-box { stroke: #b5368c; stroke-width: 4; }
+.addboth-mat .ab-token-text { font: 700 34px 'Kalam', 'Lexend', system-ui, sans-serif; fill: var(--ink); }
+.addboth-mat .ab-plus, .addboth-mat .ab-equals { font: 700 40px 'Lexend', system-ui, sans-serif; fill: var(--muted, #555); }
+.addboth-mat .ab-x.is-target .vm-box { stroke: #0072b2; stroke-width: 5; animation: sw-pulse 1.2s ease-in-out infinite; }
+.addboth-mat .ab-chip-box { fill: #fff; stroke: var(--ink); stroke-width: 3; }
+.addboth-mat .ab-chip-box.is-quiet { stroke-width: 2; stroke-dasharray: 5 4; }
+.addboth-mat .ab-chip-btn { cursor: pointer; }
+.addboth-mat .ab-chip-text { font: 800 34px 'Lexend', system-ui, sans-serif; fill: var(--ink); }
+.addboth-mat .ab-chip-small { font: 600 18px 'Lexend', system-ui, sans-serif; fill: var(--ink); }
+.addboth-mat .ab-chip { cursor: grab; touch-action: none; }
+.addboth-mat .ab-chip-dot { fill: #fff6b8; stroke: #0072b2; stroke-width: 4; }
+.addboth-mat .ab-chip-value { font: 800 34px 'Lexend', system-ui, sans-serif; fill: var(--ink); }
+.addboth-mat .ab-note { font: 600 22px 'Lexend', system-ui, sans-serif; fill: var(--muted, #555); }
+.addboth-mat .ab-check { font: 700 38px 'Kalam', 'Lexend', system-ui, sans-serif; fill: var(--ink); }
+.addboth-mat .ab-check.is-good { fill: #1b6e3a; }
+.addboth-mat .ab-check.is-bad { fill: #a3281b; }
+.addboth-mat .sv-slash { stroke: #a3281b; stroke-width: 3; stroke-linecap: round; }
+.addboth-mat .sv-struck .mark { opacity: 0.3; }
+.ab-typing { margin: 4px 0 6px; font-weight: 700; color: var(--muted, #555); text-align: center; }
+.ab-row { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin: 6px 0; }
+.ab-row[hidden], .ab-typing[hidden] { display: none; }
+.ab-row .btn { min-height: 48px; }
+.btn-move.is-on { background: #fff6b8; border-width: 3px; }
+.btn-party { background: #eaf4ff; } .btn-battle { background: #fdebe8; }
+
+.addboth-mat .sv-x { font: 700 36px 'Kalam', 'Lexend', system-ui, sans-serif; fill: var(--ink); stroke: #fffdf2; stroke-width: 7px; paint-order: stroke; stroke-linejoin: round; }
