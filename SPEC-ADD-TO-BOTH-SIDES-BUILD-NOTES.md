@@ -65,3 +65,10 @@ New order (decision log): add to both sides → multiply/divide → fraction equ
 6. **Progress loss on updates** (spec §9.10, must be fixed before rollout). I haven't been able to reproduce this. **Need from you:** which browser and device, whether it happened right after a deploy or after closing the browser, and whether a Save code restored it. Meanwhile I'll audit every place progress is read and written for a way a deploy or a changed save layout could drop it.
 
 Steps 1 and 2 touch no screen, so they can be merged early; the card appears for students when step 3 is done.
+
+## 7. Decisions made while building (Karl, 2026-10-11)
+
+- **Tutorials play once per student, then only by choice** (a replay button). They justify the new move's logic and matter, but they are not a barrier. This replaces "every time the card is opened" in the spec, and applies to every card's tutorial. Kept in the browser (`mat.tutorials.v1`), so a new device sees it once more.
+- **Combining groups:** tap two groups, say Party or Battle, then type how many are left; "Cross off for me" is an extra scaffold that still asks for the count.
+- **Building from counters is only at L1–L2.** The first look was changed after Karl's review: the board starts empty and the student drags the □, + and − up from a tray (tap a piece, then tap a side, as the alternative).
+- **Screen layout:** Balanced/Unbalanced word and a seesaw on the dashed border at the top; the board (box and counters) above the equation; the moves in a "Balancing moves" panel beside it (under it on phones); Fewer terms / x alone / x on the left as checkboxes; only help and the pad at the bottom.

@@ -46,3 +46,8 @@ Format: decision, why, date. All dated 2026-10-11 unless noted.
 ## Next
 - Pilot spec (`SPEC-ADD-TO-BOTH-SIDES.md`) goes to Claude Code. Karl reviews and reports back.
 - In parallel, design **multiply/divide one-step** and then **fraction equations** here.
+
+## Added during the build (Claude Code, 2026-10-11)
+- **Tutorials play once per student, then by choice** (replay button). Applies to every card's tutorial. (Karl)
+- **Add to both sides screen redesigned** after Karl's first look: balance and seesaw on the dashed border, board above the equation, drag-up tray, Balancing moves panel, checkboxes. (Karl)
+- **Divide it** spec saved (`SPEC-DIVIDE-IT.md`); review and defaults in `SPEC-DIVIDE-IT-BUILD-NOTES.md`.
