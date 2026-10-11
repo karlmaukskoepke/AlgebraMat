@@ -2,7 +2,7 @@
 // for the counters and symbols parts, and a panel with what that part needs. Skip tutorial is always there.
 
 import { renderTutorialMat, TITLES } from './tutorialMat.js';
-import { boardSvg, trayFor, panelFor, html } from './addBothMat.js';
+import { boardBlock, trayFor, panelFor, html } from './addBothMat.js';
 import { readyForQuiz, quizItem } from '../engine/numericTutorial.js';
 import { MINUS } from '../engine/expr.js';
 
@@ -38,8 +38,8 @@ function numericPanel(tut) {
     if (t.menu === 'add') {
       const l = btn('Add to left', 'addTo', 'btn ab-side', { side: 'left' });
       const r = btn('Add to right', 'addTo', 'btn ab-side', { side: 'right' });
-      l.disabled = t.pending?.side === 'left';
-      r.disabled = t.pending?.side === 'right';
+      l.disabled = Boolean(t.pending && (t.pending.both || t.pending.side === 'left'));
+      r.disabled = Boolean(t.pending && (t.pending.both || t.pending.side === 'right'));
       const go = btn('Go ▶', 'go', 'btn btn-primary');
       go.disabled = !(t.pending?.both);
       sub.append(l, r, go);
@@ -70,7 +70,7 @@ export function renderTutorialGame(s) {
     main.append(renderTutorialMat(tut.t));
     panel = numericPanel(tut);
   } else {
-    main.append(boardSvg(tut.eng));
+    main.append(boardBlock(tut.eng));
     const tray = trayFor(tut.eng);
     if (tray) main.append(tray);
     panel = panelFor(tut.eng);

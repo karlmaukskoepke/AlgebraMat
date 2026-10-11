@@ -67,7 +67,7 @@ export function buildAddBothControls(root, dispatch) {
       typing.hidden = building || done || checking || (combining && s.combining.step !== 'count');
       if (combining) typing.textContent = `Typing: how many are left ${s.combining.entry ? `= ${s.combining.entry.replace('-', MINUS)}` : ''}`.trim();
       else if (amountMode) typing.textContent = `Typing: the amount to add = ${s.amountEntry ? s.amountEntry.replace('-', MINUS) : '?'}`;
-      else typing.textContent = 'Typing: your answer for x';
+      else typing.textContent = `Typing: your answer for x = ${s.entry ? s.entry.replace('-', MINUS) : '?'}`;
 
       undo.hidden = building || done || !s.history.length;
       startOver.hidden = !s.startOver || done;

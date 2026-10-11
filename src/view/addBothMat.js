@@ -32,7 +32,7 @@ const GAP = 46;
 const MIDDLE = 90;
 const MAX_COLS = 9;
 const MIN_SIDE = 230;
-const BEAM_Y = 112;
+const BEAM_Y = 90;
 
 // How a group of n counters sits: up to 3 rows.
 export function groupShape(n) {
@@ -98,10 +98,37 @@ export function drawSeesaw(svg, cx, cy, half, angle) {
 }
 export const angleFor = (delta) => Math.max(-8, Math.min(8, -delta * 2.5));
 
+// The board with, when an amount is being added, one button under each side ("Add −3 here"): the action sits on the side it
+// changes. They are real buttons laid over the drawing (placed by percentages of its size), so they stay 44 px or more.
+export function boardBlock(s) {
+  const { top, bottom, geo, sideBtnsOn } = boardSvg(s);
+  const block = html('div', 'ab-boardwrap');
+  const [, , vw, vh] = top.getAttribute('viewBox').split(' ').map(Number);
+  block.style.setProperty('--ar', String(vw / (vh + 150)));
+  block.append(top);
+  if (sideBtnsOn) {
+    const row = html('div', 'ab-sidebtns');
+    const amount = s.amountEntry ? s.amountEntry.replace('-', MINUS) : '___';
+    row.style.setProperty('--left', `${geo.x0 / geo.W * 100}%`);
+    row.style.setProperty('--side', `${geo.lw / geo.W * 100}%`);
+    row.style.setProperty('--gap', `${geo.middle / geo.W * 100}%`);
+    row.style.setProperty('--mid', `${geo.borderX / geo.W * 100}%`);
+    for (const side of ['left', 'right']) {
+      const b = html('button', 'btn ab-sidebtn', [`Add ${amount} here`], { type: 'button', 'data-action': 'addTo', 'data-side': side });
+      // this side has had its share (or both have): fade it
+      b.disabled = Boolean(s.pending && (s.pending.both || s.pending.side === side));
+      row.append(b);
+    }
+    block.append(row);
+  }
+  block.append(bottom);
+  return block;
+}
+
 export function renderAddBothMat(s) {
   const wrap = html('div', `ab-game${s.stage === 'build' ? ' is-building' : ''}`);
   const main = html('div', 'ab-main');
-  main.append(boardSvg(s));
+  main.append(boardBlock(s));
   const tray = trayFor(s);
   if (tray) main.append(tray);
   wrap.append(main, panelFor(s, { replay: true }));
@@ -120,11 +147,11 @@ export function boardSvg(s) {
 
   // ---- the balance: the word, and the seesaw on the dashed border ----
   const building = s.stage === 'build';
-  svg.append(el('text', { x: W / 2, y: 40, 'text-anchor': 'middle', class: `ab-readout ${building ? '' : balanced(s) ? 'is-good' : 'is-bad'}` }, [building ? 'Build the equation' : tiltText(s)]));
+  svg.append(el('text', { x: W / 2, y: 34, 'text-anchor': 'middle', class: `ab-readout ${building ? '' : balanced(s) ? 'is-good' : 'is-bad'}` }, [building ? 'Build the equation' : tiltText(s)]));
   drawSeesaw(svg, borderX, BEAM_Y, (lw + MIDDLE + rw) / 2, tipAngle(s));
 
   // ---- the board ----
-  const top = BEAM_Y + 78;
+  const top = BEAM_Y + 66;
   const h = Math.max(rowHeight(items.left), rowHeight(items.right), 96);
   const zonesOn = building || (s.stage === 'moves' && s.menu === 'add' && !s.combining);
   const zoneTop = top - 14;
@@ -136,7 +163,7 @@ export function boardSvg(s) {
   };
   zone('left', x0, lw);
   zone('right', x0 + lw + MIDDLE, rw);
-  svg.append(el('line', { x1: borderX, y1: BEAM_Y + 46, x2: borderX, y2: zoneTop + zoneH + 78, class: 'sv-border' }));
+  svg.append(el('line', { x1: borderX, y1: BEAM_Y + 46, x2: borderX, y2: zoneTop + zoneH, class: 'sv-border', 'data-border': '1' }));
 
   const cls = (id) => `${s.selected === id ? ' is-selected' : ''}${s.combining && (s.combining.a === id || s.combining.b === id) ? ' is-combining' : ''}${s.hint?.kind === 'cancel' && s.hint.id === id ? ' is-hint' : ''}${s.pending?.kind === 'cross' && s.pending.id === id ? ' is-crossing' : ''}`;
   const tapAction = (id) => (s.menu === 'cross' ? (s.pending?.kind === 'cross' && s.pending.id === id ? 'flipSign' : 'cross') : 'select');
@@ -194,12 +221,19 @@ export function boardSvg(s) {
     requestAnimationFrame(() => { try { gl.animate(arc(dist, -60), { duration: 900, easing: 'ease-in-out' }); gr.animate(arc(-dist, 60), { duration: 900, easing: 'ease-in-out' }); } catch { /* no animation: the sides just swap */ } });
   }
 
-  // ---- the equation, under the board, with the border through the = ----
-  let y = zoneTop + zoneH + 56;
+  // ---- the equation, under the board (a second drawing, so buttons can sit between), with the border through the = ----
+  const sideBtnsOn = !building && s.stage === 'moves' && (s.menu === 'add') && !s.combining && !s.resolving && s.pending?.kind !== 'cross';
+  const split = zoneTop + zoneH + 14;                       // the board's drawing ends here
+  svg.setAttribute('viewBox', `0 0 ${W} ${split}`);
+  svg.setAttribute('data-geo', [x0, lw, MIDDLE, W].join(','));
+  svg.setAttribute('data-sidebtns', sideBtnsOn ? '1' : '');
+  const eq = el('svg', { class: 'mat value-mat addboth-mat ab-eqsvg', role: 'img', 'aria-label': 'The equation so far' });
   const base = s.stage === 'build' ? s.base : s.board;
-  svg.append(el('text', { x: borderX - 34, y, 'text-anchor': 'end', class: 'ab-eq' }, [sideValueText(base.left)]));
-  svg.append(el('text', { x: borderX, y, 'text-anchor': 'middle', class: 'ab-eq ab-equals' }, ['=']));
-  svg.append(el('text', { x: borderX + 34, y, 'text-anchor': 'start', class: 'ab-eq' }, [sideValueText(base.right)]));
+  let y = 52;
+  eq.append(el('line', { x1: borderX, y1: 0, x2: borderX, y2: y + 20, class: 'sv-border' }));
+  eq.append(el('text', { x: borderX - 34, y, 'text-anchor': 'end', class: 'ab-eq' }, [sideValueText(base.left)]));
+  eq.append(el('text', { x: borderX, y, 'text-anchor': 'middle', class: 'ab-eq ab-equals' }, ['=']));
+  eq.append(el('text', { x: borderX + 34, y, 'text-anchor': 'start', class: 'ab-eq' }, [sideValueText(base.right)]));
   y += 24;
 
   // ---- the early answer's drag-check lines ----
@@ -208,21 +242,13 @@ export function boardSvg(s) {
     lines.forEach((line, i) => {
       const last = i === s.early.lines.length - 1;
       const bad = last && line.includes('Unbalanced');
-      svg.append(el('text', { x: W / 2, y: y + 40 + i * 48, 'text-anchor': 'middle', class: `ab-check${last ? (bad ? ' is-bad' : ' is-good') : ''}` }, [line]));
+      eq.append(el('text', { x: W / 2, y: y + 40 + i * 48, 'text-anchor': 'middle', class: `ab-check${last ? (bad ? ' is-bad' : ' is-good') : ''}` }, [line]));
     });
     y += lines.length * 48 + 30;
   }
-
-  // ---- the answer line ----
-  if (!building) {
-    const done = s.stage === 'done';
-    const text = done ? s.finalText : s.entry.replace(/-/g, MINUS);
-    svg.append(el('text', { x: W / 2, y: y + 48, 'text-anchor': 'middle', class: `vm-answer${text ? '' : ' is-empty'}${done ? ' is-done' : ''}` }, [`x = ${text || '?'}`]));
-    if (!done) svg.append(el('line', { x1: W / 2 - 70, y1: y + 62, x2: W / 2 + 130, y2: y + 62, class: 'vm-rule' }));
-    y += 74;
-  }
-  svg.setAttribute('viewBox', `0 0 ${W} ${y + 16}`);
-  return svg;
+  eq.setAttribute('viewBox', `0 0 ${W} ${y + 12}`);
+  svg.querySelector('[data-border]')?.setAttribute('y2', String(split));
+  return { top: svg, bottom: eq, geo: { x0, lw, middle: MIDDLE, W, borderX }, sideBtnsOn };
 }
 
 // ---------- the tray: pieces to drag up ----------
@@ -263,7 +289,7 @@ export function panelFor(s, { replay = false } = {}) {
   const combining = Boolean(s.combining);
   const mid = Boolean(s.pending);
   const checking = s.early?.step === 'drag' || s.early?.step === 'check';
-  const choosing = !building && !done && !combining && !mid && !checking;
+  const choosing = !building && !done && !combining && !mid && !checking && !s.resolving;
   const allowed = MOVES_BY_LEVEL(s.level);
 
   const moves = html('div', 'ab-moves');
@@ -281,16 +307,10 @@ export function panelFor(s, { replay = false } = {}) {
   }
   panel.append(moves);
 
+  if (s.resolving && !combining) panel.append(html('p', 'ab-simplify', ['Simplify first: tap two groups on a side to combine them.']));
   const sub = html('div', 'ab-sub');
   const crossing = s.pending?.kind === 'cross';
   if (!building && !done && !combining && (s.menu === 'add' || crossing)) {
-    if (!crossing) {
-      const l = html('button', 'btn ab-side', ['Add to left'], { type: 'button', 'data-action': 'addTo', 'data-side': 'left' });
-      const r = html('button', 'btn ab-side', ['Add to right'], { type: 'button', 'data-action': 'addTo', 'data-side': 'right' });
-      l.disabled = Boolean(mid && s.pending.side === 'left');
-      r.disabled = Boolean(mid && s.pending.side === 'right');
-      sub.append(l, r);
-    }
     const go = html('button', 'btn btn-primary', ['Go ▶'], { type: 'button', 'data-action': 'go' });
     go.disabled = !(mid && s.pending.both) || s.leftDelta !== s.rightDelta;
     sub.append(go);
