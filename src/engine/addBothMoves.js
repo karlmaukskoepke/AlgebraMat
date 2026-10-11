@@ -34,48 +34,33 @@ const sumNums = (terms) => terms.filter((t) => t.kind === 'num').reduce((s, t) =
 export const sideValueText = (terms) => terms.map((t) => (t.kind === 'x' ? 'x' : signed(t.v))).join(' + ');
 export const boardText = (board) => `${sideValueText(board.left)} = ${sideValueText(board.right)}`;
 
-// Pairs that can cancel: a + and a − number on the same side.
-export function cancellable(board) {
+// Groups that can be combined: any two numbers on the same side. Same signs make a Party, opposite signs a Battle.
+export function combinable(board) {
   const out = [];
   for (const side of ['left', 'right']) {
     const nums = board[side].filter((t) => t.kind === 'num');
-    for (const a of nums) for (const b of nums) if (a.v > 0 && b.v < 0) out.push({ side, a: a.id, b: b.id });
+    for (let i = 0; i < nums.length; i++) for (let j = i + 1; j < nums.length; j++) out.push({ side, a: nums[i].id, b: nums[j].id });
   }
   return out;
 }
-
-// Cancel a + and a − on one side: as many pairs as both have, and what is left of the bigger (a Battle) stays.
-function cancelPair(board, aId, bId) {
-  const a = find(board, aId);
-  const b = find(board, bId);
-  const side = sideOf(board, aId);
-  if (!a || !b || a.kind !== 'num' || b.kind !== 'num' || side !== sideOf(board, bId) || a.id === b.id || Math.sign(a.v) === Math.sign(b.v)) return null;
-  const rest = a.v + b.v;
-  const terms = [];
-  for (const t of board[side]) {
-    if (t.id === a.id) { if (rest !== 0) terms.push({ id: nextId(), kind: 'num', v: rest }); } else if (t.id !== b.id) terms.push(t);
-  }
-  return { ...board, [side]: keepZero(terms) };
-}
+export const unresolved = (board) => combinable(board).length > 0;
+export const kindOf = (a, b) => (Math.sign(a) === Math.sign(b) ? 'party' : 'battle');
 
 // A side with nothing left on it says 0 (a side is never empty).
 const keepZero = (terms) => (terms.length ? terms : [{ id: nextId(), kind: 'num', v: 0 }]);
 
-// Like numbers on a side combine into one (once there is nothing left to cancel, so every one has the same sign).
-function combineLike(board) {
-  const fix = (terms) => {
-    const nums = terms.filter((t) => t.kind === 'num');
-    if (nums.length <= 1) return terms;
-    const total = sumNums(terms);
-    const out = [];
-    let placed = false;
-    for (const t of terms) {
-      if (t.kind !== 'num') out.push(t);
-      else if (!placed) { placed = true; if (total !== 0) out.push({ id: nextId(), kind: 'num', v: total }); }
-    }
-    return keepZero(out);
-  };
-  return { left: fix(board.left), right: fix(board.right) };
+// Combine two numbers on one side into their sum (a Battle leaves what is left of the bigger; equal ones leave nothing).
+function combineTerms(board, aId, bId) {
+  const a = find(board, aId);
+  const b = find(board, bId);
+  const side = sideOf(board, aId);
+  if (!a || !b || a.kind !== 'num' || b.kind !== 'num' || side !== sideOf(board, bId) || a.id === b.id) return null;
+  const total = a.v + b.v;
+  const terms = [];
+  for (const t of board[side]) {
+    if (t.id === a.id) { if (total !== 0) terms.push({ id: nextId(), kind: 'num', v: total }); } else if (t.id !== b.id) terms.push(t);
+  }
+  return { ...board, [side]: keepZero(terms) };
 }
 
 // Is x alone on its side (and so, once the other side is one number, solved)? What does the board say x is?
@@ -116,7 +101,7 @@ export function newAddBoth(problem, { level = 1 } = {}) {
     leftDelta: 0, rightDelta: 0,
     prevBoard: board, lights: { fewer: 'off', xAlone: 'off', xLeft: 'off' }, earnedFewer: false, reds: 0,
     counterMode: level <= 3, startOver: false, forced: false, hint: null, rung: 0,
-    entry: '', early: null, selected: null,
+    entry: '', early: null, selected: null, combining: null, kindMisses: 0, countMisses: 0,
     skipped: [], wrongs: 0, tag: null, tags: [], stuck: 0, taught: 0, helped: false, clean: false,
     on: { ...emptySkills(), partyBattle: false, sign: false }, answers: [], supportsShown: [],
     finalText: null, lastAmount: null,
@@ -125,7 +110,7 @@ export function newAddBoth(problem, { level = 1 } = {}) {
 }
 
 const say = (s, key, params = {}, bad = false) => { s.feedback = { key, params, bad }; return s; };
-const snapshot = (s) => ({ board: s.board, leftDelta: s.leftDelta, rightDelta: s.rightDelta, pending: s.pending, prevBoard: s.prevBoard, lights: s.lights, earnedFewer: s.earnedFewer, reds: s.reds, resolving: s.resolving, menu: s.menu, amountEntry: s.amountEntry });
+const snapshot = (s) => ({ board: s.board, leftDelta: s.leftDelta, rightDelta: s.rightDelta, pending: s.pending, prevBoard: s.prevBoard, lights: s.lights, earnedFewer: s.earnedFewer, reds: s.reds, resolving: s.resolving, menu: s.menu, amountEntry: s.amountEntry, combining: null, selected: null });
 const restore = (s, snap) => Object.assign(s, snap);
 export const tilt = (s) => s.leftDelta - s.rightDelta;            // positive: the left side is heavier
 export const balanced = (s) => tilt(s) === 0;
@@ -137,7 +122,6 @@ function startOverBoard(s) {
 
 // A move has been committed and nothing is left to cancel: combine, judge, and say how it went.
 function resolve(s) {
-  s.board = combineLike(s.board);
   const { lights, earnedFewer } = judge(s.prevBoard, s.board, { level: s.level, earnedFewer: s.earnedFewer });
   s.lights = lights;
   s.earnedFewer = earnedFewer;
@@ -194,6 +178,13 @@ export function reduceAddBoth(state, action) {
   // ----- typing: the amount while the move menu is open and no add has started, otherwise the answer -----
   if (isTyping(action)) {
     if (s.stage === 'build' || (s.early && s.early.step !== 'move')) return state;
+    if (s.combining && s.combining.step !== 'count') return state;
+    if (s.combining) {
+      const entry = typeInto(s.combining.entry, action, 'integer');
+      if (entry === s.combining.entry) return state;
+      s.combining = { ...s.combining, entry };
+      return s;
+    }
     const amountMode = s.menu === 'add' && (!s.pending || s.pending.second);
     const key = amountMode ? 'amountEntry' : 'entry';
     const entry = typeInto(s[key], action, 'integer');
@@ -201,6 +192,9 @@ export function reduceAddBoth(state, action) {
     s[key] = entry;
     return s;
   }
+
+  // While two groups are being combined, only that is going on (and help, Undo, and giving it up).
+  if (s.combining && !['kind', 'crossOff', 'abandon', 'check', 'stuck', 'teach', 'undo'].includes(action.type)) return state;
 
   switch (action.type) {
     // ----- L1–L2: build the equation from counters (a group at a time; a group is all one sign) -----
@@ -266,28 +260,45 @@ export function reduceAddBoth(state, action) {
       s.amountEntry = '';
       s.menu = null;
       s.hint = null;
-      if (cancellable(s.board).length) { s.resolving = true; return say(s, 'aCancelPairs'); }
+      if (unresolved(s.board)) { s.resolving = true; return say(s, 'aCombineGroups'); }
       return resolve(s);
     }
 
-    // ----- cancel a + and a − (tap one, then the other) -----
+    // ----- combine two groups: tap one, then the other; Party or Battle? how many are left? (then they combine) -----
     case 'select': {
-      if (s.stage !== 'moves' || s.pending) return state;
+      if (s.stage !== 'moves' || s.pending || s.combining) return state;
       const t = find(s.board, action.id);
-      if (!t || t.kind !== 'num') return say(s, 'aOnlyPairs', {}, true);
+      if (!t || t.kind !== 'num') return say(s, 'aOnlyNumbers', {}, true);
       if (!s.selected) { s.selected = t.id; return s; }
       const first = s.selected;
       s.selected = null;
       if (first === t.id) return s;
-      const next = cancelPair(s.board, first, t.id) ?? cancelPair(s.board, t.id, first);
-      if (!next) return say(s, 'aOnlyPairs', {}, true);
-      return applyCancel(s, next);
+      if (sideOf(s.board, first) !== sideOf(s.board, t.id)) return say(s, 'aSameSide', {}, true);
+      s.combining = { a: first, b: t.id, step: 'kind', crossed: false, entry: '' };
+      return say(s, 'aPartyOrBattle', combineParams(s));
     }
-    case 'cancel': {
-      if (s.stage !== 'moves' || s.pending) return state;
-      const next = cancelPair(s.board, action.a, action.b) ?? cancelPair(s.board, action.b, action.a);
-      if (!next) return say(s, 'aOnlyPairs', {}, true);
-      return applyCancel(s, next);
+    case 'kind': {
+      if (s.combining?.step !== 'kind') return state;
+      const { a, b } = combineTerms2(s);
+      const right = kindOf(a.v, b.v);
+      if (action.value !== right) {
+        s.kindMisses += 1;
+        return say(s, 'aKindWrong', { ...combineParams(s), picked: action.value }, true);
+      }
+      s.combining = { ...s.combining, step: 'count', kind: right };
+      return say(s, 'aHowMany', combineParams(s));
+    }
+    case 'crossOff': {
+      if (s.combining?.step !== 'count' || s.combining.crossed) return state;
+      s.combining = { ...s.combining, crossed: true };
+      s.helped = true;
+      if (!s.supportsShown.includes('crossoff')) s.supportsShown.push('crossoff');
+      return say(s, 'aCrossedOff', combineParams(s));
+    }
+    case 'abandon': {
+      if (!s.combining) return state;
+      s.combining = null;
+      return say(s, 'aAbandoned');
     }
 
     // ----- Cross the border (L6): a number crosses and switches teams; crossed but not flipped it does not balance -----
@@ -344,7 +355,7 @@ export function reduceAddBoth(state, action) {
 
     // ----- the typed answer -----
     case 'check':
-      return check(s);
+      return check(s, applyCombine);
 
     // ----- the early answer's drag-check -----
     case 'dropValue': {
@@ -377,12 +388,21 @@ export function reduceAddBoth(state, action) {
     return say(st, boardAnswer(st.board) !== null ? 'aTradedSolved' : 'aTraded');
   }
 
-  function applyCancel(st, next) {
+  function applyCombine(st, next) {
     st.history.push(snapshot(st));
     st.board = next;
-    if (cancellable(st.board).length) return say(st, 'aCancelled');
+    st.combining = null;
+    if (unresolved(st.board)) return say(st, 'aCombined');
     return resolve(st);
   }
+}
+
+const combineTerms2 = (s) => ({ a: find(s.board, s.combining.a), b: find(s.board, s.combining.b) });
+// What the messages need about the two groups being combined.
+function combineParams(s) {
+  const { a, b } = combineTerms2(s);
+  const total = a.v + b.v;
+  return { a: signed(a.v), b: signed(b.v), kind: kindOf(a.v, b.v), total: signed(total), left: signed(total) };
 }
 
 // What the early answer's drag-check shows: the order of operations for the x side with the typed value in.
@@ -393,11 +413,27 @@ export function checkLines(p, typed) {
   return [`${inner}`, `${signed(typed)} ${sign} ${p.a} = ${signed(value)}`, `${signed(value)} ${value === p.b ? '=' : '≠'} ${signed(p.b)}   ${value === p.b ? 'Balanced ✓' : 'Unbalanced ✗'}`];
 }
 
-function check(s) {
+// The count of a combination: how many are left after the two groups meet.
+function checkCount(s, applyCombine) {
+  const c = s.combining;
+  const { a, b } = combineTerms2(s);
+  const text = c.entry;
+  if (!/^-?\d+$/.test(text)) return say(s, text === '' || text === '-' ? 'typeCount' : 'answerUnreadable', {}, true);
+  const typed = Number(text);
+  const total = a.v + b.v;
+  if (typed === total) return applyCombine(s, combineTerms(s.board, c.a, c.b));
+  s.countMisses += 1;
+  const tag = c.kind === 'battle' && typed === Math.abs(a.v) + Math.abs(b.v) ? 'sizes-added' : typed === -total ? 'sign-flipped' : 'unmatched';
+  s.combining = { ...c, entry: '' };
+  return say(s, 'aCountWrong', { ...combineParams(s), tag, typed }, true);
+}
+
+function check(s, applyCombine) {
+  if (s.combining) return s.combining.step === 'count' ? checkCount(s, applyCombine) : say(s, 'aPickKind', {}, true);
   const { correct, tag, typed, unreadable } = checkAddBoth(s.problem, s.entry);
   if (unreadable) return say(s, s.entry === '' || s.entry === '-' ? 'typeAnswer' : 'answerUnreadable', {}, true);
   const onBoard = boardAnswer(s.board);
-  if (s.stage === 'build' || s.pending || s.resolving) return say(s, 'aFinishMoveFirst', {}, true);
+  if (s.stage === 'build' || s.pending) return say(s, 'aFinishMoveFirst', {}, true);
   if (onBoard !== null) {
     // x is alone: the board says what x is
     if (correct) return finish(s, 'aCorrect');

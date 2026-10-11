@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { makeAddBoth, formatAddBoth } from '../src/engine/addBoth.js';
 import {
-  newAddBoth, reduceAddBoth, boardText, cancellable, boardAnswer, tilt, balanced, checkLines, MOVES_BY_LEVEL,
+  newAddBoth, reduceAddBoth, boardText, combinable, kindOf, boardAnswer, tilt, balanced, checkLines, MOVES_BY_LEVEL,
 } from '../src/engine/addBothMoves.js';
 
 const run = (s, ...actions) => actions.reduce(reduceAddBoth, s);
@@ -11,14 +11,17 @@ const P = (form, a, b, mirror = false) => makeAddBoth(form, a, form === 'x+a' ? 
 const ids = (s, side) => s.board[side].map((t) => t.id);
 const termsOf = (s, side) => s.board[side];
 
-// The whole correct move for x + a = b / x − a = b: choose Add, type the opposite, add left, add right, Go, cancel every pair.
+// Combine one pair the way a student does: tap both groups, say Party or Battle, type how many are left.
+function combineOne(s, pair) {
+  const a = s.board[pair.side].find((t) => t.id === pair.a);
+  const b = s.board[pair.side].find((t) => t.id === pair.b);
+  return run(s, { type: 'select', id: pair.a }, { type: 'select', id: pair.b }, { type: 'kind', value: kindOf(a.v, b.v) }, ...typed(String(a.v + b.v)), { type: 'check' });
+}
+const combineAll = (s) => { let t = s; while (combinable(t.board).length) t = combineOne(t, combinable(t.board)[0]); return t; };
+
+// The whole correct move for x + a = b / x − a = b: choose Add, type the opposite, add left, add right, Go, combine every pair.
 function doMove(s, amount) {
-  let t = run(s, { type: 'choose', move: 'add' }, ...typed(String(amount)), { type: 'addTo', side: 'left' }, { type: 'addTo', side: 'right' }, { type: 'go' });
-  while (cancellable(t.board).length) {
-    const pair = cancellable(t.board)[0];
-    t = run(t, { type: 'cancel', a: pair.a, b: pair.b });
-  }
-  return t;
+  return combineAll(run(s, { type: 'choose', move: 'add' }, ...typed(String(amount)), { type: 'addTo', side: 'left' }, { type: 'addTo', side: 'right' }, { type: 'go' }));
 }
 
 describe('the board', () => {
@@ -47,10 +50,10 @@ describe('add to both sides, in two actions', () => {
     expect(s.feedback.key).toBe('aBalanced');
     s = run(s, { type: 'go' });
     expect(s.resolving).toBe(true);                                                    // the pair has to be cancelled
-    expect(s.feedback.key).toBe('aCancelPairs');
+    expect(s.feedback.key).toBe('aCombineGroups');
   });
 
-  it('judges only after the pairs are cancelled, then combines like numbers, and the lights go green', () => {
+  it('judges only after every pair of groups is combined, and the lights go green', () => {
     let s = doMove(start(), -3);
     expect(boardText(s.board)).toBe('x = −9');
     expect(s.lights).toEqual({ fewer: 'green', xAlone: 'green', xLeft: 'off' });
@@ -60,29 +63,61 @@ describe('add to both sides, in two actions', () => {
     expect(s).toMatchObject({ stage: 'done', clean: true, finalText: '−9' });
   });
 
-  it('cancels a Battle down to what is left (tap one, then the other)', () => {
+  it('combines two groups in steps: tap both, Party or Battle, how many are left (then they combine)', () => {
     let s = newAddBoth(P('x-a', 5, -2), { level: 3 });                              // x − 5 = −2
     s = run(s, { type: 'choose', move: 'add' }, ...typed('5'), { type: 'addTo', side: 'left' }, { type: 'addTo', side: 'right' }, { type: 'go' });
     expect(boardText(s.board)).toBe('x + −5 + 5 = −2 + 5');
-    const [l1, l2] = [termsOf(s, 'left')[1].id, termsOf(s, 'left')[2].id];
-    s = run(s, { type: 'select', id: l1 }, { type: 'select', id: l2 });
+    const [l1, l2] = [s.board.left[1].id, s.board.left[2].id];
+    s = run(s, { type: 'select', id: l1 });
+    expect(s.selected).toBe(l1);
+    s = run(s, { type: 'select', id: l2 });
+    expect(s.combining).toMatchObject({ step: 'kind' });
+    expect(s.feedback).toMatchObject({ key: 'aPartyOrBattle', params: { a: '−5', b: '5', kind: 'battle' } });
+    expect(run(s, { type: 'kind', value: 'party' }).feedback.key).toBe('aKindWrong');   // the wrong team is a miss, and stays at the question
+    expect(run(s, { type: 'kind', value: 'party' }).kindMisses).toBe(1);
+    expect(run(s, { type: 'kind', value: 'party' }).combining.step).toBe('kind');
+    s = run(s, { type: 'kind', value: 'battle' });
+    expect([s.combining.step, s.feedback.key]).toEqual(['count', 'aHowMany']);
+    expect(run(s, { type: 'check' }).feedback.key).toBe('typeCount');
+    const wrong = run(s, ...typed('10'), { type: 'check' });
+    expect(wrong).toMatchObject({ countMisses: 1, feedback: { key: 'aCountWrong', params: { tag: 'sizes-added' } } });
+    expect(boardText(wrong.board)).toBe('x + −5 + 5 = −2 + 5');                       // nothing combines until the count is right
+    s = run(s, ...typed('0'), { type: 'check' });
     expect(boardText(s.board)).toBe('x = −2 + 5');
-    expect(s.resolving).toBe(true);                                                    // the right side still has a pair
-    s = run(s, { type: 'cancel', a: termsOf(s, 'right')[0].id, b: termsOf(s, 'right')[1].id });
+    expect([s.combining, s.resolving, s.feedback.key]).toEqual([null, true, 'aCombined']);
+    s = combineAll(s);
     expect(boardText(s.board)).toBe('x = 3');
     expect(s.lights.fewer).toBe('green');
   });
 
-  it('only cancels a real + and − pair on one side, and says so otherwise', () => {
+  it('cross off is an extra scaffold: it shows the pairs struck, and still asks for the count', () => {
+    let s = newAddBoth(P('x-a', 5, -2), { level: 3 });
+    s = run(s, { type: 'choose', move: 'add' }, ...typed('5'), { type: 'addTo', side: 'left' }, { type: 'addTo', side: 'right' }, { type: 'go' });
+    s = run(s, { type: 'select', id: s.board.right[0].id }, { type: 'select', id: s.board.right[1].id });
+    expect(run(s, { type: 'crossOff' })).toBe(s);                                        // not before Party or Battle is answered
+    s = run(s, { type: 'kind', value: 'battle' }, { type: 'crossOff' });
+    expect(s.combining.crossed).toBe(true);
+    expect(s.supportsShown).toContain('crossoff');
+    expect(s).toMatchObject({ helped: true, stuck: 0 });
+    expect(boardText(s.board)).toBe('x + −5 + 5 = −2 + 5');
+    s = run(s, ...typed('3'), { type: 'check' });
+    expect(boardText(s.board)).toBe('x + −5 + 5 = 3');
+  });
+
+  it('combines like groups too (a Party), and only two numbers on one side', () => {
     let s = run(start(), { type: 'choose', move: 'add' }, ...typed('−3'), { type: 'addTo', side: 'left' }, { type: 'addTo', side: 'right' }, { type: 'go' });
-    const [x, three, minus3] = termsOf(s, 'left');
-    expect(run(s, { type: 'cancel', a: three.id, b: x.id }).feedback.key).toBe('aOnlyPairs');
-    expect(run(s, { type: 'select', id: x.id }).feedback.key).toBe('aOnlyPairs');
-    const across = run(s, { type: 'cancel', a: three.id, b: termsOf(s, 'right')[0].id });
-    expect(across.feedback.key).toBe('aOnlyPairs');
-    expect(across.board).toEqual(s.board);
-    expect(cancellable(s.board)).toHaveLength(1);
+    const [x, three, minus3] = s.board.left;
+    expect(run(s, { type: 'select', id: x.id }).feedback.key).toBe('aOnlyNumbers');
+    expect(run(s, { type: 'select', id: three.id }, { type: 'select', id: s.board.right[0].id }).feedback.key).toBe('aSameSide');
+    expect(run(s, { type: 'select', id: three.id }, { type: 'select', id: three.id }).combining).toBeNull();
+    const party = run(s, { type: 'select', id: s.board.right[0].id }, { type: 'select', id: s.board.right[1].id });
+    expect(party.feedback.params).toMatchObject({ a: '−6', b: '−3', kind: 'party' });
     expect(minus3.v).toBe(-3);
+    expect(kindOf(-6, -3)).toBe('party');
+    expect(kindOf(3, -3)).toBe('battle');
+    // while two groups are being combined nothing else starts
+    expect(run(party, { type: 'choose', move: 'add' })).toBe(party);
+    expect(run(party, { type: 'abandon' }).combining).toBeNull();
   });
 
   it('refuses amount 0, a second add on the same side, and an amount that is too big', () => {
@@ -184,6 +219,8 @@ describe('cross the border (L6)', () => {
     expect(boardText(s.board)).toBe('x = −6 + −3');
     expect([balanced(s), s.feedback.key]).toEqual([true, 'aSwitchedTeams']);
     s = run(s, { type: 'go' });
+    expect(boardText(s.board)).toBe('x = −6 + −3');                                    // a Party still to combine
+    s = combineAll(s);
     expect(boardText(s.board)).toBe('x = −9');
     expect(s.lights).toMatchObject({ fewer: 'green', xAlone: 'green', xLeft: 'green' });
     expect(run(s, ...answer('−9')).stage).toBe('done');
@@ -211,7 +248,7 @@ describe('typing the answer early', () => {
     s = run(s, { type: 'nextLine' }, { type: 'nextLine' }, { type: 'nextLine' });
     expect(s.early.step).toBe('move');
     s = run(s, { type: 'choose', move: 'add' }, ...typed('5'), { type: 'addTo', side: 'left' }, { type: 'addTo', side: 'right' }, { type: 'go' });
-    while (cancellable(s.board).length) s = run(s, { type: 'cancel', a: cancellable(s.board)[0].a, b: cancellable(s.board)[0].b });
+    s = combineAll(s);
     expect(s).toMatchObject({ stage: 'done', clean: true, finalText: '3' });
   });
 
@@ -274,7 +311,7 @@ describe('I\'m stuck and Teach me', () => {
     expect(s).toMatchObject({ taught: 1, forced: true, menu: 'add', amountEntry: '-3', clean: false });
     expect(run(s, { type: 'backspace' }, { type: 'backspace' }, ...typed('2'), { type: 'addTo', side: 'left' }).feedback).toMatchObject({ key: 'aForced', params: { amount: '−3' } });
     s = run(s, { type: 'addTo', side: 'left' }, { type: 'addTo', side: 'right' }, { type: 'go' });
-    while (cancellable(s.board).length) s = run(s, { type: 'cancel', a: cancellable(s.board)[0].a, b: cancellable(s.board)[0].b });
+    s = combineAll(s);
     expect(boardAnswer(s.board)).toBe(-9);
     s = run(s, ...answer('−9'));
     expect(s).toMatchObject({ stage: 'done', clean: false, taught: 1 });
