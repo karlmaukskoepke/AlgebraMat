@@ -15,7 +15,7 @@ function el(name, attrs = {}, children = []) {
   node.append(...children);
   return node;
 }
-function html(tag, cls, children = [], attrs = {}) {
+export function html(tag, cls, children = [], attrs = {}) {
   const node = document.createElement(tag);
   if (cls) node.className = cls;
   for (const [k, v] of Object.entries(attrs)) if (v !== undefined && v !== null && v !== false) node.setAttribute(k, v);
@@ -82,17 +82,33 @@ const tipAngle = (s) => (s.stage === 'build' ? 0 : Math.max(-8, Math.min(8, -til
 let lastAngle = 0;
 const reduceMotion = () => typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+// The seesaw: a beam on a pivot at the border, tipped `angle` degrees (it eases from where it was).
+export function drawSeesaw(svg, cx, cy, half, angle) {
+  const pivot = el('g', { transform: `translate(${cx} ${cy})` });
+  pivot.append(el('polygon', { points: '-22,46 22,46 0,2', class: 'ab-pivot' }));
+  const beam = el('g', { class: 'ab-beam', style: `transform: rotate(${angle}deg)` });
+  beam.append(el('line', { x1: -half, y1: 0, x2: half, y2: 0, class: 'ab-beam-bar' }));
+  for (const sx of [-half, half]) beam.append(el('circle', { cx: sx, cy: 0, r: 13, class: 'ab-beam-end' }));
+  pivot.append(beam);
+  svg.append(pivot);
+  if (!reduceMotion() && angle !== lastAngle && typeof beam.animate === 'function') {
+    beam.animate([{ transform: `rotate(${lastAngle}deg)` }, { transform: `rotate(${angle}deg)` }], { duration: 650, easing: 'cubic-bezier(.3,1.6,.5,1)' });
+  }
+  lastAngle = angle;
+}
+export const angleFor = (delta) => Math.max(-8, Math.min(8, -delta * 2.5));
+
 export function renderAddBothMat(s) {
   const wrap = html('div', `ab-game${s.stage === 'build' ? ' is-building' : ''}`);
   const main = html('div', 'ab-main');
   main.append(boardSvg(s));
   const tray = trayFor(s);
   if (tray) main.append(tray);
-  wrap.append(main, panelFor(s));
+  wrap.append(main, panelFor(s, { replay: true }));
   return wrap;
 }
 
-function boardSvg(s) {
+export function boardSvg(s) {
   const items = boardItems(s);
   const lw = Math.max(sideWidth(items.left), sideWidth(items.right));   // both sides alike, so the border (and the seesaw's pivot) is the middle
   const rw = lw;
@@ -105,19 +121,7 @@ function boardSvg(s) {
   // ---- the balance: the word, and the seesaw on the dashed border ----
   const building = s.stage === 'build';
   svg.append(el('text', { x: W / 2, y: 40, 'text-anchor': 'middle', class: `ab-readout ${building ? '' : balanced(s) ? 'is-good' : 'is-bad'}` }, [building ? 'Build the equation' : tiltText(s)]));
-  const beamL = (lw + MIDDLE + rw) / 2;
-  const pivot = el('g', { transform: `translate(${borderX} ${BEAM_Y})` });
-  pivot.append(el('polygon', { points: '-22,46 22,46 0,2', class: 'ab-pivot' }));
-  const angle = tipAngle(s);
-  const beam = el('g', { class: 'ab-beam', style: `transform: rotate(${angle}deg)` });
-  beam.append(el('line', { x1: -beamL, y1: 0, x2: beamL, y2: 0, class: 'ab-beam-bar' }));
-  for (const sx of [-beamL, beamL]) beam.append(el('circle', { cx: sx, cy: 0, r: 13, class: 'ab-beam-end' }));
-  pivot.append(beam);
-  svg.append(pivot);
-  if (!reduceMotion() && angle !== lastAngle && typeof beam.animate === 'function') {
-    beam.animate([{ transform: `rotate(${lastAngle}deg)` }, { transform: `rotate(${angle}deg)` }], { duration: 650, easing: 'cubic-bezier(.3,1.6,.5,1)' });
-  }
-  lastAngle = angle;
+  drawSeesaw(svg, borderX, BEAM_Y, (lw + MIDDLE + rw) / 2, tipAngle(s));
 
   // ---- the board ----
   const top = BEAM_Y + 78;
@@ -139,12 +143,13 @@ function boardSvg(s) {
   const struck = struckCounts(s);
 
   const drawSide = (list, startX, sw, side) => {
+    const out = el('g', { class: `ab-sideg ab-sideg-${side}` });
     const used = list.reduce((w, i) => w + i.width, 0) + GAP * Math.max(0, list.length - 1);
     let cx = startX + (sw - used) / 2;
-    if (!list.length && building) svg.append(el('text', { x: startX + sw / 2, y: top + h / 2 + 8, 'text-anchor': 'middle', class: 'ab-drophere' }, ['drop here']));
+    if (!list.length && building) out.append(el('text', { x: startX + sw / 2, y: top + h / 2 + 8, 'text-anchor': 'middle', class: 'ab-drophere' }, ['drop here']));
     list.forEach((it, i) => {
       const cy = top + (h - it.height) / 2;
-      if (i > 0) svg.append(el('text', { x: cx - GAP / 2, y: top + h / 2 + 12, 'text-anchor': 'middle', class: 'ab-plus' }, ['+']));
+      if (i > 0) out.append(el('text', { x: cx - GAP / 2, y: top + h / 2 + 12, 'text-anchor': 'middle', class: 'ab-plus' }, ['+']));
       if (it.type === 'x') {
         const early = s.early?.step === 'drag';
         const attrs = building
@@ -153,12 +158,12 @@ function boardSvg(s) {
         const box = el('g', { class: `ab-x${early ? ' is-target' : ''}`, 'data-x': '1', ...attrs });
         box.append(el('rect', { x: cx, y: cy, width: BOX_W, height: BOX_H, rx: 6, class: 'vm-box' }));
         box.append(el('text', { x: cx + BOX_W / 2, y: cy + BOX_H / 2 + 12, 'text-anchor': 'middle', class: 'sv-x' }, ['x']));
-        svg.append(box);
+        out.append(box);
       } else if (it.type === 'token') {
         const g = el('g', { class: `ab-token${cls(it.id)}`, 'data-action': tapAction(it.id), 'data-id': it.id, 'data-numval': it.v, role: 'button', tabindex: '0', 'aria-label': `Group ${signed(it.v)}` });
         g.append(el('rect', { x: cx, y: cy, width: it.width, height: it.height, rx: 12, class: 'ab-token-box' }));
         g.append(el('text', { x: cx + it.width / 2, y: cy + it.height / 2 + 12, 'text-anchor': 'middle', class: 'ab-token-text' }, [signed(it.v)]));
-        svg.append(g);
+        out.append(g);
       } else {
         const attrs = building
           ? { 'data-action': 'buildRemove', 'data-side': side, role: 'button', tabindex: '0', 'aria-label': `Take a counter off the ${side} side` }
@@ -172,13 +177,22 @@ function boardSvg(s) {
           counterMark(g, mx, my, Math.sign(it.v), n < k ? 'sv-struck' : '');
           if (n < k) g.append(el('line', { x1: mx - 9, y1: my + 9, x2: mx + 9, y2: my - 9, class: 'sv-slash' }));
         }
-        svg.append(g);
+        out.append(g);
       }
       cx += it.width + GAP;
     });
+    svg.append(out);
+    return out;
   };
-  drawSide(items.left, x0, lw, 'left');
-  drawSide(items.right, x0 + lw + MIDDLE, rw, 'right');
+
+  const gl = drawSide(items.left, x0, lw, 'left');
+  const gr = drawSide(items.right, x0 + lw + MIDDLE, rw, 'right');
+  // Trade places: the side now on the left travels up and over from the right, the other down and over, around the border.
+  if (s.anim === 'trade' && !reduceMotion()) {
+    const dist = lw + MIDDLE;
+    const arc = (dx, dy) => [{ transform: `translate(${dx}px, 0px)` }, { transform: `translate(${dx / 2}px, ${dy}px)`, offset: 0.5 }, { transform: 'translate(0px, 0px)' }];
+    requestAnimationFrame(() => { try { gl.animate(arc(dist, -60), { duration: 900, easing: 'ease-in-out' }); gr.animate(arc(-dist, 60), { duration: 900, easing: 'ease-in-out' }); } catch { /* no animation: the sides just swap */ } });
+  }
 
   // ---- the equation, under the board, with the border through the = ----
   let y = zoneTop + zoneH + 56;
@@ -218,7 +232,7 @@ function chip(label, attrs, cls = '') {
   return b;
 }
 
-function trayFor(s) {
+export function trayFor(s) {
   if (s.early?.step === 'drag') {
     const t = html('div', 'ab-tray');
     t.append(html('p', 'ab-tray-note', ['Drag your answer up onto the x (or tap the x)']));
@@ -241,7 +255,7 @@ function trayFor(s) {
 
 // ---------- the Balancing moves panel ----------
 
-function panelFor(s) {
+export function panelFor(s, { replay = false } = {}) {
   const panel = html('aside', 'ab-panel', [], { 'aria-label': 'Balancing moves' });
   panel.append(html('h3', 'ab-panel-title', ['Balancing moves']));
   const done = s.stage === 'done';
@@ -303,6 +317,9 @@ function panelFor(s) {
     goals.append(html('li', `ab-goal is-${state}`, [box, html('span', 'ab-goal-label', [label])]));
   }
   panel.append(goals);
+  if (replay && !done) {
+    panel.append(html('button', 'btn btn-quiet ab-replay', ['Replay tutorial'], { type: 'button', 'data-action': 'replayTutorial' }));
+  }
   return panel;
 }
 

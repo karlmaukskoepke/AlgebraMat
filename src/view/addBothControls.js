@@ -49,12 +49,13 @@ export function buildAddBothControls(root, dispatch) {
     if (!b || b.disabled) return;
     if (b.dataset.action === 'tour') { startTour({ first: false }); return; }
     const { action, digit, move, side, value } = b.dataset;
+    if (action === 'check' && b.dataset.cont) return dispatch({ type: 'continue' });
     if (action === 'check' && b.dataset.next) return dispatch({ type: 'next' });
     dispatch({ type: action, digit: digit === undefined ? undefined : Number(digit), move, side, value });
   });
 
-  return {
-    update(s) {
+  const apply = (s) => {
+      delete check.dataset.cont;
       const stage = s.step === 'levelDone' ? 'levelDone' : s.stage;
       const done = stage === 'done' || stage === 'levelDone';
       const building = stage === 'build';
@@ -78,6 +79,31 @@ export function buildAddBothControls(root, dispatch) {
       check.disabled = !done && (!typingOk);
       check.innerHTML = done ? 'Next →' : 'Check ✓';
       if (done) check.dataset.next = '1'; else delete check.dataset.next;
+  };
+
+  return {
+    update(s) {
+      const tut = s.tut;
+      if (!tut) return apply(s);
+      // a tutorial is on: nothing here counts as help, and "next" means "continue" (the tutorial is never a barrier: Skip is on the Mat)
+      if (tut.phase !== 'numeric') {
+        apply(tut.eng);
+        stuck.disabled = teach.disabled = tourButton.disabled = true;
+        undo.hidden = true;
+        startOver.hidden = true;
+        if (tut.eng.stage === 'done') { check.innerHTML = 'Continue ▸'; delete check.dataset.next; check.dataset.cont = '1'; check.disabled = false; }
+        return;
+      }
+      const t = tut.t;
+      const typingOk = t.kind === 'add' && t.menu === 'add' && t.stage === 'explore';
+      delete check.dataset.cont;
+      delete check.dataset.next;
+      typing.hidden = !typingOk;
+      typing.textContent = `Typing: the amount to add = ${t.amountEntry ? t.amountEntry.replace('-', MINUS) : '?'}`;
+      undo.hidden = startOver.hidden = true;
+      stuck.disabled = teach.disabled = tourButton.disabled = check.disabled = true;
+      check.innerHTML = 'Check ✓';
+      for (const b of keys.querySelectorAll('button')) b.disabled = !typingOk;
     },
   };
 }
