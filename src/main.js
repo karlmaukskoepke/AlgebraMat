@@ -19,6 +19,7 @@ import { distributeLightPlay } from './play/distributeLightPlay.js';
 import { valueLightPlay } from './play/valueLightPlay.js';
 import { solveLightPlay } from './play/solveLightPlay.js';
 import { switchPlay } from './play/switchPlay.js';
+import { addBothPlay } from './play/addBothPlay.js';
 import { boxPlay } from './play/boxPlay.js';
 import { afterAnswer } from './engine/streak.js';
 import { loadBests, saveBest, loadLog } from './lightStore.js';
@@ -68,6 +69,7 @@ const PLAY = {
   'one-step': solveLightPlay,
   'two-step': solveLightPlay,
   switch: switchPlay,
+  'add-both': addBothPlay,
   'distribute-combine': (level) => (level >= 4 ? distributeTypedPlay : LIGHT ? distributeLightPlay : distributePlay),
 };
 const adapterFor = (packId, level) => (typeof PLAY[packId] === 'function' ? PLAY[packId](level) : PLAY[packId]);
@@ -338,15 +340,15 @@ function nextProblem() {
 
 function finishLevel() {
   const { pack, level } = play;
-  if (!pack.comingSoon) progress = completeLevel(progress, pack.id, level); // a round opened from a link isn't saved yet
+  if (!pack.comingSoon && !pack.hidden) progress = completeLevel(progress, pack.id, level); // a round opened from a link isn't saved yet
   play.finished = true;
   persist();
   render();
   feedback.textContent = '';
   renderLevelDone(matRoot, {
     pack, level,
-    packComplete: isPackComplete(progress, pack.id),
-    nextPack: PACKS[PACKS.indexOf(pack) + 1],
+    packComplete: !pack.hidden && isPackComplete(progress, pack.id),
+    nextPack: pack.hidden ? undefined : PACKS[PACKS.indexOf(pack) + 1],
     best: play.best,
     onNext: () => startLevel(pack.id, level + 1),
     onMap: goHome,
@@ -372,7 +374,7 @@ function startPractice() {
 // modes that type the answer have one.
 function renderStreak() {
   const { session, streak, best, practicing, pack, level } = play;
-  const has = session && 'clean' in session;
+  const has = session && 'clean' in session && !play.adapter.noStreak;
   $('streak').hidden = !has;
   if (has) {
     $('streak').textContent = `Streak ${streak} · Best ${Math.max(best, streak)}`;
@@ -456,7 +458,7 @@ function render(before) {
   const { adapter } = play;
   const fx = adapter.effects(before, session);
   // A problem just finished: the streak grows with a clean answer and goes back to zero after any other.
-  if (session.step === 'done' && before && before.step !== 'done' && 'clean' in session) {
+  if (session.step === 'done' && before && before.step !== 'done' && 'clean' in session && !adapter.noStreak) {
     play.streak = afterAnswer(play.streak, session);
     if (play.streak > play.best) play.best = saveBest(play.pack.id, play.level, play.streak);
   }

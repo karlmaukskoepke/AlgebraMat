@@ -11,6 +11,7 @@ import { generateValueLevel } from '../engine/generateValue.js';
 import { generateSolveLevel } from '../engine/generateSolve.js';
 import { generateSolve2Level } from '../engine/generateSolve2.js';
 import { generateSwitchLevel } from '../engine/generateSwitch.js';
+import { generateAddBothLevel } from '../engine/generateAddBoth.js';
 
 // Group It (built as "Lasso"; its id stays 'lasso' so saved progress and
 // save codes from before the rename still work).
@@ -96,6 +97,19 @@ export const oneStep = {
   generate: (level, seed) => generateSolveLevel(level, seed),
 };
 
+// Add to both sides (SPEC-ADD-TO-BOTH-SIDES.md): the pilot of the moves-based Solve it. Hidden (reachable by ?pack=add-both)
+// until its screens, tutorials and save-code migration are done; then it takes its place in Solve it.
+export const addBoth = {
+  id: 'add-both',
+  title: 'Add to both sides',
+  subtitle: 'Cancel the number next to x with its opposite',
+  blurb: 'Add the opposite to both sides, and cancel the pairs.',
+  levels: 6,
+  levelNames: ['x + a = b', 'x − a = b', 'both forms', 'x on the right', 'bigger numbers', 'cross the border'],
+  hidden: true,
+  generate: (level, seed) => generateAddBothLevel(level, seed),
+};
+
 // Switch sides (SPEC-SOLVE.md §8): the other way to solve it: the number is dragged across the border and switches teams.
 export const switchSides = {
   id: 'switch',
@@ -143,4 +157,6 @@ export const SECTIONS = [
 ];
 export const sectionById = (id) => SECTIONS.find((s) => s.id === id);
 export const sectionOf = (packId) => SECTIONS.find((s) => s.packs.includes(packId));
-export const packById = (id) => PACKS.find((p) => p.id === id);
+// Packs still being built are reachable by ?pack= but are not on the home screen, in progress or in save codes.
+export const HIDDEN_PACKS = [addBoth];
+export const packById = (id) => PACKS.find((p) => p.id === id) ?? HIDDEN_PACKS.find((p) => p.id === id);

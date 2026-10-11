@@ -72,7 +72,7 @@ describe('add to both sides, in two actions', () => {
     expect(s.selected).toBe(l1);
     s = run(s, { type: 'select', id: l2 });
     expect(s.combining).toMatchObject({ step: 'kind' });
-    expect(s.feedback).toMatchObject({ key: 'aPartyOrBattle', params: { a: '−5', b: '5', kind: 'battle' } });
+    expect(s.feedback).toMatchObject({ key: 'aPartyOrBattle', params: { g1: '−5', g2: '5', kind: 'battle' } });
     expect(run(s, { type: 'kind', value: 'party' }).feedback.key).toBe('aKindWrong');   // the wrong team is a miss, and stays at the question
     expect(run(s, { type: 'kind', value: 'party' }).kindMisses).toBe(1);
     expect(run(s, { type: 'kind', value: 'party' }).combining.step).toBe('kind');
@@ -111,7 +111,7 @@ describe('add to both sides, in two actions', () => {
     expect(run(s, { type: 'select', id: three.id }, { type: 'select', id: s.board.right[0].id }).feedback.key).toBe('aSameSide');
     expect(run(s, { type: 'select', id: three.id }, { type: 'select', id: three.id }).combining).toBeNull();
     const party = run(s, { type: 'select', id: s.board.right[0].id }, { type: 'select', id: s.board.right[1].id });
-    expect(party.feedback.params).toMatchObject({ a: '−6', b: '−3', kind: 'party' });
+    expect(party.feedback.params).toMatchObject({ g1: '−6', g2: '−3', kind: 'party' });
     expect(minus3.v).toBe(-3);
     expect(kindOf(-6, -3)).toBe('party');
     expect(kindOf(3, -3)).toBe('battle');

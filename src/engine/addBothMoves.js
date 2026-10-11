@@ -7,7 +7,7 @@
 import { typeInto, isTyping } from './entry.js';
 import { emptySkills } from './skills.js';
 import {
-  constantOf, oppositeOf, checkAddBoth, tagAddBoth, formatAddBoth, answerText, signed,
+  constantOf, oppositeOf, checkAddBoth, tagAddBoth, formatAddBoth, answerText, signed, isBattle,
 } from './addBoth.js';
 
 export const MOVES_BY_LEVEL = (level) => ['add', ...(level >= 4 ? ['trade'] : []), ...(level >= 6 ? ['cross'] : [])];
@@ -91,7 +91,7 @@ const amountOf = (entry) => (/^-?\d+$/.test(entry) ? Number(entry) : null);
 
 export function newAddBoth(problem, { level = 1 } = {}) {
   const board = startBoard(problem);
-  return {
+  return say({
     problem, level,
     stage: level <= 2 ? 'build' : 'moves',     // L1–L2: the student builds the equation from counters first
     built: { constant: 0, other: 0 },
@@ -105,11 +105,13 @@ export function newAddBoth(problem, { level = 1 } = {}) {
     skipped: [], wrongs: 0, tag: null, tags: [], stuck: 0, taught: 0, helped: false, clean: false,
     on: { ...emptySkills(), partyBattle: false, sign: false }, answers: [], supportsShown: [],
     finalText: null, lastAmount: null,
-    feedback: { key: level <= 2 ? 'aBuild' : 'aIntro' },
-  };
+    feedback: null,
+  }, level <= 2 ? 'aBuild' : 'aIntro');
 }
 
-const say = (s, key, params = {}, bad = false) => { s.feedback = { key, params, bad }; return s; };
+// What every message may say about the problem itself: the number next to x, its opposite, the other side.
+const problemParams = (p) => ({ con: signed(constantOf(p)), opp: signed(oppositeOf(p)), a: p.a, other: signed(p.b), battle: isBattle(p), mirror: Boolean(p.mirror), form: p.form });
+const say = (s, key, params = {}, bad = false) => { s.feedback = { key, params: { ...problemParams(s.problem), ...params }, bad }; return s; };
 const snapshot = (s) => ({ board: s.board, leftDelta: s.leftDelta, rightDelta: s.rightDelta, pending: s.pending, prevBoard: s.prevBoard, lights: s.lights, earnedFewer: s.earnedFewer, reds: s.reds, resolving: s.resolving, menu: s.menu, amountEntry: s.amountEntry, combining: null, selected: null });
 const restore = (s, snap) => Object.assign(s, snap);
 export const tilt = (s) => s.leftDelta - s.rightDelta;            // positive: the left side is heavier
@@ -367,10 +369,10 @@ export function reduceAddBoth(state, action) {
       if (s.early?.step !== 'check') return state;
       const shown = s.early.shown + 1;
       if (shown < s.early.lines.length) { s.early = { ...s.early, shown }; return s; }
-      const ok = s.early.correct;
-      s.early = ok ? { ...s.early, shown, step: 'move' } : null;
-      if (ok) { s.menu = 'add'; return say(s, 'aEarlyMove'); }
-      return say(s, 'aCheckFailed', { typed: signed(s.early?.typed ?? 0) }, true);
+      const early = s.early;
+      s.early = early.correct ? { ...early, shown, step: 'move' } : null;
+      if (early.correct) { s.menu = 'add'; return say(s, 'aEarlyMove'); }
+      return say(s, 'aCheckFailed', { typed: signed(early.typed), tag: early.tag }, true);
     }
     default:
       return state;
@@ -402,7 +404,7 @@ const combineTerms2 = (s) => ({ a: find(s.board, s.combining.a), b: find(s.board
 function combineParams(s) {
   const { a, b } = combineTerms2(s);
   const total = a.v + b.v;
-  return { a: signed(a.v), b: signed(b.v), kind: kindOf(a.v, b.v), total: signed(total), left: signed(total) };
+  return { g1: signed(a.v), g2: signed(b.v), kind: kindOf(a.v, b.v), total: signed(total) };
 }
 
 // What the early answer's drag-check shows: the order of operations for the x side with the typed value in.
@@ -438,7 +440,7 @@ function check(s, applyCombine) {
     // x is alone: the board says what x is
     if (correct) return finish(s, 'aCorrect');
     s.wrongs += 1; s.tag = tag; s.tags.push(tag); s.answers.push({ typed: s.entry, tag }); s.entry = '';
-    return say(s, 'aReadBoard', { answer: onBoard }, true);
+    return say(s, 'aReadBoard', { answer: onBoard, typed: signed(typed), tag }, true);
   }
   // typed before x is alone: the early answer (never a stuck click)
   if (!correct) { s.wrongs += 1; s.tag = tag; s.tags.push(tag); s.answers.push({ typed: s.entry, tag }); }
