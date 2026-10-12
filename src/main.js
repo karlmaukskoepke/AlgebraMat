@@ -542,7 +542,8 @@ document.addEventListener('keydown', (e) => {
   else if (e.key === 'Backspace' || e.key === 'Delete') candidates.push('.pad button[data-action="backspace"]', 'button[data-key="Backspace"]');
   else if (e.key === '-' || e.key === '−') candidates.push('.pad button[data-action="toggleSign"]', '.pad button[data-key="-"]', 'button[data-key="-"]');
   else if (e.key === '+') candidates.push('.pad button[data-key="+"]', 'button[data-key="+"]');
-  else if (e.key === 'Enter' && !e.repeat) candidates.push('button[data-action="check"]', 'button[data-action="next"]', 'button[data-action="nextLine"]');
+  else if (e.key === 'Enter' && !e.repeat) // Enter moves forward through anything: Check, a green Next (of any kind), or Go once an amount is in
+    candidates.push('button[data-action="check"]', 'button[data-action="next"]', 'button[data-action="nextLine"]', 'button[data-action="quizNext"]', 'button[data-action="wtNext"]', 'button[data-action="go"]');
   else if (letter) candidates.push(`button[data-key="${e.key.toLowerCase()}"]`);
   if (!candidates.length) return;
   // Of the buttons that exist, the first enabled one wins (Backspace is the

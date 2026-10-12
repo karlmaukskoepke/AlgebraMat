@@ -292,6 +292,17 @@ describe('I\'m stuck and Teach me bring in the scaffold, one rung at a time', ()
     expect(s.stage).toBe('done');
     expect(s.clean).toBe(false);
   });
+  it('x alone with numbers still to put together: stuck 1 reminds, stuck 2 draws the model, stuck 3 asks Party or Battle, combines, and asks for the answer', () => {
+    let s = run(move(start(), -3), { type: 'stuck' });
+    expect([s.scaffold, s.feedback.key]).toEqual([false, 'aStuckSolved']);
+    s = run(s, { type: 'stuck' });
+    expect([s.scaffold, s.feedback.key, s.combining]).toEqual([true, 'aStuckSolved', null]);
+    s = run(s, { type: 'stuck' });
+    expect([s.feedback.key, s.combining.step, s.helpCombine]).toEqual(['aPartyOrBattle', 'kind', true]);
+    expect(answerLive(s)).toBe(false);
+    s = run(s, { type: 'kind', value: 'party' });                                          // −6 and −3 are a Party
+    expect([boardText(s.board), s.combining, s.feedback.key, s.helpCombine, s.undoCue, answerLive(s)]).toEqual(['x = −9', null, 'aSolvedBoard', false, false, true]);
+  });
   it('help while x is alone says to work it out', () => {
     expect(run(move(start(), -3), { type: 'stuck' }).feedback.key).toBe('aStuckSolved');
   });
