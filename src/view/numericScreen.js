@@ -6,7 +6,7 @@ import { numericFeedbackText } from './numericFeedback.js';
 import { signed } from '../engine/addBoth.js';
 import { html, drawBalance, equationSvg, sideButtons, actionRow, groupShape, angleFor } from './addBothMat.js';
 import { movePanel, equationRow, workTerms } from './lightScreen.js';
-import { readoutOf, sideText, equationText, askOf } from '../engine/numericLevel.js';
+import { readoutOf, sideText, equationText, askParts } from '../engine/numericLevel.js';
 
 const SVG_NS = 'http://www.w3.org/2000/svg';
 function el(name, attrs = {}, children = []) {
@@ -100,12 +100,15 @@ function quizBlock(s) {
   // nothing moves when an answer is picked: the answers just sit a little lower
   const list = html('ol', 'lb-subst lb-reveal');
   if (s.reveal) {
-    list.append(...s.reveal.lines.slice(1).map((line) => html('li', '', [line])));
+    // the equation after the change, with what was added in blue, then what each side comes to
+    const side = (terms) => terms.flatMap((t, i) => [...(i ? [' + '] : []), t.blue ? html('span', 'is-blue', [t.text]) : t.text]);
+    list.append(html('li', '', [...side(s.reveal.after.left), ' = ', ...side(s.reveal.after.right)]));
+    list.append(html('li', '', [s.reveal.lines[2]]));
     list.append(html('li', s.reveal.ok ? 'is-good' : 'is-bad', [s.reveal.ok ? '✓ Balanced' : '✗ Unbalanced']));
   }
   block.append(list);
   const answered = Boolean(s.answered);
-  block.append(html('p', 'ab-question', [askOf(p), html('br'), 'Does it keep the balance, or upset it?']));
+  block.append(html('p', 'ab-question', [...askParts(p).map((part) => (part.blue ? html('span', 'is-blue', [part.text]) : part.text)), html('br'), 'Does it keep the balance, or upset it?']));
   const label = { keeps: 'Keeps the balance', upsets: 'Upsets the balance' };
   block.append(html('div', 'ab-answers', p.order.map((v) => {
     const b = html('button', `btn ab-answer${answered && s.answered.value === v ? ' is-chosen' : ''}`, [label[v]], { type: 'button', 'data-action': 'quiz', 'data-value': v });
