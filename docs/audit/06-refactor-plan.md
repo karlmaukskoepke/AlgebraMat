@@ -27,6 +27,7 @@ These are the acceptance tests the steps below add. They run on **every Solve it
 - **Goal:** fix the two observed causes in 03 §C.
 - **Files:** `src/syncStore.js` (keep `{ mode: 'device', id, token, label }` across reloads), `src/main.js` (`saveProgress`: read what is stored, union it with memory, keep packs this build doesn't know, then write; read `mat.v1.backup` at start and union it in), `tests/syncStore.test.js` (new), `tests/progress.test.js`.
 - **Acceptance:** a device sign-in survives `loadSync(saveSync(x))`; two "tabs" (two app instances on one fake storage) each finishing a different level end with both done; a store holding an unknown pack keeps it after a save from an older pack list.
+- **Also (Karl, 2026-10-12):** ask students to sign in at every visit, before play (details pending: skippable or not, how a returning student confirms). Merge stays level by level: a level finished on either side stays finished.
 - **Risk to saves:** reduces it. No code-format change.
 
 ### R2. Shared Solve it home and tokens  (S)
@@ -59,7 +60,8 @@ These are the acceptance tests the steps below add. They run on **every Solve it
 - **Acceptance:** the "scaffold never blanks" screen test at `x = ⅓(6)`, `⅕(35)`, `⅙(−18)`; Group It screenshots unchanged if the optional part is done.
 - **Risk to saves:** none (Group It's id and levels untouched).
 
-### R7. Add to both sides onto the shared loop  (L) — depends on Q1-Q3
+### R7. Add to both sides onto the shared loop  (L) — Karl's condition: nothing from the day's work is lost
+- **Before porting:** (a) characterisation tests pin today's Add behaviour (build notes §8-17: zero-the-other-side, Trade places on L5, hint box round sign and number, Check under the x row, Enter, combining Party/Battle, the amount blank, lighter first I'm stuck); (b) a list of every behaviour marked keep / change (and the loop line that requires it) / ask; Karl approves it; (c) the port runs behind `?addloop=1` until Karl has played it, then replaces the old one.
 - **Goal:** Add becomes a loop config (its move with the amount, its zero-the-other-side slip, Trade places, its seesaw scaffold and combining as rungs); `addBothMoves.js` shrinks to the card.
 - **Files:** `engine/addBothMoves.js`, `play/addBothPlay.js`, `view/lightScreen.js` (retired), `view/addBothMat.js` (scaffold only).
 - **Acceptance:** every conformance test above runs on Add and passes; Start over is live once touched; the choice returns after Trade places; I'm stuck at `x = 9 + 6` shows a picture; Add fits 1366×657.

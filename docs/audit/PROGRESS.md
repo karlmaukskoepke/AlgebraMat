@@ -14,10 +14,16 @@ Baseline when the audit started (commit `17835f7`): `npm test` 63 files, 931 tes
 | 1 Inventory | `01-inventory.md` | Done (first pass) |
 | 2 Shared-components registry | `02-registry.md` | Done (first pass) |
 | 3 Conformance report + progress-loss trace | `03-conformance.md` | Done (first pass) |
-| 4 Inferences | `04-inferences.md` | Batch 1 asked; waiting on Karl's answers |
+| 4 Inferences | `04-inferences.md` | Batch 1 answered; follow-ups on the sign-in prompt asked in chat; batch 2 queued |
 | 5 Alignment suggestions | `05-alignment.md` | Draft; recommendations may change with the Phase 4 answers |
 | 6 Refactor plan | `06-refactor-plan.md` | Draft; same caveat |
 | 7 CLAUDE.md | `CLAUDE.md.draft` | Not started; needs Karl's approval of 02 and 06 first |
+
+## Reminder for Claude
+At the end of this chat, remind Karl to paste this file (`docs/audit/PROGRESS.md`) as the first message of the new chat.
+
+## New request from Karl (2026-10-12)
+Prompt sign-in at every visit, before play; on sign-in the more advanced progress wins, never less over more. Folded into R1 in `06-refactor-plan.md`.
 
 ## Read next
 1. `04-inferences.md`: the open questions. If Karl has answered, record the answers there, then revise 05 and 06 to match.

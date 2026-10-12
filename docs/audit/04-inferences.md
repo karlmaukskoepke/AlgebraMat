@@ -2,7 +2,7 @@
 
 *Each inference is written as a question with my recommended answer and the evidence. Karl confirms them in batches of five at most. Answers are recorded under each question. Status: **Asked** (batch n), **Queued** (not yet asked), **Answered**.*
 
-## Batch 1 (asked 2026-10-12)
+## Batch 1 (asked and answered 2026-10-12)
 
 ### Q1. Should Add to both sides move onto the shared loop before any other card is built?  (Asked)
 - **A. Yes, first (recommended).** Port Add onto `createSolveLoop` and `solveScreen`, keeping its own move, scaffold, slips and Trade places as card config.
@@ -11,7 +11,7 @@
 
 *Evidence:* the loop says "a card should never re-implement the loop" and Add is the only Solve it card that does (`addBothMoves.js`, 677 lines). Most Add failures in 03 (choice per state, Start over, rung 1 text-only at x alone, its own renderer) disappear when it uses the loop that Divide already passes. The Divide build notes list it as "the next job". Risk to saves: none (no level count change).
 
-**Answer:** _pending_
+**Answer (2026-10-12):** Worried that a port would erase the day's work on Add. Agreed approach (proposed, awaiting OK): pin today's Add behaviour in tests first, list every behaviour as keep / change (loop rule) / ask, Karl approves the list, port behind a URL flag so the live card is unchanged until Karl has played the new one. Git keeps the old version either way.
 
 ### Q2. When does a helpful partial move fold to one row?  (Asked)
 - **A. When the student acts on the choice (as built) (recommended),** and change loop §3A to say so.
@@ -20,7 +20,7 @@
 
 *Evidence:* `solveLoop.js:101,129-135`; Divide build notes §11 explain the two rules ("the same prompt immediately" and "Next folds") can't both hold. A keeps the prompt rule (§1A, which the brief stresses) and needs no new click. It also matches what was tested.
 
-**Answer:** _pending_
+**Answer (2026-10-12):** A. Fold when the student acts on the choice; update loop §3A.
 
 ### Q3. What is the first rung of I'm stuck?  (Asked)
 - **A. Model it, with the picture, on every card (recommended)** (loop §6 as written). Add's text reminder becomes part of rung 1's line, not a separate rung.
@@ -29,7 +29,7 @@
 
 *Evidence:* loop §6 rung 1 is Model it and §6 forbids text-only help at x alone; Add's build follows the earlier rule and fails that (`addBothMoves.js:199, 220`). Divide already folds the reminder into rung 1 (outline the coefficient + the counters). The loop's own code comment still lists four rungs (`solveLoop.js:28`), which is the leftover of B.
 
-**Answer:** _pending_
+**Answer (2026-10-12):** C. Each card spec decides its first rung ("it really depends"). Loop §6 needs an edit: rung 1 is set per card; the rule that x alone with an unevaluated side always gets a picture still needs a decision for Add.
 
 ### Q4. Do your students' Chromebooks keep site data between sessions?  (Asked)
 - **A. I don't know; please give me a way to check (recommended)** (a one-line test: finish a level, sign out of the Chromebook, sign back in, open the site).
@@ -38,7 +38,7 @@
 
 *Evidence:* inferred only; districts often set Chromebooks to clear browsing data. It decides how much weight to put on local save versus the sheet.
 
-**Answer:** _pending_
+**Answer (2026-10-12):** B. Chromebooks keep site data. New request: prompt sign-in at every visit, before play. On sign-in, the more advanced progress wins; never overwrite more progress with less. (Note: both the app and the sheet already merge level by level and never un-finish a level; the sign-in bug in 03 §C.1 is what stops it working.) Follow-up questions on the prompt asked in chat.
 
 ### Q5. How far should Count it and Build it be aligned with Solve it?  (Asked)
 - **A. Shared frame only (recommended):** the same header, colour tokens, number pad, help placement, line position and type sizes; their own pedagogy (type the answer first, steps, supports) stays. Remove their 2.5 s auto-advance.
@@ -47,7 +47,7 @@
 
 *Evidence:* `DECISION-LOG.md` "Structure", last bullet; screenshots show different line position (bottom vs top), help placement (palette vs help row), streaks and a steps bar on Count it / Build it. Their timer (`main.js:517-518`) breaks a rule you wrote for Solve it ("nothing advances on a timer"); whether it applies to the other sections is the question.
 
-**Answer:** _pending_
+**Answer (2026-10-12):** A, after a plain explanation of "same frame" (the parts around the problem: header, the line, help buttons, number pad, colours, sizes; not how each card teaches).
 
 ## Queued for later batches (my current recommendation in bold)
 
