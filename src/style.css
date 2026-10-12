@@ -2990,3 +2990,9 @@ body {
 .lb-subst { font-size: 28px; min-height: 108px; }
 .lb-stack { min-height: 380px; }
 .lb-checkrow .btn { min-height: 46px; }
+
+/* the border runs through the = (behind it), centred, so it never shows beside the equation */
+.lb-border { position: relative; border: 0; padding: 0 16px; margin: 0 4px; }
+.lb-border::before { content: ''; position: absolute; left: 50%; top: 0; bottom: 0; border-left: 4px dashed var(--ink); transform: translateX(-2px); }
+.lb-equals { position: relative; z-index: 1; }
+@media (max-width: 760px) { .lb-border { padding: 0 8px; } }

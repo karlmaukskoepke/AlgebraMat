@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { makeAddBoth } from '../src/engine/addBoth.js';
 import { oppositeOf } from '../src/engine/addBoth.js';
 import {
-  newAddBoth, reduceAddBoth, boardText, kindOf, balanced, tilt, xTerms, substitutionSteps, owesMove, answerLive,
+  newAddBoth, reduceAddBoth, boardText, kindOf, balanced, tilt, xTerms, substitutionSteps, owesMove, answerLive, tradePending, tradeAvailable,
 } from '../src/engine/addBothMoves.js';
 
 const run = (s, ...actions) => actions.reduce(reduceAddBoth, s);
@@ -325,5 +325,28 @@ describe('building the equation in the scaffold (L2–L3)', () => {
   });
   it('typing is not offered while building', () => {
     expect(run(built([]), ...typed('5')).entry).toBe('');
+  });
+});
+
+describe('Trade places (Level 5 on: x on the right)', () => {
+  const mirror = () => newAddBoth(P('x+a', 3, 7, true), { level: 5, introTrade: true });
+  it('is pointed out the first time: after Use a move the line says so and Add waits until the sides are traded', () => {
+    let s = run(mirror(), { type: 'path', value: 'move' });
+    expect([s.feedback.key, tradePending(s), tradeAvailable(s)]).toEqual(['aTradeIntro', true, true]);
+    expect(run(s, { type: 'choose', move: 'add' }).feedback.key).toBe('aTradeFirst');
+    s = run(s, { type: 'choose', move: 'trade' });
+    expect(boardText(s.board)).toBe('x + 3 = 7');
+    expect([s.feedback.key, s.tradeCount, tradePending(s), tradeAvailable(s)]).toEqual(['aTraded', 1, false, false]);
+    expect(s.rows.map((r) => r.type)).toEqual(['eq', 'eq']);                                 // rewritten below the original
+    s = run(s, { type: 'choose', move: 'add' }, ...typed('−3'), { type: 'go' });
+    expect(boardText(s.board)).toBe('x = 7 + −3');
+    expect(run(s, { type: 'undo' }).board.left.length).toBe(2);
+  });
+  it('is not offered with x on the left, below Level 5, or in the scaffold; after the first time it is optional', () => {
+    expect(tradeAvailable(run(newAddBoth(P('x+a', 3, 7), { level: 5, introTrade: true }), { type: 'path', value: 'move' }))).toBe(false);
+    expect(tradeAvailable(run(newAddBoth(P('x+a', 3, 7, true), { level: 4 }), { type: 'path', value: 'move' }))).toBe(false);
+    const later = run(newAddBoth(P('x+a', 3, 7, true), { level: 5, introTrade: false }), { type: 'path', value: 'move' });
+    expect([later.feedback.key, tradePending(later), tradeAvailable(later)]).toEqual(['aMovePrompt', false, true]);
+    expect(run(later, { type: 'stuck' }, { type: 'stuck' }).scaffold).toBe(true);
   });
 });

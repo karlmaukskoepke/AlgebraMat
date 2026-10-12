@@ -6,7 +6,7 @@
 
 import { MINUS } from '../engine/expr.js';
 import { signed } from '../engine/addBoth.js';
-import { xSideOf, answerLive, helpOk } from '../engine/addBothMoves.js';
+import { xSideOf, answerLive, helpOk, tradeAvailable, tradePending } from '../engine/addBothMoves.js';
 import { addBothFeedbackText } from './addBothFeedback.js';
 import { boardBlock, trayFor, html, actionRow } from './addBothMat.js';
 
@@ -259,6 +259,9 @@ export function movePanel(o) {
       const b = html('button', `btn btn-move lb-move${o.menu === 'add' ? ' is-on' : ''}${target ? ' is-target' : ''}${o.locked ? ' is-grey' : ''}`, [moveIcon('add')], { type: 'button', 'data-action': 'choose', 'data-move': 'add', 'aria-label': label, ...(o.locked ? {} : { 'data-tip': label }), style: `grid-row: ${i + 1}` });
       b.disabled = Boolean(o.disabled);
       grid.append(b);
+    } else if (id === 'trade' && o.tradeOn) {
+      // Trade places is live from Level 5, when x is on the right; the first time it is pointed out and Add waits for it
+      grid.append(html('button', `btn btn-move lb-move${o.tradeTarget ? ' is-target' : ''}`, [moveIcon(id)], { type: 'button', 'data-action': 'choose', 'data-move': 'trade', 'aria-label': label, 'data-tip': label, style: `grid-row: ${i + 1}` }));
     } else {
       // a greyed move shows its icon only; its name is read aloud but not shown
       grid.append(html('button', 'btn lb-move is-grey', [moveIcon(id)], { type: 'button', 'data-action': 'greyMove', 'data-move': id, 'aria-disabled': 'true', 'aria-label': label, style: `grid-row: ${i + 1}` }));
@@ -293,8 +296,9 @@ function panelBlock(s) {
   return movePanel({
     menu: s.menu, typing: s.typing, amountEntry: s.amountEntry, path: s.path,
     disabled: building || s.stage === 'done' || Boolean(s.combining) || Boolean(s.pending) || Boolean(s.sub),
-    locked: !s.scaffold && s.stage === 'moves' && s.path !== 'move',                  // before the choice, and on the guess path
-    target: s.path === 'move' && !s.menu && !s.combining && !s.resolving && s.lights.solved !== 'green' && !s.undoCue && !s.sub && s.stage === 'moves' && !s.hint,
+    locked: !s.scaffold && s.stage === 'moves' && (s.path !== 'move' || tradePending(s)),   // before the choice, on the guess path, and until Trade places is clicked
+    tradeOn: tradeAvailable(s), tradeTarget: tradePending(s),
+    target: s.path === 'move' && !tradePending(s) && !s.menu && !s.combining && !s.resolving && s.lights.solved !== 'green' && !s.undoCue && !s.sub && s.stage === 'moves' && !s.hint,
     lights: s.lights, off: building, flash: ['red', 'neutral'].includes(s.lights.fewer) && s.history.length > 0, sub,
   });
 }

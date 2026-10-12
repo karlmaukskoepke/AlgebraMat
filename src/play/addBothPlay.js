@@ -8,6 +8,8 @@ import { bindAddBothMat } from '../view/addBothPointer.js';
 import { addBothFeedbackText } from '../view/addBothFeedback.js';
 import { recordProblem } from '../lightStore.js';
 
+let taught = null;      // what this level has already shown the student (the first Trade places is pointed out once)
+
 export const addBothPlay = {
   noStreak: true,       // no streaks on this card: the stuck count is what is kept
   noSteps: true,        // no steps bar
@@ -15,7 +17,10 @@ export const addBothPlay = {
   owesMove,             // a correct guess makes the next problem a move (and adds one if it was the last)
   lineInMat: true,      // the line (every message) is on the Mat, above the equation
   steps: () => [],
-  newSession: (problem, { forceMove = false } = {}) => newAddBoth(problem, { level: problem.logLevel ?? 2, forceMove }),
+  newSession: (problem, { forceMove = false, flags = null } = {}) => {
+    taught = flags ?? taught ?? {};
+    return newAddBoth(problem, { level: problem.logLevel ?? 2, forceMove, introTrade: !taught.trade });
+  },
   reduce: reduceAddBoth,
   feedbackText: addBothFeedbackText,
   buildControls: buildAddBothControls,
@@ -24,6 +29,7 @@ export const addBothPlay = {
     if (before && before.step !== 'done' && s.step === 'done') {
       recordProblem(s, { pack: 'add-both', level: s.problem.logLevel ?? null, problem: formatAddBoth(s.problem) });
     }
+    if (s.tradeCount > 0 && taught) taught.trade = true;
     return { hint: null };
   },
   renderMat: (s) => renderLightScreen(s),
