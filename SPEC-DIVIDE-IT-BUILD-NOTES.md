@@ -62,3 +62,13 @@ I'd start this after the Add to both sides tutorials and save code are in, since
 2. **`4x` at L2–L3.** `½` is allowed (it is legal and doesn't finish).
 3. **The balance carries the models.** The boxes and counters stand on the seesaw at the top, so a move shows up on the left or right of the balance (built that way for Add to both sides; Divide it reuses it).
 4. **The side panel pairs each move with its goals** (a green, red or grey checkbox beside the move that works toward it). Divide it adds its fraction buttons there, each with its light.
+
+## 8. Build, step 1 (2026-10-12): the problems and the slip tagger
+
+Built and tested, no screen yet: `src/engine/divide.js` (problem model, the five fractions, which fractions split which side, the typed-answer slip tagger with one tag per wrong value in the priority order of §2.2) and `src/engine/generateDivide.js` (levels 1–5 with the spec's form counts; a problem whose answer equals a is dropped; every set is verified by substitution). `tests/divide.test.js` checks every slip example in the spec and 750 generated sets.
+
+**Before building the screen I need a decision.** The spec was written before Add to both sides became the "light build" pilot (a bare screen, Guess x or Use a move chosen first, a work stack, Level 1 numeric, scaffolds only from I'm stuck / Teach me). My proposal for Divide it on that pattern:
+- **L1 is a numeric level** (`3 × 4 = 2 × 6`; ⅓ of one side upsets the balance, ⅓ of both keeps it; the keeps/upsets quiz; a watched `3x = 6` walkthrough), so the dealing-by-hand levels shift up and the five equation levels become L2–L6 as on the pilot.
+- **Bare screen:** the move list with *Take a fraction of both sides* active, its five stacked buttons (`× ⅓` over `÷ 3`) in a row under the equation. Tapping a fraction runs the whole move on both sides in one action: the work stack shows `⅓(3x) = ⅓(−12)`, then `x = −4` unsimplified until typed, and the student types the value. A fraction that does not split shows which side breaks (the boxes or the counters) with Undo. No dealing and no keep tap on the bare screen.
+- **The counters** (a pile shared into groups, dealing a round, keeping one group) are the scaffold from I'm stuck / Teach me, as the counters are on the pilot.
+- Everything else follows the pilot: path choice, plug back in line by line, Enter moves forward, the lighter first I'm stuck (outline the number in front of x: "how many boxes? what fraction of both sides leaves one box?").
