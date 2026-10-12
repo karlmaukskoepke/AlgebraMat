@@ -24,6 +24,7 @@ export function bindAddBothMat(root, dispatch, getSession) {
 
   const stop = () => {
     drag?.ghost?.remove();
+    root.classList.remove('is-dragging');
     for (const n of root.querySelectorAll('.is-drop-over')) n.classList.remove('is-drop-over');
     drag = null;
   };
@@ -45,6 +46,7 @@ export function bindAddBothMat(root, dispatch, getSession) {
     if (!drag.started) {
       if (Math.hypot(e.clientX - drag.x0, e.clientY - drag.y0) < SLOP) return;
       drag.started = true;
+      if (drag.kind === 'number') root.classList.add('is-dragging');             // the blank in "Add ___" must be visible to drop on
       const ghost = document.createElement('div');
       ghost.className = 'ab-ghost';
       ghost.textContent = drag.kind === 'number' ? (drag.src.getAttribute('data-numval') < 0 ? `−${Math.abs(drag.src.getAttribute('data-numval'))}` : drag.src.getAttribute('data-numval')) : drag.src.textContent.trim();
