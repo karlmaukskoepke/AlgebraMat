@@ -126,3 +126,9 @@ The spec is `SPEC-ADD-TO-BOTH-SIDES.md` revision 2.3. Built:
 - **L1:** quiz questions in capitals; either answer shows the equation, the equation after, what each side comes to, and Balanced/Unbalanced, then the green Next (no retry). The walkthrough keeps every step on screen and ends with the plug-back-in. The line has a fixed height so pressing Add to left/right no longer moves the page. The dashed border no longer runs through the `=` of the equation under the balance (I could not find a dashed line that survives into L2 after the level screens were rebuilt; tell me if you still see one).
 
 Not built (still open in the spec): the **skip L1 after the diagnostic** rule (§8, open item 1), Why? boxes for greyed moves, move icons, and the printed-notes renames.
+
+## 12. Icons, faint Why? boxes, skipping L1 (Karl, 2026-10-12)
+
+- **Move icons (§3H)** are built: one small pictogram beside each move label, the equation shape in grey and the changing part in colour (outside numbers in blue). Greyed moves keep theirs. The move panel is a little wider (480 px) so every label fits on one line.
+- **Greyed moves show faint Why? boxes.** I only know one box name (Fewer terms), so every greyed move shows a faint "Fewer terms"; rename them when the later cards define their own boxes.
+- **Skip L1:** when the Add to both sides diagnostic's x − a Battle is right (level 5 or 6 recommended), Level 1 is marked done. It stays playable. It is stored as a completed level, so the class sheet shows it as done, not "skipped".

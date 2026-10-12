@@ -24,6 +24,37 @@ const MOVES = [
   ['combine', 'Combine like terms'],
 ];
 
+// One small pictogram per move (§3H), in one template: the equation shape in grey, the part that changes in colour (numbers
+// from outside the equation in blue). About 24 px tall, in the row beside the label; the label carries the meaning.
+const SVG_NS = 'http://www.w3.org/2000/svg';
+const GREY = '#8a8576';
+const BLUE = '#0072b2';
+function svgEl(name, attrs = {}, kids = []) {
+  const n = document.createElementNS(SVG_NS, name);
+  for (const [k, v] of Object.entries(attrs)) n.setAttribute(k, v);
+  n.append(...kids);
+  return n;
+}
+const txt = (x, y, text, fill = GREY, size = 13) => svgEl('text', { x, y, 'text-anchor': 'middle', fill, 'font-size': size, 'font-weight': 700, 'font-family': 'Lexend, system-ui, sans-serif' }, [text]);
+const box = (x, y, w = 12, h = 12, stroke = GREY, dash = '') => svgEl('rect', { x, y, width: w, height: h, rx: 3, fill: 'none', stroke, 'stroke-width': 1.6, ...(dash ? { 'stroke-dasharray': dash } : {}) });
+const arrow = (d) => svgEl('path', { d, fill: 'none', stroke: BLUE, 'stroke-width': 1.8, 'stroke-linecap': 'round', 'marker-end': 'url(#lb-ah)' });
+const ICONS = {
+  add: () => [box(2, 6, 14, 14), txt(22, 17, '+', BLUE, 15), box(26, 6, 12, 14, BLUE, '2 2'), txt(44, 17, '=', GREY, 14), box(50, 6, 14, 14), txt(70, 17, '+', BLUE, 15), box(74, 6, 12, 14, BLUE, '2 2')],
+  cross: () => [box(2, 8, 12, 12), txt(21, 18, '+n', GREY, 11), txt(40, 18, '=', GREY, 14), box(48, 8, 12, 12), svgEl('path', { d: 'M12 4 Q 38 -4 62 4', fill: 'none', stroke: BLUE, 'stroke-width': 1.8, 'stroke-linecap': 'round' }), txt(70, 20, '−n', BLUE, 11)],
+  fraction: () => [txt(10, 10, '1', BLUE, 11), svgEl('line', { x1: 3, y1: 12, x2: 17, y2: 12, stroke: BLUE, 'stroke-width': 1.4 }), txt(10, 22, 'n', BLUE, 11), box(20, 6, 14, 14), txt(42, 17, '=', GREY, 14), txt(52, 10, '1', BLUE, 11), svgEl('line', { x1: 45, y1: 12, x2: 59, y2: 12, stroke: BLUE, 'stroke-width': 1.4 }), txt(52, 22, 'n', BLUE, 11), box(62, 6, 14, 14)],
+  multiply: () => [txt(8, 18, 'n', BLUE, 14), box(14, 6, 14, 14), txt(40, 17, '=', GREY, 14), txt(52, 18, 'n', BLUE, 14), box(58, 6, 14, 14)],
+  flip: () => [txt(10, 17, '−x', GREY, 13), txt(28, 17, '= n', GREY, 13), svgEl('path', { d: 'M52 13 H66', fill: 'none', stroke: BLUE, 'stroke-width': 1.8, 'stroke-linecap': 'round', 'marker-end': 'url(#lb-ah)' }), txt(80, 17, 'x = −n', BLUE, 12)],
+  trade: () => [box(2, 8, 14, 14), txt(26, 19, '=', GREY, 14), box(36, 8, 14, 14), svgEl('path', { d: 'M9 6 Q 26 -4 43 6', fill: 'none', stroke: BLUE, 'stroke-width': 1.8, 'stroke-linecap': 'round', 'marker-end': 'url(#lb-ah)' })],
+  distribute: () => [txt(6, 18, 'n', BLUE, 14), txt(16, 18, '(', GREY, 15), box(21, 8, 10, 12), txt(37, 18, '+', GREY, 13), box(42, 8, 10, 12), txt(57, 18, ')', GREY, 15), svgEl('path', { d: 'M6 5 Q 14 -2 26 7 M6 5 Q 22 -4 47 7', fill: 'none', stroke: BLUE, 'stroke-width': 1.3 })],
+  combine: () => [txt(10, 18, '2x', GREY, 12), txt(24, 18, '+', GREY, 12), txt(38, 18, '3x', GREY, 12), txt(54, 18, '=', GREY, 12), txt(70, 18, '5x', BLUE, 13)],
+};
+const WIDTH = { add: 92, cross: 82, fraction: 82, multiply: 80, flip: 112, trade: 56, distribute: 62, combine: 82 };
+export function moveIcon(id) {
+  const svg = svgEl('svg', { class: 'lb-icon', viewBox: `0 -5 ${WIDTH[id]} 28`, width: WIDTH[id], height: 28, 'aria-hidden': 'true', focusable: 'false' });
+  svg.append(svgEl('defs', {}, [svgEl('marker', { id: 'lb-ah', markerWidth: 6, markerHeight: 6, refX: 4.5, refY: 3, orient: 'auto' }, [svgEl('path', { d: 'M0 0 L6 3 L0 6 z', fill: BLUE })])]), ...ICONS[id]());
+  return svg;
+}
+
 export const validAmount = (entry) => /^-?\d+$/.test(entry ?? '') && Number(entry) !== 0;
 
 // ---------- the line ----------
@@ -192,13 +223,14 @@ export function movePanel(o) {
     const row = html('div', 'lb-row');
     if (id === 'add') {
       const target = o.target || o.walkStep === 'move';
-      const b = html('button', `btn btn-move lb-move${o.menu === 'add' ? ' is-on' : ''}${target ? ' is-target' : ''}${o.locked ? ' is-grey' : ''}`, ['Add ', blank, ' to both sides'], { type: 'button', 'data-action': 'choose', 'data-move': 'add' });
+      const b = html('button', `btn btn-move lb-move${o.menu === 'add' ? ' is-on' : ''}${target ? ' is-target' : ''}${o.locked ? ' is-grey' : ''}`, [moveIcon('add'), html('span', 'lb-movelabel', ['Add ', blank, ' to both sides'])], { type: 'button', 'data-action': 'choose', 'data-move': 'add' });
       b.disabled = Boolean(o.disabled);
       row.append(b);
       row.append(html('ul', 'ab-goals', [html('li', `ab-goal is-${fewer}${o.flash ? ' is-flash' : ''}`, [checkbox(fewer), html('span', 'ab-goal-label', ['Fewer terms'])])]));
     } else {
-      row.append(html('button', 'btn lb-move is-grey', [label], { type: 'button', 'data-action': 'greyMove', 'data-move': id, 'aria-disabled': 'true' }));
-      row.append(html('span', 'lb-nowhy'));
+      row.append(html('button', 'btn lb-move is-grey', [moveIcon(id), html('span', 'lb-movelabel', [label])], { type: 'button', 'data-action': 'greyMove', 'data-move': id, 'aria-disabled': 'true' }));
+      // the Why? boxes a later card will turn on, drawn as faint outlines so the column keeps its shape
+      row.append(html('ul', 'ab-goals is-faint', [html('li', 'ab-goal is-off', [checkbox('off'), html('span', 'ab-goal-label', ['Fewer terms'])])]));
     }
     panel.append(row);
   }

@@ -264,9 +264,11 @@ describe('Add to both sides\' diagnostic (SPEC-ADD-TO-BOTH-SIDES.md §8)', () =>
     expect(rec([true, false, false]).rec).toBe(5);
     expect(rec([true, true, true]).rec).toBe(6);
   });
-  it('opens those levels in progress, with the numeric Level 1 still left to play', () => {
+  it('opens those levels in progress; a right x − a Battle skips the numeric Level 1, a wrong one leaves it to play', () => {
     const p = applyReadout(newProgress(PACKS), readout(SEED, answers([true, true, true]), items, 'solve'));
     expect([1, 2, 3, 4, 5, 6].map((l) => isLevelUnlocked(p, 'add-both', l))).toEqual(Array(6).fill(true));
-    expect(p.packs['add-both'].levels[0]).toBe(false);
+    expect(p.packs['add-both'].levels[0]).toBe(true);
+    const q = applyReadout(newProgress(PACKS), readout(SEED, answers([false, true, true]), items, 'solve'));
+    expect(q.packs['add-both'].levels[0]).toBe(false);
   });
 });
