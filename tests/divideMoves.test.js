@@ -80,18 +80,65 @@ describe('plugging a typed value back in', () => {
 });
 
 describe('help', () => {
-  it('the first I\'m stuck outlines the number in front of x and asks what fraction leaves one box; the second points at the fraction', () => {
+  it('the first I\'m stuck outlines the number in front of x; the second draws the counters; the third points at the fraction', () => {
     let s = run(start(), { type: 'stuck' });
-    expect([s.path, s.menu, s.hint, s.feedback.key, s.stuck]).toEqual(['move', 'fraction', { kind: 'coef' }, 'dStuckHint', 1]);
+    expect([s.path, s.menu, s.hint, s.feedback.key, s.stuck, s.scaffold]).toEqual(['move', 'fraction', { kind: 'coef' }, 'dStuckHint', 1, false]);
     s = run(s, { type: 'stuck' });
-    expect([s.hint, s.feedback.key, s.stuck]).toEqual([{ kind: 'fraction', n: 3 }, 'dStuckGuided', 2]);
+    expect([s.scaffold, s.hint, s.feedback.key, s.stuck]).toEqual([true, null, 'dModel', 2]);
+    s = run(s, { type: 'stuck' });
+    expect([s.hint, s.feedback.key, s.stuck]).toEqual([{ kind: 'fraction', n: 3 }, 'dStuckGuided', 3]);
     expect(run(take(start(), 3), { type: 'stuck' }).feedback.key).toBe('aStuckSolved');
   });
-  it('Teach me forces the right fraction', () => {
+  it('Teach me puts the counters up and allows only the right fraction', () => {
     let s = run(start(), { type: 'teach' });
-    expect([s.taught, s.forced, s.hint]).toEqual([1, true, { kind: 'fraction', n: 3 }]);
+    expect([s.taught, s.forced, s.scaffold, s.hint]).toEqual([1, true, true, { kind: 'fraction', n: 3 }]);
     s = run(s, { type: 'take', n: 2 });
     expect(s.feedback.key).toBe('dForced');
-    expect(boardText(run(s, { type: 'take', n: 3 }).board)).toBe('x = ⅓(−12)');
+    s = run(s, { type: 'take', n: 3 });
+    expect([s.deal.n, boardText(s.board)]).toEqual([3, '3x = −12']);                          // not committed until the pile is dealt and a group kept
+  });
+});
+
+describe('the counters: deal the pile into groups, then keep one', () => {
+  const up = (p = P(3, -4), level = 3) => run(newDivide(p, { level }), { type: 'path', value: 'move' }, { type: 'stuck' }, { type: 'stuck' }, { type: 'choose', move: 'fraction' });
+  it('a fraction that splits gives n empty groups; tapping a group deals one counter; keep waits for all of them, shared evenly', () => {
+    let s = run(up(), { type: 'take', n: 3 });
+    expect([s.deal.groups, s.feedback.key, s.feedback.params.per]).toEqual([[0, 0, 0], 'dDealPrompt', 1]);
+    s = run(s, { type: 'deal', group: 0 });
+    expect([s.deal.groups, s.feedback.key]).toEqual([[1, 0, 0], 'dDealt']);
+    expect(run(s, { type: 'keep', group: 0 }).feedback.key).toBe('dShareFirst');
+    for (let i = 0; i < 3; i++) s = run(s, { type: 'deal', group: 0 });                         // 4 in the first group
+    for (let i = 0; i < 4; i++) s = run(s, { type: 'deal', group: 1 });
+    s = run(s, { type: 'deal', group: 2 });
+    expect([s.deal.groups, s.feedback.key]).toEqual([[4, 4, 1], 'dDealt']);
+    expect(run(s, { type: 'deal', group: 2 }).feedback.key).toBe('dDealt');
+    s = run(s, ...Array(3).fill({ type: 'deal', group: 2 }));
+    expect([s.deal.groups, s.feedback.key]).toEqual([[4, 4, 4], 'dKeepReady']);
+    expect(run(s, { type: 'deal', group: 0 }).feedback.key).toBe('dAllShared');
+    s = run(s, { type: 'keep', group: 1 });
+    expect([boardText(s.board), s.deal, s.lights.smaller, s.feedback.key]).toEqual(['x = ⅓(−12)', null, 'green', 'aSolvedBoard']);
+  });
+  it('uneven groups cannot be kept, and Undo takes the whole attempt back', () => {
+    let s = run(up(P(3, -2)), { type: 'take', n: 3 });
+    s = run(s, { type: 'deal', group: 0 }, { type: 'deal', group: 0 }, { type: 'deal', group: 0 }, { type: 'deal', group: 1 }, { type: 'deal', group: 1 }, { type: 'deal', group: 1 });
+    expect([s.deal.groups, s.feedback.key]).toEqual([[3, 3, 0], 'dUneven']);
+    const uneven = run(up(P(3, -4)), { type: 'take', n: 3 }, ...Array(12).fill({ type: 'deal', group: 0 }));
+    expect([uneven.deal.groups, uneven.feedback.key]).toEqual([[12, 0, 0], 'dUneven']);
+    expect(run(uneven, { type: 'keep', group: 0 }).feedback.key).toBe('dUneven');
+    const back = run(uneven, { type: 'undo' });
+    expect([back.deal, boardText(back.board), back.rows.length]).toEqual([null, '3x = −12', 1]);
+  });
+  it('Deal a round (the bigger levels): one counter to every group, only while a whole round is left', () => {
+    let s = run(up(P(3, -4), 4), { type: 'take', n: 3 }, { type: 'dealRound' }, { type: 'dealRound' }, { type: 'dealRound' }, { type: 'dealRound' });
+    expect([s.deal.groups, s.feedback.key]).toEqual([[4, 4, 4], 'dKeepReady']);
+    expect(run(s, { type: 'dealRound' }).feedback.key).toBe('dNoRound');
+    expect(run(up(P(3, -4), 3), { type: 'take', n: 3 }, { type: 'dealRound' }).deal.groups).toEqual([0, 0, 0]);   // not before level 4
+  });
+  it('a fraction that does not split fails with the counters up too, and a partial move keeps the model going', () => {
+    const s = run(up(), { type: 'take', n: 2 });
+    expect([s.deal, s.fail.boxesSplit, s.feedback.key]).toEqual([null, false, 'dFail']);
+    let t = run(up(P(4, 6)), { type: 'take', n: 2 }, ...Array(12).fill({ type: 'deal', group: 0 }), ...Array(12).fill({ type: 'deal', group: 1 }));
+    t = run(t, { type: 'keep', group: 0 });
+    expect([boardText(t.board), t.scaffold, t.feedback.key]).toEqual(['2x = 12', true, 'dPartial']);
   });
 });
