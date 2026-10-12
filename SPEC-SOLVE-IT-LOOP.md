@@ -1,4 +1,4 @@
-# The Solve it loop: the shared structure every Solve it card follows  (Karl, 2026-10-12; revision 1.0; status: designed)
+# The Solve it loop: the shared structure every Solve it card follows  (Karl, 2026-10-12; revision 1.1; status: designed; 1.1 adds the conformance checklist, §3D-3E and the renderer rule after the first Divide it test)
 
 **What this is.** One document for everything every Solve it card shares: the screen, the choice, the moves loop, the checks, the help row, the scaffolds and the generator rules. **Each card spec follows this document and says only what is specific to that card** (its move, levels, forms, slips, lights, scaffold pictures).
 
@@ -33,6 +33,7 @@ x is ALONE (after a move) ──► no choice: the x = [▁] row goes live ─�
 - **Use a move:** the move list is live. The `x = [▁]` row is **greyed out, with no cursor,** until x is alone.
 - **The choice is fixed for the current state, not for the whole problem.** After a correct move the new state offers the choice again.
 - **Asking for help from guess mode** (I'm stuck, Teach me) moves that state into move mode (the `x = [▁]` row greys out).
+- **The prompt and both buttons are identical at every state.** The prompt text above, with **Guess x** and **Use a move**, comes from **one shared string and one shared component**. No state may reword it ("guess again", "use a step") or show buttons that do nothing. Both buttons always work, and each leads to the same guess mode or move mode every time.
 - **Guessing at every state is allowed and intended.** Mental math is valued; moves are still practised through the forced-move rule (1B).
 
 ### 1B. Guesses and the final value
@@ -69,7 +70,7 @@ x is ALONE (after a move) ──► no choice: the x = [▁] row goes live ─�
 
 1. **Header:** "<Card> · Level n" and five dots for the five problems.
 2. **The line:** always at the top; a **colored box, full width, text and buttons centered inside it.** It holds **actions only**: the choice prompt, the next instruction, a question, a one-sentence result, and buttons (Guess x, Use a move, Next, Undo, Go). One sentence at a time; the newest replaces the old. **It does not hold work.**
-3. **The work stack** (left, under the line): the equation, each row of work beneath it, the `x = [▁]` row with **Check ✓** beside it, and the substitution check in colour. **Undo** sits directly under the stack. **Rows are added as the work happens and stay until the next problem** (or Start over). Everything that is not an action lives here.
+3. **The work stack** (left, under the line): the equation, each row of work beneath it, the `x = [▁]` row with **Check ✓ directly under it** (decided 2026-10-12; the pilot spec said "beside", and the built Divide it already has it under), and the substitution check in colour. **Undo** sits directly under the stack. **Rows are added as the work happens and stay until the next problem** (or Start over). Everything that is not an action lives here.
 4. **The move panel** (right; under the stack on a phone): headings **Move** and **Why?**; each move is a row with its Why? boxes beside it; the last row is the uber-goal, **Solved for x**.
 5. **The help row (permanent, bottom of the equation mat, above the pad):** **I'm stuck**, **Teach me step-by-step**, **Start over.** Always the same place; each greyed unless it is an option.
 6. **The number pad** at the very bottom.
@@ -105,12 +106,21 @@ x is ALONE (after a move) ──► no choice: the x = [▁] row goes live ─�
 - **Colour plus underline,** never colour alone (black-and-white print; colour-blind students).
 - **The accent colour must be unique:** not green or red (Balanced / Not balanced), not the blue of the icons, not the added-amount colour. Suggested: purple.
 
+### 3D. The operation is blue wherever it appears (new in 1.1)
+- **The move's own number** (the amount added, the fraction taken, the flip sign) is **blue everywhere it shows**: in the line's prompt and quiz text, in every work-stack row, and in every piece of check or quiz evidence. If the question says "TAKE ⅓ of ONE SIDE ONLY" with the ⅓ in blue, the matching `⅓(3 × 4)` in the evidence rows has its ⅓ in blue too.
+- This is separate from the step highlight (§3C, the accent colour) and from the value placed on x (also blue; see the card specs).
+
+### 3E. Work is shown at every step, on every level (new in 1.1)
+- **Every operation writes its rows** into the work stack: the operation applied (in blue), then **what each quantity becomes**. This holds on **every level, numeric L1 and quiz evidence included**: e.g., taking ½ of the left side shows `½(2 × 6) = 3 × 4`, then `6 = 12`, then the Unbalanced mark; taking ½ of the right shows `½(2 × 6) = ½(3 × 4)`, then `6 = 6`, then the Balanced mark. A readout alone is never enough.
+- A card spec may not drop this rule for a level.
+
 ---
 
 ## 4. Checking the work (substitution)
 
 - **Every answer is checked by substituting it back,** right or wrong, whichever path produced it. It is written in the work stack under the problem, never in the line.
 - **Before the clicks begin, the value is placed on x.** In **full-check levels** the student **drags the typed value onto x** in the stack (tap alternative: tap the value, then tap x). In **collapsed levels** it slides onto x automatically. (Proposed in design; see Open.)
+- **Rendering rule (one shared renderer, with tests).** The first substitution line is the equation exactly as written, with every x replaced by the value, a **negative value in parentheses**, and a **coefficient written as ×**. Test cases: `3x = −12`, −4 → `3 × (−4) = −12` · `x − 6 = 9`, 15 → `15 − 6 = 9` · `−3x = 12`, −4 → `−3 × (−4) = 12` · `12 = −x`, −12 → `12 = −(−12)` · `7 = x + 3`, 4 → `7 = 4 + 3`. The renderer never drops the coefficient, never shows `× −4` without parentheses, and never substitutes into a different equation than the one named in §1B.
 - **Full check:** line by line, **one click per line** (a green Next each time), with the step highlighting of §3C, ending in the green or red mark.
 - **Collapsed check:** the first substitution line, then the final `✓ Balanced` line (the middle arithmetic skipped). **A wrong value always shows the full check at every level,** because the steps are the evidence of where it broke.
 - **Which levels collapse is decided per level, set by each card spec.** Defaults:
@@ -150,6 +160,8 @@ The same scaffolds on a **forced path**: only the correct move is accepted, and 
 - When several moves would work, the scaffold shows **the one the card is teaching**. For example, on a Distribute card it pushes distribute then combine, not divide first. **The move menu itself never narrows** and students may choose any legal move.
 - **The scaffold redraws the current state exactly,** including any moves already made (the unsimplified side shows as separate groups).
 - **A scaffold stays on until the state ends.** The next state starts bare again.
+- **A scaffold never clears or blanks the work stack** (new in 1.1). It draws in its reserved area; the equation and every row stay on screen. A scaffold that makes the stack disappear and reappear is a bug.
+- **Every rung that has a picture shows the picture.** "I'm stuck" must open the card's diagram on every rung it defines, at every state, **including a state where x is alone but the other side is still an unevaluated expression** (`x = ⅓(6)`). The card spec defines that diagram. A card may not answer "I'm stuck" there with text only.
 - **Scaffold pictures are card-specific** (the seesaw for Add, dealing groups for Divide, counters turning to opposites for Flip it). A card spec says where its scaffold picture departs from the default (e.g., the dealing scaffold never deals into an opposite box).
 - **Numeric levels** (§7) offer neither I'm stuck nor Teach me.
 
@@ -195,6 +207,25 @@ Each card spec opens with "Follows `SPEC-SOLVE-IT-LOOP.md` rev N." and then stat
 8. **Banned answers and generator constraints** beyond §8.
 9. **Diagnostic** sample and results, and the old-level mapping.
 10. **Open items.**
+
+---
+
+## Conformance checklist (new in 1.1): every card must pass this before it is called done
+
+The conventions built on the one-step card must hold on **every card and every level, from now on**. Claude Code runs this list on each card and reports the results; a card that fails any line is not done.
+
+1. **One prompt.** At every state with x not alone, the line shows the same prompt and the same two working buttons (§1A).
+2. **Work shown.** Every operation writes its rows with what each quantity becomes, on every level, numeric levels and quiz evidence included (§3E).
+3. **Operation in blue** in prompts, work-stack rows and evidence (§3D).
+4. **Substitution renders correctly** (the renderer rule and its test cases, §4), and uses the right equation (§1B).
+5. **Scaffolds show pictures and never blank the stack,** at every state including x alone with an unevaluated side (§6).
+6. **Layout stable:** reserved space, no reflow, no appearing or hiding rows (§2).
+7. **Start over, Undo and folding** behave as in §1C, §1D and §3A.
+8. **One highlighted target at a time;** Check, Go, Undo and Next follow §2.
+9. **Fit:** worst-case row count reported and the fit test run (§3B).
+10. **Generator:** every problem verified by substitution, banned answers enforced, collisions reported (§8).
+11. **Greyed-out rules** hold (nothing live that can't be used).
+12. **Shared code:** the prompt, the row builder, the substitution renderer, the operation colour and the scaffold diagrams are shared components, not re-implemented per card.
 
 ---
 

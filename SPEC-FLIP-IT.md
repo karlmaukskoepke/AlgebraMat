@@ -1,6 +1,6 @@
 # Flip it: solve equations with an opposite box by flipping everything  (Karl, 2026-10-12; revision 1.0; status: designed)
 
-**Follows `SPEC-SOLVE-IT-LOOP.md` rev 1.0.** Everything shared (the screen, the guess-or-move choice at every state, the forced-move rule, substitution checks, Undo and Start over, the work stack and folding, the help row, scaffolds, generator rules) is defined there and wins any conflict. This spec states only what is specific to Flip it.
+**Follows `SPEC-SOLVE-IT-LOOP.md` rev 1.1** (including its conformance checklist). Everything shared (the screen, the guess-or-move choice at every state, the forced-move rule, substitution checks, Undo and Start over, the work stack and folding, the help row, scaffolds, generator rules) is defined there and wins any conflict. This spec states only what is specific to Flip it.
 
 Section: Solve it.   Prerequisite card(s): **Divide it** (L4 uses Take a fraction of both sides). Old levels: old One-step `−x = b` maps here (Claude Code must read the real old definitions; see §8).
 
@@ -156,7 +156,7 @@ Reuse the printed notes' words: **box, opposite box, counters, border, add the o
 - **Flip everything:** the move name; annotation "take the opposite of both sides". **Flip** is reserved for signs.
 - **No opposite box:** the first Why? box (green when no x term has a negative coefficient).
 - **Solved for x:** x alone **with a positive coefficient** on this card.
-- **Trade places** and **Cross the border** are listed (greyed) but belong to their own cards.
+- **Trade places** and **Cross the border** are listed (greyed). **Neither has its own card:** Cross the border is taught in later levels of Add to both sides (and unlocks again on Two-step and the multi-step cards); Trade places appears in later levels of Add to both sides and again in later levels of other early cards. Whether Trade places goes live in later Flip it levels (L5-L6, where x is on the right) is open (§8, item 9).
 
 ---
 
@@ -187,3 +187,5 @@ Reuse the printed notes' words: **box, opposite box, counters, border, add the o
 6. **Greyed-move messages** (earlier-card vs later-card, §3A) differ from the loop's single message. If kept, the loop (§5) should say so.
 7. **Smaller numbers not gating Solved for x** (§3E) is my reading of "Solved for x goes green when all lights are met," because on `−x = b` the numbers can't get smaller. Confirm.
 8. **Teacher data scope** is as in the loop (stuck and Teach me counts only).
+9. **Trade places on this card:** live in later levels (L5-L6, with x on the right), or greyed throughout? Not decided.
+10. **Take a fraction's dealing scaffold** is now defined by `SPEC-DIVIDE-IT.md` §3C (rev 2.0); this card reuses it and adds only "never deal into an opposite box". This closes open item 2.

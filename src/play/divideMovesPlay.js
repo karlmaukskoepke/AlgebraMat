@@ -5,6 +5,7 @@ import { formatDivide } from '../engine/divide.js';
 import { renderDivideScreen } from '../view/divideScreen.js';
 import { buildDivideControls } from '../view/divideControls.js';
 import { divideFeedbackText } from '../view/divideFeedback.js';
+import { bindValueDrag } from '../view/solveScreen.js';
 import { recordProblem } from '../lightStore.js';
 
 export const divideMovesPlay = {
@@ -25,10 +26,12 @@ export const divideMovesPlay = {
     return { hint: null };
   },
   renderMat: (s) => renderDivideScreen(s),
+  bindMat: (root, dispatch) => bindValueDrag(root, dispatch),
   matAction(d) {
     switch (d.action) {
       case 'choose': return { type: 'choose', move: d.move };
-      case 'greyMove': return { type: 'greyMove' };
+      case 'greyMove': return { type: 'greyMove', move: d.move };
+      case 'placeValue': return { type: 'placeValue' };
       case 'path': return { type: 'path', value: d.value };
       case 'take': return { type: 'take', n: Number(d.n) };
       case 'deal': return { type: 'deal', group: Number(d.group) };

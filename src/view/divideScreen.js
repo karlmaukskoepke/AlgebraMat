@@ -1,114 +1,98 @@
-// The Divide it screen, light build (SPEC-DIVIDE-IT.md on the pattern of SPEC-ADD-TO-BOTH-SIDES.md): the line on top, the work stack
-// (the equation, each move beneath it, the x = [ ] row with Check and Next, the substitution), the fractions row under it ("Take
-// ½ ⅓ ¼ ⅕ ⅙ of both sides", each stacked × ⅓ over ÷ 3), Undo, the help row, and the move panel with "Take a fraction" active.
+// The Divide it screen (SPEC-DIVIDE-IT.md rev 2.1) on the shared Solve it loop: the line with its one prompt and two buttons, the work stack
+// (the equation, each earlier move folded to one row, the current move's work, the x = [ ] row with Check under it, the substitution),
+// the fractions row ("Take × ½ × ⅓ × ¼ × ⅕ × ⅙ of both sides", each stacked × ⅓ over ÷ 3, its room always kept), Undo, the help row,
+// and the Move / Why? panel with "Take a fraction" active. The group diagram (counters scaffold; I'm stuck at x alone) draws in
+// its own reserved area under the panel, so the work stack never leaves the screen.
 
-import { html, actionRow } from './addBothMat.js';
-import { stackRows, answerBlock, helpRow, movePanel, lineBlock } from './lightScreen.js';
+import { html } from './addBothMat.js';
+import { movePanel } from './lightScreen.js';
+import { lineBlock, stackRows, answerBlock, helpRow, undoRow } from './solveScreen.js';
+import { groupDiagram } from './groupDiagram.js';
 import { divideFeedbackText } from './divideFeedback.js';
-import { answerLive, helpOk, xAlone, coefOf, pileSize, DEAL_ROUND_LEVEL } from '../engine/divideMoves.js';
-import { FRACTIONS, fractionText } from '../engine/divide.js';
+import { solve, xAlone, coefOf, pileSize, DEAL_ROUND_LEVEL } from '../engine/divideMoves.js';
+import { FRACTIONS } from '../engine/divide.js';
+import { fractionText } from '../engine/solveTerms.js';
 
-// "Take [½][⅓][¼][⅕][⅙] of both sides": shown once the move is chosen (its room is always kept so nothing shifts).
+// "Take [½][⅓][¼][⅕][⅙] of both sides": live once the move is chosen; greyed (never hidden) before that and while counters are dealt.
 function fractionRow(s) {
-  const on = s.stage === 'moves' && s.menu === 'fraction' && !s.sub;
-  const row = html('div', `lb-fractionrow${on ? '' : ' is-hidden'}`, [html('strong', '', ['Take'])]);
-  const forced = s.forced && !xAlone(s.board);
+  const on = s.stage === 'moves' && s.menu === 'fraction' && !s.sub && !s.deal;
+  const row = html('div', `lb-fractionrow${on ? '' : ' is-off'}`, [html('strong', '', ['Take'])]);
+  const forcedOnly = s.forced && !xAlone(s.board) ? coefOf(s.board) : null;
   for (const n of FRACTIONS) {
-    const b = html('button', `btn lb-frac-btn${s.hint?.kind === 'fraction' && s.hint.n === n ? ' is-target' : ''}`, [html('span', 'lb-frac-main', [`× ${fractionText(n)}`]), html('span', 'lb-frac-sub', [`÷ ${n}`])], { type: 'button', 'data-action': 'take', 'data-n': n, 'aria-label': `Take ${fractionText(n)} of both sides` });
-    b.disabled = !on || (forced && n !== s.board.left[0].coef);
+    const b = html('button', `btn lb-frac-btn${s.hint?.kind === 'fraction' && s.hint.n === n && on ? ' is-target' : ''}`, [html('span', 'lb-frac-main', [`× ${fractionText(n)}`]), html('span', 'lb-frac-sub', [`÷ ${n}`])], { type: 'button', 'data-action': 'take', 'data-n': n, 'aria-label': `Take ${fractionText(n)} of both sides` });
+    b.disabled = !on || (forcedOnly !== null && n !== forcedOnly);
     row.append(b);
   }
   row.append(html('strong', '', ['of both sides']));
-  if (!on) row.setAttribute('aria-hidden', 'true');
   return row;
 }
 
-// The counters (from I'm stuck / Teach me): the boxes on the left, the pile on the right. Once a fraction is chosen, n empty groups appear on
-// the right and the boxes split into the same n on the left. A tap on a group deals it one counter (or keeps it, when all are shared
-// evenly); Deal a round gives every group one. A count and the groups' sizes are always written under it.
-function modelBlock(s) {
-  const board = s.board;
-  const boxes = coefOf(board);
-  const size = pileSize(board);
-  const sign = board.right[0].kind === 'num' && board.right[0].v < 0 ? '−' : '+';
-  const deal = s.deal;
-  const dealt = deal ? deal.groups.reduce((a, b) => a + b, 0) : 0;
-  const counter = () => html('span', `dv-counter${sign === '−' ? ' is-neg' : ''}`, [sign]);
-  const model = html('div', 'dv-model');
-  // left: the boxes, in n groups once a fraction is chosen
-  const left = html('div', 'dv-side dv-boxes');
-  const per = deal ? boxes / deal.n : boxes;
-  for (let g = 0; g < (deal ? deal.n : 1); g++) {
-    const cluster = html('div', `dv-cluster${deal ? ' is-split' : ''}`);
-    for (let i = 0; i < per; i++) cluster.append(html('span', 'dv-box', ['x']));
-    left.append(cluster);
+// ---------- the group diagram, in its reserved area ----------
+
+function diagramOptions(s) {
+  if (s.diag) {
+    const d = s.diag;
+    const got = d.groups ? d.groups.reduce((a, b) => a + b, 0) : 0;
+    const even = d.groups && got === d.size && d.groups.every((c) => c === d.groups[0]);
+    return {
+      n: d.n, boxes: 0, size: d.size, neg: d.neg, groups: d.groups, pile: d.groups ? d.size - got : 0, kept: d.kept,
+      tap: d.groups && d.kept === null ? (even ? 'keep' : 'deal') : null, dealt: got, even, round: d.groups && d.kept === null && got < d.size,
+    };
   }
-  // right: the pile, and the groups
-  const right = html('div', 'dv-side dv-pile');
-  const pile = html('div', 'dv-poolwrap');
-  for (let i = 0; i < size - dealt; i++) pile.append(counter());
-  right.append(pile);
-  if (deal) {
-    const groups = html('div', 'dv-groups');
-    deal.groups.forEach((count, g) => {
-      const b = html('button', 'dv-group', [], { type: 'button', 'data-action': 'deal', 'data-group': g, 'aria-label': `Group ${g + 1}: ${count} counters` });
-      for (let i = 0; i < count; i++) b.append(counter());
-      b.dataset.keep = g;
-      groups.append(b);
-    });
-    right.append(groups);
+  const b = s.board;
+  const size = pileSize(b);
+  const neg = b.right[0].kind === 'num' && b.right[0].v < 0;
+  if (s.deal) {
+    const d = s.deal;
+    const got = d.groups.reduce((a, c) => a + c, 0);
+    const even = got === size && d.groups.every((c) => c === d.groups[0]);
+    return { n: d.n, boxes: coefOf(b), size, neg, groups: d.groups, pile: size - got, kept: null, tap: even ? 'keep' : 'deal', dealt: got, even, round: got < size };
   }
-  model.append(left, html('div', 'dv-border'), right);
-  const wrap = html('div', 'dv-modelwrap', [model]);
-  if (deal) {
-    const readout = html('p', 'dv-readout', [`${dealt} of ${size} shared · groups hold ${deal.groups.join(', ')}`]);
-    const even = dealt === size && deal.groups.every((c) => c === deal.groups[0]);
-    const row = html('div', 'dv-actions');
-    if (s.level >= DEAL_ROUND_LEVEL) row.append(html('button', 'btn', ['Deal a round'], { type: 'button', 'data-action': 'dealRound' }));
-    wrap.append(readout);
-    if (even) {
-      // keeping: tapping a group now keeps it
-      for (const b of model.querySelectorAll('.dv-group')) b.setAttribute('data-action', 'keep');
-      wrap.append(html('p', 'dv-hint', ['Tap a group to keep it.']));
-    } else if (row.childElementCount) wrap.append(row);
-  }
-  return wrap;
+  return { n: 1, boxes: coefOf(b), size, neg, groups: null, pile: size, kept: null, tap: null, outline: s.hint?.kind === 'coef' || s.scaffold, dealt: 0, even: false, round: false };
+}
+
+function diagramBlock(s) {
+  const area = html('div', 'sv-diagram');
+  if (!s.scaffold) return area;
+  const o = diagramOptions(s);
+  // the groups' sizes are printed only while they are uneven; once they are even, the size of a group is what the student finds
+  const readout = !o.groups || s.diag?.guided ? '' : (o.even || s.diag ? `${o.dealt} of ${o.size} shared` : `${o.dealt} of ${o.size} shared · groups hold ${o.groups.join(', ')}`);
+  area.append(groupDiagram({ ...o, caption: readout }));
+  const row = html('div', 'dv-actions');
+  if (o.groups && o.even && o.tap === 'keep') row.append(html('p', 'dv-hint', ['Tap a group to keep it.']));
+  else if (o.round && s.level >= DEAL_ROUND_LEVEL && o.size - o.dealt >= o.n) row.append(html('button', 'btn', ['Deal a round'], { type: 'button', 'data-action': 'dealRound' }));
+  area.append(row);
+  return area;
 }
 
 function bareBlock(s) {
-  const block = html('div', `lb-eqblock${s.scaffold ? ' dv-scaffold' : ''}`);
-  if (s.scaffold && !xAlone(s.board)) block.append(modelBlock(s));
-  block.append(html('div', 'lb-stack', [...stackRows(s), answerBlock(s, answerLive)]));
-  const done = s.stage === 'done';
-  const row = actionRow({ undo: true });
-  const undo = row.querySelector('.btn-undo');
-  const wrongGuess = s.sub?.kind === 'guess' && !s.sub.ok && s.sub.step >= 3;
-  undo.disabled = done || !((s.history.length > 0 && !s.sub) || wrongGuess);
-  if (!undo.disabled && (Boolean(s.fail) || wrongGuess)) undo.classList.add('is-target');
-  if (!s.deal) block.append(fractionRow(s));                       // while the counters are being dealt, Undo is the way to pick another fraction
-  block.append(row);
+  const block = html('div', 'lb-eqblock');
+  block.append(html('div', 'lb-stack', [html('div', 'lb-rows', stackRows(s)), answerBlock(s, solve)]));
+  const wrongGuess = s.sub?.kind === 'guess' && !s.sub.ok && s.sub.step >= solve.subTotal(s.sub);
+  block.append(fractionRow(s), undoRow(s, { wrongGuess, cue: Boolean(s.fail) }));
   return block;
 }
 
+// "Solved for x" is green when x is alone; Smaller numbers and One box are judged after the move; every other Why? box is a faint outline.
 function panelBlock(s) {
-  const solved = xAlone(s.board) && s.lights.smaller === 'green' ? 'green' : 'off';
+  const mapLight = (v) => (v === 'neutral' ? 'off' : v);
   return movePanel({
     active: 'fraction', menu: s.menu, typing: s.typing, amountEntry: '', path: s.path,
     disabled: s.stage === 'done' || Boolean(s.sub),
     locked: s.stage === 'moves' && s.path !== 'move',
-    target: s.path === 'move' && !s.menu && !s.sub && s.stage === 'moves' && !xAlone(s.board),
-    lights: { fewer: s.lights.smaller, solved },
-    whys: { smaller: s.lights.smaller, onebox: s.lights.onebox === 'neutral' ? 'off' : s.lights.onebox },
+    target: s.path === 'move' && !s.menu && !s.sub && s.stage === 'moves' && !xAlone(s.board) && !s.scaffold,
+    lights: { fewer: 'off', solved: xAlone(s.board) ? 'green' : 'off' },
+    whys: { fewer: 'off', nofrac: 'off', smaller: mapLight(s.lights.smaller), onebox: mapLight(s.lights.onebox), noopp: 'off', xleft: 'off', simple: 'off' },
   });
 }
 
 export function renderDivideScreen(s) {
-  const wrap = html('div', 'lb-game lb-eqcard');
-  wrap.append(lineBlock(s, divideFeedbackText));
+  const wrap = html('div', 'lb-game lb-eqcard sv-card');
+  wrap.append(lineBlock(s, divideFeedbackText, solve));
   const body = html('div', 'lb-body');
   const main = html('div', 'lb-main');
-  main.append(bareBlock(s), helpRow(s, helpOk));
-  body.append(main, panelBlock(s));
+  main.append(bareBlock(s), helpRow(s, solve));
+  body.append(main, html('div', 'sv-side', [panelBlock(s), diagramBlock(s)]));
   wrap.append(body);
   return wrap;
 }

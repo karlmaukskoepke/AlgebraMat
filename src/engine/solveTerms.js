@@ -16,7 +16,7 @@ export const termText = (t) => {
   if (t.kind === 'frac') return `${fractionText(t.n)}(${t.inner.map(termText).join(' + ')})`;
   return signed(t.v);
 };
-export const sideText = (terms) => terms.map(termText).join(' + ');
+export const sideText = (terms) => terms.map((t, i) => (i && t.kind === 'num' && t.v < 0 ? ` − ${-t.v}` : `${i ? ' + ' : ''}${termText(t)}`)).join('');
 export const boardText = (board) => `${sideText(board.left)} = ${sideText(board.right)}`;
 
 // ---------- the value in place of x, worked out one operation at a time ----------
@@ -24,7 +24,7 @@ export const boardText = (board) => `${sideText(board.left)} = ${sideText(board.
 // An item of the working expression: { k: 'sub', v } (the value, in blue), { k: 'num', v }, { k: 'prod', a, v } (a × value),
 // { k: 'frac', n, inner: [items] }. `sub`/`num` are finished numbers.
 const toItem = (t, value) => {
-  if (t.kind === 'x') return (t.coef ?? 1) === 1 ? { k: 'sub', v: value } : { k: 'prod', a: t.coef, v: value };
+  if (t.kind === 'x') return (t.coef ?? 1) === 1 ? { k: 'sub', v: value } : (t.coef === -1 ? { k: 'neg', v: value } : { k: 'prod', a: t.coef, v: value });
   if (t.kind === 'frac') return { k: 'frac', n: t.n, inner: t.inner.map((u) => toItem(u, value)) };
   return { k: 'num', v: t.v };
 };
@@ -35,7 +35,8 @@ function itemSegs(it, ctx, alone) {
   const cls = ctx.op === it || ctx.pair?.includes(it) ? 'is-op' : ctx.res === it ? 'is-res' : '';
   if (it.k === 'sub') return [{ text: !alone && it.v < 0 ? `(${signed(it.v)})` : signed(it.v), cls: cls || 'is-blue' }];
   if (it.k === 'num') return [{ text: signed(it.v), cls }];
-  if (it.k === 'prod') return [{ text: `${it.a} × ${plugValue(it.v)}`, cls: cls || 'is-blue-part' }];
+  if (it.k === 'prod') return [{ text: `${signed(it.a)} × `, cls }, { text: plugValue(it.v), cls: cls || 'is-blue' }];
+  if (it.k === 'neg') return [{ text: `${MINUS}(`, cls }, { text: signed(it.v), cls: cls || 'is-blue' }, { text: ')', cls }];
   // a fraction: the fraction and its inner part; the whole is the op when it is the one being worked out
   const inner = sumSegs(it.inner, ctx);
   return [{ text: `${fractionText(it.n)}(`, cls }, ...inner, { text: ')', cls }];
@@ -43,7 +44,13 @@ function itemSegs(it, ctx, alone) {
 function sumSegs(items, ctx) {
   const out = [];
   items.forEach((it, i) => {
-    if (i) out.push({ text: ' + ', cls: ctx.pair?.includes(it) && ctx.pair.includes(items[i - 1]) ? 'is-op' : '' });
+    const opCls = i && ctx.pair?.includes(it) && ctx.pair.includes(items[i - 1]) ? 'is-op' : '';
+    if (i && it.k === 'num' && it.v < 0) {                          // a negative number after another term is written as a subtraction: 15 − 6
+      out.push({ text: ' − ', cls: opCls });
+      out.push({ text: `${-it.v}`, cls: ctx.op === it || ctx.pair?.includes(it) ? 'is-op' : ctx.res === it ? 'is-res' : '' });
+      return;
+    }
+    if (i) out.push({ text: ' + ', cls: opCls });
     out.push(...itemSegs(it, ctx, items.length === 1));
   });
   return out;
@@ -62,6 +69,10 @@ function nextOp(items) {
     }
   }
   for (const it of items) {
+    if (it.k === 'neg') {
+      const r = { k: 'num', v: -it.v };
+      return { op: it, res: r, apply: (list) => list.map((x) => (x === it ? r : x)) };
+    }
     if (it.k === 'prod') {
       const r = { k: 'num', v: it.a * it.v };
       return { op: it, res: r, apply: (list) => list.map((x) => (x === it ? r : x)) };

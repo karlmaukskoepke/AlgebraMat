@@ -3,8 +3,9 @@
 //   - guesses and the final value: the substitution (the value placed on x, then worked out an operation at a time, a click a
 //     line), a wrong guess checked in the CURRENT equation, a wrong value or a correct answer in the ORIGINAL one;
 //   - the forced-move rule (a correct guess at the first state, with no move made, forces the next problem to be a move);
-//   - committing a move: a helpful move writes the new equation and waits for Next, which folds the move to one row and brings
-//     the choice back; an unhelpful move waits for Undo, which returns to the same state with the choice showing;
+//   - committing a move: a helpful move writes the new equation and the choice returns at once, with the same prompt; the move
+//     folds to one row the moment the student acts on the choice (guess, move, or help), and Undo reaches only an unfolded
+//     move, returning to the same state with the choice showing; an unhelpful move waits for Undo;
 //   - Undo (only the current, unfolded move), Start over (always live except on the untouched original), the help ladder
 //     (rungs restart at each state), the stuck count, and the answer row's rules.
 // A card (Add to both sides, Divide it, Flip it, ...) is a config: its board, its moves (`reduce`), its lights, its slips and
@@ -27,7 +28,12 @@ import { signed, substitutionLines, boardText } from './solveTerms.js';
 //   rungs              [reminder, model, choose, guided]: each (s, api) => s, the n-th ask in a state
 //   teach(s, api)      Teach me: the scaffold on a forced path
 //   answerBlocked(s)   something of the card's is open that holds the typing row back (an amount, a pending deal)
+//   answerOpen(s)      the card lets the typing row be live although x is not alone (a reminder scaffold, a diagram)
 //   nextNeeded(s)      after a wrong guess is undone: mark the next needed move
+// The choice prompt: one string for every card and every state (loop §1A). No state may reword it.
+export const CHOICE_PROMPT = 'Would you like to guess the solution (the value of x), or use a move to make the problem simpler?';
+export const CHOICE_BUTTONS = [['Guess x', 'guess'], ['Use a move', 'move']];
+
 export function createSolveLoop(card) {
   const say = (s, key, params = {}, bad = false) => { s.feedback = { key, params: { ...(card.params?.(s) ?? {}), ...params }, bad }; return s; };
 
@@ -37,14 +43,14 @@ export function createSolveLoop(card) {
     const s = {
       problem, level, stage: 'moves', step: 'moves', path: forceMove ? 'move' : null, mustMove: forceMove,
       board, base: board, rows: [{ type: 'eq', board }], moveStart: 1, history: [], menu: null, typing: null, entry: '', sub: null,
-      lights: card.noLights(), reds: 0, hint: null, rung: 0, scaffold: false, forced: false, pendingFold: false, foldLabel: '', needUndo: false,
+      lights: card.noLights(), reds: 0, hint: null, rung: 0, scaffold: false, forced: false, unfolded: false, foldLabel: '', needUndo: false,
       stuck: 0, taught: 0, wrongs: 0, tag: null, tags: [], answers: [], helped: false, clean: false, skipped: [], supportsShown: [],
       guessedFirst: false, finalText: null, feedback: null, ...card.extra(problem, { level, ...opts }),
     };
     return say(s, forceMove ? (card.mustMoveKey?.(s) ?? 'aMustMove') : 'aChoose');
   }
 
-  const snapshot = (s) => ({ board: s.board, rows: [...s.rows], lights: s.lights, reds: s.reds, menu: s.menu, hint: s.hint, pendingFold: false, needUndo: false, ...card.snapshotExtra(s) });
+  const snapshot = (s) => ({ board: s.board, rows: [...s.rows], lights: s.lights, reds: s.reds, menu: s.menu, hint: s.hint, unfolded: false, needUndo: false, ...card.snapshotExtra(s) });
   const restore = (s, snap) => Object.assign(s, snap);
   const pushHistory = (s) => { s.history.push(snapshot(s)); };
 
@@ -57,21 +63,24 @@ export function createSolveLoop(card) {
 
   const alone = (s) => card.alone(s.board);
   // Has the student done anything on this problem? Start over is greyed on the untouched original.
-  const touched = (s) => s.rows.length > 1 || s.history.length > 0 || s.path !== null || Boolean(s.sub) || s.entry !== '' || s.pendingFold || card.touched?.(s) === true;
-  const helpOk = (s) => s.stage !== 'done' && (!s.sub || (s.sub.step >= subTotal(s.sub) && !s.sub.ok)) && !s.pendingFold;
+  const touched = (s) => s.rows.length > 1 || s.history.length > 0 || s.path !== null || Boolean(s.sub) || s.entry !== '' || s.unfolded || card.touched?.(s) === true;
+  const helpOk = (s) => s.stage !== 'done' && (!s.sub || (s.sub.step >= subTotal(s.sub) && !s.sub.ok));
   const startOverOk = (s) => s.stage !== 'done' && touched(s);
 
   // Is the x = [ ] row live? Greyed before the choice (while x is not alone), while a move waits for Next or Undo, while a
   // substitution is stepped, and when the problem is done.
   function answerLive(s) {
-    if (s.stage === 'done' || s.pendingFold || s.needUndo) return false;
+    if (s.stage === 'done' || s.needUndo) return false;
     if (s.sub) return s.sub.kind === 'value' && s.sub.step >= subTotal(s.sub) && !s.sub.ok;
     if (card.answerBlocked?.(s)) return false;
-    return s.path === 'guess' || alone(s);
+    if (s.unfolded) return alone(s);
+    return s.path === 'guess' || alone(s) || card.answerOpen?.(s) === true;
   }
 
   // The substitution: lines, then the mark. Collapsed: the first line, then the mark (a wrong value is always full).
   const subTotal = (sub) => (sub.collapsed ? 2 : sub.lines.length + 1);
+  // What of the check is on screen: the lines written so far (the first appears when the value is placed on x), and the mark.
+  const subView = (sub) => ({ lines: sub.collapsed ? (sub.step >= 1 ? [sub.lines[0]] : []) : sub.lines.slice(0, Math.min(sub.step, sub.lines.length)), mark: sub.step >= subTotal(sub), last: sub.step - 1 });
 
   // ---------- committing a move ----------
   // A move that the card has worked out: `rows` are the work rows and the new equation, `next` the new board, `label` the folded
@@ -86,7 +95,10 @@ export function createSolveLoop(card) {
     if (helpful) {
       s.reds = 0;
       s.needUndo = false;
-      if (!alone(s)) { s.pendingFold = true; s.foldLabel = label; }            // a new equation state: Next folds the move and brings the choice back
+      s.scaffold = false;                                                      // the new equation state starts bare
+      s.rung = 0;
+      s.forced = false;
+      if (!alone(s)) { s.unfolded = true; s.foldLabel = label; s.path = null; } // a new equation state: the choice returns at once; the move folds when it is acted on
     } else {
       s.reds += 1;
       s.needUndo = true;                                                       // an unhelpful move waits for Undo
@@ -97,8 +109,7 @@ export function createSolveLoop(card) {
 
   // A move gets in only on the move path, with nothing waiting on Next or Undo.
   function blockMove(s) {
-    if (s.stage !== 'moves' || s.sub) return s;
-    if (s.pendingFold) return say(s, 'aFoldFirst');
+    if (s.stage !== 'moves' || s.sub) return 'ignore';
     if (s.needUndo) return say(s, 'aUndoFirst', {}, true);
     if (!s.path) return say(s, 'aChooseFirst', {}, true);
     if (s.path === 'guess') return say(s, 'aGuessing');
@@ -113,13 +124,23 @@ export function createSolveLoop(card) {
     return say(s, key, { answer: s.finalText });
   }
 
+  // The move just made is folded to one row, and nothing before it can be undone: the equation state it led to is the new
+  // starting point. (Acting on the choice, or asking for help, commits it.)
+  function fold(s) {
+    if (!s.unfolded) return;
+    s.rows = [...s.rows.slice(0, s.moveStart), { type: 'fold', label: s.foldLabel, board: s.board }];
+    s.moveStart = s.rows.length;
+    s.history = [];
+    s.unfolded = false;
+  }
+
   // Help from the guess path moves the state into move mode.
   function moveMode(s) {
     s.sub = null;
-    if (s.path !== 'move') { s.path = 'move'; s.entry = ''; s.typing = null; }
+    if (s.path !== 'move') { s.path = 'move'; if (!alone(s)) s.entry = ''; s.typing = null; }
   }
 
-  const api = { say, commit, pushHistory, snapshot, restore, blockMove, finish, alone, bareState, tryStuck };
+  const api = { say, commit, pushHistory, snapshot, restore, blockMove, finish, alone, bareState, tryStuck, fold };
 
   // ---------- the reducer ----------
   function reduce(state, action) {
@@ -134,7 +155,7 @@ export function createSolveLoop(card) {
     // typing the value: the row must be live; after a wrong value the first key clears the old substitution
     if (isTyping(action)) {
       if (s.sub) { if (!(s.sub.kind === 'value' && s.sub.step >= subTotal(s.sub) && !s.sub.ok)) return state; s.sub = null; }
-      if (!answerLive(s) && !(s.sub === null && (s.path === 'guess' || alone(s)) && !s.pendingFold && !s.needUndo && !card.answerBlocked?.(s))) return state;
+      if (!answerLive(s) && !(s.sub === null && (s.path === 'guess' || alone(s) || card.answerOpen?.(s)) && !s.unfolded && !s.needUndo && !card.answerBlocked?.(s))) return state;
       const entry = typeInto(s.entry, action, 'integer');
       if (entry === s.entry) return state;
       s.entry = entry;
@@ -143,7 +164,8 @@ export function createSolveLoop(card) {
 
     switch (action.type) {
       case 'path': {
-        if (s.stage !== 'moves' || s.path || alone(s) || s.pendingFold || s.needUndo) return state;
+        if (s.stage !== 'moves' || s.path || alone(s) || s.needUndo) return state;
+        fold(s);                                                                            // acting on the choice commits the move before it
         s.path = action.value === 'move' ? 'move' : 'guess';
         if (s.path === 'guess') { s.typing = 'answer'; return say(s, 'aGuessPrompt'); }
         s.typing = null;
@@ -174,15 +196,15 @@ export function createSolveLoop(card) {
         const target = current ? s.board : s.rows[0].board;
         const work = substitutionLines(target, typed);
         const collapsed = correct && card.collapse(s.level);
-        s.sub = { kind, typed, ok: correct, tag, target: current ? 'current' : 'original', lines: work.lines, collapsed, placing: !collapsed, step: 0 };
+        s.sub = { kind, typed, ok: correct, tag, target: current ? 'current' : 'original', lines: work.lines, collapsed, placing: !collapsed, step: collapsed ? 1 : 0 };
         if (s.sub.placing) return say(s, 'aPlace', { typed: signed(typed) });
-        return say(s, correct || kind === 'value' ? 'aPlugIn' : 'aGuessed', { typed: signed(typed), where: s.sub.target }, !correct && kind === 'guess');
+        return say(s, correct || kind === 'value' ? 'aPlugIn' : 'aPlugCurrent', { typed: signed(typed), where: s.sub.target });
       }
       // the value goes onto x (dragged, or tapped there)
       case 'placeValue': {
         if (!s.sub?.placing) return state;
-        s.sub = { ...s.sub, placing: false };
-        return say(s, s.sub.ok || s.sub.kind === 'value' ? 'aPlugIn' : 'aGuessed', { typed: signed(s.sub.typed), where: s.sub.target }, !s.sub.ok && s.sub.kind === 'guess');
+        s.sub = { ...s.sub, placing: false, step: 1 };
+        return say(s, s.sub.ok || s.sub.kind === 'value' ? 'aPlugIn' : 'aPlugCurrent', { typed: signed(s.sub.typed), where: s.sub.target });
       }
       case 'nextLine': {
         if (!s.sub || s.sub.placing || s.sub.step >= subTotal(s.sub)) return state;
@@ -194,17 +216,6 @@ export function createSolveLoop(card) {
         s.entry = '';                                                                       // a wrong value: the row clears so the student retypes
         const m = card.slip(s, typed, tag);
         return say(s, m.key, m.params, true);
-      }
-
-      // ----- a helpful move was made: Next commits and folds it, and the choice returns -----
-      case 'foldNext': {
-        if (!s.pendingFold) return state;
-        s.rows = [...s.rows.slice(0, s.moveStart), { type: 'fold', label: s.foldLabel, board: s.board }];
-        s.moveStart = s.rows.length;
-        s.history = [];                                                                     // nothing is reversible after Next
-        s.pendingFold = false;
-        bareState(s);
-        return say(s, 'aChoose');
       }
 
       // ----- Undo: only the current, unfolded move; the choice shows again -----
@@ -219,16 +230,17 @@ export function createSolveLoop(card) {
         const wasScaffold = s.scaffold;
         restore(s, s.history.pop());
         s.needUndo = false;
+        s.unfolded = false;
         if (!wasScaffold) { s.path = null; s.menu = null; }                                 // the same state, with the choice showing again
         s.hint = null;
         card.afterUndo?.(s);
-        return say(s, 'aUndone');
+        return say(s, s.path ? (card.undoKey?.(s) ?? 'aUndone') : 'aChoose');                // the same state: the choice showing again
       }
 
       // ----- Start over: always live except on the untouched original; wipes the work, keeps the stuck count -----
       case 'startOver': {
         if (!startOverOk(s)) return state;
-        Object.assign(s, { board: s.base, rows: [{ type: 'eq', board: s.base }], moveStart: 1, history: [], sub: null, entry: '', reds: 0, pendingFold: false, lights: card.noLights() });
+        Object.assign(s, { board: s.base, rows: [{ type: 'eq', board: s.base }], moveStart: 1, history: [], sub: null, entry: '', reds: 0, unfolded: false, lights: card.noLights() });
         bareState(s);
         s.path = s.mustMove ? 'move' : null;
         return say(s, s.path ? 'aStartedOver' : 'aChoose');
@@ -237,6 +249,7 @@ export function createSolveLoop(card) {
       // ----- help -----
       case 'stuck': {
         if (!helpOk(s)) return state;
+        fold(s);
         moveMode(s);
         s.stuck += 1;
         s.helped = true;
@@ -246,6 +259,7 @@ export function createSolveLoop(card) {
       }
       case 'teach': {
         if (!helpOk(s)) return state;
+        fold(s);
         moveMode(s);
         s.taught += 1;
         s.forced = true;
@@ -258,7 +272,7 @@ export function createSolveLoop(card) {
     }
   }
 
-  return { newSession, reduce, answerLive, helpOk, startOverOk, subTotal, touched, owesMove: (s) => Boolean(s.guessedFirst) && s.stage === 'done', api };
+  return { newSession, reduce, answerLive, helpOk, startOverOk, subTotal, subView, touched, alone: (s) => card.alone(s.board), owesMove: (s) => Boolean(s.guessedFirst) && s.stage === 'done', api };
 }
 
 export { boardText };

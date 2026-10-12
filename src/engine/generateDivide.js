@@ -4,7 +4,8 @@
 // (BUILD-NOTES §2.1). Every problem is verified by substitution when it is made (makeDivide).
 
 import { mulberry32, pickSet } from './generate.js';
-import { makeDivide } from './divide.js';
+import { makeDivide, FRACTIONS } from './divide.js';
+import { substitutionLines } from './solveTerms.js';
 
 export const DIVIDE_LEVEL_COUNT = 5;
 const range = (lo, hi) => Array.from({ length: hi - lo + 1 }, (_, i) => lo + i);
@@ -66,7 +67,8 @@ export function generateDivideLevel(level, seed) {
 // of the left side and then of the right), three quiz items ("does it keep the balance or upset it?": ⅓ of one side only, ⅓ of
 // both sides, ⅓ of the left and ½ of the right) and then a watched walkthrough on 3x = 6. Nothing may balance by accident.
 
-const PAIRS = { 12: [[2, 6], [3, 4], [4, 3], [6, 2]], 18: [[2, 9], [3, 6], [6, 3], [9, 2]], 24: [[3, 8], [4, 6], [6, 4], [8, 3]], 30: [[5, 6], [6, 5]], 36: [[4, 9], [6, 6], [9, 4]] };
+// (at most 6 groups on a side, so the seesaw stays legible)
+const PAIRS = { 12: [[2, 6], [3, 4], [4, 3], [6, 2]], 18: [[2, 9], [3, 6], [6, 3]], 24: [[3, 8], [4, 6], [6, 4]], 30: [[5, 6], [6, 5]], 36: [[4, 9], [6, 6]] };
 const pickOne = (list, rng) => list[Math.floor(rng() * list.length)];
 
 export function generateDivideNumeric(seed) {
@@ -105,4 +107,28 @@ export function generateDivideNumeric(seed) {
     }
   });
   return items;
+}
+
+
+// ---------- the worst-case work-stack height (loop §3B, §8): reported so the screen can reserve it ----------
+// Rows of the work stack for one problem on its longest honest path: the original, a folded partial move when a fraction that
+// does not finish is legal (composite a), the finishing move's work row and its new equation; then the x = [ ] row, Check, and
+// the substitution (a line each, then the mark). A failed attempt shares a row with a move still to come, so it never adds one.
+export function stackRowsFor(p) {
+  const partial = FRACTIONS.some((n) => n < p.a && p.a % n === 0);
+  const moves = (partial ? 1 : 0) + 2;
+  const board = { left: [{ kind: 'x', coef: p.a }], right: [{ kind: 'num', v: p.b }] };
+  const check = substitutionLines(board, p.x).lines.length + 1;
+  return { moves: 1 + moves, answer: 2, check, total: 1 + moves + 2 + check };
+}
+// The worst case of a level over many seeds (the generator reports it; the screen reserves the move rows).
+export function worstCaseRows(level, seeds = 40) {
+  let worst = { moves: 0, answer: 0, check: 0, total: 0 };
+  for (let seed = 0; seed < seeds; seed++) {
+    for (const p of generateDivideLevel(level, seed)) {
+      const r = stackRowsFor(p);
+      if (r.total > worst.total) worst = r;
+    }
+  }
+  return worst;
 }

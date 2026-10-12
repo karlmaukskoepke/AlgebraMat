@@ -95,3 +95,42 @@ Built and on the Solve it screen, after Add to both sides. Six levels: **Level 1
 - **Keeping:** once every counter is shared evenly, the groups become tappable to keep; tapping one commits "⅓ of both sides" (the work stack shows `⅓(3x) = ⅓(−12)` and the new equation, with a partial move leaving the model up for the next fraction). Keeping early says how many are still in the pile; uneven groups say what they hold.
 - **Undo** takes the whole attempt (the groups and anything dealt) back. While the counters are being dealt the fraction row is hidden to save room; Undo is the way to pick another fraction.
 - Not built: the other groups fading on both sides when one is kept (the move just commits).
+
+## 11. Divide it on the shared Solve it loop (2026-10-12, brief a; SPEC-SOLVE-IT-LOOP.md rev 1.1, SPEC-DIVIDE-IT.md rev 2.1)
+
+**What was built.** Divide it no longer carries its own copy of the loop. One module, `src/engine/solveLoop.js` (`createSolveLoop(card)`), owns the choice at every state, the forced-move rule, the substitution (the value placed on x, then a line a click), folding, Undo, Start over, and the help ladder. `src/engine/divideMoves.js` is now only the card: its board, its one move (take 1/n of both sides, in one action or by hand with the counters), the failed attempt, the lights, the slips, and the rungs. Shared pieces, each in one place so the next card cannot drop them:
+
+| Piece | File |
+|---|---|
+| The choice prompt (one string) and its two buttons | `CHOICE_PROMPT`, `CHOICE_BUTTONS` in `src/engine/solveLoop.js` (Add's `aChoose` uses the same constant) |
+| The substitution renderer and the step highlighting | `src/engine/solveTerms.js` (`substitutionLines`) |
+| The work-stack rows, the answer row, Check/Next, the line, the help row, the drag onto x | `src/view/solveScreen.js` |
+| The operation in blue | `.is-blue`: work rows, fold rows, the line (`blueFractions`), the quiz question and its evidence rows |
+| The group diagram | `src/view/groupDiagram.js` |
+
+**Choice on the line, fold on action (a decision for Karl).** Brief C1 needs the same prompt and two working buttons *after every move*. So after a partial move the line shows the prompt at once, and the move folds to one row the moment the student acts on the choice (Guess x, Use a move, I'm stuck, Teach me). There is no separate Next after a partial move. Undo reaches only the unfolded move and returns to the same state with the choice showing. The loop doc says Next folds; the two cannot both put the prompt on the line immediately, so I made the choice the commit. Easy to flip.
+
+**The group diagram (report item 3).** The Count it / Group It fraction-of-a-group drawing is `fractionScript` in `src/view/lassoMat.js` (a bar of connected groups with counters, the "take" bracket, the fade of the others). `renderLassoMat` itself draws one bar beside a text column, so it cannot show boxes and counters either side of a border, a loose pile, or tap-to-deal. `groupDiagram.js` is therefore a sibling that imports `lassoMat`'s `el` and `counter` (now exported) and uses its classes and colours (`bar-part`, `bar-outline`, `take-bracket`, `take-label`, `.part.is-left`, the green/magenta counters), so it draws in the same language. It is used by the counters scaffold, by I'm stuck at x alone, and by the Level 1 walkthrough. It never prints the answer as a numeral: once the groups are even, no group size is written.
+
+**What B1 showed (report item 2).** After a correct guess on `2x = −6` the stack row read `−3 = −6`. The old view slid the guess into the equation row in place of the x, and its coefficient was dropped with it (`lightScreen.termsOf` skipped the number in front whenever a guess was sliding in). The equation row is now left alone (its x is outlined; the value is dragged onto it, or tap x), and the check is written beneath by the shared renderer. Tests: the brief's five cases plus every coefficient and sign.
+
+**Conformance checklist (loop §, report item 1).**
+1. One prompt: pass (`tests/divideMoves.test.js`, "the prompt never changes": every state of every legal path from 4x = −16, 6x = ±…, after a failed attempt is undone).
+2. Work shown: pass. Level 1 writes the equation, the evaluated sides and the mark for every action and for every quiz answer (`workRows`, `quizRows`; the brief's 2 × 6 = 3 × 4 example is a test).
+3. Operation in blue: pass in prompts, rows, fold rows and evidence. The fraction buttons themselves are black (they are controls, not evidence).
+4. Substitution: pass. The right equation (current for a wrong guess, original otherwise), the coefficient as ×, negatives in parentheses.
+5. Scaffolds show pictures and never blank the stack: pass at every rung and state, including x = ⅓(6), ⅕(35), ⅙(−18).
+6. Layout stable: pass at 1366×768. Eighteen states were stepped through; the line, the rows, the answer block, the fractions row, Undo, the help row and the pad do not move (the line reserves three lines, the rows reserve four). The page needed a wide-screen change to get there (below).
+7. Start over, Undo, folding: pass (tests).
+8. One highlighted target: pass, with one exception. On I'm stuck rung 1 the number in front of x is outlined (spec) while the answer row is live with a blinking cursor ("Do you know x now?").
+9. Fit: **the worst case is 9 rows** for a composite coefficient (the original, a folded partial move, the finishing move's work and equation, the x row, Check, two substitution lines and the mark); 8 for a prime one. The generator reports it (`worstCaseRows`) and tests it. **At 1366×768 the whole mat, the help row and the pad fit with no page scroll, but only by putting the picture area between the work and the Move / Why? panel on screens 1250 px wide or more** (stacked under the panel the page was 200 px too tall). On a Chromebook with the browser's tabs and address bar (about 657 high) it still scrolls about 50 px. Below 1250 px wide the picture goes under the panel, as on a phone.
+10. Generator: pass (never 0, ±1, ±a; b never ±a; verified by substitution; Level 1 pairs capped at 6 groups a side so the seesaw stays legible).
+11. Greyed rules: pass.
+12. Shared code: pass for Divide it. **Add to both sides still has its own copies** (`lightScreen.stackRows`, `answerBlock`, its engine). Moving it onto the loop is the next job.
+
+**Also built from rev 2.0/2.1 §10:** Level 1 on the seesaw of Add's Level 1 (`drawBalance`; counters grouped as the expression reads, the beam tipping or levelling; in quiz items it shows what happened once answered); the walkthrough's group diagram (bracket and fade at ⅓, then the kept group alone); the fractions row always reserved and greyed, never hidden; Why? boxes other than Smaller numbers and One box are faint outlines; Solved for x is green when x is alone; greyed-move messages by earlier card ("You don't need that move here.") and later card ("That move unlocks on a later card."), for Divide it only; Start over live except on the untouched original; three red moves only add "Try I'm stuck."; rungs restart at each equation state; the step highlighting is purple (underline plus colour).
+
+**Not built / open.**
+- "skipped" on a Level 1 the diagnostic skipped needs a new save-data field, not built.
+- The first I'm stuck rung leaves the typing row live ("Do you know x now?"); a guess typed there is a guess at that state.
+- Add to both sides is not yet on the loop, so the Add-only screens still use the old messages for greyed moves and its own stack code.

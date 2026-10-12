@@ -86,3 +86,21 @@ describe('the generator', () => {
     for (const { set } of sets) for (const p of set) for (const t of [p.b, -p.x, p.a * p.b, p.a, p.b + p.a, p.b - p.a]) expect(t === p.x).toBe(false);
   });
 });
+
+import { stackRowsFor, worstCaseRows, generateDivideLevel as genLevel } from '../src/engine/generateDivide.js';
+describe('the generator: never ±a, and the worst-case work-stack height it reports (loop §3B, §8)', () => {
+  it('no problem on any level has an answer of 0, ±1 or ±a, and b is never ±a', () => {
+    for (let level = 1; level <= 5; level++) for (let seed = 0; seed < 60; seed++) for (const p of genLevel(level, seed)) {
+      expect([0, 1, -1, p.a, -p.a]).not.toContain(p.x);
+      expect([p.a, -p.a]).not.toContain(p.b);
+      expect(p.a * p.x).toBe(p.b);                                                              // verified by substitution
+    }
+  });
+  it('a prime coefficient is 8 rows at most; a composite one (a partial move is legal) is 9, as the spec estimated', () => {
+    expect(stackRowsFor({ a: 3, b: -12, x: -4 })).toEqual({ moves: 3, answer: 2, check: 3, total: 8 });
+    expect(stackRowsFor({ a: 6, b: 12, x: 2 })).toEqual({ moves: 4, answer: 2, check: 3, total: 9 });
+    for (let level = 1; level <= 5; level++) expect(worstCaseRows(level).total).toBeLessThanOrEqual(9);
+    expect(worstCaseRows(1).total).toBe(8);                                                      // generator level 1 = the card's Level 2: a is 2 or 3, no partial move
+    expect([2, 3, 4, 5].map((l) => worstCaseRows(l).total)).toEqual([9, 9, 9, 9]);               // the card's Levels 3-6 have a composite a, so a partial move is legal
+  });
+});
