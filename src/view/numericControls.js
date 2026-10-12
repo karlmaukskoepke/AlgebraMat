@@ -1,17 +1,8 @@
-// The numeric level's controls: just the pad, with the amount being typed shown above it (SPEC-ADD-TO-BOTH-SIDES.md §3D: no
-// I'm stuck and no Teach me on this level).
-
-import { MINUS } from '../engine/expr.js';
+// The numeric level's controls: just the pad (the amount is typed in the "Add [ ] to both sides" line on the Mat; SPEC-ADD-TO-BOTH-SIDES.md
+// §3D: no I'm stuck and no Teach me on this level).
 
 export function buildNumericControls(root, dispatch) {
   root.innerHTML = '';
-  const field = document.createElement('div');
-  field.className = 'lb-answerrow';
-  const prompt = document.createElement('strong');
-  prompt.textContent = 'Amount to add:';
-  const value = document.createElement('span');
-  value.className = 'ab-typed';
-  field.append(prompt, value);
   const keys = document.createElement('div');
   keys.className = 'pad';
   const mk = (label, action, data = {}, aria) => {
@@ -25,7 +16,7 @@ export function buildNumericControls(root, dispatch) {
     return b;
   };
   keys.append(mk('±', 'toggleSign', {}, 'Change sign'), ...[1, 2, 3, 4, 5, 6, 7, 8, 9, 0].map((d) => mk(String(d), 'digit', { digit: d })), mk('⌫', 'backspace', {}, 'Delete'));
-  root.append(field, keys);
+  root.append(keys);
   root.addEventListener('click', (e) => {
     const b = e.target.closest('button[data-action]');
     if (!b || b.disabled) return;
@@ -34,10 +25,6 @@ export function buildNumericControls(root, dispatch) {
   return {
     update(s) {
       const on = s.stage === 'moves' && s.menu === 'add';
-      field.hidden = !on;                                  // the amount row appears only once the move is chosen
-      value.textContent = (s.amountEntry ?? '').replace('-', MINUS) || ' ';
-      value.classList.toggle('is-empty', !s.amountEntry);
-      value.classList.toggle('is-blink', on && !s.amountEntry);
       for (const b of keys.querySelectorAll('button')) b.disabled = !on;
     },
   };

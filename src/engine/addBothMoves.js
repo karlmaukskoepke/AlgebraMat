@@ -104,7 +104,7 @@ export function newAddBoth(problem, { level = 2, forceMove = false } = {}) {
     leftDelta: 0, rightDelta: 0,
     prevBoard: board, lights: { fewer: 'off', solved: 'off' }, reds: 0,
     counterMode: false, startOver: false, forced: false, hint: null, rung: 0,
-    entry: '', sub: null, work: null, undoCue: false, selected: null, combining: null, kindMisses: 0, countMisses: 0,
+    entry: '', hintGiven: false, sub: null, work: null, undoCue: false, selected: null, combining: null, kindMisses: 0, countMisses: 0,
     skipped: [], wrongs: 0, tag: null, tags: [], stuck: 0, taught: 0, helped: false, clean: false,
     on: { ...emptySkills(), partyBattle: false, sign: false }, answers: [], supportsShown: [],
     finalText: null, lastAmount: null,
@@ -182,6 +182,19 @@ function enterScaffold(s) {
 // What a stuck click does at each rung (§4): 1 model it, 2 choose the move, 3 the guided amount.
 function climb(s) {
   s.helped = true;
+  // The first ask on the bare screen is a reminder of the move's logic, not a model: the number next to x is outlined and the
+  // question is what to add to both sides to eliminate it. Only a second ask brings in the scaffold (rung 1 below).
+  if (!s.scaffold && !s.hintGiven) {
+    s.hintGiven = true;
+    if (!s.supportsShown.includes('hint')) s.supportsShown.push('hint');
+    const con = s.board[xSideOf(s.board)].find((t) => t.kind === 'num');
+    if (xAlone(s.board)) return say(s, 'aStuckSolved');
+    s.hint = con ? { kind: 'cancel', id: con.id } : null;
+    s.menu = 'add';
+    s.typing = null;
+    s.amountEntry = '';
+    return say(s, 'aStuckHint', { constant: con ? plus(con.v) : '' });
+  }
   const rung = Math.min(s.rung + 1, 3);
   const fresh = rung !== s.rung;
   s.rung = rung;

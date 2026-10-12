@@ -5,7 +5,7 @@
 import { numericFeedbackText } from './numericFeedback.js';
 import { signed } from '../engine/addBoth.js';
 import { html, drawBalance, equationSvg, sideButtons, actionRow, groupShape, angleFor } from './addBothMat.js';
-import { movePanel, equationRow, workTerms } from './lightScreen.js';
+import { movePanel, equationRow, workTerms, addPhrase } from './lightScreen.js';
 import { readoutOf, sideText, equationText, askParts } from '../engine/numericLevel.js';
 
 const SVG_NS = 'http://www.w3.org/2000/svg';
@@ -45,13 +45,13 @@ function balanceBlock(s) {
   const done = s.stage === 'done';
   const row = actionRow({
     undo: !done && s.history.length > 0,
-    go: done ? 'Ready for the next problem' : s.menu === 'add' ? 'Go ▶' : null,
+    go: done ? 'Next problem ▸' : s.menu === 'add' ? 'Go ▶' : null,
     goAction: done ? 'next' : 'go',
     goDisabled: !done && (!(s.pending?.both) || !r.balanced),
   });
   if (row) {
     if (s.pending?.both || done) row.querySelector('.btn-go')?.classList.add('is-target');
-    block.append(row);
+    block.append(addPhrase(s), row);
   }
   return block;
 }

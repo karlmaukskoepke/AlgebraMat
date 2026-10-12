@@ -200,8 +200,8 @@ describe('plugging a typed value back in: a line a click', () => {
   });
   it('help from the guess path moves the problem to the move path', () => {
     const g = run(start(), { type: 'path', value: 'guess' }, ...typed('4'));
-    const s = run(g, { type: 'stuck' });
-    expect([s.path, s.entry, s.scaffold, s.stuck]).toEqual(['move', '', true, 1]);
+    const s = run(g, { type: 'stuck' }, { type: 'stuck' });
+    expect([s.path, s.entry, s.scaffold, s.stuck]).toEqual(['move', '', true, 2]);
     expect(run(answer(g, '4'), { type: 'stuck' }).stuck).toBe(0);                          // not while the lines are being clicked through
   });
   it('a move shows its work line: the added amount on both sides, x\'s numbers struck as they combine', () => {
@@ -216,33 +216,40 @@ describe('plugging a typed value back in: a line a click', () => {
 });
 
 describe('I\'m stuck and Teach me bring in the scaffold, one rung at a time', () => {
+  it('the first I\'m stuck is only a reminder: the number next to x outlined, "what would we add to eliminate it?", the Add blank open, no model', () => {
+    const s = run(start(), { type: 'stuck' });
+    expect([s.scaffold, s.stuck, s.menu, s.path, s.feedback.key, s.feedback.params.constant]).toEqual([false, 1, 'add', 'move', 'aStuckHint', '+3']);
+    expect(s.hint).toEqual({ kind: 'cancel', id: s.board.left.find((t) => t.kind === 'num').id });
+    expect(run(s, ...typed('2')).hint).toBeNull();                                         // the outline goes once they start typing
+    expect(run(move(start(), -3), { type: 'stuck' }).scaffold).toBe(false);                // x alone: just "work out what x is"
+  });
   it('rung 1 at L4–L6: the seesaw model with counters, the number next to x highlighted; nothing opens by itself before', () => {
     const s0 = start();
     expect(s0.scaffold).toBe(false);
-    const s = run(s0, { type: 'stuck' });
-    expect([s.scaffold, s.counterMode, s.stuck, s.rung, s.stage, s.feedback.key]).toEqual([true, true, 1, 1, 'moves', 'aStuck1']);
+    const s = run(s0, { type: 'stuck' }, { type: 'stuck' });
+    expect([s.scaffold, s.counterMode, s.stuck, s.rung, s.stage, s.feedback.key]).toEqual([true, true, 2, 1, 'moves', 'aStuck1']);
     expect(s.hint.kind).toBe('cancel');
     expect(boardText(s.board)).toBe(boardText(s0.board));                                  // the same equation, pre-built
   });
   it('rung 1 at L2–L3 with no move made: the board starts empty and the student builds the equation', () => {
-    let s = run(start(P('x+a', 3, -6), 2), { type: 'stuck' });
+    let s = run(start(P('x+a', 3, -6), 2), { type: 'stuck' }, { type: 'stuck' });
     expect([s.stage, s.feedback.key]).toEqual(['build', 'aBuild']);
     s = run(s, { type: 'drop', piece: 'x', side: 'left' }, ...Array(3).fill({ type: 'drop', piece: '+', side: 'left' }), ...Array(6).fill({ type: 'drop', piece: '-', side: 'right' }));
     expect(s.stage).toBe('moves');
   });
   it('rung 1 at L2–L3 after a move has been made redraws the current equation, unsimplified side included', () => {
-    const s = run(move(start(P('x+a', 3, -6), 2), -5), { type: 'stuck' });
+    const s = run(move(start(P('x+a', 3, -6), 2), -5), { type: 'stuck' }, { type: 'stuck' });
     expect(s.stage).toBe('moves');
     expect(boardText(s.board)).toBe('x + −2 = −6 + −5');
   });
   it('rung 2 opens the two-action move; rung 3 pre-fills the amount; the stuck count adds up', () => {
-    let s = run(start(), { type: 'stuck' }, { type: 'stuck' });
-    expect([s.menu, s.stuck]).toEqual(['add', 2]);
+    let s = run(start(), { type: 'stuck' }, { type: 'stuck' }, { type: 'stuck' });
+    expect([s.menu, s.stuck]).toEqual(['add', 3]);
     s = run(s, { type: 'stuck' });
-    expect([s.amountEntry, s.stuck, s.feedback.key]).toEqual(['-3', 3, 'aStuck3']);
+    expect([s.amountEntry, s.stuck, s.feedback.key]).toEqual(['-3', 4, 'aStuck3']);
   });
   it('in the scaffold: add to one side (tilt), the other (balanced), Go, then the combining ritual, then judged', () => {
-    let s = run(start(), { type: 'stuck' }, { type: 'choose', move: 'add' }, ...typed('−3'), { type: 'addTo', side: 'left' });
+    let s = run(start(), { type: 'stuck' }, { type: 'stuck' }, { type: 'choose', move: 'add' }, ...typed('−3'), { type: 'addTo', side: 'left' });
     expect(boardText(s.board)).toBe('x + 3 + −3 = −6');
     expect([tilt(s), balanced(s)]).toEqual([-3, false]);
     expect(run(s, { type: 'go' }).feedback.key).toBe('aGoNotYet');
@@ -255,7 +262,7 @@ describe('I\'m stuck and Teach me bring in the scaffold, one rung at a time', ()
     expect(s.feedback.key).toBe('aSolvedBoard');
   });
   it('the scaffold\'s combining highlights the next pair and asks Party or Battle; a right answer combines them by itself', () => {
-    let s = run(start(), { type: 'stuck' }, { type: 'choose', move: 'add' }, ...typed('−3'), { type: 'addTo', side: 'left' }, { type: 'addTo', side: 'right' }, { type: 'go' });
+    let s = run(start(), { type: 'stuck' }, { type: 'stuck' }, { type: 'choose', move: 'add' }, ...typed('−3'), { type: 'addTo', side: 'left' }, { type: 'addTo', side: 'right' }, { type: 'go' });
     const first = s.combining;
     expect(s.board.left.some((t) => t.id === first.a)).toBe(true);                       // the left side comes first
     expect(run(s, { type: 'kind', value: 'party' }).feedback.key).toBe('aKindWrong');
@@ -268,7 +275,7 @@ describe('I\'m stuck and Teach me bring in the scaffold, one rung at a time', ()
     expect([boardText(s.board), s.combining]).toEqual(['x = −9', null]);
   });
   it('while x is not alone the answer row stays greyed, scaffold or not', () => {
-    const s = run(start(), { type: 'stuck' });
+    const s = run(start(), { type: 'stuck' }, { type: 'stuck' });
     expect(run(s, ...typed('5')).entry).toBe('');
     expect(answerLive(s)).toBe(false);
   });
@@ -280,7 +287,7 @@ describe('I\'m stuck and Teach me bring in the scaffold, one rung at a time', ()
     expect(s.feedback.key).toBe('aForced');
   });
   it('a typed answer once the scaffold has got x alone is plugged back in, and then finishes the problem', () => {
-    let s = run(start(), { type: 'stuck' }, { type: 'choose', move: 'add' }, ...typed('−3'), { type: 'addTo', side: 'left' }, { type: 'addTo', side: 'right' }, { type: 'go' });
+    let s = run(start(), { type: 'stuck' }, { type: 'stuck' }, { type: 'choose', move: 'add' }, ...typed('−3'), { type: 'addTo', side: 'left' }, { type: 'addTo', side: 'right' }, { type: 'go' });
     s = clickThrough(answer(combineAll(s), '−9'));
     expect(s.stage).toBe('done');
     expect(s.clean).toBe(false);
@@ -291,7 +298,7 @@ describe('I\'m stuck and Teach me bring in the scaffold, one rung at a time', ()
 });
 
 describe('building the equation in the scaffold (L2–L3)', () => {
-  const built = (extra) => run(start(P('x-a', 2, 3), 3), { type: 'stuck' }, ...extra);
+  const built = (extra) => run(start(P('x-a', 2, 3), 3), { type: 'stuck' }, { type: 'stuck' }, ...extra);
   it('takes the box on its own side, one-signed groups, and removes with a tap', () => {
     let s = built([{ type: 'drop', piece: '-', side: 'left' }, { type: 'drop', piece: '-', side: 'left' }]);       // x − 2 = 3
     expect(s.built.constant).toBe(-2);
