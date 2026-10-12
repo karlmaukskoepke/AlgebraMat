@@ -228,9 +228,11 @@ export function movePanel(o) {
       row.append(b);
       row.append(html('ul', 'ab-goals', [html('li', `ab-goal is-${fewer}${o.flash ? ' is-flash' : ''}`, [checkbox(fewer), html('span', 'ab-goal-label', ['Fewer terms'])])]));
     } else {
-      row.append(html('button', 'btn lb-move is-grey', [moveIcon(id), html('span', 'lb-movelabel', [label])], { type: 'button', 'data-action': 'greyMove', 'data-move': id, 'aria-disabled': 'true' }));
-      // the Why? boxes a later card will turn on, drawn as faint outlines so the column keeps its shape
-      row.append(html('ul', 'ab-goals is-faint', [html('li', 'ab-goal is-off', [checkbox('off'), html('span', 'ab-goal-label', ['Fewer terms'])])]));
+      // a greyed move shows only its icon (the name is for moves you can use); the label stays for screen readers
+      row.append(html('button', 'btn lb-move is-grey', [moveIcon(id), html('span', 'lb-movelabel', [label])], { type: 'button', 'data-action': 'greyMove', 'data-move': id, 'aria-disabled': 'true', 'aria-label': label, title: label }));
+      // its Why? box is satisfied whenever the move that was made satisfied it: green together, faint until then
+      const met = fewer === 'green' ? 'green' : 'off';
+      row.append(html('ul', `ab-goals${met === 'off' ? ' is-faint' : ''}`, [html('li', `ab-goal is-${met}`, [checkbox(met), html('span', 'ab-goal-label', ['Fewer terms'])])]));
     }
     panel.append(row);
   }

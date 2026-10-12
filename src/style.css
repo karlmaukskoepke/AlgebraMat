@@ -2920,3 +2920,10 @@ body {
 .lb-move.is-grey .lb-icon { opacity: 0.8; }
 .lb-movelabel { white-space: nowrap; }
 @media (max-width: 760px) { .lb-body { grid-template-columns: 1fr; } .lb-row, .lb-head { grid-template-columns: 1fr; } }
+
+/* a move's name appears only for a move you can use: on hover or focus, while it is selected (the amount lives in it), or while a number is dragged to it */
+.lb-movelabel { max-width: 0; opacity: 0; overflow: hidden; white-space: nowrap; transition: opacity 0.12s; }
+.lb-move:not(.is-grey):hover .lb-movelabel, .lb-move:not(.is-grey):focus-visible .lb-movelabel, .lb-move.is-on .lb-movelabel,
+.is-dragging .lb-move:not(.is-grey) .lb-movelabel { max-width: 22em; opacity: 1; }
+.lb-move.is-grey .lb-movelabel { display: none; }
+.lb-icon { flex: none; }
