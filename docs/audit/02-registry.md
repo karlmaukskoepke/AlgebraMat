@@ -31,6 +31,7 @@
 | 15b | Local save | Shared | `storage.js` + `main.js:110-119` | 6 other stores call `localStorage` directly (`syncStore`, `lightStore`, `fluencyStore`, `diagStore`, `speech`, `installPrompt`) |
 | 16 | Anonymous sync | Shared | `engine/sync.js`, `sync.js`, `syncStore.js`, `teacher/Code.gs` | none |
 | 17 | The loop itself (choice, forced move, fold, Undo, Start over, help ladder) | Duplicated | `engine/solveLoop.js` `createSolveLoop` (Divide) | `engine/addBothMoves.js` (Add: its own copy, with older rules) |
+| 19 | Tucked layout shell (pilot, `?layout=tucked`) | Shared (one card so far) | `src/view/tuckedLayout.js` on branch `tucked-pilot`: work column, slim Why? column, Moves drawer, counter tray; `withTuckedUi` view state | Divide it L2-6 only |
 | 18 | Term algebra (board text, signed, fractions) | Partly shared | `engine/solveTerms.js` | Add uses `engine/addBoth.js` `signed` and its own board shape |
 
 ## Notes per piece

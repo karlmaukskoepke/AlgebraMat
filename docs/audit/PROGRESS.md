@@ -25,6 +25,9 @@ At the end of this chat, remind Karl to paste this file (`docs/audit/PROGRESS.md
 ## New request from Karl (2026-10-12)
 Prompt sign-in at every visit, before play; on sign-in the more advanced progress wins, never less over more. "Not now" allowed but nudged; returning students signed in silently. Folded into R1 in `06-refactor-plan.md`.
 
+## Since the audit
+- 2026-10-12: brief c, the tucked layout pilot, built on branch `tucked-pilot` (notes: `SPEC-DIVIDE-IT-BUILD-NOTES.md` §13 there). Main has moved on (docs/design added, brief b built); this audit was written against `17835f7`.
+
 ## Read next
 1. `CLAUDE.md.draft`: if Karl approved it, copy it to `CLAUDE.md` at the repo root, commit, and stop (Phase 7).
 2. `06-refactor-plan.md`: the refactor starts at R1 (progress loss + sign-in) in a fresh session.
