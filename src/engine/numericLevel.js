@@ -38,6 +38,18 @@ export function askOf(p) {
   return `What happens if we ADD ${p.addLeft} to the LEFT and ${p.addRight} to the RIGHT?`;
 }
 
+// The same question in pieces, the "ADD ..." part (what is added, and where) apart so it can be drawn in blue.
+export function askParts(p) {
+  const what = p.scenario === 'one' ? `ADD ${p.amount} to ONE SIDE ONLY` : p.scenario === 'both' ? `ADD ${p.amount} to BOTH SIDES` : `ADD ${p.addLeft} to the LEFT and ${p.addRight} to the RIGHT`;
+  return [{ text: 'What happens if we ' }, { text: what, blue: true }, { text: '?' }];
+}
+
+// The equation after the change, term by term, the added amounts marked (they are drawn in blue).
+export function afterParts(p) {
+  const side = (terms, add) => [...terms.map((v) => ({ text: signed(v) })), ...(add ? [{ text: signed(add), blue: true }] : [])];
+  return { left: side(p.left, p.addLeft), right: side(p.right, p.addRight) };
+}
+
 const say = (s, key, params = {}, bad = false) => { s.feedback = { key, params, bad }; return s; };
 const amountOf = (entry) => (/^-?\d+$/.test(entry) ? Number(entry) : null);
 
@@ -130,7 +142,7 @@ export function reduceNumeric(state, action) {
       if (!right) s.misses += 1;
       s.clean = right;
       s.answered = { value: action.value, right };
-      s.reveal = { lines: [equationText(before), equationText(after), `${signed(l.left)} = ${signed(l.right)}`], ok: l.balanced };
+      s.reveal = { lines: [equationText(before), equationText(after), `${signed(l.left)} = ${signed(l.right)}`], after: afterParts(p), ok: l.balanced };
       s.stage = p.last ? 'review' : 'done';           // the last item goes on to the watched walkthrough after the Next
       s.step = s.stage;
       return say(s, right ? 'nlQuizRight' : 'nlQuizWrong', { correct: p.correct, said: action.value }, !right);
