@@ -32,6 +32,7 @@ export const divideMovesPlay = {
       case 'choose': return { type: 'choose', move: d.move };
       case 'greyMove': return { type: 'greyMove', move: d.move };
       case 'placeValue': return { type: 'placeValue' };
+      case 'foldNext': return { type: 'foldNext' };
       case 'path': return { type: 'path', value: d.value };
       case 'take': return { type: 'take', n: Number(d.n) };
       case 'deal': return { type: 'deal', group: Number(d.group) };

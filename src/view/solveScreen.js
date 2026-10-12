@@ -36,8 +36,14 @@ function termsOf(side, s, o) {
       out.push(html('span', 'lb-frac', [html('span', 'is-blue', [fractionText(t.n)]), '(', ...termsOf(t.inner, s, { ...o, live: false, plug: false }), ')']));
     } else if (t.kind === 'x') {
       const dropOn = o.plug && s.sub?.placing;
-      const xel = html('span', `lb-x${o.plug ? ' is-plugx' : ''}${dropOn ? ' is-droptarget' : ''}`, ['x'], { 'data-x': '1', ...(dropOn ? { 'data-action': 'placeValue', role: 'button', tabindex: '0', 'aria-label': 'Put your value on x' } : {}) });
       const c = t.coef ?? 1;
+      // the value has landed on this x: it takes x's place in the row (blue, in parentheses when negative) until Next writes the first check row
+      if (o.plug && s.sub?.landed) {
+        const v = s.sub.typed;
+        out.push(html('span', 'lb-landed', [c > 1 ? `${c} × ` : '', html('span', 'is-blue lb-landed-val', [v < 0 ? `(${signed(v)})` : String(v)])]));
+        return;
+      }
+      const xel = html('span', `lb-x${o.plug ? ' is-plugx' : ''}${dropOn ? ' is-droptarget' : ''}`, ['x'], { 'data-x': '1', ...(dropOn ? { 'data-action': 'placeValue', role: 'button', tabindex: '0', 'aria-label': 'Put your value on x' } : {}) });
       if (c > 1) out.push(html('span', 'lb-coef', [o.live && s.hint?.kind === 'coef' ? html('span', 'lb-hintbox', [String(c)]) : String(c), xel]));
       else out.push(xel);
     } else {
@@ -95,8 +101,10 @@ function substList(sub, view) {
 export function nextButton(s, loop) {
   const stepping = s.sub && !s.sub.placing && s.sub.step < loop.subTotal(s.sub);
   const done = s.stage === 'done';
-  if (!stepping && !done) return null;
-  return html('button', 'btn btn-go is-target lb-next', [done ? 'Next problem ▸' : 'Next ▸'], { type: 'button', 'data-action': done ? 'next' : 'nextLine' });
+  // a move that left a picture (or an unfolded move) waits for Next, which folds it and clears the picture (loop §3A, §6)
+  const folding = !s.sub && !done && (s.unfolded || Boolean(s.pic));
+  if (!stepping && !done && !folding) return null;
+  return html('button', `btn btn-go lb-next${folding ? '' : ' is-target'}`, [done ? 'Next problem ▸' : 'Next ▸'], { type: 'button', 'data-action': done ? 'next' : folding ? 'foldNext' : 'nextLine' });
 }
 
 export function answerBlock(s, loop) {

@@ -49,7 +49,7 @@ const M = {
   aGuessing: () => 'You’re guessing this one. Type your guess.',
   aLater: () => 'That move unlocks on a later card.',
   aNotNeeded: () => 'You don’t need that move here.',
-  aPlace: (p) => `Drag your ${p.typed} onto the x in the highlighted equation (or tap that x).`,
+  aPlace: (p) => `Drag your answer onto the x in the ${p.where === 'current' ? 'current' : 'original'} equation (or tap your answer, then tap the x).`,
   aPlugCurrent: (p) => `Let’s plug ${p.typed} back in for x, into this equation. Click Next for each line.`,
   aUndoFirst: () => 'Press Undo first.',
   aIntro: () => 'Choose a move. To get x alone, cancel the number next to it.',

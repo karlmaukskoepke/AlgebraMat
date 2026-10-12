@@ -1,8 +1,8 @@
-# Divide it: solve `ax = b` by taking a fraction of both sides  (Karl, 2026-10-12; revision 2.1; status: designed)
+# Divide it: solve `ax = b` by taking a fraction of both sides  (Karl, 2026-10-12; revision 2.2; status: designed)
 
-**Follows `SPEC-SOLVE-IT-LOOP.md` rev 1.1** (including its conformance checklist). Everything shared (the screen, the guess-or-move choice at every state, the forced-move rule, substitution checks, Undo and Start over, the work stack and folding, the help row, the scaffold ladder, generator rules) is defined there and wins any conflict. This spec states only what is specific to Divide it.
+**Follows `SPEC-SOLVE-IT-LOOP.md` rev 1.2** (including its conformance checklist). Everything shared (the screen, the guess-or-move choice at every state, the forced-move rule, substitution checks, Undo and Start over, the work stack and folding, the help row, the scaffold ladder, generator rules) is defined there and wins any conflict. This spec states only what is specific to Divide it.
 
-**Revision 2.0 brings the built card (rev 1.x, live) into line with the loop.** §10 lists every change from what is built, for Claude Code. Everything not listed there stays as built. **Revision 2.1 adds the fixes from Karl's first test of the build** (§10 items 15-21, with the matching rules in §3A, §3B, §3D and §5).
+**Revision 2.0 brings the built card (rev 1.x, live) into line with the loop.** §10 lists every change from what is built, for Claude Code. Everything not listed there stays as built. **Revision 2.1 adds the fixes from Karl's first test of the build** (§10 items 15-21, with the matching rules in §3A, §3B, §3D and §5). **Revision 2.2 adds the second round** (§10 items 22-27, in §3B, §3C and §5).
 
 Section: Solve it (after Add to both sides).   Prerequisite card(s): Group It (fractions of a group), Add to both sides.
 
@@ -77,7 +77,7 @@ Top to bottom: **the line** (a coloured box, centred, one sentence at a time); *
 - **The fractions row reserves its space at all times.** It is greyed out until the move is chosen and **greyed again while counters are dealt** (it is never hidden), so nothing reflows (loop §2).
 - **One action:** the fraction is taken of **both** sides at once. The work stack gets `⅓(3x) = ⅓(−12)` (fraction in blue) and the new equation. **On the move that finishes** (x alone), the right side stays as `x = ⅓(−12)` until the student types the value. **On a partial move** (`6x = 12`, `×½`) it shows the smaller numbers (`3x = 6`), the move folds on **Next**, and the choice returns.
 - **A fraction that doesn't split** (the boxes or the counters don't make n equal groups) is a **failed attempt**: its row is shown in red with ✗, the line says which side broke ("3 boxes can't make 2 equal groups", "12 can't be shared into 5 equal groups (2 left over)"), **Undo** is highlighted, and a new try replaces it. **Three red in a row add "Try I'm stuck."** to the line (loop §1C). A failed attempt counts toward that and never toward the stuck count.
-- **Plugging back in** (loop §1B and §4): the original equation (final value) or the current equation (a wrong guess at a simplified state) is outlined ("plugging back into this equation") with its x in blue; the typed value is **dragged onto x** (tap alternative: tap the value, then tap x), then the check is written a line a click with the step highlighting of loop §3C (`3 × (−4) = −12`, `−12 = −12`, `✓ Balanced`). The substituted value is blue (in parentheses when negative); the step highlight is the loop's accent colour. **This card never collapses the check** (it is two or three lines).
+- **Plugging back in** (loop §1B and §4). The line says **"Drag your answer onto the x in the original equation."** (tap alternative: "or tap your answer, then tap the x"). The **drop target is the x in the original equation row at the top of the stack** (for a wrong guess at a simplified state, the x in the current equation row), and it pulses blue. **On the drop the value flies to that x and takes its place in the top row** (blue, in parentheses when negative); the substituted equation is then written as the **first check row**, and the top row goes back to x so the history stays. Then the check runs a line a click with the step highlighting of loop §3C (`3 × (−4) = −12`, `−12 = −12`, `✓ Balanced`). **No underline or bracket is drawn under any check row** (decided 2026-10-12; loop §3C). The step highlight is **bold in the accent colour on the operation's characters only.** **This card never collapses the check** (it is two or three lines).
 - **A wrong guess** ends red with Undo highlighted, then "Let's make the equation simpler first, and then find the solution." with the next needed move highlighted. A correct final value forces the **next problem** to be a move **only if the correct guess came at the first state with no move made** (and adds a sixth, move-only problem if that was the level's last).
 
 ### 3C. The counters scaffold (from I'm stuck and Teach me)
@@ -86,6 +86,7 @@ Top to bottom: **the line** (a coloured box, centred, one sentence at a time); *
 - **Dealing:** tapping a group gives it one counter. **Deal a round** (one to every group, only while a whole round is left) is available from Level 4. Under the model: "9 of 12 shared · groups hold 4, 3, 2".
 - **Keeping:** once every counter is shared evenly, the groups become tappable; tapping one keeps it, which takes that fraction of both sides. Keeping early says how many are still in the pile; uneven groups say what they hold.
 - **Undo** takes the whole attempt back. **The dealing scaffold is also what Flip it reuses** (it never deals into an opposite box).
+- **The picture stays after the move is applied** (new in 2.2). Clicking Go on the fraction must not delete the counters or groups. They stay on screen exactly as the student left them, with the kept group highlighted, until the student clicks **Next** (which folds the move). The student likely still needs them. (Whether the other groups also fade is still open, §11.)
 - *Not built yet; see Open:* the other groups fading on both sides when one is kept.
 
 ### 3D. The group diagram (fraction of a group)
@@ -112,15 +113,13 @@ Top to bottom: **the line** (a coloured box, centred, one sentence at a time); *
 All supports follow the loop (§6). Specific to this card:
 
 ### "I'm stuck" (one rung per click; each click = +1 stuck count; rungs restart at each new equation state)
-- **Rung 1: Model it.** The **counters scaffold appears** (§3C) with the equation standing on it (boxes left, pile right), the number in front of x **outlined** ("3 boxes"), and the line asks: **"What fraction of both sides leaves one box?"** It ends with "Do you know x now?" and the pad.
-- **Rung 2: Choose the move.** The fraction row goes live in its scaffold form: the student **chooses a fraction** (a wrong one fails visibly), **deals** every counter into the groups and **keeps one group**, then types the value.
-- **Rung 3: Guided.** The matching fraction button is highlighted; the student still deals every counter and keeps a group.
+- **Rung 1: Model it and deal it** (merged in 2.2: a picture-only first rung was not helpful, and every rung must give the student something to do, loop §6). The **counters scaffold appears** (§3C) with the equation standing on it (`6x = 12` is **six x boxes** on the left and **all 12 counters** on the right), the number in front of x **outlined**, and the line asks: **"What fraction of both sides leaves one box?"** **The student can start dealing immediately:** deal every counter into the groups and take the fraction (in the order the scaffold already uses). The student may **type the answer at any point**, and Check works after any deal.
+- **Rung 2: Guided.** The matching fraction button is highlighted; the student still deals every counter and keeps a group, then types the value.
 - **The next needed move is the fraction that reaches one box** (**1/a**, always legal because a divides b), even where partial fractions are also legal (L5). Partial fractions are accepted in free play and never pushed.
 - **After every scaffold the choice returns** (guess, type the value, or try a move). I'm stuck is always there for the next rung.
 - **At x alone with an unevaluated right side (`x = ⅓(6)`), I'm stuck opens the group diagram** (§3D) on every rung (this replaces "I'm stuck just says to work out x", which is what the build did and which blanked the screen):
-  - **Rung 1: Model it.** The expression stays on screen and the diagram appears: **6 counters in one pile** with the line "What is ⅓ of 6? Share the 6 into 3 equal groups."
-  - **Rung 2: Do it.** The student **deals the 6 counters into 3 groups** (tap alternative; Deal a round from L4) and keeps 1 of the 3 with a bracket; the student counts it and types the value.
-  - **Rung 3: Guided.** The 6 counters arrive **already in 3 equal groups with one group bracketed** ("1 of the 3"); the student counts the kept group and types it. No numeral is printed.
+  - **Rung 1: Model it and deal it** (merged in 2.2: the pile alone, e.g. a box of 18 negative counters, was not helpful). The expression stays on screen and the diagram appears: **the counters in one pile** (for `x = ⅓(−18)`, 18 negative counters) with the line "What is ⅓ of −18? Share the counters into 3 equal groups." **The student can deal at once** into 3 groups (tap alternative; Deal a round from L4) and keep 1 of the 3 with a bracket; they count it and type the value, **or type at any point**.
+  - **Rung 2: Guided.** The counters arrive **already in 3 equal groups with one group bracketed** ("1 of the 3"); the student counts the kept group and types it. No numeral is printed.
   - **The work stack stays on screen throughout** (loop §6); the diagram draws in its reserved area.
 
 ### "Teach me step-by-step"
@@ -191,7 +190,7 @@ The same scaffolds on a **forced path:** only **1/a** is accepted, the student p
 2. **Check targets:** a wrong guess is substituted into the **current** equation; a correct final value, or a wrong value typed once x is alone, into the **original** (loop §1B). The next problem is forced to be a move **only** when the correct guess came at the first state with no move made.
 3. **Folding:** a helpful move writes the new equation and waits for a green **Next**, which **folds** the move to one row. **Undo** reaches only the current, unfolded move and returns to the same state with the choice showing (loop §1C, §3A).
 4. **Start over is always live,** greyed **only** on the original, untouched equation (nothing to wipe), and live the moment the student does anything. It wipes the stack and returns to the original equation with the choice showing; the stuck count survives. **Remove** "three failed attempts in a row offer Start over"; three red only adds "Try I'm stuck." to the line.
-5. **Substitution highlighting and drag onto x:** the operation about to happen is underlined in the accent colour and its result appears in the next line in the same colour (loop §3C); the typed value is dragged onto x first, with a tap alternative (loop §4).
+5. **Substitution highlighting and drag onto x:** the operation about to happen is bold in the accent colour, never underlined, and its result appears in the next line in the same colour (loop §3C); the typed value is dragged onto x first, with a tap alternative (loop §4).
 6. **"I'm stuck" rungs follow the loop:** Rung 1 shows the counters (with the number in front outlined and the question), Rung 2 is choosing a fraction and dealing, Rung 3 is guided. They restart at each new equation state. (The built Rung 1 was a hint without the counters.)
 7. **The fractions row reserves its space** and is greyed out (not hidden) while counters are dealt, so nothing reflows.
 8. **Check ✓ sits directly under the `x = [▁]` row,** as built. **The loop is updated to match** (the pilot spec said "beside").
@@ -210,6 +209,14 @@ The same scaffolds on a **forced path:** only **1/a** is accepted, the student p
 19. **"I'm stuck" at x alone opens the group diagram** on every rung and never blanks the stack (§5).
 20. **The choice prompt never changes** (§3B): the same words and two working buttons at every state, including after a partial move.
 21. **Run the loop's conformance checklist** on this card and report the results.
+
+**Added in 2.2 (from Karl's second test of the build; see `BUILD-BRIEF-DIVIDE-IT-2026-10-12-b.md`):**
+22. **The drag target is the x in the original equation at the top,** and the value visibly flies onto it before the check rows are written (§3B; loop §4).
+23. **No underline or bracket under any check row;** the step highlight is bold in the accent colour on the operation's characters only (§3B; loop §3C).
+24. **"I'm stuck" is merged to two rungs** on normal states (model-and-deal, then guided) (§5).
+25. **"I'm stuck" at x alone is merged to two rungs** (pile-and-deal, then guided); the student may type at any point (§5).
+26. **The scaffold picture stays after the fraction is applied,** until Next (§3C; loop §6).
+27. **The step in brief a's B2 (three rungs at x alone) is superseded** by item 25.
 
 ---
 

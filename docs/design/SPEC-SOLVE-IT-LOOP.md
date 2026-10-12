@@ -1,4 +1,4 @@
-# The Solve it loop: the shared structure every Solve it card follows  (Karl, 2026-10-12; revision 1.1; status: designed; 1.1 adds the conformance checklist, §3D-3E and the renderer rule after the first Divide it test)
+# The Solve it loop: the shared structure every Solve it card follows  (Karl, 2026-10-12; revision 1.2; status: designed; 1.1 added the conformance checklist, §3D-3E and the renderer rule; 1.2 changes the step highlight to bold (no underline), defines the drag target, and sets the scaffold rules: every rung gives something to do, and the picture stays until Next)
 
 **What this is.** One document for everything every Solve it card shares: the screen, the choice, the moves loop, the checks, the help row, the scaffolds and the generator rules. **Each card spec follows this document and says only what is specific to that card** (its move, levels, forms, slips, lights, scaffold pictures).
 
@@ -101,9 +101,9 @@ x is ALONE (after a move) ──► no choice: the x = [▁] row goes live ─�
 - **If a card fails the test, the fix is more folding, never smaller text.**
 
 ### 3C. Highlighting each step (new)
-- In every substitution and every simplification, **the operation about to happen is coloured and underlined in the line before; in the next line its result appears in the same colour, and the earlier highlight fades.** One pair at a time, so the eye follows one change down the stack.
+- In every substitution and every simplification, **the operation about to happen is coloured and bold in the line before; in the next line its result appears in the same colour, and the earlier highlight fades.** One pair at a time, so the eye follows one change down the stack.
 - **One operation per click**, in order-of-operations order, left to right on ties.
-- **Colour plus underline,** never colour alone (black-and-white print; colour-blind students).
+- **Colour plus bold, on exactly the characters of the operation,** never colour alone (black-and-white print; colour-blind students). **Never underline a whole row or equation, and never draw a line or bracket under a check row** (decided 2026-10-12, reversing the earlier "colour plus underline": in the first Divide it test the underline under the first check equation read like a division bar and was confusing and redundant).
 - **The accent colour must be unique:** not green or red (Balanced / Not balanced), not the blue of the icons, not the added-amount colour. Suggested: purple.
 
 ### 3D. The operation is blue wherever it appears (new in 1.1)
@@ -119,7 +119,7 @@ x is ALONE (after a move) ──► no choice: the x = [▁] row goes live ─�
 ## 4. Checking the work (substitution)
 
 - **Every answer is checked by substituting it back,** right or wrong, whichever path produced it. It is written in the work stack under the problem, never in the line.
-- **Before the clicks begin, the value is placed on x.** In **full-check levels** the student **drags the typed value onto x** in the stack (tap alternative: tap the value, then tap x). In **collapsed levels** it slides onto x automatically. (Proposed in design; see Open.)
+- **Before the clicks begin, the value is placed on the x of the equation being checked.** The line says **"Drag your answer onto the x in the original equation."** (tap alternative: "or tap your answer, then tap the x"). The **drop target is the x in the original equation row at the top of the stack** (for a wrong guess at a simplified state, the x in the current equation row), and it pulses blue. **On the drop, the value flies to that x and takes its place in that row** (blue, in parentheses when negative); the substituted equation is then written as the **first check row**, and the top row goes back to showing x, so the history stays. In **collapsed levels** the same animation plays automatically. A check that only writes a substituted line under the answer, with no visible link back to the equation, is a bug.
 - **Rendering rule (one shared renderer, with tests).** The first substitution line is the equation exactly as written, with every x replaced by the value, a **negative value in parentheses**, and a **coefficient written as ×**. Test cases: `3x = −12`, −4 → `3 × (−4) = −12` · `x − 6 = 9`, 15 → `15 − 6 = 9` · `−3x = 12`, −4 → `−3 × (−4) = 12` · `12 = −x`, −12 → `12 = −(−12)` · `7 = x + 3`, 4 → `7 = 4 + 3`. The renderer never drops the coefficient, never shows `× −4` without parentheses, and never substitutes into a different equation than the one named in §1B.
 - **Full check:** line by line, **one click per line** (a green Next each time), with the step highlighting of §3C, ending in the green or red mark.
 - **Collapsed check:** the first substitution line, then the final `✓ Balanced` line (the middle arithmetic skipped). **A wrong value always shows the full check at every level,** because the steps are the evidence of where it broke.
@@ -161,6 +161,8 @@ The same scaffolds on a **forced path**: only the correct move is accepted, and 
 - **The scaffold redraws the current state exactly,** including any moves already made (the unsimplified side shows as separate groups).
 - **A scaffold stays on until the state ends.** The next state starts bare again.
 - **A scaffold never clears or blanks the work stack** (new in 1.1). It draws in its reserved area; the equation and every row stay on screen. A scaffold that makes the stack disappear and reappear is a bug.
+- **Every rung gives the student something to do** (new in 1.2). A rung that only shows a picture is not helpful; **merge it into the next rung** so the first click already lets the student act (deal the counters, flip a side). A card spec may therefore have **two rungs instead of three** (a merged "model it and do it", then guided). The student may **type the answer at any point** in any rung.
+- **The scaffold picture stays after the move is applied** (new in 1.2). Applying the move (Go) must never delete the picture. It stays on screen, showing the result, until the student clicks **Next**, which folds the move. The student likely still needs it.
 - **Every rung that has a picture shows the picture.** "I'm stuck" must open the card's diagram on every rung it defines, at every state, **including a state where x is alone but the other side is still an unevaluated expression** (`x = ⅓(6)`). The card spec defines that diagram. A card may not answer "I'm stuck" there with text only.
 - **Scaffold pictures are card-specific** (the seesaw for Add, dealing groups for Divide, counters turning to opposites for Flip it). A card spec says where its scaffold picture departs from the default (e.g., the dealing scaffold never deals into an opposite box).
 - **Numeric levels** (§7) offer neither I'm stuck nor Teach me.
@@ -217,8 +219,8 @@ The conventions built on the one-step card must hold on **every card and every l
 1. **One prompt.** At every state with x not alone, the line shows the same prompt and the same two working buttons (§1A).
 2. **Work shown.** Every operation writes its rows with what each quantity becomes, on every level, numeric levels and quiz evidence included (§3E).
 3. **Operation in blue** in prompts, work-stack rows and evidence (§3D).
-4. **Substitution renders correctly** (the renderer rule and its test cases, §4), and uses the right equation (§1B).
-5. **Scaffolds show pictures and never blank the stack,** at every state including x alone with an unevaluated side (§6).
+4. **Substitution renders correctly** (the renderer rule and its test cases, §4), uses the right equation (§1B), and **the value visibly lands on the x of that equation** with no underline under any check row (§3C, §4).
+5. **Scaffolds show pictures, never blank the stack, and every rung gives the student something to do,** at every state including x alone with an unevaluated side; **the picture stays after the move is applied, until Next** (§6).
 6. **Layout stable:** reserved space, no reflow, no appearing or hiding rows (§2).
 7. **Start over, Undo and folding** behave as in §1C, §1D and §3A.
 8. **One highlighted target at a time;** Check, Go, Undo and Next follow §2.

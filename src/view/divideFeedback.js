@@ -26,7 +26,7 @@ const M = {
   },
   dFail3: (p) => `${p.frac} doesn't split evenly. Press Undo and try another fraction. Try I’m stuck.`,
   // I'm stuck at a state with x not alone: the counters (the number in front outlined), then choosing and dealing, then guided
-  dModel: (p) => `Here are the ${p.boxes} boxes and the ${p.size} counters. What fraction of both sides leaves one box? Do you know x now?`,
+  dModel: (p) => `${p.boxes} boxes and ${p.size} counters. What fraction of both sides leaves one box? Choose it, share the counters, and keep one group.`,
   dStuck2: () => 'Choose a fraction of both sides: the boxes and the counters split into that many groups. Then share out every counter and keep one group.',
   dDealPrompt: (p) => `${p.boxes} boxes make ${p.n} groups of ${p.per}. Now share the ${p.size} counters into ${p.n} equal groups: tap a group to give it one counter.`,
   dDealt: (p) => (p.holds ? `${p.got} of ${p.total} shared. Groups hold ${p.holds}.` : `${p.got} of ${p.total} shared.`),
@@ -38,7 +38,7 @@ const M = {
   dStuckGuided: (p) => `${p.boxes} boxes: take ${p.frac} of both sides to leave one box. Tap ${p.frac}, then share out the counters and keep one group.`,
   dTeach: (p) => `Step by step: ${p.boxes} boxes, so take ${p.frac} of both sides. Tap ${p.frac}.`,
   // I'm stuck at x alone with an unevaluated side (x = ⅓(6)): the diagram of the right side, on every rung
-  dDiag1: (p) => `What is ${p.frac} of ${p.size}? Share the ${p.size} into ${p.n} equal groups.`,
+  dDiag1: (p) => `What is ${p.frac} of ${p.val}? Share the counters into ${p.n} equal groups: tap a group to give it a counter.`,
   dDiag2: (p) => `Share the ${p.size} counters into ${p.n} equal groups: tap a group to give it a counter. Then keep 1 of the ${p.n} groups.`,
   dDiag3: (p) => `The counters are already in ${p.n} equal groups, with 1 of the ${p.n} kept. Count it, and type what x is.`,
   dDiagKept: (p) => `You kept 1 of the groups: that is ${p.frac} of it. Count what is in it, and type x.`,

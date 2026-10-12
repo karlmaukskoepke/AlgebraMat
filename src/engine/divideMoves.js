@@ -43,7 +43,7 @@ const evenGroups = (groups) => groups.every((c) => c === groups[0]);
 // At x alone with an unevaluated side (`x = ⅓(6)`): the diagram of the right side only, on every rung (spec §5).
 function diagOf(board) {
   const t = board.right[0];
-  return { n: t.n, size: Math.min(36, Math.abs(t.inner[0].v)), neg: t.inner[0].v < 0, groups: null, kept: null, guided: false };
+  return { n: t.n, size: Math.min(36, Math.abs(t.inner[0].v)), neg: t.inner[0].v < 0, val: signed(t.inner[0].v), groups: null, kept: null, guided: false };
 }
 
 const EARLIER = ['add', 'cross', 'trade'];                                      // the moves of earlier cards (Add to both sides)
@@ -74,15 +74,15 @@ const loop = createSolveLoop({
   alone: xAlone,
   noLights: () => ({ smaller: 'off', onebox: 'off' }),
   params: (s) => ({ a: s.problem.a, b: signed(s.problem.b) }),
-  extra: () => ({ fail: null, deal: null, diag: null, taught: 0 }),
-  snapshotExtra: () => ({ fail: null, deal: null, diag: null }),
-  resetState: (s) => { s.fail = null; s.deal = null; s.diag = null; },
+  extra: () => ({ fail: null, deal: null, diag: null, pic: null, taught: 0 }),
+  snapshotExtra: () => ({ fail: null, deal: null, diag: null, pic: null }),
+  resetState: (s) => { s.fail = null; s.deal = null; s.diag = null; s.pic = null; },
   collapse: () => false,                                                          // a single-step card: the check never collapses
   movePromptKey: () => 'dMovePrompt',
   mustMoveKey: () => 'aMustMove',
   undoKey: () => 'dUndone',
-  answerBlocked: (s) => Boolean(s.deal),
-  answerOpen: (s) => s.scaffold && !s.menu && !s.deal && !s.fail && !s.diag,      // the first rung is a reminder: "Do you know x now?"
+  // with the counters up the student may type the answer at any point, and Check works after any deal (loop §6, rev 1.2)
+  answerOpen: (s) => s.scaffold,
   tag: (p, typed) => tagDivide(p, typed),
   slip: (s, typed, tag) => {
     const p = s.problem;
@@ -158,8 +158,9 @@ const loop = createSolveLoop({
         if (!evenGroups(d.groups)) return say(s, 'dUneven', { holds: d.groups.join(', ') }, true);
         if (s.diag) { d.kept = gi; return say(s, 'dDiagKept', { frac: fractionText(d.n) }); }
         const n = s.deal.n;
+        const pic = { n, boxes: coefOf(s.board), size: pileSize(s.board), neg: s.board.right[0].v < 0, groups: [...s.deal.groups], kept: gi };
         s.deal = null;
-        return commitFraction(s, n, api);                                            // keeping one group is taking 1/n of both sides
+        return commitFraction(s, n, api, pic);                                       // keeping one group is taking 1/n of both sides; the picture stays until Next
       }
       default:
         return undefined;
@@ -167,31 +168,23 @@ const loop = createSolveLoop({
   },
 
   // ----- the help ladder: rungs restart at every equation state -----
+  // two rungs (rev 1.2: every rung gives the student something to do, so the picture-only first rung is merged into the next)
   rungs: [
-    (s) => {                                                                          // 1. Model it
-      if (xAlone(s.board)) { s.scaffold = true; s.diag = diagOf(s.board); return say(s, 'dDiag1', { frac: fractionText(s.diag.n), size: s.diag.size, n: s.diag.n }); }
+    (s) => {                                                                          // 1. Model it and deal it
       s.scaffold = true;
+      if (xAlone(s.board)) {                                                          // x = ⅓(−18): the counters in a pile, ready to deal at once
+        s.diag = diagOf(s.board);
+        s.diag.groups = Array(s.diag.n).fill(0);
+        return say(s, 'dDiag1', { frac: fractionText(s.diag.n), val: s.diag.val, n: s.diag.n });
+      }
+      s.menu = 'fraction';                                                            // the fractions are live: choose one, deal the counters, keep a group
       s.hint = { kind: 'coef' };
       if (!s.supportsShown.includes('model')) s.supportsShown.push('model');
       return say(s, 'dModel', { boxes: coefOf(s.board), size: pileSize(s.board) });
     },
-    (s) => {                                                                          // 2. Choose the move / do it
-      if (xAlone(s.board)) {
-        s.scaffold = true;
-        s.diag = { ...(s.diag ?? diagOf(s.board)) };
-        s.diag.groups = Array(s.diag.n).fill(0);
-        s.diag.kept = null;
-        return say(s, 'dDiag2', { frac: fractionText(s.diag.n), size: s.diag.size, n: s.diag.n });
-      }
+    (s) => {                                                                          // 2. Guided
       s.scaffold = true;
-      s.menu = 'fraction';
-      s.hint = null;
-      if (!s.supportsShown.includes('choose')) s.supportsShown.push('choose');
-      return say(s, 'dStuck2', { boxes: coefOf(s.board) });
-    },
-    (s) => {                                                                          // 3. Guided
       if (xAlone(s.board)) {
-        s.scaffold = true;
         s.diag = { ...(s.diag ?? diagOf(s.board)) };
         s.diag.groups = Array(s.diag.n).fill(s.diag.size / s.diag.n);
         s.diag.kept = 0;
@@ -200,7 +193,6 @@ const loop = createSolveLoop({
         return say(s, 'dDiag3', { frac: fractionText(s.diag.n), n: s.diag.n });
       }
       const a = coefOf(s.board);
-      s.scaffold = true;
       s.menu = 'fraction';
       s.hint = { kind: 'fraction', n: a };
       if (!s.supportsShown.includes('guided')) s.supportsShown.push('guided');
@@ -228,7 +220,7 @@ function sayDealt(s, d, total) {
 
 // A move that splits both sides is committed: the work row `⅓(3x) = ⅓(−12)` and the new equation. Smaller numbers goes green with it,
 // and One box when x is alone. A partial move leaves the choice (the same prompt) and folds when the student acts on it.
-function commitFraction(s, n, api) {
+function commitFraction(s, n, api, pic = null) {
   const { work, next } = applyFraction(s.board, n);
   api.commit(s, {
     rows: [{ type: 'work', board: work }, { type: 'eq', board: next }], next, label: { n }, helpful: true,
@@ -237,6 +229,7 @@ function commitFraction(s, n, api) {
   s.fail = null;
   s.deal = null;
   s.diag = null;
+  s.pic = pic;                                                                     // what the student made stays on screen until Next folds the move
   return say(s, xAlone(next) ? 'aSolvedBoard' : 'aChoose');
 }
 

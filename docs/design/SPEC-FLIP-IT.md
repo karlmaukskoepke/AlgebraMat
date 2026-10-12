@@ -1,6 +1,6 @@
 # Flip it: solve equations with an opposite box by flipping everything  (Karl, 2026-10-12; revision 1.0; status: designed)
 
-**Follows `SPEC-SOLVE-IT-LOOP.md` rev 1.1** (including its conformance checklist). Everything shared (the screen, the guess-or-move choice at every state, the forced-move rule, substitution checks, Undo and Start over, the work stack and folding, the help row, scaffolds, generator rules) is defined there and wins any conflict. This spec states only what is specific to Flip it.
+**Follows `SPEC-SOLVE-IT-LOOP.md` rev 1.2** (including its conformance checklist). Everything shared (the screen, the guess-or-move choice at every state, the forced-move rule, substitution checks, Undo and Start over, the work stack and folding, the help row, scaffolds, generator rules) is defined there and wins any conflict. This spec states only what is specific to Flip it.
 
 Section: Solve it.   Prerequisite card(s): **Divide it** (L4 uses Take a fraction of both sides). Old levels: old One-step `−x = b` maps here (Claude Code must read the real old definitions; see §8).
 
@@ -109,9 +109,8 @@ The screen shows numbers only, standing on a seesaw as groups of counters, with 
 All supports follow the loop (§6). Specific to this card:
 
 ### "I'm stuck" (one rung per click; each click = +1 stuck count; rungs restart at each new equation state)
-- **Rung 1: Model it.** The seesaw appears **pre-built** with the equation standing on it (opposite boxes drawn as opposite boxes, the other side a pile of counters), the balance word on. The opposite box is highlighted: "This box is opposite. What would make it a regular box?" It ends with "Do you know x now?" and the pad. **Pre-built at every level of this card** (the new idea is the flip, not building the picture).
-- **Rung 2: Choose the move.** Flip everything opens in its **two-action form**: the student flips the left side (the box turns regular, the beam tips, "Unbalanced"), then flips the right side (the counters turn to their opposites, the beam levels). Ends with the pad.
-- **Rung 3: Guided.** The flip is pre-selected and only the next target is highlighted. On L4 and up, once the flip is done, the next needed move is **Take a fraction**: its button is highlighted and the student deals and keeps one group.
+- **Rung 1: Model it and flip it** (merged per the loop's rule that every rung gives the student something to do, loop §6). The seesaw appears **pre-built** with the equation standing on it (opposite boxes drawn as opposite boxes, the other side a pile of counters), the balance word on, and the opposite box highlighted: "This box is opposite. What would make it a regular box?" **Flip everything opens at once in its two-action form:** the student flips the left side (the box turns regular, the beam tips, "Unbalanced"), then flips the right side (the counters turn to their opposites, the beam levels). The student may type the answer at any point. **Pre-built at every level of this card** (the new idea is the flip, not building the picture). The picture stays after the flip, until Next.
+- **Rung 2: Guided.** The flip is pre-selected and only the next target is highlighted. On L4 and up, once the flip is done, the next needed move is **Take a fraction**: its button is highlighted and the student deals and keeps one group.
 - **After every scaffold the choice returns:** guess, type the value, or try a move. I'm stuck is always there for the next rung.
 - **On a state reached by taking the fraction first** (`−x = 4`): the scaffold redraws the opposite box against the pile, and Rung 2 flips it. **The dealing scaffold never deals into an opposite box;** it always flips the boxes first.
 - **x on the right** (`12 = −x`): the highlight lands on the opposite box on the right side. Nothing else changes.
@@ -188,4 +187,5 @@ Reuse the printed notes' words: **box, opposite box, counters, border, add the o
 7. **Smaller numbers not gating Solved for x** (§3E) is my reading of "Solved for x goes green when all lights are met," because on `−x = b` the numbers can't get smaller. Confirm.
 8. **Teacher data scope** is as in the loop (stuck and Teach me counts only).
 9. **Trade places on this card:** live in later levels (L5-L6, with x on the right), or greyed throughout? Not decided.
+11. **Merged rungs (§4):** the "I'm stuck" ladder here now has two rungs, by analogy with the Divide it feedback ("the first scaffold wasn't helpful; merge it with the second"). Confirm, or restore the three-rung ladder.
 10. **Take a fraction's dealing scaffold** is now defined by `SPEC-DIVIDE-IT.md` §3C (rev 2.0); this card reuses it and adds only "never deal into an opposite box". This closes open item 2.
