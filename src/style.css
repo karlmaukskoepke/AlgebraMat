@@ -2718,3 +2718,46 @@ body {
 .ab-simplify { margin: 10px 0 0; padding: 8px 10px; border: 2px dashed #b5368c; border-radius: 10px; background: #fbe3f1; font: 700 17px 'Lexend', system-ui, sans-serif; }
 .ab-move:disabled { opacity: 0.4; }
 .mat-wrap:has(.ab-game) { align-items: flex-start; }
+
+/* ---------- the balance carries the models; Undo (red) and Go / Continue (green) sit under the equation ---------- */
+.addboth-mat .ab-rot { transform-box: view-box; }
+.ab-actions { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 4px 4% 0; }
+.ab-actions .btn { min-width: 150px; min-height: 52px; font-size: 20px; font-weight: 800; }
+.btn-go { background: #2f9e5f; border-color: #1b6e3a; color: #fff; }
+.btn-go:disabled { background: #cfe9da; border-color: #9fcdb3; color: #fff; opacity: 1; }
+.btn-undo { background: #fff; border: 3px solid #c0392b; color: #a3281b; }
+.btn-undo:hover { background: #fdebe8; }
+
+/* ---------- moves paired with their goals; the quiz; the typing line ---------- */
+.ab-game { grid-template-columns: minmax(0, 1fr) 340px; }
+.ab-grid { display: flex; flex-direction: column; gap: 10px; }
+.ab-grow { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; align-items: center; }
+.ab-grow .ab-goals { margin: 0; padding: 0; border: 0; min-width: 8.5rem; }
+.ab-grow .ab-goals:empty { display: none; }
+.ab-grow:has(.ab-goals:empty) { grid-template-columns: 1fr; }
+@media (max-width: 760px) { .ab-game { grid-template-columns: 1fr; } .ab-grow { grid-template-columns: 1fr; gap: 6px; } .ab-grow .ab-goals { flex-direction: row; flex-wrap: wrap; gap: 4px 16px; } }
+.ab-blank.is-empty { border-bottom: 0; position: relative; min-width: 3ch; }
+.ab-blank.is-empty::after { content: ''; position: absolute; left: 4px; right: 4px; bottom: 2px; border-bottom: 3px solid var(--ink); animation: ab-blink 1s steps(2, start) infinite; }
+@keyframes ab-blink { to { visibility: hidden; } }
+@media (prefers-reduced-motion: reduce) { .ab-blank.is-empty::after { animation: none; } }
+.ab-quiz { display: flex; flex-direction: column; align-items: center; gap: 10px; width: 100%; }
+.ab-quiz svg { width: 100%; height: auto; }
+.ab-question { margin: 6px 0 0; text-align: center; font: 800 28px/1.25 'Lexend', system-ui, sans-serif; color: var(--ink); }
+.ab-answers { display: flex; gap: 14px; flex-wrap: wrap; justify-content: center; width: 100%; }
+.ab-answer { flex: 1 1 220px; min-height: 64px; font-size: 22px; font-weight: 800; border-width: 3px; }
+.ab-typing { margin: 6px 0 8px; display: flex; align-items: center; justify-content: center; gap: 10px; font: 700 22px 'Lexend', system-ui, sans-serif; color: var(--ink); }
+.ab-typed { min-width: 4.5ch; padding: 2px 12px; text-align: center; border: 3px solid var(--ink); border-radius: 10px; background: #fff; font-weight: 800; }
+.ab-typed.is-empty { position: relative; }
+.ab-typed.is-empty::after { content: ''; position: absolute; left: 14px; right: 14px; bottom: 5px; border-bottom: 3px solid var(--ink); animation: ab-blink 1s steps(2, start) infinite; }
+.ab-game { grid-template-columns: minmax(0, 1fr) 380px; }
+.mat-wrap:has(.ab-game) { flex: 0 0 auto; align-items: flex-start; }
+.ab-boardwrap { max-width: calc(48vh * var(--ar, 1.1)); }
+.ab-move { font-size: 17px; }
+@media (max-width: 760px) { .ab-boardwrap { max-width: none; } }
+.ab-move { white-space: normal; line-height: 1.2; padding: 6px 10px; }
+.ab-grow .ab-goals { min-width: 7.2rem; gap: 6px; }
+.ab-grow .ab-goal { font-size: 16px; }
+.ab-grow .ab-checkbox { width: 24px; height: 24px; font-size: 16px; border-width: 2.5px; }
+.ab-grow { grid-template-columns: minmax(0, 1fr) 7.6rem; }
+@media (max-width: 760px) { .ab-grow { grid-template-columns: 1fr; } }
+@media (max-width: 760px) { .ab-game { grid-template-columns: 1fr; } }

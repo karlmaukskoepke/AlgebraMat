@@ -55,3 +55,10 @@ The Mat frame (balance and seesaw on the dashed border, the Balancing moves pane
 5. Save code, migration, diagnostic (one L2-type, one L4-type, one L5-type), log fields, register on Solve it.
 
 I'd start this after the Add to both sides tutorials and save code are in, since they share the tutorial store and the v13 layout.
+
+## 7. Karl's answers (2026-10-12)
+
+1. **L4–L5 symbols.** Tapping `× ⅓` runs the whole move and shows both whole sides in parentheses with the fraction outside: `⅓(3x) = ⅓(−12)`. A fraction that doesn't split evenly shows its failed picture, and **Undo must be readily available**. Undo (red) and Continue/Go (green) sit under the equation, on the left and right, as on Add to both sides.
+2. **`4x` at L2–L3.** `½` is allowed (it is legal and doesn't finish).
+3. **The balance carries the models.** The boxes and counters stand on the seesaw at the top, so a move shows up on the left or right of the balance (built that way for Add to both sides; Divide it reuses it).
+4. **The side panel pairs each move with its goals** (a green, red or grey checkbox beside the move that works toward it). Divide it adds its fraction buttons there, each with its light.
