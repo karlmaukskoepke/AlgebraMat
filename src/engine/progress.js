@@ -8,12 +8,18 @@ export const PROGRESS_VERSION = 1;
 export function newProgress(packs) {
   const out = { v: PROGRESS_VERSION, packs: {} };
   for (const p of packs) {
-    if (p.levels && !p.comingSoon) out.packs[p.id] = { levels: Array(p.levels).fill(false) };
+    if (p.levels && !p.comingSoon) {
+      out.packs[p.id] = { levels: Array(p.levels).fill(false) };
+      // A card that shows only its later levels (One-step equations, while the new cards replace its first ones) opens at
+      // `first`. The saved levels keep their own numbers, so nothing in a save code or on the class sheet is renumbered.
+      if (p.firstLevel > 1) out.packs[p.id].first = p.firstLevel;
+    }
   }
   return out;
 }
 
 const levelsOf = (progress, packId) => progress.packs[packId]?.levels ?? [];
+const firstOf = (progress, packId) => progress.packs[packId]?.first ?? 1;
 
 export const isLevelDone = (progress, packId, level) => levelsOf(progress, packId)[level - 1] === true;
 
@@ -22,7 +28,9 @@ export const isLevelDone = (progress, packId, level) => levelsOf(progress, packI
 export function isLevelUnlocked(progress, packId, level) {
   const levels = levelsOf(progress, packId);
   if (level < 1 || level > levels.length) return false;
-  return level === 1 || levels[level - 2] === true || level <= (progress.packs[packId]?.open ?? 0);
+  const first = firstOf(progress, packId);
+  if (level < first) return false;
+  return level === first || levels[level - 2] === true || level <= (progress.packs[packId]?.open ?? 0);
 }
 
 // The diagnostic opens levels up to `level` in a pack (never closing any that were already open).
@@ -35,8 +43,11 @@ export function openLevels(progress, packId, level) {
   return out;
 }
 
+// How many levels are finished in all (progress only ever grows, so a save that lowers it is a bug worth a backup).
+export const doneCount = (progress) => Object.values(progress?.packs ?? {}).reduce((n, e) => n + (e.levels ?? []).filter((d) => d === true).length, 0);
+
 export function isPackComplete(progress, packId) {
-  const levels = levelsOf(progress, packId);
+  const levels = levelsOf(progress, packId).slice(firstOf(progress, packId) - 1);
   return levels.length > 0 && levels.every(Boolean);
 }
 
@@ -51,7 +62,8 @@ export function completeLevel(progress, packId, level) {
 // The level to offer next: the first open level not yet done, or null if all are done.
 export function nextLevel(progress, packId) {
   const levels = levelsOf(progress, packId);
-  const i = levels.findIndex((done) => !done);
+  const first = firstOf(progress, packId);
+  const i = levels.findIndex((done, k) => k >= first - 1 && !done);
   return i === -1 ? null : i + 1;
 }
 
@@ -77,7 +89,34 @@ export function normalizeProgress(raw, packs) {
     entry.levels = entry.levels.map((_, i) => levels[i] === true);
     if (Number.isInteger(open) && open > 1) entry.open = Math.min(open, entry.levels.length);
   }
-  return out;
+  return withLegacyCredit(out);
+}
+
+// Add to both sides (revision 2.2) replaces One-step equations' first two levels and Switch sides' first four, so a student who
+// finished those has not lost anything (Karl, 2026-10-12): L2 ← One-step L1; L3 ← One-step L2; L4 ← Switch sides L1 and L2;
+// L5 ← Switch sides L4; L6 ← Switch sides L3 and L4. The numeric Level 1 is new and nothing earns it, so it is left open but
+// not required. The old cards' own levels keep their numbers (they are still saved, in codes and on the class sheet), so this
+// is worked out each time progress is loaded or merged, and it only ever adds.
+const done = (p, id, level) => p.packs[id]?.levels?.[level - 1] === true;
+const LEGACY_ADD_BOTH = [
+  null,
+  (p) => done(p, 'one-step', 1),
+  (p) => done(p, 'one-step', 2),
+  (p) => done(p, 'switch', 1) && done(p, 'switch', 2),
+  (p) => done(p, 'switch', 4),
+  (p) => done(p, 'switch', 3) && done(p, 'switch', 4),
+];
+
+export function withLegacyCredit(progress) {
+  const entry = progress.packs['add-both'];
+  if (!entry) return progress;
+  let top = 0;
+  LEGACY_ADD_BOTH.forEach((rule, i) => {
+    if (rule && rule(progress)) entry.levels[i] = true;
+    if (entry.levels[i]) top = i + 1;
+  });
+  if (top >= 2) entry.open = Math.max(entry.open ?? 0, top);
+  return progress;
 }
 
 // Union of two progress objects: a level finished in either stays finished.
@@ -110,8 +149,13 @@ export function mergeProgress(a, b) {
 //   v10: 10 data symbols (about 49.5 bits): + One-step equations (8, room for its later levels), 49 bits in use
 //   v11: 12 data symbols (about 59.4 bits): + Two-step equations (8, room for one more level), 57 bits in use
 //   v12: 13 data symbols (about 64.4 bits): + Switch sides (6), 63 bits in use
+//   v13: 14 data symbols (about 69.4 bits): + Add to both sides (6), 69 bits in use
 //
-// New codes are always v12; older codes (written down earlier) still work, and a code from before Combine it's
+// The data is a whole number of up to 69 bits, so it is worked out with BigInt: a plain JavaScript number holds only 53 bits
+// exactly, and v11 and v12 codes (57 and 63 bits) were written with plain numbers, which rounded the low bits (Count it and
+// Build it's levels). Those codes can still be read, but what they carry for those cards may be wrong; v13 is exact.
+//
+// New codes are always v13; older codes (written down earlier) still work, and a code from before Combine it's
 // mixed round (or Boxes & Circles' read-the-model round) brings its levels back in the right places (see
 // normalizeProgress). (Group It's pack id is still `lasso`.) v8 uses 36 of about 39.6 bits.
 
@@ -190,31 +234,45 @@ const LAYOUTS = {
       { id: 'value', levels: 5 }, { id: 'one-step', levels: 8 }, { id: 'two-step', levels: 8 }, { id: 'switch', levels: 6 },
     ],
   },
+  // Add to both sides, 6 levels: 69 of about 69.4 bits. The old cards keep their places (One-step equations and Two-step still
+  // play, and Switch sides' last levels are for the two-step card that replaces it); the old ones retire when theirs ships.
+  13: {
+    data: 14,
+    packs: [
+      { id: 'flipit', levels: 5 }, { id: 'lasso', levels: 7 }, { id: 'boxes', levels: 6 },
+      { id: 'groups-of-terms', levels: 8 }, { id: 'combineit', levels: 5 }, { id: 'distribute-combine', levels: 5 },
+      { id: 'value', levels: 5 }, { id: 'one-step', levels: 8 }, { id: 'two-step', levels: 8 }, { id: 'switch', levels: 6 },
+      { id: 'add-both', levels: 6 },
+    ],
+  },
 };
-export const CODE_VERSION = 12;
+export const CODE_VERSION = 13;
 
 // Weighted sum mod 31. Weights 2, 3, 4, … are all nonzero mod 31 and differ
 // by 1 between neighbors, so any single typo or neighbor swap is caught.
 const checksum = (values) => values.reduce((sum, v, i) => sum + (i + 2) * v, 0) % BASE;
 
+const BIG_BASE = BigInt(BASE);
+
 function toDigits(value, count) {
   const out = [];
+  let v = value;
   for (let i = 0; i < count; i++) {
-    out.unshift(value % BASE);
-    value = Math.floor(value / BASE);
+    out.unshift(Number(v % BIG_BASE));
+    v /= BIG_BASE;
   }
   return out;
 }
 
-const fromDigits = (digits) => digits.reduce((v, x) => v * BASE + x, 0);
+const fromDigits = (digits) => digits.reduce((v, x) => v * BIG_BASE + BigInt(x), 0n);
 
 export function encodeProgress(progress, version = CODE_VERSION) {
   const layout = LAYOUTS[version];
-  let bits = 0;
+  let bits = 0n;
   let shift = 0;
   for (const { id, levels } of layout.packs) {
     const done = progress.packs[id]?.levels ?? [];
-    for (let i = 0; i < levels; i++) if (done[i] === true) bits += 2 ** (shift + i);
+    for (let i = 0; i < levels; i++) if (done[i] === true) bits += 1n << BigInt(shift + i);
     shift += levels;
   }
   const values = [version, ...toDigits(bits, layout.data)];
@@ -242,9 +300,9 @@ export function decodeProgress(code, packs) {
   const raw = { packs: {} };
   let shift = 0;
   for (const { id, levels } of layout.packs) {
-    raw.packs[id] = { levels: Array.from({ length: levels }, (_, i) => Math.floor(bits / 2 ** (shift + i)) % 2 === 1) };
+    raw.packs[id] = { levels: Array.from({ length: levels }, (_, i) => ((bits >> BigInt(shift + i)) & 1n) === 1n) };
     shift += levels;
   }
-  if (bits >= 2 ** shift) return null; // bits set for packs this version doesn't have
+  if (bits >= 1n << BigInt(shift)) return null; // bits set for packs this version doesn't have
   return normalizeProgress(raw, packs);
 }

@@ -6,6 +6,7 @@ import { PACKS, packById } from '../packs/index.js';
 import { CARDS, cardIdFor } from './lightCards.js';
 import { typeInto, isTyping } from './entry.js';
 import { openLevels } from './progress.js';
+import { isBattle } from './addBoth.js';
 
 // Adding and subtracting first, then groups, then the algebra cards (the pack map's order). Two levels each: one
 // early, one later. Each card belongs to a section of the home screen (Count it, Build it), which has its own
@@ -20,6 +21,14 @@ export const PROBES = [
   { pack: 'value', levels: [1, 3], section: 'build' },
   { pack: 'one-step', levels: [2, 4], section: 'solve' },   // x − a = b, and x / a = b
   { pack: 'two-step', levels: [2, 5], section: 'solve' },   // ax − b = c, and b − ax = c (a negative coefficient)
+  // Add to both sides (SPEC-ADD-TO-BOTH-SIDES.md §8): an x − a = b Battle (level 3), then two of the bigger level 6, one with x on
+  // the left and one with x on the right. L3 wrong opens L1–L3; L3 right and a level-6 wrong, L1–L5; both level-6 right, all six.
+  // (Last in the list, so a Solve it diagnostic saved before it was added carries on with these three.)
+  {
+    pack: 'add-both', levels: [3, 6, 6], section: 'solve',
+    pick: [(set) => set.find((p) => p.form === 'x-a' && isBattle(p)), (set) => set.find((p) => !p.mirror), (set) => set.find((p) => p.mirror)],
+    rec: ([easy, left, right]) => (!easy ? 3 : left && right ? 6 : 5),
+  },
 ];
 
 // The sections that have a diagnostic ('all' is every probe, in order).
@@ -28,8 +37,11 @@ export const probesOf = (section = 'all') => PROBES.filter((p) => section === 'a
 
 // The problems for a seed: [{ pack, level, problem }], in order.
 export function diagnosticItems(seed, section = 'all') {
-  return PROBES.flatMap(({ pack, levels, section: of }, p) => (section === 'all' || of === section
-    ? levels.map((level, i) => ({ pack, level, problem: packById(pack).generate(level, (seed + p * 7 + i * 13) >>> 0)[0] }))
+  return PROBES.flatMap(({ pack, levels, section: of, pick }, p) => (section === 'all' || of === section
+    ? levels.map((level, i) => {
+      const set = packById(pack).generate(level, (seed + p * 7 + i * 13) >>> 0);
+      return { pack, level, problem: pick?.[i]?.(set) ?? set[0] };
+    })
     : []));
 }
 
@@ -70,11 +82,11 @@ export function reduceDiagnostic(state, action, items = diagnosticItems(state.se
 // How each card went, and the level to start at: both right → the level after the harder one; the easier one right →
 // the level after it; otherwise from the start.
 export function readout(seed, answers, items = diagnosticItems(seed), section = 'all') {
-  return probesOf(section).map(({ pack, levels }) => {
+  return probesOf(section).map(({ pack, levels, rec: recOf }) => {
     const mine = items.map((it, i) => ({ it, a: answers[i], i })).filter((x) => x.it.pack === pack);
     const right = mine.map((x) => isRight(x.it, x.a?.typed));
     const total = packById(pack).levels;
-    const rec = right.every(Boolean) ? Math.min(total, levels[1] + 1)
+    const rec = recOf ? recOf(right) : right.every(Boolean) ? Math.min(total, levels[1] + 1)
       : right[0] ? Math.min(total, levels[0] + 1)
         : right[1] ? levels[0] : 1;
     const standing = right.every(Boolean) ? 'strong' : right.some(Boolean) ? 'growing' : 'start';

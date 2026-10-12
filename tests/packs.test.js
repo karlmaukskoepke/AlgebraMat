@@ -7,8 +7,8 @@ describe('pack list', () => {
     for (const p of PACKS) expect(p.subtitle, p.id).toMatch(/\w/);
   });
 
-  it('opens Combine it, Flip It, Group It, Boxes & Circles, Groups of Terms and Distribute, then combine, Value it, One-step equations, Switch sides and Two-step equations, in order', () => {
-    expect(PACKS.filter((p) => !p.comingSoon).map((p) => p.id)).toEqual(['combineit', 'flipit', 'lasso', 'boxes', 'groups-of-terms', 'distribute-combine', 'value', 'one-step', 'switch', 'two-step']);
+  it('opens Combine it, Flip It, Group It, Boxes & Circles, Groups of Terms and Distribute, then combine, Value it, Add to both sides, One-step equations, Switch sides (retired) and Two-step equations, in order', () => {
+    expect(PACKS.filter((p) => !p.comingSoon).map((p) => p.id)).toEqual(['combineit', 'flipit', 'lasso', 'boxes', 'groups-of-terms', 'distribute-combine', 'value', 'add-both', 'one-step', 'switch', 'two-step']);
     expect(PACKS.filter((p) => p.comingSoon).map((p) => p.id)).toEqual(['multi-step']);
     expect(packById('distribute-combine')).toMatchObject({ levels: 5 });
   });
@@ -23,7 +23,7 @@ describe('pack list', () => {
   it('keeps coming-soon packs out of progress and save codes', () => {
     const soon = { id: 'later', title: 'Later', subtitle: '', levels: 3, comingSoon: true };   // nothing is coming soon right now
     const fresh = newProgress([...PACKS, soon]);
-    expect(Object.keys(fresh.packs)).toEqual(['combineit', 'flipit', 'lasso', 'boxes', 'groups-of-terms', 'distribute-combine', 'value', 'one-step', 'switch', 'two-step']);
+    expect(Object.keys(fresh.packs)).toEqual(['combineit', 'flipit', 'lasso', 'boxes', 'groups-of-terms', 'distribute-combine', 'value', 'add-both', 'one-step', 'switch', 'two-step']);
     expect(isLevelUnlocked(fresh, 'lasso', 1)).toBe(true);
     let p = fresh;
     for (let l = 1; l <= 4; l++) p = completeLevel(p, 'flipit', l);
@@ -43,7 +43,7 @@ describe('the home screen\'s sections', () => {
     const { SECTIONS, sectionOf, sectionById } = await import('../src/packs/index.js');
     expect(SECTIONS.map((s) => s.title)).toEqual(['Count it', 'Build it', 'Solve it']);
     const ids = SECTIONS.flatMap((s) => s.packs);
-    expect(ids.sort()).toEqual(PACKS.map((p) => p.id).sort());
+    expect(ids.sort()).toEqual(PACKS.filter((p) => !p.retired).map((p) => p.id).sort());      // Switch sides is retired: saved, not shown
     expect(new Set(ids).size).toBe(ids.length);
     expect(sectionOf('flipit').id).toBe('count');
     expect(sectionOf('value').id).toBe('build');

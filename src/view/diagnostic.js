@@ -3,7 +3,7 @@
 
 import { h, buildPad, bindKeys, shown } from './quiz.js';
 import { itemText, itemPad, itemLead, STANDING, packTitle } from '../engine/diagnostic.js';
-import { packById, sectionById } from '../packs/index.js';
+import { packById, sectionById, levelNumber } from '../packs/index.js';
 
 export function createDiagnosticView(root, { onAction, onStop, onPlay, onMap, onRetake }) {
   let items = [];
@@ -58,7 +58,7 @@ export function createDiagnosticView(root, { onAction, onStop, onPlay, onMap, on
             h('span', { class: 'diag-text' }, p.lead === '=' ? `${p.text} = ${p.answer}` : `${p.text}, ${p.lead} ${p.answer}`),
             p.right ? null : h('span', { class: 'diag-typed' }, p.skipped ? 'skipped' : `you typed ${shown(p.typed)}`)))),
           h('button', { type: 'button', class: 'btn diag-go', dataset: { play: '1', pack: r.pack, level: String(r.rec) } },
-            `Start at Level ${r.rec}: ${pack.levelNames[r.rec - 1]}`));
+            `Start at Level ${levelNumber(pack, r.rec)}: ${pack.levelNames[r.rec - 1]}`));
       }),
       h('div', { class: 'quiz-actions' },
         h('button', { type: 'button', class: 'btn btn-primary', dataset: { go: 'map' } }, 'Back to the cards'),

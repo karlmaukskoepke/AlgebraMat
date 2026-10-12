@@ -3,6 +3,9 @@ import { isLevelDone, isLevelUnlocked, isPackComplete } from '../engine/progress
 import { installBar } from './installPrompt.js';
 import { accountLabel } from './account.js';
 import { CARD_CHALLENGES, challengeById } from '../engine/fluency.js';
+import { levelNumber } from '../packs/index.js';
+
+const firstOf = (pack) => pack.firstLevel ?? 1;                       // a card that opens at a later level counts from 1 on screen
 
 const h = (tag, attrs = {}, ...children) => {
   const el = document.createElement(tag);
@@ -17,7 +20,7 @@ const h = (tag, attrs = {}, ...children) => {
 
 function levelDots(progress, pack) {
   const dots = h('div', { class: 'dots', 'aria-hidden': 'true' });
-  for (let l = 1; l <= pack.levels; l++) {
+  for (let l = firstOf(pack); l <= pack.levels; l++) {
     const state = isLevelDone(progress, pack.id, l) ? 'done'
       : isLevelUnlocked(progress, pack.id, l) ? '' : 'locked';
     dots.append(h('span', { class: `dot ${state}`.trim() }));
@@ -45,7 +48,7 @@ function fluencyRow(pack, bests) {
 function packCard(progress, pack, bests) {
   const complete = isPackComplete(progress, pack.id);
   const levels = h('div', { class: `level-list${pack.levels > 4 ? ' many' : ''}` });
-  for (let l = 1; l <= pack.levels; l++) {
+  for (let l = firstOf(pack); l <= pack.levels; l++) {
     const done = isLevelDone(progress, pack.id, l);
     const open = isLevelUnlocked(progress, pack.id, l);
     levels.append(h('button', {
@@ -53,9 +56,9 @@ function packCard(progress, pack, bests) {
       class: `btn level-btn${done ? ' is-done' : ''}`,
       disabled: !open,
       dataset: { pack: pack.id, level: String(l) },
-      'aria-label': `${pack.title} Level ${l}, ${pack.levelNames[l - 1]}${done ? ', done' : open ? '' : ', locked'}`,
+      'aria-label': `${pack.title} Level ${levelNumber(pack, l)}, ${pack.levelNames[l - 1]}${done ? ', done' : open ? '' : ', locked'}`,
     },
-    h('span', { class: 'level-num' }, `${done ? '✓ ' : ''}Level ${l}`),
+    h('span', { class: 'level-num' }, `${done ? '✓ ' : ''}Level ${levelNumber(pack, l)}`),
     h('span', { class: 'level-name' }, open ? pack.levelNames[l - 1] : 'Locked')));
   }
   return h('article', { class: 'pack-card' },
@@ -89,10 +92,11 @@ function landing(sections, packs, progress) {
       h('span', { class: 'section-blurb' }, sec.blurb),
       h('span', { class: 'mini-cards' }, ...sec.packs.map((id) => {
         const pack = packs.find((p) => p.id === id);
-        const done = pack.comingSoon ? 0 : Array.from({ length: pack.levels }, (_, i) => isLevelDone(progress, pack.id, i + 1)).filter(Boolean).length;
+        const shown = pack.levels - firstOf(pack) + 1;
+        const done = pack.comingSoon ? 0 : Array.from({ length: shown }, (_, i) => isLevelDone(progress, pack.id, firstOf(pack) + i)).filter(Boolean).length;
         return h('span', { class: `mini-card${pack.comingSoon ? ' is-soon' : ''}` },
           h('span', { class: 'mini-name' }, pack.title),
-          h('span', { class: 'mini-progress' }, pack.comingSoon ? 'soon' : `${done}/${pack.levels}`));
+          h('span', { class: 'mini-progress' }, pack.comingSoon ? 'soon' : `${done}/${shown}`));
       })))));
 }
 
@@ -192,14 +196,14 @@ export function renderPackMap(root, progress, packs, {
 export function renderLevelDone(root, { pack, level, packComplete, nextPack, best = 0, onNext, onMap, onPractice }) {
   const hasNext = level < pack.levels;
   const buttons = h('div', { class: 'level-done-actions' });
-  if (hasNext) buttons.append(h('button', { type: 'button', class: 'btn btn-primary', 'data-go': 'next' }, `Level ${level + 1} →`));
+  if (hasNext) buttons.append(h('button', { type: 'button', class: 'btn btn-primary', 'data-go': 'next' }, `Level ${levelNumber(pack, level + 1)} →`));
   buttons.append(h('button', { type: 'button', class: hasNext ? 'btn' : 'btn btn-primary', 'data-go': 'practice' }, 'Keep practicing'));
   buttons.append(h('button', { type: 'button', class: 'btn', 'data-go': 'map' }, 'Pack map'));
 
   const panel = h('section', { class: 'level-done', 'aria-live': 'polite' },
-    h('h2', {}, `Level ${level} complete!`),
+    h('h2', {}, `Level ${levelNumber(pack, level)} complete!`),
     h('p', {}, hasNext
-      ? `Level ${level + 1} is open. Move on, or keep practicing this level as long as you like.`
+      ? `Level ${levelNumber(pack, level + 1)} is open. Move on, or keep practicing this level as long as you like.`
       : packComplete && nextPack?.comingSoon
         ? `You finished ${pack.title}! ${nextPack.title} is coming soon.`
         : packComplete && nextPack ? `You finished ${pack.title}! Next up: ${nextPack.title}, on the pack map.`

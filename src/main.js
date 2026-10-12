@@ -2,10 +2,10 @@ import './style.css';
 import { PROBLEMS_PER_LEVEL } from './engine/generate.js';
 import {
   completeLevel, isPackComplete, isLevelUnlocked, normalizeProgress, mergeProgress,
-  encodeProgress, decodeProgress,
+  encodeProgress, decodeProgress, doneCount,
 } from './engine/progress.js';
 import { createStore } from './storage.js';
-import { PACKS, SECTIONS, packById } from './packs/index.js';
+import { PACKS, SECTIONS, packById, levelNumber } from './packs/index.js';
 import { flipitPlay } from './play/flipitPlay.js';
 import { combinePlay } from './play/combinePlay.js';
 import { lightPlay, flipLightPlay } from './play/lightPlay.js';
@@ -92,6 +92,8 @@ const fixedSeed = Number.isInteger(urlSeed) && urlSeed > 0 ? urlSeed : null;
 // "read the model" level (layout 3) the same way.
 const SAVE_LAYOUT = 3;
 const store = createStore('mat.v1');
+// A safety net: if a save would ever lower the number of finished levels (it never should), the copy that was there is kept here.
+const backupStore = createStore('mat.v1.backup');
 const saved = store.load();
 let progress = normalizeProgress(saved, PACKS);
 let homeNote = null;
@@ -106,6 +108,10 @@ function saveProgress() {
   const current = play && !play.finished
     ? { pack: play.pack.id, level: play.level, seed: play.seed, index: play.index }
     : null;
+  try {
+    const before = store.load();
+    if (before && doneCount(normalizeProgress(before, PACKS)) > doneCount(progress)) backupStore.save(before);
+  } catch { /* the check is only a safety net */ }
   store.save({ ...progress, current, layout: SAVE_LAYOUT });
 }
 function persist() {
@@ -238,7 +244,7 @@ function startLevel(packId, level, resume = null) {
   };
   useControls(adapter);
   useMat(adapter);
-  $('title').textContent = `${pack.title.toUpperCase()} · Level ${level}`;
+  $('title').textContent = `${pack.title.toUpperCase()} · Level ${levelNumber(pack, level)}`;
   persist();
   showScreen('play');
   render();
@@ -538,7 +544,7 @@ function savedCurrent() {
   if (c.pack === 'combineit' && !(saved.layout >= 2)) return null;
   if (c.pack === 'boxes' && !(saved.layout >= 3)) return null;
   const pack = packById(c.pack);
-  const ok = pack && !pack.comingSoon && isLevelUnlocked(progress, pack.id, c.level)
+  const ok = pack && !pack.comingSoon && !pack.retired && isLevelUnlocked(progress, pack.id, c.level)
     && Number.isInteger(c.seed) && c.seed >= 0
     && Number.isInteger(c.index) && c.index >= 0 && c.index < PROBLEMS_PER_LEVEL;
   return ok ? c : null;
