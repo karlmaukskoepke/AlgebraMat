@@ -43,14 +43,14 @@ const sizes = (board) => [coefOf(board), board.right[0].kind === 'num' ? Math.ab
 // ---------- the session ----------
 
 const say = (s, key, params = {}, bad = false) => { s.feedback = { key, params: { a: s.problem.a, b: signed(s.problem.b), ...params }, bad }; return s; };
-const snapshot = (s) => ({ board: s.board, rows: [...s.rows], lights: s.lights, reds: s.reds, menu: s.menu, startOver: s.startOver, fail: null });
+const snapshot = (s) => ({ board: s.board, rows: [...s.rows], lights: s.lights, reds: s.reds, menu: s.menu, startOver: s.startOver, fail: null, deal: null });
 const restore = (s, snap) => Object.assign(s, snap);
 
 export function newDivide(problem, { level = 2, forceMove = false } = {}) {
   const board = startBoard(problem);
   const s = {
     problem, level, stage: 'moves', step: 'moves', path: forceMove ? 'move' : null, mustMove: forceMove,
-    board, base: board, rows: [{ type: 'eq', board }], history: [], menu: null, typing: null, entry: '', sub: null, fail: null,
+    board, base: board, rows: [{ type: 'eq', board }], history: [], menu: null, typing: null, entry: '', sub: null, fail: null, scaffold: false, deal: null,
     lights: { smaller: 'off', onebox: 'off' }, reds: 0, startOver: false, forced: false, hint: null, hintGiven: false, rung: 0, taught: 0, stuck: 0,
     wrongs: 0, tag: null, tags: [], answers: [], helped: false, clean: false, skipped: [], supportsShown: [], finalText: null, feedback: null,
   };
@@ -68,7 +68,7 @@ export function answerLive(s) {
 }
 
 function startOverBoard(s) {
-  Object.assign(s, { board: s.base, rows: [{ type: 'eq', board: s.base }], history: [], menu: null, typing: null, startOver: false, reds: 0, sub: null, entry: '', fail: null, lights: { smaller: 'off', onebox: 'off' }, hint: null });
+  Object.assign(s, { board: s.base, rows: [{ type: 'eq', board: s.base }], history: [], menu: null, typing: null, startOver: false, reds: 0, sub: null, entry: '', fail: null, deal: null, lights: { smaller: 'off', onebox: 'off' }, hint: null });
   s.path = s.mustMove ? 'move' : null;
   return say(s, s.path ? 'aStartedOver' : 'aChoose');
 }
@@ -94,6 +94,12 @@ function climb(s) {
     if (!s.supportsShown.includes('hint')) s.supportsShown.push('hint');
     return say(s, 'dStuckHint', { boxes: a });
   }
+  if (!s.scaffold) {                                   // the second ask draws the counters: the boxes, the pile, and the groups to share it into
+    s.scaffold = true;
+    if (!s.supportsShown.includes('model')) s.supportsShown.push('model');
+    s.hint = null;
+    return say(s, 'dModel', { boxes: a, b: signed(p.b), size: Math.abs(p.b) });
+  }
   s.rung = Math.min(s.rung + 1, 2);
   s.hint = { kind: 'fraction', n: a };
   if (!s.supportsShown.includes('guided')) s.supportsShown.push('guided');
@@ -113,6 +119,36 @@ export function substitutionSteps(p, typed) {
   return [first, `${signed(p.a * typed)} = ${signed(p.b)}`];
 }
 export const substitutionParts = (p, typed) => [{ text: `${p.a} × ` }, { text: plugValue(typed), blue: true }, { text: ` = ${signed(p.b)}` }];
+
+// The model (counters): the pile is the size of the number on the right; the boxes are the number in front of x.
+export const DEAL_ROUND_LEVEL = 4;                                                // Deal a round arrives with the bigger levels (spec §2: L3 there)
+export const pileSize = (board) => (board.right[0].kind === 'num' ? Math.min(36, Math.abs(board.right[0].v)) : 0);
+const dealt = (s) => s.deal.groups.reduce((a, b) => a + b, 0);
+const evenGroups = (groups) => groups.every((c) => c === groups[0]);
+const sayDealt = (s) => { const m = dealtMessage(s); return say(s, m.key, m.params, m.key === 'dUneven'); };
+function dealtMessage(s) {
+  const total = pileSize(s.board);
+  const got = dealt(s);
+  const left = total - got;
+  const holds = s.deal.groups.join(', ');
+  if (left > 0) return { key: 'dDealt', params: { got, total, holds } };
+  return evenGroups(s.deal.groups) ? { key: 'dKeepReady', params: { each: s.deal.groups[0], frac: fractionText(s.deal.n) } } : { key: 'dUneven', params: { holds } };
+}
+
+// A move that splits both sides is committed: the work stack gets `⅓(3x) = ⅓(−12)` and the new equation.
+function commit(s, n) {
+  const p = s.problem;
+  const { work, next } = applyFraction(s.board, p, n);
+  s.rows.push({ type: 'work', board: work }, { type: 'eq', board: next });
+  s.board = next;
+  s.menu = null;
+  s.fail = null;
+  s.deal = null;
+  s.reds = 0;
+  s.lights = { smaller: 'green', onebox: xAlone(next) ? 'green' : 'neutral' };
+  if (xAlone(next)) return say(s, 'aSolvedBoard');
+  return say(s, 'dPartial', { frac: fractionText(n), boxes: coefOf(next) });
+}
 
 export function reduceDivide(state, action) {
   if (state.stage === 'done') return state;
@@ -150,7 +186,7 @@ export function reduceDivide(state, action) {
       if (s.stage !== 'moves' || s.menu !== 'fraction' || s.sub || !FRACTIONS.includes(action.n)) return state;
       const n = action.n;
       const p = s.problem;
-      if (s.fail && s.history.length) { const reds = s.reds; restore(s, s.history.pop()); s.reds = reds; }   // a new try replaces the failed one
+      if ((s.fail || s.deal) && s.history.length) { const reds = s.reds; restore(s, s.history.pop()); s.reds = reds; }   // a new try replaces the last one
       const a = coefOf(s.board);
       if (s.forced && n !== a) return say(s, 'dForced', { frac: fractionText(a) }, true);
       const check = takeFraction({ a, b: p.b }, n);
@@ -164,15 +200,36 @@ export function reduceDivide(state, action) {
         if (s.reds >= 3) s.startOver = true;
         return say(s, s.reds >= 3 ? 'dFail3' : 'dFail', failParams(p, s.board, n, check), true);
       }
-      const { work, next } = applyFraction(s.board, p, n);
-      s.rows.push({ type: 'work', board: work }, { type: 'eq', board: next });
-      s.board = next;
-      s.menu = null;
-      s.fail = null;
-      s.reds = 0;
-      s.lights = { smaller: 'green', onebox: xAlone(next) ? 'green' : 'neutral' };
-      if (xAlone(next)) return say(s, 'aSolvedBoard');
-      return say(s, 'dPartial', { frac: fractionText(n), boxes: coefOf(next) });
+      // with the counters up, the move is done by hand: n empty groups appear, the boxes split into the same n, the pile is dealt
+      if (s.scaffold) { s.deal = { n, groups: Array(n).fill(0) }; return say(s, 'dDealPrompt', { n, frac: fractionText(n), boxes: a, size: pileSize(s.board), per: a / n }); }
+      return commit(s, n);
+    }
+    // ----- the counters: deal the pile one counter at a time (or a round), then keep one group -----
+    case 'deal': {
+      if (!s.deal || s.sub) return state;
+      const left = pileSize(s.board) - dealt(s);
+      if (left <= 0) return say(s, 'dAllShared', {}, true);
+      const g = action.group;
+      if (!Number.isInteger(g) || g < 0 || g >= s.deal.n) return state;
+      s.deal.groups[g] += 1;
+      return sayDealt(s);
+    }
+    case 'dealRound': {
+      if (!s.deal || s.sub || s.level < DEAL_ROUND_LEVEL) return state;
+      if (pileSize(s.board) - dealt(s) < s.deal.n) return say(s, 'dNoRound', { n: s.deal.n }, true);
+      s.deal.groups = s.deal.groups.map((c) => c + 1);
+      return sayDealt(s);
+    }
+    case 'keep': {
+      if (!s.deal || s.sub) return state;
+      const g = action.group;
+      if (!Number.isInteger(g) || g < 0 || g >= s.deal.n) return state;
+      const left = pileSize(s.board) - dealt(s);
+      if (left > 0) return say(s, 'dShareFirst', { left }, true);
+      if (!evenGroups(s.deal.groups)) return say(s, 'dUneven', { holds: s.deal.groups.join(', ') }, true);
+      const n = s.deal.n;
+      s.deal = null;
+      return commit(s, n);                                                      // keeping one group is taking 1/n of both sides
     }
     case 'undo': {
       if (s.sub) {
@@ -199,7 +256,7 @@ export function reduceDivide(state, action) {
       if (!helpOk(s)) return state;
       s.sub = null;
       if (s.path !== 'move') { s.path = 'move'; s.entry = ''; s.typing = null; }
-      s.taught += 1; s.forced = true; s.helped = true;
+      s.taught += 1; s.forced = true; s.helped = true; s.scaffold = true;
       if (!s.supportsShown.includes('forced')) s.supportsShown.push('forced');
       if (xAlone(s.board)) return say(s, 'aStuckSolved');
       const a = coefOf(s.board);

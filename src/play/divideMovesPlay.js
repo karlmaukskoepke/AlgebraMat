@@ -31,6 +31,9 @@ export const divideMovesPlay = {
       case 'greyMove': return { type: 'greyMove' };
       case 'path': return { type: 'path', value: d.value };
       case 'take': return { type: 'take', n: Number(d.n) };
+      case 'deal': return { type: 'deal', group: Number(d.group) };
+      case 'dealRound': return { type: 'dealRound' };
+      case 'keep': return { type: 'keep', group: Number(d.group) };
       case 'nextLine': return { type: 'nextLine' };
       case 'next': return { type: 'next' };
       case 'check': return { type: 'check' };

@@ -3019,3 +3019,23 @@ body {
 .lb-readout.is-good { color: #1b6e3a; } .lb-readout.is-bad { color: #a3281b; }
 .lb-numblock .lb-sidebtn { min-height: 52px; font-size: 18px; font-weight: 800; }
 .lb-numblock .lb-sidebtn.is-target { animation: sw-pulse 1.2s ease-in-out infinite; box-shadow: 0 0 0 4px #0072b2; }
+
+/* Divide it's counters: the boxes, the pile, and the groups */
+.dv-scaffold .lb-stack { min-height: 0; } .dv-scaffold .lb-subst { min-height: 0; }
+.dv-modelwrap { display: flex; flex-direction: column; align-items: center; gap: 6px; width: 100%; margin-bottom: 6px; }
+.dv-model { display: grid; grid-template-columns: minmax(0, 1fr) 4px minmax(0, 1.4fr); gap: 12px; width: 100%; min-height: 150px; align-items: start; }
+.dv-border { align-self: stretch; border-left: 4px dashed var(--ink); }
+.dv-side { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; align-content: flex-start; padding: 6px; }
+.dv-cluster { display: flex; gap: 4px; padding: 4px; border-radius: 10px; }
+.dv-cluster.is-split { border: 3px solid #0072b2; background: #eef7fd; }
+.dv-box { display: grid; place-items: center; width: 36px; height: 36px; border: 3px solid var(--ink); border-radius: 8px; background: #fff; font: 800 18px 'Lexend', system-ui, sans-serif; }
+.dv-pile { flex-direction: column; align-items: center; gap: 10px; }
+.dv-poolwrap { display: flex; flex-wrap: wrap; gap: 4px; justify-content: center; min-height: 30px; }
+.dv-counter { display: grid; place-items: center; width: 24px; height: 24px; border: 2px solid var(--ink); border-radius: 50%; background: #fff6b8; font: 800 15px 'Lexend', system-ui, sans-serif; }
+.dv-counter.is-neg { background: #fdebe8; }
+.dv-groups { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+.dv-group { display: flex; flex-wrap: wrap; gap: 3px; align-content: flex-start; justify-content: center; min-width: 68px; min-height: 68px; max-width: 110px; padding: 6px; border: 3px dashed #0072b2; border-radius: 12px; background: #fff; cursor: pointer; }
+.dv-group:hover { background: #eef7fd; }
+.dv-readout { margin: 0; font: 800 20px 'Lexend', system-ui, sans-serif; text-align: center; }
+.dv-hint { margin: 0; font: 700 18px 'Lexend', system-ui, sans-serif; color: #0072b2; }
+.dv-actions { display: flex; gap: 10px; }
