@@ -1,6 +1,6 @@
 # 06 · Refactor plan (draft)
 
-*Draft: steps R4 and R7 depend on Q1-Q3 in `04-inferences.md`. Each step is a small build brief: one change, its own PR, CI green, no level-count change unless it says so. Order: what protects students first, then the shared pieces with the highest value, then the big port.*
+*Updated with Karl's answers (04, batches 1-2). Each step is a small build brief: one change, its own PR, CI green, no level-count change unless it says so. Order: what protects students first, then the shared pieces with the highest value, then the big port.*
 
 ## The tests that would have caught the Divide it regressions
 
@@ -90,7 +90,21 @@ These are the acceptance tests the steps below add. They run on **every Solve it
 - **Acceptance:** keyboard and tap tests on two cards from different sections.
 - **Risk to saves:** none.
 
-### R12. Retire old Solve it content  (S) — depends on I10
+### R12. Retire old Solve it content  (S) — Karl: hide One-step now
 - **Goal:** hide One-step from the menu; block `?pack=switch`.
 - **Acceptance:** One-step's bits still decode and still credit Divide it.
 - **Risk to saves:** none if ids and bits stay (they must).
+
+### R13. Divide L1 item rule  (S)
+- **Goal:** a "do" or quiz item takes a fraction only from a side whose number of groups it splits (⅓ of `3 × 4`, never of `4 × 9`), so the picture can show "keep 1 of 3 groups".
+- **Files:** `engine/divideNumeric.js`, its tests.
+- **Acceptance:** over 1,500 seeds, every item's fraction denominator divides the group count of each side it is taken from.
+- **Risk to saves:** none.
+
+### R14. Spec edits for the design chat (not code)
+- Loop §3A: a partial move folds when the student acts on the choice (Q2).
+- Loop §6: rung 1 may be a text reminder if the picture comes on the next rung, including at x alone with an unevaluated side (Q3).
+- Loop §5 / Flip it: rename the Solve it card "Flip it" before it is built (I11).
+- Add spec rev 2.4: the loop's required edits, plus Trade places on L5 (I13) and no answers of ±1 (I14).
+- Divide spec §3A: the L1 item rule (I12).
+- Sign-in at every visit: skippable with "Not now", silent for returning students (Q4); belongs in `SPEC-SYNC.md`.

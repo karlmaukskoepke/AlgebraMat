@@ -49,16 +49,24 @@
 
 **Answer (2026-10-12):** A, refined: the home screen and card menus are the same across sections; the lesson screens vary naturally (Solve it has the Move / Why? panel). After a plain explanation of "same frame" (the parts around the problem: header, the line, help buttons, number pad, colours, sizes; not how each card teaches).
 
-## Queued for later batches (my current recommendation in bold)
+## Batch 2 (asked and answered 2026-10-12)
+
+- **I10 old One-step card:** A. Hide it from the menu now; keep its saved bits (they credit Divide it).
+- **I11 the two "Flip it"s:** A. Rename the Solve it card before it is built (e.g. "Flip everything"). Pack ids are never renamed.
+- **I12 Divide L1 items:** A. Only fractions that split the number of groups on that side (⅓ of 3 × 4).
+- **I13 Trade places on Add L5:** A. Keep it; record it in the Add spec (rev 2.4).
+- **I14 answers of ±1 on Add:** A. Ban them.
+
+## Still queued (recommendation in bold; to adopt with the CLAUDE.md draft unless Karl objects)
 
 - **I6. Branch name.** You asked for `audit`; this session was assigned `claude/friendly-faraday-xzolrt` and pushes only there. **Keep this branch for the audit; open a PR or rename later.** (Asked in chat, not in the batch.)
 - **I7. The shape of a card configuration.** **A card = pack entry (levels, generator) + one loop config (`startBoard, alone, moves, lights, slips, rungs, teach, collapse, pictures`) + its feedback table. The play adapter and the screen become generic.** Evidence: `solveLoop.js:17-32` already lists most fields; `divideMovesPlay.js` and `addBothPlay.js` are near copies.
 - **I8. Where shared pieces live.** **A new `src/solveit/` (or `src/shared/`) folder; nothing shared stays in a card file** (`addBothMat.js`, `lightScreen.js`, `addBothFeedback.js` today host shared code).
 - **I9. How Count it and Build it relate to Solve it.** **Count it is the source of the models Solve it reuses (counters, Party/Battle, the group diagram from Group It); Build it is the source of expressions (Combine like terms, Distribute) that later Solve it moves will use. Solve it should import their drawings, not copy them.** Evidence: Divide's diagram borrows Group It's; the move list already contains Distribute and Combine like terms.
-- **I10. The old One-step and Two-step cards.** **Hide One-step once Divide it is confirmed (keep its bits in the save code; its `ax = b` level already credits Divide L2). Keep Two-step until the new two-step card exists.** Evidence: `packs/index.js:91-104, 129-138`; they break most of the loop and duplicate Divide.
-- **I11. The name "Flip it".** Count it already has **Flip It** (subtracting integers); the designed Solve it card is **Flip it** (flip every sign). **Rename one before Flip it is built** (e.g. the Solve it card "Opposite it" or "Flip everything"), because the pack id, save code and teacher sheet all key on names students see. Evidence: `packs/flipit.js:7`, `SPEC-FLIP-IT.md:1`.
-- **I12. Divide L1 items.** **The fraction in a "do" item should always divide the number of groups on the side it is taken from** (so ⅓ of `3 × 4`, not ⅓ of `4 × 9`), so the picture can show "keep 1 of 3 groups". Evidence: 03 §B.5.
-- **I13. Trade places on Add L5.** **Record it in the Add spec (rev 2.4) as built, or remove it; today the spec and the build disagree.** Evidence: Add build notes §17 vs spec line 5.
-- **I14. Answers of ±1 on Add.** **Ban them (loop §8 wins over the Add spec).** Evidence: 03 table line 10.
+- **I10.** Answered in batch 2 (above).
+- **I11.** Answered in batch 2 (above).
+- **I12.** Answered in batch 2 (above).
+- **I13.** Answered in batch 2 (above).
+- **I14.** Answered in batch 2 (above).
 - **I15. The help row and pad position on Add.** **Same layout as Divide (wide screen: picture area between stack and panel) so Add fits 1366×768.**
 - **I16. Fit target.** **Test at 1366×657 (a Chromebook with the browser's bars), not 1366×768**, since that is what students see. Divide fails it by 87 px today.

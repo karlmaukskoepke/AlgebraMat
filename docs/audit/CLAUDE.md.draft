@@ -1,0 +1,59 @@
+# CLAUDE.md · The Mat (AlgebraMat)
+
+## What this is
+A free, static algebra practice site for Karl's middle school students: Vite + plain JavaScript, hosted on GitHub Pages. Three sections of cards (Count it, Build it, Solve it), five problems per level. Progress lives in the browser (localStorage) with a save code, and syncs anonymously to Karl's Google Sheet. Students use school Chromebooks first, phones second. Karl has limited coding knowledge: explain only as much as he needs, briefly.
+
+## Authority order
+1. `SPEC-SOLVE-IT-LOOP.md` (the shared Solve it loop, with its conformance checklist)
+2. The card spec (`SPEC-<CARD>.md`)
+3. Build briefs (`BUILD-BRIEF-*.md`)
+4. `DECISION-LOG.md`: history only; some lines were later reversed.
+
+Where code and a spec disagree, report it; don't silently pick one.
+
+## Where things live
+- **Specs, briefs, logs:** the repo root (`SPEC-*.md`, `BUILD-BRIEF-*.md`, `DECISION-LOG.md`, `DESIGN-HANDOFF.md`). Audit: `docs/audit/`. Handoff notes: `docs/handoff/NEXT.md`.
+- **Entry:** `index.html`, `src/main.js` (routing, saving, sync, keyboard).
+- **Cards:** `src/packs/index.js` (each card's levels and generator; `SECTIONS`); `src/play/` (one adapter per card or level type, chosen in `main.js`); `src/engine/` (logic, generators, slips; no DOM); `src/view/` (screens). Styles: `src/style.css`.
+- **Save code and progress:** `src/engine/progress.js` (code v14, one bit per level; migrations; legacy credit); `src/storage.js`.
+- **Sync:** `src/engine/sync.js`, `src/sync.js`, `src/syncStore.js`, `src/view/account.js`; sheet side `teacher/Code.gs`, `teacher/RosterSync.gs`, `teacher/SETUP.md`.
+- **Deploy:** `.github/workflows/ci-deploy.yml`: tests and build on every push; deploys to Pages only from `main`.
+- **Tests:** `tests/` (Vitest, `npm test`). Run them, and `npm run build`, before every push.
+
+## Shared-components registry (details: `docs/audit/02-registry.md`)
+| Piece | File | What it does |
+|---|---|---|
+| The Solve it loop | `src/engine/solveLoop.js` `createSolveLoop` | Choice at every state, forced move, substitution, fold, Undo, Start over, help ladder. Divide it uses it; Add to both sides does not yet. |
+| Choice prompt | `src/engine/solveLoop.js` `CHOICE_PROMPT`, `CHOICE_BUTTONS` | The one prompt and its two buttons. |
+| Substitution renderer | `src/engine/solveTerms.js` `substitutionLines` | Value placed on x, one operation a line, step highlight; the loop's test cases. |
+| Solve it screen pieces | `src/view/solveScreen.js` | The line, work-stack rows, answer row, Check / Next, drag onto x, help row, Undo. |
+| Move / Why? panel | `src/view/lightScreen.js` `movePanel`, `moveIcon` | The full move list with Why? boxes. |
+| Seesaw | `src/view/addBothMat.js` `drawBalance` | The balance with counters, tipping or level. |
+| Group diagram | `src/view/groupDiagram.js` | A fraction of a group: n groups, a bracket on the kept one. |
+| Shared messages | `src/view/addBothFeedback.js` | The loop's shared lines (choice, greyed moves...). |
+| Number pad | `src/view/quiz.js` `buildPad` | The integer pad (most cards still have their own; see R11). |
+| Save code | `src/engine/progress.js` | Encode / decode; one bit per level. |
+| Anonymous sync | `src/engine/sync.js`, `src/sync.js` | Sends progress and the anonymous log; merges level by level. |
+
+Several shared pieces still live in card files (`addBothMat.js`, `lightScreen.js`, `addBothFeedback.js`). The plan to move them to one shared folder is `docs/audit/06-refactor-plan.md`. When a piece moves, update this table in the same change.
+
+## Hard rules (never break)
+- **Scrambled ids only to the class sheet** (district rule). No names, emails or real ids leave the device.
+- **Save codes hold one bit per level,** so a card's level count is fixed. Never rename a pack id. A level-count change needs a migration and a new save-code version.
+- **Never overwrite more progress with less:** saves and syncs merge level by level; a finished level stays finished.
+- **Answers are whole numbers,** typed on the integer pad.
+- **Every generated problem is verified by substitution in code.** No hand-typed banks.
+- **Printables are low-ink:** outlines, no filled heading boxes, no grid.
+
+## Reuse before you build
+Before writing anything for a card, search the registry above and the repo. If you create a reusable piece, add it to the registry in the same change.
+
+## Working agreements
+
+Working agreements: sessions and models
+Start of every session: read this file, `docs/design/SPEC-SOLVE-IT-LOOP.md` and its conformance checklist, the card spec and the brief being worked on, and `docs/handoff/NEXT.md` if it exists. Check the registry before writing anything.
+Definition of done: the conformance checklist has been run and its results reported; the registry is updated; this file is updated if the structure changed; a handoff note is written.
+Tell Karl to start a fresh session. Say so plainly at the end of your reply, and say what to paste, when: a card or brief is finished and reported; the kind of task is changing (audit or refactor, card build, bug fix); you have re-read the same files more than once or your work is drifting from the specs; earlier context is being summarised away; or a new section or card is starting. Don't wait to be asked.
+Before ending a session, write `docs/handoff/NEXT.md`: what is done, what is in progress, decisions made, files touched, what to read first, open questions.
+Model guidance. Tell Karl when a change of model is worth it. Strongest available (Claude Fable 5.1 or Claude Opus 5.5): audits, refactors that touch shared components, changes to the loop or the architecture, bugs that cross cards, anything where a wrong structural choice is expensive. Mid-tier (Claude Sonnet 5.5): building a card from a finished spec, fixes from a brief. Light (Claude Haiku 5.5): mechanical edits (copy changes, renames, formatting) and re-running checklists. When unsure, say which tier you would choose and why. Keep this list current as models change.
+Reuse before you build. If something you are about to build might already exist, stop and search the registry and the repo first.
