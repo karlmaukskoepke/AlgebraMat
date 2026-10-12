@@ -29,13 +29,21 @@ export function buildAddBothControls(root, dispatch) {
   typing.className = 'ab-typing';
   typing.setAttribute('aria-live', 'polite');
 
-  const undo = button('↶ Undo', 'undo', { cls: 'btn-quiet', data: { key: 'u' } });
   const startOver = button('Start over', 'startOver', { cls: 'btn-quiet' });
+  // "x = ?": a bold prompt and a boxed place for what is being typed (an underline blinks while it is empty)
+  const setTyping = (prompt, value) => {
+    const b = document.createElement('strong');
+    b.textContent = prompt;
+    const v = document.createElement('span');
+    v.className = `ab-typed${value ? '' : ' is-empty'}`;
+    v.textContent = value || '\u00a0';
+    typing.replaceChildren(b, v);
+  };
   const stuck = button('I’m stuck', 'stuck', { data: { key: 's' }, aria: 'I’m stuck (key S)' });
   const teach = button('Teach me step-by-step', 'teach', { data: { key: 't' }, aria: 'Teach me step-by-step (key T)' });
   const tourButton = button('?', 'tour', { cls: 'btn-tour', aria: 'Show me around' });
   const check = button('Check ✓', 'check', { cls: 'btn-primary' });
-  const palette = row('palette-row', undo, startOver, stuck, teach, tourButton, check);
+  const palette = row('palette-row', startOver, stuck, teach, tourButton, check);
 
   const keys = document.createElement('div');
   keys.className = 'pad';
@@ -65,11 +73,10 @@ export function buildAddBothControls(root, dispatch) {
       // what the pad is typing right now
       const amountMode = s.menu === 'add' && (!s.pending || s.pending.second);
       typing.hidden = building || done || checking || (combining && s.combining.step !== 'count');
-      if (combining) typing.textContent = `Typing: how many are left ${s.combining.entry ? `= ${s.combining.entry.replace('-', MINUS)}` : ''}`.trim();
-      else if (amountMode) typing.textContent = `Typing: the amount to add = ${s.amountEntry ? s.amountEntry.replace('-', MINUS) : '?'}`;
-      else typing.textContent = `Typing: your answer for x = ${s.entry ? s.entry.replace('-', MINUS) : '?'}`;
+      if (combining) setTyping('How many are left?', s.combining.entry.replace('-', MINUS));
+      else if (amountMode) setTyping('Amount to add:', (s.amountEntry ?? '').replace('-', MINUS));
+      else setTyping('x =', s.entry.replace('-', MINUS));
 
-      undo.hidden = building || done || !s.history.length;
       startOver.hidden = !s.startOver || done;
       const helpOk = !done && !building;
       stuck.disabled = teach.disabled = !helpOk;
@@ -89,7 +96,6 @@ export function buildAddBothControls(root, dispatch) {
       if (tut.phase !== 'numeric') {
         apply(tut.eng);
         stuck.disabled = teach.disabled = tourButton.disabled = true;
-        undo.hidden = true;
         startOver.hidden = true;
         if (tut.eng.stage === 'done') { check.innerHTML = 'Continue ▸'; delete check.dataset.next; check.dataset.cont = '1'; check.disabled = false; }
         return;
@@ -99,8 +105,8 @@ export function buildAddBothControls(root, dispatch) {
       delete check.dataset.cont;
       delete check.dataset.next;
       typing.hidden = !typingOk;
-      typing.textContent = `Typing: the amount to add = ${t.amountEntry ? t.amountEntry.replace('-', MINUS) : '?'}`;
-      undo.hidden = startOver.hidden = true;
+      setTyping('Amount to add:', t.amountEntry.replace('-', MINUS));
+      startOver.hidden = true;
       stuck.disabled = teach.disabled = tourButton.disabled = check.disabled = true;
       check.innerHTML = 'Check ✓';
       for (const b of keys.querySelectorAll('button')) b.disabled = !typingOk;

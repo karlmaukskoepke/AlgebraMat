@@ -26,7 +26,8 @@ describe('the add tutorial (4 + 1 = 2 + 3)', () => {
 
   it('never offers amount 0, or the same side twice, and Undo takes both actions back', () => {
     let t = run(newTutorial('add'), { type: 'choose', move: 'add' });
-    expect(run(t, { type: 'addTo', side: 'left' }).feedback.key).toBe('tuAmountZero');
+    expect(t.amountEntry).toBe('3');                                                    // a number is suggested: a positive first
+    expect(run(t, { type: 'addTo', side: 'left' }).feedback.key).toBe('tuAddedOne');
     expect(run(t, ...typed('0'), { type: 'addTo', side: 'left' }).feedback.key).toBe('tuAmountZero');
     t = run(t, ...typed('2'), { type: 'addTo', side: 'left' });
     expect(run(t, { type: 'addTo', side: 'left' }).feedback.key).toBe('tuOtherSide');
@@ -124,5 +125,22 @@ describe('the cross the border tutorial', () => {
 
   it('knows its kinds', () => {
     expect(() => newTutorial('nope')).toThrow();
+  });
+});
+
+describe('the add tutorial suggests a positive, then a negative, and asks for both', () => {
+  it('suggests 3 then −2, and is not ready for the quiz until both signs have been tried', () => {
+    let t = run(newTutorial('add'), { type: 'choose', move: 'add' });
+    expect([t.amountEntry, t.feedback.key]).toEqual(['3', 'tuSuggestPos']);
+    t = run(t, { type: 'addTo', side: 'left' }, { type: 'addTo', side: 'right' }, { type: 'go' });
+    expect(t.feedback.key).toBe('tuTryNeg');
+    expect(readyForQuiz(t)).toBe(false);
+    t = run(t, { type: 'choose', move: 'add' });
+    expect([t.amountEntry, t.feedback.key]).toEqual(['-2', 'tuSuggestNeg']);
+    t = run(t, { type: 'addTo', side: 'left' }, { type: 'addTo', side: 'right' }, { type: 'go' });
+    expect(readyForQuiz(t)).toBe(true);
+  });
+  it('two positives are not enough', () => {
+    expect(readyForQuiz(addMove(addMove(newTutorial('add'), 2), 4))).toBe(false);
   });
 });

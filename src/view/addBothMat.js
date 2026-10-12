@@ -32,7 +32,7 @@ const GAP = 46;
 const MIDDLE = 90;
 const MAX_COLS = 9;
 const MIN_SIDE = 230;
-const BEAM_Y = 90;
+const BEAM_PAD = 46;
 
 // How a group of n counters sits: up to 3 rows.
 export function groupShape(n) {
@@ -73,6 +73,9 @@ function counterMark(parent, cx, cy, sign, cls) {
   parent.append(g);
 }
 
+// Has an amount been typed (or is a move under way)? Only then do the places to put it appear.
+export const hasAmount = (s) => Boolean(s.pending) || (/^-?\d+$/.test(s.amountEntry ?? '') && Number(s.amountEntry) !== 0);
+
 const tiltText = (s) => {
   if (balanced(s)) return 'Balanced ✓';
   return `Unbalanced ✗   the ${tilt(s) > 0 ? 'left' : 'right'} side is heavier by ${Math.abs(tilt(s))}`;
@@ -82,20 +85,6 @@ const tipAngle = (s) => (s.stage === 'build' ? 0 : Math.max(-8, Math.min(8, -til
 let lastAngle = 0;
 const reduceMotion = () => typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-// The seesaw: a beam on a pivot at the border, tipped `angle` degrees (it eases from where it was).
-export function drawSeesaw(svg, cx, cy, half, angle) {
-  const pivot = el('g', { transform: `translate(${cx} ${cy})` });
-  pivot.append(el('polygon', { points: '-22,46 22,46 0,2', class: 'ab-pivot' }));
-  const beam = el('g', { class: 'ab-beam', style: `transform: rotate(${angle}deg)` });
-  beam.append(el('line', { x1: -half, y1: 0, x2: half, y2: 0, class: 'ab-beam-bar' }));
-  for (const sx of [-half, half]) beam.append(el('circle', { cx: sx, cy: 0, r: 13, class: 'ab-beam-end' }));
-  pivot.append(beam);
-  svg.append(pivot);
-  if (!reduceMotion() && angle !== lastAngle && typeof beam.animate === 'function') {
-    beam.animate([{ transform: `rotate(${lastAngle}deg)` }, { transform: `rotate(${angle}deg)` }], { duration: 650, easing: 'cubic-bezier(.3,1.6,.5,1)' });
-  }
-  lastAngle = angle;
-}
 export const angleFor = (delta) => Math.max(-8, Math.min(8, -delta * 2.5));
 
 // The board with, when an amount is being added, one button under each side ("Add −3 here"): the action sits on the side it
@@ -106,22 +95,16 @@ export function boardBlock(s) {
   const [, , vw, vh] = top.getAttribute('viewBox').split(' ').map(Number);
   block.style.setProperty('--ar', String(vw / (vh + 150)));
   block.append(top);
-  if (sideBtnsOn) {
-    const row = html('div', 'ab-sidebtns');
-    const amount = s.amountEntry ? s.amountEntry.replace('-', MINUS) : '___';
-    row.style.setProperty('--left', `${geo.x0 / geo.W * 100}%`);
-    row.style.setProperty('--side', `${geo.lw / geo.W * 100}%`);
-    row.style.setProperty('--gap', `${geo.middle / geo.W * 100}%`);
-    row.style.setProperty('--mid', `${geo.borderX / geo.W * 100}%`);
-    for (const side of ['left', 'right']) {
-      const b = html('button', 'btn ab-sidebtn', [`Add ${amount} here`], { type: 'button', 'data-action': 'addTo', 'data-side': side });
-      // this side has had its share (or both have): fade it
-      b.disabled = Boolean(s.pending && (s.pending.both || s.pending.side === side));
-      row.append(b);
-    }
-    block.append(row);
-  }
+  if (sideBtnsOn) block.append(sideButtons(geo, s.amountEntry, s.pending));
   block.append(bottom);
+  const done = s.stage === 'done';
+  const flow = !done && s.stage === 'moves' && !s.combining && !s.resolving && (s.menu === 'add' || s.pending?.kind === 'cross');
+  const row = actionRow({
+    undo: !done && s.stage !== 'build' && s.history.length > 0,
+    go: flow ? 'Go ▶' : null,
+    goDisabled: !(s.pending?.both) || s.leftDelta !== s.rightDelta,
+  });
+  if (row) block.append(row);
   return block;
 }
 
@@ -135,50 +118,52 @@ export function renderAddBothMat(s) {
   return wrap;
 }
 
-export function boardSvg(s) {
-  const items = boardItems(s);
-  const lw = Math.max(sideWidth(items.left), sideWidth(items.right));   // both sides alike, so the border (and the seesaw's pivot) is the middle
+// The balance (Karl: the models stand on the seesaw). The beam tips; the board's items (the x box, groups of counters or
+// numbers) stand on it, so what is added to a side shows up on that side of the balance. A pivot sits under the middle, and
+// the dashed border runs up and down through it. `ctx`: { top (room for the readout), readout: {text, cls, size}, building,
+// zonesOn, early, tapAction(id), cls(id), struck, angle, anim, hint, dropText }.
+export function drawBalance(svg, items, ctx) {
+  const lw = Math.max(sideWidth(items.left), sideWidth(items.right));   // both sides alike, so the border (and the pivot) is the middle
   const rw = lw;
   const W = Math.max(VIEW_WIDTH, lw + MIDDLE + rw + 40);
-  const svg = el('svg', { class: 'mat value-mat addboth-mat', viewBox: `0 0 ${W} 520`, role: 'group', 'aria-label': 'The Add to both sides Mat' });
   const x0 = (W - (lw + MIDDLE + rw)) / 2;
   const borderX = x0 + lw + MIDDLE / 2;
+  const h = Math.max(rowHeight(items.left), rowHeight(items.right), 96);
+  const zoneH = h + 28;
+  const zoneTop = (ctx.top ?? 64) + BEAM_PAD;
+  const beamY = zoneTop + zoneH + 12;
+  const split = beamY + 64;
+  const { building } = ctx;
+  svg.setAttribute('viewBox', `0 0 ${W} ${split}`);
   svg.setAttribute('data-border-x', String(borderX));
 
-  // ---- the balance: the word, and the seesaw on the dashed border ----
-  const building = s.stage === 'build';
-  svg.append(el('text', { x: W / 2, y: 34, 'text-anchor': 'middle', class: `ab-readout ${building ? '' : balanced(s) ? 'is-good' : 'is-bad'}` }, [building ? 'Build the equation' : tiltText(s)]));
-  drawSeesaw(svg, borderX, BEAM_Y, (lw + MIDDLE + rw) / 2, tipAngle(s));
+  if (ctx.readout) svg.append(el('text', { x: W / 2, y: ctx.readout.y ?? 34, 'text-anchor': 'middle', class: `ab-readout ${ctx.readout.cls ?? ''}`, ...(ctx.readout.size ? { style: `font-size:${ctx.readout.size}px` } : {}) }, [ctx.readout.text]));
+  svg.append(el('line', { x1: borderX, y1: zoneTop - 14, x2: borderX, y2: split, class: 'sv-border', 'data-border': '1' }));
 
-  // ---- the board ----
-  const top = BEAM_Y + 66;
-  const h = Math.max(rowHeight(items.left), rowHeight(items.right), 96);
-  const zonesOn = building || (s.stage === 'moves' && s.menu === 'add' && !s.combining);
-  const zoneTop = top - 14;
-  const zoneH = h + 28;
+  // everything on the beam tips with it, about the pivot
+  const rot = el('g', { class: 'ab-rot', style: `transform-origin: ${borderX}px ${beamY}px; transform: rotate(${ctx.angle ?? 0}deg)` });
+  svg.append(rot);
   const zone = (side, zx, zw) => {
-    const g = el('g', { class: `ab-zone${zonesOn ? ' is-on' : ''}`, 'data-zone': side, ...(zonesOn ? { 'data-action': 'zone', 'data-side': side, role: 'button', tabindex: '0', 'aria-label': `Put it on the ${side} side` } : {}) });
-    g.append(el('rect', { x: zx, y: zoneTop, width: zw, height: zoneH, rx: 16, class: 'ab-zone-box' }));
-    svg.append(g);
+    const g = el('g', { class: `ab-zone${ctx.zonesOn ? ' is-on' : ''}`, 'data-zone': side, ...(ctx.zonesOn ? { 'data-action': 'zone', 'data-side': side, role: 'button', tabindex: '0', 'aria-label': `Put it on the ${side} side` } : {}) });
+    if (ctx.zonesOn || ctx.building) g.append(el('rect', { x: zx, y: zoneTop, width: zw, height: zoneH, rx: 16, class: 'ab-zone-box' }));
+    rot.append(g);
   };
   zone('left', x0, lw);
   zone('right', x0 + lw + MIDDLE, rw);
-  svg.append(el('line', { x1: borderX, y1: BEAM_Y + 46, x2: borderX, y2: zoneTop + zoneH, class: 'sv-border', 'data-border': '1' }));
+  rot.append(el('line', { x1: x0, y1: beamY, x2: x0 + lw + MIDDLE + rw, y2: beamY, class: 'ab-beam-bar' }));
+  for (const bx of [x0, x0 + lw + MIDDLE + rw]) rot.append(el('circle', { cx: bx, cy: beamY, r: 13, class: 'ab-beam-end' }));
 
-  const cls = (id) => `${s.selected === id ? ' is-selected' : ''}${s.combining && (s.combining.a === id || s.combining.b === id) ? ' is-combining' : ''}${s.hint?.kind === 'cancel' && s.hint.id === id ? ' is-hint' : ''}${s.pending?.kind === 'cross' && s.pending.id === id ? ' is-crossing' : ''}`;
-  const tapAction = (id) => (s.menu === 'cross' ? (s.pending?.kind === 'cross' && s.pending.id === id ? 'flipSign' : 'cross') : 'select');
-  const struck = struckCounts(s);
-
+  const stand = beamY - 10;                                   // what stands on the beam rests here
   const drawSide = (list, startX, sw, side) => {
     const out = el('g', { class: `ab-sideg ab-sideg-${side}` });
     const used = list.reduce((w, i) => w + i.width, 0) + GAP * Math.max(0, list.length - 1);
     let cx = startX + (sw - used) / 2;
-    if (!list.length && building) out.append(el('text', { x: startX + sw / 2, y: top + h / 2 + 8, 'text-anchor': 'middle', class: 'ab-drophere' }, ['drop here']));
+    if (!list.length && building) out.append(el('text', { x: startX + sw / 2, y: zoneTop + zoneH / 2 + 8, 'text-anchor': 'middle', class: 'ab-drophere' }, [ctx.dropText ?? 'drop here']));
     list.forEach((it, i) => {
-      const cy = top + (h - it.height) / 2;
-      if (i > 0) out.append(el('text', { x: cx - GAP / 2, y: top + h / 2 + 12, 'text-anchor': 'middle', class: 'ab-plus' }, ['+']));
+      const cy = stand - it.height;
+      if (i > 0) out.append(el('text', { x: cx - GAP / 2, y: stand - 22, 'text-anchor': 'middle', class: 'ab-plus' }, ['+']));
       if (it.type === 'x') {
-        const early = s.early?.step === 'drag';
+        const early = ctx.early;
         const attrs = building
           ? { 'data-action': 'buildRemove', 'data-side': side, 'data-what': 'x', role: 'button', tabindex: '0', 'aria-label': 'Take the box back off' }
           : early ? { 'data-action': 'dropValue', role: 'button', tabindex: '0', 'aria-label': 'Put your answer in for x' } : {};
@@ -187,17 +172,17 @@ export function boardSvg(s) {
         box.append(el('text', { x: cx + BOX_W / 2, y: cy + BOX_H / 2 + 12, 'text-anchor': 'middle', class: 'sv-x' }, ['x']));
         out.append(box);
       } else if (it.type === 'token') {
-        const g = el('g', { class: `ab-token${cls(it.id)}`, 'data-action': tapAction(it.id), 'data-id': it.id, 'data-numval': it.v, role: 'button', tabindex: '0', 'aria-label': `Group ${signed(it.v)}` });
+        const g = el('g', { class: `ab-token${ctx.cls?.(it.id) ?? ''}`, ...(ctx.tapAction?.(it.id) ? { 'data-action': ctx.tapAction(it.id), 'data-id': it.id } : {}), 'data-numval': it.v, role: 'button', tabindex: '0', 'aria-label': `Group ${signed(it.v)}` });
         g.append(el('rect', { x: cx, y: cy, width: it.width, height: it.height, rx: 12, class: 'ab-token-box' }));
         g.append(el('text', { x: cx + it.width / 2, y: cy + it.height / 2 + 12, 'text-anchor': 'middle', class: 'ab-token-text' }, [signed(it.v)]));
         out.append(g);
       } else {
         const attrs = building
           ? { 'data-action': 'buildRemove', 'data-side': side, role: 'button', tabindex: '0', 'aria-label': `Take a counter off the ${side} side` }
-          : { 'data-action': tapAction(it.id), 'data-id': it.id, 'data-numval': it.v, role: 'button', tabindex: '0', 'aria-label': `Group of ${signed(it.v)}` };
-        const g = el('g', { class: `ab-group${cls(it.id)}${it.v < 0 ? ' is-negative' : ''}`, ...attrs });
+          : { ...(ctx.tapAction?.(it.id) ? { 'data-action': ctx.tapAction(it.id), 'data-id': it.id } : {}), 'data-numval': it.v, role: 'button', tabindex: '0', 'aria-label': `Group of ${signed(it.v)}` };
+        const g = el('g', { class: `ab-group${ctx.cls?.(it.id) ?? ''}${it.v < 0 ? ' is-negative' : ''}`, ...attrs });
         g.append(el('rect', { x: cx, y: cy, width: it.width, height: it.height, rx: 12, class: 'ab-group-box' }));
-        const k = struck[it.id] ?? 0;
+        const k = ctx.struck?.[it.id] ?? 0;
         for (let n = 0; n < it.n; n++) {
           const mx = cx + 11 + (n % it.shape.cols) * CELL + CELL / 2;
           const my = cy + 11 + Math.floor(n / it.shape.cols) * CELL + CELL / 2;
@@ -208,47 +193,99 @@ export function boardSvg(s) {
       }
       cx += it.width + GAP;
     });
-    svg.append(out);
+    rot.append(out);
     return out;
   };
-
   const gl = drawSide(items.left, x0, lw, 'left');
   const gr = drawSide(items.right, x0 + lw + MIDDLE, rw, 'right');
+
+  // the pivot, in front
+  svg.append(el('polygon', { points: `${borderX - 24},${beamY + 52} ${borderX + 24},${beamY + 52} ${borderX},${beamY + 4}`, class: 'ab-pivot' }));
+
+  // the beam eases from where it was to where it is now
+  const angle = ctx.angle ?? 0;
+  if (!reduceMotion() && angle !== lastAngle && typeof rot.animate === 'function') {
+    rot.animate([{ transform: `rotate(${lastAngle}deg)` }, { transform: `rotate(${angle}deg)` }], { duration: 650, easing: 'cubic-bezier(.3,1.6,.5,1)' });
+  }
+  lastAngle = angle;
+
   // Trade places: the side now on the left travels up and over from the right, the other down and over, around the border.
-  if (s.anim === 'trade' && !reduceMotion()) {
+  if (ctx.anim === 'trade' && !reduceMotion()) {
     const dist = lw + MIDDLE;
     const arc = (dx, dy) => [{ transform: `translate(${dx}px, 0px)` }, { transform: `translate(${dx / 2}px, ${dy}px)`, offset: 0.5 }, { transform: 'translate(0px, 0px)' }];
     requestAnimationFrame(() => { try { gl.animate(arc(dist, -60), { duration: 900, easing: 'ease-in-out' }); gr.animate(arc(-dist, 60), { duration: 900, easing: 'ease-in-out' }); } catch { /* no animation: the sides just swap */ } });
   }
+  return { W, x0, lw, middle: MIDDLE, borderX, split };
+}
 
-  // ---- the equation, under the board (a second drawing, so buttons can sit between), with the border through the = ----
-  const sideBtnsOn = !building && s.stage === 'moves' && (s.menu === 'add') && !s.combining && !s.resolving && s.pending?.kind !== 'cross';
-  const split = zoneTop + zoneH + 14;                       // the board's drawing ends here
-  svg.setAttribute('viewBox', `0 0 ${W} ${split}`);
-  svg.setAttribute('data-geo', [x0, lw, MIDDLE, W].join(','));
-  svg.setAttribute('data-sidebtns', sideBtnsOn ? '1' : '');
+// The equation under the balance, in a drawing of its own so buttons can sit between: the border runs through the =.
+export function equationSvg(text, geo, lines = []) {
+  const { W, borderX } = geo;
   const eq = el('svg', { class: 'mat value-mat addboth-mat ab-eqsvg', role: 'img', 'aria-label': 'The equation so far' });
-  const base = s.stage === 'build' ? s.base : s.board;
   let y = 52;
   eq.append(el('line', { x1: borderX, y1: 0, x2: borderX, y2: y + 20, class: 'sv-border' }));
-  eq.append(el('text', { x: borderX - 34, y, 'text-anchor': 'end', class: 'ab-eq' }, [sideValueText(base.left)]));
+  eq.append(el('text', { x: borderX - 34, y, 'text-anchor': 'end', class: 'ab-eq' }, [text.left]));
   eq.append(el('text', { x: borderX, y, 'text-anchor': 'middle', class: 'ab-eq ab-equals' }, ['=']));
-  eq.append(el('text', { x: borderX + 34, y, 'text-anchor': 'start', class: 'ab-eq' }, [sideValueText(base.right)]));
+  eq.append(el('text', { x: borderX + 34, y, 'text-anchor': 'start', class: 'ab-eq' }, [text.right]));
   y += 24;
-
-  // ---- the early answer's drag-check lines ----
-  if (s.early?.step === 'check' || s.early?.step === 'move') {
-    const lines = s.early.step === 'check' ? s.early.lines.slice(0, s.early.shown + 1) : s.early.lines;
-    lines.forEach((line, i) => {
-      const last = i === s.early.lines.length - 1;
-      const bad = last && line.includes('Unbalanced');
-      eq.append(el('text', { x: W / 2, y: y + 40 + i * 48, 'text-anchor': 'middle', class: `ab-check${last ? (bad ? ' is-bad' : ' is-good') : ''}` }, [line]));
-    });
-    y += lines.length * 48 + 30;
-  }
+  lines.forEach((line, i) => {
+    eq.append(el('text', { x: W / 2, y: y + 40 + i * 48, 'text-anchor': 'middle', class: `ab-check${line.cls ? ` ${line.cls}` : ''}` }, [line.text]));
+  });
+  y += lines.length * 48 + (lines.length ? 30 : 0);
   eq.setAttribute('viewBox', `0 0 ${W} ${y + 12}`);
-  svg.querySelector('[data-border]')?.setAttribute('y2', String(split));
-  return { top: svg, bottom: eq, geo: { x0, lw, middle: MIDDLE, W, borderX }, sideBtnsOn };
+  return eq;
+}
+
+export function boardSvg(s) {
+  const items = boardItems(s);
+  const building = s.stage === 'build';
+  const svg = el('svg', { class: 'mat value-mat addboth-mat', role: 'group', 'aria-label': 'The Add to both sides Mat' });
+  const cls = (id) => `${s.selected === id ? ' is-selected' : ''}${s.combining && (s.combining.a === id || s.combining.b === id) ? ' is-combining' : ''}${s.hint?.kind === 'cancel' && s.hint.id === id ? ' is-hint' : ''}${s.pending?.kind === 'cross' && s.pending.id === id ? ' is-crossing' : ''}`;
+  const tapAction = (id) => (building ? null : s.menu === 'cross' ? (s.pending?.kind === 'cross' && s.pending.id === id ? 'flipSign' : 'cross') : 'select');
+  const geo = drawBalance(svg, items, {
+    top: 64,
+    readout: { text: building ? 'Build the equation' : tiltText(s), cls: building ? '' : balanced(s) ? 'is-good' : 'is-bad' },
+    building, zonesOn: building || (s.stage === 'moves' && s.menu === 'add' && hasAmount(s) && !s.combining),
+    early: s.early?.step === 'drag', tapAction, cls, struck: struckCounts(s), angle: tipAngle(s), anim: s.anim,
+  });
+  const sideBtnsOn = !building && s.stage === 'moves' && s.menu === 'add' && hasAmount(s) && !s.combining && !s.resolving && s.pending?.kind !== 'cross';
+  const base = building ? s.base : s.board;
+  let lines = [];
+  if (s.early?.step === 'check' || s.early?.step === 'move') {
+    const shown = s.early.step === 'check' ? s.early.lines.slice(0, s.early.shown + 1) : s.early.lines;
+    lines = shown.map((text, i) => ({ text, cls: i === s.early.lines.length - 1 ? (text.includes('Unbalanced') ? 'is-bad' : 'is-good') : '' }));
+  }
+  const bottom = equationSvg({ left: sideValueText(base.left), right: sideValueText(base.right) }, geo, lines);
+  return { top: svg, bottom, geo, sideBtnsOn };
+}
+
+// Undo on the left (red), Go or Continue on the right (green): right under the equation, where the action is.
+export function actionRow({ undo = false, go = null, goAction = 'go', goDisabled = false }) {
+  if (!undo && !go) return null;
+  const row = html('div', 'ab-actions');
+  row.append(undo ? html('button', 'btn btn-undo', ['↶ Undo'], { type: 'button', 'data-action': 'undo', 'data-key': 'u' }) : html('span'));
+  if (go) {
+    const g = html('button', 'btn btn-go', [go], { type: 'button', 'data-action': goAction });
+    g.disabled = goDisabled;
+    row.append(g);
+  }
+  return row;
+}
+
+// The buttons under each side: "Add −9 here". `pending` fades the side that has had its share.
+export function sideButtons(geo, amountEntry, pending) {
+  const row = html('div', 'ab-sidebtns');
+  const amount = amountEntry ? amountEntry.replace('-', MINUS) : '___';
+  row.style.setProperty('--left', `${geo.x0 / geo.W * 100}%`);
+  row.style.setProperty('--side', `${geo.lw / geo.W * 100}%`);
+  row.style.setProperty('--gap', `${geo.middle / geo.W * 100}%`);
+  row.style.setProperty('--mid', `${geo.borderX / geo.W * 100}%`);
+  for (const side of ['left', 'right']) {
+    const b = html('button', 'btn ab-sidebtn', [`Add ${amount} here`], { type: 'button', 'data-action': 'addTo', 'data-side': side });
+    b.disabled = Boolean(pending && (pending.both || pending.side === side));
+    row.append(b);
+  }
+  return row;
 }
 
 // ---------- the tray: pieces to drag up ----------
@@ -265,7 +302,7 @@ export function trayFor(s) {
     t.append(chip(signed(s.early.typed), { 'data-chip': '1', 'aria-label': `Your answer ${signed(s.early.typed)}` }, 'is-answer'));
     return t;
   }
-  const adding = s.stage === 'moves' && s.menu === 'add' && s.counterMode && !s.combining;
+  const adding = s.stage === 'moves' && s.menu === 'add' && hasAmount(s) && s.counterMode && !s.combining;
   if (s.stage !== 'build' && !adding) return null;
   const t = html('div', 'ab-tray');
   t.append(html('p', 'ab-tray-note', [s.stage === 'build' ? 'Drag up onto a side (or tap one, then tap a side)' : 'Drag a counter up onto each side']));
@@ -292,29 +329,26 @@ export function panelFor(s, { replay = false } = {}) {
   const choosing = !building && !done && !combining && !mid && !checking && !s.resolving;
   const allowed = MOVES_BY_LEVEL(s.level);
 
-  const moves = html('div', 'ab-moves');
-  const blankText = s.amountEntry ? s.amountEntry.replace('-', MINUS) : '___';
-  const blank = html('span', `ab-blank${s.menu === 'add' ? ' is-active' : ''}${s.amountEntry ? '' : ' is-empty'}`, [blankText], { 'data-blank': '1' });
-  const labels = {
-    add: ['Add ', blank, ' to both sides'],
-    trade: ['Trade places'],
-    cross: ['Cross the border'],
+  // Each move sits beside the goals it works toward (a green, red or grey checkbox for how the last move did).
+  const goalFor = (key, label) => {
+    const state = building ? 'off' : s.lights[key];
+    const box = html('span', `ab-checkbox is-${state}`, [state === 'green' ? '✓' : state === 'red' ? '✗' : state === 'neutral' ? '–' : ''], { 'aria-hidden': 'true' });
+    return html('li', `ab-goal is-${state}`, [box, html('span', 'ab-goal-label', [label])]);
   };
+  const GOALS = { add: [['fewer', 'Fewer terms'], ['xAlone', 'x alone']], trade: [['xLeft', 'x on the left']], cross: [] };
+  const blank = html('span', `ab-blank${s.menu === 'add' ? ' is-active' : ''}${s.amountEntry ? '' : ' is-empty'}`, [s.amountEntry ? s.amountEntry.replace('-', MINUS) : '\u00a0'], { 'data-blank': '1' });
+  const labels = { add: ['Add ', blank, ' to both sides'], trade: ['Trade places'], cross: ['Cross the border'] };
+  const grid = html('div', 'ab-grid');
   for (const m of allowed) {
     const b = html('button', `btn btn-move ab-move${s.menu === m ? ' is-on' : ''}`, labels[m], { type: 'button', 'data-action': 'choose', 'data-move': m });
     b.disabled = !choosing || s.stage !== 'moves';
-    moves.append(b);
+    const goals = html('ul', 'ab-goals', GOALS[m].map(([key, label]) => goalFor(key, label)), { 'aria-label': 'Goals for this move' });
+    grid.append(html('div', 'ab-grow', [b, goals]));
   }
-  panel.append(moves);
+  panel.append(grid);
 
   if (s.resolving && !combining) panel.append(html('p', 'ab-simplify', ['Simplify first: tap two groups on a side to combine them.']));
   const sub = html('div', 'ab-sub');
-  const crossing = s.pending?.kind === 'cross';
-  if (!building && !done && !combining && (s.menu === 'add' || crossing)) {
-    const go = html('button', 'btn btn-primary', ['Go ▶'], { type: 'button', 'data-action': 'go' });
-    go.disabled = !(mid && s.pending.both) || s.leftDelta !== s.rightDelta;
-    sub.append(go);
-  }
   if (combining) {
     const inKind = s.combining.step === 'kind';
     if (inKind) {
@@ -328,15 +362,6 @@ export function panelFor(s, { replay = false } = {}) {
   if (s.early?.step === 'check') sub.append(html('button', 'btn btn-primary', ['Next ▸'], { type: 'button', 'data-action': 'nextLine' }));
   if (sub.childNodes.length) panel.append(sub);
 
-  // the checkboxes: what a good move earns
-  const names = [['fewer', 'Fewer terms'], ['xAlone', 'x alone'], ...(s.level >= 4 ? [['xLeft', 'x on the left']] : [])];
-  const goals = html('ul', 'ab-goals', [], { 'aria-label': 'Goals' });
-  for (const [key, label] of names) {
-    const state = building ? 'off' : s.lights[key];
-    const box = html('span', `ab-checkbox is-${state}`, [state === 'green' ? '✓' : state === 'red' ? '✗' : state === 'neutral' ? '–' : ''], { 'aria-hidden': 'true' });
-    goals.append(html('li', `ab-goal is-${state}`, [box, html('span', 'ab-goal-label', [label])]));
-  }
-  panel.append(goals);
   if (replay && !done) {
     panel.append(html('button', 'btn btn-quiet ab-replay', ['Replay tutorial'], { type: 'button', 'data-action': 'replayTutorial' }));
   }

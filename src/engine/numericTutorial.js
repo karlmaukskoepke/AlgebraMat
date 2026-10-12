@@ -32,17 +32,17 @@ const START_BOARD = (kind) => board(START[kind]);
 const withTerm = (b, side, v) => ({ ...b, [side]: [...b[side], term(v)] });
 const QUIZ = {
   add: [
-    { say: 'Adding 3 to one side only', correct: 'upsets', apply: (b) => withTerm(b, 'left', 3) },
-    { say: 'Adding 3 to both sides', correct: 'keeps', apply: (b) => withTerm(withTerm(b, 'left', 3), 'right', 3) },
-    { say: 'Adding 3 to the left and 2 to the right', correct: 'upsets', apply: (b) => withTerm(withTerm(b, 'left', 3), 'right', 2) },
+    { ask: 'What would happen if we added 3 to one side only?', say: 'Adding 3 to one side only', correct: 'upsets', apply: (b) => withTerm(b, 'left', 3) },
+    { ask: 'What would happen if we added 3 to both sides?', say: 'Adding 3 to both sides', correct: 'keeps', apply: (b) => withTerm(withTerm(b, 'left', 3), 'right', 3) },
+    { ask: 'What would happen if we added 3 to the left and 2 to the right?', say: 'Adding 3 to the left and 2 to the right', correct: 'upsets', apply: (b) => withTerm(withTerm(b, 'left', 3), 'right', 2) },
   ],
   trade: [
-    { say: 'Trading places', correct: 'keeps', apply: (b) => ({ left: b.right.map((t) => term(t.v)), right: b.left.map((t) => term(t.v)) }) },
-    { say: 'Changing the sign of just one term', correct: 'upsets', apply: (b) => ({ ...b, right: b.right.map((t, i) => (i === 0 ? term(-t.v) : term(t.v))) }) },
+    { ask: 'What would happen if we traded places?', say: 'Trading places', correct: 'keeps', apply: (b) => ({ left: b.right.map((t) => term(t.v)), right: b.left.map((t) => term(t.v)) }) },
+    { ask: 'What would happen if we changed the sign of just one term?', say: 'Changing the sign of just one term', correct: 'upsets', apply: (b) => ({ ...b, right: b.right.map((t, i) => (i === 0 ? term(-t.v) : term(t.v))) }) },
   ],
   cross: [
-    { say: 'Crossing the border and not switching teams', correct: 'upsets', apply: (b) => ({ left: b.left.filter((_, i) => i !== 1).map((t) => term(t.v)), right: [...b.right.map((t) => term(t.v)), term(b.left[1].v)] }) },
-    { say: 'Crossing the border and switching teams', correct: 'keeps', apply: (b) => ({ left: b.left.filter((_, i) => i !== 1).map((t) => term(t.v)), right: [...b.right.map((t) => term(t.v)), term(-b.left[1].v)] }) },
+    { ask: 'What would happen if a number crossed the border and did not switch teams?', say: 'Crossing the border and not switching teams', correct: 'upsets', apply: (b) => ({ left: b.left.filter((_, i) => i !== 1).map((t) => term(t.v)), right: [...b.right.map((t) => term(t.v)), term(b.left[1].v)] }) },
+    { ask: 'What would happen if a number crossed the border and switched teams?', say: 'Crossing the border and switching teams', correct: 'keeps', apply: (b) => ({ left: b.left.filter((_, i) => i !== 1).map((t) => term(t.v)), right: [...b.right.map((t) => term(t.v)), term(-b.left[1].v)] }) },
   ],
 };
 export const QUIZ_LENGTH = (kind) => QUIZ[kind].length;
@@ -52,7 +52,7 @@ export function newTutorial(kind) {
   const b = kind === 'trade' ? board(TRADE_ITEMS[0]) : START_BOARD(kind);
   return {
     kind, stage: 'explore', board: b, item: 0, traded: false,
-    pending: null, amountEntry: '', menu: null, leftDelta: 0, rightDelta: 0, history: [],
+    pending: null, amountEntry: '', suggested: false, menu: null, leftDelta: 0, rightDelta: 0, history: [],
     moves: [], sawUnbalanced: false, crosses: 0, flips: 0, sawAllFlip: false, crossed: null, flipMode: false,
     quiz: 0, reveal: null, misses: 0, feedback: { key: `tuIntro_${kind}`, params: {} },
   };
@@ -64,7 +64,7 @@ const restore = (t, s) => Object.assign(t, s);
 
 // Ready to leave the exploring and take the quiz?
 export function readyForQuiz(t) {
-  if (t.kind === 'add') return t.moves.length >= 2 && t.sawUnbalanced;
+  if (t.kind === 'add') return t.moves.some((m) => m > 0) && t.moves.some((m) => m < 0) && t.sawUnbalanced;      // one positive and one negative
   if (t.kind === 'trade') return t.item >= TRADE_ITEMS.length - 1 && t.traded;
   return t.crosses >= 1 && t.flips >= 1;
 }
@@ -76,9 +76,10 @@ export function reduceTutorial(state, action) {
 
   if (isTyping(action)) {
     if (t.stage !== 'explore' || t.kind !== 'add' || t.menu !== 'add') return state;
-    const entry = typeInto(t.amountEntry, action, 'integer');
-    if (entry === t.amountEntry) return state;
+    const entry = typeInto(t.suggested ? '' : t.amountEntry, action, 'integer');     // typing replaces a suggested number
+    if (entry === t.amountEntry && !t.suggested) return state;
     t.amountEntry = entry;
+    t.suggested = false;
     return t;
   }
 
@@ -87,7 +88,11 @@ export function reduceTutorial(state, action) {
     case 'choose': {
       if (t.stage !== 'explore' || t.kind !== 'add' || t.pending) return state;
       t.menu = 'add';
-      return say(t, 'tuPickAmount');
+      // suggest a number: first a positive, then a negative (the pad changes it)
+      const suggestion = !t.moves.some((m) => m > 0) ? '3' : !t.moves.some((m) => m < 0) ? '-2' : '';
+      t.amountEntry = suggestion;
+      t.suggested = suggestion !== '';
+      return say(t, suggestion === '3' ? 'tuSuggestPos' : suggestion === '-2' ? 'tuSuggestNeg' : 'tuPickAmount');
     }
     case 'addTo': {
       if (t.stage !== 'explore' || t.kind !== 'add' || t.menu !== 'add') return state;
@@ -96,6 +101,7 @@ export function reduceTutorial(state, action) {
       if (amount === null || amount === 0) return say(t, 'tuAmountZero', {}, true);
       if (Math.abs(amount) > 12) return say(t, 'tuAmountBig', {}, true);
       if (t.pending && t.pending.side === side) return say(t, 'tuOtherSide', {}, true);
+      t.suggested = false;
       const first = !t.pending;
       if (first) t.history.push(snap(t));
       t.board = withTerm(t.board, side, amount);
@@ -118,7 +124,8 @@ export function reduceTutorial(state, action) {
         const r = sum(t.board.right);
         t.board = { left: [term(l)], right: [term(r)] };       // tidy: each side is what it comes to
         t.pending = null; t.menu = null; t.amountEntry = '';
-        return say(t, readyForQuiz(t) ? 'tuTryMoreDone' : 'tuTryMore', { amount: signed(amount), readout: readoutOf(t.board).text });
+        const need = !t.moves.some((m) => m > 0) ? 'tuTryPos' : !t.moves.some((m) => m < 0) ? 'tuTryNeg' : 'tuTryMore';
+        return say(t, readyForQuiz(t) ? 'tuTryMoreDone' : need, { amount: signed(amount), readout: readoutOf(t.board).text });
       }
       if (t.kind === 'cross') {
         if (t.crossed === null || !readoutOf(t.board).balanced) return say(t, 'tuGoNotYet', {}, true);
