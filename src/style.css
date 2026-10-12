@@ -2907,3 +2907,16 @@ body {
 .lb-main .ab-boardwrap > .ab-actions { margin-top: auto; width: 100%; box-sizing: border-box; }
 @media (max-width: 760px) { .lb-eqcard .lb-line { min-height: 0; } .lb-main .ab-boardwrap { min-height: 0; } }
 @media (max-width: 760px) { .lb-stack, .lb-walkstack { min-height: 0; } .lb-subst { min-height: 0; } }
+
+/* move icons and the faint Why? boxes of greyed moves */
+.lb-move { display: flex; align-items: center; justify-content: center; gap: 8px; }
+.lb-icon { flex: none; height: 24px; width: auto; }
+.lb-move.is-grey .lb-icon { opacity: 0.55; }
+.lb-movelabel { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.ab-goals.is-faint { opacity: 0.4; }
+.lb-body { grid-template-columns: minmax(0, 1fr) 480px; }
+.lb-row, .lb-head { grid-template-columns: minmax(0, 1fr) 7.6rem; }
+.lb-icon { height: 28px; }
+.lb-move.is-grey .lb-icon { opacity: 0.8; }
+.lb-movelabel { white-space: nowrap; }
+@media (max-width: 760px) { .lb-body { grid-template-columns: 1fr; } .lb-row, .lb-head { grid-template-columns: 1fr; } }

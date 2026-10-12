@@ -98,7 +98,13 @@ export function readout(seed, answers, items = diagnosticItems(seed), section = 
 }
 
 // The progress with the recommended levels opened.
-export const applyReadout = (progress, results) => results.reduce((p, r) => openLevels(p, r.pack, r.rec), progress);
+// A student whose Add to both sides diagnostic shows they apply the move correctly (the x − a Battle was right, so level 5 or 6
+// is recommended) skips Level 1, the numeric level: it is marked done. They can still play it.
+export const applyReadout = (progress, results) => results.reduce((p, r) => {
+  const opened = openLevels(p, r.pack, r.rec);
+  if (r.pack === 'add-both' && r.rec >= 5 && opened.packs['add-both']) opened.packs['add-both'].levels[0] = true;
+  return opened;
+}, progress);
 
 export const STANDING = { strong: 'Strong', growing: 'Getting there', start: 'Start here' };
 export const packTitle = (id) => PACKS.find((p) => p.id === id)?.title ?? id;
