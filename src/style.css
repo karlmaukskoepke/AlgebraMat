@@ -2930,3 +2930,30 @@ body {
 
 .ab-quiz .lb-reveal { min-height: 150px; margin: 0; }
 @media (max-width: 760px) { .ab-quiz .lb-reveal { min-height: 120px; } }
+
+/* the move grid: icons only, names pop up outside the box; Why? groups centred beside their moves */
+.lb-grid { display: grid; grid-template-columns: minmax(0, 1fr) 9.2rem; grid-auto-rows: 44px; gap: 6px 8px; align-items: stretch; }
+.lb-grid .lb-move { grid-column: 1; min-height: 0; height: 44px; padding: 2px 8px; overflow: visible; position: relative; }
+.lb-grid .lb-why { grid-column: 2; align-self: center; margin: 0; padding: 0; border: 0; display: flex; flex-direction: column; gap: 2px; }
+.lb-grid .lb-why .ab-goal { font-size: 14px; white-space: nowrap; }
+.lb-grid .lb-why .ab-goals { display: contents; }
+.lb-move.is-on { font-size: inherit; min-height: 0; }
+.lb-move .ab-blank { min-width: 2.2ch; margin-left: 6px; font: 800 20px 'Lexend', system-ui, sans-serif; }
+.lb-move:not(.is-on) .ab-blank { visibility: hidden; }
+.lb-move[data-tip]:hover::after, .lb-move[data-tip]:focus-visible::after {
+  content: attr(data-tip); position: absolute; right: calc(100% + 12px); top: 50%; transform: translateY(-50%); z-index: 30; white-space: nowrap;
+  background: #fff; color: var(--ink); border: 3px solid var(--ink); border-radius: 12px; padding: 6px 14px; font: 800 17px 'Lexend', system-ui, sans-serif; box-shadow: 0 3px 10px rgba(0, 0, 0, 0.18); pointer-events: none;
+}
+.lb-body { grid-template-columns: minmax(0, 1fr) 440px; }
+@media (max-width: 760px) {
+  .lb-body { grid-template-columns: 1fr; }
+  .lb-grid { grid-template-columns: minmax(0, 1fr) 8.4rem; }
+  .lb-move[data-tip]:hover::after, .lb-move[data-tip]:focus-visible::after { right: auto; left: 0; top: auto; bottom: calc(100% + 6px); transform: none; }
+}
+.lb-grid { grid-template-columns: minmax(0, 1fr) 11.4rem; }
+.lb-grid .lb-why .ab-goal { font-size: 13px; gap: 6px; }
+.lb-grid .lb-why .ab-checkbox { width: 22px; height: 22px; font-size: 14px; border-width: 2px; flex: none; }
+.lb-move.is-grey { opacity: 0.8; }
+.lb-move.is-grey .lb-icon { opacity: 1; }
+@media (max-width: 760px) { .lb-grid { grid-template-columns: minmax(0, 1fr) 10.6rem; } }
+.lb-icon { height: auto; max-height: 40px; }
