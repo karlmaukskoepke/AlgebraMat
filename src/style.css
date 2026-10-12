@@ -2957,3 +2957,14 @@ body {
 .lb-move.is-grey .lb-icon { opacity: 1; }
 @media (max-width: 760px) { .lb-grid { grid-template-columns: minmax(0, 1fr) 10.6rem; } }
 .lb-icon { height: auto; max-height: 40px; }
+
+/* moves that are not available: a grey fill and a dark grey dashed edge, so they read as off */
+.lb-move.is-grey { background: #dcdad2; border-color: #6b685f; opacity: 1; }
+.lb-move.is-grey .lb-icon { opacity: 0.85; }
+/* plugging back in: the original equation is outlined, its x (or the guess) and the value in the first line are blue */
+.lb-rowwrap { position: relative; }
+.lb-rowwrap.is-plugrow { outline: 4px solid #0072b2; outline-offset: -2px; border-radius: 14px; background: #eef7fd; }
+.lb-plugtag { position: absolute; top: -2px; left: 12px; z-index: 2; padding: 1px 10px; border-radius: 999px; background: #0072b2; color: #fff; font: 800 13px 'Lexend', system-ui, sans-serif; letter-spacing: 0.02em; }
+.lb-x.is-plugx { color: #0072b2; }
+.lb-guess { color: #0072b2; border-color: #0072b2; }
+.lb-subst .is-blue { color: #0072b2; }

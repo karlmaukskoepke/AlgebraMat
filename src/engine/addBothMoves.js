@@ -231,8 +231,8 @@ export function reduceAddBoth(state, action) {
     }
     const amountMode = s.menu === 'add' && s.typing !== 'answer' && (!s.pending || s.pending.second);
     const key = amountMode ? 'amountEntry' : 'entry';
-    // the answer row is greyed until the guess path is chosen, or (on the move path) until x is alone; the scaffold ends with the pad
-    if (key === 'entry' && !s.scaffold && (!s.path || (s.path === 'move' && !xAlone(s.board)))) return state;
+    // the answer row is greyed until the guess path is chosen, or (on the move path, scaffold included) until x is alone
+    if (key === 'entry' && (!s.path || (s.path === 'move' && !xAlone(s.board)))) return state;
     const entry = typeInto(s[key], action, 'integer');
     if (entry === s[key]) return state;
     s[key] = entry;
@@ -358,7 +358,7 @@ export function reduceAddBoth(state, action) {
         s.amountEntry = '';
         s.menu = null;
         s.hint = null;
-        if (unresolved(s.board)) { s.resolving = true; return say(s, 'aCombineGroups'); }
+        if (unresolved(s.board)) { s.resolving = true; return startPair(s); }
         return resolve(s);
       }
       // the bare move: the amount goes onto both sides in one action
@@ -395,6 +395,7 @@ export function reduceAddBoth(state, action) {
       s.combining = { a: first, b: t.id, step: 'kind', crossed: false, entry: '' };
       return say(s, 'aPartyOrBattle', combineParams(s));
     }
+    // Party or Battle? A right answer combines the two highlighted groups for the student (no count to type) and moves to the next pair.
     case 'kind': {
       if (s.combining?.step !== 'kind') return state;
       const { a, b } = combineTerms2(s);
@@ -403,8 +404,12 @@ export function reduceAddBoth(state, action) {
         s.kindMisses += 1;
         return say(s, 'aKindWrong', { ...combineParams(s), picked: action.value }, true);
       }
-      s.combining = { ...s.combining, step: 'count', kind: right };
-      return say(s, 'aHowMany', combineParams(s));
+      const params = combineParams(s);
+      s.history.push(snapshot(s));
+      s.board = combineTerms(s.board, a.id, b.id);
+      s.combining = null;
+      s.combinedNote = { kind: right, g1: params.g1, g2: params.g2, total: params.total };
+      return startPair(s);
     }
     case 'crossOff': {
       if (s.combining?.step !== 'count' || s.combining.crossed) return state;
@@ -540,15 +545,32 @@ function combineParams(s) {
   return { g1: signed(a.v), g2: signed(b.v), kind: kindOf(a.v, b.v), total: signed(total) };
 }
 
+// The next two numbers on a side that can combine (the left side first) are highlighted and the student is asked: Party or Battle?
+function startPair(s) {
+  const pair = combinable(s.board)[0];
+  if (!pair) { s.combining = null; return resolve(s); }
+  s.combining = { a: pair.a, b: pair.b, step: 'kind', crossed: false, entry: '' };
+  return say(s, 'aPartyOrBattle', { ...combineParams(s), before: s.combinedNote ? `${s.combinedNote.kind === 'party' ? 'Party' : 'Battle'}! ${s.combinedNote.g1} and ${s.combinedNote.g2} make ${s.combinedNote.total}.` : '' });
+}
+
 // The substitution of a typed value, as written in the equation (the value in place of x), then what it comes to.
 // Two lines, then the mark (✓ Balanced / ✗ Not balanced) on its own line.
 export function substitutionSteps(p, typed) {
   const op = p.form === 'x-a' ? '−' : '+';
-  const inner = `${signed(typed)} ${op} ${p.a}`;
+  const inner = `${plugValue(typed)} ${op} ${p.a}`;
   const value = typed + constantOf(p);
   const first = p.mirror ? `${signed(p.b)} = ${inner}` : `${inner} = ${signed(p.b)}`;
   const second = p.mirror ? `${signed(p.b)} = ${signed(value)}` : `${signed(value)} = ${signed(p.b)}`;
   return [first, second];
+}
+// A negative value goes in parentheses when it replaces x, so it is seen how it would be re-entered.
+export const plugValue = (typed) => (typed < 0 ? `(${signed(typed)})` : `${typed}`);
+// The first line in pieces, the value (in blue on screen) apart from the rest.
+export function substitutionParts(p, typed) {
+  const op = p.form === 'x-a' ? '−' : '+';
+  const val = { text: plugValue(typed), blue: true };
+  const rest = { text: ` ${op} ${p.a}` };
+  return p.mirror ? [{ text: `${signed(p.b)} = ` }, val, rest] : [val, rest, { text: ` = ${signed(p.b)}` }];
 }
 
 // What a move looked like before x's side was simplified: both sides with the added amount (coloured), and the numbers on x's
@@ -584,8 +606,7 @@ export function answerLive(s) {
   if (s.combining) return s.combining.step === 'count';
   if (s.sub) return s.sub.kind === 'value' && s.sub.step >= 3 && !s.sub.ok;
   if (s.menu === 'add' && s.typing !== 'answer') return false;
-  if (s.scaffold) return !s.pending;
-  return s.path === 'guess' || (s.path === 'move' && xAlone(s.board));
+  return s.path === 'guess' || (s.path === 'move' && xAlone(s.board) && !s.pending && !s.resolving);
 }
 
 // Asking for help from the guess path moves the problem to the move path (the scaffolds are about moves).
@@ -603,7 +624,7 @@ function check(s, applyCombine) {
   if (!correct) { s.wrongs += 1; s.tag = tag; s.tags.push(tag); s.answers.push({ typed: s.entry, tag }); }
   // every typed value is plugged back in, a line a click. A first guess (x not alone yet) slides onto x.
   const kind = xAlone(s.board) || s.scaffold ? 'value' : 'guess';
-  s.sub = { kind, typed, ok: correct, tag, lines: substitutionSteps(s.problem, typed), step: 0 };
+  s.sub = { kind, typed, ok: correct, tag, lines: substitutionSteps(s.problem, typed), parts: substitutionParts(s.problem, typed), step: 0 };
   return correct ? say(s, 'aPlugIn', { typed: signed(typed) }) : say(s, kind === 'guess' ? 'aGuessed' : 'aPlugIn', { typed: signed(typed) }, kind === 'guess');
 }
 

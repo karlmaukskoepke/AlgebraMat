@@ -25,7 +25,7 @@ const M = {
   // building the equation (L1–L2)
   aBuild: (p) => `Build the equation on the balance: drag the □, the + and the − up onto the sides (or tap one, then tap a side). ${p.mirror ? `The □ goes on the right.` : `The □ goes on the left.`}`,
   aBuilding: () => 'Keep going. Tap a counter to take one back off.',
-  aSimplifyFirst: () => 'Simplify first: tap two groups on the same side to combine them. Then choose your next move.',
+  aSimplifyFirst: () => 'Finish combining first: say whether the highlighted numbers are a Party or a Battle.',
   aPickFirst: () => 'Pick a piece first (□, + or −), then tap the side to put it on.',
   aBuildXSide: (p) => `The □ goes on the ${p.xside} side in this equation.`,
   aBuildXHave: () => 'The □ is already up. Tap it to take it back off.',
@@ -53,10 +53,10 @@ const M = {
   aGoNotYet: () => 'Go works when both sides got the same amount and it is balanced.',
   aForced: (p) => `In this walkthrough the move is ${p.amount}. It is the opposite of the number next to x.`,
   // combining groups (Party or Battle? how many are left?)
-  aCombineGroups: () => 'Now combine the groups on each side: tap two groups.',
-  aOnlyNumbers: () => 'Tap two groups of counters (numbers) on the same side.',
+  aCombineGroups: () => 'Now combine the numbers on each side.',
+  aOnlyNumbers: () => 'Tap two numbers on the same side.',
   aSameSide: () => 'Both groups have to be on the same side of the border.',
-  aPartyOrBattle: (p) => `${p.g1} and ${p.g2}: Party or Battle?`,
+  aPartyOrBattle: (p) => `${p.before ? `${p.before} ` : ''}Look at the highlighted ${p.g1} and ${p.g2}. Is this a Party or a Battle?`,
   aKindWrong: (p) => (p.kind === 'party'
     ? `Look at the signs: ${p.g1} and ${p.g2} are the same team, so it's a Party.`
     : `Look at the signs: ${p.g1} and ${p.g2} are opposite teams, so it's a Battle.`),
@@ -92,7 +92,7 @@ const M = {
   aGuessed: (p) => `You guessed x = ${p.typed}. This unbalances the equation.`,
   aUndoGuess: () => 'Press Undo to take your guess back.',
   aSimplerFirst: () => 'Let’s make the equation simpler first, and then find the solution.',
-  aPlugIn: (p) => `Let’s plug ${p.typed} back in for x. Click Next for each line.`,
+  aPlugIn: (p) => `Let’s plug ${p.typed} back in for x, into the original equation. Click Next for each line.`,
   aCorrect: (p) => `Yes! x = ${p.answer}, and it balances.`,
   aFinishMoveFirst: () => 'Finish the move first, then type your answer.',
   typeAnswer: () => 'Type your answer with the pad, then Check.',
