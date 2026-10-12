@@ -1,5 +1,7 @@
 # 05 · Aligning Count it, Build it and Solve it (draft)
 
+*Karl (Q5): the home screen and card menus are the same across sections; lesson screens vary naturally. So rows 1, 3, 4 apply to the shared frame only, not to how each card teaches.*
+
 *Draft: several recommendations depend on Q5 in `04-inferences.md` (how far to align). Nothing here is applied. Evidence: screenshots taken at 1366×768 of Combine it L2, Group It L6, Boxes L3, Value it L2, Add L1/L5, Divide L1/L5, One-step, Two-step, and the code cited.*
 
 **Cost:** S = an hour or two, M = a day, L = several days. **Save risk:** whether students' saved progress could be affected.

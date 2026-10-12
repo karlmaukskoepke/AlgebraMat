@@ -27,7 +27,7 @@ These are the acceptance tests the steps below add. They run on **every Solve it
 - **Goal:** fix the two observed causes in 03 §C.
 - **Files:** `src/syncStore.js` (keep `{ mode: 'device', id, token, label }` across reloads), `src/main.js` (`saveProgress`: read what is stored, union it with memory, keep packs this build doesn't know, then write; read `mat.v1.backup` at start and union it in), `tests/syncStore.test.js` (new), `tests/progress.test.js`.
 - **Acceptance:** a device sign-in survives `loadSync(saveSync(x))`; two "tabs" (two app instances on one fake storage) each finishing a different level end with both done; a store holding an unknown pack keeps it after a save from an older pack list.
-- **Also (Karl, 2026-10-12):** ask students to sign in at every visit, before play (details pending: skippable or not, how a returning student confirms). Merge stays level by level: a level finished on either side stays finished.
+- **Also (Karl, 2026-10-12):** ask students to sign in at every visit, before play. Skippable with "Not now" (asked again next visit); a returning student with a device token is signed in silently. Merge stays level by level: a level finished on either side stays finished.
 - **Risk to saves:** reduces it. No code-format change.
 
 ### R2. Shared Solve it home and tokens  (S)

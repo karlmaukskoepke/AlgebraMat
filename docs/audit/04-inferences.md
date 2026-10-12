@@ -29,7 +29,7 @@
 
 *Evidence:* loop §6 rung 1 is Model it and §6 forbids text-only help at x alone; Add's build follows the earlier rule and fails that (`addBothMoves.js:199, 220`). Divide already folds the reminder into rung 1 (outline the coefficient + the counters). The loop's own code comment still lists four rungs (`solveLoop.js:28`), which is the leftover of B.
 
-**Answer (2026-10-12):** C. Each card spec decides its first rung ("it really depends"). Loop §6 needs an edit: rung 1 is set per card; the rule that x alone with an unevaluated side always gets a picture still needs a decision for Add.
+**Answer (2026-10-12):** C. Each card spec decides its first rung ("it really depends"). Follow-up answer: "Text reminders first are usually best." So the default for new cards is rung 1 = a text reminder, rung 2 = the picture. Loop §6 needs an edit: rung 1 may be a text reminder as long as the picture comes on the next rung, including at x alone with an unevaluated side. Divide (rung 1 = counters + outline) stays as built unless Karl asks.
 
 ### Q4. Do your students' Chromebooks keep site data between sessions?  (Asked)
 - **A. I don't know; please give me a way to check (recommended)** (a one-line test: finish a level, sign out of the Chromebook, sign back in, open the site).
@@ -38,7 +38,7 @@
 
 *Evidence:* inferred only; districts often set Chromebooks to clear browsing data. It decides how much weight to put on local save versus the sheet.
 
-**Answer (2026-10-12):** B. Chromebooks keep site data. New request: prompt sign-in at every visit, before play. On sign-in, the more advanced progress wins; never overwrite more progress with less. (Note: both the app and the sheet already merge level by level and never un-finish a level; the sign-in bug in 03 §C.1 is what stops it working.) Follow-up questions on the prompt asked in chat.
+**Answer (2026-10-12):** B. Chromebooks keep site data. New request: prompt sign-in at every visit, before play. On sign-in, the more advanced progress wins; never overwrite more progress with less. (Note: both the app and the sheet already merge level by level and never un-finish a level; the sign-in bug in 03 §C.1 is what stops it working.) Follow-ups: the prompt can be skipped ("Not now") but should nudge, and asks again next visit; a student who signed in before is signed in silently (the device token), no prompt.
 
 ### Q5. How far should Count it and Build it be aligned with Solve it?  (Asked)
 - **A. Shared frame only (recommended):** the same header, colour tokens, number pad, help placement, line position and type sizes; their own pedagogy (type the answer first, steps, supports) stays. Remove their 2.5 s auto-advance.
@@ -47,7 +47,7 @@
 
 *Evidence:* `DECISION-LOG.md` "Structure", last bullet; screenshots show different line position (bottom vs top), help placement (palette vs help row), streaks and a steps bar on Count it / Build it. Their timer (`main.js:517-518`) breaks a rule you wrote for Solve it ("nothing advances on a timer"); whether it applies to the other sections is the question.
 
-**Answer (2026-10-12):** A, after a plain explanation of "same frame" (the parts around the problem: header, the line, help buttons, number pad, colours, sizes; not how each card teaches).
+**Answer (2026-10-12):** A, refined: the home screen and card menus are the same across sections; the lesson screens vary naturally (Solve it has the Move / Why? panel). After a plain explanation of "same frame" (the parts around the problem: header, the line, help buttons, number pad, colours, sizes; not how each card teaches).
 
 ## Queued for later batches (my current recommendation in bold)
 
