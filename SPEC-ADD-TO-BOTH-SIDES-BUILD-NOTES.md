@@ -110,3 +110,19 @@ Not built: the move icons (§3H, proposed only).
 - **Diagnostic:** Add to both sides adds 3 problems at the end of the Solve it diagnostic (x − a Battle; two level-6, x left and x right). L3 wrong → start L3; both L6 right → L6; otherwise L5. Appended last so saved partial diagnostics continue.
 - **Log:** stuck/taught per level were already recorded per pack-level; nothing new needed in the sheet.
 - **Loss audit:** `storage.js` keeps a `.backup` copy of any value that fails to parse; `saveProgress` copies the old store to `mat.v1.backup` if a save would lower the completed-level count.
+
+## 11. Revision 2.3 (third build review, 2026-10-12): what was built, and the defaults I took
+
+The spec is `SPEC-ADD-TO-BOTH-SIDES.md` revision 2.3. Built:
+
+- **Path chosen first and fixed.** Before the choice the Add move and the `x = [ ]` row are greyed (a tap on Add says "Choose first"). Guess x: the field is live with the cursor and the moves are greyed ("You're guessing this one"). Use a move: the field is greyed, no cursor, until x is alone. I'm stuck / Teach me from the guess path move the problem to the move path. Start over returns to the choice.
+- **A correct guess owes a move.** The next problem starts on the move path ("Let's try solving this one using a move."). If the guess was on the last problem of a level, a sixth, move-only problem is added (a sixth dot appears). The owed move is not kept across a page reload.
+- **Every typed value is plugged back in**, a line a click (a green Next each): the substitution, its result, then ✓ Balanced / ✗ Not balanced on its own line. A right value ends in "Yes! x = 15, and it balances." and a green "Ready for the next problem". A wrong guess ends with Undo highlighted, then "Let's make the equation simpler first". A wrong value after a move names the slip at the end, clears the row, and the first key clears the old lines.
+- **Work stack.** The equation, each move beneath it (the added amount in colour, x's numbers struck), the `x = [ ]` row with Check beside it, the substitution. Room is reserved for the first move and its check, so Undo/Go/Next don't move; a second move grows the stack.
+- **Zeroing the side without x** is caught: the other side shows the 0 it cancelled to, the line says so, Undo is highlighted, and after Undo the blank is cleared, the number next to x is outlined, and the line asks "What do we add to both sides to eliminate this?" It counts toward three reds. Undo now clears the amount blank after any move.
+- **Fewer terms judges x's side only** (red when its terms or the number next to x grew).
+- **Help row** (I'm stuck, Teach me, Start over) is in the Mat under the stack, always there; whatever isn't an option is greyed. Start over is live only after three reds.
+- **Nothing advances on a timer** (`noAuto`); the numeric level has Next buttons everywhere.
+- **L1:** quiz questions in capitals; either answer shows the equation, the equation after, what each side comes to, and Balanced/Unbalanced, then the green Next (no retry). The walkthrough keeps every step on screen and ends with the plug-back-in. The line has a fixed height so pressing Add to left/right no longer moves the page. The dashed border no longer runs through the `=` of the equation under the balance (I could not find a dashed line that survives into L2 after the level screens were rebuilt; tell me if you still see one).
+
+Not built (still open in the spec): the **skip L1 after the diagnostic** rule (§8, open item 1), Why? boxes for greyed moves, move icons, and the printed-notes renames.

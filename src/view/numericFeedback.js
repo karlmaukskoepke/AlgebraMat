@@ -16,6 +16,7 @@ const M = {
   nlUndone: () => 'Undone.',
   nlLater: () => 'That move unlocks on a later card.',
   nlQuizRight: (p) => `Yes! It ${p.correct === 'keeps' ? 'keeps' : 'upsets'} the balance.`,
+  nlQuizWrong: (p) => `You said ${p.said}. Look: it ${p.correct === 'keeps' ? 'keeps' : 'upsets'} the balance.`,
   wtA: () => 'We don’t know x yet, but the = sign tells us both sides are balanced. Tap “Add ___ to both sides”.',
   wtB: () => 'To cancel the +3 we add its opposite, −3, to both sides. It is in the blank. Press Go.',
   wtC: () => 'The −3 is now on both sides. Press Next.',
@@ -24,7 +25,6 @@ const M = {
   wtF: () => '2 is the amount that makes it balance. Press Next.',
   wtG: () => 'Adding to both sides can make the problem simpler. Press Next to go on.',
   wtEnd: () => 'Adding to both sides can make the problem simpler.',
-  nlQuizWrong: () => 'Not quite. Compare the before and after, then try again.',
 };
 
 export function numericFeedbackText(fb) {

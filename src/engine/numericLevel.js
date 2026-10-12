@@ -1,7 +1,7 @@
 // Level 1 of Add to both sides: the numeric level (SPEC-ADD-TO-BOTH-SIDES.md §3D). Numbers only, no x: the balance is on, and
 // each of the five problems is one item. A "do" item: add an amount (suggested, a positive for the first, a negative for the
 // second) to the left, then to the right (the two actions are the point), then Go. A "quiz" item: does a change keep the
-// balance or upset it? A wrong answer shows the equations before and after, and the student tries again. After the fifth item
+// balance or upset it? Either answer shows the equations before and after, then a green Next (no retry). After the fifth item
 // comes a watched walkthrough on `x + 3 = 5` (a demonstration: no typing, one highlighted click at a time, and the only place
 // the value is shown to the student). No DOM here.
 
@@ -33,9 +33,9 @@ export function quizAfter(p) {
 
 // What the question says (the wording is the spec's: "added 3 to one side only" ...)
 export function askOf(p) {
-  if (p.scenario === 'one') return `What would happen if we added ${p.amount} to one side only?`;
-  if (p.scenario === 'both') return `What would happen if we added ${p.amount} to both sides?`;
-  return `What would happen if we added ${p.addLeft} to the left and ${p.addRight} to the right?`;
+  if (p.scenario === 'one') return `What happens if we ADD ${p.amount} to ONE SIDE ONLY?`;
+  if (p.scenario === 'both') return `What happens if we ADD ${p.amount} to BOTH SIDES?`;
+  return `What happens if we ADD ${p.addLeft} to the LEFT and ${p.addRight} to the RIGHT?`;
 }
 
 const say = (s, key, params = {}, bad = false) => { s.feedback = { key, params, bad }; return s; };
@@ -119,23 +119,26 @@ export function reduceNumeric(state, action) {
       Object.assign(s, s.history.pop());
       return say(s, 'nlUndone');
     }
+    // A quiz answer, right or wrong, shows what happened (the work stack: the equation, the equation after, what each side comes to,
+    // and Balanced or Unbalanced), says whether it was right, and waits for the green Next. No retry (decided 2026-10-12).
     case 'quiz': {
       if (s.stage !== 'quiz') return state;
       const before = board(p);
       const after = quizAfter(p);
-      if (action.value === p.correct) {
-        s.reveal = null;
-        s.clean = s.misses === 0;
-        if (p.last) {                                   // on to the watched walkthrough
-          s.stage = 'walk'; s.step = 'walk'; s.walk = { step: 'a' };
-          return say(s, 'wtA');
-        }
-        s.stage = 'done'; s.step = 'done';
-        return say(s, 'nlQuizRight', { correct: p.correct });
-      }
-      s.misses += 1;
-      s.reveal = { before: equationText(before), beforeRead: readoutOf(before).text, after: equationText(after), afterRead: readoutOf(after).text };
-      return say(s, 'nlQuizWrong', { correct: p.correct }, true);
+      const right = action.value === p.correct;
+      const l = readoutOf(after);
+      if (!right) s.misses += 1;
+      s.clean = right;
+      s.answered = { value: action.value, right };
+      s.reveal = { lines: [equationText(before), equationText(after), `${signed(l.left)} = ${signed(l.right)}`], ok: l.balanced };
+      s.stage = p.last ? 'review' : 'done';           // the last item goes on to the watched walkthrough after the Next
+      s.step = s.stage;
+      return say(s, right ? 'nlQuizRight' : 'nlQuizWrong', { correct: p.correct, said: action.value }, !right);
+    }
+    case 'quizNext': {
+      if (s.stage !== 'review') return state;
+      s.stage = 'walk'; s.step = 'walk'; s.walk = { step: 'a' }; s.reveal = null;
+      return say(s, 'wtA');
     }
     // ----- the watched walkthrough: x + 3 = 5 -----
     case 'wtChoose': {

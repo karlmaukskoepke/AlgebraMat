@@ -213,7 +213,8 @@ export function equationSvg(text, geo, lines = []) {
   const { W, borderX } = geo;
   const eq = el('svg', { class: 'mat value-mat addboth-mat ab-eqsvg', role: 'img', 'aria-label': 'The equation so far' });
   let y = 52;
-  eq.append(el('line', { x1: borderX, y1: 0, x2: borderX, y2: y + 20, class: 'sv-border' }));
+  eq.append(el('line', { x1: borderX, y1: 0, x2: borderX, y2: y + 12, class: 'sv-border' }));
+  eq.append(el('rect', { x: borderX - 22, y: y - 40, width: 44, height: 54, class: 'ab-eqhalo' }));          // the border passes behind the =
   eq.append(el('text', { x: borderX - 34, y, 'text-anchor': 'end', class: 'ab-eq' }, [text.left]));
   eq.append(el('text', { x: borderX, y, 'text-anchor': 'middle', class: 'ab-eq ab-equals' }, ['=']));
   eq.append(el('text', { x: borderX + 34, y, 'text-anchor': 'start', class: 'ab-eq' }, [text.right]));

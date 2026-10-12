@@ -8,6 +8,7 @@ import { numericFeedbackText } from '../view/numericFeedback.js';
 export const addBothNumericPlay = {
   noStreak: true,
   noSteps: true,
+  noAuto: true,
   lineInMat: true,
   steps: () => [],
   newSession: (problem) => newNumeric(problem),
@@ -24,6 +25,8 @@ export const addBothNumericPlay = {
       case 'go': return { type: 'go' };
       case 'undo': return { type: 'undo' };
       case 'quiz': return { type: 'quiz', value: d.value };
+      case 'quizNext': return { type: 'quizNext' };
+      case 'next': return { type: 'next' };
       case 'wtNext': return { type: 'wtNext' };
       default: return null;
     }

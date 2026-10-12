@@ -45,11 +45,12 @@ function balanceBlock(s) {
   const done = s.stage === 'done';
   const row = actionRow({
     undo: !done && s.history.length > 0,
-    go: s.menu === 'add' ? 'Go ▶' : null,
-    goDisabled: !(s.pending?.both) || !r.balanced,
+    go: done ? 'Ready for the next problem' : s.menu === 'add' ? 'Go ▶' : null,
+    goAction: done ? 'next' : 'go',
+    goDisabled: !done && (!(s.pending?.both) || !r.balanced),
   });
   if (row) {
-    if (s.pending?.both) row.querySelector('.btn-go')?.classList.add('is-target');
+    if (s.pending?.both || done) row.querySelector('.btn-go')?.classList.add('is-target');
     block.append(row);
   }
   return block;
@@ -65,21 +66,22 @@ function walkBlock(s) {
   const num = (v, cls = '') => html('span', `lb-num ${cls}`.trim(), [signed(v)]);
   const plus = () => html('span', 'lb-plus', ['+']);
   const added = (cls = '') => num(-3, `is-added ${cls}`.trim());
-  if (step === 'a' || step === 'b') {
-    block.append(equationRow([x(), plus(), num(3)], [num(5)]));
-  } else if (step === 'c') {
-    block.append(equationRow([x(), plus(), num(3), plus(), added()], [num(5), plus(), added()]));
-  } else if (step === 'd') {
-    block.append(html('div', 'lb-eqblock has-work', [
-      equationRow([x(), plus(), num(3, 'is-struck'), plus(), added('is-struck')], [num(5), plus(), added()], 'lb-work'),
-      equationRow([x()], [num(5), plus(), num(-3)]),
-    ]));
-  } else {
-    block.append(equationRow([x()], [num(2)]));
-    if (step === 'f' || step === 'g' || step === 'end') block.append(html('ol', 'lb-subst', [html('li', 'is-good', ['2 + 3 = 5   ✓ Balanced'])]));
+  const at = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'end'].indexOf(step);
+  // nothing is erased: every step stays on screen, a row under the one before
+  const rows = [equationRow([x(), plus(), num(3)], [num(5)])];
+  if (at >= 2 && at < 3) rows.push(equationRow([x(), plus(), num(3), plus(), added()], [num(5), plus(), added()], 'lb-work'));
+  if (at >= 3) {
+    rows.push(equationRow([x(), plus(), num(3, 'is-struck'), plus(), added('is-struck')], [num(5), plus(), added()], 'lb-work'));
+    rows.push(equationRow([x()], [num(5), plus(), num(-3)]));
   }
+  if (at >= 4) rows.push(equationRow([x()], [num(2)]));
+  const stack = html('div', 'lb-stack lb-walkstack');
+  rows.forEach((r, i) => stack.append(html('div', `lb-rowwrap${i < rows.length - 1 ? ' is-settled' : ''}${r.classList.contains('lb-work') ? ' has-work' : ''}`, [r])));
+  stack.append(html('ol', 'lb-subst', at >= 5 ? [html('li', 'is-good', ['2 + 3 = 5   ✓ Balanced'])] : []));
+  block.append(stack);
   const going = step === 'b';
-  const row = actionRow({ go: going ? 'Go ▶' : ['c', 'd', 'e', 'f', 'g'].includes(step) ? 'Next ▸' : null, goAction: going ? 'go' : 'wtNext' });
+  const finished = step === 'end';
+  const row = actionRow({ go: going ? 'Go ▶' : ['c', 'd', 'e', 'f', 'g'].includes(step) ? 'Next ▸' : finished ? 'Next ▸' : null, goAction: going ? 'go' : finished ? 'next' : 'wtNext' });
   if (row) { row.querySelector('.btn-go')?.classList.add('is-target'); block.append(row); }
   return block;
 }
@@ -89,23 +91,26 @@ function quizBlock(s) {
   const block = html('div', 'ab-quiz');
   const before = s.board;
   const r = readoutOf(before);
-  const svg = el('svg', { class: 'mat value-mat addboth-mat', viewBox: `0 0 ${W} 150`, role: 'group', 'aria-label': 'The equation' });
-  svg.append(el('text', { x: W / 2, y: 60, 'text-anchor': 'middle', class: 'ab-eq' }, [equationText(before)]));
-  svg.append(el('text', { x: W / 2, y: 118, 'text-anchor': 'middle', class: `ab-readout ${r.balanced ? 'is-good' : 'is-bad'}`, style: 'font-size:40px' }, [r.text]));
-  block.append(svg);
+  const answered = Boolean(s.answered);
+  if (!answered) {
+    const svg = el('svg', { class: 'mat value-mat addboth-mat', viewBox: `0 0 ${W} 150`, role: 'group', 'aria-label': 'The equation' });
+    svg.append(el('text', { x: W / 2, y: 60, 'text-anchor': 'middle', class: 'ab-eq' }, [equationText(before)]));
+    svg.append(el('text', { x: W / 2, y: 118, 'text-anchor': 'middle', class: `ab-readout ${r.balanced ? 'is-good' : 'is-bad'}`, style: 'font-size:40px' }, [r.text]));
+    block.append(svg);
+  }
   block.append(html('p', 'ab-question', [askOf(p), html('br'), 'Does it keep the balance, or upset it?']));
   const label = { keeps: 'Keeps the balance', upsets: 'Upsets the balance' };
-  block.append(html('div', 'ab-answers', p.order.map((v) => html('button', 'btn ab-answer', [label[v]], { type: 'button', 'data-action': 'quiz', 'data-value': v }))));
+  block.append(html('div', 'ab-answers', p.order.map((v) => {
+    const b = html('button', `btn ab-answer${answered && s.answered.value === v ? ' is-chosen' : ''}`, [label[v]], { type: 'button', 'data-action': 'quiz', 'data-value': v });
+    b.disabled = answered;
+    return b;
+  })));
   if (s.reveal) {
-    const rev = el('svg', { class: 'mat value-mat addboth-mat', viewBox: `0 0 ${W} 250`, role: 'group', 'aria-label': 'Before and after' });
-    let y = 36;
-    for (const [name, eq, read] of [['Before', s.reveal.before, s.reveal.beforeRead], ['After', s.reveal.after, s.reveal.afterRead]]) {
-      rev.append(el('text', { x: W / 2, y, 'text-anchor': 'middle', class: 'tu-reveal-label' }, [name]));
-      rev.append(el('text', { x: W / 2, y: y + 42, 'text-anchor': 'middle', class: 'ab-check' }, [eq]));
-      rev.append(el('text', { x: W / 2, y: y + 82, 'text-anchor': 'middle', class: `ab-readout ${read.includes('Unbalanced') ? 'is-bad' : 'is-good'}` }, [read]));
-      y += 110;
-    }
-    block.append(rev);
+    // what happened, one line each: the equation, the equation after, what each side comes to, and Balanced or Unbalanced
+    const list = html('ol', 'lb-subst lb-reveal', s.reveal.lines.map((line) => html('li', '', [line])));
+    list.append(html('li', s.reveal.ok ? 'is-good' : 'is-bad', [s.reveal.ok ? '✓ Balanced' : '✗ Unbalanced']));
+    block.append(list);
+    block.append(html('div', 'ab-actions', [html('span'), html('button', 'btn btn-go is-target', ['Next ▸'], { type: 'button', 'data-action': s.stage === 'review' ? 'quizNext' : 'next' })]));
   }
   return block;
 }
