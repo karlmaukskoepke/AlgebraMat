@@ -1,9 +1,10 @@
-// The moves behind Add to both sides (SPEC-ADD-TO-BOTH-SIDES.md, revision 2 "light build"), as one pure reducer. The
+// The moves behind Add to both sides (SPEC-ADD-TO-BOTH-SIDES.md, revision 2.3 "light build"), as one pure reducer. The
 // equation is a board of terms (an x, and numbers). The BARE card has two paths: guess x (type it), or use a move: type an
 // amount, press Go, and it is added to both sides in one action; the numbers on x's side cancel on their own and the other
 // side is left as it is, so the value is never shown. The SCAFFOLD (the seesaw, the counters, the two-action move, the
 // combining ritual) only comes in from I'm stuck or Teach me. The lights (Fewer terms, Solved for x) judge each committed
-// move. A wrong guess offers "Put it back in"; a right one gets a click-through of the move. No DOM here.
+// move. Every typed value (a guess, or the value once x is alone) is plugged back in, a line a click, ending Balanced or Not
+// balanced; a correct guess makes the next problem a move. The path (guess or move) is chosen at the start and fixed. No DOM here.
 
 import { typeInto, isTyping } from './entry.js';
 import { emptySkills } from './skills.js';
@@ -74,15 +75,15 @@ export function boardAnswer(board) {
 // ---------- the lights (§3E) ----------
 
 const xSideConstant = (board) => Math.abs(sumNums(board[xSideOf(board)]));
-// Terms counted as if the numbers on a side were combined (the screen never shows the combined value of the unsimplified side).
-const sideTerms = (terms) => (terms.some((t) => t.kind === 'x') ? 1 : 0) + (sumNums(terms) !== 0 || !terms.some((t) => t.kind === 'x') ? 1 : 0);
-export const effTerms = (board) => sideTerms(board.left) + sideTerms(board.right);
+// The terms on x's side, counted as if its numbers were combined (§3E: only x's side is judged, so zeroing the other side
+// never lights up green and the unsimplified side is never read).
+export const xTerms = (board) => 1 + (sumNums(board[xSideOf(board)]) !== 0 ? 1 : 0);
 
-// Fewer terms: green when the terms went down, red when they went up or the number next to x got bigger, else grey.
+// Fewer terms: green when x's side has fewer terms, red when it has more or the number next to x got bigger, else grey.
 // Solved for x: green once x is the only term on its side (the student still types the value).
 export function judge(before, after) {
-  const fewer = effTerms(after) < effTerms(before) ? 'green'
-    : effTerms(after) > effTerms(before) || xSideConstant(after) > xSideConstant(before) ? 'red' : 'neutral';
+  const fewer = xTerms(after) < xTerms(before) ? 'green'
+    : xTerms(after) > xTerms(before) || xSideConstant(after) > xSideConstant(before) ? 'red' : 'neutral';
   return { lights: { fewer, solved: xAlone(after) ? 'green' : 'off' } };
 }
 
@@ -90,38 +91,44 @@ export function judge(before, after) {
 
 const amountOf = (entry) => (/^-?\d+$/.test(entry) ? Number(entry) : null);
 
-export function newAddBoth(problem, { level = 2 } = {}) {
+export function newAddBoth(problem, { level = 2, forceMove = false } = {}) {
   const board = startBoard(problem);
-  return say({
+  const s = {
     problem, level,
     stage: 'moves', step: 'moves',
     scaffold: false,                              // the seesaw, counters and two-action move: only from I'm stuck or Teach me
     built: { constant: 0, other: 0, x: false }, pick: null,
     board, base: board, history: [], resolving: false,
-    menu: null, amountEntry: '', pending: null, typing: null, path: null,
+    menu: null, amountEntry: '', pending: null, typing: null, path: forceMove ? 'move' : null, mustMove: forceMove,
+    rows: [{ type: 'eq', board }], zeroOther: false,
     leftDelta: 0, rightDelta: 0,
     prevBoard: board, lights: { fewer: 'off', solved: 'off' }, reds: 0,
     counterMode: false, startOver: false, forced: false, hint: null, rung: 0,
-    entry: '', guessCheck: null, subst: null, work: null, undoCue: false, walk: null, selected: null, combining: null, kindMisses: 0, countMisses: 0,
+    entry: '', sub: null, work: null, undoCue: false, selected: null, combining: null, kindMisses: 0, countMisses: 0,
     skipped: [], wrongs: 0, tag: null, tags: [], stuck: 0, taught: 0, helped: false, clean: false,
     on: { ...emptySkills(), partyBattle: false, sign: false }, answers: [], supportsShown: [],
     finalText: null, lastAmount: null,
     feedback: null,
-  }, 'aChoose');
+  };
+  return say(s, forceMove ? 'aMustMove' : 'aChoose');
 }
+
+// A correct guess owes one problem solved with a move (the next one is forced).
+export const owesMove = (s) => s.path === 'guess' && s.stage === 'done';
 
 // What every message may say about the problem itself: the number next to x, its opposite, the other side.
 const plus = (v) => (v < 0 ? signed(v) : `+${v}`);
 const problemParams = (p) => ({ con: plus(constantOf(p)), opp: plus(oppositeOf(p)), a: p.a, other: signed(p.b), battle: isBattle(p), mirror: Boolean(p.mirror), form: p.form });
 const say = (s, key, params = {}, bad = false) => { s.feedback = { key, params: { ...problemParams(s.problem), ...params }, bad }; return s; };
-const snapshot = (s) => ({ board: s.board, leftDelta: s.leftDelta, rightDelta: s.rightDelta, pending: s.pending, prevBoard: s.prevBoard, lights: s.lights, reds: s.reds, resolving: s.resolving, menu: s.menu, amountEntry: s.amountEntry, walk: s.walk, work: s.work, undoCue: s.undoCue, startOver: s.startOver, combining: null, selected: null });
+const snapshot = (s) => ({ board: s.board, rows: [...s.rows], leftDelta: s.leftDelta, rightDelta: s.rightDelta, pending: s.pending, prevBoard: s.prevBoard, lights: s.lights, reds: s.reds, resolving: s.resolving, menu: s.menu, amountEntry: s.amountEntry, work: s.work, undoCue: s.undoCue, startOver: s.startOver, combining: null, selected: null });
 const restore = (s, snap) => Object.assign(s, snap);
 export const tilt = (s) => s.leftDelta - s.rightDelta;            // positive: the left side is heavier
 export const balanced = (s) => tilt(s) === 0;
 
 function startOverBoard(s) {
-  Object.assign(s, { board: s.base, history: [], pending: null, leftDelta: 0, rightDelta: 0, prevBoard: s.base, resolving: false, menu: null, amountEntry: '', typing: null, startOver: false, reds: 0, walk: null, guessCheck: null, subst: null, work: null, undoCue: false, lights: { fewer: 'off', solved: 'off' }, hint: null, combining: null, selected: null });
-  return say(s, 'aStartedOver');
+  Object.assign(s, { board: s.base, rows: [{ type: 'eq', board: s.base }], history: [], pending: null, leftDelta: 0, rightDelta: 0, prevBoard: s.base, resolving: false, menu: null, amountEntry: '', typing: null, startOver: false, reds: 0, sub: null, entry: '', zeroOther: false, work: null, undoCue: false, lights: { fewer: 'off', solved: 'off' }, hint: null, combining: null, selected: null });
+  s.path = s.mustMove || s.scaffold ? 'move' : null;                       // Start over returns to the choice (§9)
+  return say(s, s.path ? 'aStartedOver' : 'aChoose');
 }
 
 // A move has been committed (and, in the scaffold, everything that can combine has): judge it and say how it went.
@@ -130,11 +137,11 @@ function resolve(s) {
   s.lights = lights;
   s.prevBoard = s.board;
   s.resolving = false;
-  s.reds = lights.fewer === 'red' ? s.reds + 1 : 0;
-  s.undoCue = lights.fewer === 'red' || lights.fewer === 'neutral';       // the next click to point at is Undo
-  if (s.walk?.step === 'go') {
-    s.walk = { ...s.walk, step: 'match' };
-    return say(s, 'aWalkMatch', { typed: signed(s.walk.typed) });
+  s.reds = lights.fewer === 'red' || s.zeroOther ? s.reds + 1 : 0;
+  s.undoCue = lights.fewer === 'red' || lights.fewer === 'neutral' || s.zeroOther;       // the next click to point at is Undo
+  if (s.zeroOther) {                                                       // the side without x went to 0 (§3B step 8)
+    if (s.reds >= 3) s.startOver = true;
+    return say(s, 'aZeroOther', {}, true);
   }
   if (lights.fewer === 'red') {
     if (s.reds >= 3) s.startOver = true;
@@ -150,8 +157,6 @@ function finish(s, key) {
   s.step = 'done';
   s.clean = s.wrongs === 0 && s.stuck === 0 && s.taught === 0 && !s.helped;
   s.finalText = answerText(s.problem);
-  s.guessCheck = null;
-  s.subst = null;
   return say(s, key, { answer: s.finalText });
 }
 
@@ -161,9 +166,7 @@ function enterScaffold(s) {
   if (!s.scaffold) {
     s.scaffold = true;
     s.counterMode = true;
-    s.walk = null;
-    s.guessCheck = null;
-    s.subst = null;
+    s.sub = null;
     s.entry = '';
     s.typing = null;
     if (s.level <= 3 && s.history.length === 0) {
@@ -203,8 +206,10 @@ function lightBoard(board, amount) {
   const other = xSide === 'left' ? 'right' : 'left';
   const sum = sumNums(board[xSide]) + amount;
   const xTerm = board[xSide].find((t) => t.kind === 'x');
-  const xTerms = [xTerm, ...(sum !== 0 ? [num(sum)] : [])];
-  return { ...board, [xSide]: xTerms, [other]: [...board[other], num(amount)] };
+  const xTermsNow = [xTerm, ...(sum !== 0 ? [num(sum)] : [])];
+  // the other side is left as it is, unless the amount cancels it to 0 (the zero-the-wrong-side slip shows the 0 they were after)
+  const otherSum = sumNums(board[other]) + amount;
+  return { ...board, [xSide]: xTermsNow, [other]: otherSum === 0 ? [num(0)] : [...board[other], num(amount)] };
 }
 
 export function reduceAddBoth(state, action) {
@@ -214,7 +219,9 @@ export function reduceAddBoth(state, action) {
 
   // ----- typing: the amount (when the move is open) or the answer; a tap on a field says which -----
   if (isTyping(action)) {
-    if (s.stage === 'build' || s.guessCheck) return state;
+    if (s.stage === 'build') return state;
+    // while the substitution is stepped nothing can be typed; after a wrong value the first key clears it and the student retypes
+    if (s.sub) { if (!(s.sub.kind === 'value' && s.sub.step >= 3 && !s.sub.ok)) return state; s.sub = null; }
     if (s.combining && s.combining.step !== 'count') return state;
     if (s.combining) {
       const entry = typeInto(s.combining.entry, action, 'integer');
@@ -224,9 +231,12 @@ export function reduceAddBoth(state, action) {
     }
     const amountMode = s.menu === 'add' && s.typing !== 'answer' && (!s.pending || s.pending.second);
     const key = amountMode ? 'amountEntry' : 'entry';
+    // the answer row is greyed until the guess path is chosen, or (on the move path) until x is alone; the scaffold ends with the pad
+    if (key === 'entry' && !s.scaffold && (!s.path || (s.path === 'move' && !xAlone(s.board)))) return state;
     const entry = typeInto(s[key], action, 'integer');
     if (entry === s[key]) return state;
     s[key] = entry;
+    if (key === 'amountEntry' && !s.scaffold) s.hint = null;
     return s;
   }
 
@@ -236,7 +246,7 @@ export function reduceAddBoth(state, action) {
   switch (action.type) {
     // ----- the choice at the start: guess x, or use a move -----
     case 'path': {
-      if (s.stage !== 'moves' || s.walk) return state;
+      if (s.stage !== 'moves' || s.path) return state;                                       // chosen once, fixed for the problem
       s.path = action.value === 'move' ? 'move' : 'guess';
       if (s.path === 'guess') { s.typing = 'answer'; return say(s, 'aGuessPrompt'); }
       s.typing = null;
@@ -290,7 +300,7 @@ export function reduceAddBoth(state, action) {
     }
     // A number dragged up into the blank of "Add ___ to both sides" fills it (the student still decides its sign).
     case 'setAmount': {
-      if (s.stage !== 'moves' || s.resolving || (s.pending && !s.pending.second) || s.guessCheck || s.combining || s.walk || !Number.isInteger(action.value)) return state;
+      if (s.stage !== 'moves' || s.path !== 'move' || s.resolving || (s.pending && !s.pending.second) || s.sub || s.combining || !Number.isInteger(action.value)) return state;
       s.menu = 'add';
       s.typing = null;
       s.amountEntry = String(action.value);
@@ -299,19 +309,14 @@ export function reduceAddBoth(state, action) {
 
     // ----- the menu: only "Add ___ to both sides" is a move on this card -----
     case 'choose': {
-      if (s.stage !== 'moves' || s.pending || s.guessCheck) return state;
+      if (s.stage !== 'moves' || s.pending || s.sub) return state;
       if (action.move !== 'add') return state;
+      if (!s.path) return say(s, 'aChooseFirst', {}, true);                                  // the path comes first
+      if (s.path === 'guess') return say(s, 'aGuessing');
       if (s.resolving) return say(s, 'aSimplifyFirst', {}, true);
       s.menu = 'add';
       s.typing = null;
       s.undoCue = false;
-      s.subst = null;
-      if (s.walk?.step === 'move') {
-        s.walk = { ...s.walk, step: 'go' };
-        s.amountEntry = String(oppositeOf(s.problem));
-        return say(s, 'aWalkAmount', { opposite: plus(oppositeOf(s.problem)) });
-      }
-      s.path = 'move';
       return say(s, 'aPickAmount');
     }
 
@@ -357,20 +362,22 @@ export function reduceAddBoth(state, action) {
         return resolve(s);
       }
       // the bare move: the amount goes onto both sides in one action
-      if (s.stage !== 'moves' || s.menu !== 'add' || s.guessCheck) return state;
+      if (s.stage !== 'moves' || s.menu !== 'add' || s.sub) return state;
       const amount = amountOf(s.amountEntry);
       if (amount === null || amount === 0) return say(s, 'aAmountZero', {}, true);
       if (Math.abs(amount) > 15) return say(s, 'aAmountBig', {}, true);
-      if ((s.forced || s.walk) && amount !== oppositeOf(s.problem)) return say(s, 'aForced', { amount: signed(oppositeOf(s.problem)) }, true);
+      if (s.forced && amount !== oppositeOf(s.problem)) return say(s, 'aForced', { amount: signed(oppositeOf(s.problem)) }, true);
       s.history.push(snapshot(s));
       s.work = workLine(s.board, amount);
-      s.board = lightBoard(s.board, amount);
+      const after = lightBoard(s.board, amount);
+      s.zeroOther = !xAlone(after) && sumNums(s.board[xSideOf(s.board) === 'left' ? 'right' : 'left']) + amount === 0;
+      s.board = after;
+      s.rows.push({ type: 'work', work: s.work }, { type: 'eq', board: after });
       s.lastAmount = amount;
       s.menu = null;
       s.typing = null;
       s.amountEntry = '';
       s.hint = null;
-      s.subst = null;
       s.undoCue = false;
       return resolve(s);
     }
@@ -415,18 +422,30 @@ export function reduceAddBoth(state, action) {
     // ----- undo (always one tap; a half-done move goes in one go) and start over -----
     case 'undo': {
       // after a wrong guess, once the substitution has been shown: take the guess back and go to the move
-      if (s.guessCheck) {
-        if (s.guessCheck.step < 2) return state;
-        s.guessCheck = null;
+      if (s.sub) {
+        if (s.sub.kind !== 'guess' || s.sub.ok || s.sub.step < 3) return state;
+        s.sub = null;
+        s.entry = '';
         s.path = 'move';
         s.typing = null;
         return say(s, 'aSimplerFirst');
       }
       if (!s.history.length) return state;
+      const wasZero = s.zeroOther;
       restore(s, s.history.pop());
+      s.zeroOther = false;
       s.selected = null;
-      s.subst = null;
       s.undoCue = false;
+      s.hint = null;
+      if (!s.scaffold) {
+        s.menu = 'add';                                                      // the move stays chosen; the blank is cleared, not pre-filled
+        s.amountEntry = '';
+      }
+      if (wasZero && !s.scaffold) {
+        const con = s.board[xSideOf(s.board)].find((t) => t.kind === 'num');
+        s.hint = con ? { kind: 'cancel', id: con.id } : null;               // the number next to x is highlighted
+        return say(s, 'aZeroUndone');
+      }
       return say(s, 'aUndone');
     }
     case 'startOver':
@@ -435,11 +454,15 @@ export function reduceAddBoth(state, action) {
     // ----- I'm stuck / Teach me: the scaffold comes in -----
     case 'stuck': {
       if (s.stage === 'build' && s.scaffold) return state;
+      if (!helpOk(s)) return state;
+      moveMode(s);
       s.stuck += 1;
       return climb(s);
     }
     case 'teach': {
       if (s.stage === 'build' && s.scaffold) return state;
+      if (!helpOk(s)) return state;
+      moveMode(s);
       s.taught += 1;
       s.forced = true;
       s.helped = true;
@@ -458,16 +481,16 @@ export function reduceAddBoth(state, action) {
     case 'check':
       return check(s, applyCombine);
 
-    // ----- after a wrong guess: the substitution, one step a click (Next), then Undo -----
+    // ----- the substitution, a line a click (Next): the first line, the second, then Balanced or Not balanced -----
     case 'nextLine': {
-      if (!s.guessCheck || s.guessCheck.step >= 2) return state;
-      s.guessCheck = { ...s.guessCheck, step: s.guessCheck.step + 1 };
-      return s.guessCheck.step === 2 ? say(s, 'aUndoGuess', { typed: signed(s.guessCheck.typed) }) : s;
-    }
-    // ----- after a right guess: the last tap of the click-through shows the value matching the other side -----
-    case 'matchGuess': {
-      if (s.walk?.step !== 'match') return state;
-      return finish(s, 'aCorrect');
+      if (!s.sub || s.sub.step >= 3) return state;
+      s.sub = { ...s.sub, step: s.sub.step + 1 };
+      if (s.sub.step < 3) return s;
+      const { kind, ok, typed, tag } = s.sub;
+      if (ok) return finish(s, 'aCorrect');
+      if (kind === 'guess') return say(s, 'aUndoGuess', { typed: signed(typed) });
+      s.entry = '';                                                          // a wrong value: the row clears so the student retypes
+      return say(s, 'aWrong', { typed: signed(typed), tag, value: signed(typed + constantOf(s.problem)) }, true);
     }
     default:
       return state;
@@ -517,22 +540,23 @@ function combineParams(s) {
   return { g1: signed(a.v), g2: signed(b.v), kind: kindOf(a.v, b.v), total: signed(total) };
 }
 
-// The substitution of a guess, as written in the equation (the guess in place of x), then what it comes to.
+// The substitution of a typed value, as written in the equation (the value in place of x), then what it comes to.
+// Two lines, then the mark (✓ Balanced / ✗ Not balanced) on its own line.
 export function substitutionSteps(p, typed) {
   const op = p.form === 'x-a' ? '−' : '+';
   const inner = `${signed(typed)} ${op} ${p.a}`;
   const value = typed + constantOf(p);
-  const ok = value === p.b;
   const first = p.mirror ? `${signed(p.b)} = ${inner}` : `${inner} = ${signed(p.b)}`;
-  const second = p.mirror ? `${signed(p.b)} ${ok ? '=' : '≠'} ${signed(value)}` : `${signed(value)} ${ok ? '=' : '≠'} ${signed(p.b)}`;
-  return [first, `${second}   ${ok ? '✓ Balanced' : '✗ Not balanced'}`];
+  const second = p.mirror ? `${signed(p.b)} = ${signed(value)}` : `${signed(value)} = ${signed(p.b)}`;
+  return [first, second];
 }
 
 // What a move looked like before x's side was simplified: both sides with the added amount (coloured), and the numbers on x's
 // side that are about to combine (struck through, then dropped). Shown as a line above the new equation.
 function workLine(board, amount) {
   const xSide = xSideOf(board);
-  const side = (terms, isX) => [...terms.map((t) => (t.kind === 'x' ? { x: true } : { v: t.v, struck: isX })), { v: amount, added: true, struck: isX }];
+  const otherZero = sumNums(board[xSide === 'left' ? 'right' : 'left']) + amount === 0;       // the other side cancels to 0 too
+  const side = (terms, isX) => [...terms.map((t) => (t.kind === 'x' ? { x: true } : { v: t.v, struck: isX || otherZero })), { v: amount, added: true, struck: isX || otherZero }];
   return { left: side(board.left, xSide === 'left'), right: side(board.right, xSide === 'right'), amount };
 }
 
@@ -551,29 +575,36 @@ function checkCount(s, applyCombine) {
   return say(s, 'aCountWrong', { ...combineParams(s), tag, typed }, true);
 }
 
+// Help is offered unless a substitution is being stepped (a wrong one, once finished, may still ask).
+export const helpOk = (s) => !s.sub || (s.sub.step >= 3 && !s.sub.ok);
+// Is the x = [ ] row live (cursor, pad, Check)? Greyed before the path is chosen, on the move path until x is alone, while the
+// move's amount is being typed, while a substitution is stepped, and when the problem is done. The scaffold ends with the pad.
+export function answerLive(s) {
+  if (s.stage === 'done' || s.stage === 'build') return false;
+  if (s.combining) return s.combining.step === 'count';
+  if (s.sub) return s.sub.kind === 'value' && s.sub.step >= 3 && !s.sub.ok;
+  if (s.menu === 'add' && s.typing !== 'answer') return false;
+  if (s.scaffold) return !s.pending;
+  return s.path === 'guess' || (s.path === 'move' && xAlone(s.board));
+}
+
+// Asking for help from the guess path moves the problem to the move path (the scaffolds are about moves).
+function moveMode(s) {
+  s.sub = null;
+  if (s.path !== 'move') { s.path = 'move'; s.entry = ''; s.typing = null; }
+}
+
 function check(s, applyCombine) {
   if (s.combining) return s.combining.step === 'count' ? checkCount(s, applyCombine) : say(s, 'aPickKind', {}, true);
   const { correct, tag, typed, unreadable } = checkAddBoth(s.problem, s.entry);
   if (unreadable) return say(s, s.entry === '' || s.entry === '-' ? 'typeAnswer' : 'answerUnreadable', {}, true);
   if (s.stage === 'build' || s.pending) return say(s, 'aFinishMoveFirst', {}, true);
-  if (s.walk) return say(s, 'aWalkFirst', {}, true);
-  if (correct) {
-    // x is already alone (or the scaffold is on): that's it. A right guess before that gets the click-through of the move.
-    if (xAlone(s.board) || s.scaffold) return finish(s, 'aCorrect');
-    s.walk = { step: 'move', typed };
-    s.entry = '';
-    s.path = 'move';
-    return say(s, 'aCorrectWalk');
-  }
-  s.wrongs += 1; s.tag = tag; s.tags.push(tag); s.answers.push({ typed: s.entry, tag }); s.entry = '';
-  if (xAlone(s.board)) {
-    // a wrong value after a move: the slip is named and the substitution is shown; the student retypes
-    s.subst = substitutionSteps(s.problem, typed);
-    return say(s, 'aWrong', { typed: signed(typed), tag, value: signed(typed + constantOf(s.problem)) }, true);
-  }
-  // a wrong first guess: it slides onto x, the substitution is stepped by clicks, then Undo, then the move
-  s.guessCheck = { typed, step: 0, lines: substitutionSteps(s.problem, typed) };
-  return say(s, 'aGuessed', { typed: signed(typed) }, true);
+  if (s.sub) return s;
+  if (!correct) { s.wrongs += 1; s.tag = tag; s.tags.push(tag); s.answers.push({ typed: s.entry, tag }); }
+  // every typed value is plugged back in, a line a click. A first guess (x not alone yet) slides onto x.
+  const kind = xAlone(s.board) || s.scaffold ? 'value' : 'guess';
+  s.sub = { kind, typed, ok: correct, tag, lines: substitutionSteps(s.problem, typed), step: 0 };
+  return correct ? say(s, 'aPlugIn', { typed: signed(typed) }) : say(s, kind === 'guess' ? 'aGuessed' : 'aPlugIn', { typed: signed(typed) }, kind === 'guess');
 }
 
 export { formatAddBoth, tagAddBoth };

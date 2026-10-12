@@ -237,7 +237,11 @@ function startLevel(packId, level, resume = null) {
   const adapter = adapterFor(pack.id, level);
   const seed = resume?.seed ?? fixedSeed ?? newSeed();
   const problems = levelled(pack.generate(level, seed), level);
-  const index = resume?.index ?? 0;
+  let index = resume?.index ?? 0;
+  if (index >= problems.length) {          // a reload in the extra, move-only problem after a correct guess
+    const extra = adapter.owesMove ? extraProblem(pack, level, seed, problems) : null;
+    if (extra) problems.push(extra); else index = 0;
+  }
   play = {
     pack, adapter, level, seed, problems, index, session: adapter.newSession(problems[index]), finished: false,
     practicing: false, streak: 0, best: bestFor(loadBests(), pack.id, level),
@@ -330,16 +334,31 @@ function dispatch(action) {
   if (play.session !== before) render(before);
 }
 
+// A card can owe a move problem (Add to both sides: a correct guess forces the next problem to be solved with a move, and if that
+// was the last problem of the level, one more is added). The extra problem is one the level didn't already have.
+function extraProblem(pack, level, seed, used) {
+  for (let k = 1; k <= 20; k++) {
+    const fresh = levelled(pack.generate(level, (seed + 1000 * k) >>> 0), level).find((c) => !used.some((u) => u.x === c.x));
+    if (fresh) return fresh;
+  }
+  return null;
+}
+
 function nextProblem() {
   clearTimeout(nextTimer);
-  if (play.index + 1 >= PROBLEMS_PER_LEVEL) {
-    if (!play.practicing) return finishLevel();
-    play.seed = newSeed();                // practice goes on with a fresh set, for as long as the student likes
-    play.problems = levelled(play.pack.generate(play.level, play.seed), play.level);
-    play.index = -1;
+  const owed = Boolean(play.adapter.owesMove?.(play.session));
+  if (play.index + 1 >= play.problems.length) {
+    const extra = owed && play.problems.length === PROBLEMS_PER_LEVEL ? extraProblem(play.pack, play.level, play.seed, play.problems) : null;
+    if (extra) play.problems.push(extra);
+    else {
+      if (!play.practicing) return finishLevel();
+      play.seed = newSeed();                // practice goes on with a fresh set, for as long as the student likes
+      play.problems = levelled(play.pack.generate(play.level, play.seed), play.level);
+      play.index = -1;
+    }
   }
   play.index += 1;
-  play.session = play.adapter.newSession(play.problems[play.index]);
+  play.session = play.adapter.newSession(play.problems[play.index], { forceMove: owed });
   play.fit = null;
   persist();
   render();
@@ -424,12 +443,15 @@ function renderSteps(session) {
 
 function renderDots() {
   const { index, session, finished } = play;
+  const dots = $('dots');
+  while (dots.children.length < play.problems.length) dots.append(Object.assign(document.createElement('span'), { className: 'dot' }));
+  while (dots.children.length > play.problems.length && dots.children.length > PROBLEMS_PER_LEVEL) dots.lastElementChild.remove();
   $('dots').querySelectorAll('.dot').forEach((d, i) => {
     const solved = finished || i < index || (i === index && session.step === 'done');
     d.classList.toggle('done', solved);
     d.classList.toggle('current', !solved && i === index);
   });
-  $('dots').setAttribute('aria-label', `Problem ${Math.min(index + 1, PROBLEMS_PER_LEVEL)} of ${PROBLEMS_PER_LEVEL}`);
+  $('dots').setAttribute('aria-label', `Problem ${Math.min(index + 1, play.problems.length)} of ${play.problems.length}`);
 }
 
 // On a phone the Mat is scaled to the screen's width, and a drawing built for a wide screen has a lot of empty space
@@ -488,7 +510,7 @@ function render(before) {
   if (session.feedback?.bad) feedback.classList.add('bad');
   if (session.step === 'done') feedback.classList.add('celebrate');
 
-  if (session.step === 'done' && before?.step !== 'done') {
+  if (session.step === 'done' && before?.step !== 'done' && !adapter.noAuto) {
     nextTimer = setTimeout(nextProblem, 2500);
   }
 }
@@ -520,7 +542,7 @@ document.addEventListener('keydown', (e) => {
   else if (e.key === 'Backspace' || e.key === 'Delete') candidates.push('.pad button[data-action="backspace"]', 'button[data-key="Backspace"]');
   else if (e.key === '-' || e.key === '−') candidates.push('.pad button[data-action="toggleSign"]', '.pad button[data-key="-"]', 'button[data-key="-"]');
   else if (e.key === '+') candidates.push('.pad button[data-key="+"]', 'button[data-key="+"]');
-  else if (e.key === 'Enter' && !e.repeat) candidates.push('button[data-action="check"]');
+  else if (e.key === 'Enter' && !e.repeat) candidates.push('button[data-action="check"]', 'button[data-action="next"]', 'button[data-action="nextLine"]');
   else if (letter) candidates.push(`button[data-key="${e.key.toLowerCase()}"]`);
   if (!candidates.length) return;
   // Of the buttons that exist, the first enabled one wins (Backspace is the
@@ -546,7 +568,7 @@ function savedCurrent() {
   const pack = packById(c.pack);
   const ok = pack && !pack.comingSoon && !pack.retired && isLevelUnlocked(progress, pack.id, c.level)
     && Number.isInteger(c.seed) && c.seed >= 0
-    && Number.isInteger(c.index) && c.index >= 0 && c.index < PROBLEMS_PER_LEVEL;
+    && Number.isInteger(c.index) && c.index >= 0 && c.index <= PROBLEMS_PER_LEVEL;
   return ok ? c : null;
 }
 

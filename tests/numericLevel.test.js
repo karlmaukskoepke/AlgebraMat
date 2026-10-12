@@ -40,29 +40,32 @@ describe('a "do" item', () => {
 describe('a quiz item', () => {
   it('asks in the spec\'s words and takes the right answer', () => {
     const q = items[2];
-    expect(askOf(q)).toMatch(/^What would happen if we added \d to one side only\?$/);
-    expect(askOf(items[3])).toMatch(/to both sides\?$/);
-    expect(askOf(items[4])).toMatch(/to the left and \d to the right\?$/);
+    expect(askOf(q)).toMatch(/^What happens if we ADD \d to ONE SIDE ONLY\?$/);
+    expect(askOf(items[3])).toMatch(/ADD \d to BOTH SIDES\?$/);
+    expect(askOf(items[4])).toMatch(/ADD \d to the LEFT and \d to the RIGHT\?$/);
     const s = run(newNumeric(q), { type: 'quiz', value: q.correct });
-    expect([s.stage, s.clean]).toEqual(['done', true]);
+    expect([s.stage, s.clean, s.feedback.key]).toEqual(['done', true, 'nlQuizRight']);
   });
-  it('a wrong answer shows before and after and lets the student try again', () => {
+  it('either answer shows what happened, line by line, ending Balanced or Unbalanced; a wrong one is not retried', () => {
     const q = items[2];
     const wrong = q.correct === 'keeps' ? 'upsets' : 'keeps';
     let s = run(newNumeric(q), { type: 'quiz', value: wrong });
-    expect([s.stage, s.misses, s.feedback.key]).toEqual(['quiz', 1, 'nlQuizWrong']);
-    expect(s.reveal.beforeRead).toContain('Balanced');
-    expect(s.reveal.afterRead).toContain('Unbalanced');
-    s = run(s, { type: 'quiz', value: q.correct });
-    expect([s.stage, s.clean, s.reveal]).toEqual(['done', false, null]);
+    expect([s.stage, s.misses, s.clean, s.feedback.key]).toEqual(['done', 1, false, 'nlQuizWrong']);
+    expect(s.reveal.lines).toHaveLength(3);
+    expect(s.reveal.lines[0]).toBe(equationText(newNumeric(q).board));
+    expect(s.reveal.ok).toBe(false);                                                     // adding to one side only upsets it
+    expect(run(s, { type: 'quiz', value: q.correct })).toBe(s);
+    const right = run(newNumeric(items[3]), { type: 'quiz', value: items[3].correct });
+    expect(right.reveal.ok).toBe(true);                                                  // both sides keeps it
   });
 });
 
 describe('the watched walkthrough after the fifth item', () => {
-  const quizDone = () => run(newNumeric(items[4]), { type: 'quiz', value: items[4].correct });
-  it('opens after the last quiz item (not before), without finishing the problem', () => {
+  const quizDone = () => run(newNumeric(items[4]), { type: 'quiz', value: items[4].correct }, { type: 'quizNext' });
+  it('opens after the last quiz item and its Next (not before), without finishing the problem', () => {
     expect(items[4].last).toBe(true);
     expect(items.slice(0, 4).some((i) => i.last)).toBe(false);
+    expect(run(newNumeric(items[4]), { type: 'quiz', value: items[4].correct }).stage).toBe('review');
     const s = quizDone();
     expect([s.stage, s.walk.step, s.feedback.key]).toEqual(['walk', 'a', 'wtA']);
     expect(run(newNumeric(items[3]), { type: 'quiz', value: items[3].correct }).stage).toBe('done');

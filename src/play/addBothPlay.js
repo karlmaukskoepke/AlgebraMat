@@ -1,6 +1,6 @@
 // The play adapter for Add to both sides, "light build" (engine/addBothMoves.js, view/lightScreen.js).
 
-import { newAddBoth, reduceAddBoth } from '../engine/addBothMoves.js';
+import { newAddBoth, reduceAddBoth, owesMove } from '../engine/addBothMoves.js';
 import { formatAddBoth } from '../engine/addBoth.js';
 import { renderLightScreen } from '../view/lightScreen.js';
 import { buildAddBothControls } from '../view/addBothControls.js';
@@ -11,9 +11,11 @@ import { recordProblem } from '../lightStore.js';
 export const addBothPlay = {
   noStreak: true,       // no streaks on this card: the stuck count is what is kept
   noSteps: true,        // no steps bar
+  noAuto: true,         // nothing advances on a timer: every pause ends with a green Next
+  owesMove,             // a correct guess makes the next problem a move (and adds one if it was the last)
   lineInMat: true,      // the line (every message) is on the Mat, above the equation
   steps: () => [],
-  newSession: (problem) => newAddBoth(problem, { level: problem.logLevel ?? 2 }),
+  newSession: (problem, { forceMove = false } = {}) => newAddBoth(problem, { level: problem.logLevel ?? 2, forceMove }),
   reduce: reduceAddBoth,
   feedbackText: addBothFeedbackText,
   buildControls: buildAddBothControls,
@@ -31,10 +33,13 @@ export const addBothPlay = {
       case 'choose': return { type: 'choose', move: d.move };
       case 'greyMove': return { type: 'greyMove' };
       case 'path': return { type: 'path', value: d.value };
-      case 'putBack': return { type: 'putBack' };
       case 'nextLine': return { type: 'nextLine' };
-      case 'matchGuess': return { type: 'matchGuess' };
-      case 'dropValue': return { type: 'dropValue' };
+      case 'next': return { type: 'next' };
+      case 'check': return { type: 'check' };
+      case 'focus': return { type: 'focus', target: d.target };
+      case 'stuck': return { type: 'stuck' };
+      case 'teach': return { type: 'teach' };
+      case 'startOver': return { type: 'startOver' };
       case 'go': return { type: 'go' };
       case 'undo': return { type: 'undo' };
       case 'addTo': return { type: 'addTo', side: d.side };
