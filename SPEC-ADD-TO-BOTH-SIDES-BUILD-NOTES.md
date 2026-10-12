@@ -74,3 +74,23 @@ Steps 1 and 2 touch no screen, so they can be merged early; the card appears for
 - **Screen layout:** Balanced/Unbalanced word and a seesaw on the dashed border at the top; the board (box and counters) above the equation; the moves in a "Balancing moves" panel beside it (under it on phones); Fewer terms / x alone / x on the left as checkboxes; only help and the pad at the bottom.
 - **The models stand on the balance** (Karl, 2026-10-12): the beam at the top tips, and the box and counters stand on it, so what is added shows on that side. The equation sits under it; Undo (red) and Go/Continue (green) sit under the equation. The side panel pairs each move with its goal checkboxes. The add buttons ("Add −3 here") appear under each side only once a number is in the blank.
 - **Tutorial:** not skippable the first time (Karl found it quick), a replay by choice can be left at any point. It suggests +3 then −2 so both a positive and a negative are tried before the quiz. The quiz puts its question, in bold, right above its two answers.
+
+## 8. Revision 2 ("light build") (Karl, 2026-10-12): what was built, and the defaults I took
+
+The spec is `SPEC-ADD-TO-BOTH-SIDES.md` (revision 1 is `…-REV1.md`; `…-AS-BUILT.md` describes the earlier build and is superseded).
+
+**Built:** the numeric level L1 (two "do" items, three quiz items, seeded, no accidental balance, quiz answers in a shuffled order); L2–L6 are the old equation levels 1–5 shifted (the Cross the border level is gone); the bare screen (the line above the equation, the equation with Undo and Go under it, the Move / Why? panel with all eight moves and only Add active, Solved for x last, the `x = [ ]` answer row); one-action Go with automatic simplifying on x's side only and the other side left as separate terms; Fewer terms counts terms as if each side were combined; Guess x / Use a move buttons; a right guess gets the three-tap click-through (Add, Go with the amount filled in, then a button showing the value matching the other side); a wrong guess names the slip and offers Put it back in; three reds offer Start over and say "try I'm stuck"; the scaffold (seesaw, counters, tray, the two-action move, the combining ritual, and building from an empty board at L2–L3 when no move has been made) comes in only from I'm stuck or Teach me and stays for the rest of the problem. Removed: the steps bar, the "?" button, Replay, the tutorials (L1 replaces them), Trade places and Cross the border (greyed in the list), and the faded panel while simplifying.
+
+**Defaults I took on the spec's open questions (§9), so nothing waits on them:**
+1. The unfinished sentence: after Undo the line says "Add the opposite of +3 to both sides."
+2. The move list is as proposed (Add, Take a fraction, Multiply, Flip everything, Distribute, Combine like terms, Trade places, Cross the border).
+3. Greyed moves show **no** Why? boxes.
+4. **Solved for x** turns green when x is alone (before the value is typed).
+5. The Guess x / Use a move buttons are on the line at the start.
+6. The click-through taps are the student's own actions on highlighted buttons.
+7. Put it back in is offered, never automatic.
+8. Red stays for a move that makes things worse (terms up or the number next to x bigger).
+9. L1 opens first and levels open in order as on every card (so it gates L2); replaying a level is the normal level replay.
+10. Old-level mapping, diagnostic thresholds and the class-sheet fields are still the next build (save code v13).
+
+**Typing:** the pad types into the blank while the move is open and into `x = [ ]` otherwise; tapping the answer field sends typing to it.

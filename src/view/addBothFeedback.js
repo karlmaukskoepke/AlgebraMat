@@ -4,24 +4,26 @@
 // opposite meet a number of the other sign?), g1 and g2 (two groups being combined), amount, tilt, heavier, typed.
 
 const NOT = (p) => `Put ${p.typed} back in for x and it doesn't balance.`;
+// "−6 + 3" for the number typed and the number next to x
+const withCon = (p) => `${p.typed} ${String(p.con).startsWith('−') ? '−' : '+'} ${String(p.con).slice(1)}`;
 
-// The slips (§5), merged: one message per slip, shaped by the equation.
+// The slips (§5): one message per slip, shaped by the equation.
 const SLIP = {
   'wrong-op': (p) => (p.mirror
-    ? `${NOT(p)} The ${p.con} changed sides but stayed ${p.con}: when a number is on the other side it needs its opposite, ${p.opp}.`
+    ? `The ${String(p.con).slice(1)} changed sides but stayed ${p.con}. Put ${p.typed} back in: ${withCon(p)} is not ${p.other}.`
     : `${NOT(p)} The ${p.con} next to x needs its opposite to cancel: add ${p.opp} to both sides, not ${p.con}.`),
-  untouched: (p) => `${NOT(p)} What's still hiding next to x? The ${p.con} is still there.`,
+  untouched: (p) => `Put ${p.typed} back in for x: ${withCon(p)} = ${p.value}, not ${p.other}. What's still hiding next to x?`,
   'sign-flipped': (p) => (p.battle
-    ? `${NOT(p)} Battle! ${p.opp} and ${p.other} fight, and the bigger team wins: which team has more?`
-    : `${NOT(p)} Right size, wrong team: check the sign.`),
-  'sizes-added': (p) => `${NOT(p)} ${p.opp} and ${p.other} are opposites, so it's a Battle, not a Party: take the bigger side's sign.`,
+    ? `Battle! ${p.opp} and ${p.other} fight, and the bigger team wins. Which team has more?`
+    : 'Right size, wrong team. Check the sign.'),
+  'sizes-added': (p) => `${p.opp} and ${p.other} are opposites, so it's a Battle, not a Party. Take the bigger side's sign.`,
   unmatched: (p) => `${NOT(p)} Cancel the ${p.con} with its opposite, ${p.opp}, on both sides.`,
 };
 const slip = (p) => (SLIP[p.tag] ?? SLIP.unmatched)(p);
 
 const M = {
   // building the equation (L1–L2)
-  aBuild: (p) => `Build the equation up above: drag the □, the + and the − up onto the sides (or tap one, then tap a side). ${p.mirror ? `The □ goes on the right.` : `The □ goes on the left.`}`,
+  aBuild: (p) => `Build the equation on the balance: drag the □, the + and the − up onto the sides (or tap one, then tap a side). ${p.mirror ? `The □ goes on the right.` : `The □ goes on the left.`}`,
   aBuilding: () => 'Keep going. Tap a counter to take one back off.',
   aSimplifyFirst: () => 'Simplify first: tap two groups on the same side to combine them. Then choose your next move.',
   aPickFirst: () => 'Pick a piece first (□, + or −), then tap the side to put it on.',
@@ -33,9 +35,13 @@ const M = {
   aBuildOneSign: () => 'A group is all one sign. Tap a counter to take one off first.',
   aBuilt: () => 'That is the equation. Now choose a move.',
   // the first moves
+  aChoose: () => 'Would you like to guess the solution (the value of x), or use a move to make the problem simpler?',
+  aGuessPrompt: () => 'Type your guess for x on the answer line, then press Check.',
+  aMovePrompt: () => 'Choose “Add ___ to both sides” in the move list.',
+  aLater: () => 'That move unlocks on a later card.',
   aIntro: () => 'Choose a move. To get x alone, cancel the number next to it.',
-  aPickAmount: () => 'Pick an amount with the pad, then add it to one side.',
-  aAmountZero: () => 'Pick an amount that is not 0.',
+  aPickAmount: () => 'Type a number to add to both sides, then press Go.',
+  aAmountZero: () => 'Add a number that isn’t 0.',
   aAmountBig: () => 'That is a big number. Try a smaller amount.',
   aOtherSide: () => 'You added to this side already. Now add the same to the other side.',
   aAddedOne: (p) => `${p.amount} on the ${p.side}: the ${p.heavier} side is heavier by ${p.tilt}. Now add the same to the other side.`,
@@ -63,35 +69,30 @@ const M = {
   aAbandoned: () => 'Never mind. Tap two groups when you are ready.',
   aCombined: () => 'Combined. Keep going: tap two more groups.',
   // judging the move
-  aGreen: () => 'Fewer terms: that move helped.',
-  aNeutral: () => 'Same number of terms: that move did not get you closer.',
-  aRed1: (p) => `That made it worse: the ${p.con} next to x is still there, and there is more of it. You can Undo it. Try the opposite of ${p.con}.`,
-  aRed2: (p) => `Still going the wrong way. Counters are on if you want them. What cancels ${p.con}?`,
-  aRed3: () => 'Want a fresh start? Tap Start over (or keep going).',
-  aSolvedBoard: (p) => `x is alone: ${p.mirror ? `${p.answer} = x` : `x = ${p.answer}`}. Do you know x? Type it.`,
+  aGreen: () => 'Fewer terms: that move helped. Keep going, or type your guess for x.',
+  aRed: () => 'That didn’t give you fewer terms. Try adding the opposite of the number next to x. Press Undo to take it back.',
+  aRed3: () => 'That didn’t give you fewer terms. Press Undo, then try I’m stuck.',
+  aPartial: (p) => `The ${p.con} is still there, partly cancelled. What would cancel it all? Press Undo to take it back.`,
+  aSolvedBoard: () => 'x is alone. What is it? Type it.',
   aStartedOver: () => 'Back to the start. Try again.',
   aUndone: () => 'Undone.',
-  // the other moves
-  aTraded: () => 'The sides traded places. Same equation, new view.',
-  aTradedSolved: () => 'Same equation, new view.',
-  aCross: () => 'Tap the number to send it across the border. It switches teams.',
-  aCrossed: (p) => `${p.number} crossed the border, but it did not switch teams: it is not balanced. Tap it to switch teams.`,
-  aSwitchedTeams: (p) => `It switched teams: ${p.number}. Balanced. Tap Go.`,
+  aUndoneTip: (p) => `Undone. Add the opposite of ${p.con} to both sides.`,
   // I'm stuck, Teach me
   aStuck1: (p) => `Which number would cancel the ${p.constant}? Tap it, then add its opposite to both sides. Do you know x now?`,
   aStuck2: () => 'Choose "Add ___ to both sides" and pick an amount. Do you know x now?',
   aStuck3: (p) => `${p.opposite} cancels the ${p.constant}. Add it to both sides yourself.`,
-  aStuckSolved: () => 'x is alone on the board. Read the other side: that is x.',
+  aStuckSolved: () => 'x is alone. Work out what x is and type it.',
   aTeach: (p) => `Step by step: the ${p.constant} next to x cancels with its opposite, ${p.opposite}. Add ${p.opposite} to the left, then to the right, then Go.`,
   // typing the answer early (the drag-check)
-  aEarlyYes: (p) => `Yes! ${p.typed}. Now check it: put ${p.typed} in for x.`,
-  aEarlyDrag: (p) => `Let's check ${p.typed}: put it in for x.`,
+  aWrong: slip,
+  aEarlyDrag: (p) => `Let's check ${p.typed}: put it in for x. Drag it onto the x, or tap the x.`,
   aCheckStart: (p) => `${p.typed} goes in for x. Tap Next to follow the steps.`,
-  aEarlyMove: () => 'Balanced! Which move would get you there? Add the opposite to both sides.',
   aCheckFailed: slip,
-  aDoneEarly: () => 'Yes! That is the move that gets you there.',
+  aCorrectWalk: () => 'CORRECT! Here’s how to solve that with moves. Tap “Add ___ to both sides”.',
+  aWalkAmount: (p) => `The number next to x needs its opposite: ${p.opposite}. It is in the blank. Press Go.`,
+  aWalkMatch: (p) => `x is alone. Your ${p.typed} should match the other side. Tap the button to see it match.`,
+  aWalkFirst: () => 'Finish the click-through first: follow the highlighted button.',
   aCorrect: (p) => `Yes! x = ${p.answer}, and it balances.`,
-  aReadBoard: (p) => `${slip(p)} The board says x = ${p.answer}: read the other side.`,
   aFinishMoveFirst: () => 'Finish the move first, then type your answer.',
   typeAnswer: () => 'Type your answer with the pad, then Check.',
   answerUnreadable: () => 'I can’t read that. Type a whole number, with − if it’s negative.',

@@ -6,7 +6,7 @@
 
 import { MINUS } from '../engine/expr.js';
 import { formatAddBoth, signed } from '../engine/addBoth.js';
-import { xSideOf, tilt, balanced, kindOf, sideValueText, MOVES_BY_LEVEL } from '../engine/addBothMoves.js';
+import { xSideOf, tilt, balanced, kindOf, sideValueText } from '../engine/addBothMoves.js';
 
 const SVG_NS = 'http://www.w3.org/2000/svg';
 function el(name, attrs = {}, children = []) {
@@ -106,16 +106,6 @@ export function boardBlock(s) {
   });
   if (row) block.append(row);
   return block;
-}
-
-export function renderAddBothMat(s) {
-  const wrap = html('div', `ab-game${s.stage === 'build' ? ' is-building' : ''}`);
-  const main = html('div', 'ab-main');
-  main.append(boardBlock(s));
-  const tray = trayFor(s);
-  if (tray) main.append(tray);
-  wrap.append(main, panelFor(s, { replay: true }));
-  return wrap;
 }
 
 // The balance (Karl: the models stand on the seesaw). The beam tips; the board's items (the x box, groups of counters or
@@ -314,58 +304,6 @@ export function trayFor(s) {
   row.append(chip(MINUS, { 'data-piece': '-', 'data-action': 'pickPiece', 'aria-label': 'Minus counter' }, s.pick === '-' ? 'is-picked' : ''));
   t.append(row);
   return t;
-}
-
-// ---------- the Balancing moves panel ----------
-
-export function panelFor(s, { replay = false } = {}) {
-  const panel = html('aside', 'ab-panel', [], { 'aria-label': 'Balancing moves' });
-  panel.append(html('h3', 'ab-panel-title', ['Balancing moves']));
-  const done = s.stage === 'done';
-  const building = s.stage === 'build';
-  const combining = Boolean(s.combining);
-  const mid = Boolean(s.pending);
-  const checking = s.early?.step === 'drag' || s.early?.step === 'check';
-  const choosing = !building && !done && !combining && !mid && !checking && !s.resolving;
-  const allowed = MOVES_BY_LEVEL(s.level);
-
-  // Each move sits beside the goals it works toward (a green, red or grey checkbox for how the last move did).
-  const goalFor = (key, label) => {
-    const state = building ? 'off' : s.lights[key];
-    const box = html('span', `ab-checkbox is-${state}`, [state === 'green' ? '✓' : state === 'red' ? '✗' : state === 'neutral' ? '–' : ''], { 'aria-hidden': 'true' });
-    return html('li', `ab-goal is-${state}`, [box, html('span', 'ab-goal-label', [label])]);
-  };
-  const GOALS = { add: [['fewer', 'Fewer terms'], ['xAlone', 'x alone']], trade: [['xLeft', 'x on the left']], cross: [] };
-  const blank = html('span', `ab-blank${s.menu === 'add' ? ' is-active' : ''}${s.amountEntry ? '' : ' is-empty'}`, [s.amountEntry ? s.amountEntry.replace('-', MINUS) : '\u00a0'], { 'data-blank': '1' });
-  const labels = { add: ['Add ', blank, ' to both sides'], trade: ['Trade places'], cross: ['Cross the border'] };
-  const grid = html('div', 'ab-grid');
-  for (const m of allowed) {
-    const b = html('button', `btn btn-move ab-move${s.menu === m ? ' is-on' : ''}`, labels[m], { type: 'button', 'data-action': 'choose', 'data-move': m });
-    b.disabled = !choosing || s.stage !== 'moves';
-    const goals = html('ul', 'ab-goals', GOALS[m].map(([key, label]) => goalFor(key, label)), { 'aria-label': 'Goals for this move' });
-    grid.append(html('div', 'ab-grow', [b, goals]));
-  }
-  panel.append(grid);
-
-  if (s.resolving && !combining) panel.append(html('p', 'ab-simplify', ['Simplify first: tap two groups on a side to combine them.']));
-  const sub = html('div', 'ab-sub');
-  if (combining) {
-    const inKind = s.combining.step === 'kind';
-    if (inKind) {
-      sub.append(html('button', 'btn btn-party', ['Party!'], { type: 'button', 'data-action': 'kind', 'data-value': 'party' }),
-        html('button', 'btn btn-battle', ['Battle!'], { type: 'button', 'data-action': 'kind', 'data-value': 'battle' }));
-    } else if (!s.combining.crossed && s.combining.kind === 'battle') {
-      sub.append(html('button', 'btn', ['Cross off for me'], { type: 'button', 'data-action': 'crossOff' }));
-    }
-    sub.append(html('button', 'btn btn-quiet', ['Never mind'], { type: 'button', 'data-action': 'abandon' }));
-  }
-  if (s.early?.step === 'check') sub.append(html('button', 'btn btn-primary', ['Next ▸'], { type: 'button', 'data-action': 'nextLine' }));
-  if (sub.childNodes.length) panel.append(sub);
-
-  if (replay && !done) {
-    panel.append(html('button', 'btn btn-quiet ab-replay', ['Replay tutorial'], { type: 'button', 'data-action': 'replayTutorial' }));
-  }
-  return panel;
 }
 
 // While two groups are being combined and the student has asked to cross them off: the pairs struck, as counts per group id.
