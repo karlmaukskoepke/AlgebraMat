@@ -141,11 +141,12 @@ describe('the problems and the card', () => {
     expect(generateSwitchLevel(4, 9)).toEqual(generateSwitchLevel(4, 9));
   });
 
-  it('is a card of six levels in Solve it, between One-step and Two-step, with room in the save code', () => {
+  it('is a retired card of six levels: off the Solve it screen, still saved in the code (its levels feed Add to both sides)', () => {
     const pack = packById('switch');
     expect(pack).toMatchObject({ levels: 6, title: 'Switch sides' });
     expect(pack.levelNames).toHaveLength(6);
-    expect(SECTIONS.find((s) => s.id === 'solve').packs).toEqual(['one-step', 'switch', 'two-step', 'multi-step']);
+    expect(pack.retired).toBe(true);
+    expect(SECTIONS.find((s) => s.id === 'solve').packs).toEqual(['add-both', 'one-step', 'two-step', 'multi-step']);
     const progress = newProgress(PACKS);
     progress.packs.switch.levels = [true, true, false, true, false, true];
     expect(decodeProgress(encodeProgress(progress), PACKS).packs.switch.levels).toEqual([true, true, false, true, false, true]);

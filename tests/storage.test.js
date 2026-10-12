@@ -59,3 +59,17 @@ describe('storage', () => {
     expect(store.load()).toEqual({ b: 1 });
   });
 });
+
+describe('storage safety net', () => {
+  it('keeps a copy of a corrupt saved value before anything overwrites it (once)', () => {
+    const backend = fakeStorage();
+    backend.map.set('mat.v1', '{"v":1,"packs":{"flipit"');
+    const store = createStore('mat.v1', backend);
+    expect(store.load()).toBeNull();
+    expect(backend.map.get('mat.v1.backup')).toBe('{"v":1,"packs":{"flipit"');
+    store.save({ v: 1, packs: {} });
+    backend.map.set('mat.v1', 'more garbage');
+    createStore('mat.v1', backend).load();
+    expect(backend.map.get('mat.v1.backup')).toBe('{"v":1,"packs":{"flipit"');        // the first copy stays
+  });
+});

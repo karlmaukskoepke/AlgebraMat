@@ -11,7 +11,7 @@ const state = (flipit, lasso = Array(7).fill(false), boxes = Array(6).fill(false
   v: 1,
   packs: {
     combineit: { levels: pad(combine, 5) }, flipit: { levels: pad(flipit, 5) }, lasso: { levels: lasso }, boxes: { levels: pad(boxes, 6) },
-    'groups-of-terms': { levels: terms }, 'distribute-combine': { levels: distribute }, value: { levels: [false, false, false, false] }, 'one-step': { levels: Array(5).fill(false) }, 'two-step': { levels: Array(7).fill(false) }, switch: { levels: Array(6).fill(false) },
+    'groups-of-terms': { levels: terms }, 'distribute-combine': { levels: distribute }, value: { levels: [false, false, false, false] }, 'add-both': { levels: Array(6).fill(false) }, 'one-step': { levels: Array(5).fill(false), first: 3 }, 'two-step': { levels: Array(7).fill(false) }, switch: { levels: Array(6).fill(false) },
   },
 });
 const state3 = state;
@@ -29,7 +29,7 @@ const sample = allStates3.filter((_, n) => n % 997 === 0 || n === 65535 || n ===
 // counted as done once the old Level 2 was.
 const fromFive = (p) => { const b = pad(p.packs.boxes.levels, 6).slice(0, 5); return { ...p, packs: { ...p.packs, boxes: { levels: [b[0], b[1], b[1], b[2], b[3], b[4]] } } }; };
 
-describe('save code v12', () => {
+describe('save code v13', () => {
   it('uses no look-alike characters', () => {
     expect(CODE_ALPHABET).toHaveLength(31);
     for (const ch of '01OIL') expect(CODE_ALPHABET).not.toContain(ch);
@@ -40,7 +40,7 @@ describe('save code v12', () => {
     const codes = new Set();
     for (const p of allStates3) {
       const code = encodeProgress(p);
-      expect(code).toMatch(/^MAT-E[2-9A-HJKMNP-Z]{14}$/); // "E" is version 12
+      expect(code).toMatch(/^MAT-F[2-9A-HJKMNP-Z]{15}$/); // "F" is version 13
       expect(decodeProgress(code, WITH_BOXES)).toEqual(p);
       codes.add(code);
     }
@@ -223,5 +223,51 @@ describe('normalizeProgress / mergeProgress', () => {
   it('merges so no finished level is ever lost', () => {
     expect(mergeProgress(state([true, true, false, false]), state([true, false, true, false], [true, ...Array(6).fill(false)])))
       .toEqual(state([true, true, true, false], [true, ...Array(6).fill(false)]));
+  });
+});
+
+describe('save code v13 is exact (the data is a 69-bit number, so it is read and written with BigInt)', () => {
+  const randomProgress = (rand) => {
+    const p = newProgress(PACKS);
+    for (const e of Object.values(p.packs)) e.levels = e.levels.map(() => rand() < 0.5);
+    return normalizeProgress(p, PACKS);
+  };
+  const rng = (seed) => () => { seed = (seed * 1664525 + 1013904223) >>> 0; return seed / 2 ** 32; };
+
+  it('round-trips every level of every pack, set or not', () => {
+    const all = newProgress(PACKS);
+    for (const e of Object.values(all.packs)) e.levels = e.levels.map(() => true);
+    expect(decodeProgress(encodeProgress(all), PACKS)).toEqual(normalizeProgress(all, PACKS));
+    expect(decodeProgress(encodeProgress(newProgress(PACKS)), PACKS)).toEqual(newProgress(PACKS));
+    const rand = rng(7);
+    for (let i = 0; i < 1500; i++) {
+      const p = randomProgress(rand);
+      expect(decodeProgress(encodeProgress(p), PACKS), encodeProgress(p)).toEqual(p);
+    }
+  });
+  it('carries Add to both sides', () => {
+    const p = newProgress(PACKS);
+    p.packs['add-both'].levels = [true, false, true, true, false, true];
+    expect(decodeProgress(encodeProgress(p), PACKS).packs['add-both'].levels).toEqual([true, false, true, true, false, true]);
+  });
+  it('catches a typo anywhere in the code', () => {
+    const rand = rng(3);
+    for (let i = 0; i < 200; i++) {
+      const code = encodeProgress(randomProgress(rand));
+      const at = 4 + Math.floor(rand() * (code.length - 4));
+      const other = CODE_ALPHABET[(CODE_ALPHABET.indexOf(code[at]) + 1 + Math.floor(rand() * 30)) % 31];
+      expect(decodeProgress(code.slice(0, at) + other + code.slice(at + 1), PACKS)).toBeNull();
+    }
+  });
+  it('still reads a v12 code, and the old Switch sides and One-step levels come back as Add to both sides credit', () => {
+    const p = newProgress(PACKS);
+    p.packs['one-step'].levels[0] = true;                         // One-step L1 → Add to both sides L2
+    p.packs.switch.levels = [true, true, false, true, false, false];   // Switch sides L1, L2 → L4; L4 → L5
+    const old = encodeProgress(p, 12);
+    expect(old).toMatch(/^MAT-E[2-9A-HJKMNP-Z]{14}$/);
+    const back = decodeProgress(old, PACKS);
+    expect(back.packs.switch.levels).toEqual([true, true, false, true, false, false]);
+    expect(back.packs['add-both'].levels).toEqual([false, true, false, true, true, false]);
+    expect(back.packs['add-both'].open).toBe(5);
   });
 });

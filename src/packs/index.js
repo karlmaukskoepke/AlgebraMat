@@ -90,29 +90,32 @@ export const valueIt = {
 export const oneStep = {
   id: 'one-step',
   title: 'One-step equations',
-  subtitle: 'Adding, subtracting, multiplying and dividing',
+  subtitle: 'Multiplying and dividing',
   blurb: 'Undo the one thing stuck to x.',
   levels: 5,
   levelNames: ['x + a = b', 'x − a = b', 'ax = b', 'x / a = b', 'all four mixed'],
+  // Add to both sides has taken over the first two (x + a, x − a), so this card opens at its third, shown as Level 1, until
+  // the multiply and divide cards replace it. The saved levels keep their numbers.
+  firstLevel: 3,
   generate: (level, seed) => generateSolveLevel(level, seed),
 };
 
-// Add to both sides (SPEC-ADD-TO-BOTH-SIDES.md): the pilot of the moves-based Solve it. Hidden (reachable by ?pack=add-both)
-// until its screens, tutorials and save-code migration are done; then it takes its place in Solve it.
+// Add to both sides (SPEC-ADD-TO-BOTH-SIDES.md): the pilot of the moves-based Solve it. Level 1 is numeric (no x); levels 2–6 are
+// the equations. It replaces One-step equations' first two levels and Switch sides (see engine/progress.js, withLegacyCredit).
 export const addBoth = {
   id: 'add-both',
   title: 'Add to both sides',
   subtitle: 'Cancel the number next to x with its opposite',
   blurb: 'Add the opposite to both sides, and cancel the pairs.',
   levels: 6,
-  levelNames: ['x + a = b', 'x − a = b', 'both forms', 'x on the right', 'bigger numbers', 'cross the border'],
-  hidden: true,
+  levelNames: ['numbers only', 'x + a = b', 'x − a = b', 'both forms', 'x on the right', 'all four forms, bigger'],
   generate: (level, seed) => generateAddBothLevel(level, seed),
 };
 
 // Switch sides (SPEC-SOLVE.md §8): the other way to solve it: the number is dragged across the border and switches teams.
 export const switchSides = {
   id: 'switch',
+  retired: true,        // off the home screen (Add to both sides replaced it); its saved levels are kept for the two-step card
   title: 'Switch sides',
   subtitle: 'Counters cross the border and switch teams',
   blurb: 'Drag the number across the equals sign: it becomes its opposite.',
@@ -143,6 +146,7 @@ export const PACKS = [
   groupsOfTerms,
   distributeCombine,
   valueIt,
+  addBoth,
   oneStep,
   switchSides,
   twoStep,
@@ -153,10 +157,12 @@ export const PACKS = [
 export const SECTIONS = [
   { id: 'count', title: 'Count it', blurb: 'Adding, subtracting and multiplying numbers', packs: ['combineit', 'flipit', 'lasso'] },
   { id: 'build', title: 'Build it', blurb: 'Expressions, with boxes, circles and groups', packs: ['boxes', 'groups-of-terms', 'distribute-combine', 'value'] },
-  { id: 'solve', title: 'Solve it', blurb: 'Solving equations', packs: ['one-step', 'switch', 'two-step', 'multi-step'] },
+  { id: 'solve', title: 'Solve it', blurb: 'Solving equations', packs: ['add-both', 'one-step', 'two-step', 'multi-step'] },
 ];
 export const sectionById = (id) => SECTIONS.find((s) => s.id === id);
 export const sectionOf = (packId) => SECTIONS.find((s) => s.packs.includes(packId));
-// Packs still being built are reachable by ?pack= but are not on the home screen, in progress or in save codes.
-export const HIDDEN_PACKS = [addBoth];
+// Packs still being built are reachable by ?pack= but are not on the home screen, in progress or in save codes (none now).
+export const HIDDEN_PACKS = [];
+// The number a level is called on screen: a card that opens at a later level counts from 1.
+export const levelNumber = (pack, level) => level - ((pack?.firstLevel ?? 1) - 1);
 export const packById = (id) => PACKS.find((p) => p.id === id) ?? HIDDEN_PACKS.find((p) => p.id === id);

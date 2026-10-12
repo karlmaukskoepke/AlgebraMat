@@ -20,12 +20,16 @@ export function createStore(key, backend = defaultBackend()) {
     },
     load() {
       if (available) {
+        let text = null;
         try {
-          const text = backend.getItem(key);
+          text = backend.getItem(key);
           if (text !== null) return JSON.parse(text);
           return null;
         } catch {
-          // unreadable or corrupt: fall back to memory
+          // unreadable or corrupt: keep a copy of what was there (the next save would overwrite it), and fall back to memory
+          if (text !== null) {
+            try { if (backend.getItem(`${key}.backup`) === null) backend.setItem(`${key}.backup`, text); } catch { /* nothing more to do */ }
+          }
         }
       }
       return memory === null ? null : JSON.parse(memory);
