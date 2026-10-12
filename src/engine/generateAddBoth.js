@@ -131,6 +131,7 @@ export function generateNumericLevel(seed) {
   const rp = pick([1, 2, 3, 4].filter((n) => n !== lp), rng);
   items.push({ ...base('quiz'), amount: lp, addLeft: lp, addRight: rp, scenario: 'different' });
 
+  items[items.length - 1].last = true;            // after the fifth item comes the watched walkthrough (§3D item 6)
   for (const it of items) {
     if (it.item === 'quiz') {
       it.correct = numericItemOutcome(it);

@@ -2809,3 +2809,57 @@ body {
 .lb-eq.is-long { font-size: 44px; } .lb-eq.is-xlong { font-size: 34px; }
 @media (max-width: 760px) { .lb-eq.is-long { font-size: 32px; } .lb-eq.is-xlong { font-size: 25px; } }
 @media (max-width: 760px) { .lb-side { flex-wrap: wrap; white-space: normal; } .lb-eq { font-size: 34px; } .lb-border { padding: 0 8px; } }
+
+/* ---------- revision 2.2: a centred line box, one-line moves, directed highlights, work line, walkthrough ---------- */
+.lb-line { align-items: center; text-align: center; justify-content: center; }
+.lb-text { text-align: center; }
+.lb-linebtns { justify-content: center; }
+.lb-tag { align-self: center; margin: 0; padding: 2px 14px; border: 2px solid var(--ink); border-radius: 999px; font: 800 16px 'Lexend', system-ui, sans-serif; letter-spacing: 0.06em; text-transform: uppercase; background: #fff; }
+/* the move list: small, one line a move; the chosen move grows */
+.lb-panel { gap: 6px; }
+.lb-row { grid-template-columns: minmax(0, 1fr) 7.4rem; }
+.lb-head { grid-template-columns: minmax(0, 1fr) 7.4rem; }
+.lb-move { min-height: 40px; padding: 4px 8px; font-size: 14px; line-height: 1.15; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.lb-move.is-on { font-size: 17px; min-height: 48px; font-weight: 800; }
+.lb-row .ab-goal { font-size: 14px; white-space: nowrap; }
+.lb-row .ab-checkbox { width: 22px; height: 22px; font-size: 14px; border-width: 2px; }
+.lb-solved-label { font-size: 16px; }
+@media (max-width: 760px) { .lb-row, .lb-head { grid-template-columns: 1fr; } .lb-move { white-space: normal; } }
+/* cursors blink only where the student is about to type */
+.ab-blank.is-empty:not(.is-active)::after { display: none; }
+.ab-typed.is-empty:not(.is-blink)::after { display: none; }
+.lb-amountrow[hidden] { display: none; }
+/* what to click next: green and flashing for Go, Next, Check; a pulsing outline for Undo and the move */
+.btn-go.is-target { animation: lb-flash 0.9s ease-in-out infinite; box-shadow: 0 0 0 4px #7fd0a2; }
+.btn-undo.is-target, .lb-sidebtn.is-target, .ab-sidebtn.is-target { animation: sw-pulse 1.1s ease-in-out infinite; box-shadow: 0 0 0 4px #0072b2; }
+@keyframes lb-flash { 0%, 100% { filter: none; } 50% { filter: brightness(1.18); } }
+@media (prefers-reduced-motion: reduce) { .btn-go.is-target, .btn-undo.is-target, .ab-sidebtn.is-target, .lb-move.is-target { animation: none; } }
+/* the guess slides onto x */
+.lb-guess { display: inline-block; color: #a3281b; border: 3px solid #a3281b; border-radius: 12px; padding: 0 12px; animation: lb-slide 0.9s ease-out both; }
+@keyframes lb-slide { from { transform: translate(0, 90px); opacity: 0; } to { transform: none; opacity: 1; } }
+.lb-subst { margin: 0; padding: 0; list-style: none; text-align: center; font: 700 34px/1.4 'Kalam', 'Lexend', system-ui, sans-serif; }
+.lb-subst .is-bad { color: #a3281b; } .lb-subst .is-good { color: #1b6e3a; }
+/* a move's work line: the added amount coloured, x's numbers struck then dropped, then the new equation fades in */
+.lb-eqblock.has-work { gap: 4px; }
+.lb-work { font-size: 40px; color: var(--muted, #555); }
+.lb-work.is-long { font-size: 32px; } .lb-work.is-xlong { font-size: 26px; }
+.lb-num.is-added { color: #0072b2; }
+.lb-num.is-struck { position: relative; }
+.lb-num.is-struck::after { content: ''; position: absolute; left: -2px; right: -2px; top: 54%; border-top: 4px solid #a3281b; transform: scaleX(0); transform-origin: left; animation: lb-strike 0.5s 0.8s ease-out forwards; }
+.lb-work .lb-num.is-struck { animation: lb-drop 0.5s 1.5s ease-in forwards; }
+@keyframes lb-strike { to { transform: scaleX(1); } }
+@keyframes lb-drop { to { opacity: 0.25; } }
+.lb-eqblock.has-work > .lb-eq:not(.lb-work) { animation: lb-fadein 0.5s 1.6s both; }
+@keyframes lb-fadein { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .lb-num.is-struck::after { animation: none; transform: scaleX(1); } .lb-work .lb-num.is-struck, .lb-eqblock.has-work > .lb-eq:not(.lb-work) { animation: none; } }
+.lb-balance { align-self: center; padding: 4px 18px; border: 3px solid #1b6e3a; border-radius: 999px; background: #e3f4ea; color: #1b6e3a; font: 800 28px 'Lexend', system-ui, sans-serif; }
+.lb-walk { align-items: stretch; }
+.is-settled .lb-num.is-struck::after { animation: none; transform: scaleX(1); }
+.is-settled .lb-work .lb-num.is-struck { animation: none; opacity: 0.25; }
+.is-settled.has-work > .lb-eq:not(.lb-work) { animation: none; }
+.is-settled .lb-guess { animation: none; }
+.ab-blank.is-empty:not(.is-active) { border-bottom: 3px solid var(--ink); }
+.lb-body { grid-template-columns: minmax(0, 1fr) 410px; }
+.lb-row, .lb-head { grid-template-columns: minmax(0, 1fr) 8.8rem; }
+@media (max-width: 760px) { .lb-body { grid-template-columns: 1fr; } .lb-row, .lb-head { grid-template-columns: 1fr; } }
+.lb-move.is-grey { font-size: 13px; }

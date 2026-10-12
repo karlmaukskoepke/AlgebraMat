@@ -1,8 +1,8 @@
-# Add to both sides: solve `x + a = b` and `x − a = b` by adding the opposite to both sides  (Karl, 2026-10-12; status: designed, revision 2 "light build")
+# Add to both sides: solve `x + a = b` and `x − a = b` by adding the opposite to both sides  (Karl, 2026-10-12; status: designed, revision 2.2 "light build", answers to the second review folded in)
 
 Section: Solve it.   Prerequisite card(s): Combine it L2 (adding a positive and a negative). Replaces the old One-step L1-L2 and the old Switch sides card (see §9).
 
-**Revision 2 replaces revision 1 (2026-10-11, kept as `SPEC-ADD-TO-BOTH-SIDES-REV1.md`) and the build briefing of 2026-10-12.** It returns the card to the **light build**: a bare screen with two paths, and every scaffold held back until the student asks for it. Trade places and Cross the border are **no longer on this card** (each gets its own card).
+**Revision 2 replaces revision 1 (2026-10-11) and the build briefing of 2026-10-12.** It returns the card to the **light build**: a bare screen with two paths, and every scaffold held back until the student asks for it. Trade places and Cross the border are **no longer on this card** (each gets its own card).
 
 ## The light-build pattern (every Solve it card follows this; this card is the pilot)
 
@@ -20,11 +20,11 @@ Section: Solve it.   Prerequisite card(s): Combine it L2 (adding a positive and 
 
 **Example:** `x − 5 = −2`. The student sees the equation and one line at the top. They either type a guess for x, or choose "Add ___ to both sides", type **5**, and press Go. The equation shows both sides getting the 5 (`x − 5 + 5 = −2 + 5`), the +5 and −5 on x's side cancel on their own, and the line says x is alone and asks what it is. The right side is **not** simplified (`x = −2 + 5`), so the student works out the Battle and types **3**.
 
-**What they type:** one whole number, on the integer pad (digits and ±), in a line that reads `x = [   ]`. The student never types an expression. **The solved value is never displayed** before the student types it.
+**What they type:** one whole number, on the integer pad (digits and ±), in a line that reads `x = [   ]`. The student never types an expression. **The solved value is never displayed** before the student types it (the one exception is the watched L1 walkthrough, §3D item 6).
 
 ### The bare screen, top to bottom
 1. **Header:** "Add to both sides · Level n" and five dots for the five problems.
-2. **The line** (the one place to read, always at the top, above the equation, highlighted). At the start of a problem it asks: **"Would you like to guess the solution (the value of x), or use a move to make the problem simpler?"** It then carries every message (see §3F).
+2. **The line** (the one place to read, always at the top, above the equation: a **colored box, full width, with its text and buttons centered inside it** so there is no unused space). At the start of a problem it asks: **"Would you like to guess the solution (the value of x), or use a move to make the problem simpler?"** It then carries every message (see §3F).
 3. **The equation**, bare, with the border (the = sign) in the middle. **Undo** sits directly under it.
 4. **The move panel (right side; under the equation on a phone):** two column headings, **Move** and **Why?**. Each move is a row. The checkboxes in the Why? column sit beside the move they belong to. The last row of the panel is the uber-goal, **Solved for x**.
 5. **The answer row (bottom):** `x = [   ]`, **Check ✓**, **I'm stuck**, **Teach me step-by-step**, **Start over** (only after three red moves), and the number pad.
@@ -32,7 +32,7 @@ Section: Solve it.   Prerequisite card(s): Combine it L2 (adding a positive and 
 **Not on the bare screen:** the seesaw, the "Balanced / Unbalanced" word, the counter tray, the "Add here" buttons under each side, the steps bar, the "?" button, the Replay button. All of the first four are scaffolds (§4). The rest are retired.
 
 ### The two paths
-- **Path A: guess x.** The student types a value and presses Check. **Correct:** the line says "CORRECT! Here's how to solve that with moves." and a short **click-through** shows the move (§3C). **Wrong:** the line names the slip (§5). A **"Put it back in"** button then appears beside the line (see §3C) so the student can test the guess. Nothing is forced.
+- **Path A: guess x.** The student types a value and presses Check. **Correct:** the line says "CORRECT! Here's how to solve that with moves." and a short **click-through** shows the move (§3C). **Wrong:** the line names the guess, the guess slides onto x, and the unbalanced substitution is shown under the equation. The student clicks **Undo**, and the line then says to make the equation simpler first and the student is taken straight to the move (§3C). There is **no "Put it back in" button**.
 - **Path B: use a move.** See §3B.
 - **Choice prompt (my assumption):** the line carries two small buttons, **Guess x** and **Use a move**. Tapping one highlights its area (the `x = [   ]` row, or the move list) and the line changes to that path's prompt. Typing or choosing a move directly also works without tapping either.
 
@@ -44,7 +44,7 @@ Five problems per level, **no repeated answers within a level**. In every level 
 
 | Level | Forms | Numbers | What's new | Working surface |
 |---|---|---|---|---|
-| **L1** | Numeric: `a + b = c + d` | whole numbers, results ≤ 15 | The balance. Adding the same to both sides keeps it; one side only upsets it (§3D). | The seesaw with number groups, **balance readout ON** (numbers only) |
+| **L1** | Numeric: `a + b = c + d` | whole numbers, results ≤ 15 | The balance. Adding the same to both sides keeps it; one side only upsets it (§3D). Ends with one guided `x + 3 = 5`. | The seesaw with number groups, **balance readout ON** (numbers only) |
 | **L2** | `x + a = b` | a: 1-9. b: -9 to 12 | Add the opposite (−a) to both sides. Right side is a Party (negative answers) or a Battle (positive answers). | Bare screen |
 | **L3** | `x − a = b` | a: 2-9. b: -9 to 12 | Adding a **positive** to cancel a negative. Battles with a negative b and positive answers. | Bare |
 | **L4** | Mixed `x + a = b` and `x − a = b` | a: 2-9. b: -10 to 12 | Choosing the right opposite without being told the form. Answers positive and negative. | Bare |
@@ -52,7 +52,7 @@ Five problems per level, **no repeated answers within a level**. In every level 
 | **L6** | All four forms | a: 1-14. b: -15 to 15 | Bigger numbers. | Bare |
 
 **Form counts per level (required mix of the 5 problems)**
-- **L1:** 2 "do" problems and 3 "quiz" problems (see §3D).
+- **L1:** 2 "do" problems and 3 "quiz" problems, then one guided walkthrough with x (see §3D).
 - **L2:** 3 Party (negative answers), 2 Battle (positive answers, or a negative answer such as `x + 5 = 2`).
 - **L3:** at least 2 Battle with a negative b. At least 1 Party (b positive). Answers mix signs.
 - **L4:** at least 2 of each form. At least 2 negative answers and 2 positive answers.
@@ -77,33 +77,48 @@ Note: in the design conversation `x − 5 = −2` was once spoken as having answ
 ## 3. The model / picture
 
 ### 3A. The move list (the same on every card of the unit)
-Rows, in this order (proposed; see §9): **Add ___ to both sides**, **Take a fraction of both sides** (×⅓, ÷3), **Multiply both sides by ___**, **Flip everything**, **Distribute**, **Combine like terms**, **Trade places**, **Cross the border**.
+Rows, in this order (decided 2026-10-12): **Add ___ to both sides**, **Cross the border** (second, because it goes with the Fewer terms goal), **Take a fraction of both sides** (×⅓, ÷3), **Multiply both sides by ___**, **Flip everything**, **Trade places**, then **Distribute** and **Combine like terms** last (they act on one side of the equation, not both).
 - On this card only **Add ___ to both sides** is active. The others are **greyed out**. Tapping a greyed move says in the line: "That move unlocks on a later card."
 - The **Why?** boxes sit beside the active move. Greyed moves show no boxes (so the column stays short). The last row, **Solved for x**, is always visible.
+- **Icons (proposed, not decided; see §3H).**
+- **Size:** every move and its Why? boxes are in a **smaller font and smaller buttons**, **on one line each**. The **selected** move grows a little. Only a move that is waiting for input (a flashing amount) gets extra activity. Every other row stays quiet.
 
 ### 3B. Path B: one move, in one action
-1. Tap **Add ___ to both sides**. The blank shows a **blinking cursor**.
+1. Tap **Add ___ to both sides**. **Only now** does the blank show a **blinking cursor**, and **only now** does the row **Amount to add: [   ]** appear above the pad. Before the move is selected there is no cursor and no amount row. When nothing is waiting for typing, **no cursor blinks anywhere**.
 2. **Type a number** with the pad (± toggles the sign). The amount 0 is refused ("Add a number that isn't 0"). The student may also **drag a number off the equation into the blank**; it copies the number and the student still chooses the sign.
-3. Press **Go ▶**. **One action:** the equation shows the amount added to **both** sides at once (`x + 3 + −3 = −6 + −3`).
-4. **Automatic simplifying, x's side only.** Pairs that cancel on x's side cancel on their own (`x + 3 + −3` becomes `x`; `x + 3 + −5` becomes `x − 2`). **The other side is left unsimplified** (`−6 + −3`) so the answer isn't shown.
-5. **Why? boxes are judged** after Go (§3E). When x is alone on its side, the line says: "x is alone. What is it? Type it." and **Solved for x** turns green. The student works out the number and types it.
-6. **An unhelpful amount.** If the amount does not meet **Fewer terms**, the **Fewer terms** box flashes (red if the move made things worse, grey if it changed nothing) and the line draws attention to it: "That didn't give you fewer terms. Try adding the opposite of the number next to x." The student presses **Undo** and tries again; the line then prompts: "Add the opposite of +3 to both sides." (my wording for the sentence Karl left unfinished; see §9).
+3. Press **Go ▶**. **One action:** the equation shows the amount added to **both** sides at once, with the **added amount in colour on both sides** (`x + 3 + −3 = −6 + −3`, the −3 coloured on each side).
+4. **The cancelling is shown.** On the next line the pair on x's side visibly cancels (the +3 and −3 are struck through, then drop out) and the line reads `x = −6 + −3`. A partial cancel shows `x − 2`. **The other side is left unsimplified** so the answer isn't shown. The student does that last operation.
+5. **Why? boxes are judged** after Go (§3E). When x is alone on its side, the line says: "x is alone. What is it? Type it." and **Solved for x** turns green. The `x = [   ]` row starts blinking. The student works out the number and types it; as soon as the typed text has a numeric value, **Check ✓ turns green and flashes** (§3G).
+6. **An unhelpful amount.** If the amount does not meet **Fewer terms**, the **Fewer terms** box flashes (red if the move made things worse, grey if it changed nothing) and the line draws attention to it: "That didn't give you fewer terms. Try adding the opposite of the number next to x." **Undo** is highlighted (flashing) and the line says: "Undo it and try a different number to add to both sides." The student presses Undo and tries a different number.
 
 ### 3C. Path A: guess x
-- **Correct guess:** the line says "CORRECT! Here's how to solve that with moves." Then a **three-tap click-through**, each tap on a highlighted target: (1) the move (**Add ___ to both sides**), (2) **Go** with the correct amount **pre-filled**, (3) a button that shows the typed value matching the unsimplified right side. Solved for x turns green. (Whether the taps should be the student's own actions or a passive "Next": see §9.)
-- **Wrong guess:** the line names the slip (§5). A **"Put it back in"** button appears beside the line. If the student taps it, a chip with their number can be **dragged onto x** (tap alternative: tap the chip, then tap x), then **Next** through the order of operations (`(3) − 5` → `3 − 5 = −2` → `−2 = −2 Balanced ✓`, or Unbalanced ✗ with the step that failed). It is the student's choice, not automatic, and does not count as a stuck click.
+- **Correct guess:** the line says "CORRECT! Here's how to solve that with moves." Then a **three-tap click-through**, each tap on a highlighted target: (1) the move (**Add ___ to both sides**), (2) **Go** with the correct amount **pre-filled**, (3) a button that shows the typed value matching the unsimplified right side. Solved for x turns green. The taps are the student's own actions on highlighted targets (decided 2026-10-12).
+- **Wrong guess** (decided 2026-10-12, revised 2.2). The whole sequence is animated, then **stepped by clicks** (each step waits for the one highlighted target):
+  1. The line names the guess and the result: **"You guessed x = 5. This unbalances the equation."** The guess **slides onto x** by itself.
+  2. **Under the equation** the substitution is shown, a step per click on a highlighted **Next**: `5 − 5 = −2`, then `0 ≠ −2 ✗  Not balanced`.
+  3. The line highlights **Undo**: "Press Undo to take your guess back." The student clicks it. That click is the student seeing the error for themselves.
+  4. **Automatically** the line changes to: **"Let's make the equation simpler first, and then find the solution."** and **Add ___ to both sides** is highlighted. They are now in the move (§3B).
+  - This does not count as a stuck click. **There is no "Put it back in" button**, and the slip-naming messages of §5 do **not** appear on this path (they apply to a wrong value typed after a move).
 
 ### 3D. Level 1: the numeric level (the only level where the balance shows by default)
-The screen shows numbers only: `4 + 1 = 2 + 3`, standing on a **seesaw** as groups of counters, with a big readout: **`5 = 5   Balanced ✓`**. The prompt is in the line. The five problems:
+The screen shows numbers only: `4 + 1 = 2 + 3`, standing on a **seesaw** as groups of counters, with a big readout: **`5 = 5   Balanced ✓`**. The prompt is in the line. The five numeric problems, then one guided walkthrough:
 1. **Do (amount pre-filled +3):** the student chooses "Add ___ to both sides", adds it to the **left** (`8 ≠ 5   Unbalanced ✗`, the beam tips), then to the **right** (`8 = 8   Balanced ✓`), then Go. Two actions here are the point of the level.
 2. **Do (amount pre-filled −2):** the same with a negative.
 3. **Quiz:** "What would happen if we added 3 to one side only? Does it keep the balance, or upset it?" (*Keeps the balance* / *Upsets the balance*.) Answer: **upsets**.
 4. **Quiz:** "What if we added 3 to **both** sides?" Answer: **keeps**.
 5. **Quiz:** "What if we added 3 to the left and 2 to the right?" Answer: **upsets**.
+6. **Final guided walkthrough (a watched demonstration, not a problem; no typing).** `x + 3 = 5` on the bare screen with a **balance indicator at the top** of the equation. A note opens it: **"We don't know x yet, but the = sign tells us both sides are balanced."** Each animation plays, then waits for a click on the one highlighted target:
+   - (a) Highlighted: **Add ___ to both sides**.
+   - (b) The amount blank shows **−3 pre-filled**. Highlighted: **Go**. The equation shows the −3 in colour on both sides (`x + 3 + −3 = 5 + −3`).
+   - (c) **Next:** the +3 and −3 on x's side cancel (struck through, then drop out). The equation reads `x = 5 + −3`. The Why? boxes go green (**Fewer terms**, **Solved for x**).
+   - (d) **Next:** the right side combines and the line says **"Now we have x = 2."** This is the **only place the value is shown for the student**, because they are watching a demonstration, not solving.
+   - (e) **Next:** the substitution is shown, `2 + 3 = 5`, with a green check and **Balanced ✓**: "2 is the amount that makes it balance."
+   - Takeaway in the line: **"Adding to both sides can make the problem simpler."** Then the card moves on to L2. **No sixth dot:** the header shows the five dots, then the label "Walkthrough". The Move/Why? panel is visible with **only Add active** (decided), so the play area is the same shape at every level.
 - A wrong quiz answer shows **Before / After** equations with readouts under the buttons, and the student retries that item.
 - Amount 0 is never accepted. No item may balance by accident (the generator checks).
 - "I'm stuck" and "Teach me" are not offered on this level.
-- Number choices change each time (the five items above are the shape; the numbers vary and are verified).
+- Number choices change each time (the shape is fixed; the numbers vary and are verified).
+- **Directed walkthrough:** in every guided item the line says what to do and **only the one next place to click is highlighted** (a pulsing outline). Nothing else competes. **No cursor blinks** except in a field the student is about to type in, and none between items.
 
 ### 3E. The Why? boxes (green ✓ / red ✗ / grey –), judged only after Go
 | Box | Beside | Rule |
@@ -115,13 +130,33 @@ The screen shows numbers only: `4 + 1 = 2 + 3`, standing on a **seesaw** as grou
 - Lights count terms **as if** the unsimplified side were combined; the screen never shows the combined value.
 
 ### 3F. The line (one place to read)
-Always the same spot, above the equation. It shows, in order of what's happening: the opening choice prompt; feedback on the student's last action; the next prompt ("x is alone. What is it? Type it."); "Yes! x = 3, and it balances." on a correct answer; the unhelpful-amount message. One sentence at a time; the newest message replaces the old.
+Always the same spot, above the equation. It shows, in order of what's happening: the opening choice prompt; feedback on the student's last action; the next prompt ("x is alone. What is it? Type it."); the guess feedback ("You guessed x = 5. This unbalances the equation."); "Yes! x = 3, and it balances." on a correct answer; the unhelpful-amount message. One sentence at a time; the newest message replaces the old.
+
+### 3G. Always say where to click (Go, Undo, Check)
+Whenever the next step is a button, **that button is the one highlighted** (green and flashing for Go, Next and Check; a pulsing outline for Undo). Only one thing is highlighted at a time.
+- **Go ▶:** when an amount is in the blank.
+- **Undo:** after an unhelpful move (§3B step 6).
+- **Check ✓ (decided):** it turns green and flashes **as soon as the typed text has a numeric value**. A lone **−** does not trigger it; **−5** does. This is the same on both paths (a guess, or the value after a move). When x is alone and nothing is typed yet, the `x = [   ]` row blinks.
+
+### 3H. Move icons (proposed; Karl's idea, not yet decided; see §9 item 18)
+One small pictogram per move, beside the label, in a fixed template: the equation shape in grey, the part that changes in colour (outside numbers in blue, matching the ⅓ on the fraction button).
+| Move | Icon |
+|---|---|
+| Add ___ to both sides | `[ ] = [ ]` with a `+ ▢` dotted box on each side |
+| Cross the border | `▢ + n = ▢` with an arrow carrying `+n` over the = and landing as `−n` |
+| Take a fraction of both sides | `1/n ( ▢ ) = 1/n ( ▢ )`, the fractions in blue |
+| Multiply both sides by ___ | `n ( ▢ ) = n ( ▢ )`, the n in blue |
+| Flip everything | `−x = n` with an arrow to `x = −n` |
+| Trade places | `▢ = ▢` with a curved arrow carrying the left box over the = to the right, and back |
+| Distribute | `n ( ▢ + ▢ )` with arrows from the n to each box |
+| Combine like terms | `2x + 3x = 5x` |
+Rules if adopted: icons are about 24 px and sit in the row without making it taller; the full-size picture appears only for the selected move or a tapped greyed move, in the line's space; every icon has a text label so nothing depends on the picture.
 
 ---
 
 ## 4. Supports (the ladder)
 
-**Principle:** supports are things the student **does**, not steps they watch. Every support ends by sending the student back to the answer line. **Nothing opens automatically.** The scaffolds below are the existing build (the seesaw, the tray, the two-action move, the combining ritual), now held back until asked for.
+**Principle:** supports are things the student **does**, not steps they watch. Every support ends by sending the student back to the answer line. **Nothing opens automatically**, with one exception Karl chose: a wrong guess is followed by the substitution (stepped by clicks), Undo, and a direction to the move (§3C). The scaffolds below are the existing build (the seesaw, the tray, the two-action move, the combining ritual), now held back until asked for.
 
 ### "I'm stuck" (just-in-time, one rung at a time; each click = +1 stuck count per level)
 - **Rung 1: Model it.** The seesaw appears with the equation standing on it as counters, with the tray, and the **balance word** ("Balanced ✓ / Unbalanced ✗") turns on. In L2-L3 the board starts **empty** and the student builds the equation by dragging □, + and − up from the tray (tap alternative: tap a piece, then a side). In L4-L6 it arrives pre-built. The number next to x is highlighted: "Which number would cancel the +3?" Ends with "Do you know x now?" and the pad.
@@ -135,7 +170,7 @@ The same scaffolds on a **forced path**: model on, the move opened in its two-ac
 Scaffolds stay on until the problem ends. The next problem starts bare again. If the student asks for help mid-problem, the scaffold **redraws the current equation, including any moves already made** (the unsimplified side shows as separate groups).
 
 ### Wrong-move handling (a move that is red or grey)
-1. **Every red or grey move:** the line says what happened (see §3B step 6) and **Undo** is available. Nothing opens by itself.
+1. **Every red or grey move:** the line says what happened (see §3B step 6) and **Undo** is highlighted, so the student takes the move back and tries a different number. Nothing else opens by itself.
 2. **Three red moves in a row:** **Start over** appears and the line adds: "Try I'm stuck." The menu is never narrowed to the correct move.
 
 ### Stuck count (teacher-visible)
@@ -145,17 +180,17 @@ Per level: number of **I'm stuck** clicks and **Teach me** uses. Anonymous (scra
 
 ## 5. What a wrong answer looks like (the slips)
 
-Typed-answer slips (Path A, or a wrong value typed after Path B). Each wrong answer is **tagged** by recognizing which mistake produces that exact answer. Messages are built from the equation (`con` = the number next to x, `opp` = its opposite). Examples are checked by code.
+Typed-answer slips (a wrong value typed **after a move**, when x is alone). They do not appear after a wrong first guess (§3C), where the sequence is substitution, Undo, "make the equation simpler first". Each wrong answer is **tagged** by recognizing which mistake produces that exact answer. Messages are built from the equation (`con` = the number next to x, `opp` = its opposite). Examples are checked by code.
 
 | Slip | Example → wrong answer | Message the student sees (in the line) | After a wrong answer |
 |---|---|---|---|
-| **Added the same number instead of its opposite** (b + a) | `x+3=−6` → **−3**; `x+4=−2` → **2** | "Put −3 back in for x and it doesn't balance. The +3 next to x needs its **opposite** to cancel: add −3 to both sides, not +3." | "Put it back in" offered |
-| **Ignored the number next to x** | `x+3=−6` → **−6** | "Put −6 back in for x: −6 + 3 = −3, not −6. What's still hiding next to x?" | "Put it back in" offered |
-| **Right size, wrong team / sign dropped** | `x+4=−2` → **6** (correct −6); `x+5=2` → **3** (correct −3) | Party: "Right size, wrong team. Check the sign." Battle: "Battle! −5 and +2 fight, and the bigger team wins. Which team has more?" | "Put it back in" offered |
-| **Added the sizes of opposite numbers** (a Battle treated as a Party) | `x−5=−2` → **7** (correct 3); `x−3=−6` → **9** (correct −3) | "+5 and −2 are opposites, so it's a **Battle**, not a Party. Take the bigger side's sign." | "Put it back in" offered |
-| **Moved a term across without switching teams** (x on the right) | `7=x+3` → **10** (correct 4) | "The 3 changed sides but stayed +3. Put 10 back in: 10 + 3 is not 7." | "Put it back in" offered |
-| **Added the wrong opposite to the right** | `x−5=−2` → **−7** | "That's −5 on the left, which makes it −10, not a cancelled pair. To cancel a −5, add the opposite." | "Put it back in" offered |
-| **Anything else** | | "Cancel the +3 with its opposite, −3, on both sides." | "Put it back in" offered |
+| **Added the same number instead of its opposite** (b + a) | `x+3=−6` → **−3**; `x+4=−2` → **2** | "Put −3 back in for x and it doesn't balance. The +3 next to x needs its **opposite** to cancel: add −3 to both sides, not +3." | Substitution shown; the student retypes |
+| **Ignored the number next to x** | `x+3=−6` → **−6** | "Put −6 back in for x: −6 + 3 = −3, not −6. What's still hiding next to x?" | Substitution shown; the student retypes |
+| **Right size, wrong team / sign dropped** | `x+4=−2` → **6** (correct −6); `x+5=2` → **3** (correct −3) | Party: "Right size, wrong team. Check the sign." Battle: "Battle! −5 and +2 fight, and the bigger team wins. Which team has more?" | Substitution shown; the student retypes |
+| **Added the sizes of opposite numbers** (a Battle treated as a Party) | `x−5=−2` → **7** (correct 3); `x−3=−6` → **9** (correct −3) | "+5 and −2 are opposites, so it's a **Battle**, not a Party. Take the bigger side's sign." | Substitution shown; the student retypes |
+| **Moved a term across without switching teams** (x on the right) | `7=x+3` → **10** (correct 4) | "The 3 changed sides but stayed +3. Put 10 back in: 10 + 3 is not 7." | Substitution shown; the student retypes |
+| **Added the wrong opposite to the right** | `x−5=−2` → **−7** | "That's −5 on the left, which makes it −10, not a cancelled pair. To cancel a −5, add the opposite." | Substitution shown; the student retypes |
+| **Anything else** | | "Cancel the +3 with its opposite, −3, on both sides." | Substitution shown; the student retypes |
 
 Move slips (Path B, judged by the Why? boxes):
 
@@ -186,8 +221,8 @@ New or changed:
 - **Answer never 0.** b is never 0. A problem is never already solved. No repeated answers or equations within a level.
 - **Size limits:** all numbers |n| ≤ 15 (a ≤ 14); at most **36 counters per side** in a scaffold; one box.
 - **Amount 0** is never accepted.
-- **Automatic simplifying** happens on x's side only; the other side stays unsimplified until the student types the value. A partial cancel (`x − 2`) is shown simplified on x's side.
-- **No screen or message ever shows the solved value** (`x = 3`) before the student types it. The checkbox counts terms as if the right side were combined.
+- **Cancelling is shown** (struck through, then dropped) on x's side only; the other side stays unsimplified until the student types the value. A partial cancel (`x − 2`) is shown simplified on x's side.
+- **No screen or message ever shows the solved value** (`x = 3`) before the student types it. The one exception is the watched L1 walkthrough (§3D item 6). The checkbox counts terms as if the right side were combined.
 - **Undo** always reverses one whole move.
 - **Greyed moves** can be tapped (the line says they unlock later) but never act.
 - **Guess and move mixed:** a student who guesses wrong and then uses a move gets the move normally; the guess has no penalty.
@@ -207,21 +242,29 @@ New or changed:
 
 ---
 
-## 9. Not decided / open questions
+## 9. Decided and open
 
-1. **Karl's unfinished sentence (§3B step 6).** "They then should be prompted to add …" I assumed: the opposite of the number next to x, to both sides. Confirm or correct.
-2. **The full move list and its order (§3A).** Proposed: Add, Take a fraction, Multiply, Flip everything, Distribute, Combine like terms, Trade places, Cross the border. Is that the list for the whole unit? Where does "Divide" live (the fraction button covers it)?
-3. **Why? boxes for greyed moves (§3A).** I hid them to keep the column short. Show them (as faint outlines) so the whole unit looks the same, or hide until the move is active?
-4. **"Solved for x" meaning (§3E).** I made it green when x is alone (before the value is typed). Risk: it reads as "done" while the student still has to type x. Alternative: it turns green only after the correct value is typed. Which?
-5. **Choice prompt (§1).** The two small buttons **Guess x** / **Use a move** are my reading of "Based on their choice…". Keep, or just let the two areas speak for themselves?
-6. **Click-through after a correct guess (§3C).** I made the three taps the student's own actions on highlighted targets. You said "simple click through". A passive "Next" is simpler but means the student only watches. Which?
-7. **"Put it back in" after a wrong guess (§3C).** Offered, not automatic. Confirm.
-8. **Red for a worse move.** The build marks red when terms go up or the number next to x gets bigger. Is red right, or neutral plus the message? (Build question 6, still open.)
-9. **Numeric level (§3D).** Five items: 2 do, 3 quiz. Okay? Is the numeric level gating (must it be completed to open L2), or only opened first? Does a replay mean playing L1 again?
-10. **Old-level mapping and diagnostic thresholds** (§2, §8) are proposals. Claude Code must read the real old definitions.
-11. **Printed notes.** Rename "A · Switch sides" and add "Trade places" and "Cross the border" (when those cards exist).
-12. **Teacher data.** Only stuck and Teach me counts. Not recording undos, red moves, or which path (guess or move) a student chose. Enough?
-13. **Progress loss after site updates** has been reported once. It is on the audit list before rollout.
+**Decided (2026-10-12):**
+- Solved for x is green when x is alone, before the value is typed.
+- Correct guess: three pre-filled, highlighted taps the student performs.
+- Wrong guess: animated, then stepped by clicks: names the guess, substitution under the equation, Undo, then "Let's make the equation simpler first" and the move is highlighted. No slip-naming message on this path.
+- Check turns green and flashes as soon as the typed text has a numeric value ("−" alone does not; "−5" does).
+- Move order: Add, Cross the border, Take a fraction, Multiply, Flip everything, Trade places, Distribute, Combine like terms.
+- L1 replay is just the same L1 played again (decided).
+- L1 final walkthrough: a watched demonstration (balance indicator at the top, "we don't know x yet but = says it's balanced", add −3, cancel, "Now we have x = 2", substitution check). No typing.
+
+**Open:**
+1. **Unfinished sentence (§3B step 6).** "They then should be prompted to add …" I assumed: the opposite of the number next to x, to both sides. Confirm.
+2. **Where does "Divide" live** (the fraction button covers it)? Confirm that the move list above is the list for the whole unit.
+3. **Why? boxes for greyed moves.** Hidden now to keep the column short. Show them as faint outlines so the whole unit looks the same?
+4. **Choice prompt (§1).** Keep the small **Guess x** / **Use a move** buttons, or let the two areas speak for themselves?
+5. **Red for a worse move.** Red when terms go up or the number next to x gets bigger, or neutral plus the message?
+6. **L1 gating (§3D).** Is L1 required to open L2, or only played first? (A replay is just L1 again: decided.)
+7. **Old-level mapping and diagnostic thresholds** (§2, §8) are proposals. Claude Code must read the real old definitions.
+8. **Printed notes.** Rename "A · Switch sides" and add "Trade places" and "Cross the border" when those cards exist.
+9. **Teacher data.** Only stuck and Teach me counts. Not recording undos, red moves, or which path was chosen. Enough?
+10. **Progress loss after site updates** has been reported once. On the audit list before rollout.
+11. **Move icons (§3H).** Adopt? See the reply for the recommendation.
 
 ---
 
@@ -230,5 +273,7 @@ New or changed:
 - **Hide until scaffolded:** seesaw, balance word, counter tray, the "Add here" side buttons, the combining ritual (Party/Battle tap and count), the two-action move. All of these become **scaffold mode**, turned on by I'm stuck rung 1 or Teach me.
 - **Remove:** the steps bar, the "?" button, the Replay button, the Tutorial step, the "Build it" step as a default, the faded move panel while simplifying, the automatic counters on a second red move, the L5 one-tap button (the bare move is already one action).
 - **Move to their own cards:** Trade places and its tutorial, Cross the border and its tutorial, the `4 = x` convention nudge. L6 (Cross the border) is gone from this card; the card is numeric + five levels.
-- **Change:** the prompt line moves to the top, above the equation, highlighted, and carries all messages; the move is one action with automatic simplifying on x's side; the right panel gets the **Move / Why?** headings and the full greyed move list; **Solved for x** is the uber-goal; a correct guess gets the "CORRECT! Here's how to solve that with moves" click-through; a wrong guess offers "Put it back in".
+- **Change:** the prompt line moves to the top, above the equation, highlighted, and carries all messages; the move is one action with automatic simplifying on x's side; the right panel gets the **Move / Why?** headings and the full greyed move list; **Solved for x** is the uber-goal; a correct guess gets the "CORRECT! Here's how to solve that with moves" click-through; a wrong guess animates the substitution under the equation and steps by clicks, then Undo, then the move is highlighted (no "Put it back in").
 - **Add:** the numeric level L1 (§3D), the Guess x / Use a move buttons (§1).
+- **Changes from the first build review (2026-10-12):** (L1) highlight only the next place to click; the blinking cursor and the "Amount to add" row appear only after the move is selected, and no cursor blinks between items; add the final guided `x + 3 = 5`. (L3) center the line's text and buttons and remove unused space; delete "Put it back in"; a wrong guess shows the substitution, then "make the equation simpler first", then the move; show the added amount in colour on both sides and show the cancelling (struck through); an unhelpful amount highlights Undo; Check turns green and flashes when it is time to check. (Move menu) smaller font and buttons on one line each; the selected move grows; Cross the border second; Distribute and Combine like terms last.
+- **Changes from the second review (2026-10-12, revision 2.2):** the L1 walkthrough becomes a watched demonstration with a balance indicator and ends with the value and the substitution check; a wrong guess is animated and stepped by clicks (guess named, substitution, Undo, "make the equation simpler first"); Check triggers on the first numeric typed value; Trade places position confirmed; icons proposed (§3H).

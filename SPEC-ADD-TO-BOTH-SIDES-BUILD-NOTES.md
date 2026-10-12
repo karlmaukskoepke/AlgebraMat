@@ -94,3 +94,9 @@ The spec is `SPEC-ADD-TO-BOTH-SIDES.md` (revision 1 is `…-REV1.md`; `…-AS-BU
 10. Old-level mapping, diagnostic thresholds and the class-sheet fields are still the next build (save code v13).
 
 **Typing:** the pad types into the blank while the move is open and into `x = [ ]` otherwise; tapping the answer field sends typing to it.
+
+## 9. Revision 2.2 (Karl, 2026-10-12): what changed in the build
+
+Built to `SPEC-ADD-TO-BOTH-SIDES.md` revision 2.2: the line is a full-width coloured box with its text and buttons centred; **no "Put it back in"**: a wrong first guess is named ("You guessed x = 5. This unbalances the equation."), slides onto x, the substitution is shown a click at a time (`5 − 5 = −2`, then `0 ≠ −2 ✗ Not balanced`), Undo is highlighted, and after Undo the line says "Let's make the equation simpler first" with Add highlighted (not a stuck click, no slip message on this path); a wrong value typed after a move names the slip and shows the substitution at once; a move leaves a work line above the new equation (the added amount coloured on both sides, x's numbers struck then dropped) and an unhelpful move highlights Undo; the move list is in the new order, smaller, one line each, the chosen one bigger; the "Amount to add" row and the blinking cursors appear only where the student is about to type; Check turns green and flashes once the typed text has a numeric value; Go, Next, Undo and Check are the one highlighted next click; L1 highlights only the next click and ends with the watched `x + 3 = 5` walkthrough (label "Walkthrough", no sixth dot; the only place the value is shown to the student).
+
+Not built: the move icons (§3H, proposed only).

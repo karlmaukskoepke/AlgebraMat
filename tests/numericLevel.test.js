@@ -57,3 +57,27 @@ describe('a quiz item', () => {
     expect([s.stage, s.clean, s.reveal]).toEqual(['done', false, null]);
   });
 });
+
+describe('the watched walkthrough after the fifth item', () => {
+  const quizDone = () => run(newNumeric(items[4]), { type: 'quiz', value: items[4].correct });
+  it('opens after the last quiz item (not before), without finishing the problem', () => {
+    expect(items[4].last).toBe(true);
+    expect(items.slice(0, 4).some((i) => i.last)).toBe(false);
+    const s = quizDone();
+    expect([s.stage, s.walk.step, s.feedback.key]).toEqual(['walk', 'a', 'wtA']);
+    expect(run(newNumeric(items[3]), { type: 'quiz', value: items[3].correct }).stage).toBe('done');
+  });
+  it('goes a click at a time: Add, Go (with −3 filled in), then Next to the end, and only then is the problem done', () => {
+    let s = quizDone();
+    expect(run(s, { type: 'wtGo' })).toBe(s);                                            // only the highlighted click works
+    s = run(s, { type: 'wtChoose' });
+    expect([s.walk.step, s.amountEntry]).toEqual(['b', '-3']);
+    s = run(s, { type: 'wtGo' });
+    const seen = [s.walk.step];
+    for (let i = 0; i < 4; i++) { s = run(s, { type: 'wtNext' }); seen.push(s.walk.step); }
+    expect(seen).toEqual(['c', 'd', 'e', 'f', 'g']);
+    expect(s.stage).toBe('walk');
+    s = run(s, { type: 'wtNext' });
+    expect([s.stage, s.feedback.key]).toEqual(['done', 'wtEnd']);
+  });
+});

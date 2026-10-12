@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { makeAddBoth } from '../src/engine/addBoth.js';
 import {
-  newAddBoth, reduceAddBoth, boardText, combinable, kindOf, balanced, tilt, effTerms, checkLines,
+  newAddBoth, reduceAddBoth, boardText, combinable, kindOf, balanced, tilt, effTerms, substitutionSteps,
 } from '../src/engine/addBothMoves.js';
 
 const run = (s, ...actions) => actions.reduce(reduceAddBoth, s);
@@ -86,11 +86,13 @@ describe('path B: one move in one action', () => {
 });
 
 describe('undo and the wrong-move handling', () => {
-  it('undo reverses the whole move, and after a red or grey move gives the tip', () => {
+  it('undo reverses the whole move; after a red or grey move the next click to point at is Undo', () => {
     let s = move(start(), 3);
+    expect(s.undoCue).toBe(true);
+    expect(move(start(), -3).undoCue).toBe(false);
     s = run(s, { type: 'undo' });
     expect(boardText(s.board)).toBe('x + 3 = −6');
-    expect([s.feedback.key, s.feedback.params.con]).toEqual(['aUndoneTip', '+3']);
+    expect([s.feedback.key, s.undoCue]).toEqual(['aUndone', false]);
     expect(s.lights).toEqual({ fewer: 'off', solved: 'off' });
     expect(run(move(start(), -3), { type: 'undo' }).feedback.key).toBe('aUndone');
   });
@@ -131,22 +133,41 @@ describe('path A: guess x', () => {
     s = run(s, { type: 'undo' });
     expect(s.walk.step).toBe('go');
   });
-  it('a wrong guess names the slip and offers Put it back in (never forced); wrong counts, stuck does not', () => {
-    let s = answer(start(), '−3');                                                       // x + 3 = −6: added instead of the opposite
-    expect([s.feedback.key, s.tag, s.wrongs, s.stuck]).toEqual(['aWrong', 'wrong-op', 1, 0]);
-    expect(s.canPutBack).toMatchObject({ typed: -3 });
-    expect(answer(start(), '−6').tag).toBe('untouched');
-    expect(answer(start(P('x+a', 4, -2)), '6').tag).toBe('sign-flipped');
-    s = run(s, { type: 'putBack' });
-    expect([s.early.step, s.canPutBack]).toEqual(['drag', null]);
-    s = run(s, { type: 'dropValue' });
-    expect(s.early.lines).toEqual(checkLines(s.problem, -3));
-    s = run(s, { type: 'nextLine' }, { type: 'nextLine' }, { type: 'nextLine' });
-    expect([s.early, s.feedback.key]).toEqual([null, 'aCheckFailed']);
+  it('a wrong first guess: named, the substitution a click at a time, Undo takes it back and points to the move', () => {
+    let s = answer(start(), '5');
+    expect([s.feedback.key, s.guessCheck.typed, s.guessCheck.step, s.guessCheck.lines.length, s.wrongs, s.stuck]).toEqual(['aGuessed', 5, 0, 2, 1, 0]);
+    expect(s.feedback.params.typed).toBe('5');
+    expect(run(s, ...typed('2')).entry).toBe('');                                          // typing waits
+    expect(run(s, { type: 'undo' })).toBe(s);                                              // Undo only once the substitution is shown
+    s = run(s, { type: 'nextLine' });
+    expect(s.guessCheck.step).toBe(1);
+    s = run(s, { type: 'nextLine' });
+    expect([s.guessCheck.step, s.feedback.key]).toEqual([2, 'aUndoGuess']);
+    expect(run(s, { type: 'nextLine' })).toBe(s);
+    s = run(s, { type: 'undo' });
+    expect([s.guessCheck, s.path, s.feedback.key, s.stuck, s.history.length]).toEqual([null, 'move', 'aSimplerFirst', 0, 0]);
+    s = run(s, { type: 'choose', move: 'add' });
+    expect(s.menu).toBe('add');                                                            // the move is open as usual
   });
-  it('a wrong value typed after x is alone is handled the same way', () => {
-    const s = answer(move(start(), -3), '−3');
-    expect([s.feedback.key, s.stage]).toEqual(['aWrong', 'moves']);
+  it('the substitution is written as the equation is, then what it comes to', () => {
+    expect(substitutionSteps(P('x-a', 5, -2), 5)).toEqual(['5 − 5 = −2', '0 ≠ −2   ✗ Not balanced']);
+    expect(substitutionSteps(P('x-a', 5, -2), 3)[1]).toBe('−2 = −2   ✓ Balanced');
+    expect(substitutionSteps(P('x+a', 3, 7, true), 10)).toEqual(['7 = 10 + 3', '7 ≠ 13   ✗ Not balanced']);
+  });
+  it('a wrong value typed after a move names the slip, shows the substitution at once, and the student retypes', () => {
+    let s = answer(move(start(), -3), '−3');                                               // x + 3 = −6: added instead of the opposite
+    expect([s.feedback.key, s.tag, s.stage, s.guessCheck]).toEqual(['aWrong', 'wrong-op', 'moves', null]);
+    expect(s.subst).toEqual(substitutionSteps(s.problem, -3));
+    expect(answer(move(start(), -3), '−6').tag).toBe('untouched');
+    expect(answer(move(start(P('x+a', 4, -2)), -4), '6').tag).toBe('sign-flipped');
+    s = answer(s, '−9');
+    expect(s.stage).toBe('done');
+  });
+  it('a move shows its work line: the added amount on both sides, x\'s numbers struck as they combine', () => {
+    const s = move(start(), -3);
+    expect(s.work.left).toEqual([{ x: true }, { v: 3, struck: true }, { v: -3, added: true, struck: true }]);
+    expect(s.work.right).toEqual([{ v: -6, struck: false }, { v: -3, added: true, struck: false }]);
+    expect(run(s, { type: 'undo' }).work).toBeNull();
   });
   it('reads unreadable answers', () => {
     expect(run(start(), { type: 'check' }).feedback.key).toBe('typeAnswer');

@@ -3,6 +3,7 @@
 // into the amount blank while the move is open and into the answer otherwise; tapping the answer field says "the answer".
 
 import { MINUS } from '../engine/expr.js';
+import { xAlone } from '../engine/addBothMoves.js';
 
 function button(label, action, extra = {}) {
   const b = document.createElement('button');
@@ -29,6 +30,16 @@ export function buildAddBothControls(root, dispatch) {
   value.setAttribute('aria-label', 'Your answer for x');
   field.append(prompt, value);
 
+  // "Amount to add: [   ]": only while a move is selected and waiting for its number
+  const amountRow = document.createElement('div');
+  amountRow.className = 'lb-answerrow lb-amountrow';
+  const amountPrompt = document.createElement('strong');
+  amountPrompt.textContent = 'Amount to add:';
+  const amountValue = document.createElement('span');
+  amountValue.className = 'ab-typed';
+  amountRow.append(amountPrompt, amountValue);
+  amountRow.hidden = true;
+
   const startOver = button('Start over', 'startOver', { cls: 'btn-quiet' });
   const stuck = button('I’m stuck', 'stuck', { data: { key: 's' }, aria: 'I’m stuck (key S)' });
   const teach = button('Teach me step-by-step', 'teach', { data: { key: 't' }, aria: 'Teach me step-by-step (key T)' });
@@ -42,7 +53,7 @@ export function buildAddBothControls(root, dispatch) {
   const digits = [1, 2, 3, 4, 5, 6, 7, 8, 9, 0].map((d) => button(String(d), 'digit', { cls: 'btn-pad', data: { digit: d } }));
   keys.append(button('±', 'toggleSign', { cls: 'btn-pad', aria: 'Change sign' }), ...digits, button('⌫', 'backspace', { cls: 'btn-pad', aria: 'Delete' }));
 
-  root.append(field, palette, keys);
+  root.append(amountRow, field, palette, keys);
 
   root.addEventListener('click', (e) => {
     const b = e.target.closest('button[data-action]');
@@ -58,13 +69,21 @@ export function buildAddBothControls(root, dispatch) {
       const done = stage === 'done' || stage === 'levelDone';
       const building = stage === 'build';
       const combining = Boolean(s.combining);
-      const early = Boolean(s.early);
+      const early = Boolean(s.guessCheck);
       const amountMode = s.menu === 'add' && s.typing !== 'answer' && !combining;
 
       if (combining) { prompt.textContent = 'How many are left?'; value.textContent = s.combining.entry.replace('-', MINUS) || ' '; value.classList.toggle('is-empty', !s.combining.entry); }
       else { prompt.textContent = 'x ='; value.textContent = s.entry.replace('-', MINUS) || ' '; value.classList.toggle('is-empty', !s.entry); }
       field.classList.toggle('is-dim', amountMode);
-      field.classList.toggle('is-target', s.path === 'guess' && !done && !amountMode && !s.entry);
+      // a cursor blinks only where the student is about to type: the amount once the move is chosen, the answer once x is alone
+      // (or the guess path was chosen); nowhere else
+      const waitingForAnswer = !done && !building && !early && !amountMode && !combining && !s.entry && !s.walk && (xAlone(s.board) || s.path === 'guess');
+      value.classList.toggle('is-blink', waitingForAnswer || (combining && !s.combining.entry && s.combining.step === 'count'));
+      field.classList.toggle('is-target', waitingForAnswer);
+      amountRow.hidden = !(amountMode && s.stage === 'moves');
+      amountValue.textContent = (s.amountEntry ?? '').replace('-', MINUS) || '\u00a0';
+      amountValue.classList.toggle('is-empty', !s.amountEntry);
+      amountValue.classList.toggle('is-blink', !s.amountEntry);
       value.disabled = done || building || early;
 
       startOver.hidden = !s.startOver || done;
@@ -72,6 +91,11 @@ export function buildAddBothControls(root, dispatch) {
       const typingOk = !done && !building && !early && !(combining && s.combining.step !== 'count');
       for (const b of keys.querySelectorAll('button')) b.disabled = !typingOk;
       check.disabled = !done && (!typingOk || amountMode);
+      // Check turns green and flashes as soon as the typed text has a numeric value ("−" alone does not, "−5" does)
+      const ready = !done && typingOk && !amountMode && /^-?\d+$/.test(combining ? s.combining.entry : s.entry);
+      check.classList.toggle('btn-go', ready);
+      check.classList.toggle('is-target', ready);
+      check.classList.toggle('btn-primary', !ready);
       check.innerHTML = done ? 'Next →' : 'Check ✓';
       if (done) check.dataset.next = '1'; else delete check.dataset.next;
     },
