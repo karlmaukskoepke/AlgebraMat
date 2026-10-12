@@ -78,14 +78,14 @@ function lineBlock(s) {
 
 // A side as it stands: x, and numbers joined by plus signs (a negative number after a plus, as in the notes). Only the newest
 // equation is live: its numbers can be dragged, the guess slides onto its x, the number next to x can be highlighted.
-function termsOf(side, s, live) {
+function termsOf(side, s, live, plug = false) {
   const out = [];
   side.forEach((t, i) => {
     if (i > 0) out.push(html('span', 'lb-plus', ['+']));
     if (t.kind === 'x') {
-      out.push(live && s.sub?.kind === 'guess'
+      out.push(live && plug && s.sub?.kind === 'guess'
         ? html('span', 'lb-x lb-guess', [signed(s.sub.typed)], { 'data-x': '1' })              // the guess slides onto x
-        : html('span', 'lb-x', ['x'], { 'data-x': '1' }));
+        : html('span', `lb-x${plug ? ' is-plugx' : ''}`, ['x'], { 'data-x': '1' }));
     } else {
       const hint = live && s.hint?.kind === 'cancel' && s.hint.id === t.id;
       out.push(html('span', `lb-num${hint ? ' is-hint' : ''}`, [signed(t.v)], live ? { 'data-numval': t.v } : {}));
@@ -133,9 +133,10 @@ function stackRows(s) {
       return html('div', cls, [w]);
     }
     const live = i === last;
+    const plug = i === 0 && Boolean(s.sub);                  // the original equation is the one the value goes back into
     const eq = html('div', `lb-eq${eqClass(charsOf([...row.board.left, ...row.board.right]))}`, [], { role: 'img', 'aria-label': 'The equation' });
-    eq.append(html('div', 'lb-side lb-left', termsOf(row.board.left, s, live)), html('div', 'lb-border', [html('span', 'lb-equals', ['='])]), html('div', 'lb-side lb-right', termsOf(row.board.right, s, live)));
-    return html('div', cls, [eq]);
+    eq.append(html('div', 'lb-side lb-left', termsOf(row.board.left, s, live, plug)), html('div', 'lb-border', [html('span', 'lb-equals', ['='])]), html('div', 'lb-side lb-right', termsOf(row.board.right, s, live, plug)));
+    return html('div', `${cls}${plug ? ' is-plugrow' : ''}`, plug ? [html('span', 'lb-plugtag', ['plugging back into this equation']), eq] : [eq]);
   });
 }
 
@@ -149,7 +150,7 @@ export function answerBlock(s) {
   const text = counting ? s.combining.entry : s.sub && !live ? String(s.sub.typed) : s.entry;
   const ready = live && /^-?\d+$/.test(text);
   const row = html('div', `lb-answerrow${live ? '' : ' is-dim'}`);
-  row.append(html('strong', 'lb-prompt', [s.combining ? 'How many are left?' : 'x =']));
+  row.append(html('strong', 'lb-prompt', ['x =']));
   const typed = html('button', `ab-typed lb-typed${text ? '' : ' is-empty'}${live && !text ? ' is-blink' : ''}`, [text ? text.replace('-', MINUS) : ' '], { type: 'button', 'data-action': 'focus', 'data-target': 'answer', 'aria-label': 'Your answer for x' });
   typed.disabled = !live;
   const check = html('button', `btn lb-check${ready ? ' btn-go is-target' : ' btn-primary'}`, ['Check ✓'], { type: 'button', 'data-action': 'check' });
@@ -160,7 +161,7 @@ export function answerBlock(s) {
   // the substitution: a line a click, then Balanced or Not balanced on its own line
   if (s.sub) {
     const shown = s.sub.lines.slice(0, Math.min(s.sub.step, 2));
-    const list = html('ol', 'lb-subst', shown.map((line) => html('li', '', [line])));
+    const list = html('ol', 'lb-subst', shown.map((line, i) => html('li', '', i === 0 && s.sub.parts ? s.sub.parts.map((part) => (part.blue ? html('span', 'is-blue', [part.text]) : part.text)) : [line])));
     if (s.sub.step >= 3) list.append(html('li', s.sub.ok ? 'is-good' : 'is-bad', [s.sub.ok ? '✓ Balanced' : '✗ Not balanced']));
     block.append(list);
   } else block.append(html('ol', 'lb-subst'));
@@ -274,16 +275,13 @@ function panelBlock(s) {
     sub = html('div', 'ab-sub');
     if (s.combining.step === 'kind') {
       sub.append(btn('Party!', 'kind', 'btn btn-party', { value: 'party' }), btn('Battle!', 'kind', 'btn btn-battle', { value: 'battle' }));
-    } else if (!s.combining.crossed && s.combining.kind === 'battle') {
-      sub.append(btn('Cross off for me', 'crossOff'));
     }
-    sub.append(btn('Never mind', 'abandon', 'btn btn-quiet'));
   }
   return movePanel({
     menu: s.menu, typing: s.typing, amountEntry: s.amountEntry, path: s.path,
     disabled: building || s.stage === 'done' || Boolean(s.combining) || Boolean(s.pending) || Boolean(s.sub),
     locked: !s.scaffold && s.stage === 'moves' && s.path !== 'move',                  // before the choice, and on the guess path
-    target: s.path === 'move' && !s.menu && s.lights.solved !== 'green' && !s.undoCue && !s.sub && s.stage === 'moves' && !s.hint,
+    target: s.path === 'move' && !s.menu && !s.combining && !s.resolving && s.lights.solved !== 'green' && !s.undoCue && !s.sub && s.stage === 'moves' && !s.hint,
     lights: s.lights, off: building, flash: ['red', 'neutral'].includes(s.lights.fewer) && s.history.length > 0, sub,
   });
 }

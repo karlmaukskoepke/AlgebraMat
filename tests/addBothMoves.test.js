@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { makeAddBoth } from '../src/engine/addBoth.js';
 import { oppositeOf } from '../src/engine/addBoth.js';
 import {
-  newAddBoth, reduceAddBoth, boardText, combinable, kindOf, balanced, tilt, xTerms, substitutionSteps, owesMove,
+  newAddBoth, reduceAddBoth, boardText, kindOf, balanced, tilt, xTerms, substitutionSteps, owesMove, answerLive,
 } from '../src/engine/addBothMoves.js';
 
 const run = (s, ...actions) => actions.reduce(reduceAddBoth, s);
@@ -13,13 +13,13 @@ const start = (p = P('x+a', 3, -6), level = 4) => newAddBoth(p, { level });
 const move = (s, amount) => run(s, ...(s.path ? [] : [{ type: 'path', value: 'move' }]), { type: 'choose', move: 'add' }, ...typed(String(amount)), { type: 'go' });
 const answer = (s, text) => run(s, ...typed(text), { type: 'check' });
 
-// the scaffold's way: tap two groups, say Party or Battle, type how many are left
-function combineOne(s, pair) {
-  const a = s.board[pair.side].find((t) => t.id === pair.a);
-  const b = s.board[pair.side].find((t) => t.id === pair.b);
-  return run(s, { type: 'select', id: pair.a }, { type: 'select', id: pair.b }, { type: 'kind', value: kindOf(a.v, b.v) }, ...typed(String(a.v + b.v)), { type: 'check' });
+// the scaffold's way: the next two numbers on a side are highlighted and the student says Party or Battle; the right answer combines them
+function combineOne(s) {
+  const a = s.board[s.combining ? (s.board.left.some((t) => t.id === s.combining.a) ? 'left' : 'right') : 'left'].find((t) => t.id === s.combining.a);
+  const b = [...s.board.left, ...s.board.right].find((t) => t.id === s.combining.b);
+  return run(s, { type: 'kind', value: kindOf(a.v, b.v) });
 }
-const combineAll = (s) => { let t = s; while (combinable(t.board).length) t = combineOne(t, combinable(t.board)[0]); return t; };
+const combineAll = (s) => { let t = s; while (t.combining) t = combineOne(t); return t; };
 
 describe('the bare screen', () => {
   it('starts with the choice prompt, the equation as written, nothing scaffolded, and the lights off', () => {
@@ -182,6 +182,7 @@ describe('plugging a typed value back in: a line a click', () => {
   it('the substitution is written as the equation is, then what it comes to', () => {
     expect(substitutionSteps(P('x-a', 5, -2), 5)).toEqual(['5 − 5 = −2', '0 = −2']);
     expect(substitutionSteps(P('x-a', 5, -2), 3)).toEqual(['3 − 5 = −2', '−2 = −2']);
+    expect(substitutionSteps(P('x+a', 3, -6), -9)).toEqual(['(−9) + 3 = −6', '−6 = −6']);              // a negative goes in parentheses
     expect(substitutionSteps(P('x+a', 3, 7, true), 10)).toEqual(['7 = 10 + 3', '7 = 13']);
   });
   it('a wrong value typed after a move: plugged in, the slip named at the end, the row clears and the student retypes', () => {
@@ -246,23 +247,30 @@ describe('I\'m stuck and Teach me bring in the scaffold, one rung at a time', ()
     expect([tilt(s), balanced(s)]).toEqual([-3, false]);
     expect(run(s, { type: 'go' }).feedback.key).toBe('aGoNotYet');
     s = run(s, { type: 'addTo', side: 'right' }, { type: 'go' });
-    expect([s.resolving, s.feedback.key]).toEqual([true, 'aCombineGroups']);
-    expect(run(s, { type: 'choose', move: 'add' }).feedback.key).toBe('aSimplifyFirst');
+    expect([s.resolving, s.feedback.key, s.combining.step]).toEqual([true, 'aPartyOrBattle', 'kind']);   // the first pair is highlighted for them
+    expect(run(s, { type: 'choose', move: 'add' })).toBe(s);                                   // nothing else is open while a pair waits
     s = combineAll(s);
     expect(boardText(s.board)).toBe('x = −9');
     expect(s.lights).toEqual({ fewer: 'green', solved: 'green' });
     expect(s.feedback.key).toBe('aSolvedBoard');
   });
-  it('the scaffold\'s combining asks Party or Battle, then how many are left (cross off is a scaffold, not the answer)', () => {
+  it('the scaffold\'s combining highlights the next pair and asks Party or Battle; a right answer combines them by itself', () => {
     let s = run(start(), { type: 'stuck' }, { type: 'choose', move: 'add' }, ...typed('−3'), { type: 'addTo', side: 'left' }, { type: 'addTo', side: 'right' }, { type: 'go' });
-    const [pair] = combinable(s.board);
-    s = run(s, { type: 'select', id: pair.a }, { type: 'select', id: pair.b });
-    expect(s.feedback.key).toBe('aPartyOrBattle');
+    const first = s.combining;
+    expect(s.board.left.some((t) => t.id === first.a)).toBe(true);                       // the left side comes first
     expect(run(s, { type: 'kind', value: 'party' }).feedback.key).toBe('aKindWrong');
-    s = run(s, { type: 'kind', value: 'battle' }, { type: 'crossOff' });
-    expect(s.combining.crossed).toBe(true);
-    s = run(s, ...typed('5'), { type: 'check' });
-    expect(s.feedback.key).toBe('aCountWrong');
+    expect(run(s, { type: 'kind', value: 'party' }).combining).toEqual(first);
+    s = run(s, { type: 'kind', value: 'battle' });                                         // +3 and −3: a Battle, they cancel
+    expect(boardText(s.board)).toBe('x = −6 + −3');
+    expect(s.feedback.params.before).toBe('Battle! 3 and −3 make 0.');
+    expect(s.combining.step).toBe('kind');                                                 // now the other side
+    s = run(s, { type: 'kind', value: 'party' });
+    expect([boardText(s.board), s.combining]).toEqual(['x = −9', null]);
+  });
+  it('while x is not alone the answer row stays greyed, scaffold or not', () => {
+    const s = run(start(), { type: 'stuck' });
+    expect(run(s, ...typed('5')).entry).toBe('');
+    expect(answerLive(s)).toBe(false);
   });
   it('Teach me: the scaffold on a forced path, only the right amount, and it counts as a Teach me', () => {
     let s = run(start(), { type: 'teach' });
@@ -271,8 +279,9 @@ describe('I\'m stuck and Teach me bring in the scaffold, one rung at a time', ()
     s = run(start(), { type: 'teach' }, { type: 'backspace' }, { type: 'backspace' }, ...typed('2'), { type: 'addTo', side: 'left' });
     expect(s.feedback.key).toBe('aForced');
   });
-  it('a typed answer once the scaffold is on is plugged back in, and then finishes the problem', () => {
-    const s = clickThrough(answer(run(start(), { type: 'stuck' }), '−9'));
+  it('a typed answer once the scaffold has got x alone is plugged back in, and then finishes the problem', () => {
+    let s = run(start(), { type: 'stuck' }, { type: 'choose', move: 'add' }, ...typed('−3'), { type: 'addTo', side: 'left' }, { type: 'addTo', side: 'right' }, { type: 'go' });
+    s = clickThrough(answer(combineAll(s), '−9'));
     expect(s.stage).toBe('done');
     expect(s.clean).toBe(false);
   });
