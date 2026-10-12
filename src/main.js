@@ -20,6 +20,8 @@ import { valueLightPlay } from './play/valueLightPlay.js';
 import { solveLightPlay } from './play/solveLightPlay.js';
 import { switchPlay } from './play/switchPlay.js';
 import { addBothPlay } from './play/addBothPlay.js';
+import { divideMovesPlay } from './play/divideMovesPlay.js';
+import { divideNumericPlay } from './play/divideNumericPlay.js';
 import { addBothNumericPlay } from './play/addBothNumericPlay.js';
 import { boxPlay } from './play/boxPlay.js';
 import { afterAnswer } from './engine/streak.js';
@@ -70,6 +72,7 @@ const PLAY = {
   'one-step': solveLightPlay,
   'two-step': solveLightPlay,
   switch: switchPlay,
+  'divide-it': (level) => (level === 1 ? divideNumericPlay : divideMovesPlay),   // Level 1 is numeric (no x)
   'add-both': (level) => (level === 1 ? addBothNumericPlay : addBothPlay),   // Level 1 is numeric (no x)
   'distribute-combine': (level) => (level >= 4 ? distributeTypedPlay : LIGHT ? distributeLightPlay : distributePlay),
 };
@@ -237,13 +240,14 @@ function startLevel(packId, level, resume = null) {
   const adapter = adapterFor(pack.id, level);
   const seed = resume?.seed ?? fixedSeed ?? newSeed();
   const problems = levelled(pack.generate(level, seed), level);
+  const flags = {};                 // things a card has shown the student in this level (Add to both sides: Trade places)
   let index = resume?.index ?? 0;
   if (index >= problems.length) {          // a reload in the extra, move-only problem after a correct guess
     const extra = adapter.owesMove ? extraProblem(pack, level, seed, problems) : null;
     if (extra) problems.push(extra); else index = 0;
   }
   play = {
-    pack, adapter, level, seed, problems, index, session: adapter.newSession(problems[index]), finished: false,
+    pack, adapter, level, seed, problems, index, flags, session: adapter.newSession(problems[index], { flags }), finished: false,
     practicing: false, streak: 0, best: bestFor(loadBests(), pack.id, level),
   };
   useControls(adapter);
@@ -358,7 +362,7 @@ function nextProblem() {
     }
   }
   play.index += 1;
-  play.session = play.adapter.newSession(play.problems[play.index], { forceMove: owed });
+  play.session = play.adapter.newSession(play.problems[play.index], { forceMove: owed, flags: play.flags });
   play.fit = null;
   persist();
   render();
@@ -390,7 +394,7 @@ function startPractice() {
   play.seed = newSeed();
   play.problems = levelled(play.pack.generate(play.level, play.seed), play.level);
   play.index = 0;
-  play.session = play.adapter.newSession(play.problems[0]);
+  play.session = play.adapter.newSession(play.problems[0], { flags: play.flags });
   play.fit = null;
   persist();
   render();

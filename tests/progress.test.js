@@ -10,7 +10,7 @@ describe('progress', () => {
   it('starts with every level of every pack unfinished', () => {
     expect(fresh).toEqual({
       v: 1,
-      packs: { combineit: { levels: Array(5).fill(false) }, flipit: { levels: Array(5).fill(false) }, lasso: { levels: Array(7).fill(false) }, boxes: { levels: Array(6).fill(false) }, 'groups-of-terms': { levels: Array(8).fill(false) }, 'distribute-combine': { levels: Array(5).fill(false) }, value: { levels: Array(4).fill(false) }, 'add-both': { levels: Array(6).fill(false) }, 'one-step': { levels: Array(5).fill(false), first: 3 }, 'two-step': { levels: Array(7).fill(false) }, switch: { levels: Array(6).fill(false) } },
+      packs: { combineit: { levels: Array(5).fill(false) }, flipit: { levels: Array(5).fill(false) }, lasso: { levels: Array(7).fill(false) }, boxes: { levels: Array(6).fill(false) }, 'groups-of-terms': { levels: Array(8).fill(false) }, 'distribute-combine': { levels: Array(5).fill(false) }, value: { levels: Array(4).fill(false) }, 'add-both': { levels: Array(6).fill(false) }, 'divide-it': { levels: Array(6).fill(false) }, 'one-step': { levels: Array(5).fill(false), first: 3 }, 'two-step': { levels: Array(7).fill(false) }, switch: { levels: Array(6).fill(false) } },
     });
   });
 
@@ -130,5 +130,15 @@ describe('doneCount', () => {
     p = completeLevel(completeLevel(p, 'flipit', 1), 'lasso', 1);
     expect(doneCount(p)).toBe(2);
     expect(doneCount(null)).toBe(0);
+  });
+});
+
+describe('old One-step progress counts for Divide it', () => {
+  const old = (levels) => { let p = newProgress(PACKS); for (const l of levels) p = completeLevel(p, 'one-step', l); return normalizeProgress(p, PACKS); };
+  it('maps One-step ax = b (3) to Divide it L2 and mixed (5) to L3, never L1, and opens up to what was earned', () => {
+    expect(old([3]).packs['divide-it'].levels).toEqual([false, true, false, false, false, false]);
+    expect(old([3, 5]).packs['divide-it'].levels).toEqual([false, true, true, false, false, false]);
+    expect(old([3, 5]).packs['divide-it'].open).toBe(3);
+    expect(old([4]).packs['divide-it'].levels.some(Boolean)).toBe(false);
   });
 });

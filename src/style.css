@@ -2990,3 +2990,32 @@ body {
 .lb-subst { font-size: 28px; min-height: 108px; }
 .lb-stack { min-height: 380px; }
 .lb-checkrow .btn { min-height: 46px; }
+
+/* the border runs through the = (behind it), centred, so it never shows beside the equation */
+.lb-border { position: relative; border: 0; padding: 0 16px; margin: 0 4px; }
+.lb-border::before { content: ''; position: absolute; left: 50%; top: 0; bottom: 0; border-left: 4px dashed var(--ink); transform: translateX(-2px); }
+.lb-equals { position: relative; z-index: 1; }
+@media (max-width: 760px) { .lb-border { padding: 0 8px; } }
+
+/* Divide it: fractions inside the equations, the coefficient, and the fractions row */
+.lb-frac { white-space: nowrap; }
+.lb-frac .is-blue { color: #0072b2; }
+.lb-coef { display: inline-flex; align-items: baseline; }
+.lb-work.is-failed { color: #a3281b; }
+.lb-failmark { color: #a3281b; font: 800 34px 'Lexend', system-ui, sans-serif; margin-left: 8px; }
+.lb-fractionrow { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 8px; margin: 4px 0; min-height: 72px; font: 700 22px 'Lexend', system-ui, sans-serif; }
+.lb-fractionrow.is-hidden { visibility: hidden; }
+.lb-frac-btn { display: flex; flex-direction: column; align-items: center; justify-content: center; min-width: 64px; min-height: 64px; padding: 2px 10px; line-height: 1.05; }
+.lb-frac-main { font: 800 24px 'Lexend', system-ui, sans-serif; }
+.lb-frac-sub { font: 600 13px 'Lexend', system-ui, sans-serif; color: var(--muted, #555); }
+.lb-frac-btn:disabled { opacity: 0.4; }
+.lb-frac-btn.is-target { animation: sw-pulse 1.2s ease-in-out infinite; box-shadow: 0 0 0 4px #0072b2; }
+.lb-fractionrow { gap: 6px; font-size: 18px; }
+.lb-frac-btn { min-width: 52px; padding: 2px 6px; }
+.lb-frac-main { font-size: 21px; }
+.lb-work { position: relative; }
+.lb-failmark { position: absolute; right: 4%; top: 50%; transform: translateY(-50%); margin: 0; }
+.lb-readout { align-self: center; font: 800 40px 'Lexend', system-ui, sans-serif; margin: 4px 0; }
+.lb-readout.is-good { color: #1b6e3a; } .lb-readout.is-bad { color: #a3281b; }
+.lb-numblock .lb-sidebtn { min-height: 52px; font-size: 18px; font-weight: 800; }
+.lb-numblock .lb-sidebtn.is-target { animation: sw-pulse 1.2s ease-in-out infinite; box-shadow: 0 0 0 4px #0072b2; }

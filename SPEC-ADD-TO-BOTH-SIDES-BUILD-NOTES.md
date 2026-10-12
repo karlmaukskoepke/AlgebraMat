@@ -157,3 +157,9 @@ Not built (still open in the spec): the **skip L1 after the diagnostic** rule (�
 - **Check sits under the `x = [ ]` row** (it was crowding it), and the green Next sits right beside it, so it is never far from where the eye is. Go stays with Undo. The page was tightened a little (smaller rows, a shorter line box) to make room.
 - **Enter moves forward through anything:** Check, any green Next, the walkthrough's Next, or Go once an amount is in (first enabled one wins).
 - **Another scaffold:** with x alone and the model up, a further I'm stuck asks "Party or Battle?" for the numbers left on the other side, combines them when answered, and asks for the answer one last time (no judging, so no Undo cue). Ladder at `x = 11 + −7`: stuck 1 reminds, stuck 2 draws the model, stuck 3 does this.
+
+## 17. Trade places on Level 5, and the border line (Karl, 2026-10-12)
+
+- **Trade places is live from Level 5** (where x can be on the right), when the equation has x on the right and the student is on the move path. Clicking it rewrites the same equation with the sides swapped, as a new row below the original; Undo takes it back.
+- **The first time** (once per Level 5 play, not kept between sessions) the line says "x is on the right. Click “Trade places”…", the Trade places button is highlighted, and Add waits ("First click Trade places") until it has been clicked. After that it is available but never required. It is not offered in the scaffold. Its Why? box ("x on the left") still just follows the good move.
+- **The dashed border** was drawn as the left edge of the `=` cell, so it sat beside the equation, not through it, and looked like an artifact. It is now centred on the `=` and passes behind it.

@@ -91,10 +91,10 @@ export function judge(before, after) {
 
 const amountOf = (entry) => (/^-?\d+$/.test(entry) ? Number(entry) : null);
 
-export function newAddBoth(problem, { level = 2, forceMove = false } = {}) {
+export function newAddBoth(problem, { level = 2, forceMove = false, introTrade = false } = {}) {
   const board = startBoard(problem);
   const s = {
-    problem, level,
+    problem, level, tradeIntro: introTrade && level >= TRADE_LEVEL && Boolean(problem.mirror), tradeCount: 0,
     stage: 'moves', step: 'moves',
     scaffold: false,                              // the seesaw, counters and two-action move: only from I'm stuck or Teach me
     built: { constant: 0, other: 0, x: false }, pick: null,
@@ -110,8 +110,16 @@ export function newAddBoth(problem, { level = 2, forceMove = false } = {}) {
     finalText: null, lastAmount: null,
     feedback: null,
   };
-  return say(s, forceMove ? 'aMustMove' : 'aChoose');
+  return say(s, forceMove ? (tradePending(s) ? 'aTradeIntro' : 'aMustMove') : 'aChoose');
 }
+
+// Trade places (swap the two sides) is offered from Level 5, where x can be on the right. The first time it matters it is
+// pointed out and the student has to click it (SPEC-ADD-TO-BOTH-SIDES.md §3A "later cards"; Karl, 2026-10-12).
+export const TRADE_LEVEL = 5;
+export const tradeAvailable = (s) => s.level >= TRADE_LEVEL && !s.scaffold && s.path === 'move' && s.stage === 'moves' && !s.sub && !s.pending && !s.combining
+  && !s.resolving && xSideOf(s.board) === 'right';
+// The first time, Add waits until the sides have been traded.
+export const tradePending = (s) => Boolean(s.tradeIntro) && s.tradeCount === 0 && tradeAvailable(s);
 
 // A correct guess owes one problem solved with a move (the next one is forced).
 export const owesMove = (s) => s.path === 'guess' && s.stage === 'done';
@@ -269,7 +277,7 @@ export function reduceAddBoth(state, action) {
       s.path = action.value === 'move' ? 'move' : 'guess';
       if (s.path === 'guess') { s.typing = 'answer'; return say(s, 'aGuessPrompt'); }
       s.typing = null;
-      return say(s, 'aMovePrompt');
+      return say(s, tradePending(s) ? 'aTradeIntro' : 'aMovePrompt');
     }
     case 'focus': {
       if (action.target !== 'answer' && action.target !== 'amount') return state;
@@ -329,10 +337,24 @@ export function reduceAddBoth(state, action) {
     // ----- the menu: only "Add ___ to both sides" is a move on this card -----
     case 'choose': {
       if (s.stage !== 'moves' || s.pending || s.sub) return state;
-      if (action.move !== 'add') return state;
+      if (action.move !== 'add' && action.move !== 'trade') return state;
       if (!s.path) return say(s, 'aChooseFirst', {}, true);                                  // the path comes first
       if (s.path === 'guess') return say(s, 'aGuessing');
       if (s.resolving) return say(s, 'aSimplifyFirst', {}, true);
+      if (action.move === 'trade') {
+        if (!tradeAvailable(s)) return say(s, 'aTradeNot');
+        s.history.push(snapshot(s));
+        s.board = { left: s.board.right, right: s.board.left };                              // the same equation, the sides swapped
+        s.rows.push({ type: 'eq', board: s.board });
+        s.prevBoard = s.board;
+        s.tradeCount += 1;
+        s.menu = null;
+        s.hint = null;
+        s.amountEntry = '';
+        s.undoCue = false;
+        return say(s, 'aTraded');
+      }
+      if (tradePending(s)) return say(s, 'aTradeFirst', {}, true);
       s.menu = 'add';
       s.typing = null;
       s.undoCue = false;

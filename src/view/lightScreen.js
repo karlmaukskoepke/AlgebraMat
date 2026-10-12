@@ -6,7 +6,8 @@
 
 import { MINUS } from '../engine/expr.js';
 import { signed } from '../engine/addBoth.js';
-import { xSideOf, answerLive, helpOk } from '../engine/addBothMoves.js';
+import { fractionText } from '../engine/divide.js';
+import { xSideOf, answerLive, helpOk, tradeAvailable, tradePending } from '../engine/addBothMoves.js';
 import { addBothFeedbackText } from './addBothFeedback.js';
 import { boardBlock, trayFor, html, actionRow } from './addBothMat.js';
 
@@ -76,9 +77,9 @@ export const validAmount = (entry) => /^-?\d+$/.test(entry ?? '') && Number(entr
 
 // ---------- the line ----------
 
-function lineBlock(s) {
+export function lineBlock(s, textOf = addBothFeedbackText) {
   const line = html('div', `lb-line${s.feedback?.bad ? ' is-bad' : ''}${s.stage === 'done' ? ' is-good' : ''}`, [], { role: 'status', 'aria-live': 'polite' });
-  line.append(html('p', 'lb-text', [addBothFeedbackText(s.feedback)]));
+  line.append(html('p', 'lb-text', [textOf(s.feedback)]));
   const atStart = s.stage === 'moves' && !s.scaffold && !s.path;
   if (atStart) line.append(html('div', 'lb-linebtns', [btn('Guess x', 'path', 'btn lb-choice', { value: 'guess' }), btn('Use a move', 'path', 'btn lb-choice', { value: 'move' })]));
   return line;
@@ -92,10 +93,14 @@ function termsOf(side, s, live, plug = false) {
   const out = [];
   side.forEach((t, i) => {
     if (i > 0) out.push(html('span', 'lb-plus', ['+']));
-    if (t.kind === 'x') {
-      out.push(live && plug && s.sub?.kind === 'guess'
+    if (t.kind === 'frac') {
+      out.push(html('span', 'lb-frac', [html('span', 'is-blue', [fractionText(t.n)]), '(', ...termsOf(t.inner, s, false, false), ')']));
+    } else if (t.kind === 'x') {
+      const xel = live && plug && s.sub?.kind === 'guess'
         ? html('span', 'lb-x lb-guess', [signed(s.sub.typed)], { 'data-x': '1' })              // the guess slides onto x
-        : html('span', `lb-x${plug ? ' is-plugx' : ''}`, ['x'], { 'data-x': '1' }));
+        : html('span', `lb-x${plug ? ' is-plugx' : ''}`, ['x'], { 'data-x': '1' });
+      if (t.coef > 1 && !(live && plug && s.sub?.kind === 'guess')) out.push(html('span', 'lb-coef', [live && s.hint?.kind === 'coef' ? html('span', 'lb-hintbox', [String(t.coef)]) : String(t.coef), xel]));
+      else out.push(xel);
     } else {
       const hint = live && s.hint?.kind === 'cancel' && s.hint.id === t.id;
       const num = html('span', 'lb-num', [signed(t.v)], live ? { 'data-numval': t.v } : {});
@@ -127,14 +132,14 @@ export function equationRow(leftEls, rightEls, cls = '') {
 }
 
 const eqClass = (chars) => (chars > 30 ? ' is-xlong' : chars > 20 ? ' is-long' : '');
-const charsOf = (list) => list.map((x) => (x.kind === 'x' || x.x ? 1 : String(signed(x.v)).length + 3)).reduce((a, b) => a + b, 0);
+const charsOf = (list) => list.map((x) => (x.kind === 'frac' ? 5 + charsOf(x.inner) : x.kind === 'x' ? (x.coef > 1 ? 2 : 1) : x.x ? 1 : String(signed(x.v)).length + 3)).reduce((a, b) => a + b, 0);
 
 // An animation plays once: a later render of the same state (typing a digit, say) draws it already settled.
 let playedKey = null;
 
 // The work stack (§3I): the equation, then each move made beneath it, the x = [ ] row with Check, the substitution in colour.
 // Rows are added beneath as the work happens and stay until the next problem. Room for about seven rows is reserved.
-function stackRows(s) {
+export function stackRows(s) {
   const last = s.rows.length - 1;
   const key = s.work && s.rows.length > 1 ? `w${s.rows.length}:${JSON.stringify(s.work)}` : s.sub?.kind === 'guess' ? `g${s.sub.typed}` : null;
   const settledNow = key !== null && key === playedKey;
@@ -142,6 +147,13 @@ function stackRows(s) {
   return s.rows.map((row, i) => {
     const newest = i >= last - 1 && s.rows.length > 1;           // the move just made (its work row and the new equation) animates
     const cls = `lb-rowwrap${!newest || settledNow ? ' is-settled' : ''}${row.type === 'work' ? ' has-work' : ''}`;
+    if (row.type === 'work' && row.board) {
+      // a move written as an equation: the fraction of both whole sides (a failed try is marked)
+      const w = html('div', `lb-eq lb-work${row.failed ? ' is-failed' : ''}${eqClass(charsOf([...row.board.left, ...row.board.right]))}`, [], { 'aria-hidden': 'true' });
+      w.append(html('div', 'lb-side lb-left', termsOf(row.board.left, s, false)), html('div', 'lb-border', [html('span', 'lb-equals', ['='])]), html('div', 'lb-side lb-right', termsOf(row.board.right, s, false)));
+      if (row.failed) w.append(html('span', 'lb-failmark', ['✗']));
+      return html('div', `${cls} has-work`, [w]);
+    }
     if (row.type === 'work') {
       const w = html('div', `lb-eq lb-work${eqClass(charsOf([...row.work.left, ...row.work.right]))}`, [], { 'aria-hidden': 'true' });
       w.append(html('div', 'lb-side lb-left', workTerms(row.work.left)), html('div', 'lb-border', [html('span', 'lb-equals', ['='])]), html('div', 'lb-side lb-right', workTerms(row.work.right)));
@@ -157,11 +169,11 @@ function stackRows(s) {
 
 // "x = [ ▁ ]  Check ✓", the substitution under it (a line a click, then the mark), and the green Next. Used on the bare screen and
 // after the scaffold (it ends with the pad).
-export function answerBlock(s) {
+export function answerBlock(s, liveOf = answerLive) {
   const block = html('div', 'lb-answerblock');
   const done = s.stage === 'done';
   const counting = s.combining?.step === 'count';
-  const live = answerLive(s);
+  const live = liveOf(s);
   const text = counting ? s.combining.entry : s.sub && !live ? String(s.sub.typed) : s.entry;
   const ready = live && /^-?\d+$/.test(text);
   const row = html('div', `lb-answerrow${live ? '' : ' is-dim'}`);
@@ -186,7 +198,7 @@ export function answerBlock(s) {
 }
 
 // The one green Next: a line a click while the substitution is stepped, "Ready for the next problem" at the end (§3G).
-function nextButton(s) {
+export function nextButton(s) {
   const stepping = s.sub && s.sub.step < 3;
   const done = s.stage === 'done';
   if (!stepping && !done) return null;
@@ -195,9 +207,9 @@ function nextButton(s) {
 }
 
 // The help row (§1 item 5): permanent, always in the same place; whatever is not an option is greyed.
-export function helpRow(s) {
+export function helpRow(s, helpOkOf = helpOk) {
   const done = s.stage === 'done';
-  const off = done || (s.stage === 'build' && s.scaffold) || !helpOk(s);
+  const off = done || (s.stage === 'build' && s.scaffold) || !helpOkOf(s);
   const row = html('div', 'lb-helprow');
   const mk = (label, action, key, extra = {}) => {
     const b = html('button', `btn ${extra.cls ?? ''}`.trim(), [label], { type: 'button', 'data-action': action, ...(key ? { 'data-key': key } : {}) });
@@ -254,11 +266,14 @@ export function movePanel(o) {
   const grid = html('div', 'lb-grid');
   const fewer = o.off ? 'off' : o.lights.fewer;
   MOVES.forEach(([id, label], i) => {
-    if (id === 'add') {
+    if (id === (o.active ?? 'add')) {
       const target = o.target || o.walkStep === 'move';
-      const b = html('button', `btn btn-move lb-move${o.menu === 'add' ? ' is-on' : ''}${target ? ' is-target' : ''}${o.locked ? ' is-grey' : ''}`, [moveIcon('add')], { type: 'button', 'data-action': 'choose', 'data-move': 'add', 'aria-label': label, ...(o.locked ? {} : { 'data-tip': label }), style: `grid-row: ${i + 1}` });
+      const b = html('button', `btn btn-move lb-move${o.menu === id ? ' is-on' : ''}${target ? ' is-target' : ''}${o.locked ? ' is-grey' : ''}`, [moveIcon(id)], { type: 'button', 'data-action': 'choose', 'data-move': id, 'aria-label': label, ...(o.locked ? {} : { 'data-tip': label }), style: `grid-row: ${i + 1}` });
       b.disabled = Boolean(o.disabled);
       grid.append(b);
+    } else if (id === 'trade' && o.tradeOn) {
+      // Trade places is live from Level 5, when x is on the right; the first time it is pointed out and Add waits for it
+      grid.append(html('button', `btn btn-move lb-move${o.tradeTarget ? ' is-target' : ''}`, [moveIcon(id)], { type: 'button', 'data-action': 'choose', 'data-move': 'trade', 'aria-label': label, 'data-tip': label, style: `grid-row: ${i + 1}` }));
     } else {
       // a greyed move shows its icon only; its name is read aloud but not shown
       grid.append(html('button', 'btn lb-move is-grey', [moveIcon(id)], { type: 'button', 'data-action': 'greyMove', 'data-move': id, 'aria-disabled': 'true', 'aria-label': label, style: `grid-row: ${i + 1}` }));
@@ -268,7 +283,7 @@ export function movePanel(o) {
   // same good move (green together, faint until then).
   for (const g of WHYS) {
     const items = g.boxes.map(([key, name]) => {
-      const state = key === 'fewer' ? fewer : fewer === 'green' ? 'green' : 'off';
+      const state = o.whys?.[key] ?? (key === 'fewer' ? fewer : fewer === 'green' ? 'green' : 'off');
       return html('li', `ab-goal is-${state}${key === 'fewer' && o.flash ? ' is-flash' : ''}`, [checkbox(state), html('span', 'ab-goal-label', [name])]);
     });
     grid.append(html('ul', 'ab-goals lb-why', items, { style: `grid-row: ${g.rows[0] + 1} / ${g.rows[1] + 2}` }));
@@ -293,8 +308,9 @@ function panelBlock(s) {
   return movePanel({
     menu: s.menu, typing: s.typing, amountEntry: s.amountEntry, path: s.path,
     disabled: building || s.stage === 'done' || Boolean(s.combining) || Boolean(s.pending) || Boolean(s.sub),
-    locked: !s.scaffold && s.stage === 'moves' && s.path !== 'move',                  // before the choice, and on the guess path
-    target: s.path === 'move' && !s.menu && !s.combining && !s.resolving && s.lights.solved !== 'green' && !s.undoCue && !s.sub && s.stage === 'moves' && !s.hint,
+    locked: !s.scaffold && s.stage === 'moves' && (s.path !== 'move' || tradePending(s)),   // before the choice, on the guess path, and until Trade places is clicked
+    tradeOn: tradeAvailable(s), tradeTarget: tradePending(s),
+    target: s.path === 'move' && !tradePending(s) && !s.menu && !s.combining && !s.resolving && s.lights.solved !== 'green' && !s.undoCue && !s.sub && s.stage === 'moves' && !s.hint,
     lights: s.lights, off: building, flash: ['red', 'neutral'].includes(s.lights.fewer) && s.history.length > 0, sub,
   });
 }
