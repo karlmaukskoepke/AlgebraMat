@@ -23,6 +23,7 @@ const M = {
   // building the equation (L1–L2)
   aBuild: (p) => `Build the equation up above: drag the □, the + and the − up onto the sides (or tap one, then tap a side). ${p.mirror ? `The □ goes on the right.` : `The □ goes on the left.`}`,
   aBuilding: () => 'Keep going. Tap a counter to take one back off.',
+  aSimplifyFirst: () => 'Simplify first: tap two groups on the same side to combine them. Then choose your next move.',
   aPickFirst: () => 'Pick a piece first (□, + or −), then tap the side to put it on.',
   aBuildXSide: (p) => `The □ goes on the ${p.xside} side in this equation.`,
   aBuildXHave: () => 'The □ is already up. Tap it to take it back off.',

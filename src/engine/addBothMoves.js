@@ -240,7 +240,7 @@ export function reduceAddBoth(state, action) {
     }
     // A number dragged up into the blank of "Add ___ to both sides" fills it (the student still decides its sign).
     case 'setAmount': {
-      if (s.stage !== 'moves' || (s.pending && !s.pending.second) || s.early?.step === 'drag' || s.combining || !Number.isInteger(action.value)) return state;
+      if (s.stage !== 'moves' || s.resolving || (s.pending && !s.pending.second) || s.early?.step === 'drag' || s.combining || !Number.isInteger(action.value)) return state;
       s.menu = 'add';
       s.amountEntry = String(action.value);
       return say(s, 'aAmountSet', { amount: signed(action.value) });
@@ -249,6 +249,7 @@ export function reduceAddBoth(state, action) {
     // ----- the menu -----
     case 'choose': {
       if (s.stage !== 'moves' || s.pending || s.early?.step === 'drag') return state;
+      if (s.resolving) return say(s, 'aSimplifyFirst', {}, true);
       if (!MOVES_BY_LEVEL(level).includes(action.move)) return state;
       if (action.move === 'trade') return commitTrade(s);
       s.menu = action.move;
@@ -258,6 +259,7 @@ export function reduceAddBoth(state, action) {
     // ----- add an amount to a side (two actions, either order) -----
     case 'addTo': {
       if (s.stage !== 'moves' || s.menu !== 'add') return state;
+      if (s.resolving) return say(s, 'aSimplifyFirst', {}, true);
       const side = action.side === 'right' ? 'right' : 'left';
       const amount = action.amount ?? amountOf(s.amountEntry);
       if (amount === null || amount === 0) return say(s, 'aAmountZero', {}, true);
@@ -334,6 +336,7 @@ export function reduceAddBoth(state, action) {
     // ----- Cross the border (L6): a number crosses and switches teams; crossed but not flipped it does not balance -----
     case 'cross': {
       if (s.stage !== 'moves' || s.menu !== 'cross' || (s.pending && s.pending.kind !== 'cross')) return state;
+      if (s.resolving) return say(s, 'aSimplifyFirst', {}, true);
       const t = find(s.board, action.id);
       if (!t || t.kind !== 'num' || (s.pending && s.pending.id === t.id)) return state;
       if (s.pending) return say(s, 'aOtherSide', {}, true);

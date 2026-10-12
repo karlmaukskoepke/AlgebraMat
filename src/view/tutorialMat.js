@@ -3,6 +3,7 @@
 // side. Trading places is animated: the sides rotate around the = sign without mirroring anything.
 
 import { MINUS } from '../engine/expr.js';
+import { drawSeesaw, angleFor } from './addBothMat.js';
 import { readoutOf, equationText, quizItem, quizBoard } from '../engine/numericTutorial.js';
 
 const SVG_NS = 'http://www.w3.org/2000/svg';
@@ -37,6 +38,7 @@ function drawBoard(svg, b, W, y, opts = {}) {
   const total = l.width + MIDDLE + r.width;
   const x0 = (W - total) / 2;
   const borderX = x0 + l.width + MIDDLE / 2;
+  if (opts.angle !== undefined) drawSeesaw(svg, borderX, y - 74, total / 2 + 20, opts.angle);
   svg.append(el('line', { x1: borderX, y1: y - 12, x2: borderX, y2: y + TOKEN_H + 12, class: 'sv-border' }));
   svg.append(el('text', { x: borderX, y: y + TOKEN_H / 2 + 14, 'text-anchor': 'middle', class: 'vm-plus ab-equals' }, ['=']));
   const sides = [];
@@ -105,7 +107,8 @@ export function renderTutorialMat(t) {
   svg.append(el('text', { x: W / 2, y, 'text-anchor': 'middle', class: `ab-readout tu-readout ${r.balanced ? 'is-good' : 'is-bad'}` }, [r.text]));
   y += 60;
   const tap = t.kind === 'cross' ? (id) => (t.flipMode || t.crossed === id ? 'flipSign' : t.crossed ? null : 'cross') : null;
-  const drawn = drawBoard(svg, t.board, W, y, { tap, crossed: t.crossed });
+  y += 80;
+  const drawn = drawBoard(svg, t.board, W, y, { tap, crossed: t.crossed, angle: angleFor(r.left - r.right) });
   if (t.anim === 'trade') animateTrade(drawn.sides, drawn.l, drawn.r);
   y += TOKEN_H + 60;
   if (t.kind === 'add' && t.menu === 'add') {

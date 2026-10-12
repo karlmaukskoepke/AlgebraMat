@@ -2690,3 +2690,31 @@ body {
 }
 .addboth-mat .ab-equals { stroke: #fffdf2; stroke-width: 10px; paint-order: stroke; }
 .addboth-mat .ab-drophere, .addboth-mat .ab-plus, .addboth-mat .ab-eq, .addboth-mat .ab-readout { pointer-events: none; }
+
+/* ---------- tutorials ---------- */
+.ab-tutbar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 0 0 10px; padding-bottom: 8px; border-bottom: 2px dashed #bdb7a4; }
+.ab-tutname { margin: 0; flex: 1 1 100%; font: 800 18px 'Lexend', system-ui, sans-serif; }
+.ab-tutpart { font-weight: 600; color: var(--muted, #555); }
+.ab-tutbar .btn { min-height: 44px; }
+.ab-continue { width: 100%; margin-top: 10px; min-height: 52px; }
+.tutorial-mat .tu-title { font: 800 36px 'Lexend', system-ui, sans-serif; fill: var(--ink); }
+.tutorial-mat .tu-scenario { font: 700 34px 'Lexend', system-ui, sans-serif; fill: var(--ink); }
+.tutorial-mat .tu-reveal-label { font: 700 22px 'Lexend', system-ui, sans-serif; fill: var(--muted, #555); }
+.tutorial-mat .ab-readout { font: 700 34px 'Lexend', system-ui, sans-serif; }
+.tutorial-mat .ab-readout.is-good { fill: #1b6e3a; }
+.tutorial-mat .ab-readout.is-bad { fill: #a3281b; }
+.tutorial-mat .sv-border { stroke: var(--ink); stroke-width: 4; stroke-dasharray: 10 8; }
+.tutorial-mat .ab-token { cursor: pointer; }
+
+/* ---------- the board block: side buttons laid over the drawing ---------- */
+.ab-boardwrap { position: relative; width: 100%; max-width: calc(56vh * var(--ar, 1.1)); margin: 0 auto; }
+.ab-boardwrap .addboth-mat { max-height: none; display: block; }
+@media (max-width: 760px) { .ab-boardwrap { max-width: none; } }
+.ab-sidebtns { position: relative; height: 62px; }
+.ab-sidebtns::before { content: ''; position: absolute; top: 0; bottom: 0; left: var(--mid); border-left: 4px dashed var(--ink); }
+.ab-sidebtn { position: absolute; top: 7px; width: var(--side); left: var(--left); min-height: 48px; padding: 0 6px; font-size: 18px; font-weight: 700; white-space: nowrap; }
+.ab-sidebtn:last-child { left: calc(var(--left) + var(--side) + var(--gap)); }
+.ab-sidebtn:disabled { opacity: 0.35; }
+.ab-simplify { margin: 10px 0 0; padding: 8px 10px; border: 2px dashed #b5368c; border-radius: 10px; background: #fbe3f1; font: 700 17px 'Lexend', system-ui, sans-serif; }
+.ab-move:disabled { opacity: 0.4; }
+.mat-wrap:has(.ab-game) { align-items: flex-start; }
