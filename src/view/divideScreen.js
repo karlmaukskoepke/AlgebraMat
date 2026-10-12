@@ -6,7 +6,8 @@
 
 import { html } from './addBothMat.js';
 import { movePanel } from './lightScreen.js';
-import { lineBlock, stackRows, answerBlock, helpRow, undoRow } from './solveScreen.js';
+import { lineBlock, stackRows, answerBlock, helpRow, undoRow, answerRow, substBlock, helperRow } from './solveScreen.js';
+import { tuckedShell } from './tuckedLayout.js';
 import { groupDiagram } from './groupDiagram.js';
 import { divideFeedbackText } from './divideFeedback.js';
 import { solve, xAlone, coefOf, pileSize, DEAL_ROUND_LEVEL } from '../engine/divideMoves.js';
@@ -101,4 +102,56 @@ export function renderDivideScreen(s) {
   body.append(main, html('div', 'sv-side', [panelBlock(s), diagramBlock(s)]));
   wrap.append(body);
   return wrap;
+}
+
+// ---------- the tucked layout (pilot, ?layout=tucked; BUILD-BRIEF-DIVIDE-IT-2026-10-12-c) ----------
+// The same pieces, placed by the shared tucked shell: the work column (the original equation pinned on top, the stack, then the line,
+// the helper row and the x = [ ] row), the slim Why? column, the Moves drawer (the move list without its Why? boxes, and the fractions
+// row) and the counter tray (the group diagram; with the fractions row when the scaffold is choosing a fraction).
+
+export const divideTrayAvailable = (s) => s.stage !== 'done' && (s.scaffold || Boolean(s.pic));
+export const divideCanOpenMoves = (s) => s.stage === 'moves' && s.path === 'move' && !s.sub && !s.needUndo && !xAlone(s.board);
+
+function tuckedLights(s) {
+  const mapLight = (v) => (v === 'neutral' ? 'off' : v);
+  const view = s.sub ? solve.subView(s.sub) : null;
+  return [
+    { key: 'smaller', label: 'Smaller numbers', state: mapLight(s.lights.smaller) },
+    { key: 'onebox', label: 'One box', state: mapLight(s.lights.onebox) },
+    { key: 'balanced', label: 'Balanced', state: view?.mark ? (s.sub.ok ? 'green' : 'red') : 'off' },
+    { key: 'solved', label: 'Solved for x', state: xAlone(s.board) ? 'green' : 'off' },
+  ];
+}
+
+export function renderDivideTucked(s, fx = {}) {
+  const wrongGuess = s.sub?.kind === 'guess' && !s.sub.ok && s.sub.step >= solve.subTotal(s.sub);
+  const rows = stackRows(s);
+  const original = rows.shift();                                                     // the original equation, pinned above the scrolling stack
+  const stack = html('div', 'tk-stackin', [html('div', 'lb-rows', rows), substBlock(s, solve)]);
+  const controls = [lineBlock(s, divideFeedbackText, solve), helperRow(s, solve, { wrongGuess, cue: Boolean(s.fail) }), answerRow(s, solve)];
+  const panel = movePanel({
+    active: 'fraction', menu: s.menu, typing: s.typing, amountEntry: '', path: s.path, noWhys: true,
+    disabled: s.stage === 'done' || Boolean(s.sub),
+    locked: s.stage === 'moves' && s.path !== 'move',
+    target: s.path === 'move' && !s.menu && !s.sub && s.stage === 'moves' && !xAlone(s.board) && !s.scaffold,
+    lights: { fewer: 'off', solved: 'off' },
+  });
+  const choosingInScaffold = s.scaffold && !s.diag && !s.pic;
+  return tuckedShell({
+    cls: 'dv-tucked',
+    original,
+    stack,
+    controls,
+    lights: tuckedLights(s),
+    movesTabOff: s.stage === 'done',
+    drawer: { open: Boolean(s.ui?.drawer), content: [panel, fractionRow(s)] },
+    tray: {
+      available: divideTrayAvailable(s),
+      open: divideTrayAvailable(s) && !s.ui?.trayHidden,
+      title: 'Counters',
+      content: [...(choosingInScaffold ? [fractionRow(s)] : []), diagramBlock(s)],
+    },
+    fx: fx.tucked,
+    backFocus: '.lb-helprow [data-action="stuck"]',
+  });
 }

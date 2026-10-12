@@ -7,7 +7,7 @@
 import { html, actionRow } from './addBothMat.js';
 import { equationRow } from './lightScreen.js';
 import { MINUS } from '../engine/expr.js';
-import { signed, fractionText } from '../engine/solveTerms.js';
+import { signed, fractionText, boardText } from '../engine/solveTerms.js';
 import { CHOICE_BUTTONS } from '../engine/solveLoop.js';
 
 // ---------- the line: actions only, one sentence, and the choice ----------
@@ -77,8 +77,7 @@ export function stackRows(s) {
     const eq = equationRow(l, r, eqClass(charsOf([...row.board.left, ...row.board.right])));
     eq.setAttribute('role', 'img');
     eq.setAttribute('aria-label', 'The equation');
-    const kids = [];
-    if (plug) kids.push(html('span', 'lb-plugtag', ['plugging back into this equation']));
+    const kids = [];                                                // which equation is being checked is said on its own line above the check rows
     if (row.type === 'fold') kids.push(html('span', 'lb-foldtag', [html('span', 'is-blue', [fractionText(row.label.n)]), ' of both sides']));
     kids.push(eq);
     return html('div', `lb-rowwrap is-settled${row.type === 'fold' ? ' is-fold' : ''}${plug ? ' is-plugrow' : ''}`, kids);
@@ -87,9 +86,12 @@ export function stackRows(s) {
 
 // ---------- the answer row, Check, Next, the substitution ----------
 
-// The substitution lines: the operation about to happen is underlined in the accent colour, and the result of the one before shares it.
-function substList(sub, view) {
+// The substitution lines: the operation about to happen is bold in the accent colour, and the result of the one before shares it.
+// The equation being checked is named on its own line above the check rows ("Checking in 3x = 12"), never over an equation row.
+function substList(s, sub, view) {
   const list = html('ol', 'lb-subst');
+  const target = sub.target === 'current' ? s.board : s.rows[0].board;
+  list.append(html('li', 'lb-checkhead', [`Checking in ${boardText(target)}`]));
   view.lines.forEach((line, i) => {
     const marks = i === view.last ? ' is-current' : '';
     list.append(html('li', `lb-sline${marks}`, line.segs.map((seg) => (seg.cls ? html('span', seg.cls, [seg.text]) : seg.text))));
@@ -107,8 +109,9 @@ export function nextButton(s, loop) {
   return html('button', `btn btn-go lb-next${folding ? '' : ' is-target'}`, [done ? 'Next problem ▸' : 'Next ▸'], { type: 'button', 'data-action': done ? 'next' : folding ? 'foldNext' : 'nextLine' });
 }
 
-export function answerBlock(s, loop) {
-  const block = html('div', 'lb-answerblock');
+// The x = [ ] row with Check directly under it (and Next beside Check). Greyed whenever it is not an option.
+export function answerRow(s, loop) {
+  const block = html('div', 'lb-answerrows');
   const live = loop.answerLive(s);
   const placing = Boolean(s.sub?.placing);
   const text = s.sub && !live ? String(s.sub.typed) : s.entry;
@@ -122,7 +125,15 @@ export function answerBlock(s, loop) {
   row.append(typed);
   const next = nextButton(s, loop);
   block.append(row, html('div', 'lb-checkrow', next ? [check, next] : [check]));
-  block.append(s.sub ? substList(s.sub, loop.subView(s.sub)) : html('ol', 'lb-subst'));
+  return block;
+}
+
+// The check rows (the substitution, a line a click, then the mark), written in the work stack.
+export const substBlock = (s, loop) => (s.sub ? substList(s, s.sub, loop.subView(s.sub)) : html('ol', 'lb-subst'));
+
+export function answerBlock(s, loop) {
+  const block = html('div', 'lb-answerblock');
+  block.append(...answerRow(s, loop).childNodes, substBlock(s, loop));
   return block;
 }
 
@@ -169,6 +180,16 @@ export function helpRow(s, loop) {
     return b;
   };
   row.append(mk('I’m stuck', 'stuck', 's'), mk('Teach me step-by-step', 'teach', 't'), mk('Start over', 'startOver', null, { cls: 'btn-quiet', off: done || !loop.startOverOk(s) }));
+  return row;
+}
+
+// The tucked layout's one helper row: I'm stuck, Teach me, Undo, Start over, in that order.
+export function helperRow(s, loop, undoOpts) {
+  const help = helpRow(s, loop);
+  const undo = undoRow(s, undoOpts).querySelector('.btn-undo');
+  const [stuck, teach, startOver] = help.children;
+  const row = html('div', 'lb-helprow tk-helper');
+  row.append(stuck, teach, undo, startOver);
   return row;
 }
 
