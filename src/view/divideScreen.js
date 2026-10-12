@@ -53,6 +53,12 @@ function diagramOptions(s) {
 
 function diagramBlock(s) {
   const area = html('div', 'sv-diagram');
+  // what the student made stays after the fraction is applied, the kept group marked, until Next folds the move (loop §6)
+  if (s.pic && !s.scaffold) {
+    const pc = s.pic;
+    area.append(groupDiagram({ n: pc.n, boxes: pc.boxes, size: pc.size, neg: pc.neg, groups: pc.groups, pile: 0, kept: pc.kept, tap: null, caption: `You kept 1 of the ${pc.n} groups.` }));
+    return area;
+  }
   if (!s.scaffold) return area;
   const o = diagramOptions(s);
   // the groups' sizes are printed only while they are uneven; once they are even, the size of a group is what the student finds

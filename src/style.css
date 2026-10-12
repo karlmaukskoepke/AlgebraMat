@@ -3179,3 +3179,13 @@ body {
 .sv-card .ab-quiz .ab-actions .btn { min-height: 44px; }
 .sv-card .ab-quiz > .lb-eq { font-size: 34px; }
 .lb-text .is-blue { color: #0072b2; }
+
+/* rev 1.2: the drop target pulses blue; the value lands in that row; the step highlight is bold in the accent colour on the operation's characters only (never underlined) */
+.lb-x.is-droptarget { outline: 4px dashed #0072b2; }
+.lb-landed { display: inline-flex; align-items: baseline; }
+.lb-landed-val { animation: lb-land 0.45s ease-out; }
+@keyframes lb-land { from { transform: translate(120px, 200px) scale(1.4); opacity: 0.4; } to { transform: none; opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .lb-landed-val { animation: none; } }
+.lb-sline .is-op { color: var(--accent); font-weight: 900; text-decoration: none; }
+.lb-sline .is-res { color: var(--accent); font-weight: 900; }
+.ab-typed.is-chip { outline-color: #0072b2; color: #0072b2; }

@@ -115,7 +115,9 @@ describe('plugging a typed value back in (loop §4)', () => {
     expect([s.sub.kind, s.sub.ok, s.sub.placing, s.sub.target, s.feedback.key]).toEqual(['value', true, true, 'original', 'aPlace']);
     expect(shown(s)).toEqual([]);                                                            // nothing is written until the value is placed on x
     s = run(s, { type: 'placeValue' });
-    expect(shown(s)).toEqual(['3 × (−4) = −12']);
+    expect([s.sub.landed, subView(s.sub).landed, shown(s)]).toEqual([true, true, []]);      // the value sits on the original's x first (D1)
+    s = run(s, { type: 'nextLine' });
+    expect([s.sub.landed, shown(s)]).toEqual([false, ['3 × (−4) = −12']]);                  // then the first check row is written
     s = run(s, { type: 'nextLine' });
     expect(shown(s)).toEqual(['3 × (−4) = −12', '−12 = −12']);
     s = run(s, { type: 'nextLine' });
@@ -124,11 +126,11 @@ describe('plugging a typed value back in (loop §4)', () => {
   it('B1: a correct guess renders the equation as written, with the coefficient, on every form, at the first state and after a partial move', () => {
     for (const [a, x] of [[2, -5], [3, 4], [4, -6], [5, 3], [6, -3], [3, -4]]) {
       const p = P(a, x);
-      const first = shown(run(start(p), { type: 'path', value: 'guess' }, ...typed(String(x)), { type: 'check' }, { type: 'placeValue' }))[0];
+      const first = shown(run(start(p), { type: 'path', value: 'guess' }, ...typed(String(x)), { type: 'check' }, { type: 'placeValue' }, { type: 'nextLine' }))[0];
       expect(first).toBe(`${a} × ${x < 0 ? `(−${-x})` : x} = ${p.b < 0 ? `−${-p.b}` : p.b}`);
     }
     // after a partial move: a correct guess is plugged into the ORIGINAL equation, not the simplified one
-    const s = run(take(start(P(6, -3)), 2), { type: 'path', value: 'guess' }, ...typed('−3'), { type: 'check' }, { type: 'placeValue' });
+    const s = run(take(start(P(6, -3)), 2), { type: 'path', value: 'guess' }, ...typed('−3'), { type: 'check' }, { type: 'placeValue' }, { type: 'nextLine' });
     expect([s.sub.target, shown(s)[0]]).toEqual(['original', '6 × (−3) = −18']);
   });
   it('a wrong guess is plugged into the CURRENT equation, ends red, asks for Undo, then points at the move', () => {
@@ -156,16 +158,20 @@ describe('plugging a typed value back in (loop §4)', () => {
 });
 
 describe('I’m stuck: rungs restart at each state; the diagram is on every rung, at x alone too (brief B2)', () => {
-  it('rung 1 shows the counters with the number in front outlined; rung 2 the fractions; rung 3 the guided fraction', () => {
+  it('two rungs (D4): rung 1 is the counters with the fractions live and the number in front outlined, and typing allowed; rung 2 is guided', () => {
     let s = run(start(), { type: 'path', value: 'move' }, { type: 'stuck' });
-    expect([s.scaffold, s.hint, s.feedback.key, answerLive(s), s.stuck]).toEqual([true, { kind: 'coef' }, 'dModel', true, 1]);
-    s = run(s, { type: 'stuck' });
-    expect([s.menu, s.feedback.key, answerLive(s), s.stuck]).toEqual(['fraction', 'dStuck2', false, 2]);
-    s = run(s, { type: 'stuck' });
-    expect([s.hint, s.feedback.key, s.stuck]).toEqual([{ kind: 'fraction', n: 3 }, 'dStuckGuided', 3]);
+    expect([s.scaffold, s.menu, s.hint, s.feedback.key, answerLive(s), s.stuck]).toEqual([true, 'fraction', { kind: 'coef' }, 'dModel', true, 1]);
+    s = run(s, { type: 'take', n: 3 });                                                      // the dealing starts at once, and typing stays allowed (Check works after any deal)
+    expect([s.deal.n, answerLive(s)]).toEqual([3, true]);
+    s = run(s, { type: 'deal', group: 0 }, ...typed('−4'));
+    expect(run(s, { type: 'check' }).sub).toMatchObject({ kind: 'guess', ok: true });
+    s = run(start(), { type: 'path', value: 'move' }, { type: 'stuck' }, { type: 'stuck' });
+    expect([s.hint, s.feedback.key, s.stuck]).toEqual([{ kind: 'fraction', n: 3 }, 'dStuckGuided', 2]);
+    s = run(s, { type: 'stuck' });                                                           // asking again stays at the guided rung
+    expect([s.feedback.key, s.stuck]).toEqual(['dStuckGuided', 3]);
   });
   it('the counters are dealt by hand, one group kept, and that takes the fraction of both sides', () => {
-    let s = run(start(), { type: 'path', value: 'move' }, { type: 'stuck' }, { type: 'stuck' }, { type: 'take', n: 3 });
+    let s = run(start(), { type: 'path', value: 'move' }, { type: 'stuck' }, { type: 'take', n: 3 });
     expect(s.deal).toEqual({ n: 3, groups: [0, 0, 0] });
     expect(run(s, { type: 'keep', group: 0 }).feedback.key).toBe('dShareFirst');
     for (let i = 0; i < 12; i++) s = run(s, { type: 'deal', group: i % 3 });
@@ -177,28 +183,59 @@ describe('I’m stuck: rungs restart at each state; the diagram is on every rung
     let s = run(take(start(P(6, -3)), 2), { type: 'path', value: 'move' }, { type: 'stuck' });
     expect([boardText(s.board), s.feedback.key, s.hint, s.stuck]).toEqual(['3x = −9', 'dModel', { kind: 'coef' }, 1]);
   });
-  it('at x = ⅓(6): the diagram on every rung, the equation never leaves, no numeral is printed', () => {
-    const at = (a, x) => take(start(P(a, x)), a);
-    for (const [a, x] of [[3, 2], [5, 7], [6, -3]]) {
-      let s = at(a, x);
+  it('at x = ⅓(6) (D3): two rungs, the diagram on both, the student can deal at once, no numeral is printed', () => {
+    for (const [a, x] of [[3, 2], [5, 7], [6, -3], [3, -6]]) {
+      let s = take(start(P(a, x)), a);
       const rows = s.rows.length;
       s = run(s, { type: 'stuck' });
-      expect([s.rows.length, s.diag.n, s.diag.size, s.diag.groups, s.feedback.key]).toEqual([rows, a, Math.abs(a * x), null, 'dDiag1']);
+      expect([s.rows.length, s.diag.n, s.diag.size, s.diag.groups, s.diag.kept, s.feedback.key]).toEqual([rows, a, Math.abs(a * x), Array(a).fill(0), null, 'dDiag1']);
       expect(s.diag.neg).toBe(x < 0);
-      expect(line(s)).toContain(`Share the ${Math.abs(a * x)} into ${a} equal groups`);
-      s = run(s, { type: 'stuck' });
-      expect([s.rows.length, s.diag.groups, s.diag.kept, s.feedback.key]).toEqual([rows, Array(a).fill(0), null, 'dDiag2']);
-      for (let i = 0; i < Math.abs(x) * a; i++) s = run(s, { type: 'deal', group: i % a });
+      expect(line(s)).toContain(`What is ${['', '', '½', '⅓', '¼', '⅕', '⅙'][a]} of ${x * a < 0 ? '−' : ''}${Math.abs(a * x)}? Share the counters into ${a} equal groups`);
+      expect(answerLive(s)).toBe(true);                                                         // type at any point
+      for (let i = 0; i < Math.abs(x) * a; i++) s = run(s, { type: 'deal', group: i % a });     // the first click already lets the student deal
       expect(s.diag.groups).toEqual(Array(a).fill(Math.abs(x)));
       expect(s.feedback.key).toBe('dKeepReady');
       expect(line(s)).not.toMatch(new RegExp(`(^|\\D)${Math.abs(x)}(\\D|$)`));                  // even groups: the size of a group is what the student finds
       s = run(s, { type: 'keep', group: 0 });
       expect([s.diag.kept, s.feedback.key, s.rows.length]).toEqual([0, 'dDiagKept', rows]);
-      s = run(s, { type: 'stuck' });
-      expect([s.rows.length, s.diag.groups, s.diag.kept, s.diag.guided, s.feedback.key]).toEqual([rows, Array(a).fill(Math.abs(x)), 0, true, 'dDiag3']);
-      expect(line(s)).not.toContain(String(Math.abs(x)));                                      // no numeral is printed
-      expect(answerLive(s)).toBe(true);                                                         // the student counts the kept group and types it
+      s = run(s, ...typed(String(x)), { type: 'check' });                                       // Check works after dealing
+      expect(s.sub).toMatchObject({ kind: 'value', ok: true });
+      // rung 2: already in equal groups with one bracketed; no numeral printed
+      let g = run(take(start(P(a, x)), a), { type: 'stuck' }, { type: 'stuck' });
+      expect([g.rows.length, g.diag.groups, g.diag.kept, g.diag.guided, g.feedback.key]).toEqual([rows, Array(a).fill(Math.abs(x)), 0, true, 'dDiag3']);
+      expect(line(g)).not.toContain(String(Math.abs(x)));
+      expect(run(g, { type: 'stuck' }).feedback.key).toBe('dDiag3');                            // there is no third rung
     }
+  });
+});
+
+describe('the picture stays after the fraction is applied, until Next (D5)', () => {
+  const dealt = (a, x) => {
+    let s = run(start(P(a, x)), { type: 'path', value: 'move' }, { type: 'stuck' }, { type: 'take', n: a });
+    for (let i = 0; i < Math.abs(a * x); i++) s = run(s, { type: 'deal', group: i % a });
+    return s;
+  };
+  it('keeping a group adds the work rows and leaves the picture, with the kept group marked', () => {
+    const s = run(dealt(3, -4), { type: 'keep', group: 1 });
+    expect(boardText(s.board)).toBe('x = ⅓(−12)');
+    expect(s.rows.map((r) => r.type)).toEqual(['eq', 'work', 'eq']);
+    expect(s.pic).toEqual({ n: 3, boxes: 3, size: 12, neg: true, groups: [4, 4, 4], kept: 1 });
+    expect(s.scaffold).toBe(false);
+  });
+  it('Next folds the move and clears the picture; so does acting on the choice; Undo takes the whole move back', () => {
+    const partial = run(dealt(2, -3), { type: 'keep', group: 0 });                          
+    expect(partial.pic).not.toBeNull();
+    let s = run(run(start(P(4, -4)), { type: 'path', value: 'move' }, { type: 'stuck' }, { type: 'take', n: 2 }), ...Array.from({ length: 16 }, (_, i) => ({ type: 'deal', group: i % 2 })), { type: 'keep', group: 0 });
+    expect([boardText(s.board), s.pic !== null, s.unfolded]).toEqual(['2x = −8', true, true]);
+    expect(line(s)).toBe(CHOICE_PROMPT);
+    const nxt = run(s, { type: 'foldNext' });
+    expect([nxt.pic, nxt.unfolded, nxt.rows.map((r) => r.type), nxt.path]).toEqual([null, false, ['eq', 'fold'], null]);
+    expect(run(s, { type: 'path', value: 'guess' }).pic).toBeNull();
+    const undone = run(s, { type: 'undo' });
+    expect([undone.pic, boardText(undone.board)]).toEqual([null, '4x = −16']);
+    // at x alone the picture waits for Next too
+    const f = run(dealt(3, -4), { type: 'keep', group: 0 }, { type: 'foldNext' });
+    expect([f.pic, boardText(f.board), answerLive(f)]).toEqual([null, 'x = ⅓(−12)', true]);
   });
 });
 

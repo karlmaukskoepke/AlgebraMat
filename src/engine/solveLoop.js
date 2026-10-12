@@ -80,7 +80,7 @@ export function createSolveLoop(card) {
   // The substitution: lines, then the mark. Collapsed: the first line, then the mark (a wrong value is always full).
   const subTotal = (sub) => (sub.collapsed ? 2 : sub.lines.length + 1);
   // What of the check is on screen: the lines written so far (the first appears when the value is placed on x), and the mark.
-  const subView = (sub) => ({ lines: sub.collapsed ? (sub.step >= 1 ? [sub.lines[0]] : []) : sub.lines.slice(0, Math.min(sub.step, sub.lines.length)), mark: sub.step >= subTotal(sub), last: sub.step - 1 });
+  const subView = (sub) => ({ lines: sub.collapsed ? (sub.step >= 1 ? [sub.lines[0]] : []) : sub.lines.slice(0, Math.min(sub.step, sub.lines.length)), mark: sub.step >= subTotal(sub), last: sub.step - 1, landed: Boolean(sub.landed) });
 
   // ---------- committing a move ----------
   // A move that the card has worked out: `rows` are the work rows and the new equation, `next` the new board, `label` the folded
@@ -127,6 +127,7 @@ export function createSolveLoop(card) {
   // The move just made is folded to one row, and nothing before it can be undone: the equation state it led to is the new
   // starting point. (Acting on the choice, or asking for help, commits it.)
   function fold(s) {
+    s.pic = null;                                                                       // the scaffold picture the move left behind goes with the fold
     if (!s.unfolded) return;
     s.rows = [...s.rows.slice(0, s.moveStart), { type: 'fold', label: s.foldLabel, board: s.board }];
     s.moveStart = s.rows.length;
@@ -197,17 +198,18 @@ export function createSolveLoop(card) {
         const work = substitutionLines(target, typed);
         const collapsed = correct && card.collapse(s.level);
         s.sub = { kind, typed, ok: correct, tag, target: current ? 'current' : 'original', lines: work.lines, collapsed, placing: !collapsed, step: collapsed ? 1 : 0 };
-        if (s.sub.placing) return say(s, 'aPlace', { typed: signed(typed) });
+        if (s.sub.placing) return say(s, 'aPlace', { typed: signed(typed), where: s.sub.target });
         return say(s, correct || kind === 'value' ? 'aPlugIn' : 'aPlugCurrent', { typed: signed(typed), where: s.sub.target });
       }
       // the value goes onto x (dragged, or tapped there)
       case 'placeValue': {
         if (!s.sub?.placing) return state;
-        s.sub = { ...s.sub, placing: false, step: 1 };
+        s.sub = { ...s.sub, placing: false, landed: true, step: 0 };               // the value lands on the x of that row, and stays there until Next
         return say(s, s.sub.ok || s.sub.kind === 'value' ? 'aPlugIn' : 'aPlugCurrent', { typed: signed(s.sub.typed), where: s.sub.target });
       }
       case 'nextLine': {
         if (!s.sub || s.sub.placing || s.sub.step >= subTotal(s.sub)) return state;
+        if (s.sub.landed) { s.sub = { ...s.sub, landed: false, step: 1 }; return s; }   // the first check row is written; the top row goes back to x
         s.sub = { ...s.sub, step: s.sub.step + 1 };
         if (s.sub.step < subTotal(s.sub)) return s;
         const { kind, ok, typed, tag } = s.sub;
@@ -216,6 +218,14 @@ export function createSolveLoop(card) {
         s.entry = '';                                                                       // a wrong value: the row clears so the student retypes
         const m = card.slip(s, typed, tag);
         return say(s, m.key, m.params, true);
+      }
+
+      // ----- Next: commits the move (folds it) and clears the picture it left on screen -----
+      case 'foldNext': {
+        if (!s.unfolded && !s.pic) return state;
+        fold(s);
+        if (!alone(s)) { bareState(s); return say(s, 'aChoose'); }
+        return s;
       }
 
       // ----- Undo: only the current, unfolded move; the choice shows again -----
