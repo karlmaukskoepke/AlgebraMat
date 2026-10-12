@@ -91,13 +91,20 @@ function quizBlock(s) {
   const block = html('div', 'ab-quiz');
   const before = s.board;
   const r = readoutOf(before);
-  const answered = Boolean(s.answered);
-  if (!answered) {
-    const svg = el('svg', { class: 'mat value-mat addboth-mat', viewBox: `0 0 ${W} 150`, role: 'group', 'aria-label': 'The equation' });
-    svg.append(el('text', { x: W / 2, y: 60, 'text-anchor': 'middle', class: 'ab-eq' }, [equationText(before)]));
-    svg.append(el('text', { x: W / 2, y: 118, 'text-anchor': 'middle', class: `ab-readout ${r.balanced ? 'is-good' : 'is-bad'}`, style: 'font-size:40px' }, [r.text]));
-    block.append(svg);
+  // the equation and its readout stay put for the whole item
+  const svg = el('svg', { class: 'mat value-mat addboth-mat', viewBox: `0 0 ${W} 150`, role: 'group', 'aria-label': 'The equation' });
+  svg.append(el('text', { x: W / 2, y: 60, 'text-anchor': 'middle', class: 'ab-eq' }, [equationText(before)]));
+  svg.append(el('text', { x: W / 2, y: 118, 'text-anchor': 'middle', class: `ab-readout ${r.balanced ? 'is-good' : 'is-bad'}`, style: 'font-size:40px' }, [r.text]));
+  block.append(svg);
+  // room for what happened (the equation after, what each side comes to, Balanced or Unbalanced), reserved above the question so
+  // nothing moves when an answer is picked: the answers just sit a little lower
+  const list = html('ol', 'lb-subst lb-reveal');
+  if (s.reveal) {
+    list.append(...s.reveal.lines.slice(1).map((line) => html('li', '', [line])));
+    list.append(html('li', s.reveal.ok ? 'is-good' : 'is-bad', [s.reveal.ok ? '✓ Balanced' : '✗ Unbalanced']));
   }
+  block.append(list);
+  const answered = Boolean(s.answered);
   block.append(html('p', 'ab-question', [askOf(p), html('br'), 'Does it keep the balance, or upset it?']));
   const label = { keeps: 'Keeps the balance', upsets: 'Upsets the balance' };
   block.append(html('div', 'ab-answers', p.order.map((v) => {
@@ -105,13 +112,7 @@ function quizBlock(s) {
     b.disabled = answered;
     return b;
   })));
-  if (s.reveal) {
-    // what happened, one line each: the equation, the equation after, what each side comes to, and Balanced or Unbalanced
-    const list = html('ol', 'lb-subst lb-reveal', s.reveal.lines.map((line) => html('li', '', [line])));
-    list.append(html('li', s.reveal.ok ? 'is-good' : 'is-bad', [s.reveal.ok ? '✓ Balanced' : '✗ Unbalanced']));
-    block.append(list);
-    block.append(html('div', 'ab-actions', [html('span'), html('button', 'btn btn-go is-target', ['Next ▸'], { type: 'button', 'data-action': s.stage === 'review' ? 'quizNext' : 'next' })]));
-  }
+  if (s.reveal) block.append(html('div', 'ab-actions', [html('span'), html('button', 'btn btn-go is-target', ['Next ▸'], { type: 'button', 'data-action': s.stage === 'review' ? 'quizNext' : 'next' })]));
   return block;
 }
 

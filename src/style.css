@@ -2927,3 +2927,6 @@ body {
 .is-dragging .lb-move:not(.is-grey) .lb-movelabel { max-width: 22em; opacity: 1; }
 .lb-move.is-grey .lb-movelabel { display: none; }
 .lb-icon { flex: none; }
+
+.ab-quiz .lb-reveal { min-height: 150px; margin: 0; }
+@media (max-width: 760px) { .ab-quiz .lb-reveal { min-height: 120px; } }
