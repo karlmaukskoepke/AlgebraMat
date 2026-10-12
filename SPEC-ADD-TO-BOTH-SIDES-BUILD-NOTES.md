@@ -150,3 +150,10 @@ Not built (still open in the spec): the **skip L1 after the diagnostic** rule (�
 - **General rule: the first help is a reminder of the move's logic, not a model.** The first I'm stuck on the bare screen outlines the number next to x and asks "What would we add to both sides to eliminate it?", with the Add move open and its blank waiting. Only a second I'm stuck brings in the scaffold (the balance with counters, building the equation at L2–L3, and so on); a third and fourth go up the old rungs. If x is already alone the first help just says to work out x. Teach me still goes straight to the scaffold. Each click still counts as a stuck. Apply the same two-step ladder (reminder first, model second) to later cards' help.
 - **The amount is typed in "Add [ ] to both sides"** under the equation, above Undo and Go (also on Level 1). It is no longer in the Add button, and the "Amount to add" row above the pad is gone. The room for it is always kept, so nothing shifts when it appears.
 - **"Next problem ▸"** replaces "Ready for the next problem".
+
+## 16. Hint box, Check under the x row, Enter, one more scaffold (Karl, 2026-10-12)
+
+- The blue hint outline goes round the sign and the number together (`+ 8`), not just the number.
+- **Check sits under the `x = [ ]` row** (it was crowding it), and the green Next sits right beside it, so it is never far from where the eye is. Go stays with Undo. The page was tightened a little (smaller rows, a shorter line box) to make room.
+- **Enter moves forward through anything:** Check, any green Next, the walkthrough's Next, or Go once an amount is in (first enabled one wins).
+- **Another scaffold:** with x alone and the model up, a further I'm stuck asks "Party or Battle?" for the numbers left on the other side, combines them when answered, and asks for the answer one last time (no judging, so no Undo cue). Ladder at `x = 11 + −7`: stuck 1 reminds, stuck 2 draws the model, stuck 3 does this.

@@ -104,7 +104,7 @@ export function newAddBoth(problem, { level = 2, forceMove = false } = {}) {
     leftDelta: 0, rightDelta: 0,
     prevBoard: board, lights: { fewer: 'off', solved: 'off' }, reds: 0,
     counterMode: false, startOver: false, forced: false, hint: null, rung: 0,
-    entry: '', hintGiven: false, sub: null, work: null, undoCue: false, selected: null, combining: null, kindMisses: 0, countMisses: 0,
+    entry: '', hintGiven: false, helpCombine: false, sub: null, work: null, undoCue: false, selected: null, combining: null, kindMisses: 0, countMisses: 0,
     skipped: [], wrongs: 0, tag: null, tags: [], stuck: 0, taught: 0, helped: false, clean: false,
     on: { ...emptySkills(), partyBattle: false, sign: false }, answers: [], supportsShown: [],
     finalText: null, lastAmount: null,
@@ -200,11 +200,17 @@ function climb(s) {
   s.rung = rung;
   const names = ['', 'model', 'move', 'guided'];
   if (fresh && !s.supportsShown.includes(names[rung])) s.supportsShown.push(names[rung]);
+  const wasScaffold = s.scaffold;
   enterScaffold(s);
   if (s.stage === 'build') return say(s, 'aBuild');
   const constant = s.board[xSideOf(s.board)].find((t) => t.kind === 'num');
   const p = { constant: constant ? plus(constant.v) : '', opposite: plus(oppositeOf(s.problem)) };
-  if (xAlone(s.board)) return say(s, 'aStuckSolved', p);
+  if (xAlone(s.board)) {
+    // x is alone but the other side still has numbers to put together: with the model up, the next ask walks them through it
+    // (Party or Battle? then it combines for them) and asks for the answer one last time
+    if (wasScaffold && !s.combining && combinable(s.board).length) { s.helpCombine = true; s.resolving = true; return startPair(s); }
+    return say(s, 'aStuckSolved', p);
+  }
   if (rung === 1) { s.hint = constant ? { kind: 'cancel', id: constant.id } : null; return say(s, 'aStuck1', p); }
   if (rung === 2) { s.menu = 'add'; return say(s, 'aStuck2', p); }
   s.menu = 'add';
@@ -452,6 +458,7 @@ export function reduceAddBoth(state, action) {
       const wasZero = s.zeroOther;
       restore(s, s.history.pop());
       s.zeroOther = false;
+      s.helpCombine = false;
       s.selected = null;
       s.undoCue = false;
       s.hint = null;
@@ -561,7 +568,11 @@ function combineParams(s) {
 // The next two numbers on a side that can combine (the left side first) are highlighted and the student is asked: Party or Battle?
 function startPair(s) {
   const pair = combinable(s.board)[0];
-  if (!pair) { s.combining = null; return resolve(s); }
+  if (!pair) {
+    s.combining = null;
+    if (s.helpCombine) { s.helpCombine = false; s.resolving = false; return say(s, 'aSolvedBoard'); }   // help only: no judging
+    return resolve(s);
+  }
   s.combining = { a: pair.a, b: pair.b, step: 'kind', crossed: false, entry: '' };
   return say(s, 'aPartyOrBattle', { ...combineParams(s), before: s.combinedNote ? `${s.combinedNote.kind === 'party' ? 'Party' : 'Battle'}! ${s.combinedNote.g1} and ${s.combinedNote.g2} make ${s.combinedNote.total}.` : '' });
 }

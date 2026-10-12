@@ -98,7 +98,12 @@ function termsOf(side, s, live, plug = false) {
         : html('span', `lb-x${plug ? ' is-plugx' : ''}`, ['x'], { 'data-x': '1' }));
     } else {
       const hint = live && s.hint?.kind === 'cancel' && s.hint.id === t.id;
-      out.push(html('span', `lb-num${hint ? ' is-hint' : ''}`, [signed(t.v)], live ? { 'data-numval': t.v } : {}));
+      const num = html('span', 'lb-num', [signed(t.v)], live ? { 'data-numval': t.v } : {});
+      if (hint && i > 0) {
+        // the outline goes round the sign and the number together, so it is seen as a positive 7 (or a negative one)
+        out.pop();
+        out.push(html('span', 'lb-hintbox', [html('span', 'lb-plus', ['+']), num]));
+      } else out.push(hint ? html('span', 'lb-hintbox', [num]) : num);
     }
   });
   return out;
@@ -165,8 +170,10 @@ export function answerBlock(s) {
   typed.disabled = !live;
   const check = html('button', `btn lb-check${ready ? ' btn-go is-target' : ' btn-primary'}`, ['Check ✓'], { type: 'button', 'data-action': 'check' });
   check.disabled = !ready;
-  row.append(typed, check);
-  block.append(row);
+  row.append(typed);
+  // Check sits under the x = row, not beside it, and Next (a line a click, then the next problem) sits right next to it
+  const next = nextButton(s);
+  block.append(row, html('div', 'lb-checkrow', next ? [check, next] : [check]));
 
   // the substitution: a line a click, then Balanced or Not balanced on its own line
   if (s.sub) {
@@ -205,10 +212,9 @@ function bareBlock(s) {
   const block = html('div', 'lb-eqblock');
   block.append(html('div', 'lb-stack', [...stackRows(s), answerBlock(s)]));
   const done = s.stage === 'done';
-  const next = nextButton(s);
   const row = actionRow({
     undo: true,
-    go: !next && s.stage === 'moves' && s.menu === 'add' && !s.sub ? 'Go ▶' : null,
+    go: s.stage === 'moves' && s.menu === 'add' && !s.sub ? 'Go ▶' : null,
     goAction: 'go',
     goDisabled: !validAmount(s.amountEntry),
   });
@@ -219,7 +225,6 @@ function bareBlock(s) {
   // the one next place to click is the one highlighted
   if (go && validAmount(s.amountEntry)) go.classList.add('is-target');
   if (!undo.disabled && (s.undoCue || wrongGuess)) undo.classList.add('is-target');
-  if (next) row.append(next);                                   // Next takes Go's place
   block.append(addPhrase(s), row);
   return block;
 }
@@ -305,8 +310,6 @@ export function renderLightScreen(s) {
     if (tray) main.append(tray);
     if (s.stage !== 'build') {
       main.append(answerBlock(s));
-      const next = nextButton(s);
-      if (next) main.append(html('div', 'ab-actions', [html('span'), next]));
     }
   } else main.append(bareBlock(s));
   main.append(helpRow(s));

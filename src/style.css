@@ -2978,3 +2978,15 @@ body {
 .lb-blank.is-drop-over { background: #cfe8f7; }
 .ab-actions .lb-next, .ab-actions .btn-go { white-space: nowrap; }
 .lb-stack { min-height: 400px; } .lb-subst { min-height: 130px; } .lb-addphrase { margin: 2px 0; min-height: 56px; }
+
+.lb-hintbox { display: inline-flex; align-items: center; outline: 4px solid #0072b2; outline-offset: 2px; border-radius: 10px; padding: 0 8px; margin: 0 4px; animation: sw-pulse 1.2s ease-in-out infinite; box-shadow: 0 0 14px rgba(0, 114, 178, 0.45); }
+.lb-hintbox .lb-num.is-hint { outline: none; animation: none; padding: 0; }
+.lb-checkrow { display: flex; justify-content: center; align-items: center; gap: 12px; margin: 4px 0; }
+.lb-checkrow .btn { min-height: 52px; padding: 0 22px; font-size: 20px; font-weight: 800; white-space: nowrap; }
+/* a tighter page: the check row and the Add line fit on a 900 px screen */
+.lb-eqcard .lb-line { min-height: 120px; }
+.lb-rowwrap .lb-eq { font-size: 42px; }
+.lb-rowwrap.has-work .lb-eq { font-size: 30px; }
+.lb-subst { font-size: 28px; min-height: 108px; }
+.lb-stack { min-height: 380px; }
+.lb-checkrow .btn { min-height: 46px; }
