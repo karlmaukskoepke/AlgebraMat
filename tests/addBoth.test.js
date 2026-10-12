@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import {
   makeAddBoth, formatAddBoth, answerText, constantOf, oppositeOf, isBattle, balances, slipsOf, tagAddBoth, checkAddBoth,
 } from '../src/engine/addBoth.js';
-import { generateAddBothLevel, ADD_BOTH_LEVELS } from '../src/engine/generateAddBoth.js';
+import { generateAddBothLevel, generateEquationLevel, ADD_BOTH_LEVELS } from '../src/engine/generateAddBoth.js';
 
 const P = (form, a, b, mirror = false) => makeAddBoth(form, a, form === 'x+a' ? b - a : b + a, mirror);
 
@@ -74,8 +74,8 @@ describe('what a wrong answer looked like', () => {
 
   it('never tags the right answer, for any problem the generator makes', () => {
     for (let seed = 1; seed <= 30; seed++) {
-      for (let level = 1; level <= 6; level++) {
-        for (const p of generateAddBothLevel(level, seed)) {
+      for (let level = 1; level <= 5; level++) {
+        for (const p of generateEquationLevel(level, seed)) {
           for (const [tag, value] of Object.entries(slipsOf(p))) expect(value, `${formatAddBoth(p)} ${tag}`).not.toBe(p.x);
         }
       }
@@ -93,7 +93,7 @@ describe('what a wrong answer looked like', () => {
 
 describe('the problems', () => {
   const sets = [];
-  for (let seed = 1; seed <= 200; seed++) for (let level = 1; level <= 6; level++) sets.push({ level, seed, set: generateAddBothLevel(level, seed) });
+  for (let seed = 1; seed <= 200; seed++) for (let level = 1; level <= 5; level++) sets.push({ level, seed, set: generateEquationLevel(level, seed) });
 
   it('are five a level, verified by substitution, never already solved, within the limits, with no repeats', () => {
     for (const { level, set } of sets) {
@@ -142,17 +142,39 @@ describe('the problems', () => {
         for (const form of ['x+a', 'x-a']) for (const mirror of [false, true]) expect(count((p) => p.form === form && Boolean(p.mirror) === mirror)).toBeGreaterThanOrEqual(1);
         expect(count((p) => p.x < 0)).toBeGreaterThanOrEqual(2);
       }
-      if (level === 6) {
-        expect(set.every((p) => !p.mirror)).toBe(true);
-        expect(count((p) => p.form === 'x+a') >= 1 && count((p) => p.form === 'x-a') >= 1).toBe(true);
-      }
     }
   });
 
   it('are the same for the same seed and different for another', () => {
-    expect(generateAddBothLevel(4, 9)).toEqual(generateAddBothLevel(4, 9));
-    expect(generateAddBothLevel(4, 9)).not.toEqual(generateAddBothLevel(4, 10));
+    expect(generateEquationLevel(4, 9)).toEqual(generateEquationLevel(4, 9));
+    expect(generateEquationLevel(4, 9)).not.toEqual(generateEquationLevel(4, 10));
+    expect(generateAddBothLevel(5, 9)).toEqual(generateEquationLevel(4, 9));           // the card's L5 is the equation set 4
     expect(() => generateAddBothLevel(7, 1)).toThrow();
-    expect(Object.keys(ADD_BOTH_LEVELS)).toHaveLength(6);
+    expect(Object.keys(ADD_BOTH_LEVELS)).toHaveLength(5);
+  });
+});
+
+describe('level 1: the numeric level', () => {
+  it('is two "do" items then three quiz items, with numbers that vary, never balancing by accident', () => {
+    for (let seed = 1; seed <= 300; seed++) {
+      const set = generateAddBothLevel(1, seed);
+      expect(set.map((i) => i.item)).toEqual(['do', 'do', 'quiz', 'quiz', 'quiz']);
+      expect(set[0].amount).toBeGreaterThan(0);
+      expect(set[1].amount).toBeLessThan(0);
+      for (const it of set) {
+        const l = it.left.reduce((s, n) => s + n, 0);
+        const r = it.right.reduce((s, n) => s + n, 0);
+        expect(l).toBe(r);                                                           // each starts balanced
+        expect(l).toBeGreaterThanOrEqual(5);
+        expect(l).toBeLessThanOrEqual(9);
+      }
+      expect(new Set(set.map((i) => `${i.left}|${i.right}`)).size).toBe(5);
+      expect(set.slice(2).map((i) => i.correct)).toEqual(['upsets', 'keeps', 'upsets']);
+      for (const q of set.slice(2)) expect([...q.order].sort()).toEqual(['keeps', 'upsets']);
+    }
+  });
+  it('is the same for the same seed', () => {
+    expect(generateAddBothLevel(1, 4)).toEqual(generateAddBothLevel(1, 4));
+    expect(generateAddBothLevel(1, 4)).not.toEqual(generateAddBothLevel(1, 5));
   });
 });

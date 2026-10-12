@@ -20,6 +20,7 @@ import { valueLightPlay } from './play/valueLightPlay.js';
 import { solveLightPlay } from './play/solveLightPlay.js';
 import { switchPlay } from './play/switchPlay.js';
 import { addBothPlay } from './play/addBothPlay.js';
+import { addBothNumericPlay } from './play/addBothNumericPlay.js';
 import { boxPlay } from './play/boxPlay.js';
 import { afterAnswer } from './engine/streak.js';
 import { loadBests, saveBest, loadLog } from './lightStore.js';
@@ -69,7 +70,7 @@ const PLAY = {
   'one-step': solveLightPlay,
   'two-step': solveLightPlay,
   switch: switchPlay,
-  'add-both': addBothPlay,
+  'add-both': (level) => (level === 1 ? addBothNumericPlay : addBothPlay),   // Level 1 is numeric (no x)
   'distribute-combine': (level) => (level >= 4 ? distributeTypedPlay : LIGHT ? distributeLightPlay : distributePlay),
 };
 const adapterFor = (packId, level) => (typeof PLAY[packId] === 'function' ? PLAY[packId](level) : PLAY[packId]);
@@ -388,6 +389,7 @@ function renderStreak() {
 function renderSteps(session) {
   const steps = play.adapter.steps(session);
   const bar = $('steps');
+  bar.hidden = Boolean(play.adapter.noSteps);        // the light-build cards have no steps bar
   const phase = play.adapter.phaseLabel?.(session); // a pack that runs in phases names the one in play
   if (phase) bar.dataset.phase = phase; else delete bar.dataset.phase;
   const labels = steps.map((x) => x.label).join('|');
@@ -473,6 +475,7 @@ function render(before) {
   fitMatToPhone(matRoot.firstElementChild);
   hintLine.textContent = fx.hint ? `Hint: ${adapter.feedbackText(fx.hint)}` : '';
   feedback.textContent = adapter.feedbackText(session.feedback);
+  feedback.hidden = Boolean(adapter.lineInMat);       // the line is on the Mat, above the equation, on the light-build cards
   // restart the shake/celebrate animation on repeated messages
   feedback.classList.remove('bad', 'celebrate');
   void feedback.offsetWidth;
