@@ -34,9 +34,10 @@ export function buildNumericControls(root, dispatch) {
   return {
     update(s) {
       const on = s.stage === 'moves' && s.menu === 'add';
+      field.hidden = !on;                                  // the amount row appears only once the move is chosen
       value.textContent = (s.amountEntry ?? '').replace('-', MINUS) || ' ';
       value.classList.toggle('is-empty', !s.amountEntry);
-      field.hidden = s.stage === 'quiz';
+      value.classList.toggle('is-blink', on && !s.amountEntry);
       for (const b of keys.querySelectorAll('button')) b.disabled = !on;
     },
   };

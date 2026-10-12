@@ -1,5 +1,7 @@
 # Add to both sides: the card as it is built today
 
+> **Superseded** by `SPEC-ADD-TO-BOTH-SIDES.md` (revision 2.2): this describes the build before the light build.
+
 *A briefing for a design chat. It describes what students actually see and do on the card right now (2026-10-12), after three rounds of Karl's feedback, so the chat can critique it and propose changes. The chat cannot see the code; everything it needs is here. Where this differs from the original design (`SPEC-ADD-TO-BOTH-SIDES.md`), the difference is marked **[changed]** or **[not built]**. Sections 11 and 12 are the places I most want pushback.*
 
 ---

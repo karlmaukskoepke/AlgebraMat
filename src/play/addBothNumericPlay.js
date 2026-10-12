@@ -24,6 +24,7 @@ export const addBothNumericPlay = {
       case 'go': return { type: 'go' };
       case 'undo': return { type: 'undo' };
       case 'quiz': return { type: 'quiz', value: d.value };
+      case 'wtNext': return { type: 'wtNext' };
       default: return null;
     }
   },

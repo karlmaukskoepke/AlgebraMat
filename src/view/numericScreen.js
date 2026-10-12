@@ -3,9 +3,10 @@
 // problem, the question in bold and its two answers right under it, and the before / after after a miss.
 
 import { numericFeedbackText } from './numericFeedback.js';
+import { signed } from '../engine/addBoth.js';
 import { html, drawBalance, equationSvg, sideButtons, actionRow, groupShape, angleFor } from './addBothMat.js';
-import { movePanel } from './lightScreen.js';
-import { readoutOf, sideText, equationText, askOf, quizAfter } from '../engine/numericLevel.js';
+import { movePanel, equationRow, workTerms } from './lightScreen.js';
+import { readoutOf, sideText, equationText, askOf } from '../engine/numericLevel.js';
 
 const SVG_NS = 'http://www.w3.org/2000/svg';
 function el(name, attrs = {}, children = []) {
@@ -33,7 +34,13 @@ function balanceBlock(s) {
   const [, , vw, vh] = svg.getAttribute('viewBox').split(' ').map(Number);
   block.style.setProperty('--ar', String(vw / (vh + 150)));
   block.append(svg);
-  if (s.menu === 'add' && (s.pending || /^-?\d+$/.test(s.amountEntry))) block.append(sideButtons(geo, s.amountEntry, s.pending));
+  if (s.menu === 'add' && (s.pending || /^-?\d+$/.test(s.amountEntry))) {
+    const sb = sideButtons(geo, s.amountEntry, s.pending);
+    // only the one next place to click is highlighted: the left side first, then the right
+    const [l, r] = sb.querySelectorAll('button');
+    if (!s.pending) l.classList.add('is-target'); else if (!s.pending.both) (s.pending.side === 'left' ? r : l).classList.add('is-target');
+    block.append(sb);
+  }
   block.append(equationSvg({ left: sideText(s.board.left), right: sideText(s.board.right) }, geo));
   const done = s.stage === 'done';
   const row = actionRow({
@@ -41,7 +48,39 @@ function balanceBlock(s) {
     go: s.menu === 'add' ? 'Go ▶' : null,
     goDisabled: !(s.pending?.both) || !r.balanced,
   });
-  if (row) block.append(row);
+  if (row) {
+    if (s.pending?.both) row.querySelector('.btn-go')?.classList.add('is-target');
+    block.append(row);
+  }
+  return block;
+}
+
+// The watched walkthrough on x + 3 = 5 (SPEC-ADD-TO-BOTH-SIDES.md §3D item 6): a balance indicator on top, then one animation
+// a click, each click on the one highlighted place.
+function walkBlock(s) {
+  const step = s.walk.step;
+  const block = html('div', 'lb-eqblock lb-walk');
+  block.append(html('div', 'lb-balance', ['Balanced ✓'], { 'aria-label': 'The equation is balanced' }));
+  const x = () => html('span', 'lb-x', ['x']);
+  const num = (v, cls = '') => html('span', `lb-num ${cls}`.trim(), [signed(v)]);
+  const plus = () => html('span', 'lb-plus', ['+']);
+  const added = (cls = '') => num(-3, `is-added ${cls}`.trim());
+  if (step === 'a' || step === 'b') {
+    block.append(equationRow([x(), plus(), num(3)], [num(5)]));
+  } else if (step === 'c') {
+    block.append(equationRow([x(), plus(), num(3), plus(), added()], [num(5), plus(), added()]));
+  } else if (step === 'd') {
+    block.append(html('div', 'lb-eqblock has-work', [
+      equationRow([x(), plus(), num(3, 'is-struck'), plus(), added('is-struck')], [num(5), plus(), added()], 'lb-work'),
+      equationRow([x()], [num(5), plus(), num(-3)]),
+    ]));
+  } else {
+    block.append(equationRow([x()], [num(2)]));
+    if (step === 'f' || step === 'g' || step === 'end') block.append(html('ol', 'lb-subst', [html('li', 'is-good', ['2 + 3 = 5   ✓ Balanced'])]));
+  }
+  const going = step === 'b';
+  const row = actionRow({ go: going ? 'Go ▶' : ['c', 'd', 'e', 'f', 'g'].includes(step) ? 'Next ▸' : null, goAction: going ? 'go' : 'wtNext' });
+  if (row) { row.querySelector('.btn-go')?.classList.add('is-target'); block.append(row); }
   return block;
 }
 
@@ -68,7 +107,6 @@ function quizBlock(s) {
     }
     block.append(rev);
   }
-  void quizAfter;
   return block;
 }
 
@@ -78,10 +116,15 @@ export function renderNumericScreen(s) {
   wrap.append(line);
   const body = html('div', 'lb-body');
   const main = html('div', 'lb-main');
-  main.append(s.problem.item === 'quiz' ? quizBlock(s) : balanceBlock(s));
+  const walking = s.stage === 'walk' || s.walk?.step === 'end';
+  if (walking) wrap.insertBefore(html('p', 'lb-tag', ['Walkthrough']), line);
+  main.append(walking ? walkBlock(s) : s.problem.item === 'quiz' ? quizBlock(s) : balanceBlock(s));
+  const greenFrom = walking && ['d', 'e', 'f', 'g', 'end'].includes(s.walk.step);
   body.append(main, movePanel({
-    menu: s.menu, typing: null, amountEntry: s.amountEntry, path: null, walkStep: null,
-    disabled: s.problem.item === 'quiz' || s.stage === 'done' || Boolean(s.pending), lights: { fewer: 'off', solved: 'off' }, off: true,
+    menu: s.menu, typing: null, amountEntry: s.amountEntry, path: null, walkStep: walking && s.walk.step === 'a' ? 'move' : null,
+    target: !walking && s.problem.item !== 'quiz' && !s.menu && !s.pending && s.stage === 'moves',
+    disabled: (!walking && (s.problem.item === 'quiz' || s.stage === 'done' || Boolean(s.pending))) || (walking && s.walk.step !== 'a'),
+    lights: greenFrom ? { fewer: 'green', solved: 'green' } : { fewer: 'off', solved: 'off' }, off: !greenFrom,
   }));
   wrap.append(body);
   return wrap;

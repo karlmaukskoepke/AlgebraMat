@@ -1,7 +1,9 @@
 // Level 1 of Add to both sides: the numeric level (SPEC-ADD-TO-BOTH-SIDES.md §3D). Numbers only, no x: the balance is on, and
 // each of the five problems is one item. A "do" item: add an amount (suggested, a positive for the first, a negative for the
 // second) to the left, then to the right (the two actions are the point), then Go. A "quiz" item: does a change keep the
-// balance or upset it? A wrong answer shows the equations before and after, and the student tries again. No DOM here.
+// balance or upset it? A wrong answer shows the equations before and after, and the student tries again. After the fifth item
+// comes a watched walkthrough on `x + 3 = 5` (a demonstration: no typing, one highlighted click at a time, and the only place
+// the value is shown to the student). No DOM here.
 
 import { typeInto, isTyping } from './entry.js';
 import { MINUS } from './expr.js';
@@ -46,7 +48,7 @@ export function newNumeric(problem) {
     stage: isQuiz ? 'quiz' : 'moves', step: isQuiz ? 'quiz' : 'moves',
     board: board(problem), base: null, history: [],
     menu: null, amountEntry: '', suggested: false, pending: null, leftDelta: 0, rightDelta: 0,
-    reveal: null, misses: 0, wrongs: 0, stuck: 0, taught: 0, helped: false, clean: false, skipped: [],
+    reveal: null, walk: null, misses: 0, wrongs: 0, stuck: 0, taught: 0, helped: false, clean: false, skipped: [],
     finalText: null, anim: null, feedback: null,
   };
   return say(s, isQuiz ? 'nlQuiz' : 'nlStart', { amount: problem.amount, ask: isQuiz ? askOf(problem) : '' });
@@ -71,6 +73,7 @@ export function reduceNumeric(state, action) {
 
   switch (action.type) {
     case 'choose': {
+      if (s.stage === 'walk') return reduceNumeric(state, { type: 'wtChoose' });
       if (s.stage !== 'moves' || s.pending || action.move !== 'add') return state;
       s.menu = 'add';
       s.amountEntry = String(p.amount);
@@ -101,6 +104,7 @@ export function reduceNumeric(state, action) {
       return say(s, r.balanced ? 'nlBalanced' : 'nlUnbalanced', { amount: signed(amount), readout: r.text }, !r.balanced);
     }
     case 'go': {
+      if (s.stage === 'walk') return reduceNumeric(state, { type: 'wtGo' });
       if (s.stage !== 'moves' || !s.pending?.both || !readoutOf(s.board).balanced) return say(s, 'nlGoNotYet', {}, true);
       const l = sum(s.board.left);
       const r = sum(s.board.right);
@@ -121,12 +125,43 @@ export function reduceNumeric(state, action) {
       const after = quizAfter(p);
       if (action.value === p.correct) {
         s.reveal = null;
-        s.stage = 'done'; s.step = 'done'; s.clean = s.misses === 0;
+        s.clean = s.misses === 0;
+        if (p.last) {                                   // on to the watched walkthrough
+          s.stage = 'walk'; s.step = 'walk'; s.walk = { step: 'a' };
+          return say(s, 'wtA');
+        }
+        s.stage = 'done'; s.step = 'done';
         return say(s, 'nlQuizRight', { correct: p.correct });
       }
       s.misses += 1;
       s.reveal = { before: equationText(before), beforeRead: readoutOf(before).text, after: equationText(after), afterRead: readoutOf(after).text };
       return say(s, 'nlQuizWrong', { correct: p.correct }, true);
+    }
+    // ----- the watched walkthrough: x + 3 = 5 -----
+    case 'wtChoose': {
+      if (s.stage !== 'walk' || s.walk.step !== 'a') return state;
+      s.walk = { step: 'b' };
+      s.menu = 'add';
+      s.amountEntry = '-3';
+      return say(s, 'wtB');
+    }
+    case 'wtGo': {
+      if (s.stage !== 'walk' || s.walk.step !== 'b') return state;
+      s.walk = { step: 'c' };
+      s.menu = null;
+      s.amountEntry = '';
+      return say(s, 'wtC');
+    }
+    case 'wtNext': {
+      if (s.stage !== 'walk' || !['c', 'd', 'e', 'f', 'g'].includes(s.walk.step)) return state;
+      const order = ['c', 'd', 'e', 'f', 'g'];
+      const next = order[order.indexOf(s.walk.step) + 1];
+      if (!next) {
+        s.stage = 'done'; s.step = 'done'; s.walk = { step: 'end' };
+        return say(s, 'wtEnd');
+      }
+      s.walk = { step: next };
+      return say(s, `wt${next.toUpperCase()}`);
     }
     default:
       return state;
