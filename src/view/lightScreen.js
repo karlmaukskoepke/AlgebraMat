@@ -62,6 +62,16 @@ export function moveIcon(id) {
   return svg;
 }
 
+// "Add [  ] to both sides", under the equation and above Undo and Go: where the amount is typed (or a number is dragged to). It is
+// only visible once the Add move is chosen, but its room is always kept so nothing shifts.
+export function addPhrase(s) {
+  const on = s.menu === 'add' && s.stage === 'moves' && !s.sub && !s.combining && s.typing !== 'answer';
+  const blank = html('span', `ab-typed lb-blank${s.amountEntry ? '' : ' is-empty is-blink'}`, [s.amountEntry ? s.amountEntry.replace('-', MINUS) : ' '], { 'data-blank': '1' });
+  const row = html('div', `lb-addphrase${on ? '' : ' is-hidden'}`, [html('strong', '', ['Add']), blank, html('strong', '', ['to both sides'])]);
+  if (!on) row.setAttribute('aria-hidden', 'true');
+  return row;
+}
+
 export const validAmount = (entry) => /^-?\d+$/.test(entry ?? '') && Number(entry) !== 0;
 
 // ---------- the line ----------
@@ -173,7 +183,7 @@ function nextButton(s) {
   const stepping = s.sub && s.sub.step < 3;
   const done = s.stage === 'done';
   if (!stepping && !done) return null;
-  const b = html('button', 'btn btn-go is-target lb-next', [done ? 'Ready for the next problem' : 'Next ▸'], { type: 'button', 'data-action': done ? 'next' : 'nextLine' });
+  const b = html('button', 'btn btn-go is-target lb-next', [done ? 'Next problem ▸' : 'Next ▸'], { type: 'button', 'data-action': done ? 'next' : 'nextLine' });
   return b;
 }
 
@@ -210,7 +220,7 @@ function bareBlock(s) {
   if (go && validAmount(s.amountEntry)) go.classList.add('is-target');
   if (!undo.disabled && (s.undoCue || wrongGuess)) undo.classList.add('is-target');
   if (next) row.append(next);                                   // Next takes Go's place
-  block.append(row);
+  block.append(addPhrase(s), row);
   return block;
 }
 
@@ -241,9 +251,7 @@ export function movePanel(o) {
   MOVES.forEach(([id, label], i) => {
     if (id === 'add') {
       const target = o.target || o.walkStep === 'move';
-      // the amount is typed (or dropped) into the blank beside the icon; it shows once the move is chosen
-      const blank = html('span', `ab-blank${o.menu === 'add' && o.typing !== 'answer' ? ' is-active' : ''}${o.amountEntry ? '' : ' is-empty'}`, [o.amountEntry ? o.amountEntry.replace('-', MINUS) : ' '], { 'data-blank': '1' });
-      const b = html('button', `btn btn-move lb-move${o.menu === 'add' ? ' is-on' : ''}${target ? ' is-target' : ''}${o.locked ? ' is-grey' : ''}`, [moveIcon('add'), blank], { type: 'button', 'data-action': 'choose', 'data-move': 'add', 'aria-label': label, ...(o.locked ? {} : { 'data-tip': label }), style: `grid-row: ${i + 1}` });
+      const b = html('button', `btn btn-move lb-move${o.menu === 'add' ? ' is-on' : ''}${target ? ' is-target' : ''}${o.locked ? ' is-grey' : ''}`, [moveIcon('add')], { type: 'button', 'data-action': 'choose', 'data-move': 'add', 'aria-label': label, ...(o.locked ? {} : { 'data-tip': label }), style: `grid-row: ${i + 1}` });
       b.disabled = Boolean(o.disabled);
       grid.append(b);
     } else {

@@ -82,6 +82,7 @@ const M = {
   aStartedOver: () => 'Back to the start. Try again.',
   aUndone: () => 'Undone. Choose “Add ___ to both sides” and try a different number.',
   // I'm stuck, Teach me
+  aStuckHint: (p) => `Look at the ${p.constant} next to x. What would we add to both sides to eliminate it? Type it in the blank, then press Go.`,
   aStuck1: (p) => `Which number would cancel the ${p.constant}? Tap it, then add its opposite to both sides. Do you know x now?`,
   aStuck2: () => 'Choose "Add ___ to both sides" and pick an amount. Do you know x now?',
   aStuck3: (p) => `${p.opposite} cancels the ${p.constant}. Add it to both sides yourself.`,
