@@ -3253,3 +3253,7 @@ body {
 .tk-tray .gd-svg { max-height: 150px; }
 .tk-tray .tk-trayhead { font-size: 16px; }
 .tk-tray .tk-close { min-height: 40px; }
+/* the classic Divide it screen has no spare line under its stack (at 1366×768 the label's line pushes the pad 17 px off the screen,
+   and beside the check rows it overlaps them), so there the outlined row and the line's words ("into the original equation") name the
+   equation, and the label shows only in the tucked layout */
+.sv-card:not(.tk-shell) .lb-subst .lb-checkhead { display: none; }
