@@ -17,7 +17,6 @@ const SLIP = {
 const M = {
   dMovePrompt: () => 'Choose “Take a fraction of both sides”.',
   dPickFraction: () => 'Pick a fraction of both sides. Which one leaves one box?',
-  dPartial: (p) => `${p.frac} of both sides: ${p.boxes} boxes are left. Take another fraction, or type your guess for x.`,
   dUndone: () => 'Undone. Pick a different fraction.',
   dForced: (p) => `For this one, take ${p.frac} of both sides.`,
   dFail: (p) => {
@@ -25,18 +24,24 @@ const M = {
     if (!p.boxesSplit) return `${p.boxes} boxes can't make ${p.n} equal groups. Press Undo and try another fraction.`;
     return `${p.b} can't be shared into ${p.n} equal groups (${p.left} left over). Press Undo and try another fraction.`;
   },
-  dFail3: (p) => `${p.frac} doesn't split evenly. Press Undo, or Start over, and try I’m stuck.`,
-  dModel: (p) => `Here are the ${p.boxes} boxes and the ${p.size} counters. Take a fraction of both sides: the boxes and the counters split into that many groups.`,
+  dFail3: (p) => `${p.frac} doesn't split evenly. Press Undo and try another fraction. Try I’m stuck.`,
+  // I'm stuck at a state with x not alone: the counters (the number in front outlined), then choosing and dealing, then guided
+  dModel: (p) => `Here are the ${p.boxes} boxes and the ${p.size} counters. What fraction of both sides leaves one box? Do you know x now?`,
+  dStuck2: () => 'Choose a fraction of both sides: the boxes and the counters split into that many groups. Then share out every counter and keep one group.',
   dDealPrompt: (p) => `${p.boxes} boxes make ${p.n} groups of ${p.per}. Now share the ${p.size} counters into ${p.n} equal groups: tap a group to give it one counter.`,
-  dDealt: (p) => `${p.got} of ${p.total} shared. Groups hold ${p.holds}.`,
+  dDealt: (p) => (p.holds ? `${p.got} of ${p.total} shared. Groups hold ${p.holds}.` : `${p.got} of ${p.total} shared.`),
   dAllShared: () => 'All the counters are shared already. Tap a group to keep it, or Undo.',
   dNoRound: (p) => `Not enough counters left for a whole round of ${p.n}. Tap groups one at a time.`,
-  dKeepReady: (p) => `Shared evenly: ${p.each} in each group. Tap one group to keep it: that is ${p.frac} of both sides.`,
+  dKeepReady: (p) => `Shared evenly. Tap one group to keep it: that is ${p.frac} of it.`,
   dShareFirst: (p) => `Share all the counters first: ${p.left} still in the pile.`,
   dUneven: (p) => `Groups hold ${p.holds}. They must hold the same number before you keep one.`,
-  dStuckHint: (p) => `Look at the ${p.boxes} in front of x: ${p.boxes} boxes. What fraction of both sides leaves one box?`,
-  dStuckGuided: (p) => `${p.boxes} boxes: take ${p.frac} of both sides to leave one box. Tap ${p.frac}.`,
+  dStuckGuided: (p) => `${p.boxes} boxes: take ${p.frac} of both sides to leave one box. Tap ${p.frac}, then share out the counters and keep one group.`,
   dTeach: (p) => `Step by step: ${p.boxes} boxes, so take ${p.frac} of both sides. Tap ${p.frac}.`,
+  // I'm stuck at x alone with an unevaluated side (x = ⅓(6)): the diagram of the right side, on every rung
+  dDiag1: (p) => `What is ${p.frac} of ${p.size}? Share the ${p.size} into ${p.n} equal groups.`,
+  dDiag2: (p) => `Share the ${p.size} counters into ${p.n} equal groups: tap a group to give it a counter. Then keep 1 of the ${p.n} groups.`,
+  dDiag3: (p) => `The counters are already in ${p.n} equal groups, with 1 of the ${p.n} kept. Count it, and type what x is.`,
+  dDiagKept: (p) => `You kept 1 of the groups: that is ${p.frac} of it. Count what is in it, and type x.`,
   dWrong: (p) => (SLIP[p.tag] ?? SLIP.unmatched)(p),
 };
 

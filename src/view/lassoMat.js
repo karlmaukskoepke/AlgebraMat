@@ -30,7 +30,7 @@ const SVG_NS = 'http://www.w3.org/2000/svg';
 const HTML_NS = 'http://www.w3.org/1999/xhtml';
 const GLYPH = 18; // counter size inside a group
 
-function el(name, attrs = {}, children = []) {
+export function el(name, attrs = {}, children = []) {
   const node = document.createElementNS(SVG_NS, name);
   for (const [k, v] of Object.entries(attrs)) {
     if (v !== undefined && v !== null && v !== false) node.setAttribute(k, v);
@@ -49,7 +49,7 @@ function html(tag, cls, ...children) {
 const signed = (v) => (v < 0 ? `${MINUS}${-v}` : `${v}`);
 const line = (x1, y1, x2, y2, cls) => el('line', { x1, y1, x2, y2, class: cls });
 
-function counter(sign, x, y, cls, size = GLYPH) {
+export function counter(sign, x, y, cls, size = GLYPH) {
   const h = size / 2;
   const g = el('g', { class: `counter ${cls}`, transform: `translate(${x} ${y})`, 'data-sign': sign });
   g.append(line(-h, 0, h, 0, 'mark'));

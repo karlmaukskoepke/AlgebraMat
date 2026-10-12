@@ -16,6 +16,40 @@ export function readoutOf(p, nLeft, nRight) {
 }
 export const equationText = (p, nLeft, nRight) => `${sideText(p.left, nLeft)} = ${sideText(p.right, nRight)}`;
 
+// A side as segments, the fraction applied in blue (loop §3D): `⅓(3 × 4)`, or `3 × 4` before anything is taken.
+export const segsOf = (pair, n) => (n ? [{ text: fractionText(n), blue: true }, { text: `(${pair[0]} × ${pair[1]})` }] : [{ text: `${pair[0]} × ${pair[1]}` }]);
+const markOf = (r) => (r.balanced ? { text: '✓ Balanced', good: true } : { text: '✗ Unbalanced', good: false });
+
+// The work the level writes, a row at a time (loop §3E: every action writes what each side becomes, never just a readout):
+//   { type: 'eq', left, right, tag }        the equation, the fraction applied in blue, and (words) which side it was taken of
+//   { type: 'values', left, right, mark }   what each side comes to, and Balanced or Unbalanced
+// e.g. `½(2 × 6) = 3 × 4`, `6 = 12  ✗ Unbalanced`, then `½(2 × 6) = ½(3 × 4)`, `6 = 6  ✓ Balanced`.
+export function workRows(s) {
+  const p = s.problem;
+  const rows = [{ type: 'eq', left: segsOf(p.left, 0), right: segsOf(p.right, 0), mark: markOf(readoutOf(p, 0, 0)), values: `${p.v} = ${p.v}` }];
+  if (!s.pending) return rows;
+  const first = s.pending.side;
+  const one = first === 'left' ? [p.n, 0] : [0, p.n];
+  rows.push({ type: 'eq', left: segsOf(p.left, one[0]), right: segsOf(p.right, one[1]), tag: `take ${fractionText(p.n)} of the ${first}` });
+  const r1 = readoutOf(p, one[0], one[1]);
+  rows.push({ type: 'values', left: signed(r1.left), right: signed(r1.right), mark: markOf(r1) });
+  if (s.pending.both) {
+    rows.push({ type: 'eq', left: segsOf(p.left, s.nLeft), right: segsOf(p.right, s.nRight), tag: `take ${fractionText(p.n)} of the ${first === 'left' ? 'right' : 'left'}` });
+    const r2 = readoutOf(p, s.nLeft, s.nRight);
+    rows.push({ type: 'values', left: signed(r2.left), right: signed(r2.right), mark: markOf(r2) });
+  }
+  return rows;
+}
+
+// A quiz item's evidence: the equation after the change (the fraction in blue), what each side comes to, and the mark.
+export function quizRows(p) {
+  const r = readoutOf(p, p.nLeft, p.nRight);
+  return [
+    { type: 'eq', left: segsOf(p.left, p.nLeft), right: segsOf(p.right, p.nRight) },
+    { type: 'values', left: signed(r.left), right: signed(r.right), mark: markOf(r) },
+  ];
+}
+
 // The question, with the "TAKE ⅓ ..." part apart so it is drawn in blue.
 export function askParts(p) {
   const f = (n) => fractionText(n);
@@ -80,7 +114,7 @@ export function reduceDivideNumeric(state, action) {
       if (!right) s.misses += 1;
       s.clean = right;
       s.answered = { value: action.value, right };
-      s.reveal = { lines: [equationText(p, p.nLeft, p.nRight), `${signed(r.left)} = ${signed(r.right)}`], ok: r.balanced };
+      s.reveal = { lines: [equationText(p, p.nLeft, p.nRight), `${signed(r.left)} = ${signed(r.right)}`], ok: r.balanced, rows: quizRows(p) };
       s.stage = p.last ? 'review' : 'done';
       s.step = s.stage;
       return say(s, right ? 'dnQuizRight' : 'dnQuizWrong', { correct: p.correct, said: action.value }, !right);

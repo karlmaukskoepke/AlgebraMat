@@ -3039,3 +3039,143 @@ body {
 .dv-readout { margin: 0; font: 800 20px 'Lexend', system-ui, sans-serif; text-align: center; }
 .dv-hint { margin: 0; font: 700 18px 'Lexend', system-ui, sans-serif; color: #0072b2; }
 .dv-actions { display: flex; gap: 10px; }
+
+/* ---------- Solve it loop cards (Divide it, ...): folded rows, placing the value on x, the accent step, the group diagram ---------- */
+.sv-card { --accent: #7b3fb0; }
+.sv-card .lb-stack { min-height: 300px; }
+.sv-card .lb-subst { min-height: 120px; font-size: 28px; }
+.sv-card .lb-rowwrap.is-fold .lb-eq { font-size: 32px; color: var(--muted, #555); }
+.lb-foldtag { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font: 800 18px 'Lexend', system-ui, sans-serif; color: var(--muted, #555); white-space: nowrap; }
+.lb-foldtag .is-blue, .lb-eq .is-blue { color: #0072b2; }
+.lb-x.is-droptarget { outline: 4px dashed var(--accent); outline-offset: 6px; border-radius: 8px; cursor: pointer; animation: sw-pulse 1.2s ease-in-out infinite; }
+.ab-typed.is-chip { cursor: grab; touch-action: none; user-select: none; outline: 4px solid var(--accent); outline-offset: 2px; color: var(--accent); }
+.sv-ghost { position: fixed; z-index: 60; transform: translate(-50%, -60%); pointer-events: none; padding: 2px 16px; border-radius: 12px; border: 3px solid var(--accent); background: #fff; color: var(--accent); font: 800 34px 'Lexend', system-ui, sans-serif; box-shadow: 0 6px 14px rgba(0, 0, 0, 0.25); }
+.lb-sline .is-op { color: var(--accent); text-decoration: underline; text-decoration-thickness: 4px; text-underline-offset: 6px; }
+.lb-sline .is-res { color: var(--accent); }
+.lb-fractionrow.is-off > strong { color: #9a968a; }
+.sv-side { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.sv-diagram { min-height: 215px; border: 2px dashed rgba(0, 0, 0, 0.14); border-radius: 14px; padding: 6px; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.sv-diagram:empty::before { content: 'counters appear here when you ask for help'; color: #9a968a; font: 600 15px 'Lexend', system-ui, sans-serif; }
+.gd { width: 100%; display: flex; flex-direction: column; align-items: center; }
+.gd-svg { width: 100%; height: auto; max-height: 240px; }
+.gd.is-wide .gd-svg { max-height: 340px; }
+.gd-box-rect { fill: #fff; stroke: var(--ink); stroke-width: 2.5; }
+.gd-box-x { font: 800 17px 'Lexend', system-ui, sans-serif; fill: var(--ink); }
+.gd-ring { fill: none; stroke: #0072b2; stroke-width: 4; }
+.gd-border { stroke: var(--ink); stroke-width: 3; stroke-dasharray: 7 6; }
+.gd-caption { margin: 2px 0 0; font: 700 17px 'Lexend', system-ui, sans-serif; text-align: center; }
+.sv-diagram .dv-actions { display: flex; justify-content: center; margin-top: 4px; min-height: 40px; }
+.sv-diagram .dv-hint { margin: 0; font: 700 17px 'Lexend', system-ui, sans-serif; }
+/* a compact left column: the fractions on one line, a shorter line box, the stack reserved for its worst case (a folded move, the finishing move's work and equation) */
+.sv-card.lb-eqcard .lb-line { min-height: 96px; }
+.sv-card .lb-stack { min-height: 196px; }
+.sv-card .lb-rowwrap .lb-eq { font-size: 40px; }
+.sv-card .lb-rowwrap.has-work .lb-eq { font-size: 28px; }
+.sv-card .lb-fractionrow { font-size: 16px; min-height: 64px; gap: 6px; margin: 0; flex-wrap: nowrap; }
+.sv-card .lb-frac-btn { min-width: 50px; min-height: 56px; }
+.sv-card .lb-subst { min-height: 108px; font-size: 26px; }
+.sv-card .lb-eqblock { gap: 6px; padding-top: 6px; }
+.sv-card .lb-stack { min-height: 0; }
+.sv-card .lb-rows { min-height: 168px; display: flex; flex-direction: column; justify-content: flex-start; gap: 0; }
+.sv-card .lb-rowwrap .lb-eq { font-size: 38px; }
+.sv-card .lb-rowwrap.is-fold .lb-eq { font-size: 28px; }
+.sv-card .lb-rowwrap.has-work .lb-eq { font-size: 26px; }
+.sv-card .lb-helprow { flex-wrap: nowrap; gap: 8px; }
+.sv-card .lb-helprow .btn { font-size: 17px; padding: 0 14px; white-space: nowrap; }
+.sv-card .lb-line { flex-direction: row; gap: 20px; min-height: 100px; padding: 8px 16px; }
+.sv-card .lb-text { flex: 1 1 auto; font-size: 25px; }
+.sv-card .lb-linebtns { flex: none; flex-direction: column; gap: 6px; }
+.sv-card .lb-choice { min-height: 44px; min-width: 150px; padding: 0 18px; font-size: 19px; }
+.sv-card.lb-eqcard .lb-line { min-height: 100px; }
+.sv-card .lb-answerrow { padding-top: 0; }
+
+.sv-card .lb-fractionrow > strong { white-space: nowrap; font-size: 16px; }
+.sv-card .lb-fractionrow { justify-content: center; }
+
+/* Level 1 (numeric): the work stack's tags and marks, the evidence rows, the seesaw in the picture area */
+.lb-rowwrap .lb-rowtag { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); font: 700 15px 'Lexend', system-ui, sans-serif; color: var(--muted, #555); }
+.lb-rowwrap .lb-rowmark { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); font: 800 17px 'Lexend', system-ui, sans-serif; white-space: nowrap; }
+.lb-rowmark.is-good { color: #1b6e3a; } .lb-rowmark.is-bad { color: #a3281b; }
+.sv-card .lb-numrows { min-height: 250px; }
+.sv-card .lb-numrows .lb-rowwrap .lb-eq { font-size: 32px; }
+.sv-card .lb-numrows .lb-rowwrap.has-work .lb-eq { font-size: 30px; }
+.lb-reveal-rows { min-height: 130px; }
+.lb-reveal-rows .lb-rowwrap .lb-eq { font-size: 32px; }
+.sv-picture { min-height: 250px; }
+.sv-seesaw { width: 100%; }
+.sv-seesaw .gd-seesaw { width: 100%; height: auto; max-height: 250px; }
+.lb-numrows .lb-rowwrap, .lb-reveal-rows .lb-rowwrap { display: flex; align-items: center; }
+.lb-numrows .lb-rowwrap .lb-eq, .lb-reveal-rows .lb-rowwrap .lb-eq { flex: 1 1 auto; min-width: 0; font-size: 27px; }
+.lb-numrows .lb-rowwrap.has-work .lb-eq, .lb-reveal-rows .lb-rowwrap.has-work .lb-eq { font-size: 27px; }
+.lb-numrows .lb-rowtag, .lb-numrows .lb-rowmark, .lb-reveal-rows .lb-rowtag, .lb-reveal-rows .lb-rowmark { position: static; transform: none; flex: none; width: 138px; padding-left: 6px; text-align: left; font-size: 15px; line-height: 1.15; }
+.sv-card .lb-numrows .lb-rowwrap .lb-eq, .sv-card .lb-reveal-rows .lb-rowwrap .lb-eq, .sv-card .lb-numrows .lb-rowwrap.has-work .lb-eq { font-size: 27px; }
+.sv-card .lb-numrows .lb-rowtag, .sv-card .lb-numrows .lb-rowmark, .sv-card .lb-reveal-rows .lb-rowtag, .sv-card .lb-reveal-rows .lb-rowmark { font-size: 14px; width: 134px; }
+.sv-card .lb-numrows .lb-rowwrap .lb-side, .sv-card .lb-reveal-rows .lb-rowwrap .lb-side { min-width: 0; }
+.sv-card .lb-numrows .lb-rowtag, .sv-card .lb-numrows .lb-rowmark, .sv-card .lb-reveal-rows .lb-rowtag, .sv-card .lb-reveal-rows .lb-rowmark { font-size: 13px; width: 124px; padding-left: 4px; }
+.sv-card .lb-numrows .lb-rowwrap .lb-eq, .sv-card .lb-reveal-rows .lb-rowwrap .lb-eq, .sv-card .lb-numrows .lb-rowwrap.has-work .lb-eq { font-size: 26px; }
+.sv-card .lb-numrows .lb-rowmark { white-space: nowrap; }
+/* tight rows: the work stack is reserved for its worst case (4 rows: the original, a folded move, the finishing move's work and its equation) */
+.sv-card .lb-side { padding: 1px 6px; }
+.sv-card .lb-eq { line-height: 1.12; }
+.sv-card .lb-rows { min-height: 0; }
+.sv-card .lb-checkrow .btn { min-height: 44px; }
+.sv-card .lb-answerrow .lb-typed { min-height: 46px; }
+
+.sv-card .lb-rows { min-height: 168px; }
+/* a wide screen (a Chromebook is 1366 across): the picture area sits between the work and the Move / Why? panel, so the panel and the picture
+   are not stacked in one column (the page would be 200 px taller than the screen). Narrower: the picture goes under the panel. */
+@media (min-width: 1250px) {
+  .screen:has(.sv-card) { max-width: 1320px; }
+  .sv-card .lb-body { grid-template-columns: minmax(0, 1fr) 350px 400px; }
+  .sv-card .sv-side { display: contents; }
+  .sv-card .sv-diagram { grid-column: 2; grid-row: 1; align-self: start; }
+  .sv-card .lb-panel { grid-column: 3; grid-row: 1; }
+}
+/* tightening for a 768-high screen: lines a little closer, buttons a little shorter (the text stays as large and bold) */
+.sv-card.lb-eqcard .lb-line { min-height: 88px; padding: 6px 16px; }
+.sv-card .lb-game, .sv-card.lb-game { gap: 8px; }
+.sv-card .lb-subst { min-height: 96px; line-height: 1.2; }
+.sv-card .lb-answerblock { gap: 2px; }
+.sv-card .lb-fractionrow { min-height: 62px; }
+.sv-card .lb-frac-btn { min-height: 54px; }
+.sv-card .lb-eqblock .ab-actions .btn { min-height: 44px; }
+.sv-card .lb-helprow .btn { min-height: 44px; }
+.sv-card .lb-eqblock { gap: 4px; padding-top: 2px; }
+.sv-card .lb-main { gap: 4px; }
+.sv-card .lb-rows { min-height: 164px; }
+.sv-card.lb-eqcard .lb-line { min-height: 80px; padding: 4px 16px; }
+.sv-card .lb-rowwrap .lb-eq { font-size: 36px; }
+.sv-card .lb-rowwrap.is-fold .lb-eq { font-size: 27px; }
+.sv-card .lb-rowwrap.has-work .lb-eq { font-size: 25px; }
+.sv-card .lb-rows { min-height: 152px; }
+.sv-card .lb-answerrow .lb-typed { min-height: 42px; }
+.sv-card .lb-checkrow .btn { min-height: 42px; }
+.sv-card .lb-helprow .btn { min-height: 42px; }
+.sv-card .lb-subst { min-height: 90px; font-size: 25px; }
+/* the line reserves three lines of text (the choice with its buttons, or a longest message), so it never changes height */
+.sv-card.lb-eqcard .lb-line { min-height: 102px; padding: 4px 16px; }
+.sv-card .lb-text { font-size: 24px; line-height: 1.18; }
+.sv-card .lb-subst { min-height: 84px; line-height: 1.1; font-size: 25px; }
+.sv-card .lb-eqblock .ab-actions .btn { min-height: 40px; }
+.sv-card .lb-fractionrow { min-height: 58px; }
+.sv-card .lb-frac-btn { min-height: 50px; }
+.sv-card .lb-helprow .btn { min-height: 40px; }
+.sv-card .lb-choice { min-height: 40px; }
+.sv-card .lb-linebtns { gap: 4px; }
+.sv-card .lb-subst li { min-height: 0; }
+.sv-card .lb-rows { min-height: 156px; }
+
+.sv-card .lb-frac-main, .sv-card .lb-frac-sub { white-space: nowrap; }
+.sv-card .lb-frac-btn { min-width: 48px; padding: 2px 4px; }
+.sv-card .lb-line { position: relative; }
+.lb-walktag { position: absolute; top: -13px; left: 18px; padding: 1px 12px; border: 2px solid var(--ink); border-radius: 999px; background: #fff; font: 800 13px 'Lexend', system-ui, sans-serif; letter-spacing: 0.08em; text-transform: uppercase; }
+.sv-card .ab-quiz .ab-actions { min-height: 52px; }
+.sv-card .ab-quiz { display: flex; flex-direction: column; gap: 2px; }
+.sv-card .ab-question { font-size: 24px; line-height: 1.2; margin: 2px 0 0; }
+.sv-card .ab-answer { min-height: 52px; font-size: 20px; flex: 1 1 180px; }
+.sv-card .lb-readout { font-size: 32px; margin: 0; }
+.sv-card .lb-reveal-rows { min-height: 100px; }
+.sv-card .ab-quiz .ab-actions { min-height: 46px; }
+.sv-card .ab-quiz .ab-actions .btn { min-height: 44px; }
+.sv-card .ab-quiz > .lb-eq { font-size: 34px; }
+.lb-text .is-blue { color: #0072b2; }

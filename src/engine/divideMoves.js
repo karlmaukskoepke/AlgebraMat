@@ -1,11 +1,12 @@
-// The moves behind Divide it (SPEC-DIVIDE-IT.md on the light-build pattern of Add to both sides), as one pure reducer. The equation
-// is `ax = b`: a boxes on the left, b counters on the right. The student chooses a path (guess x, or use a move) and the choice is
-// fixed. The one move is "Take a fraction of both sides": tapping ½ ⅓ ¼ ⅕ or ⅙ takes that fraction of BOTH sides in one action.
-// The work stack keeps `⅓(3x) = ⅓(−12)` and the new equation; a fraction that does not split the boxes or the counters is a failed
-// attempt (shown, with Undo), never a committed move. Every typed value is plugged back in a line a click. No DOM here.
+// Divide it (SPEC-DIVIDE-IT.md rev 2.1) as a card of the shared Solve it loop (engine/solveLoop.js). The loop owns the choice at every
+// state, the forced-move rule, the substitution, folding, Undo, Start over and the help ladder; this file only says what is
+// Divide it's own: the board (`ax = b`: a boxes on the left, b counters on the right), the one move (take 1/n of BOTH sides, in one
+// action, or by hand with the counters), the failed attempt (a fraction that does not split), the lights, the slips, and the
+// pictures that go with the help rungs. No DOM here.
 
-import { typeInto, isTyping } from './entry.js';
-import { signed, takeFraction, fractionText, checkDivide, answerText, legalFractions, groupsOf, FRACTIONS, formatDivide } from './divide.js';
+import { createSolveLoop } from './solveLoop.js';
+import { signed, fractionText, boardText } from './solveTerms.js';
+import { takeFraction, tagDivide, groupsOf, FRACTIONS, legalFractions, formatDivide } from './divide.js';
 
 // ---------- the board: terms, as on Add to both sides, plus a coefficient and a fraction of a part ----------
 
@@ -18,274 +19,229 @@ const fracOf = (n, inner) => ({ id: id(), kind: 'frac', n, inner, blue: true });
 export const startBoard = (p) => ({ left: [xTerm(p.a)], right: [numTerm(p.b)] });
 export const coefOf = (board) => board.left[0].coef;
 export const xAlone = (board) => coefOf(board) === 1;
-// A side as written: "3x", "x", "−12", "⅓(−12)".
-export function termText(t) {
-  if (t.kind === 'x') return t.coef > 1 ? `${t.coef}x` : 'x';
-  if (t.kind === 'frac') return `${fractionText(t.n)}(${t.inner.map(termText).join(' + ')})`;
-  return signed(t.v);
-}
-export const boardText = (board) => `${board.left.map(termText).join(' + ')} = ${board.right.map(termText).join(' + ')}`;
+export { boardText, signed };
 
 // The board after taking 1/n of both sides, and the work row that shows it. The right side stays unsimplified on the move that
 // finishes (x alone), so the value is never shown before it is typed; a partial move shows the smaller numbers.
-function applyFraction(board, p, n) {
+function applyFraction(board, n) {
   const a = coefOf(board);
-  const b = board.right[0].kind === 'num' ? board.right[0].v : p.b;
+  const b = board.right[0].v;
   const work = { left: [fracOf(n, [board.left[0]])], right: [fracOf(n, [board.right[0]])] };
   const next = a / n === 1
     ? { left: [xTerm(1)], right: [fracOf(n, [numTerm(b)])] }
     : { left: [xTerm(a / n)], right: [numTerm(b / n)] };
   return { work, next };
 }
-// The numbers the right side stands for, for the lights: how big is each number now?
-const sizes = (board) => [coefOf(board), board.right[0].kind === 'num' ? Math.abs(board.right[0].v) : null];
 
-// ---------- the session ----------
+// ---------- the counters: a pile the size of the number on the right, dealt into n groups, one kept ----------
+
+export const DEAL_ROUND_LEVEL = 4;                                              // Deal a round arrives with the bigger levels (spec §2: Level 4)
+export const pileSize = (board) => (board.right[0].kind === 'num' ? Math.min(36, Math.abs(board.right[0].v)) : 0);
+const dealt = (d) => d.groups.reduce((a, b) => a + b, 0);
+const evenGroups = (groups) => groups.every((c) => c === groups[0]);
+
+// At x alone with an unevaluated side (`x = ⅓(6)`): the diagram of the right side only, on every rung (spec §5).
+function diagOf(board) {
+  const t = board.right[0];
+  return { n: t.n, size: Math.min(36, Math.abs(t.inner[0].v)), neg: t.inner[0].v < 0, groups: null, kept: null, guided: false };
+}
+
+const EARLIER = ['add', 'cross', 'trade'];                                      // the moves of earlier cards (Add to both sides)
 
 const say = (s, key, params = {}, bad = false) => { s.feedback = { key, params: { a: s.problem.a, b: signed(s.problem.b), ...params }, bad }; return s; };
-const snapshot = (s) => ({ board: s.board, rows: [...s.rows], lights: s.lights, reds: s.reds, menu: s.menu, startOver: s.startOver, fail: null, deal: null });
-const restore = (s, snap) => Object.assign(s, snap);
 
-export function newDivide(problem, { level = 2, forceMove = false } = {}) {
-  const board = startBoard(problem);
-  const s = {
-    problem, level, stage: 'moves', step: 'moves', path: forceMove ? 'move' : null, mustMove: forceMove,
-    board, base: board, rows: [{ type: 'eq', board }], history: [], menu: null, typing: null, entry: '', sub: null, fail: null, scaffold: false, deal: null,
-    lights: { smaller: 'off', onebox: 'off' }, reds: 0, startOver: false, forced: false, hint: null, hintGiven: false, rung: 0, taught: 0, stuck: 0,
-    wrongs: 0, tag: null, tags: [], answers: [], helped: false, clean: false, skipped: [], supportsShown: [], finalText: null, feedback: null,
-  };
-  return say(s, forceMove ? 'aMustMove' : 'aChoose');
-}
-
-export const owesMove = (s) => s.path === 'guess' && s.stage === 'done';
-export const helpOk = (s) => !s.sub || (s.sub.step >= 3 && !s.sub.ok);
-
-// Is the x = [ ] row live? Greyed before the path is chosen, on the move path until x is alone, and while a substitution is stepped.
-export function answerLive(s) {
-  if (s.stage === 'done') return false;
-  if (s.sub) return s.sub.kind === 'value' && s.sub.step >= 3 && !s.sub.ok;
-  return s.path === 'guess' || (s.path === 'move' && xAlone(s.board) && !s.fail);
-}
-
-function startOverBoard(s) {
-  Object.assign(s, { board: s.base, rows: [{ type: 'eq', board: s.base }], history: [], menu: null, typing: null, startOver: false, reds: 0, sub: null, entry: '', fail: null, deal: null, lights: { smaller: 'off', onebox: 'off' }, hint: null });
-  s.path = s.mustMove ? 'move' : null;
-  return say(s, s.path ? 'aStartedOver' : 'aChoose');
-}
-
-function finish(s, key) {
-  s.stage = 'done';
-  s.step = 'done';
-  s.clean = s.wrongs === 0 && s.stuck === 0 && s.taught === 0 && !s.helped;
-  s.finalText = answerText(s.problem);
-  return say(s, key, { answer: s.finalText });
-}
-
-// The first I'm stuck is a reminder of the move's logic; the next points at the fraction that leaves one box.
-function climb(s) {
-  s.helped = true;
-  const p = s.problem;
-  if (xAlone(s.board)) return say(s, 'aStuckSolved');
-  const a = coefOf(s.board);
-  s.menu = 'fraction';
-  if (!s.hintGiven) {
-    s.hintGiven = true;
-    s.hint = { kind: 'coef' };
-    if (!s.supportsShown.includes('hint')) s.supportsShown.push('hint');
-    return say(s, 'dStuckHint', { boxes: a });
-  }
-  if (!s.scaffold) {                                   // the second ask draws the counters: the boxes, the pile, and the groups to share it into
-    s.scaffold = true;
-    if (!s.supportsShown.includes('model')) s.supportsShown.push('model');
-    s.hint = null;
-    return say(s, 'dModel', { boxes: a, b: signed(p.b), size: Math.abs(p.b) });
-  }
-  s.rung = Math.min(s.rung + 1, 2);
-  s.hint = { kind: 'fraction', n: a };
-  if (!s.supportsShown.includes('guided')) s.supportsShown.push('guided');
-  return say(s, 'dStuckGuided', { boxes: a, frac: fractionText(a), n: a, b: signed(p.b) });
+// What the dealing says. In a real problem the number in each group is what the student is there to find, so it is never printed once the
+// groups are even (and never at x alone, where the groups' size is the answer): the student counts a group and types it.
+function dealtMessage(s, d, total) {
+  const got = dealt(d);
+  const left = total - got;
+  const holds = d.groups.join(', ');
+  if (left > 0) return { key: 'dDealt', params: { got, total, holds: s.diag ? '' : holds } };
+  return evenGroups(d.groups) ? { key: 'dKeepReady', params: { frac: fractionText(d.n) } } : { key: 'dUneven', params: { holds } };
 }
 
 // What a failed attempt says: which side broke.
-function failParams(p, board, n, res) {
+function failParams(board, n, res) {
   const a = coefOf(board);
-  return { n, frac: fractionText(n), boxes: a, b: board.right[0].kind === 'num' ? signed(board.right[0].v) : signed(p.b), left: res.leftOver, boxesSplit: res.boxesSplit, countersSplit: res.countersSplit };
+  return { n, frac: fractionText(n), boxes: a, b: signed(board.right[0].v), left: res.leftOver, boxesSplit: res.boxesSplit, countersSplit: res.countersSplit };
 }
 
-// The substitution of a typed value into ax = b: a × (value) = b, then what it comes to.
-export const plugValue = (typed) => (typed < 0 ? `(${signed(typed)})` : `${typed}`);
-export function substitutionSteps(p, typed) {
-  const first = `${p.a} × ${plugValue(typed)} = ${signed(p.b)}`;
-  return [first, `${signed(p.a * typed)} = ${signed(p.b)}`];
-}
-export const substitutionParts = (p, typed) => [{ text: `${p.a} × ` }, { text: plugValue(typed), blue: true }, { text: ` = ${signed(p.b)}` }];
+// ---------- the card ----------
 
-// The model (counters): the pile is the size of the number on the right; the boxes are the number in front of x.
-export const DEAL_ROUND_LEVEL = 4;                                                // Deal a round arrives with the bigger levels (spec §2: L3 there)
-export const pileSize = (board) => (board.right[0].kind === 'num' ? Math.min(36, Math.abs(board.right[0].v)) : 0);
-const dealt = (s) => s.deal.groups.reduce((a, b) => a + b, 0);
-const evenGroups = (groups) => groups.every((c) => c === groups[0]);
-const sayDealt = (s) => { const m = dealtMessage(s); return say(s, m.key, m.params, m.key === 'dUneven'); };
-function dealtMessage(s) {
-  const total = pileSize(s.board);
-  const got = dealt(s);
-  const left = total - got;
-  const holds = s.deal.groups.join(', ');
-  if (left > 0) return { key: 'dDealt', params: { got, total, holds } };
-  return evenGroups(s.deal.groups) ? { key: 'dKeepReady', params: { each: s.deal.groups[0], frac: fractionText(s.deal.n) } } : { key: 'dUneven', params: { holds } };
-}
+const loop = createSolveLoop({
+  id: 'divide-it',
+  startBoard,
+  alone: xAlone,
+  noLights: () => ({ smaller: 'off', onebox: 'off' }),
+  params: (s) => ({ a: s.problem.a, b: signed(s.problem.b) }),
+  extra: () => ({ fail: null, deal: null, diag: null, taught: 0 }),
+  snapshotExtra: () => ({ fail: null, deal: null, diag: null }),
+  resetState: (s) => { s.fail = null; s.deal = null; s.diag = null; },
+  collapse: () => false,                                                          // a single-step card: the check never collapses
+  movePromptKey: () => 'dMovePrompt',
+  mustMoveKey: () => 'aMustMove',
+  undoKey: () => 'dUndone',
+  answerBlocked: (s) => Boolean(s.deal),
+  answerOpen: (s) => s.scaffold && !s.menu && !s.deal && !s.fail && !s.diag,      // the first rung is a reminder: "Do you know x now?"
+  tag: (p, typed) => tagDivide(p, typed),
+  slip: (s, typed, tag) => {
+    const p = s.problem;
+    const groups = groupsOf(p, typed);
+    return { key: 'dWrong', params: { typed: signed(typed), tag, groups, per: groups ? p.a / groups : 0, product: signed(p.a * typed), word: p.b < 0 ? 'negatives' : 'positives', wordx: typed < 0 ? 'negatives' : 'positives' } };
+  },
 
-// A move that splits both sides is committed: the work stack gets `⅓(3x) = ⅓(−12)` and the new equation.
-function commit(s, n) {
-  const p = s.problem;
-  const { work, next } = applyFraction(s.board, p, n);
-  s.rows.push({ type: 'work', board: work }, { type: 'eq', board: next });
-  s.board = next;
-  s.menu = null;
-  s.fail = null;
-  s.deal = null;
-  s.reds = 0;
-  s.lights = { smaller: 'green', onebox: xAlone(next) ? 'green' : 'neutral' };
-  if (xAlone(next)) return say(s, 'aSolvedBoard');
-  return say(s, 'dPartial', { frac: fractionText(n), boxes: coefOf(next) });
-}
-
-export function reduceDivide(state, action) {
-  if (state.stage === 'done') return state;
-  const s = structuredClone(state);
-
-  if (isTyping(action)) {
-    if (s.sub) { if (!(s.sub.kind === 'value' && s.sub.step >= 3 && !s.sub.ok)) return state; s.sub = null; }
-    if (!s.path || (s.path === 'move' && !xAlone(s.board))) return state;
-    const entry = typeInto(s.entry, action, 'integer');
-    if (entry === s.entry) return state;
-    s.entry = entry;
-    return s;
-  }
-
-  switch (action.type) {
-    case 'path': {
-      if (s.path) return state;
-      s.path = action.value === 'move' ? 'move' : 'guess';
-      if (s.path === 'guess') { s.typing = 'answer'; return say(s, 'aGuessPrompt'); }
-      return say(s, 'dMovePrompt');
+  // ----- Divide it's own actions: choosing the move, taking a fraction, dealing and keeping -----
+  reduce(s, action, api) {
+    const gate = () => { const g = api.blockMove(s); return g; };
+    switch (action.type) {
+      // a move from an earlier card is not needed here; a move from a later card unlocks later (spec §4)
+      case 'greyMove':
+        return say(s, EARLIER.includes(action.move) ? 'aNotNeeded' : 'aLater');
+      case 'choose': {
+        if (action.move !== 'fraction') return undefined;
+        const g = gate();
+        if (g) return g;
+        if (xAlone(s.board)) return say(s, 'aSolvedBoard');
+        s.menu = 'fraction';
+        s.fail = null;
+        return say(s, 'dPickFraction');
+      }
+      case 'take': {
+        if (s.menu !== 'fraction' || !FRACTIONS.includes(action.n)) return 'ignore';
+        const g = gate();
+        if (g) return g === 'ignore' ? g : 'ignore';
+        const n = action.n;
+        if ((s.fail || s.deal) && s.history.length) { const reds = s.reds; api.restore(s, s.history.pop()); s.reds = reds; }   // a new try replaces the last one
+        const a = coefOf(s.board);
+        if (s.forced && n !== a) return say(s, 'dForced', { frac: fractionText(a) }, true);
+        const check = takeFraction({ a, b: s.board.right[0].v }, n);
+        api.pushHistory(s);
+        s.hint = null;
+        if (!check.ok) {
+          s.fail = { n, boxesSplit: check.boxesSplit, countersSplit: check.countersSplit };
+          s.reds += 1;
+          const work = { left: [fracOf(n, [s.board.left[0]])], right: [fracOf(n, [s.board.right[0]])] };
+          s.rows.push({ type: 'work', board: work, failed: true });
+          return say(s, s.reds >= 3 ? 'dFail3' : 'dFail', failParams(s.board, n, check), true);
+        }
+        // with the counters up, the move is done by hand: n empty groups appear, the boxes split into the same n, the pile is dealt
+        if (s.scaffold) { s.deal = { n, groups: Array(n).fill(0) }; return say(s, 'dDealPrompt', { n, frac: fractionText(n), boxes: a, size: pileSize(s.board), per: a / n }); }
+        return commitFraction(s, n, api);
+      }
+      // ----- dealing: one counter at a time (or a round), then keep one group; also the diagram at x alone -----
+      case 'deal': {
+        const d = s.deal ?? s.diag;
+        if (!d || !d.groups || s.sub) return 'ignore';
+        const total = s.deal ? pileSize(s.board) : d.size;
+        if (total - dealt(d) <= 0) return say(s, 'dAllShared', {}, true);
+        const gi = action.group;
+        if (!Number.isInteger(gi) || gi < 0 || gi >= d.n) return 'ignore';
+        d.groups[gi] += 1;
+        return sayDealt(s, d, total);
+      }
+      case 'dealRound': {
+        const d = s.deal ?? s.diag;
+        if (!d || !d.groups || s.sub || s.level < DEAL_ROUND_LEVEL) return 'ignore';
+        const total = s.deal ? pileSize(s.board) : d.size;
+        if (total - dealt(d) < d.n) return say(s, 'dNoRound', { n: d.n }, true);
+        d.groups = d.groups.map((c) => c + 1);
+        return sayDealt(s, d, total);
+      }
+      case 'keep': {
+        const d = s.deal ?? s.diag;
+        if (!d || !d.groups || s.sub) return 'ignore';
+        const gi = action.group;
+        if (!Number.isInteger(gi) || gi < 0 || gi >= d.n) return 'ignore';
+        const total = s.deal ? pileSize(s.board) : d.size;
+        const left = total - dealt(d);
+        if (left > 0) return say(s, 'dShareFirst', { left }, true);
+        if (!evenGroups(d.groups)) return say(s, 'dUneven', { holds: d.groups.join(', ') }, true);
+        if (s.diag) { d.kept = gi; return say(s, 'dDiagKept', { frac: fractionText(d.n) }); }
+        const n = s.deal.n;
+        s.deal = null;
+        return commitFraction(s, n, api);                                            // keeping one group is taking 1/n of both sides
+      }
+      default:
+        return undefined;
     }
-    case 'greyMove':
-      return say(s, 'aLater');
-    case 'choose': {
-      if (s.stage !== 'moves' || s.sub || action.move !== 'fraction') return state;
-      if (!s.path) return say(s, 'aChooseFirst', {}, true);
-      if (s.path === 'guess') return say(s, 'aGuessing');
-      if (xAlone(s.board)) return say(s, 'aSolvedBoard');
+  },
+
+  // ----- the help ladder: rungs restart at every equation state -----
+  rungs: [
+    (s) => {                                                                          // 1. Model it
+      if (xAlone(s.board)) { s.scaffold = true; s.diag = diagOf(s.board); return say(s, 'dDiag1', { frac: fractionText(s.diag.n), size: s.diag.size, n: s.diag.n }); }
+      s.scaffold = true;
+      s.hint = { kind: 'coef' };
+      if (!s.supportsShown.includes('model')) s.supportsShown.push('model');
+      return say(s, 'dModel', { boxes: coefOf(s.board), size: pileSize(s.board) });
+    },
+    (s) => {                                                                          // 2. Choose the move / do it
+      if (xAlone(s.board)) {
+        s.scaffold = true;
+        s.diag = { ...(s.diag ?? diagOf(s.board)) };
+        s.diag.groups = Array(s.diag.n).fill(0);
+        s.diag.kept = null;
+        return say(s, 'dDiag2', { frac: fractionText(s.diag.n), size: s.diag.size, n: s.diag.n });
+      }
+      s.scaffold = true;
       s.menu = 'fraction';
-      s.fail = null;
-      return say(s, 'dPickFraction');
-    }
-    // Take 1/n of both sides, in one action (or fail to: the boxes or the counters do not split into n equal groups).
-    case 'take': {
-      if (s.stage !== 'moves' || s.menu !== 'fraction' || s.sub || !FRACTIONS.includes(action.n)) return state;
-      const n = action.n;
-      const p = s.problem;
-      if ((s.fail || s.deal) && s.history.length) { const reds = s.reds; restore(s, s.history.pop()); s.reds = reds; }   // a new try replaces the last one
-      const a = coefOf(s.board);
-      if (s.forced && n !== a) return say(s, 'dForced', { frac: fractionText(a) }, true);
-      const check = takeFraction({ a, b: p.b }, n);
-      s.history.push(snapshot(s));
       s.hint = null;
-      if (!check.ok) {
-        s.fail = { n, boxesSplit: check.boxesSplit, countersSplit: check.countersSplit };
-        s.reds += 1;
-        const work = { left: [fracOf(n, [s.board.left[0]])], right: [fracOf(n, [s.board.right[0]])] };
-        s.rows.push({ type: 'work', board: work, failed: true });
-        if (s.reds >= 3) s.startOver = true;
-        return say(s, s.reds >= 3 ? 'dFail3' : 'dFail', failParams(p, s.board, n, check), true);
+      if (!s.supportsShown.includes('choose')) s.supportsShown.push('choose');
+      return say(s, 'dStuck2', { boxes: coefOf(s.board) });
+    },
+    (s) => {                                                                          // 3. Guided
+      if (xAlone(s.board)) {
+        s.scaffold = true;
+        s.diag = { ...(s.diag ?? diagOf(s.board)) };
+        s.diag.groups = Array(s.diag.n).fill(s.diag.size / s.diag.n);
+        s.diag.kept = 0;
+        s.diag.guided = true;
+        if (!s.supportsShown.includes('guided')) s.supportsShown.push('guided');
+        return say(s, 'dDiag3', { frac: fractionText(s.diag.n), n: s.diag.n });
       }
-      // with the counters up, the move is done by hand: n empty groups appear, the boxes split into the same n, the pile is dealt
-      if (s.scaffold) { s.deal = { n, groups: Array(n).fill(0) }; return say(s, 'dDealPrompt', { n, frac: fractionText(n), boxes: a, size: pileSize(s.board), per: a / n }); }
-      return commit(s, n);
-    }
-    // ----- the counters: deal the pile one counter at a time (or a round), then keep one group -----
-    case 'deal': {
-      if (!s.deal || s.sub) return state;
-      const left = pileSize(s.board) - dealt(s);
-      if (left <= 0) return say(s, 'dAllShared', {}, true);
-      const g = action.group;
-      if (!Number.isInteger(g) || g < 0 || g >= s.deal.n) return state;
-      s.deal.groups[g] += 1;
-      return sayDealt(s);
-    }
-    case 'dealRound': {
-      if (!s.deal || s.sub || s.level < DEAL_ROUND_LEVEL) return state;
-      if (pileSize(s.board) - dealt(s) < s.deal.n) return say(s, 'dNoRound', { n: s.deal.n }, true);
-      s.deal.groups = s.deal.groups.map((c) => c + 1);
-      return sayDealt(s);
-    }
-    case 'keep': {
-      if (!s.deal || s.sub) return state;
-      const g = action.group;
-      if (!Number.isInteger(g) || g < 0 || g >= s.deal.n) return state;
-      const left = pileSize(s.board) - dealt(s);
-      if (left > 0) return say(s, 'dShareFirst', { left }, true);
-      if (!evenGroups(s.deal.groups)) return say(s, 'dUneven', { holds: s.deal.groups.join(', ') }, true);
-      const n = s.deal.n;
-      s.deal = null;
-      return commit(s, n);                                                      // keeping one group is taking 1/n of both sides
-    }
-    case 'undo': {
-      if (s.sub) {
-        if (s.sub.kind !== 'guess' || s.sub.ok || s.sub.step < 3) return state;
-        s.sub = null; s.entry = ''; s.path = 'move'; s.typing = null;
-        return say(s, 'aSimplerFirst');
-      }
-      if (!s.history.length) return state;
-      restore(s, s.history.pop());
-      s.hint = null;
-      s.menu = s.path === 'move' ? 'fraction' : null;
-      return say(s, 'dUndone');
-    }
-    case 'startOver':
-      return startOverBoard(s);
-    case 'stuck': {
-      if (!helpOk(s)) return state;
-      s.sub = null;
-      if (s.path !== 'move') { s.path = 'move'; s.entry = ''; s.typing = null; }
-      s.stuck += 1;
-      return climb(s);
-    }
-    case 'teach': {
-      if (!helpOk(s)) return state;
-      s.sub = null;
-      if (s.path !== 'move') { s.path = 'move'; s.entry = ''; s.typing = null; }
-      s.taught += 1; s.forced = true; s.helped = true; s.scaffold = true;
-      if (!s.supportsShown.includes('forced')) s.supportsShown.push('forced');
-      if (xAlone(s.board)) return say(s, 'aStuckSolved');
       const a = coefOf(s.board);
+      s.scaffold = true;
       s.menu = 'fraction';
       s.hint = { kind: 'fraction', n: a };
-      return say(s, 'dTeach', { boxes: a, frac: fractionText(a), b: signed(s.problem.b) });
+      if (!s.supportsShown.includes('guided')) s.supportsShown.push('guided');
+      return say(s, 'dStuckGuided', { boxes: a, frac: fractionText(a), n: a });
+    },
+  ],
+  teach(s) {                                                                          // the same scaffolds on a forced path
+    s.scaffold = true;
+    if (xAlone(s.board)) {
+      s.diag = diagOf(s.board);
+      s.diag.groups = Array(s.diag.n).fill(0);
+      return say(s, 'dDiag2', { frac: fractionText(s.diag.n), size: s.diag.size, n: s.diag.n });
     }
-    case 'check': {
-      const { correct, tag, typed, unreadable } = checkDivide(s.problem, s.entry);
-      if (unreadable) return say(s, s.entry === '' || s.entry === '-' ? 'typeAnswer' : 'answerUnreadable', {}, true);
-      if (s.sub) return s;
-      if (!correct) { s.wrongs += 1; s.tag = tag; s.tags.push(tag); s.answers.push({ typed: s.entry, tag }); }
-      const kind = xAlone(s.board) ? 'value' : 'guess';
-      s.sub = { kind, typed, ok: correct, tag, lines: substitutionSteps(s.problem, typed), parts: substitutionParts(s.problem, typed), step: 0 };
-      return correct ? say(s, 'aPlugIn', { typed: signed(typed) }) : say(s, kind === 'guess' ? 'aGuessed' : 'aPlugIn', { typed: signed(typed) }, kind === 'guess');
-    }
-    case 'nextLine': {
-      if (!s.sub || s.sub.step >= 3) return state;
-      s.sub = { ...s.sub, step: s.sub.step + 1 };
-      if (s.sub.step < 3) return s;
-      const { kind, ok, typed, tag } = s.sub;
-      if (ok) return finish(s, 'aCorrect');
-      if (kind === 'guess') return say(s, 'aUndoGuess', { typed: signed(typed) });
-      s.entry = '';
-      return say(s, 'dWrong', { typed: signed(typed), tag, groups: groupsOf(s.problem, typed), per: groupsOf(s.problem, typed) ? s.problem.a / groupsOf(s.problem, typed) : 0, product: signed(s.problem.a * typed), word: s.problem.b < 0 ? 'negatives' : 'positives', wordx: typed < 0 ? 'negatives' : 'positives' }, true);
-    }
-    default:
-      return state;
-  }
+    const a = coefOf(s.board);
+    s.menu = 'fraction';
+    s.hint = { kind: 'fraction', n: a };
+    return say(s, 'dTeach', { boxes: a, frac: fractionText(a), b: signed(s.problem.b) });
+  },
+});
+
+function sayDealt(s, d, total) {
+  const m = dealtMessage(s, d, total);
+  return say(s, m.key, m.params, m.key === 'dUneven');
 }
 
+// A move that splits both sides is committed: the work row `⅓(3x) = ⅓(−12)` and the new equation. Smaller numbers goes green with it,
+// and One box when x is alone. A partial move leaves the choice (the same prompt) and folds when the student acts on it.
+function commitFraction(s, n, api) {
+  const { work, next } = applyFraction(s.board, n);
+  api.commit(s, {
+    rows: [{ type: 'work', board: work }, { type: 'eq', board: next }], next, label: { n }, helpful: true,
+    lights: { smaller: 'green', onebox: xAlone(next) ? 'green' : 'off' },
+  });
+  s.fail = null;
+  s.deal = null;
+  s.diag = null;
+  return say(s, xAlone(next) ? 'aSolvedBoard' : 'aChoose');
+}
+
+export const newDivide = (problem, opts = {}) => loop.newSession(problem, { level: opts.level ?? 2, forceMove: opts.forceMove ?? false });
+export const reduceDivide = loop.reduce;
+export const solve = loop;
+export const { answerLive, helpOk, startOverOk, subView, subTotal, touched, owesMove } = loop;
 export { formatDivide, legalFractions, FRACTIONS };
