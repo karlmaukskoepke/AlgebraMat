@@ -15,6 +15,7 @@ import { evaluate as evaluateProblem, formatProblem } from './expr.js';
 import { formatValue, answerText as answerValueText, checkValue } from './value.js';
 import { formatEquation, answerText as answerSolveText, checkEquation } from './equation.js';
 import { formatAddBoth, answerText as answerAddBothText, checkAddBoth } from './addBoth.js';
+import { formatDivide, answerText as answerDivideText, checkDivide } from './divide.js';
 
 const UNREADABLE = new Set(['typeAnswer', 'answerUnreadable']);
 
@@ -201,6 +202,14 @@ export const CARDS = {
     answerText: answerAddBothText,
     check: (p, text) => { const r = checkAddBoth(p, text); return { correct: r.correct, tag: r.unreadable ? 'unreadable' : r.tag }; },
   },
+  // Divide it: only the diagnostic reads it.
+  divide: {
+    pad: 'integer',
+    problemText: formatDivide,
+    lead: 'x =',
+    answerText: answerDivideText,
+    check: (p, text) => { const r = checkDivide(p, text); return { correct: r.correct, tag: r.unreadable ? 'unreadable' : r.tag }; },
+  },
   distribute: {
     pad: 'algebra',
     problemText: formatDistribute,
@@ -215,5 +224,5 @@ export const CARDS = {
 export function cardIdFor(packId, level) {
   if (packId === 'combineit') return level <= 3 ? 'twoTerm' : 'integers';
   if (packId === 'flipit') return level <= 4 ? 'twoTerm' : 'integers';
-  return { lasso: 'group', boxes: 'boxes', 'groups-of-terms': 'termGroups', 'distribute-combine': 'distribute', value: 'value', 'one-step': 'solve', 'two-step': 'solve', 'add-both': 'addBoth' }[packId] ?? null;
+  return { lasso: 'group', boxes: 'boxes', 'groups-of-terms': 'termGroups', 'distribute-combine': 'distribute', value: 'value', 'one-step': 'solve', 'two-step': 'solve', 'add-both': 'addBoth', 'divide-it': 'divide' }[packId] ?? null;
 }

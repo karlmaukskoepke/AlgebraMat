@@ -107,15 +107,24 @@ const LEGACY_ADD_BOTH = [
   (p) => done(p, 'switch', 3) && done(p, 'switch', 4),
 ];
 
-export function withLegacyCredit(progress) {
-  const entry = progress.packs['add-both'];
-  if (!entry) return progress;
+// Divide it (the numeric Level 1 and the five equation levels): the old One-step `ax = b` level (3) covers its Level 2, and the old
+// mixed level (5) its Level 3. Level 1 is never credited, and Levels 4–6 (composite coefficients, mixed) are new.
+const LEGACY_DIVIDE = [null, (p) => done(p, 'one-step', 3), (p) => done(p, 'one-step', 5)];
+
+function creditPack(progress, id, rules) {
+  const entry = progress.packs[id];
+  if (!entry) return;
   let top = 0;
-  LEGACY_ADD_BOTH.forEach((rule, i) => {
+  rules.forEach((rule, i) => {
     if (rule && rule(progress)) entry.levels[i] = true;
     if (entry.levels[i]) top = i + 1;
   });
   if (top >= 2) entry.open = Math.max(entry.open ?? 0, top);
+}
+
+export function withLegacyCredit(progress) {
+  creditPack(progress, 'add-both', LEGACY_ADD_BOTH);
+  creditPack(progress, 'divide-it', LEGACY_DIVIDE);
   return progress;
 }
 
@@ -150,12 +159,13 @@ export function mergeProgress(a, b) {
 //   v11: 12 data symbols (about 59.4 bits): + Two-step equations (8, room for one more level), 57 bits in use
 //   v12: 13 data symbols (about 64.4 bits): + Switch sides (6), 63 bits in use
 //   v13: 14 data symbols (about 69.4 bits): + Add to both sides (6), 69 bits in use
+//   v14: 16 data symbols (about 79.3 bits): + Divide it (6), 75 bits in use
 //
-// The data is a whole number of up to 69 bits, so it is worked out with BigInt: a plain JavaScript number holds only 53 bits
+// The data is a whole number of up to 75 bits, so it is worked out with BigInt: a plain JavaScript number holds only 53 bits
 // exactly, and v11 and v12 codes (57 and 63 bits) were written with plain numbers, which rounded the low bits (Count it and
 // Build it's levels). Those codes can still be read, but what they carry for those cards may be wrong; v13 is exact.
 //
-// New codes are always v13; older codes (written down earlier) still work, and a code from before Combine it's
+// New codes are always v14; older codes (written down earlier) still work, and a code from before Combine it's
 // mixed round (or Boxes & Circles' read-the-model round) brings its levels back in the right places (see
 // normalizeProgress). (Group It's pack id is still `lasso`.) v8 uses 36 of about 39.6 bits.
 
@@ -245,8 +255,18 @@ const LAYOUTS = {
       { id: 'add-both', levels: 6 },
     ],
   },
+  // Divide it, 6 levels (a numeric Level 1 and five equation levels): 75 bits, in 16 symbols.
+  14: {
+    data: 16,
+    packs: [
+      { id: 'flipit', levels: 5 }, { id: 'lasso', levels: 7 }, { id: 'boxes', levels: 6 },
+      { id: 'groups-of-terms', levels: 8 }, { id: 'combineit', levels: 5 }, { id: 'distribute-combine', levels: 5 },
+      { id: 'value', levels: 5 }, { id: 'one-step', levels: 8 }, { id: 'two-step', levels: 8 }, { id: 'switch', levels: 6 },
+      { id: 'add-both', levels: 6 }, { id: 'divide-it', levels: 6 },
+    ],
+  },
 };
-export const CODE_VERSION = 13;
+export const CODE_VERSION = 14;
 
 // Weighted sum mod 31. Weights 2, 3, 4, … are all nonzero mod 31 and differ
 // by 1 between neighbors, so any single typo or neighbor swap is caught.

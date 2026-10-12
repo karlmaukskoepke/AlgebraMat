@@ -29,6 +29,9 @@ export const PROBES = [
     pick: [(set) => set.find((p) => p.form === 'x-a' && isBattle(p)), (set) => set.find((p) => !p.mirror), (set) => set.find((p) => p.mirror)],
     rec: ([easy, left, right]) => (!easy ? 3 : left && right ? 6 : 5),
   },
+  // Divide it: one problem each of the spec's L2, L4 and L5 types (the card's Levels 3, 5 and 6, as Level 1 is numeric). A wrong first
+  // opens Levels 1–2; right and the second wrong, 1–4; the second right and the third wrong, 1–5; all right, 1–6. (Last, so a saved diagnostic carries on.)
+  { pack: 'divide-it', levels: [3, 5, 6], section: 'solve', rec: ([easy, mid, hard]) => (!easy ? 2 : !mid ? 4 : !hard ? 5 : 6) },
 ];
 
 // The sections that have a diagnostic ('all' is every probe, in order).
@@ -100,9 +103,10 @@ export function readout(seed, answers, items = diagnosticItems(seed), section = 
 // The progress with the recommended levels opened.
 // A student whose Add to both sides diagnostic shows they apply the move correctly (the x − a Battle was right, so level 5 or 6
 // is recommended) skips Level 1, the numeric level: it is marked done. They can still play it.
+const SKIPS_NUMERIC_L1 = { 'add-both': 5, 'divide-it': 4 };      // the recommended level from which Level 1 (numbers only) is skipped
 export const applyReadout = (progress, results) => results.reduce((p, r) => {
   const opened = openLevels(p, r.pack, r.rec);
-  if (r.pack === 'add-both' && r.rec >= 5 && opened.packs['add-both']) opened.packs['add-both'].levels[0] = true;
+  if (r.rec >= (SKIPS_NUMERIC_L1[r.pack] ?? Infinity) && opened.packs[r.pack]) opened.packs[r.pack].levels[0] = true;
   return opened;
 }, progress);
 

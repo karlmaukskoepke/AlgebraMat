@@ -12,6 +12,7 @@ import { generateSolveLevel } from '../engine/generateSolve.js';
 import { generateSolve2Level } from '../engine/generateSolve2.js';
 import { generateSwitchLevel } from '../engine/generateSwitch.js';
 import { generateAddBothLevel } from '../engine/generateAddBoth.js';
+import { generateDivideLevel } from '../engine/generateDivide.js';
 
 // Group It (built as "Lasso"; its id stays 'lasso' so saved progress and
 // save codes from before the rename still work).
@@ -135,6 +136,17 @@ export const twoStep = {
   generate: (level, seed) => generateSolve2Level(level, seed),
 };
 
+// Divide it (SPEC-DIVIDE-IT.md, light build): Level 1 is numeric; levels 2–6 are the five equation levels (the generator's 1–5).
+export const divideIt = {
+  id: 'divide-it',
+  title: 'Divide it',
+  subtitle: 'Taking a fraction of both sides',
+  blurb: 'Take a fraction of both sides until one box is left.',
+  levels: 6,
+  levelNames: ['numbers only', 'ax = b, a = 2 or 3', 'a = 2 to 5', 'bigger numbers', 'a = 4 or 6', 'all mixed'],
+  generate: (level, seed) => generateDivideLevel(level - 1, seed),                    // level 1 → numeric (0), 2–6 → the five equation sets
+};
+
 // The rest of the equations are still to come: they show as cards under Solve it, with no levels (so they take no room in saves).
 const soon = (id, title, subtitle) => ({ id, title, subtitle, comingSoon: true, levels: 0, levelNames: [] });
 
@@ -147,6 +159,7 @@ export const PACKS = [
   distributeCombine,
   valueIt,
   addBoth,
+  divideIt,
   oneStep,
   switchSides,
   twoStep,
@@ -157,7 +170,7 @@ export const PACKS = [
 export const SECTIONS = [
   { id: 'count', title: 'Count it', blurb: 'Adding, subtracting and multiplying numbers', packs: ['combineit', 'flipit', 'lasso'] },
   { id: 'build', title: 'Build it', blurb: 'Expressions, with boxes, circles and groups', packs: ['boxes', 'groups-of-terms', 'distribute-combine', 'value'] },
-  { id: 'solve', title: 'Solve it', blurb: 'Solving equations', packs: ['add-both', 'one-step', 'two-step', 'multi-step'] },
+  { id: 'solve', title: 'Solve it', blurb: 'Solving equations', packs: ['add-both', 'divide-it', 'one-step', 'two-step', 'multi-step'] },
 ];
 export const sectionById = (id) => SECTIONS.find((s) => s.id === id);
 export const sectionOf = (packId) => SECTIONS.find((s) => s.packs.includes(packId));

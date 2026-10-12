@@ -20,6 +20,8 @@ import { valueLightPlay } from './play/valueLightPlay.js';
 import { solveLightPlay } from './play/solveLightPlay.js';
 import { switchPlay } from './play/switchPlay.js';
 import { addBothPlay } from './play/addBothPlay.js';
+import { divideMovesPlay } from './play/divideMovesPlay.js';
+import { divideNumericPlay } from './play/divideNumericPlay.js';
 import { addBothNumericPlay } from './play/addBothNumericPlay.js';
 import { boxPlay } from './play/boxPlay.js';
 import { afterAnswer } from './engine/streak.js';
@@ -70,6 +72,7 @@ const PLAY = {
   'one-step': solveLightPlay,
   'two-step': solveLightPlay,
   switch: switchPlay,
+  'divide-it': (level) => (level === 1 ? divideNumericPlay : divideMovesPlay),   // Level 1 is numeric (no x)
   'add-both': (level) => (level === 1 ? addBothNumericPlay : addBothPlay),   // Level 1 is numeric (no x)
   'distribute-combine': (level) => (level >= 4 ? distributeTypedPlay : LIGHT ? distributeLightPlay : distributePlay),
 };

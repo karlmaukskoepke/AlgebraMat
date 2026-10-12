@@ -11,7 +11,7 @@ const state = (flipit, lasso = Array(7).fill(false), boxes = Array(6).fill(false
   v: 1,
   packs: {
     combineit: { levels: pad(combine, 5) }, flipit: { levels: pad(flipit, 5) }, lasso: { levels: lasso }, boxes: { levels: pad(boxes, 6) },
-    'groups-of-terms': { levels: terms }, 'distribute-combine': { levels: distribute }, value: { levels: [false, false, false, false] }, 'add-both': { levels: Array(6).fill(false) }, 'one-step': { levels: Array(5).fill(false), first: 3 }, 'two-step': { levels: Array(7).fill(false) }, switch: { levels: Array(6).fill(false) },
+    'groups-of-terms': { levels: terms }, 'distribute-combine': { levels: distribute }, value: { levels: [false, false, false, false] }, 'add-both': { levels: Array(6).fill(false) }, 'divide-it': { levels: Array(6).fill(false) }, 'one-step': { levels: Array(5).fill(false), first: 3 }, 'two-step': { levels: Array(7).fill(false) }, switch: { levels: Array(6).fill(false) },
   },
 });
 const state3 = state;
@@ -40,7 +40,7 @@ describe('save code v13', () => {
     const codes = new Set();
     for (const p of allStates3) {
       const code = encodeProgress(p);
-      expect(code).toMatch(/^MAT-F[2-9A-HJKMNP-Z]{15}$/); // "F" is version 13
+      expect(code).toMatch(/^MAT-G[2-9A-HJKMNP-Z]{17}$/); // "G" is version 14
       expect(decodeProgress(code, WITH_BOXES)).toEqual(p);
       codes.add(code);
     }

@@ -20,12 +20,13 @@ const answerAll = (right) => {
 
 describe('the diagnostic', () => {
   it('has about two problems from each card (three from Add to both sides), adding and subtracting first', () => {
-    expect(PROBES.map((p) => p.pack)).toEqual(['combineit', 'flipit', 'lasso', 'boxes', 'groups-of-terms', 'distribute-combine', 'value', 'one-step', 'two-step', 'add-both']);
-    expect(PROBES.filter((p) => p.pack !== 'add-both').every((p) => p.levels.length === 2 && p.levels[0] < p.levels[1])).toBe(true);
+    expect(PROBES.map((p) => p.pack)).toEqual(['combineit', 'flipit', 'lasso', 'boxes', 'groups-of-terms', 'distribute-combine', 'value', 'one-step', 'two-step', 'add-both', 'divide-it']);
+    expect(PROBES.filter((p) => !['add-both', 'divide-it'].includes(p.pack)).every((p) => p.levels.length === 2 && p.levels[0] < p.levels[1])).toBe(true);
     expect(PROBES.find((p) => p.pack === 'add-both').levels).toEqual([3, 6, 6]);
-    expect(TOTAL).toBe(21);
+    expect(PROBES.find((p) => p.pack === 'divide-it').levels).toEqual([3, 5, 6]);
+    expect(TOTAL).toBe(24);
     const items = diagnosticItems(SEED);
-    expect(items).toHaveLength(21);
+    expect(items).toHaveLength(24);
     expect(items.map((i) => i.pack)).toEqual(PROBES.flatMap((p) => p.levels.map(() => p.pack)));
     for (const p of PROBES) for (const level of p.levels) expect(level).toBeLessThanOrEqual(PACKS.find((x) => x.id === p.pack).levels);
   });
@@ -69,7 +70,7 @@ describe('the diagnostic', () => {
     for (let i = 0; i < items.length - 1; i++) s = run(s, { type: 'next' });
     expect(s.done).toBe(false);
     s = run(s, { type: 'next' });
-    expect(s).toMatchObject({ done: true, index: 21 });
+    expect(s).toMatchObject({ done: true, index: 24 });
     expect(run(s, { type: 'digit', digit: 1 })).toBe(s);
   });
 
@@ -86,25 +87,25 @@ describe('the readout', () => {
   it('all right: every card strong, recommending the level after the harder one', () => {
     const s = answerAll(() => true);
     const r = readout(SEED, s.answers, ITEMS);
-    expect(r.map((x) => x.standing)).toEqual(Array(10).fill('strong'));
-    expect(r.map((x) => [x.pack, x.rec])).toEqual([['combineit', 5], ['flipit', 5], ['lasso', 6], ['boxes', 6], ['groups-of-terms', 6], ['distribute-combine', 4], ['value', 4], ['one-step', 5], ['two-step', 6], ['add-both', 6]]);
+    expect(r.map((x) => x.standing)).toEqual(Array(11).fill('strong'));
+    expect(r.map((x) => [x.pack, x.rec])).toEqual([['combineit', 5], ['flipit', 5], ['lasso', 6], ['boxes', 6], ['groups-of-terms', 6], ['distribute-combine', 4], ['value', 4], ['one-step', 5], ['two-step', 6], ['add-both', 6], ['divide-it', 6]]);
     expect(r[0].problems).toHaveLength(2);
     expect(r[0].problems.every((p) => p.right && p.text && p.answer)).toBe(true);
   });
 
   it('none right: start at the beginning', () => {
     const r = readout(SEED, answerAll(() => false).answers, ITEMS);
-    expect(r.map((x) => x.standing)).toEqual(Array(10).fill('start'));
-    expect(r.map((x) => x.rec)).toEqual([...Array(9).fill(1), 3]);              // Add to both sides: L3 wrong opens L1–L3 (spec §8)
+    expect(r.map((x) => x.standing)).toEqual(Array(11).fill('start'));
+    expect(r.map((x) => x.rec)).toEqual([...Array(9).fill(1), 3, 2]);           // Add to both sides: L3 wrong opens L1–L3 (spec §8); Divide it: the first wrong opens L1–L2
     expect(r[0].problems.every((p) => p.skipped && !p.right)).toBe(true);
   });
 
   it('only the easier one right: the level after it; only the harder: back to the easier', () => {
     const items = ITEMS;
     const easier = readout(SEED, answerAll((it) => it.level === PROBES.find((p) => p.pack === it.pack).levels[0]).answers, items);
-    expect(easier.map((x) => [x.standing, x.rec])).toEqual([['growing', 3], ['growing', 3], ['growing', 3], ['growing', 4], ['growing', 3], ['growing', 2], ['growing', 2], ['growing', 3], ['growing', 3], ['growing', 5]]);
+    expect(easier.map((x) => [x.standing, x.rec])).toEqual([['growing', 3], ['growing', 3], ['growing', 3], ['growing', 4], ['growing', 3], ['growing', 2], ['growing', 2], ['growing', 3], ['growing', 3], ['growing', 5], ['growing', 4]]);
     const harder = readout(SEED, answerAll((it) => it.level === PROBES.find((p) => p.pack === it.pack).levels[1]).answers, items);
-    expect(harder.map((x) => x.rec)).toEqual([2, 2, 2, 3, 2, 1, 1, 2, 2, 3]);
+    expect(harder.map((x) => x.rec)).toEqual([2, 2, 2, 3, 2, 1, 1, 2, 2, 3, 2]);
   });
 
   it('shows what was typed, and the right answer, for each problem', () => {
@@ -123,13 +124,13 @@ describe('the readout', () => {
 describe('Solve it\'s diagnostic', () => {
   it('asks x − a = b and x / a = b, then ax − b = c and b − ax = c, and the answer line reads x =', () => {
     const items = diagnosticItems(SEED, 'solve');
-    expect(items.map((i) => [i.pack, i.level])).toEqual([['one-step', 2], ['one-step', 4], ['two-step', 2], ['two-step', 5], ['add-both', 3], ['add-both', 6], ['add-both', 6]]);
+    expect(items.map((i) => [i.pack, i.level])).toEqual([['one-step', 2], ['one-step', 4], ['two-step', 2], ['two-step', 5], ['add-both', 3], ['add-both', 6], ['add-both', 6], ['divide-it', 3], ['divide-it', 5], ['divide-it', 6]]);
     expect(items.slice(0, 4).map((i) => i.problem.form)).toEqual(['x-a', 'x/a', 'ax-b', 'b-ax']);
-    expect(items.map(itemLead)).toEqual(Array(7).fill('x ='));
+    expect(items.map(itemLead)).toEqual(Array(10).fill('x ='));
     expect(itemLead(ITEMS[0])).toBe('=');
     const right = (i) => ({ typed: itemAnswer(items[i]).replace(/ /g, '').replace(/−/g, '-'), skipped: false });
-    const r = readout(SEED, [{ typed: '', skipped: true }, right(1), right(2), right(3), right(4), right(5), right(6)], items, 'solve');
-    expect(r.map((x) => [x.pack, x.standing, x.rec])).toEqual([['one-step', 'growing', 2], ['two-step', 'strong', 6], ['add-both', 'strong', 6]]);
+    const r = readout(SEED, [{ typed: '', skipped: true }, right(1), right(2), right(3), right(4), right(5), right(6), right(7), right(8), right(9)], items, 'solve');
+    expect(r.map((x) => [x.pack, x.standing, x.rec])).toEqual([['one-step', 'growing', 2], ['two-step', 'strong', 6], ['add-both', 'strong', 6], ['divide-it', 'strong', 6]]);
     expect(r[0].problems[0].lead).toBe('x =');
   });
 });
@@ -202,12 +203,12 @@ describe('a diagnostic for each section (Karl, 2026-10-04)', () => {
     globalThis.localStorage = { getItem: (k) => (store.has(k) ? store.get(k) : null), setItem: (k, v) => { store.set(k, String(v)); }, removeItem: (k) => { store.delete(k); } };
   });
 
-  it('splits the cards between Count it (six problems), Build it (eight) and Solve it (seven), and together they are the whole list', () => {
+  it('splits the cards between Count it (six problems), Build it (eight) and Solve it (ten), and together they are the whole list', () => {
     expect(DIAGNOSTIC_SECTIONS).toEqual(['count', 'build', 'solve']);
     expect(probesOf('count').map((p) => p.pack)).toEqual(['combineit', 'flipit', 'lasso']);
     expect(probesOf('build').map((p) => p.pack)).toEqual(['boxes', 'groups-of-terms', 'distribute-combine', 'value']);
-    expect([totalOf('count'), totalOf('build'), totalOf('solve')]).toEqual([6, 8, 7]);
-    expect(probesOf('solve').map((p) => p.pack)).toEqual(['one-step', 'two-step', 'add-both']);
+    expect([totalOf('count'), totalOf('build'), totalOf('solve')]).toEqual([6, 8, 10]);
+    expect(probesOf('solve').map((p) => p.pack)).toEqual(['one-step', 'two-step', 'add-both', 'divide-it']);
     const all = diagnosticItems(SEED).map(itemText);
     expect([...diagnosticItems(SEED, 'count'), ...diagnosticItems(SEED, 'build'), ...diagnosticItems(SEED, 'solve')].map(itemText)).toEqual(all);   // same problems, same seed
   });
@@ -270,5 +271,18 @@ describe('Add to both sides\' diagnostic (SPEC-ADD-TO-BOTH-SIDES.md §8)', () =>
     expect(p.packs['add-both'].levels[0]).toBe(true);
     const q = applyReadout(newProgress(PACKS), readout(SEED, answers([false, true, true]), items, 'solve'));
     expect(q.packs['add-both'].levels[0]).toBe(false);
+  });
+});
+
+describe('Divide it\'s diagnostic and credit (SPEC-DIVIDE-IT.md §8, on the light-build levels)', () => {
+  const items = diagnosticItems(SEED, 'solve').filter((i) => i.pack === 'divide-it');
+  const rec = (right) => readout(SEED, [...Array(7).fill({ typed: '', skipped: true }), ...items.map((it, i) => (right[i] ? { typed: itemAnswer(it).replace(/ /g, '').replace(/−/g, '-'), skipped: false } : { typed: '', skipped: true }))], diagnosticItems(SEED, 'solve'), 'solve').find((r) => r.pack === 'divide-it');
+  it('opens L1–L2 on a wrong first, L1–L4 when only the first is right, L1–L5 when the third is wrong, L1–L6 when all are right', () => {
+    expect([[false, true, true], [true, false, true], [true, true, false], [true, true, true]].map((r) => rec(r).rec)).toEqual([2, 4, 5, 6]);
+  });
+  it('a right first problem skips the numeric Level 1; a wrong one leaves it to play', () => {
+    const p = applyReadout(newProgress(PACKS), [rec([true, false, false])]);
+    expect(p.packs['divide-it'].levels[0]).toBe(true);
+    expect(applyReadout(newProgress(PACKS), [rec([false, true, true])]).packs['divide-it'].levels[0]).toBe(false);
   });
 });

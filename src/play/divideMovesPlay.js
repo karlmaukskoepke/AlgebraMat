@@ -1,0 +1,45 @@
+// The play adapter for Divide it's equation levels (engine/divideMoves.js, view/divideScreen.js).
+
+import { newDivide, reduceDivide, owesMove } from '../engine/divideMoves.js';
+import { formatDivide } from '../engine/divide.js';
+import { renderDivideScreen } from '../view/divideScreen.js';
+import { buildDivideControls } from '../view/divideControls.js';
+import { divideFeedbackText } from '../view/divideFeedback.js';
+import { recordProblem } from '../lightStore.js';
+
+export const divideMovesPlay = {
+  noStreak: true,
+  noSteps: true,
+  noAuto: true,
+  lineInMat: true,
+  owesMove,
+  steps: () => [],
+  newSession: (problem, { forceMove = false } = {}) => newDivide(problem, { level: problem.logLevel ?? 2, forceMove }),
+  reduce: reduceDivide,
+  feedbackText: divideFeedbackText,
+  buildControls: buildDivideControls,
+  effects(before, s) {
+    if (before && before.step !== 'done' && s.step === 'done') {
+      recordProblem(s, { pack: 'divide-it', level: s.problem.logLevel ?? null, problem: formatDivide(s.problem) });
+    }
+    return { hint: null };
+  },
+  renderMat: (s) => renderDivideScreen(s),
+  matAction(d) {
+    switch (d.action) {
+      case 'choose': return { type: 'choose', move: d.move };
+      case 'greyMove': return { type: 'greyMove' };
+      case 'path': return { type: 'path', value: d.value };
+      case 'take': return { type: 'take', n: Number(d.n) };
+      case 'nextLine': return { type: 'nextLine' };
+      case 'next': return { type: 'next' };
+      case 'check': return { type: 'check' };
+      case 'focus': return { type: 'focus', target: d.target };
+      case 'stuck': return { type: 'stuck' };
+      case 'teach': return { type: 'teach' };
+      case 'startOver': return { type: 'startOver' };
+      case 'undo': return { type: 'undo' };
+      default: return null;
+    }
+  },
+};
