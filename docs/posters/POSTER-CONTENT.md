@@ -175,7 +175,7 @@ The panel's Why? boxes, with exact labels from `lightScreen.js:253-259` (the `WH
   - Code label and tooltip: "Trade places" (`lightScreen.js:23`).
   - Line prompts: "x is on the right. Click “Trade places” to rewrite the equation with x on the left." and "The same equation with the sides traded: x is on the left now."
   - Specs: "Trade places (not 'flip') swaps the two sides" (`DECISION-LOG.md`).
-  - **Your prompt calls this icon "switch sides"**, but in the app "Switch sides" is the old name of *Cross the border* (§4.2).
+  - **Poster name: Trade places** (decided 2026-10-13). "Switch sides" is the old name of *Cross the border* (§4.2), so it is not used for this icon.
 - **Icon:** ![](icons/trade.png) `icons/trade.png` (live button, Add to both sides L5), `icons/trade.svg`. Source: `lightScreen.js:55`. It shows two boxes either side of an =, with blue arrows going over the top one way and under the bottom the other.
 - **Lights:** x on the left.
 - **Goal candidates:** **x on the left** · x on left · Read x first.
@@ -311,10 +311,7 @@ The panel's Why? boxes, with exact labels from `lightScreen.js:253-259` (the `WH
 
 ## 7. Problems and questions
 
-1. **"Switch sides" means two different things.**
-   - Your prompt calls the two-boxes-with-arrows icon "switch sides"; the code calls it **Trade places**.
-   - In the app and the printed notes, "Switch sides" is the old name for **Cross the border** (a number crosses and switches teams).
-   - A poster titled "Switch sides" would match the old card, not this icon.
+1. **Decided (Karl, 2026-10-13): the two-boxes icon's poster is titled "Trade places"**, the app's own name. "Switch sides" stays retired; in the app and the printed notes it was the old name for Cross the border. (Swapping the sides is the *symmetric* property of equality, if a label is wanted: a = b means b = a.)
 2. **"Flip it" clash:** the designed Solve it card "Flip it" (move: Flip everything) and Count it's existing card "Flip It" (subtracting integers).
 3. **The opposite box is drawn two ways.**
    - The only opposite box the app draws is "−□", a box with a dash in front (Boxes & Circles key).
