@@ -2,9 +2,18 @@
 
 *Gathered 2026-10-13 from the code at `main` (`7d1485f`), the site run locally from that code, and `docs/design/`. Nothing in the app was changed. "Code" means the file and line named; "spec" means a design document; anything I couldn't find is marked "not found". Images are in `icons/` (see the list at the end).*
 
+## Karl's decisions (2026-10-13)
+
+1. **Trade places** is the name for the two-boxes poster. "Switch sides" stays retired.
+2. **The opposite box is drawn "−□"** (a dash in front of the box), as the app already draws it in Boxes & Circles and Value it. `SPEC-FLIP-IT.md` §1 says the opposite of this ("never as 'a box with a minus'"); that line needs changing in the design chat.
+3. **On the posters, the x box is empty and the counters are black on white.** Use `pieces/x-box-boxes-and-circles.png`, `pieces/positive-counter.png` and `pieces/negative-counter.png`. (The app itself still draws an "x" inside the box in Solve it scaffolds, and green/magenta counters in the group diagram; that is an app question for later, not changed here.)
+4. **Moves with no equation picture use the Count it / Build it pictures as references:** see Flip everything, Multiply and Trade places in §4.
+5. **The goal is the light's own words**, from the Why? column. The Why? column is likely to be renamed **"Goals"**.
+6. **For print, use real Lexend 700 or 800**, not the browser's faked bold.
+
 ## 1. Summary
 
-| Move (name students see) | Icon | Lights it works toward | Goal | Built? |
+| Move (name students see) | Icon | Lights it works toward | Goal (the light's words) | Built? |
 |---|---|---|---|---|
 | Add ___ to both sides | ![](icons/add.png) | Fewer terms | **Fewer terms** | Built (Add to both sides, L1-L6) |
 | Cross the border | ![](icons/cross.png) | Fewer terms | **Fewer terms** | Designed only (greyed everywhere). An older retired card, "Switch sides", did this move. |
@@ -148,7 +157,10 @@ The panel's Why? boxes, with exact labels from `lightScreen.js:253-259` (the `WH
 - **Worked example:** **none in the move form.**
   - The app's old One-step card has `x/a = b` problems, e.g. `x/2 = 8` → 16 (from `generateSolveLevel(4, seed 1)`; ✓ 16/2 = 8). It is solved by typing the answer, not by a move.
   - If you want one, following the icon and Divide it's pattern it would be `2(x/2) = 2(8)` → `x = 2(8)`. **I constructed this; it is not in the code or the specs.**
-- **Picture:** none.
+- **Picture:** no equation picture in the app.
+- **Reference picture (Build it, Value it Level 4, "fractions of x"):** ![](icons/pictures/reference-multiply-value-it-fraction-of-x.png)
+  - `−(4/5)(20) + 5` with x = 20: the box is split into 5 equal parts of 4 counters; 4 parts are taken (shaded), and the dash in front makes it the opposite box.
+  - It shows a fraction of x, the thing Multiply clears. Group It's "A groups of B" pictures (under Flip everything) show multiplication as groups.
 - **First appears:** designed only (greyed). The old One-step card's `x/a = b` level is built and still on the menu.
 
 ### 4.5 Flip everything (`flip`)
@@ -167,7 +179,10 @@ The panel's Why? boxes, with exact labels from `lightScreen.js:253-259` (the `WH
   3. `x = −(12)`
 
   Check: x = −12, −(−12) = 12 ✓.
-- **Picture:** **none in the app.** The spec describes counters turning into their opposites and boxes into opposite boxes, all at once on both sides (`SPEC-FLIP-IT.md` §1, "Picture").
+- **Picture:** no equation picture in the app. The spec describes counters turning into their opposites and boxes into opposite boxes, all at once on both sides (`SPEC-FLIP-IT.md` §1, "Picture").
+- **Reference picture (Count it, Group It Level 3, "opposite of" groups):** ![](icons/pictures/reference-flip-group-it-after.png)
+  - `−4(2)`, "opposite of 4 groups of 2": each group of ++ has a magenta − in front, and a magenta arrow turns it into a group of −−.
+  - Before the flip: `icons/pictures/reference-flip-group-it-before.png`. After: `reference-flip-group-it-after.png`.
 - **First appears:** Flip it, Level 2 (L1 is numeric). **Designed, not built.**
 
 ### 4.6 Trade places (`trade`)
@@ -186,7 +201,8 @@ The panel's Why? boxes, with exact labels from `lightScreen.js:253-259` (the `WH
   3. The equation is unchanged; then Add −3 to both sides.
 
   Check: x = 4, 4 + 3 = 7 ✓.
-- **Picture:** **none.** The move rewrites the equation as a new row; no scaffold picture.
+- **Picture:** none in the app. The move rewrites the equation as a new row.
+- **Reference picture:** **I found none in Count it or Build it.** No card there has two sides to swap. The nearest is Add's seesaw (§4.1) with the two sides traded; that would be a new drawing. **Question for you.**
 - **First appears:**
   - Add to both sides, **Level 5**, live only when x is on the right. The first time per play it is pointed out and Add waits for it (Add build notes §17). **Built.**
   - `DECISION-LOG.md` once said "introduced in L4 with a numeric tutorial". That line was later reversed.
@@ -281,9 +297,9 @@ The panel's Why? boxes, with exact labels from `lightScreen.js:253-259` (the `WH
 | Positive counter | Negative counter | x box | Opposite box |
 |---|---|---|---|
 | ![](icons/pieces/positive-counter.png) | ![](icons/pieces/negative-counter.png) | ![](icons/pieces/x-box.png) | ![](icons/pieces/opposite-box.png) |
-| Add seesaw (ink) | Add seesaw (ink) | Add seesaw | Boxes & Circles key |
+| **Use** (Add seesaw, ink) | **Use** (Add seesaw, ink) | Add seesaw (has an x inside: **don't use**) | **Use** (Boxes & Circles key) |
 | ![](icons/pieces/positive-counter-group-diagram.png) | ![](icons/pieces/negative-counter-group-diagram.png) | ![](icons/pieces/x-box-boxes-and-circles.png) | ![](icons/pieces/negative-group-add-scaffold.png) |
-| Group diagram (green) | Group diagram (magenta) | Boxes & Circles (no "x") | A negative group (dashed), Add seesaw |
+| Group diagram (green: don't use) | Group diagram (magenta: don't use) | **Use** (Boxes & Circles, empty) | A negative group (dashed), Add seesaw |
 
 **How "Solved for x" is drawn:** ![](icons/pieces/solved-for-x-row.png)
 - It is the last row of the Move / Why? panel, under a dashed grey rule.
@@ -312,24 +328,24 @@ The panel's Why? boxes, with exact labels from `lightScreen.js:253-259` (the `WH
 ## 7. Problems and questions
 
 1. **Decided (Karl, 2026-10-13): the two-boxes icon's poster is titled "Trade places"**, the app's own name. "Switch sides" stays retired; in the app and the printed notes it was the old name for Cross the border. (Swapping the sides is the *symmetric* property of equality, if a label is wanted: a = b means b = a.)
-2. **"Flip it" clash:** the designed Solve it card "Flip it" (move: Flip everything) and Count it's existing card "Flip It" (subtracting integers).
-3. **The opposite box is drawn two ways.**
+2. **Still open: "Flip it" clash:** the designed Solve it card "Flip it" (move: Flip everything) and Count it's existing card "Flip It" (subtracting integers).
+3. **Decided: draw it "−□".** The opposite box was drawn two ways:
    - The only opposite box the app draws is "−□", a box with a dash in front (Boxes & Circles key).
    - `SPEC-FLIP-IT.md` §1 says "An opposite box is drawn as an opposite box, never as 'a box with a minus'".
    - Decide which the poster uses.
-4. **Counters are drawn two ways.**
+4. **Decided for the posters: black counters.** In the app, counters are drawn two ways:
    - Solve it scaffolds (Add's seesaw, Switch sides) draw ink-black + and − marks, with negative groups in dashed boxes.
    - The group diagram (Divide it) and Group It draw green + and magenta −.
-5. **The x box is drawn two ways:** with an "x" inside it in Solve it, and empty in Boxes & Circles.
+5. **Decided for the posters: the x box is empty.** In the app it is drawn two ways: with an "x" inside it in Solve it, and empty in Boxes & Circles.
 6. **Five icons are rebuilt, not live.**
    - Cross, Multiply, Flip, Distribute and Combine are never live on a built card. Their `icons/<id>.png` is the real button with its greyed style removed in the browser (no code changed).
    - Their as-shown greyed state is `icons/<id>-as-shown-on-add.png`.
    - Add, Take a fraction and Trade places are screenshots of live buttons.
 7. **Light pairings not settled:** No fractions (Take a fraction or the future Fraction equations card); all of Multiply's lights (code layout only); Each side simplified is shared by two moves.
-8. **No picture** for Multiply, Flip everything or Trade places. Distribute's and Combine's pictures come from Build it cards.
+8. **Decided: use Count it / Build it references** (§4). Flip everything and Multiply now have one; **Trade places has none** (question above). Originally: no picture for Multiply, Flip everything or Trade places. Distribute's and Combine's pictures come from Build it cards.
 9. **Multiply has no example in move form.** The one shown is constructed; it is not from the code.
 10. **Cross the border** is greyed on every built card. The only built version is the retired Switch sides card.
-11. **Fonts:** Lexend 800 is used but only 400 and 600 are loaded, so heavy weights are synthesised. For print, use real Lexend 700 or 800.
+11. **Decided: use real Lexend 700/800 for print.** Fonts: Lexend 800 is used but only 400 and 600 are loaded, so heavy weights are synthesised. For print, use real Lexend 700 or 800.
 
 ## Files
 
