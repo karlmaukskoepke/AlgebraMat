@@ -44,10 +44,12 @@ export function showAccount(sync, onDone = () => {}, { prompt = false } = {}) {
       const info = sync.classInfo();
       if (!info) {
         // The class sheet couldn't be asked: say why, instead of offering a sign-in that can't work.
+        // (one short sentence for a student; the exact reason, for a teacher, is under Details)
         d.innerHTML = `
           <h2>Can’t reach your class sheet</h2>
           <p class="code-error" role="alert">${esc(sync.probeError() ?? 'Couldn’t reach the class sheet.')}</p>
-          <div class="dialog-actions"><button type="button" class="btn" data-close>Cancel</button><button type="button" class="btn btn-primary" data-retry>Try again</button></div>`;
+          ${sync.probeDetail() ? `<details><summary>Details</summary><p>${esc(sync.probeDetail())}</p></details>` : ''}
+          <div class="dialog-actions"><button type="button" class="btn" data-close>${prompt ? 'Not now' : 'Cancel'}</button><button type="button" class="btn btn-primary" data-retry>Try again</button></div>`;
         d.querySelector('[data-close]').onclick = close;
         d.querySelector('[data-retry]').onclick = () => { d.innerHTML = '<p>Checking with your class…</p>'; sync.probe().then(() => draw()); };
         return;

@@ -27,7 +27,8 @@ import { boxPlay } from './play/boxPlay.js';
 import { afterAnswer } from './engine/streak.js';
 import { loadBests, saveBest, loadLog } from './lightStore.js';
 import { createSync } from './sync.js';
-import { loadSync, saveSync } from './syncStore.js';
+import { loadSync, saveSync, loadInfo, saveInfo } from './syncStore.js';
+import { loadGoogle } from './googleSignIn.js';
 import { DEFAULT_CLASS } from './syncConfig.js';
 import { showAccount, accountLabel } from './view/account.js';
 import { bestFor } from './engine/streak.js';
@@ -125,7 +126,7 @@ function persist() {
 // The class sheet (SPEC-SYNC.md): signed in, progress, problems and runs go to the teacher's sheet, and levels finished
 // on another device come back.
 const sync = createSync({
-  load: loadSync, save: saveSync,
+  load: loadSync, save: saveSync, loadInfo, saveInfo,
   getProgress: () => progress,
   setProgress: (p) => { progress = p; saveProgress(); if (!$('home').hidden) goHome(); },
   getEvents: loadLog, getRuns: loadRuns, packs: PACKS,
@@ -593,8 +594,10 @@ if (urlPack && PLAY[urlPack.id] && Number.isInteger(urlLevel) && urlLevel >= 1 &
 }
 
 // Sign in at the start of every visit (Karl, 2026-10-12). A student who signed in before has this device's token and is signed in
-// silently, so only a signed-out student sees this. "Not now" skips it; it asks again next visit. (?nosignin=1 skips it for testing.)
-if (!params.get('nosignin') && sync.status().state === 'signed-out') {
-  // only when the class sheet answers (offline or blocked, there is nothing to sign in to, so no nagging)
-  sync.probe().then((info) => { if (info && !info.retired && sync.status().state === 'signed-out') showAccount(sync, () => { if (!$('home').hidden) goHome(); }, { prompt: true }); });
+// silently, so only a signed-out student sees this. "Not now" skips it; it asks again next visit. It opens at once from what this
+// device remembers about the class sheet (the sheet is asked again behind it), and Google's button is fetched ahead of time.
+// (?nosignin=1 skips it for testing.) Offline, there is nothing to sign in to, so it stays quiet.
+if (!params.get('nosignin') && sync.status().state === 'signed-out' && navigator.onLine !== false) {
+  if (loadInfo(sync.endpoint())?.google) loadGoogle().catch(() => {});
+  showAccount(sync, () => { if (!$('home').hidden) goHome(); }, { prompt: true });
 }

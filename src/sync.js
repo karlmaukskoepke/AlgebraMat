@@ -2,13 +2,16 @@
 // a test can give it a fake sheet. One request at a time; a request asked for during another follows it.
 
 import {
-  PROTOCOL, validAuth, authOf, studentLabel, periodLabel, buildRequest, advance, moreToSend, takeFromSheet, progressChanged, normalizeEndpoint,
+  PROTOCOL, validAuth, authOf, studentLabel, periodLabel, buildRequest, buildSigninRequest, advance, moreToSend, takeFromSheet, progressChanged, normalizeEndpoint,
 } from './engine/sync.js';
 
+const SIGNIN_TIMEOUT_MS = 20000;   // signing in is one small request; if it has not answered by now, try once more rather than wait
+const RETRY_MS = 1500;
+const INFO_TIMEOUT_MS = 10000;
 const TIMEOUT_MS = 30000;      // a class sheet that hasn't been used for a while can take a while to wake up
 const DELAY_MS = 4000;
 
-export function createSync({ load, save, getProgress, setProgress, getEvents, getRuns, packs, send = defaultSend, getInfo = defaultInfo, onChange = () => {}, setTimer = setTimeout, clearTimer = clearTimeout }) {
+export function createSync({ load, save, getProgress, setProgress, getEvents, getRuns, packs, send = defaultSend, getInfo = defaultInfo, loadInfo = () => null, saveInfo = () => {}, retryMs = RETRY_MS, onChange = () => {}, setTimer = setTimeout, clearTimer = clearTimeout }) {
   let state = load();
   let busy = false;
   let again = false;
@@ -16,6 +19,8 @@ export function createSync({ load, save, getProgress, setProgress, getEvents, ge
   let error = null;
   let info = null;            // what the class sheet says about itself: { google, numberSignin }
   let probeError = null;      // why it couldn't be asked, if it couldn't
+  let probeDetail = null;     // the exact version, for a teacher
+  let background = Promise.resolve();   // the sync that follows a sign-in (a test, or a Save now, can wait for it)
 
   const set = (patch) => { state = { ...state, ...patch }; save(state); };
   const changed = () => onChange(api.status());
@@ -72,26 +77,49 @@ export function createSync({ load, save, getProgress, setProgress, getEvents, ge
       return true;
     },
     // What the class sheet offers: { google: client id or null, numberSignin }. Null if it can't be reached.
-    async probe() {
+    // The last answer is remembered on the device, so the dialog can open at once; it is asked again in the background (`fresh`)
+    // and the new answer replaces it. Asked twice before giving up, because the first request after a quiet spell is slow.
+    async probe({ fresh = false } = {}) {
       if (!state.endpoint) return null;
-      try { info = await getInfo(state.endpoint); probeError = null; } catch (e) { info = null; probeError = e?.userMessage ?? explainFailure(e); }
+      const saved = loadInfo(state.endpoint);
+      if (saved && !fresh) { info = saved; probeError = null; api.probe({ fresh: true }); return info; }
+      for (let attempt = 0; attempt < 2; attempt++) {
+        try { info = await getInfo(state.endpoint); probeError = null; saveInfo(state.endpoint, info); return info; } catch (e) {
+          probeError = friendlyFailure(e); probeDetail = e?.detail ?? null;
+          if (attempt === 0) await later(retryMs);
+        }
+      }
+      if (!saved) info = null;                 // nothing to fall back on
       return info;
     },
     classInfo: () => info,
     probeError: () => probeError,
+    probeDetail: () => probeDetail,
     // Sign in as a period and a number, or with a Google ID token plus a period and number. Nothing is kept unless the
     // sheet takes it.
     async signIn(auth) {
       if (!state.endpoint) return { ok: false, error: 'Ask your teacher for the class link first.' };
       if (!validAuth(auth)) return { ok: false, error: 'Use letters and numbers only for the period and the student number.' };
-      const before = state;
-      state = { ...state, auth: authOf(auth), cursor: { eventsT: 0, runsT: 0 } };
-      const res = await run();
-      if (!res.ok) { state = before; save(state); changed(); return res; }   // nothing is kept, and the button goes back to Sign in
+      const mine = authOf(auth);
+      let res;
+      for (let attempt = 0; attempt < 2; attempt++) {
+        try { res = await send(state.endpoint, buildSigninRequest(mine), { timeout: SIGNIN_TIMEOUT_MS }); } catch (e) { res = { ok: false, error: friendlyFailure(e), code: 'network' }; }
+        if (res?.ok || !['network', 'busy'].includes(res?.code)) break;       // only a slow or busy sheet is worth another try
+        if (attempt === 0) await later(retryMs);
+      }
+      if (!res?.ok) return { ok: false, error: res?.code === 'busy' ? 'The class sheet is busy right now. Please try again.' : (res?.error || 'The class sheet said no.') };
+      // A Google sign-in is answered with this device's own token: from now on that is the sign-in.
+      const next = res.device?.token ? { mode: 'device', id: res.device.id, token: res.device.token, label: periodLabel(res.period) } : mine;
+      state = { ...state, auth: next, cursor: { eventsT: 0, runsT: 0 }, lastSync: null };
       save(state);
+      error = null;
+      // a class sheet that has not been updated yet answers a sign-in with a full sync: take its progress
+      if (res.progress) { const before = getProgress(); const merged = takeFromSheet(before, res.progress, packs); if (progressChanged(before, merged)) setProgress(merged); }
       changed();
-      return res;
+      background = run();                          // progress, problems and runs follow in the background; the student is signed in already
+      return { ok: true };
     },
+    settled: () => background,
     signOut() { set({ auth: null, cursor: { eventsT: 0, runsT: 0 }, lastSync: null }); error = null; changed(); },
     // Soon, not at once: a level finishing asks several times.
     request() {
@@ -118,22 +146,36 @@ export function explainFailure(error) {
   return `${base} (${why}). Your progress is still saved on this device.`;
 }
 
-const asUserError = (error) => Object.assign(error instanceof Error ? error : new Error(String(error)), { userMessage: explainFailure(error) });
+// What a student sees: one short sentence, and what to do. (`explainFailure` is the long, exact version, for a teacher.)
+export function friendlyFailure(error) {
+  if (error?.userMessage) return error.userMessage;
+  const text = String(error?.message ?? '');
+  if (error?.name === 'AbortError') return 'The class sheet is slow to answer. Please try again.';
+  if (error?.name === 'TypeError' || /offline|Failed to fetch/i.test(text)) return 'Couldn’t reach the class sheet. Check your internet and try again.';
+  return 'Couldn’t reach the class sheet. Please try again in a moment.';
+}
+const later = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+const asUserError = (error) => { const e = error instanceof Error ? error : new Error(String(error)); return Object.assign(e, { userMessage: friendlyFailure(e), detail: explainFailure(e) }); };
 
 async function defaultInfo(endpoint) {
+  const ctl = new AbortController();
+  const timer = setTimeout(() => ctl.abort(), INFO_TIMEOUT_MS);
   try {
-    const res = await fetch(endpoint, { method: 'GET' });
+    const res = await fetch(endpoint, { method: 'GET', signal: ctl.signal });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const body = await res.json();
     return { google: typeof body.google === 'string' ? body.google : null, numberSignin: body.numberSignin !== false, retired: body.retired === true };
   } catch (e) {
     throw asUserError(e);
+  } finally {
+    clearTimeout(timer);
   }
 }
 
-async function defaultSend(endpoint, request) {
+async function defaultSend(endpoint, request, { timeout = TIMEOUT_MS } = {}) {
   const ctl = new AbortController();
-  const timer = setTimeout(() => ctl.abort(), TIMEOUT_MS);
+  const timer = setTimeout(() => ctl.abort(), timeout);
   try {
     // text/plain keeps this a "simple" request, so the browser doesn't need the sheet to answer a preflight.
     const res = await fetch(endpoint, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(request), signal: ctl.signal });

@@ -51,6 +51,12 @@ Then in the **roster** sheet: **The Mat > Sync from my master list** (Google ask
 
 After changing the class sheet's **script** (not its properties), publish it again: **Deploy > Manage deployments > the pencil > Version: New version > Deploy**. The URL stays the same.
 
+## Updating the script for faster sign-in (do this once after this update)
+1. Open the **class sheet**, **Extensions > Apps Script**, select everything in `Code.gs`, and paste in the new `teacher/Code.gs` from the project. **Save**.
+2. **Deploy > Manage deployments > the pencil > Version: New version > Deploy.** The web app address stays the same.
+3. Keep it awake, so the first student of the day doesn't wait: in Apps Script, the **clock icon (Triggers) > Add Trigger**: function `keepWarm`, event source **Time-driven**, **Minutes timer**, **Every 5 minutes**. Save (Google asks you to allow it once).
+The app works with the old script too, only slower, so students aren't locked out while you update.
+
 ## Part 6. Test it, then tell students
 1. Open **https://karlmaukskoepke.github.io/AlgebraMat/?class=** followed by your Web app URL, tap **Sign in**, and use your own school account. The button should show **✓ Test**. Play a problem; ten seconds later your class sheet's **Students**, **Progress** and **Log** tabs have a row.
 2. When `DEFAULT_CLASS` in `src/syncConfig.js` holds your Web app URL, you don't need the class link at all: students just open The Mat.

@@ -49,17 +49,32 @@ function doGet() {
   return json({ ok: true, app: 'The Mat class sheet', protocol: PROTOCOL, google: client || null, numberSignin: !client || setting('ALLOW_NUMBER_SIGNIN') === 'yes', retired: isRetired() });
 }
 
-function doPost(e) {
+// One request at a time is only needed where the sheet is WRITTEN. The slow parts of signing in (asking Google whether the token is real,
+// finding the student on the class list) need no lock, so a whole class can sign in at once; only the one line that adds a device is
+// locked, for a moment. If the lock can't be had quickly the answer is "busy" (code), and the app quietly tries again.
+function withLock(fn) {
   var lock = LockService.getScriptLock();
-  lock.waitLock(20000);
+  if (!lock.tryLock(15000)) throw Object.assign(new Error('The class sheet is busy. Try again in a moment.'), { code: 'busy' });
+  try { return fn(); } finally { lock.releaseLock(); }
+}
+
+function doPost(e) {
   try {
     var req = JSON.parse(e.postData.contents);
-    return json(handle(req, SpreadsheetApp.getActiveSpreadsheet()));
+    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    if (req && req.op === 'signin') return json(handle(req, ss));       // takes its own short lock, only to add a device
+    return json(withLock(function () { return handle(req, ss); }));
   } catch (err) {
-    return json({ ok: false, error: String(err && err.message ? err.message : err), code: err && err.code ? err.code : undefined });
-  } finally {
-    lock.releaseLock();
+    var text = String(err && err.message ? err.message : err);
+    var busy = (err && err.code === 'busy') || /lock/i.test(text);
+    return json({ ok: false, error: busy ? 'The class sheet is busy. Try again in a moment.' : text, code: busy ? 'busy' : (err && err.code ? err.code : undefined) });
   }
+}
+
+// Keeps the script awake: set a time-driven trigger on this function (every 5 minutes), so the first student of the morning
+// does not wait for the script to start up. See SETUP.md.
+function keepWarm() {
+  setting('GOOGLE_CLIENT_ID');
 }
 
 function json(obj) {
@@ -279,6 +294,7 @@ function safe(v) {
 function handle(req, ss) {
   if (!req || req.v !== PROTOCOL) throw new Error('This app and this sheet are not the same version');
   if (isRetired()) throw Object.assign(new Error('This class sheet has been retired. Your progress is still saved on this device.'), { code: 'retired' });
+  if (req.op === 'signin') return signin(req, ss);
   var who = identify(req.auth, ss);
   var now = new Date().toISOString();
   var device = who.newDevice ? { id: who.id, token: newDevice(ss, who.id, now) } : undefined;
@@ -287,6 +303,18 @@ function handle(req, ss) {
   var logged = addEvents(ss, who, req.events);
   var runs = addRuns(ss, who, req.runs);
   return { ok: true, progress: merged, added: { events: logged, runs: runs }, now: now, device: device, period: who.period };
+}
+
+// Signing in, and only that (the app asks for it with op: 'signin'): is this a real student on the class list? If it is a Google
+// sign-in, add this device and hand back its token. No progress, problems or runs are merged here: the app sends those a moment
+// later, in the background. This is what makes signing in quick, and what lets a class do it at once.
+function signin(req, ss) {
+  var who = identify(req.auth, ss);
+  var device;
+  if (who.newDevice) {
+    device = withLock(function () { return { id: who.id, token: newDevice(ss, who.id, new Date().toISOString()) }; });
+  }
+  return { ok: true, signin: true, period: who.period, device: device };
 }
 
 // ---------- Sheets ----------

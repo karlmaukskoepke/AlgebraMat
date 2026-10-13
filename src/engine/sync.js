@@ -52,6 +52,12 @@ export function buildRequest({ auth, progress, events, runs, cursor = newCursor(
   return { v: PROTOCOL, auth: authOf(auth), progress: { packs }, events: after(events ?? [], cursor.eventsT), runs: after(runs ?? [], cursor.runsT) };
 }
 
+// Signing in is its own small request: who this is, and nothing else (the class sheet checks it and, for a Google sign-in, hands back
+// this device's token). Progress, problems and runs follow in the background, so the student is signed in at once.
+export function buildSigninRequest(auth) {
+  return { v: PROTOCOL, op: 'signin', auth: authOf(auth) };
+}
+
 // Where the next request starts, once the sheet has taken this one.
 export function advance(cursor, request) {
   const last = (list) => (list.length ? list[list.length - 1].t : null);
