@@ -20,7 +20,8 @@ const ago = (t) => {
 };
 
 // `sync` is the object from sync.js. `onDone` runs when the dialog closes after a change (so the map redraws).
-export function showAccount(sync, onDone = () => {}) {
+// `prompt`: the sign-in the site offers at the start of a visit. It says why, and the way out is "Not now" (it asks again next visit).
+export function showAccount(sync, onDone = () => {}, { prompt = false } = {}) {
   const d = dialog();
   let changed = false;
   const status = sync.status();
@@ -64,11 +65,12 @@ export function showAccount(sync, onDone = () => {}) {
         <div class="dialog-actions"><button type="button" class="btn btn-primary" data-close>OK</button></div>` : `
         <form class="code-form" data-form="who">
           <h2>Sign in</h2>
+          ${prompt ? '<p><b>Sign in so your progress is saved</b> and follows you to any device.</p>' : ''}
           ${google ? '<p>Sign in with your school Google account. That is all: nothing to type. Your name and email are not saved.</p>' : ''}
           ${numbers ? fields : ''}
           ${google ? '<div class="google-holder" data-google></div>' : ''}
           <p class="code-error" role="alert" ${message ? '' : 'hidden'}>${esc(message)}</p>
-          <div class="dialog-actions"><button type="button" class="btn" data-close>Cancel</button>${numbers ? `<button type="submit" class="btn ${google ? '' : 'btn-primary'}">${google ? 'Sign in with only my number' : 'Sign in'}</button>` : ''}</div>
+          <div class="dialog-actions"><button type="button" class="btn" data-close>${prompt ? 'Not now' : 'Cancel'}</button>${numbers ? `<button type="submit" class="btn ${google ? '' : 'btn-primary'}">${google ? 'Sign in with only my number' : 'Sign in'}</button>` : ''}</div>
         </form>`;
     } else {
       body = `
