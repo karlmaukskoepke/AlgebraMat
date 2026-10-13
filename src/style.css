@@ -3189,3 +3189,71 @@ body {
 .lb-sline .is-op { color: var(--accent); font-weight: 900; text-decoration: none; }
 .lb-sline .is-res { color: var(--accent); font-weight: 900; }
 .ab-typed.is-chip { outline-color: #0072b2; color: #0072b2; }
+
+/* The equation being checked is named on its own line above the check rows, never over an equation row (brief c, any layout) */
+.lb-subst .lb-checkhead { font: 700 15px 'Lexend', system-ui, sans-serif; color: var(--muted, #555); min-height: 0; }
+
+/* ---------- The tucked layout (pilot, ?layout=tucked; BUILD-BRIEF-DIVIDE-IT-2026-10-12-c) ----------
+   One work column (the original equation pinned on top, the stack, the controls), a slim Why? column, and two things that slide in
+   only on demand: the Moves drawer (from the right) and the counter tray (from the foot of the work column). Same tokens, fonts,
+   buttons and panel look as the rest of the site (the ink border, #fffdf2 panel paper, the 44 px buttons). */
+.mat-wrap:has(.tk-shell) { flex: 1 1 auto; min-height: 0; align-items: stretch; }
+.screen:has(.tk-shell) { max-width: 1320px; }
+.tk-shell { position: relative; width: 100%; height: 100%; min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr) 210px; gap: 14px; }
+.tk-work { min-width: 0; min-height: 0; display: flex; flex-direction: column; gap: 6px; }
+.tk-stack { flex: 1 1 auto; min-height: 120px; overflow-y: auto; overscroll-behavior: contain; }
+.tk-stackin { display: flex; flex-direction: column; align-items: stretch; }
+.tk-shell .lb-rows { min-height: 0; }
+.tk-original { flex: none; }
+.tk-shell .tk-original .lb-rowwrap .lb-eq { font-size: 48px; }
+.tk-drawer .lb-panel .lb-head { display: none; }
+.sv-card.tk-shell .lb-line { min-height: 98px; }
+.tk-shell .lb-subst { min-height: 0; }
+.tk-controls { flex: none; display: flex; flex-direction: column; gap: 6px; }
+.sv-card.tk-shell .lb-line { padding: 6px 16px; }
+.tk-shell .tk-helper { flex-wrap: wrap; justify-content: center; margin-top: 0; padding-top: 6px; }
+.tk-shell .tk-helper .btn-undo { min-height: 40px; }
+.tk-shell .lb-answerrows { display: flex; align-items: center; justify-content: center; gap: 14px; }
+.tk-shell .lb-answerrows .lb-answerrow, .tk-shell .lb-answerrows .lb-checkrow { margin: 0; }
+/* the slim Why? column: light names and states only, the Moves tab at its foot */
+.tk-why { min-height: 0; border: 3px solid var(--ink); border-radius: 16px; padding: 10px 12px; background: #fffdf2; display: flex; flex-direction: column; gap: 8px; }
+.tk-whyhead { font: 800 15px 'Lexend', system-ui, sans-serif; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted, #555); }
+.tk-lights { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.tk-lights .ab-goal { font-size: 16px; }
+.tk-lights .tk-light:last-child { margin-top: 6px; padding-top: 10px; border-top: 2px dashed #bdb7a4; font-weight: 800; }
+.tk-movestab { margin-top: auto; width: 100%; font-weight: 800; }
+/* the Moves drawer: over the Why? column and part of the work column */
+.tk-drawer { position: absolute; top: 0; right: 0; bottom: 0; z-index: 5; width: min(470px, 70%); overflow-y: auto; border: 3px solid var(--ink); border-radius: 16px; padding: 8px 12px 12px; background: #fffdf2; box-shadow: -10px 0 24px rgba(0, 0, 0, 0.12); display: flex; flex-direction: column; gap: 8px; }
+.tk-drawer .lb-panel { border: 0; padding: 0; background: none; }
+.tk-drawer .lb-fractionrow { flex-wrap: wrap; }
+.tk-drawerhead, .tk-trayhead { display: flex; align-items: center; justify-content: space-between; font: 800 18px 'Lexend', system-ui, sans-serif; }
+.tk-close { min-width: 44px; font-size: 22px; }
+/* the counter tray: at the foot of the work column; the stack above it shrinks and scrolls, its text never gets smaller */
+.tk-tray { flex: none; height: min(44%, 220px); overflow-y: auto; border: 3px solid var(--ink); border-radius: 16px; padding: 4px 12px 8px; background: #fffdf2; }
+.tk-tray .sv-diagram { min-height: 0; border: 0; padding: 0; }
+.tk-tray .lb-fractionrow { margin: 0; }
+.tk-traytab { align-self: center; flex: none; }
+.tk-drawer:focus, .tk-tray:focus { outline: 3px solid var(--ink); outline-offset: 2px; }
+/* the slides: about 250 ms, and none at all for a student who has asked for less motion */
+.tk-drawer.is-entering { animation: tk-slide-in 0.25s ease-out; }
+.tk-tray.is-entering { animation: tk-slide-up 0.25s ease-out; }
+@keyframes tk-slide-in { from { transform: translateX(100%); } to { transform: none; } }
+@keyframes tk-slide-up { from { transform: translateY(40%); opacity: 0; } to { transform: none; opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .tk-drawer.is-entering, .tk-tray.is-entering { animation: none; } }
+/* narrow screens: the Why? column becomes a row above the work, and the drawer takes the full width */
+@media (max-width: 900px) {
+  .tk-shell { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); gap: 8px; }
+  .tk-why { order: -1; flex-direction: row; flex-wrap: wrap; align-items: center; padding: 6px 10px; gap: 6px 14px; }
+  .tk-whyhead { display: none; }
+  .tk-lights { flex-direction: row; flex-wrap: wrap; gap: 6px 14px; }
+  .tk-lights .tk-light:last-child { margin: 0; padding: 0; border: 0; }
+  .tk-movestab { margin: 0 0 0 auto; width: auto; }
+  .tk-drawer { width: 100%; }
+}
+.tk-tray .gd-svg { max-height: 150px; }
+.tk-tray .tk-trayhead { font-size: 16px; }
+.tk-tray .tk-close { min-height: 40px; }
+/* the classic Divide it screen has no spare line under its stack (at 1366×768 the label's line pushes the pad 17 px off the screen,
+   and beside the check rows it overlaps them), so there the outlined row and the line's words ("into the original equation") name the
+   equation, and the label shows only in the tucked layout */
+.sv-card:not(.tk-shell) .lb-subst .lb-checkhead { display: none; }

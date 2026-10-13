@@ -243,7 +243,7 @@ function bareBlock(s) {
 
 // ---------- the move panel ----------
 
-function checkbox(state) {
+export function checkbox(state) {
   return html('span', `ab-checkbox is-${state}`, [state === 'green' ? '✓' : state === 'red' ? '✗' : state === 'neutral' ? '–' : ''], { 'aria-hidden': 'true' });
 }
 
@@ -262,7 +262,7 @@ const WHYS = [
 // locked, lights: { fewer, solved }, off (draw the boxes as not yet available), flash, target (point at Add), sub }.
 export function movePanel(o) {
   const panel = html('aside', 'lb-panel', [], { 'aria-label': 'Moves' });
-  panel.append(html('div', 'lb-head', [html('span', '', ['Move']), html('span', '', ['Why?'])]));
+  panel.append(html('div', 'lb-head', o.noWhys ? [html('span', '', ['Move'])] : [html('span', '', ['Move']), html('span', '', ['Why?'])]));
   const grid = html('div', 'lb-grid');
   const fewer = o.off ? 'off' : o.lights.fewer;
   MOVES.forEach(([id, label], i) => {
@@ -281,7 +281,8 @@ export function movePanel(o) {
   });
   // each group of Why? boxes sits centred beside the moves it goes with. Fewer terms is judged; the others are satisfied by the
   // same good move (green together, faint until then).
-  for (const g of WHYS) {
+  // the tucked layout shows the lights in its own Why? column, so its Moves drawer leaves the boxes out (`noWhys`)
+  for (const g of o.noWhys ? [] : WHYS) {
     const items = g.boxes.map(([key, name]) => {
       const state = o.whys?.[key] ?? (key === 'fewer' ? fewer : fewer === 'green' ? 'green' : 'off');
       return html('li', `ab-goal is-${state}${key === 'fewer' && o.flash ? ' is-flash' : ''}`, [checkbox(state), html('span', 'ab-goal-label', [name])]);
@@ -290,7 +291,7 @@ export function movePanel(o) {
   }
   panel.append(grid);
   const solved = o.off ? 'off' : o.lights.solved;
-  panel.append(html('div', 'lb-row lb-solved', [html('span', 'lb-solved-label', ['Solved for x']), html('ul', 'ab-goals', [html('li', `ab-goal is-${solved}`, [checkbox(solved)])])]));
+  if (!o.noWhys) panel.append(html('div', 'lb-row lb-solved', [html('span', 'lb-solved-label', ['Solved for x']), html('ul', 'ab-goals', [html('li', `ab-goal is-${solved}`, [checkbox(solved)])])]));
   if (o.sub) panel.append(o.sub);
   return panel;
 }
