@@ -1,0 +1,1393 @@
+{
+ "add L2 opening": {
+  "bodyScroll": 955,
+  "viewport": [
+   1366,
+   768
+  ],
+  "header": {
+   "x": 203,
+   "y": 8,
+   "w": 960,
+   "h": 54,
+   "vis": "visible",
+   "minH": "auto",
+   "hiddenCls": false
+  },
+  "dots": {
+   "x": 917,
+   "y": 22,
+   "w": 112,
+   "h": 16,
+   "vis": "visible",
+   "minH": "auto",
+   "hiddenCls": false
+  },
+  "line": {
+   "x": 203,
+   "y": 70,
+   "w": 960,
+   "h": 157,
+   "vis": "visible",
+   "minH": "120px",
+   "hiddenCls": false
+  },
+  "original": {
+   "x": 203,
+   "y": 253,
+   "w": 504,
+   "h": 70,
+   "vis": "visible",
+   "minH": "auto",
+   "hiddenCls": false
+  },
+  "stack": {
+   "x": 203,
+   "y": 253,
+   "w": 504,
+   "h": 380,
+   "vis": "visible",
+   "minH": "380px",
+   "hiddenCls": false
+  },
+  "answerRow": {
+   "x": 384,
+   "y": 329,
+   "w": 142,
+   "h": 56,
+   "vis": "visible",
+   "minH": "auto",
+   "hiddenCls": false
+  },
+  "checkRow": {
+   "x": 385,
+   "y": 397,
+   "w": 140,
+   "h": 46,
+   "vis": "visible",
+   "minH": "auto",
+   "hiddenCls": false
+  },
+  "substList": {
+   "x": 455,
+   "y": 451,
+   "w": 0,
+   "h": 108,
+   "vis": "visible",
+   "minH": "108px",
+   "hiddenCls": false
+  },
+  "addPhrase": {
+   "x": 203,
+   "y": 645,
+   "w": 504,
+   "h": 56,
+   "vis": "hidden",
+   "minH": "56px",
+   "hiddenCls": true
+  },
+  "undoGoRow": {
+   "x": 203,
+   "y": 713,
+   "w": 504,
+   "h": 56,
+   "vis": "visible",
+   "minH": "auto",
+   "hiddenCls": false
+  },
+  "helpRow": {
+   "x": 203,
+   "y": 781,
+   "w": 504,
+   "h": 108,
+   "vis": "visible",
+   "minH": "auto",
+   "hiddenCls": false
+  },
+  "movePanel": {
+   "x": 723,
+   "y": 239,
+   "w": 440,
+   "h": 495,
+   "vis": "visible",
+   "minH": "auto",
+   "hiddenCls": false
+  },
+  "moveHead": {
+   "x": 738,
+   "y": 252,
+   "w": 410,
+   "h": 29,
+   "vis": "visible",
+   "minH": "auto",
+   "hiddenCls": false
+  },
+  "moveGrid": {
+   "x": 738,
+   "y": 287,
+   "w": 410,
+   "h": 394,
+   "vis": "visible",
+   "minH": "auto",
+   "hiddenCls": false
+  },
+  "firstMove": {
+   "x": 738,
+   "y": 287,
+   "w": 220,
+   "h": 44,
+   "vis": "visible",
+   "minH": "0px",
+   "hiddenCls": false
+  },
+  "whyColumnFirst": {
+   "x": 966,
+   "y": 323,
+   "w": 182,
+   "h": 22,
+   "vis": "visible",
+   "minH": "auto",
+   "hiddenCls": false
+  },
+  "solvedRow": {
+   "x": 738,
+   "y": 687,
+   "w": 410,
+   "h": 32,
+   "vis": "visible",
+   "minH": "auto",
+   "hiddenCls": false
+  },
+  "pad": {
+   "x": 203,
+   "y": 897,
+   "w": 960,
+   "h": 58,
+   "vis": "visible",
+   "minH": "auto",
+   "hiddenCls": false
+  },
+  "mat": {
+   "x": 203,
+   "y": 70,
+   "w": 960,
+   "h": 819,
+   "vis": "visible",
+   "minH": "0px",
+   "hiddenCls": false
+  }
+ },
+ "add L2 after Add chosen": {
+  "bodyScroll": 918,
+  "viewport": [
+   1366,
+   768
+  ],
+  "header": {
+   "x": 203,
+   "y": 8,
+   "w": 960,
+   "h": 54,
+   "vis": "visible",
+   "minH": "auto",
+   "hiddenCls": false
+  },
+  "dots": {
+   "x": 917,
+   "y": 22,
+   "w": 112,
+   "h": 16,
+   "vis": "visible",
+   "minH": "auto",
+   "hiddenCls": false
+  },
+  "line": {
+   "x": 203,
+   "y": 70,
+   "w": 960,
+   "h": 120,
+   "vis": "visible",
+   "minH": "120px",
+   "hiddenCls": false
+  },
+  "original": {
+   "x": 203,
+   "y": 216,
+   "w": 504,
+   "h": 70,
+   "vis": "visible",
+   "minH": "auto",
+   "hiddenCls": false
+  },
+  "stack": {
+   "x": 203,
+   "y": 216,
+   "w": 504,
+   "h": 380,
+   "vis": "visible",
+   "minH": "380px",
+   "hiddenCls": false
+  },
+  "answerRow": {
+   "x": 384,
+   "y": 292,
+   "w": 142,
+   "h": 56,
+   "vis": "visible",
+   "minH": "auto",
+   "hiddenCls": false
+  },
+  "checkRow": {
+   "x": 385,
+   "y": 360,
+   "w": 140,
+   "h": 46,
+   "vis": "visible",
+   "minH": "auto",
+   "hiddenCls": false
+  },
+  "substList": {
+   "x": 455,
+   "y": 414,
+   "w": 0,
+   "h": 108,
+   "vis": "visible",
+   "minH": "108px",
+   "hiddenCls": false
+  },
+  "addPhrase": {
+   "x": 203,
+   "y": 608,
+   "w": 504,
+   "h": 56,
+   "vis": "visible",
+   "minH": "56px",
+   "hiddenCls": false
+  },
+  "undoGoRow": {
+   "x": 203,
+   "y": 676,
+   "w": 504,
+   "h": 56,
+   "vis": "visible",
+   "minH": "auto",
+   "hiddenCls": false
+  },
+  "helpRow": {
+   "x": 203,
+   "y": 744,
+   "w": 504,
+   "h": 108,
+   "vis": "visible",
+   "minH": "auto",
+   "hiddenCls": false
+  },
+  "movePanel": {
+   "x": 723,
+   "y": 202,
+   "w": 440,
+   "h": 495,
+   "vis": "visible",
+   "minH": "auto",
+   "hiddenCls": false
+  },
+  "moveHead": {
+   "x": 738,
+   "y": 215,
+   "w": 410,
+   "h": 29,
+   "vis": "visible",
+   "minH": "auto",
+   "hiddenCls": false
+  },
+  "moveGrid": {
+   "x": 738,
+   "y": 250,
+   "w": 410,
+   "h": 394,
+   "vis": "visible",
+   "minH": "auto",
+   "hiddenCls": false
+  },
+  "firstMove": {
+   "x": 738,
+   "y": 250,
+   "w": 220,
+   "h": 44,
+   "vis": "visible",
+   "minH": "0px",
+   "hiddenCls": false
+  },
+  "whyColumnFirst": {
+   "x": 966,
+   "y": 286,
+   "w": 182,
+   "h": 22,
+   "vis": "visible",
+   "minH": "auto",
+   "hiddenCls": false
+  },
+  "solvedRow": {
+   "x": 738,
+   "y": 650,
+   "w": 410,
+   "h": 32,
+   "vis": "visible",
+   "minH": "auto",
+   "hiddenCls": false
+  },
+  "pad": {
+   "x": 203,
+   "y": 860,
+   "w": 960,
+   "h": 58,
+   "vis": "visible",
+   "minH": "auto",
+   "hiddenCls": false
+  },
+  "mat": {
+   "x": 203,
+   "y": 70,
+   "w": 960,
+   "h": 782,
+   "vis": "visible",
+   "minH": "0px",
+   "hiddenCls": false
+  }
+ },
+ "add L4 stuck model (scaffold)": {
+  "bodyScroll": 1100,
+  "viewport": [
+   1366,
+   768
+  ],
+  "header": {
+   "x": 203,
+   "y": -22,
+   "w": 960,
+   "h": 54,
+   "vis": "visible",
+   "minH": "auto",
+   "hiddenCls": false
+  },
+  "dots": {
+   "x": 917,
+   "y": -8,
+   "w": 112,
+   "h": 16,
+   "vis": "visible",
+   "minH": "auto",
+   "hiddenCls": false
+  },
+  "line": {
+   "x": 203,
+   "y": 40,
+   "w": 960,
+   "h": 120,
+   "vis": "visible",
+   "minH": "120px",
+   "hiddenCls": false
+  },
+  "answerRow": {
+   "x": 384,
+   "y": 654,
+   "w": 142,
+   "h": 56,
+   "vis": "visible",
+   "minH": "auto",
+   "hiddenCls": false
+  },
+  "checkRow": {
+   "x": 385,
+   "y": 722,
+   "w": 140,
+   "h": 46,
+   "vis": "visible",
+   "minH": "auto",
+   "hiddenCls": false
+  },
+  "substList": {
+   "x": 455,
+   "y": 776,
+   "w": 0,
+   "h": 108,
+   "vis": "visible",
+   "minH": "108px",
+   "hiddenCls": false
+  },
+  "undoGoRow": {
+   "x": 203,
+   "y": 586,
+   "w": 504,
+   "h": 56,
+   "vis": "visible",
+   "minH": "auto",
+   "hiddenCls": false
+  },
+  "helpRow": {
+   "x": 203,
+   "y": 896,
+   "w": 504,
+   "h": 108,
+   "vis": "visible",
+   "minH": "auto",
+   "hiddenCls": false
+  },
+  "movePanel": {
+   "x": 723,
+   "y": 172,
+   "w": 440,
+   "h": 495,
+   "vis": "visible",
+   "minH": "auto",
+   "hiddenCls": false
+  },
+  "moveHead": {
+   "x": 738,
+   "y": 185,
+   "w": 410,
+   "h": 29,
+   "vis": "visible",
+   "minH": "auto",
+   "hiddenCls": false
+  },
+  "moveGrid": {
+   "x": 738,
+   "y": 220,
+   "w": 410,
+   "h": 394,
+   "vis": "visible",
+   "minH": "auto",
+   "hiddenCls": false
+  },
+  "firstMove": {
+   "x": 738,
+   "y": 220,
+   "w": 220,
+   "h": 44,
+   "vis": "visible",
+   "minH": "0px",
+   "hiddenCls": false
+  },
+  "whyColumnFirst": {
+   "x": 966,
+   "y": 256,
+   "w": 182,
+   "h": 22,
+   "vis": "visible",
+   "minH": "auto",
+   "hiddenCls": false
+  },
+  "solvedRow": {
+   "x": 738,
+   "y": 620,
+   "w": 410,
+   "h": 32,
+   "vis": "visible",
+   "minH": "auto",
+   "hiddenCls": false
+  },
+  "scaffoldBoard": {
+   "x": 203,
+   "y": 172,
+   "w": 504,
+   "h": 470,
+   "vis": "visible",
+   "minH": "470px",
+   "hiddenCls": false
+  },
+  "pad": {
+   "x": 203,
+   "y": 1012,
+   "w": 960,
+   "h": 58,
+   "vis": "visible",
+   "minH": "auto",
+   "hiddenCls": false
+  },
+  "mat": {
+   "x": 203,
+   "y": 40,
+   "w": 960,
+   "h": 964,
+   "vis": "visible",
+   "minH": "0px",
+   "hiddenCls": false
+  }
+ },
+ "divide L2 opening": {
+  "bodyScroll": 768,
+  "viewport": [
+   1366,
+   768
+  ],
+  "header": {
+   "x": 23,
+   "y": 8,
+   "w": 1320,
+   "h": 54,
+   "vis": "visible",
+   "minH": "auto",
+   "hiddenCls": false
+  },
+  "dots": {
+   "x": 1097,
+   "y": 22,
+   "w": 112,
+   "h": 16,
+   "vis": "visible",
+   "minH": "auto",
+   "hiddenCls": false
+  },
+  "line": {
+   "x": 23,
+   "y": 70,
+   "w": 1320,
+   "h": 102,
+   "vis": "visible",
+   "minH": "102px",
+   "hiddenCls": false
+  },
+  "original": {
+   "x": 23,
+   "y": 182,
+   "w": 538,
+   "h": 44,
+   "vis": "visible",
+   "minH": "auto",
+   "hiddenCls": false
+  },
+  "stack": {
+   "x": 23,
+   "y": 182,
+   "w": 538,
+   "h": 350,
+   "vis": "visible",
+   "minH": "0px",
+   "hiddenCls": false
+  },
+  "answerRow": {
+   "x": 221,
+   "y": 344,
+   "w": 142,
+   "h": 46,
+   "vis": "visible",
+   "minH": "auto",
+   "hiddenCls": false
+  },
+  "checkRow": {
+   "x": 222,
+   "y": 400,
+   "w": 140,
+   "h": 42,
+   "vis": "visible",
+   "minH": "auto",
+   "hiddenCls": false
+  },
+  "substList": {
+   "x": 292,
+   "y": 448,
+   "w": 0,
+   "h": 84,
+   "vis": "visible",
+   "minH": "84px",
+   "hiddenCls": false
+  },
+  "fractionRow": {
+   "x": 23,
+   "y": 536,
+   "w": 538,
+   "h": 58,
+   "vis": "visible",
+   "minH": "58px",
+   "hiddenCls": true
+  },
+  "undoGoRow": {
+   "x": 23,
+   "y": 598,
+   "w": 538,
+   "h": 44,
+   "vis": "visible",
+   "minH": "auto",
+   "hiddenCls": false
+  },
+  "helpRow": {
+   "x": 23,
+   "y": 650,
+   "w": 538,
+   "h": 50,
+   "vis": "visible",
+   "minH": "auto",
+   "hiddenCls": false
+  },
+  "movePanel": {
+   "x": 943,
+   "y": 180,
+   "w": 400,
+   "h": 495,
+   "vis": "visible",
+   "minH": "auto",
+   "hiddenCls": false
+  },
+  "moveHead": {
+   "x": 958,
+   "y": 193,
+   "w": 370,
+   "h": 29,
+   "vis": "visible",
+   "minH": "auto",
+   "hiddenCls": false
+  },
+  "moveGrid": {
+   "x": 958,
+   "y": 228,
+   "w": 370,
+   "h": 394,
+   "vis": "visible",
+   "minH": "auto",
+   "hiddenCls": false
+  },
+  "firstMove": {
+   "x": 958,
+   "y": 228,
+   "w": 180,
+   "h": 44,
+   "vis": "visible",
+   "minH": "0px",
+   "hiddenCls": false
+  },
+  "whyColumnFirst": {
+   "x": 1146,
+   "y": 264,
+   "w": 182,
+   "h": 22,
+   "vis": "visible",
+   "minH": "auto",
+   "hiddenCls": false
+  },
+  "solvedRow": {
+   "x": 958,
+   "y": 628,
+   "w": 370,
+   "h": 32,
+   "vis": "visible",
+   "minH": "auto",
+   "hiddenCls": false
+  },
+  "diagramArea": {
+   "x": 577,
+   "y": 180,
+   "w": 350,
+   "h": 215,
+   "vis": "visible",
+   "minH": "215px",
+   "hiddenCls": false
+  },
+  "pad": {
+   "x": 23,
+   "y": 708,
+   "w": 1320,
+   "h": 58,
+   "vis": "visible",
+   "minH": "auto",
+   "hiddenCls": false
+  },
+  "mat": {
+   "x": 23,
+   "y": 70,
+   "w": 1320,
+   "h": 630,
+   "vis": "visible",
+   "minH": "0px",
+   "hiddenCls": false
+  }
+ },
+ "divide L2 stuck rung 1": {
+  "bodyScroll": 768,
+  "viewport": [
+   1366,
+   768
+  ],
+  "header": {
+   "x": 23,
+   "y": 8,
+   "w": 1320,
+   "h": 54,
+   "vis": "visible",
+   "minH": "auto",
+   "hiddenCls": false
+  },
+  "dots": {
+   "x": 1097,
+   "y": 22,
+   "w": 112,
+   "h": 16,
+   "vis": "visible",
+   "minH": "auto",
+   "hiddenCls": false
+  },
+  "line": {
+   "x": 23,
+   "y": 70,
+   "w": 1320,
+   "h": 102,
+   "vis": "visible",
+   "minH": "102px",
+   "hiddenCls": false
+  },
+  "original": {
+   "x": 23,
+   "y": 182,
+   "w": 538,
+   "h": 44,
+   "vis": "visible",
+   "minH": "auto",
+   "hiddenCls": false
+  },
+  "stack": {
+   "x": 23,
+   "y": 182,
+   "w": 538,
+   "h": 350,
+   "vis": "visible",
+   "minH": "0px",
+   "hiddenCls": false
+  },
+  "answerRow": {
+   "x": 221,
+   "y": 344,
+   "w": 142,
+   "h": 46,
+   "vis": "visible",
+   "minH": "auto",
+   "hiddenCls": false
+  },
+  "checkRow": {
+   "x": 222,
+   "y": 400,
+   "w": 140,
+   "h": 42,
+   "vis": "visible",
+   "minH": "auto",
+   "hiddenCls": false
+  },
+  "substList": {
+   "x": 292,
+   "y": 448,
+   "w": 0,
+   "h": 84,
+   "vis": "visible",
+   "minH": "84px",
+   "hiddenCls": false
+  },
+  "fractionRow": {
+   "x": 23,
+   "y": 536,
+   "w": 538,
+   "h": 58,
+   "vis": "visible",
+   "minH": "58px",
+   "hiddenCls": false
+  },
+  "undoGoRow": {
+   "x": 23,
+   "y": 598,
+   "w": 538,
+   "h": 44,
+   "vis": "visible",
+   "minH": "auto",
+   "hiddenCls": false
+  },
+  "helpRow": {
+   "x": 23,
+   "y": 650,
+   "w": 538,
+   "h": 50,
+   "vis": "visible",
+   "minH": "auto",
+   "hiddenCls": false
+  },
+  "movePanel": {
+   "x": 943,
+   "y": 180,
+   "w": 400,
+   "h": 495,
+   "vis": "visible",
+   "minH": "auto",
+   "hiddenCls": false
+  },
+  "moveHead": {
+   "x": 958,
+   "y": 193,
+   "w": 370,
+   "h": 29,
+   "vis": "visible",
+   "minH": "auto",
+   "hiddenCls": false
+  },
+  "moveGrid": {
+   "x": 958,
+   "y": 228,
+   "w": 370,
+   "h": 394,
+   "vis": "visible",
+   "minH": "auto",
+   "hiddenCls": false
+  },
+  "firstMove": {
+   "x": 958,
+   "y": 228,
+   "w": 180,
+   "h": 44,
+   "vis": "visible",
+   "minH": "0px",
+   "hiddenCls": false
+  },
+  "whyColumnFirst": {
+   "x": 1146,
+   "y": 264,
+   "w": 182,
+   "h": 22,
+   "vis": "visible",
+   "minH": "auto",
+   "hiddenCls": false
+  },
+  "solvedRow": {
+   "x": 958,
+   "y": 628,
+   "w": 370,
+   "h": 32,
+   "vis": "visible",
+   "minH": "auto",
+   "hiddenCls": false
+  },
+  "diagramArea": {
+   "x": 577,
+   "y": 180,
+   "w": 350,
+   "h": 215,
+   "vis": "visible",
+   "minH": "215px",
+   "hiddenCls": false
+  },
+  "pad": {
+   "x": 23,
+   "y": 708,
+   "w": 1320,
+   "h": 58,
+   "vis": "visible",
+   "minH": "auto",
+   "hiddenCls": false
+  },
+  "mat": {
+   "x": 23,
+   "y": 70,
+   "w": 1320,
+   "h": 630,
+   "vis": "visible",
+   "minH": "0px",
+   "hiddenCls": false
+  }
+ },
+ "divide tucked L2 opening": {
+  "bodyScroll": 768,
+  "viewport": [
+   1366,
+   768
+  ],
+  "header": {
+   "x": 23,
+   "y": 8,
+   "w": 1320,
+   "h": 54,
+   "vis": "visible",
+   "minH": "auto",
+   "hiddenCls": false
+  },
+  "dots": {
+   "x": 1097,
+   "y": 22,
+   "w": 112,
+   "h": 16,
+   "vis": "visible",
+   "minH": "auto",
+   "hiddenCls": false
+  },
+  "line": {
+   "x": 23,
+   "y": 478,
+   "w": 1102,
+   "h": 102,
+   "vis": "visible",
+   "minH": "98px",
+   "hiddenCls": false
+  },
+  "original": {
+   "x": 23,
+   "y": 70,
+   "w": 1102,
+   "h": 58,
+   "vis": "visible",
+   "minH": "0px",
+   "hiddenCls": false
+  },
+  "stack": {
+   "x": 23,
+   "y": 134,
+   "w": 1102,
+   "h": 338,
+   "vis": "visible",
+   "minH": "120px",
+   "hiddenCls": false
+  },
+  "answerRow": {
+   "x": 426,
+   "y": 640,
+   "w": 142,
+   "h": 46,
+   "vis": "visible",
+   "minH": "auto",
+   "hiddenCls": false
+  },
+  "checkRow": {
+   "x": 582,
+   "y": 642,
+   "w": 140,
+   "h": 42,
+   "vis": "visible",
+   "minH": "auto",
+   "hiddenCls": false
+  },
+  "substList": {
+   "x": 23,
+   "y": 134,
+   "w": 1102,
+   "h": 0,
+   "vis": "visible",
+   "minH": "0px",
+   "hiddenCls": false
+  },
+  "helpRow": {
+   "x": 23,
+   "y": 586,
+   "w": 1102,
+   "h": 48,
+   "vis": "visible",
+   "minH": "auto",
+   "hiddenCls": false
+  },
+  "whyColumnTucked": {
+   "x": 1133,
+   "y": 70,
+   "w": 210,
+   "h": 616,
+   "vis": "visible",
+   "minH": "0px",
+   "hiddenCls": false
+  },
+  "movesTab": {
+   "x": 1148,
+   "y": 629,
+   "w": 180,
+   "h": 44,
+   "vis": "visible",
+   "minH": "44px",
+   "hiddenCls": false
+  },
+  "pad": {
+   "x": 23,
+   "y": 694,
+   "w": 1320,
+   "h": 58,
+   "vis": "visible",
+   "minH": "auto",
+   "hiddenCls": false
+  },
+  "mat": {
+   "x": 23,
+   "y": 70,
+   "w": 1320,
+   "h": 616,
+   "vis": "visible",
+   "minH": "0px",
+   "hiddenCls": false
+  }
+ },
+ "divide tucked L2 drawer open": {
+  "bodyScroll": 768,
+  "viewport": [
+   1366,
+   768
+  ],
+  "header": {
+   "x": 23,
+   "y": 8,
+   "w": 1320,
+   "h": 54,
+   "vis": "visible",
+   "minH": "auto",
+   "hiddenCls": false
+  },
+  "dots": {
+   "x": 1097,
+   "y": 22,
+   "w": 112,
+   "h": 16,
+   "vis": "visible",
+   "minH": "auto",
+   "hiddenCls": false
+  },
+  "line": {
+   "x": 23,
+   "y": 482,
+   "w": 1102,
+   "h": 98,
+   "vis": "visible",
+   "minH": "98px",
+   "hiddenCls": false
+  },
+  "original": {
+   "x": 23,
+   "y": 70,
+   "w": 1102,
+   "h": 58,
+   "vis": "visible",
+   "minH": "0px",
+   "hiddenCls": false
+  },
+  "stack": {
+   "x": 23,
+   "y": 134,
+   "w": 1102,
+   "h": 342,
+   "vis": "visible",
+   "minH": "120px",
+   "hiddenCls": false
+  },
+  "answerRow": {
+   "x": 426,
+   "y": 640,
+   "w": 142,
+   "h": 46,
+   "vis": "visible",
+   "minH": "auto",
+   "hiddenCls": false
+  },
+  "checkRow": {
+   "x": 582,
+   "y": 642,
+   "w": 140,
+   "h": 42,
+   "vis": "visible",
+   "minH": "auto",
+   "hiddenCls": false
+  },
+  "substList": {
+   "x": 23,
+   "y": 134,
+   "w": 1102,
+   "h": 0,
+   "vis": "visible",
+   "minH": "0px",
+   "hiddenCls": false
+  },
+  "fractionRow": {
+   "x": 902,
+   "y": 535,
+   "w": 440,
+   "h": 58,
+   "vis": "visible",
+   "minH": "58px",
+   "hiddenCls": true
+  },
+  "helpRow": {
+   "x": 23,
+   "y": 586,
+   "w": 1102,
+   "h": 48,
+   "vis": "visible",
+   "minH": "auto",
+   "hiddenCls": false
+  },
+  "movePanel": {
+   "x": 902,
+   "y": 133,
+   "w": 440,
+   "h": 394,
+   "vis": "visible",
+   "minH": "auto",
+   "hiddenCls": false
+  },
+  "moveHead": "hidden (0×0)",
+  "moveGrid": {
+   "x": 902,
+   "y": 133,
+   "w": 440,
+   "h": 394,
+   "vis": "visible",
+   "minH": "auto",
+   "hiddenCls": false
+  },
+  "firstMove": {
+   "x": 902,
+   "y": 133,
+   "w": 250,
+   "h": 44,
+   "vis": "visible",
+   "minH": "0px",
+   "hiddenCls": false
+  },
+  "whyColumnTucked": {
+   "x": 1133,
+   "y": 70,
+   "w": 210,
+   "h": 616,
+   "vis": "visible",
+   "minH": "0px",
+   "hiddenCls": false
+  },
+  "movesTab": {
+   "x": 1148,
+   "y": 629,
+   "w": 180,
+   "h": 44,
+   "vis": "visible",
+   "minH": "44px",
+   "hiddenCls": false
+  },
+  "drawer": {
+   "x": 887,
+   "y": 70,
+   "w": 470,
+   "h": 616,
+   "vis": "visible",
+   "minH": "0px",
+   "hiddenCls": false
+  },
+  "pad": {
+   "x": 23,
+   "y": 694,
+   "w": 1320,
+   "h": 58,
+   "vis": "visible",
+   "minH": "auto",
+   "hiddenCls": false
+  },
+  "mat": {
+   "x": 23,
+   "y": 70,
+   "w": 1320,
+   "h": 616,
+   "vis": "visible",
+   "minH": "0px",
+   "hiddenCls": false
+  }
+ },
+ "divide tucked L2 stuck rung 1": {
+  "bodyScroll": 768,
+  "viewport": [
+   1366,
+   768
+  ],
+  "header": {
+   "x": 23,
+   "y": 8,
+   "w": 1320,
+   "h": 54,
+   "vis": "visible",
+   "minH": "auto",
+   "hiddenCls": false
+  },
+  "dots": {
+   "x": 1097,
+   "y": 22,
+   "w": 112,
+   "h": 16,
+   "vis": "visible",
+   "minH": "auto",
+   "hiddenCls": false
+  },
+  "line": {
+   "x": 23,
+   "y": 260,
+   "w": 1102,
+   "h": 98,
+   "vis": "visible",
+   "minH": "98px",
+   "hiddenCls": false
+  },
+  "original": {
+   "x": 23,
+   "y": 70,
+   "w": 1102,
+   "h": 58,
+   "vis": "visible",
+   "minH": "0px",
+   "hiddenCls": false
+  },
+  "stack": {
+   "x": 23,
+   "y": 134,
+   "w": 1102,
+   "h": 120,
+   "vis": "visible",
+   "minH": "120px",
+   "hiddenCls": false
+  },
+  "answerRow": {
+   "x": 426,
+   "y": 418,
+   "w": 142,
+   "h": 46,
+   "vis": "visible",
+   "minH": "auto",
+   "hiddenCls": false
+  },
+  "checkRow": {
+   "x": 582,
+   "y": 420,
+   "w": 140,
+   "h": 42,
+   "vis": "visible",
+   "minH": "auto",
+   "hiddenCls": false
+  },
+  "substList": {
+   "x": 23,
+   "y": 134,
+   "w": 1102,
+   "h": 0,
+   "vis": "visible",
+   "minH": "0px",
+   "hiddenCls": false
+  },
+  "helpRow": {
+   "x": 23,
+   "y": 364,
+   "w": 1102,
+   "h": 48,
+   "vis": "visible",
+   "minH": "auto",
+   "hiddenCls": false
+  },
+  "diagramArea": {
+   "x": 38,
+   "y": 575,
+   "w": 1072,
+   "h": 194,
+   "vis": "visible",
+   "minH": "0px",
+   "hiddenCls": false
+  },
+  "whyColumnTucked": {
+   "x": 1133,
+   "y": 70,
+   "w": 210,
+   "h": 616,
+   "vis": "visible",
+   "minH": "0px",
+   "hiddenCls": false
+  },
+  "movesTab": {
+   "x": 1148,
+   "y": 629,
+   "w": 180,
+   "h": 44,
+   "vis": "visible",
+   "minH": "44px",
+   "hiddenCls": false
+  },
+  "tray": {
+   "x": 23,
+   "y": 470,
+   "w": 1102,
+   "h": 220,
+   "vis": "visible",
+   "minH": "auto",
+   "hiddenCls": false
+  },
+  "pad": {
+   "x": 23,
+   "y": 694,
+   "w": 1320,
+   "h": 58,
+   "vis": "visible",
+   "minH": "auto",
+   "hiddenCls": false
+  },
+  "mat": {
+   "x": 23,
+   "y": 70,
+   "w": 1320,
+   "h": 616,
+   "vis": "visible",
+   "minH": "0px",
+   "hiddenCls": false
+  }
+ },
+ "moveRows": 0,
+ "style": {
+  "body": {
+   "fontFamily": "Lexend, system-ui, sans-serif",
+   "backgroundColor": "rgb(255, 255, 255)",
+   "color": "rgb(29, 29, 29)"
+  },
+  "equation": {
+   "fontFamily": "Kalam, Lexend, system-ui, sans-serif",
+   "fontWeight": "700",
+   "fontSize": "36px"
+  },
+  "line": {
+   "backgroundColor": "rgb(255, 246, 184)",
+   "borderColor": "rgb(29, 29, 29)",
+   "borderRadius": "14px",
+   "fontFamily": "Lexend, system-ui, sans-serif"
+  },
+  "lineText": {
+   "fontFamily": "Lexend, system-ui, sans-serif",
+   "fontWeight": "800",
+   "fontSize": "24px"
+  },
+  "blue": null,
+  "move": {
+   "backgroundColor": "rgb(220, 218, 210)",
+   "borderColor": "rgb(107, 104, 95)",
+   "borderStyle": "dashed",
+   "height": "44px"
+  },
+  "whyLabel": {
+   "fontFamily": "Lexend, system-ui, sans-serif",
+   "fontWeight": "600",
+   "fontSize": "13px",
+   "color": "rgb(154, 154, 154)"
+  },
+  "checkboxOff": {
+   "borderColor": "rgb(154, 154, 154)",
+   "borderStyle": "dashed",
+   "backgroundColor": "rgb(255, 255, 255)",
+   "width": "22px"
+  },
+  "panel": {
+   "backgroundColor": "rgb(255, 253, 242)",
+   "borderColor": "rgb(29, 29, 29)"
+  },
+  "helpBtn": {
+   "fontFamily": "Lexend, system-ui, sans-serif",
+   "fontWeight": "600",
+   "fontSize": "17px",
+   "height": "40px"
+  },
+  "gdBox": {
+   "fill": "rgb(255, 255, 255)",
+   "stroke": "rgb(29, 29, 29)",
+   "strokeWidth": "2.5px"
+  },
+  "gdBoxX": {
+   "fill": "rgb(29, 29, 29)",
+   "fontFamily": "Lexend, system-ui, sans-serif",
+   "fontWeight": "800"
+  },
+  "pileMark": null,
+  "accent": "#7b3fb0"
+ }
+}

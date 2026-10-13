@@ -1,0 +1,145 @@
+{
+ "addCounters": {
+  "markStroke": "rgb(29, 29, 29)",
+  "markWidth": "3.5px",
+  "negBoxDash": "8px, 5px",
+  "negBoxStroke": "rgb(0, 114, 178)"
+ },
+ "divide": {
+  "part gd-lpart": {
+   "tag": "g",
+   "stroke": "none",
+   "fill": "rgb(0, 0, 0)"
+  },
+  "bar-part": {
+   "tag": "rect",
+   "stroke": "rgb(0, 114, 178)",
+   "fill": "rgba(0, 0, 0, 0)"
+  },
+  "gd-box": {
+   "tag": "g",
+   "stroke": "none",
+   "fill": "rgb(0, 0, 0)"
+  },
+  "gd-box-rect": {
+   "tag": "rect",
+   "stroke": "rgb(29, 29, 29)",
+   "fill": "rgb(255, 255, 255)"
+  },
+  "gd-box-x": {
+   "tag": "text",
+   "stroke": "none",
+   "fill": "rgb(29, 29, 29)"
+  },
+  "bar-outline": {
+   "tag": "rect",
+   "stroke": "rgb(0, 114, 178)",
+   "fill": "none"
+  },
+  "gd-ring": {
+   "tag": "rect",
+   "stroke": "rgb(0, 114, 178)",
+   "fill": "none"
+  },
+  "gd-border": {
+   "tag": "line",
+   "stroke": "rgb(29, 29, 29)",
+   "fill": "rgb(0, 0, 0)"
+  },
+  "part": {
+   "tag": "g",
+   "stroke": "none",
+   "fill": "rgb(0, 0, 0)"
+  },
+  "counter is-inside": {
+   "tag": "g",
+   "stroke": "none",
+   "fill": "rgb(0, 0, 0)"
+  },
+  "mark": {
+   "tag": "line",
+   "stroke": "rgb(0, 158, 115)",
+   "fill": "rgb(0, 0, 0)"
+  }
+ },
+ "divideNeg": {
+  "part gd-lpart": {
+   "tag": "g",
+   "stroke": "none",
+   "fill": "rgb(0, 0, 0)"
+  },
+  "bar-part": {
+   "tag": "rect",
+   "stroke": "rgb(0, 114, 178)",
+   "fill": "rgba(0, 0, 0, 0)"
+  },
+  "gd-box": {
+   "tag": "g",
+   "stroke": "none",
+   "fill": "rgb(0, 0, 0)"
+  },
+  "gd-box-rect": {
+   "tag": "rect",
+   "stroke": "rgb(29, 29, 29)",
+   "fill": "rgb(255, 255, 255)"
+  },
+  "gd-box-x": {
+   "tag": "text",
+   "stroke": "none",
+   "fill": "rgb(29, 29, 29)"
+  },
+  "bar-outline": {
+   "tag": "rect",
+   "stroke": "rgb(0, 114, 178)",
+   "fill": "none"
+  },
+  "gd-ring": {
+   "tag": "rect",
+   "stroke": "rgb(0, 114, 178)",
+   "fill": "none"
+  },
+  "gd-border": {
+   "tag": "line",
+   "stroke": "rgb(29, 29, 29)",
+   "fill": "rgb(0, 0, 0)"
+  },
+  "part": {
+   "tag": "g",
+   "stroke": "none",
+   "fill": "rgb(0, 0, 0)"
+  },
+  "counter is-opposite": {
+   "tag": "g",
+   "stroke": "none",
+   "fill": "rgb(0, 0, 0)"
+  },
+  "mark": {
+   "tag": "line",
+   "stroke": "rgb(184, 80, 143)",
+   "fill": "rgb(0, 0, 0)"
+  }
+ },
+ "opposite": "not found on screen",
+ "lights": {
+  "green": {
+   "bg": "rgb(58, 167, 109)",
+   "border": "rgb(27, 110, 58)",
+   "style": "solid"
+  },
+  "red": {
+   "bg": "rgb(217, 83, 79)",
+   "border": "rgb(163, 40, 27)",
+   "style": "solid"
+  },
+  "neutral": {
+   "bg": "rgb(236, 236, 236)",
+   "border": "rgb(29, 29, 29)",
+   "style": "solid"
+  },
+  "off": {
+   "bg": "rgb(255, 255, 255)",
+   "border": "rgb(154, 154, 154)",
+   "style": "dashed"
+  }
+ }
+}
