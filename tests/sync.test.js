@@ -74,6 +74,9 @@ describe('what comes back', () => {
   });
 });
 
+// Signing in is quick and the first sync follows in the background: these tests wait for it too.
+const settle = (d) => { const raw = d.sync.signIn; d.sync.signIn = async (a) => { const r = await raw(a); await d.sync.settled(); return r; }; return d; };
+
 // The whole thing: the app's side talking to the class sheet's script, on a stand-in sheet.
 function phone(book, { events = [], runs = [], progress = newProgress(PACKS), saved = {} } = {}) {
   const device = { progress, events, runs, store: { endpoint: null, auth: null, cursor: newCursor(), lastSync: null, ...saved }, timers: [] };
@@ -82,9 +85,9 @@ function phone(book, { events = [], runs = [], progress = newProgress(PACKS), sa
     getProgress: () => device.progress, setProgress: (p) => { device.progress = p; },
     getEvents: () => device.events, getRuns: () => device.runs, packs: PACKS,
     send: async (_url, req) => gs.handle(JSON.parse(JSON.stringify(req)), book),
-    setTimer: (fn) => { device.timers.push(fn); return device.timers.length; }, clearTimer: () => {},
+    setTimer: (fn) => { device.timers.push(fn); return device.timers.length; }, clearTimer: () => {}, retryMs: 0,
   });
-  return device;
+  return settle(device);
 }
 
 describe('syncing with the class sheet', () => {
@@ -153,8 +156,9 @@ describe('syncing with the class sheet', () => {
     d.sync = createSync({
       load: () => d.store, save: (s) => { d.store = s; }, getProgress: () => d.progress, setProgress: (p) => { d.progress = p; },
       getEvents: () => d.events, getRuns: () => d.runs, packs: PACKS,
-      send: async (_u, req) => { if (!up) throw new Error('offline'); return gs.handle(JSON.parse(JSON.stringify(req)), book); },
+      send: async (_u, req) => { if (!up) throw new Error('offline'); return gs.handle(JSON.parse(JSON.stringify(req)), book); }, retryMs: 0,
     });
+    settle(d);
     d.sync.setEndpoint(URL_);
     expect(await d.sync.signIn({ period: '3', number: '1' })).toMatchObject({ ok: false, error: expect.stringMatching(/Couldn’t reach/) });
     expect(d.store.auth).toBe(null);
@@ -209,8 +213,9 @@ function gphone(book, script, extra = {}) {
     // like doPost: a refusal comes back as { ok: false, error, code }
     send: async (_u, req) => { try { return script.handle(JSON.parse(JSON.stringify(req)), book); } catch (e) { return { ok: false, error: e.message, code: e.code }; } },
     getInfo: async () => { const g = JSON.parse(script.doGet().text); return { google: g.google, numberSignin: g.numberSignin, retired: g.retired }; },
-    ...extra,
+    retryMs: 0, ...extra,
   });
+  settle(device);
   return device;
 }
 
@@ -357,5 +362,114 @@ describe('saying why the class sheet could not be reached', () => {
     expect(await d.sync.probe()).toBe(null);
     expect(d.sync.classInfo()).toBe(null);
     expect(d.sync.probeError()).toBe('Couldn’t reach the class sheet (HTTP 403).');
+  });
+});
+
+// ---------- Signing in quickly and reliably (the light sign-in, retries, remembered class info) ----------
+
+describe('a quick, light sign-in', () => {
+  it('the class sheet answers a sign-in with the device token and nothing else: no progress, problems or runs are merged', () => {
+    const script = makeClass();
+    const book = classBook(script);
+    const res = script.handle({ v: 1, op: 'signin', auth: { mode: 'google', idToken: TOKEN } }, book);
+    expect(res).toMatchObject({ ok: true, signin: true, period: '3', device: { id: expect.stringMatching(/^S-/), token: expect.any(String) } });
+    expect(res.progress).toBeUndefined();
+    expect(Object.keys(book.sheets).sort()).toEqual(['Devices', 'Directory']);          // no Students, Progress or Log rows were written
+    // the token it handed out is what signs the device in afterwards
+    expect(script.handle({ v: 1, auth: { mode: 'device', id: res.device.id, token: res.device.token }, progress: { packs: {} }, events: [], runs: [] }, book)).toMatchObject({ ok: true, period: '3' });
+  });
+  it('a student who is not on the class list is refused, and no device is added', () => {
+    const script = makeClass({}, { [TOKEN]: info('s7654321@school.org') });
+    const book = classBook(script);
+    expect(() => script.handle({ v: 1, op: 'signin', auth: { mode: 'google', idToken: TOKEN } }, book)).toThrow(/class list/);
+    expect(book.getSheetByName('Devices')).toBeNull();
+  });
+  it('a busy script (it cannot get its lock) says "busy", in a short sentence, not a long error', () => {
+    const script = makeClass();
+    const book = classBook(script);
+    script.lock.busy = true;
+    expect(() => script.withLock(() => 1)).toThrow(/busy/);
+    expect(() => script.handle({ v: 1, op: 'signin', auth: { mode: 'google', idToken: TOKEN } }, book)).toThrow(/busy/);
+  });
+
+  it('signs in at once: the first sync follows in the background and carries the progress', async () => {
+    const script = makeClass();
+    const book = classBook(script);
+    const sent = [];
+    const d = gphone(book, script, { send: async (_u, req) => { sent.push(req); return script.handle(JSON.parse(JSON.stringify(req)), book); } });
+    d.sync.setEndpoint(URL_);
+    d.progress.packs.value.levels[0] = true;
+    expect(await d.sync.signIn({ mode: 'google', idToken: TOKEN })).toMatchObject({ ok: true });
+    await d.sync.settled();
+    expect(sent[0]).toMatchObject({ op: 'signin' });
+    expect(sent[0].progress).toBeUndefined();
+    expect(sent[1].op).toBeUndefined();
+    expect(sent[1].progress.packs.value.levels[0]).toBe(true);
+    expect(d.sync.status()).toMatchObject({ state: 'ready', label: 'P3' });
+  });
+  it('a busy or slow sheet is tried once more, quietly; a refusal is not retried', async () => {
+    const script = makeClass();
+    const book = classBook(script);
+    let calls = 0;
+    const flaky = (first) => async (_u, req) => { calls += 1; if (calls === 1) return first(); return script.handle(JSON.parse(JSON.stringify(req)), book); };
+    for (const first of [() => ({ ok: false, error: 'The class sheet is busy. Try again in a moment.', code: 'busy' }), () => { throw Object.assign(new Error('x'), { name: 'AbortError' }); }]) {
+      calls = 0;
+      const d = gphone(book, script, { send: flaky(first) });
+      d.sync.setEndpoint(URL_);
+      expect(await d.sync.signIn({ mode: 'google', idToken: TOKEN })).toMatchObject({ ok: true });
+      expect(calls).toBeGreaterThanOrEqual(2);
+    }
+    calls = 0;
+    const refused = gphone(book, script, { send: async () => { calls += 1; return { ok: false, error: 'Please sign in with your school account.', code: 'auth' }; } });
+    refused.sync.setEndpoint(URL_);
+    expect(await refused.sync.signIn({ mode: 'google', idToken: TOKEN })).toMatchObject({ ok: false, error: 'Please sign in with your school account.' });
+    expect(calls).toBe(1);
+    expect(refused.store.auth).toBeNull();
+  });
+  it('when the sheet stays unreachable, the student gets one short sentence, not a paragraph', async () => {
+    const script = makeClass();
+    const d = gphone(classBook(script), script, { send: async () => { throw Object.assign(new Error('Failed to fetch'), { name: 'TypeError' }); } });
+    d.sync.setEndpoint(URL_);
+    const res = await d.sync.signIn({ mode: 'google', idToken: TOKEN });
+    expect(res.ok).toBe(false);
+    expect(res.error.length).toBeLessThan(80);
+    expect(res.error).toMatch(/internet/);
+    const busy = gphone(classBook(script), script, { send: async () => ({ ok: false, error: 'long google text '.repeat(10), code: 'busy' }) });
+    busy.sync.setEndpoint(URL_);
+    expect((await busy.sync.signIn({ mode: 'google', idToken: TOKEN })).error).toBe('The class sheet is busy right now. Please try again.');
+  });
+  it('an older class sheet (not updated yet) answers a sign-in with a full sync: the progress is still taken', async () => {
+    const script = makeClass();
+    const book = classBook(script);
+    const d = gphone(book, script, { send: async (_u, req) => script.handle(JSON.parse(JSON.stringify({ ...req, op: undefined, progress: req.progress ?? { packs: {} }, events: [], runs: [] })), book) });
+    d.sync.setEndpoint(URL_);
+    expect(await d.sync.signIn({ mode: 'google', idToken: TOKEN })).toMatchObject({ ok: true });
+    expect(d.store.auth).toMatchObject({ mode: 'device', label: 'P3' });
+  });
+
+  it('remembers what the class sheet offers, so the dialog opens at once, and asks again in the background', async () => {
+    const script = makeClass();
+    const saved = { v: null };
+    let asked = 0;
+    const d = gphone(classBook(script), script, {
+      loadInfo: () => saved.v, saveInfo: (_e, i) => { saved.v = i; },
+      getInfo: async () => { asked += 1; const g = JSON.parse(script.doGet().text); return { google: g.google, numberSignin: g.numberSignin, retired: g.retired }; },
+    });
+    d.sync.setEndpoint(URL_);
+    expect(await d.sync.probe()).toMatchObject({ google: CLIENT });          // the first time: asked
+    expect([asked, saved.v.google]).toEqual([1, CLIENT]);
+    const again = await d.sync.probe();                                      // after that: answered from memory, asked again behind
+    expect(again).toMatchObject({ google: CLIENT });
+    await new Promise((r) => setTimeout(r, 0));
+    expect(asked).toBe(2);
+  });
+  it('asks the class sheet twice before saying it cannot be reached (the first request after a quiet spell is slow)', async () => {
+    const script = makeClass();
+    let asked = 0;
+    const d = gphone(classBook(script), script, { getInfo: async () => { asked += 1; if (asked === 1) throw Object.assign(new Error('slow'), { name: 'AbortError' }); return { google: CLIENT, numberSignin: false, retired: false }; } });
+    d.sync.setEndpoint(URL_);
+    expect(await d.sync.probe()).toMatchObject({ google: CLIENT });
+    expect(asked).toBe(2);
+    expect(d.sync.probeError()).toBeNull();
   });
 });

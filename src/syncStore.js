@@ -30,3 +30,17 @@ export function loadSync() {
 export function saveSync(state) {
   try { localStorage.setItem(SYNC_KEY, JSON.stringify(state)); } catch { /* storage blocked or full */ }
 }
+
+// What the class sheet last said about itself (is Google sign-in on?), kept so the Sign in dialog can open at once instead of waiting for
+// a sheet that may be asleep. Asked again in the background each time. Fails quietly.
+export const INFO_KEY = 'mat.sync.info.v1';
+export function loadInfo(endpoint) {
+  try {
+    const raw = JSON.parse(localStorage.getItem(INFO_KEY));
+    if (!raw || raw.endpoint !== endpoint || !raw.info || typeof raw.info !== 'object') return null;
+    return { google: typeof raw.info.google === 'string' ? raw.info.google : null, numberSignin: raw.info.numberSignin !== false, retired: raw.info.retired === true };
+  } catch { return null; }
+}
+export function saveInfo(endpoint, info) {
+  try { localStorage.setItem(INFO_KEY, JSON.stringify({ endpoint, info })); } catch { /* storage blocked or full */ }
+}

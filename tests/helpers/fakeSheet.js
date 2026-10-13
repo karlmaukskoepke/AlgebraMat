@@ -32,6 +32,7 @@ const code = readFileSync(new URL('../../teacher/Code.gs', import.meta.url), 'ut
 // `tokens` maps an ID token to what Google would say about it; `properties` are the script properties.
 export function makeScript({ properties = {}, tokens = {} } = {}) {
   const props = { ...properties };
+  const lock = { busy: false };               // set busy: true to stand in for a script that cannot get its lock
   const bytes = (buf) => [...buf].map((b) => (b > 127 ? b - 256 : b));
   const stubs = {
     PropertiesService: { getScriptProperties: () => ({ getProperty: (k) => props[k] ?? null, setProperty: (k, v) => { props[k] = v; } }) },
@@ -43,7 +44,7 @@ export function makeScript({ properties = {}, tokens = {} } = {}) {
       },
     },
     ContentService: { MimeType: { JSON: 'json' }, createTextOutput: (text) => ({ text, setMimeType() { return this; } }) },
-    LockService: { getScriptLock: () => ({ waitLock() {}, releaseLock() {} }) },
+    LockService: { getScriptLock: () => ({ waitLock() {}, tryLock() { return !lock.busy; }, releaseLock() {} }) },
     Utilities: {
       DigestAlgorithm: { SHA_256: 'sha256' }, Charset: { UTF_8: 'utf8' },
       computeDigest: (algo, text) => bytes(createHash('sha256').update(text, 'utf8').digest()),
@@ -52,8 +53,8 @@ export function makeScript({ properties = {}, tokens = {} } = {}) {
     },
   };
   const names = Object.keys(stubs);
-  const script = new Function(...names, `${code}; return { handle, identify, safe, splitKey, doGet, doPost, studentKey, isRetired, classListReport, keyFingerprint, reportText };`)(...names.map((n) => stubs[n]));
-  return { ...script, props };
+  const script = new Function(...names, `${code}; return { handle, signin, withLock, identify, safe, splitKey, doGet, doPost, studentKey, isRetired, classListReport, keyFingerprint, reportText };`)(...names.map((n) => stubs[n]));
+  return { ...script, props, lock };
 }
 
 export const gs = makeScript();
