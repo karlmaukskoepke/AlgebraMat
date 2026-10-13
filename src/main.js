@@ -591,3 +591,10 @@ if (urlPack && PLAY[urlPack.id] && Number.isInteger(urlLevel) && urlLevel >= 1 &
 } else {
   goHome();
 }
+
+// Sign in at the start of every visit (Karl, 2026-10-12). A student who signed in before has this device's token and is signed in
+// silently, so only a signed-out student sees this. "Not now" skips it; it asks again next visit. (?nosignin=1 skips it for testing.)
+if (!params.get('nosignin') && sync.status().state === 'signed-out') {
+  // only when the class sheet answers (offline or blocked, there is nothing to sign in to, so no nagging)
+  sync.probe().then((info) => { if (info && !info.retired && sync.status().state === 'signed-out') showAccount(sync, () => { if (!$('home').hidden) goHome(); }, { prompt: true }); });
+}
