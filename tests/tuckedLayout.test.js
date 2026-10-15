@@ -17,6 +17,13 @@ const run = (s, ...actions) => actions.reduce((st, a) => reduce(st, a), s);
 const start = (a, x) => newDivide(makeDivide(a, x), { level: 4 });
 
 describe('the Moves drawer', () => {
+  it('a move that closes the drawer leaves focus on the page (typing reaches x =); ✕ or Escape sends it back to the Moves tab', () => {
+    const opened = run(start(3, 5), { type: 'path', value: 'move' }, { type: 'choose', move: 'fraction' });
+    const moved = run(opened, { type: 'take', n: 3 });                    // x alone: the drawer closes itself
+    expect(tuckedEffects(opened, moved, O)).toMatchObject({ drawerClosed: true, returnFocus: false });
+    const dismissed = run(opened, { type: 'ui', patch: { drawer: false } });
+    expect(tuckedEffects(opened, dismissed, O)).toMatchObject({ drawerClosed: true, returnFocus: true });
+  });
   it('opens on Use a move, closes on the move itself, and the choice returns with the same prompt', () => {
     let s = run(start(4, -4), { type: 'path', value: 'move' });
     expect(s.ui.drawer).toBe(true);

@@ -32,7 +32,7 @@ export function withTuckedUi(reduce, o) {
   const withUi = (s, patch) => ({ ...s, ui: { ...ui(s), ...patch } });
   return (state, action) => {
     if (action.type === 'ui') {
-      const next = withUi(state, action.patch);
+      const next = withUi(state, { ...action.patch, ...(action.patch.drawer === false && ui(state).drawer ? { returnFocus: true } : {}) });
       return JSON.stringify(next.ui) === JSON.stringify(ui(state)) ? state : next;
     }
     if (action.type === 'openMoves') {
@@ -52,7 +52,10 @@ export function withTuckedUi(reduce, o) {
     if (CLOSES_DRAWER.has(action.type)) drawer = false;
     if (OPENS_TRAY.has(action.type) || (!o.trayAvailable(state) && o.trayAvailable(s))) trayHidden = false;
     if (drawer && !o.canOpenMoves(s)) drawer = false;
-    if (drawer !== Boolean(s.ui?.drawer) || trayHidden !== Boolean(s.ui?.trayHidden) || !s.ui) s = withUi(s, { drawer, trayHidden });
+    // a drawer closed by the work itself (a move taken, Check, help...) gives focus back to the page, not to the Moves tab, so the
+    // keyboard keeps typing into x = and Enter still presses Check; only ✕ and Escape (a 'ui' action) return focus to the tab
+    const returnFocus = was.drawer && !drawer ? false : Boolean(was.returnFocus);
+    if (drawer !== Boolean(s.ui?.drawer) || trayHidden !== Boolean(s.ui?.trayHidden) || returnFocus !== Boolean(s.ui?.returnFocus) || !s.ui) s = withUi(s, { drawer, trayHidden, returnFocus });
     return s;
   };
 }
@@ -66,6 +69,7 @@ export function tuckedEffects(before, s, o) {
   return {
     drawerOpened: !was.drawer && Boolean(now.drawer),
     drawerClosed: Boolean(was.drawer) && !now.drawer,
+    returnFocus: Boolean(now.returnFocus),
     trayOpened: !trayWas && trayNow,
     trayClosed: trayWas && !trayNow,
   };
@@ -107,7 +111,7 @@ export function tuckedShell(o) {
   why.append(html('ul', 'tk-lights', o.lights.map((l) => html('li', `ab-goal tk-light is-${l.state}`, [checkbox(l.state), html('span', 'ab-goal-label', [l.label])]))));
   const tab = html('button', 'btn tk-movestab', ['Moves'], { type: 'button', 'data-action': 'tkMoves', 'aria-expanded': String(Boolean(o.drawer.open)), 'aria-controls': 'tk-drawer' });
   tab.disabled = Boolean(o.movesTabOff);
-  if (fx.drawerClosed) tab.dataset.tkFocus = '1';
+  if (fx.drawerClosed && fx.returnFocus) tab.dataset.tkFocus = '1';
   why.append(tab);
 
   shell.append(work, why);

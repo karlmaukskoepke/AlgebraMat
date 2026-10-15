@@ -3251,6 +3251,17 @@ body {
   .tk-drawer { width: 100%; }
 }
 .tk-tray .gd-svg { max-height: 150px; }
+/* The tray is wide and short, so its pieces sit side by side, not stacked: the drawing on the left, the fractions (when the scaffold
+   is choosing one) on the right, the caption and Deal a round beside the drawing. Stacked, the drawing fell below the tray's bottom
+   edge at 1366x768. The tray takes the height it needs (up to about half the column) and the stack above gives way. */
+.tk-tray { height: auto; max-height: min(52%, 250px); display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "head head" "diagram side"; align-items: center; column-gap: 16px; }
+.tk-tray .tk-trayhead { grid-area: head; }
+.tk-tray .sv-diagram { grid-area: diagram; flex-direction: row; gap: 14px; }
+.tk-tray:not(:has(.lb-fractionrow)) .sv-diagram { grid-column: 1 / -1; }
+.tk-tray > .lb-fractionrow { grid-area: side; max-width: 330px; flex-wrap: wrap; justify-content: center; row-gap: 6px; }
+.tk-tray .gd { width: auto; flex: 1 1 auto; min-width: 0; }
+.tk-tray .gd-svg { max-height: 170px; }
+.tk-shell:has(.tk-tray) .tk-stack { min-height: 90px; }
 .tk-tray .tk-trayhead { font-size: 16px; }
 .tk-tray .tk-close { min-height: 40px; }
 /* the classic Divide it screen has no spare line under its stack (at 1366×768 the label's line pushes the pad 17 px off the screen,
