@@ -3257,3 +3257,71 @@ body {
    and beside the check rows it overlaps them), so there the outlined row and the line's words ("into the original equation") name the
    equation, and the label shows only in the tucked layout */
 .sv-card:not(.tk-shell) .lb-subst .lb-checkhead { display: none; }
+
+/* ---------- ?ui=lights: the "Lights" experiment on Add to both sides, L2–L3 (SPEC-LIGHTS-EXPERIMENT-ADD.md). Scoped to .ui-lights. ---------- */
+.ui-lights.lb-game { gap: 8px; }
+.ui-lights .lb-line { min-height: 72px; padding: 8px 16px; }
+.ui-lights .lb-text { font-size: 24px; }
+.ui-lights .lb-main { gap: 6px; }
+.ui-lights .lb-eqblock { padding-top: 0; gap: 0; }
+.ui-lights .lb-stack { min-height: 236px; gap: 0; }
+.ui-lights .lb-rowwrap .lb-eq { font-size: 40px; }
+.ui-lights .lb-rowwrap.has-work .lb-eq { font-size: 30px; }
+.ui-lights .lb-side { padding: 4px 6px; }
+/* the rule line under a move's result: dashed while its Next waits, solid once committed; Next at its right end */
+.ui-lights .lx-ruled { border-bottom: 3px dashed var(--ink); margin-bottom: 6px; }
+.ui-lights .lx-ruled.is-solid { border-bottom-style: solid; }
+.ui-lights .lx-next { position: absolute; right: 0; bottom: -24px; z-index: 3; min-height: 44px; padding: 0 18px; font-size: 18px; font-weight: 800; white-space: nowrap; }
+/* the ghost row: its room is always kept; it shows for the preview (grey, dashed blue boxes) and once chosen (full ink) */
+.ui-lights .lx-ghost { min-height: 60px; visibility: hidden; display: flex; flex-direction: column; justify-content: center; }
+.ui-lights .lx-ghost.is-preview, .ui-lights .lx-ghost.is-chosen, .is-dragging .ui-lights .lx-ghost.is-usable { visibility: visible; }
+.ui-lights .lx-ghosteq { font-size: 40px; }
+.ui-lights .lx-ghost.is-preview .lx-ghosteq, .is-dragging .ui-lights .lx-ghost:not(.is-chosen) .lx-ghosteq { color: #9a968a; }
+.ui-lights .lx-plus { color: #0072b2; }
+.ui-lights .lx-box { display: inline-flex; align-items: center; justify-content: center; position: relative; min-width: 2.4ch; min-height: 50px; padding: 0 8px; margin: 0 2px; box-sizing: border-box;
+  border: 3px dashed #0072b2; border-radius: 10px; background: transparent; color: #0072b2; font: 800 30px 'Lexend', system-ui, sans-serif; line-height: 1; cursor: text; }
+.ui-lights .lx-ghost.is-chosen .lx-box:not(.is-mirror) { border-style: solid; background: #fff; }
+.ui-lights .lx-box.is-mirror { cursor: default; }
+.ui-lights .lx-box.is-focus { outline: 4px solid #0072b2; outline-offset: 2px; }
+.ui-lights .lx-box.is-drop-over { background: #cfe8f7; }
+.ui-lights .lx-box.is-empty.is-blink::after { content: ''; position: absolute; left: 10px; right: 10px; bottom: 7px; border-bottom: 3px solid #0072b2; animation: ab-blink 1s steps(2, start) infinite; }
+.ui-lights .lx-box.is-shake { border-color: #a3281b; animation: lx-shake 0.35s ease-in-out 1; }
+@keyframes lx-shake { 0%, 100% { transform: none; } 25% { transform: translateX(-6px); } 75% { transform: translateX(6px); } }
+@media (prefers-reduced-motion: reduce) { .ui-lights .lx-box.is-shake { animation: none; } .ui-lights .lx-box.is-empty.is-blink::after { animation: none; } }
+.ui-lights .lx-apply { min-height: 44px; min-width: 44px; padding: 0 10px; margin-left: 6px; font-size: 22px; font-weight: 800; background: #1b6e3a; border-color: #1b6e3a; color: #fff; }
+/* the Add icon while previewed */
+.ui-lights .lb-move.is-preview { background: #eef7fd; border-color: #0072b2; }
+/* the bottom row: [I'm stuck]  x = [ ] [Check]  [Teach me] */
+.ui-lights .lx-bottom { display: flex; align-items: center; justify-content: space-between; gap: 8px; width: 100%; padding-top: 6px; border-top: 2px dashed #bdb7a4; }
+.ui-lights .lx-help { min-height: 44px; padding: 0 12px; font-size: 16px; white-space: nowrap; }
+.ui-lights .lx-help:disabled { opacity: 0.4; }
+.ui-lights .lx-answer { margin: 0; padding: 0; gap: 8px; font-size: 24px; }
+.ui-lights .lx-answer .lb-typed { min-height: 46px; min-width: 3.6ch; }
+.ui-lights .lx-answer .lb-check { min-height: 46px; padding: 0 14px; font-size: 18px; }
+.ui-lights .lx-field.is-focus { outline: 4px solid #0072b2; outline-offset: 2px; }
+/* the substitution under the bottom row, with its Next beside it */
+.ui-lights .lx-substblock { display: flex; align-items: center; justify-content: center; gap: 14px; width: 100%; min-height: 84px; }
+.ui-lights .lx-subst { min-height: 0; font-size: 24px; line-height: 1.2; }
+.ui-lights .lx-subst li { min-height: 0; }
+.ui-lights .lx-substblock.is-past .lx-subst { opacity: 0.55; }
+.ui-lights .lx-substblock .lb-next { min-height: 46px; }
+/* the small corner buttons */
+.ui-lights .lx-corners { display: flex; justify-content: space-between; width: 100%; }
+.ui-lights .lx-corner { min-height: 36px; padding: 0 12px; font-size: 15px; font-weight: 700; background: transparent; }
+.ui-lights .lx-corner:disabled { opacity: 0.4; }
+/* one Undo only: the scaffold's own Undo is the corner one */
+.ui-lights .ab-boardwrap .ab-actions .btn-undo { visibility: hidden; }
+/* the hover name never sticks after a tap on a touch screen */
+@media (hover: none) { .ui-lights .lb-move[data-tip]::after { display: none !important; } }
+/* fit 1366×650: the panel's rows and gaps are tightened (nothing removed) */
+.ui-lights .lb-panel { padding: 6px 10px 8px; gap: 4px; }
+.ui-lights .lb-head { font-size: 16px; padding-bottom: 2px; }
+.ui-lights .lb-grid { grid-auto-rows: 36px; gap: 4px 8px; }
+.ui-lights .lb-grid .lb-move { height: 36px; }
+.ui-lights .lb-icon { max-height: 32px; }
+.ui-lights .lb-solved { padding-top: 4px; }
+.ui-lights .lb-line { min-height: 84px; }                       /* room for a two-line message, so nothing shifts (loop §2) */
+.ui-lights .lx-apply.is-off { visibility: hidden; }
+.ui-lights .lx-substblock { min-height: 88px; }
+.ui-lights .lx-boxwrap { position: relative; display: inline-flex; }
+.ui-lights .lx-boxwrap .lx-apply { position: absolute; top: calc(100% + 6px); left: 50%; transform: translateX(-50%); margin: 0; z-index: 2; }

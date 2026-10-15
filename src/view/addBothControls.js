@@ -17,7 +17,10 @@ function button(label, action, extra = {}) {
   return b;
 }
 
-export function buildAddBothControls(root, dispatch) {
+// `liveOf`: is the x = [ ] row live? (?ui=lights has its own rule: x = is live from the first frame.)
+export const buildAddBothControls = (root, dispatch) => makeAddBothControls(answerLive)(root, dispatch);
+
+export const makeAddBothControls = (liveOf) => (root, dispatch) => {
   root.innerHTML = '';
   const keys = document.createElement('div');
   keys.className = 'pad';
@@ -38,8 +41,8 @@ export function buildAddBothControls(root, dispatch) {
       const done = s.stage === 'done' || s.step === 'levelDone';
       const amountMode = !done && s.stage === 'moves' && s.menu === 'add' && s.typing !== 'answer' && !s.combining;
       // the pad is live for the amount (once the move is open) and for the answer (once it is live); greyed otherwise
-      const on = !done && s.step !== 'levelDone' && (amountMode || answerLive(s));
+      const on = !done && s.step !== 'levelDone' && (amountMode || liveOf(s));
       for (const b of keys.querySelectorAll('button')) b.disabled = !on;
     },
   };
-}
+};

@@ -19,6 +19,7 @@ export function makeRecord(session, { t, pack, level, problem }) {
     taught: session.taught ?? 0,
     clean: session.clean,
     on: { ...session.on },
+    ...(session.typedBeforeMove === undefined ? {} : { typedBeforeMove: session.typedBeforeMove }),   // ?ui=lights only
   };
 }
 

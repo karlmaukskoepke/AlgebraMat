@@ -268,7 +268,8 @@ export function movePanel(o) {
   MOVES.forEach(([id, label], i) => {
     if (id === (o.active ?? 'add')) {
       const target = o.target || o.walkStep === 'move';
-      const b = html('button', `btn btn-move lb-move${o.menu === id ? ' is-on' : ''}${target ? ' is-target' : ''}${o.locked ? ' is-grey' : ''}`, [moveIcon(id)], { type: 'button', 'data-action': 'choose', 'data-move': id, 'aria-label': label, ...(o.locked ? {} : { 'data-tip': label }), style: `grid-row: ${i + 1}` });
+      // (?ui=lights: no hover name on Add, the preview on the equation replaces it, so nothing sticks after a tap: `noTip`)
+      const b = html('button', `btn btn-move lb-move${o.menu === id ? ' is-on' : ''}${o.preview ? ' is-preview' : ''}${target ? ' is-target' : ''}${o.locked ? ' is-grey' : ''}`, [moveIcon(id)], { type: 'button', 'data-action': 'choose', 'data-move': id, 'aria-label': label, ...(o.locked || o.noTip ? {} : { 'data-tip': label }), ...(o.noTip ? { 'data-fk': 'add', 'aria-pressed': String(o.menu === id) } : {}), style: `grid-row: ${i + 1}` });
       b.disabled = Boolean(o.disabled);
       grid.append(b);
     } else if (id === 'trade' && o.tradeOn) {
