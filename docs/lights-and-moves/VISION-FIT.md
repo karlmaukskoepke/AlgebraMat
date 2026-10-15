@@ -121,21 +121,21 @@
 
 ## Part 2, report 6: the smallest first experiment
 
-**Recommendation: Add to both sides, Levels 2-3, behind a flag (`?ui=lights`), ideas 4 + 5 only, choice kept.** *Inferred, with reasons:*
+**Updated after Karl's answers (Q1-Q4): Add to both sides, Levels 2-3, behind a flag (`?ui=lights`), ideas 4 + 5, with the choice dropped (idea 6).** My first recommendation kept the choice; Karl chose to drop it in the experiment too, so idea 6 is part of the build. *Inferred, with reasons:*
 - **Why Add, not Divide:** Karl's own first example is Add's `+ ▢` on both sides; Add's move already takes a typed amount, so "fill the blank" is a change of *where* the student types, not *what*. Divide's move is five buttons, so idea 5 there means first redesigning the fraction choice (Q7). **The cost:** Add is not on the shared loop, so the experiment lives in Add's own reducer and screen. That's acceptable for a throw-away experiment; not for the final build.
 - **Why L2-L3:** one term next to x, one move per problem, no Trade places (L5) and no scaffold-only features in play. Every problem is generated and verified, so "one equation" becomes "one level's five problems", which gives a teacher five tries per student instead of one.
 
 **What it would do (description only; reusing existing pieces):**
-1. After **Use a move**, hovering the Add icon (or focusing it, or the first tap on touch) draws a greyed preview row under the equation: `x + 8 + ▢ = 11 + ▢`, the boxes dashed blue (row builder from `lightScreen.js`; blue from the icon).
-2. Clicking (second tap) solidifies the row; the first box takes the typing; **the second box mirrors it** (one action, loop §1C) unless Karl wants two (Q1).
-3. **Enter or a small ✓ by the blank applies it** (no timer). The engine's existing `go` runs (`addBothMoves.js:393`, `lightBoard` `:231`), so the result rows and lights are exactly today's.
+1. With no choice in the line, the Add icon is live from the start; hovering it (or focusing it, or the first tap on touch) draws a greyed preview row under the equation: `x + 8 + ▢ = 11 + ▢`, the boxes dashed blue (row builder from `lightScreen.js`; blue from the icon).
+2. Clicking (second tap) solidifies the row; the first box takes the typing; **the second box mirrors it** (one action, loop §1C) (decided, Q1).
+3. **Enter or a small ✓ by the blank applies it** (no timer; decided, Q3). Only x's side cancels on its own; the other side is never combined by the system (decided, Q2). The engine's existing `go` runs (`addBothMoves.js:393`, `lightBoard` `:231`), so the result rows and lights are exactly today's.
 4. The result appears under a rule line with **Undo**; a green **Next** commits. Add has no fold, so Next is new on this card; it can simply clear Undo and keep the rows (no fold) for the experiment.
-5. Everything else (the line, guess path, check, I'm stuck) stays as built, with the **flag on the screen root**, so nothing changes without `?ui=lights`.
+5. **The `x = [ ]` field is always live** (no Guess x / Use a move). Typed digits go to an open blank first, then to `x =`. A correct guess at the first state still makes the next problem a forced move: there the field greys with a short message and Add pulses (Karl's proposal). Everything else (the check, I'm stuck, Teach me) stays as built, with the **flag on the screen root**, so nothing changes without `?ui=lights`.
 6. **Layout:** to fit 1366×768 it must also drop the "Add [ ] to both sides" row and move Undo into the result area, which frees about 136 px of Add's 187-px overflow (CURRENT-STATE §1.2). The help row stays where it is (below the fold) for the first test.
 
 **Which of ideas 1, 2, 3, 6 and 7 the experiment needs:**
 - **1 and 3: already there,** no work.
-- **6: the experiment needs a decision but not the build.** Keeping the choice is the smallest test of 4 + 5; dropping it tests exploration, which is a bigger change to the loop. I recommend keeping it for the first test (Q4).
+- **6: needed (decided, Q4).** The experiment drops the choice: moves live and `x = [ ]` open from the start, with the forced-move rule as above. The layout part of idea 6 (I'm stuck and Teach me beside `x =`, Undo and Start over as corner buttons) is optional for the test but it also frees the space Add needs to fit 1366×768.
 - **2: can wait.** On Add the count is 0 or 1, so yellow would never show; it can't be tested here.
 - **7: can wait.** Add L2-L3 reserve no scaffold space on the bare screen.
 - **8: can wait,** but if Karl wants the preview's blank in Add's own poster colour, decide before the build (Q8).
@@ -158,4 +158,28 @@
 
 *Asked in the session; answers are recorded below as they come in.*
 
-<!-- ANSWERS -->
+### Batch 1 (answered 2026-10-13)
+
+| # | Question | Karl's answer | Recommended? |
+|---|---|---|---|
+| Q1 | Idea 5 on Add: one blank mirrored to the other side, or two typed separately? | **One, mirrored.** The student types in the left box; the right fills with the same number. | yes |
+| Q2 | Idea 5: what does the system combine? | **x's side only.** The other side is never combined automatically; typing x is the student's combining. The answer is never shown before it is typed. | yes |
+| Q3 | Idea 5: what makes the result appear? | **Enter or a small ✓ beside the blank.** No timer. | yes |
+| Q4 | First experiment: keep or drop the Guess x / Use a move choice? | **Drop it in the experiment too.** Moves always live, `x = [ ]` always open, the forced-move rule as Karl proposed. | no (I recommended keeping it) |
+
+### Batch 2 (answered 2026-10-13)
+
+| # | Question | Karl's answer | Recommended? |
+|---|---|---|---|
+| Q5 | Idea 2: what does red mean? | **Not done = grey, red = worse.** Not started = outline/grey; partly = yellow ◐; done = green ✓; red stays "that move made it worse". | yes |
+| Q6 | Idea 1: icon always beside its light, or revealed by clicking a red light? | **Always beside** (as built). | yes |
+| Q7 | Divide it: replace the five fraction buttons with a `1/▢` blank? | **Yes, a `1/▢` blank.** The Divide spec's "menu always shows all five fractions" (§1, §3B) has to change. | no (I recommended deciding after the Add test) |
+| Q8 | Idea 8: a colour per move? | **Later, with a palette pass.** Keep blue for the first test; first split "click here" from "operation", then pick move colours that print in black and white. | yes |
+
+### What the answers change
+- **Idea 2 is now:** grey (not started), yellow ◐ (partly), green ✓ (done), red ✗ (worse). This removes the conflict with loop §5 and the decision log over red; the spec still needs the fourth state and the counts.
+- **Idea 5 no longer conflicts** with "the answer is never shown" (Q2).
+- **Idea 6 is in the first experiment,** so the experiment changes loop §1A/§1B behaviour behind the flag; the loop spec should get a note that §1A is under test.
+- **Divide it** will need a spec revision for the `1/▢` blank (Q7) before any Divide build. Open points for it: what a non-splitting denominator does (today: a red failed row), and whether `1/1` or numbers above 6 are refused.
+- **Still open:** a definition of "Smaller numbers" as a count (report 2).
+
