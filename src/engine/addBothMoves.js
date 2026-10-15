@@ -404,8 +404,8 @@ export function reduceAddBoth(state, action) {
       }
       // the bare move: the amount goes onto both sides in one action
       if (s.stage !== 'moves' || s.menu !== 'add' || s.sub) return state;
-      const amount = amountOf(s.amountEntry);
-      if (amount === null || amount === 0) return say(s, 'aAmountZero', {}, true);
+      const amount = amountOf(s.amountEntry);                        // (?ui=lights allows a 0: it just doesn't help)
+      if (amount === null || (amount === 0 && !s.allowZero)) return say(s, 'aAmountZero', {}, true);
       if (Math.abs(amount) > 15) return say(s, 'aAmountBig', {}, true);
       if (s.forced && amount !== oppositeOf(s.problem)) return say(s, 'aForced', { amount: signed(oppositeOf(s.problem)) }, true);
       s.history.push(snapshot(s));
