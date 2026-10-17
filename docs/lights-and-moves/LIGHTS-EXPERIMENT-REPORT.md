@@ -2,7 +2,7 @@
 
 Spec: SPEC-LIGHTS-EXPERIMENT-ADD.md rev 0.1 (2026-10-15). Built in the real app behind `?ui=lights`, Add to both sides, Levels 2 and 3 only.
 
-**To try it:** `?pack=add-both&level=2&ui=lights` (or `level=3`). Add `&seed=7` to get the problems in these screenshots. With the flag on, Levels 1, 4 and 5 show the classic screen.
+**To try it** (locally, or on a Netlify branch deploy of this branch): `?pack=add-both&level=2&ui=lights` (or `level=3`). Add `&seed=7` to get the problems in these screenshots. With the flag on, Levels 1, 4 and 5 show the classic screen.
 
 **Branch:** `claude/new-session-yadpxi`, not `exp/lights-add`. This session could only push to that branch. Rename or cherry-pick if you want it under the spec's name.
 
