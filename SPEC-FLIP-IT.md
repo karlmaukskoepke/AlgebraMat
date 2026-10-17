@@ -1,4 +1,4 @@
-# Flip it: solve equations with an opposite box by flipping everything  (Karl, 2026-10-12; revision 1.0; status: designed)
+# Flip it: solve equations with an opposite box by flipping everything  (Karl, 2026-10-12; revision 1.1; status: designed)
 
 **Follows `SPEC-SOLVE-IT-LOOP.md` rev 1.2** (including its conformance checklist). Everything shared (the screen, the guess-or-move choice at every state, the forced-move rule, substitution checks, Undo and Start over, the work stack and folding, the help row, scaffolds, generator rules) is defined there and wins any conflict. This spec states only what is specific to Flip it.
 
@@ -18,7 +18,7 @@ Section: Solve it.   Prerequisite card(s): **Divide it** (L4 uses Take a fractio
 
 **What they type:** one whole number on the integer pad, into the `x = [▁]` row in the work stack. **The solved value is never displayed** before the student types it.
 
-**Picture (shared by the numeric level and the scaffolds):** counters turn into their opposites (+ becomes −, − becomes +) and **boxes turn into opposite boxes** (a regular box becomes an opposite box and back). An opposite box is drawn as an opposite box, never as "a box with a minus". A flip changes every counter and every box on both sides at once.
+**Picture (shared by the numeric level and the scaffolds):** counters turn into their opposites (+ becomes −, − becomes +) and **boxes turn into opposite boxes** (a regular box becomes an opposite box and back). An opposite box is drawn **the way Build it's Boxes & Circles draws it: a box with a minus (−□)**, so students see one consistent opposite box across the site (Karl, 2026-10-17: the earlier "never a box with a minus" line is removed; it did not match his classroom notation). A flip changes every counter and every box on both sides at once.
 
 **Words:** box, **opposite box**, counters, border, add the opposite, balance, check. **"Flip" is reserved for signs.** "Trade places" (swapping sides) is a different move on its own card. We never say "multiply by −1" on the button; the move is **Flip everything**.
 

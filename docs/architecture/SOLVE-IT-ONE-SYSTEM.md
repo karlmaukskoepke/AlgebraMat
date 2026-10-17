@@ -20,7 +20,7 @@
   2. **Student data and supports cross the section line.** Solve it writes into Count it's device "skills" store and into the class sheet's `supports` column through `lightStore.js`. Embedding Combine it's help would start turning Count it's supports on for that device unless the adapter keeps its tags apart.
   3. **The look.** There are eight separate counter drawings, and the colours mean different things in different areas (magenta is "opposite" in Count it but "negative" in Divide). Making it look like one system means either drawing new pieces or living with Count it's look, because Count it may not be edited.
 - **Phase order I'd choose:** P0 parity harness → P1 fix Add's two state-blind rungs in place → P2 shape classifier and lights → P3 scaffold registry and shared ladder, Divide first → P4 Add onto the loop with the lights wrapper carried across → P5 the new rungs (Undo first; count-and-cancel by embedding Combine it) → P6 pieces layer and one screen → P7 manipulation layer (after round 2 is tested) → P8 the other cards as configuration.
-- **Questions:** five, in Part 4. Answers: *pending*.
+- **Questions:** five, in Part 4, all answered by Karl on 2026-10-17.
 
 ---
 
@@ -97,8 +97,8 @@ Count it / Build it import **nothing** from Solve it (observed: no file outside 
   - **Blue:** `--groups` (`#0072b2`) is "how many groups" in Group It, and in Solve it the same blue means "the operation" and "click here".
 - **Boxes and the opposite box.**
   - Boxes & Circles draws −x as **−□** (a box with a dash in front, `boxes-L2-a-start`). Karl's poster decision (branch `claude/friendly-faraday-xzolrt`, commit `cdba0e4`) is "opposite box −□".
-  - **But** `SPEC-FLIP-IT.md` §1 says "an opposite box is drawn as an opposite box, never as 'a box with a minus'".
-  - Divide draws `x` inside its boxes (`div-02`); Boxes & Circles draws an empty □ with a key "□ = x". These conflict; Q3.
+  - `SPEC-FLIP-IT.md` §1 rev 1.0 said "never as 'a box with a minus'"; rev 1.1 (2026-10-17) now says −□, matching Boxes & Circles.
+  - Divide draws `x` inside its boxes (`div-02`); Boxes & Circles draws an empty □ with a key "□ = x". They still differ (an x inside, or an empty □ with a key); not decided yet.
 - **The screen.**
   - Count it and Build it: the step bar on top, the feedback sentence at the **bottom** above the palette, a "?" button, a streak ("Streak 0 · Best 0"), a 2.5 s auto-advance.
   - Solve it: the line at the **top**, no step bar, no "?", no streak, nothing on a timer (loop §2).
@@ -326,35 +326,35 @@ Recommended option first. Answers are recorded here when given.
 - (B) The tucked shell now.
 - (C) The lights layout now.
 
-*Answer: pending.*
+*Answer (Karl, 2026-10-17): (A). Decided after the classroom tests.*
 
 **Q2. When a Count it helper runs inside a Solve it rung, how much of Count it's look is acceptable?**
 - **(A) Recommended:** its Mat and drawing as they are (its counters, its fonts), but never its frame (step bar, bottom line, streak, palette, auto-advance). Solve it's line and pad drive it. *Evidence:* the Mats are separable SVGs (`renderMat` returns one `<svg>`); the frame comes from `main.js`, not the Mat.
 - (B) Redraw it all in Solve it's own pieces. This duplicates the drawing and means the engines must expose more than they do.
 - (C) The whole Count it screen, as is, in a panel.
 
-*Answer: pending.*
+*Answer (Karl, 2026-10-17): close to (A). Count it's pictures need not match exactly, but the feel must not be considerably different.*
 
 **Q3. The opposite box: which drawing is the system's?**
 - **(A) Recommended:** −□ (a box with a dash in front), as Boxes & Circles draws it and your poster decision says. Change `SPEC-FLIP-IT.md` §1 to match. *Evidence:* `boxes-L2-a-start`; branch `claude/friendly-faraday-xzolrt` commit `cdba0e4`.
 - (B) A separate opposite-box drawing (Flip spec §1), which Count it wouldn't have.
 - (C) Decide when Flip it is built.
 
-*Answer: pending.*
+*Answer (Karl, 2026-10-17): (A). −□, as Build it draws it. `SPEC-FLIP-IT.md` is now rev 1.1 to match.*
 
 **Q4. Should help used inside Solve it count toward Count it's supports (the device "skills" that keep a support switched on)?**
 - **(A) Recommended:** no. Solve it's helpers start with no skills, and their tags stay out of `afterProblem`. *Evidence:* `lightStore.js:25-29` updates Count it's skills from every Solve it problem's tags; Combine it's tags would match `SKILL` (`scaffold.js:69-75`) and change Count it.
 - (B) Yes: one student, one set of supports across sections.
 - (C) Count them, but in a separate store.
 
-*Answer: pending.*
+*Answer (Karl, 2026-10-17): (A). Help used in Solve it does not switch on Count it's supports; a shared record is a later decision.*
 
 **Q5. Magenta and green: what do they mean in Solve it?**
 - **(A) Recommended:** keep Count it's meanings (magenta = came from an opposite; green = inside a group). Divide's negative counters become black − marks like Count it's. *Evidence:* `style.css:4-7`; `groupDiagram.js:31` uses `is-opposite` for "negative".
 - (B) Keep Divide's (magenta = negative) and accept that the sections differ.
 - (C) Decide in the palette pass (lights-and-moves Q8).
 
-*Answer: pending.*
+*Answer (Karl, 2026-10-17): (C). Decided in the colour pass.*
 
 ---
 
