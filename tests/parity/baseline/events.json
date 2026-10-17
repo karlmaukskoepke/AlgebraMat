@@ -1,0 +1,476 @@
+{
+ "add-both/clean-move": {
+  "done": true,
+  "record": {
+   "t": 0,
+   "pack": "add-both",
+   "level": 4,
+   "problem": "x + 8 = −4",
+   "answers": [],
+   "supports": [],
+   "stuck": 0,
+   "taught": 0,
+   "clean": true,
+   "on": {
+    "partyBattle": false,
+    "sign": false
+   }
+  }
+ },
+ "add-both/red-then-undo": {
+  "done": true,
+  "record": {
+   "t": 0,
+   "pack": "add-both",
+   "level": 4,
+   "problem": "x + 8 = −4",
+   "answers": [],
+   "supports": [],
+   "stuck": 0,
+   "taught": 0,
+   "clean": true,
+   "on": {
+    "partyBattle": false,
+    "sign": false
+   }
+  }
+ },
+ "add-both/wrong-guess-then-undo": {
+  "done": true,
+  "record": {
+   "t": 0,
+   "pack": "add-both",
+   "level": 4,
+   "problem": "x + 8 = −4",
+   "answers": [
+    {
+     "typed": "4",
+     "tag": "wrong-op"
+    }
+   ],
+   "supports": [],
+   "stuck": 0,
+   "taught": 0,
+   "clean": false,
+   "on": {
+    "partyBattle": false,
+    "sign": false
+   }
+  }
+ },
+ "add-both/correct-guess": {
+  "done": true,
+  "record": {
+   "t": 0,
+   "pack": "add-both",
+   "level": 4,
+   "problem": "x + 8 = −4",
+   "answers": [],
+   "supports": [],
+   "stuck": 0,
+   "taught": 0,
+   "clean": true,
+   "on": {
+    "partyBattle": false,
+    "sign": false
+   }
+  }
+ },
+ "add-both/stuck-x4-then-solve": {
+  "done": true,
+  "record": {
+   "t": 0,
+   "pack": "add-both",
+   "level": 4,
+   "problem": "x + 8 = −4",
+   "answers": [],
+   "supports": [
+    "hint",
+    "model",
+    "move",
+    "guided"
+   ],
+   "stuck": 4,
+   "taught": 0,
+   "clean": false,
+   "on": {
+    "partyBattle": false,
+    "sign": false
+   }
+  }
+ },
+ "add-both/teach-me": {
+  "done": true,
+  "record": {
+   "t": 0,
+   "pack": "add-both",
+   "level": 4,
+   "problem": "x + 8 = −4",
+   "answers": [],
+   "supports": [
+    "forced"
+   ],
+   "stuck": 0,
+   "taught": 1,
+   "clean": false,
+   "on": {
+    "partyBattle": false,
+    "sign": false
+   }
+  }
+ },
+ "add-both/forced-move": {
+  "done": true,
+  "record": {
+   "t": 0,
+   "pack": "add-both",
+   "level": 4,
+   "problem": "x − 5 = −2",
+   "answers": [],
+   "supports": [],
+   "stuck": 0,
+   "taught": 0,
+   "clean": true,
+   "on": {
+    "partyBattle": false,
+    "sign": false
+   }
+  }
+ },
+ "add-both/partial-then-stuck-x4": {
+  "done": false,
+  "record": {
+   "t": 0,
+   "pack": "add-both",
+   "level": 4,
+   "problem": "x + 8 = −4",
+   "answers": [],
+   "supports": [
+    "hint",
+    "model",
+    "move",
+    "guided"
+   ],
+   "stuck": 4,
+   "taught": 0,
+   "clean": false,
+   "on": {
+    "partyBattle": false,
+    "sign": false
+   }
+  }
+ },
+ "add-both/partial-then-teach": {
+  "done": false,
+  "record": {
+   "t": 0,
+   "pack": "add-both",
+   "level": 4,
+   "problem": "x + 8 = −4",
+   "answers": [],
+   "supports": [
+    "forced"
+   ],
+   "stuck": 0,
+   "taught": 1,
+   "clean": false,
+   "on": {
+    "partyBattle": false,
+    "sign": false
+   }
+  }
+ },
+ "add-both/x-alone-then-stuck-x4": {
+  "done": true,
+  "record": {
+   "t": 0,
+   "pack": "add-both",
+   "level": 4,
+   "problem": "x + 8 = −4",
+   "answers": [],
+   "supports": [
+    "hint",
+    "model",
+    "move",
+    "guided"
+   ],
+   "stuck": 4,
+   "taught": 0,
+   "clean": false,
+   "on": {
+    "partyBattle": false,
+    "sign": false
+   }
+  }
+ },
+ "add-both/x-alone-then-teach": {
+  "done": false,
+  "record": {
+   "t": 0,
+   "pack": "add-both",
+   "level": 4,
+   "problem": "x + 8 = −4",
+   "answers": [],
+   "supports": [
+    "forced"
+   ],
+   "stuck": 0,
+   "taught": 1,
+   "clean": false,
+   "on": {
+    "partyBattle": false,
+    "sign": false
+   }
+  }
+ },
+ "add-both/red-then-stuck": {
+  "done": false,
+  "record": {
+   "t": 0,
+   "pack": "add-both",
+   "level": 4,
+   "problem": "x + 8 = −4",
+   "answers": [],
+   "supports": [
+    "hint",
+    "model",
+    "move"
+   ],
+   "stuck": 3,
+   "taught": 0,
+   "clean": false,
+   "on": {
+    "partyBattle": false,
+    "sign": false
+   }
+  }
+ },
+ "add-both/zero-other-then-undo-stuck": {
+  "done": false,
+  "record": {
+   "t": 0,
+   "pack": "add-both",
+   "level": 4,
+   "problem": "x + 8 = −4",
+   "answers": [],
+   "supports": [
+    "hint",
+    "model"
+   ],
+   "stuck": 2,
+   "taught": 0,
+   "clean": false,
+   "on": {
+    "partyBattle": false,
+    "sign": false
+   }
+  }
+ },
+ "add-both/L2-build": {
+  "done": false,
+  "record": {
+   "t": 0,
+   "pack": "add-both",
+   "level": 2,
+   "problem": "x + 8 = 11",
+   "answers": [],
+   "supports": [
+    "hint",
+    "model"
+   ],
+   "stuck": 2,
+   "taught": 0,
+   "clean": false,
+   "on": {
+    "partyBattle": false,
+    "sign": false
+   }
+  }
+ },
+ "add-both/L5-trade-places": {
+  "done": true,
+  "record": {
+   "t": 0,
+   "pack": "add-both",
+   "level": 5,
+   "problem": "5 = x + 3",
+   "answers": [],
+   "supports": [],
+   "stuck": 0,
+   "taught": 0,
+   "clean": true,
+   "on": {
+    "partyBattle": false,
+    "sign": false
+   }
+  }
+ },
+ "divide-it/clean-move": {
+  "done": true,
+  "record": {
+   "t": 0,
+   "pack": "divide-it",
+   "level": 3,
+   "problem": "5x = −15",
+   "answers": [],
+   "supports": [],
+   "stuck": 0,
+   "taught": 0,
+   "clean": true,
+   "on": {}
+  }
+ },
+ "divide-it/failed-then-undo": {
+  "done": true,
+  "record": {
+   "t": 0,
+   "pack": "divide-it",
+   "level": 3,
+   "problem": "5x = −15",
+   "answers": [],
+   "supports": [],
+   "stuck": 0,
+   "taught": 0,
+   "clean": true,
+   "on": {}
+  }
+ },
+ "divide-it/wrong-guess-then-undo": {
+  "done": true,
+  "record": {
+   "t": 0,
+   "pack": "divide-it",
+   "level": 3,
+   "problem": "5x = −15",
+   "answers": [
+    {
+     "typed": "4",
+     "tag": "unmatched"
+    }
+   ],
+   "supports": [],
+   "stuck": 0,
+   "taught": 0,
+   "clean": false,
+   "on": {}
+  }
+ },
+ "divide-it/correct-guess": {
+  "done": true,
+  "record": {
+   "t": 0,
+   "pack": "divide-it",
+   "level": 3,
+   "problem": "5x = −15",
+   "answers": [],
+   "supports": [],
+   "stuck": 0,
+   "taught": 0,
+   "clean": true,
+   "on": {}
+  }
+ },
+ "divide-it/stuck-x2-then-solve": {
+  "done": true,
+  "record": {
+   "t": 0,
+   "pack": "divide-it",
+   "level": 3,
+   "problem": "5x = −15",
+   "answers": [],
+   "supports": [
+    "model",
+    "guided"
+   ],
+   "stuck": 2,
+   "taught": 0,
+   "clean": false,
+   "on": {}
+  }
+ },
+ "divide-it/teach-me": {
+  "done": true,
+  "record": {
+   "t": 0,
+   "pack": "divide-it",
+   "level": 3,
+   "problem": "5x = −15",
+   "answers": [],
+   "supports": [
+    "forced"
+   ],
+   "stuck": 0,
+   "taught": 1,
+   "clean": false,
+   "on": {}
+  }
+ },
+ "divide-it/forced-move": {
+  "done": true,
+  "record": {
+   "t": 0,
+   "pack": "divide-it",
+   "level": 2,
+   "problem": "3x = 12",
+   "answers": [],
+   "supports": [],
+   "stuck": 0,
+   "taught": 0,
+   "clean": true,
+   "on": {}
+  }
+ },
+ "divide-it/partial-composite": {
+  "done": true,
+  "record": {
+   "t": 0,
+   "pack": "divide-it",
+   "level": 5,
+   "problem": "4x = 8",
+   "answers": [],
+   "supports": [
+    "model",
+    "guided"
+   ],
+   "stuck": 2,
+   "taught": 0,
+   "clean": false,
+   "on": {}
+  }
+ },
+ "divide-it/x-alone-then-stuck-x2": {
+  "done": true,
+  "record": {
+   "t": 0,
+   "pack": "divide-it",
+   "level": 3,
+   "problem": "5x = −15",
+   "answers": [],
+   "supports": [
+    "guided"
+   ],
+   "stuck": 2,
+   "taught": 0,
+   "clean": false,
+   "on": {}
+  }
+ },
+ "divide-it/failed-then-stuck": {
+  "done": false,
+  "record": {
+   "t": 0,
+   "pack": "divide-it",
+   "level": 3,
+   "problem": "5x = −15",
+   "answers": [],
+   "supports": [
+    "model",
+    "guided"
+   ],
+   "stuck": 3,
+   "taught": 0,
+   "clean": false,
+   "on": {}
+  }
+ }
+}
