@@ -102,9 +102,9 @@ function termsOf(side, s, live, plug = false) {
       if (t.coef > 1 && !(live && plug && s.sub?.kind === 'guess')) out.push(html('span', 'lb-coef', [live && s.hint?.kind === 'coef' ? html('span', 'lb-hintbox', [String(t.coef)]) : String(t.coef), xel]));
       else out.push(xel);
     } else {
-      const hint = live && s.hint?.kind === 'cancel' && s.hint.id === t.id;
+      const hint = live && ((s.hint?.kind === 'cancel' && s.hint.id === t.id) || (s.hint?.kind === 'sum' && s.hint.ids.includes(t.id)));
       const num = html('span', 'lb-num', [signed(t.v)], live ? { 'data-numval': t.v } : {});
-      if (hint && i > 0) {
+      if (hint && i > 0 && s.hint.kind === 'cancel') {
         // the outline goes round the sign and the number together, so it is seen as a positive 7 (or a negative one)
         out.pop();
         out.push(html('span', 'lb-hintbox', [html('span', 'lb-plus', ['+']), num]));
@@ -280,12 +280,12 @@ export function movePanel(o) {
       grid.append(html('button', 'btn lb-move is-grey', [moveIcon(id)], { type: 'button', 'data-action': 'greyMove', 'data-move': id, 'aria-disabled': 'true', 'aria-label': label, style: `grid-row: ${i + 1}` }));
     }
   });
-  // each group of Why? boxes sits centred beside the moves it goes with. Fewer terms is judged; the others are satisfied by the
-  // same good move (green together, faint until then).
+  // each group of Why? boxes sits centred beside the moves it goes with. Only the lights a card judges show a state; the rest stay
+  // faint outlines.
   // the tucked layout shows the lights in its own Why? column, so its Moves drawer leaves the boxes out (`noWhys`)
   for (const g of o.noWhys ? [] : WHYS) {
     const items = g.boxes.map(([key, name]) => {
-      const state = o.whys?.[key] ?? (key === 'fewer' ? fewer : fewer === 'green' ? 'green' : 'off');
+      const state = o.whys?.[key] ?? (key === 'fewer' ? fewer : 'off');   // a light this card doesn't judge stays off (Build A)
       return html('li', `ab-goal is-${state}${key === 'fewer' && o.flash ? ' is-flash' : ''}`, [checkbox(state), html('span', 'ab-goal-label', [name])]);
     });
     grid.append(html('ul', 'ab-goals lb-why', items, { style: `grid-row: ${g.rows[0] + 1} / ${g.rows[1] + 2}` }));

@@ -257,11 +257,11 @@ describe('I\'m stuck and Teach me bring in the scaffold, one rung at a time', ()
     expect([s.resolving, s.feedback.key, s.combining.step]).toEqual([true, 'aPartyOrBattle', 'kind']);   // the first pair is highlighted for them
     expect(run(s, { type: 'choose', move: 'add' })).toBe(s);                                   // nothing else is open while a pair waits
     s = combineAll(s);
-    expect(boardText(s.board)).toBe('x = −9');
+    expect(boardText(s.board)).toBe('x = −6 + −3');                                       // the other side is left for the student (Build A)
     expect(s.lights).toEqual({ fewer: 'green', solved: 'green' });
-    expect(s.feedback.key).toBe('aSolvedBoard');
+    expect([s.feedback.key, s.feedback.params.alone]).toEqual(['aKindRight', true]);
   });
-  it('the scaffold\'s combining highlights the next pair and asks Party or Battle; a right answer combines them by itself', () => {
+  it('the scaffold\'s combining: the pair beside x cancels on its own; on the other side a right answer only confirms (Build A)', () => {
     let s = run(start(), { type: 'stuck' }, { type: 'stuck' }, { type: 'choose', move: 'add' }, ...typed('−3'), { type: 'addTo', side: 'left' }, { type: 'addTo', side: 'right' }, { type: 'go' });
     const first = s.combining;
     expect(s.board.left.some((t) => t.id === first.a)).toBe(true);                       // the left side comes first
@@ -272,7 +272,7 @@ describe('I\'m stuck and Teach me bring in the scaffold, one rung at a time', ()
     expect(s.feedback.params.before).toBe('Battle! 3 and −3 make 0.');
     expect(s.combining.step).toBe('kind');                                                 // now the other side
     s = run(s, { type: 'kind', value: 'party' });
-    expect([boardText(s.board), s.combining]).toEqual(['x = −9', null]);
+    expect([boardText(s.board), s.combining, s.feedback.key, s.hint.kind]).toEqual(['x = −6 + −3', null, 'aKindRight', 'sum']);   // never writes x = −9
   });
   it('while x is not alone the answer row stays greyed, scaffold or not', () => {
     const s = run(start(), { type: 'stuck' }, { type: 'stuck' });
@@ -292,16 +292,14 @@ describe('I\'m stuck and Teach me bring in the scaffold, one rung at a time', ()
     expect(s.stage).toBe('done');
     expect(s.clean).toBe(false);
   });
-  it('x alone with numbers still to put together: stuck 1 reminds, stuck 2 draws the model, stuck 3 asks Party or Battle, combines, and asks for the answer', () => {
+  it('x alone with numbers still to put together: stuck 1 reminds; later asks outline the two numbers and ask for the sum in words, never the seesaw or the value (Build A)', () => {
     let s = run(move(start(), -3), { type: 'stuck' });
     expect([s.scaffold, s.feedback.key]).toEqual([false, 'aStuckSolved']);
     s = run(s, { type: 'stuck' });
-    expect([s.scaffold, s.feedback.key, s.combining]).toEqual([true, 'aStuckSolved', null]);
-    s = run(s, { type: 'stuck' });
-    expect([s.feedback.key, s.combining.step, s.helpCombine]).toEqual(['aPartyOrBattle', 'kind', true]);
-    expect(answerLive(s)).toBe(false);
-    s = run(s, { type: 'kind', value: 'party' });                                          // −6 and −3 are a Party
-    expect([boardText(s.board), s.combining, s.feedback.key, s.helpCombine, s.undoCue, answerLive(s)]).toEqual(['x = −9', null, 'aSolvedBoard', false, false, true]);
+    expect([s.scaffold, s.feedback.key, s.feedback.params.sum, s.feedback.params.level, s.hint.kind, s.hint.ids.length]).toEqual([false, 'aStuckSum', '−6 + −3', 1, 'sum', 2]);
+    s = run(s, { type: 'stuck' }, { type: 'stuck' }, { type: 'stuck' });
+    expect([s.scaffold, s.combining, s.feedback.params.level, boardText(s.board), answerLive(s)]).toEqual([false, null, 3, 'x = −6 + −3', true]);
+    expect(s.supportsShown).toEqual(['hint']);
   });
   it('help while x is alone says to work it out', () => {
     expect(run(move(start(), -3), { type: 'stuck' }).feedback.key).toBe('aStuckSolved');

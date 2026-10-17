@@ -231,7 +231,7 @@ export function boardSvg(s) {
   const items = boardItems(s);
   const building = s.stage === 'build';
   const svg = el('svg', { class: 'mat value-mat addboth-mat', role: 'group', 'aria-label': 'The Add to both sides Mat' });
-  const cls = (id) => `${s.selected === id ? ' is-selected' : ''}${s.combining && (s.combining.a === id || s.combining.b === id) ? ' is-combining' : ''}${s.hint?.kind === 'cancel' && s.hint.id === id ? ' is-hint' : ''}${s.pending?.kind === 'cross' && s.pending.id === id ? ' is-crossing' : ''}`;
+  const cls = (id) => `${s.selected === id ? ' is-selected' : ''}${s.combining && (s.combining.a === id || s.combining.b === id) ? ' is-combining' : ''}${(s.hint?.kind === 'cancel' && s.hint.id === id) || (s.hint?.kind === 'sum' && s.hint.ids.includes(id)) ? ' is-hint' : ''}${s.pending?.kind === 'cross' && s.pending.id === id ? ' is-crossing' : ''}`;
   const tapAction = (id) => (building ? null : s.menu === 'cross' ? (s.pending?.kind === 'cross' && s.pending.id === id ? 'flipSign' : 'cross') : 'select');
   const geo = drawBalance(svg, items, {
     top: 64,
