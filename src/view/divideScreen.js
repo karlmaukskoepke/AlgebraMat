@@ -5,7 +5,7 @@
 // collapsed lights. No banner: what the card says is a pop-up (view/spotlight.js); the line is kept for screen readers only.
 
 import { html } from './addBothMat.js';
-import { stackRows, substBlock, forwardButton, srLine, notePopup, FORCED_TEXT, FIRST_TEXT } from './solveScreen.js';
+import { stackRows, substBlock, forwardButton, srLine, notePopup, FORCED_TEXT, FIRST_TEXT, PLACE_TEXT } from './solveScreen.js';
 import { groupDiagram } from './groupDiagram.js';
 import { divideFeedbackText } from './divideFeedback.js';
 import { narrowPanel } from './narrowPanel.js';
@@ -89,7 +89,13 @@ export function forwardOf(s) {
   if (s.stage === 'done') return { label: 'Next problem', action: 'next', enabled: true };
   if (sp?.kind === 'error') return { label: 'Check', action: 'check', enabled: false };
   if (introOpen(s)) return { label: 'Next', action: 'introNext', enabled: true };
-  if (sp?.kind === 'hint') return { label: 'Got it', action: 'spotDismiss', enabled: true };
+  if (sp?.kind === 'hint') {
+    const f = forwardCore(s);
+    return f.enabled ? f : { label: 'Got it', action: 'spotDismiss', enabled: true };
+  }
+  return forwardCore(s);
+}
+function forwardCore(s) {
   if (s.sub?.placing) return { label: 'Next', action: 'nextLine', enabled: false };
   if (s.sub && s.sub.step < solve.subTotal(s.sub)) return { label: 'Next', action: 'nextLine', enabled: true };
   if (!s.sub && (s.unfolded || s.pic)) return { label: 'Next', action: 'foldNext', enabled: true };
@@ -104,7 +110,7 @@ function answerRow(s) {
   const last = live && xAlone(s.board);                    // x = blinks only at the last step: x alone on its side
   const typed = html('button', `ab-typed lb-typed lx-field${text ? '' : ' is-empty'}${last ? ' is-focus' : ''}${last && !text ? ' is-blink' : ''}${placing ? ' is-chip' : ''}${live || placing ? '' : ' is-off'}`, [text ? text.replace('-', MINUS) : ' '], {
     type: 'button', 'data-fk': 'answer', 'data-lx-field': '1',
-    ...(placing ? { 'data-chip': '1', 'aria-label': `Your value ${text}: drag it onto x` } : { 'data-action': 'focus', 'data-target': 'answer', 'aria-label': 'Your answer for x' }),
+    ...(placing ? { 'data-chip': '1', 'data-lx-field': '1', 'aria-label': `Your value ${text}: drag it onto x` } : { 'data-action': 'focus', 'data-target': 'answer', 'aria-label': 'Your answer for x' }),
   });
   typed.disabled = !live && !placing;
   const f = forwardButton(forwardOf(s));
@@ -147,7 +153,7 @@ function panel(s) {
 
 // ---------- the pop-ups ----------
 
-const SILENT = new Set(['aFindX', 'aMustMove', 'dPickFraction', 'aPlugIn', 'aPlugCurrent', 'aSolvedBoard', 'dUndone', 'aCorrect', 'aStartedOver',
+const SILENT = new Set(['aPlace', 'aFindX', 'aMustMove', 'dPickFraction', 'aPlugIn', 'aPlugCurrent', 'aSolvedBoard', 'dUndone', 'aCorrect', 'aStartedOver',
   'aUndone', 'aSimplerFirst', 'aUndoGuess']);
 const NUDGE = {
   typeAnswer: 'answer', answerUnreadable: 'answer', aUndoFirst: 'answer', aFinishMoveFirst: 'answer',
@@ -159,6 +165,11 @@ function popups(s, wrap) {
   const o = { root: wrap, find: (root, target) => findSolveTarget(root, target, s), undo: '.lx-undo', moveSel: (m) => `[data-move="${m}"]`, work: '.lb-main' };
   if (sp) { wrap.append(spotlightLayer(sp, { ...o, text: divideFeedbackText(s.feedback) })); return; }
   if (introOpen(s)) { wrap.append(spotlightLayer({ kind: 'intro', lit: ['newest', 'panel', 'forward'] }, { ...o, text: FORCED_TEXT })); return; }
+  // checking a value: everything greys out but the equation being checked and the checking space
+  if (s.sub && s.sub.step < solve.subTotal(s.sub)) {
+    wrap.append(spotlightLayer({ kind: 'intro', lit: ['plugrow', 'check', s.sub.placing ? 'answer' : 'forward'] }, { ...o, text: s.sub.placing ? PLACE_TEXT : null }));
+    return;
+  }
   const note = notePopup(s, { silent: SILENT, nudge: NUDGE, text: divideFeedbackText, scaffold: s.scaffold || s.pic ? 'board' : null });
   if (note) { wrap.append(spotlightLayer(note.spot, { ...o, text: note.text })); return; }
   if (firstUp(s)) wrap.append(spotlightLayer({ kind: 'note', place: 'below' }, { ...o, text: FIRST_TEXT }));

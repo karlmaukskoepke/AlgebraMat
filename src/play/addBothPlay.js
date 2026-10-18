@@ -69,6 +69,7 @@ export const addBothPlay = {
       case 'nextLine': return { type: 'nextLine' };
       case 'next': return { type: 'next' };
       case 'check': return { type: 'check' };
+      case 'placeValue': return { type: 'placeValue' };
       case 'focus': return { type: 'focus', target: d.target };
       case 'stuck': return { type: 'stuck' };
       case 'teach': return { type: 'teach' };

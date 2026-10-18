@@ -12,7 +12,7 @@ const times = (n, action) => Array.from({ length: n }, () => action);
 
 const A = (form, a, x, mirror = false) => makeAddBoth(form, a, x, mirror);
 const addMove = (k) => [{ type: 'choose', move: 'add' }, ...type(k), { type: 'go' }];
-const addCheck = (v) => [...type(v), { type: 'check' }, ...times(3, { type: 'nextLine' })];
+const addCheck = (v) => [...type(v), { type: 'check' }, { type: 'placeValue' }, ...times(2, { type: 'nextLine' })];   // (Build D: the value is dragged into x first)
 
 // x + 8 = −4 (answer −12) is the Level 4 problem the inventory's screenshots use (seed 7).
 const P = A('x+a', 8, -12);

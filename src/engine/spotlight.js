@@ -34,8 +34,8 @@ export function withSpotlight(reduce, card) {
         s.reds = before;
         if (card.startOverAt && before >= card.startOverAt) s.startOver = true;
       }
-      const h = card.hint(s);
-      s.spot = h ? { kind: 'hint', target: h.target, move: h.move ?? null } : null;
+      const h = card.hint(s, state);                                              // (the state before Undo says what the slip was)
+      s.spot = h && !h.ask ? { kind: 'hint', target: h.target, move: h.move ?? null } : null;   // an ask is the card's own (card.ask)
       if (h) s.feedback = { key: h.key, params: { ...(s.feedback?.params ?? {}), ...(h.params ?? {}) }, bad: false };
       return s;
     }

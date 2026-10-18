@@ -48,6 +48,37 @@
           ]
         },
         {
+          "name": "Checking a value side by side (Build D, Part 2)",
+          "about": "Check greys the page except the original equation and the space to its right; drag your value into x, and the check is written beside the equation, one step a Next.",
+          "links": [
+            {
+              "label": "A right answer",
+              "query": "?pack=add-both&level=2&seed=7&nosignin=1",
+              "look": "Add −8, Enter, Enter, type 3, Check: drag the 3 into x (or tap x): (3) + 8 = 11 appears on the right; Next, Next: Balanced."
+            },
+            {
+              "label": "The opposite (−8)",
+              "query": "?pack=add-both&level=2&seed=7&nosignin=1",
+              "look": "Type −8 and Check, drag it into x, Next, Next: “−8 is an important number…”. Undo: the hint lights Add with −8 already in its blank."
+            },
+            {
+              "label": "Added sizes (19)",
+              "query": "?pack=add-both&level=2&seed=7&nosignin=1",
+              "look": "Add −8, Enter, Enter, type 19, Check, drag, Next, Next: “When x = 19, the equation is not balanced.” Undo: 11 − 8: party or battle? right above the numbers."
+            },
+            {
+              "label": "Any other wrong value",
+              "query": "?pack=add-both&level=4&seed=7&nosignin=1",
+              "look": "Type 4, Check, drag, Next, Next: “When x = 4, the equation is not balanced.” Undo: the usual reminder at the +8."
+            },
+            {
+              "label": "Divide it",
+              "query": "?pack=divide-it&level=3&seed=7&nosignin=1",
+              "look": "Type 4, Check, drag the 4 into the x of 5x: 5 × 4 = −15 is written on the right, then 20 = −15, Not balanced."
+            }
+          ]
+        },
+        {
           "name": "The narrow panel (was lights round 2)",
           "about": "Kept (Build D): the narrow panel with its small round lights is the only panel on Add to both sides and Divide it.",
           "links": [

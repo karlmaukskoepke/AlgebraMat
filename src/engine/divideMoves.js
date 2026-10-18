@@ -245,13 +245,13 @@ const DIVIDE_ERRORS = {
   dFail: { target: 'failSide', label: 'doesn’t split' },
   dFail3: { target: 'failSide', label: 'doesn’t split' },
   aUndoFirstHelp: { target: 'lastMove', label: 'waiting for Undo' },
-  aUndoGuess: { target: 'subst', label: 'not balanced' },
-  dWrong: { target: 'answer', label: 'check this', clear: true },
+  aUndoGuess: { target: 'subst' },
+  dWrong: { target: 'subst', clear: true },
 };
 export const DIVIDE_SPOT = {
   error: (s) => DIVIDE_ERRORS[s.feedback?.key] ?? null,
   keepsReds: (s) => ['dFail', 'dFail3'].includes(s.feedback?.key),
-  clear: (s) => { s.entry = ''; },
+  clear: (s) => { s.entry = ''; s.sub = null; },
   hint(s) {
     if (xAlone(s.board)) return { target: 'answer', key: 'aStuckSolved' };
     s.hint = { kind: 'coef' };

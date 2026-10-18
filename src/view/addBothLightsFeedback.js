@@ -29,6 +29,7 @@ const LX = {
   lxZero: () => 'Adding 0 keeps everything the same. Undo it and try a different number.',
   aPickAmount: () => 'What do you add to both sides? Type it in the box.',
   aAmountSet: (p) => `The box says ${p.amount}. Is that what you need to add to cancel? Change it with ± if not.`,
+  aOppHint: (p) => `Add ${p.opposite} to both sides to cancel the ${p.constant}. Press Go.`,
   aStuckHint: (p) => `Look at the ${p.constant} next to x. What would we add to both sides to eliminate it? Type it in the box.`,
   aUndone: () => 'Undone. Try a different number in the box.',
   aGreen: () => 'Fewer terms: that move helped. Press Next.',

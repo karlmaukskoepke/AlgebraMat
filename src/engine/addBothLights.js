@@ -12,7 +12,7 @@
 //        be shown as a negative number (B4). Reorder, minus and combine are undone here; everything else is the engine's.
 // It also counts what the classroom tests need (`s.lx.log`). No DOM here.
 
-import { reduceAddBoth, newAddBoth, xAlone, xSideOf } from './addBothMoves.js';
+import { reduceAddBoth, newAddBoth, xAlone, xSideOf, aloneAsk, alonePair } from './addBothMoves.js';
 import { isTyping, typeInto } from './entry.js';
 import { findTerm, outcomeOf, reorderBoard, combineBoard, pairText, valueOf } from './lightsGrab.js';
 
@@ -370,16 +370,35 @@ const ADD_ERRORS = {
   lxZero: { target: 'xnum', label: 'no change' },
   aZeroOther: { target: 'otherSide', label: 'now 0' },
   aUndoFirstHelp: { target: 'lastMove', label: 'waiting for Undo' },
-  aUndoGuess: { target: 'subst', label: 'not balanced' },
-  aWrong: { target: 'answer', label: 'check this', clear: true },
+  aUndoGuess: { target: 'subst' },
+  aWrong: { target: 'subst', clear: true },
 };
 const plusText = (v) => (v < 0 ? `−${-v}` : `+${v}`);
 export const ADD_SPOT = {
   error: (s) => (s.scaffold ? null : ADD_ERRORS[s.feedback?.key] ?? null),
   keepsReds: (s) => ['aRed', 'aRed3', 'aZeroOther', 'lxZero', 'aPartial'].includes(s.feedback?.key),
   startOverAt: 3,
-  clear: (s) => { s.entry = ''; },
-  hint(s) {
+  clear: (s) => { s.entry = ''; s.sub = null; },
+  // `before`: the state Undo was pressed on. A value that was a slip shapes the hint (Build D, Part 2): the opposite of the number next
+  // to x lights the Add move with that amount in its blank (its preview); added sizes at x = −8 + 11 ask party or battle at the numbers.
+  hint(s, before = null) {
+    const tag = before?.sub?.tag ?? (before?.feedback?.key === 'aWrong' ? before.feedback.params?.tag : null);
+    // added sizes are read from the numbers on screen (x = 11 − 8 and 19), whatever the tag says (19 is also 11 + 8)
+    const pair = xAlone(s.board) ? alonePair(s.board) : null;
+    const typed = before?.sub?.typed;
+    const sizes = pair && Math.sign(pair[0].v) !== Math.sign(pair[1].v) && Math.abs(typed) === Math.abs(pair[0].v) + Math.abs(pair[1].v);
+    if (sizes || (tag === 'sizes-added' && pair)) {
+      aloneAsk(s);
+      return { ask: true, key: 'aAlonePB', params: { sum: s.feedback.params.sum } };
+    }
+    const con0 = s.board[xSideOf(s.board)].find((t) => t.kind === 'num');
+    if (tag === 'gave-opposite' && con0) {
+      s.hint = { kind: 'cancel', id: con0.id };
+      s.menu = 'add';
+      s.amountEntry = String(-con0.v);
+      s.typing = null;
+      return { target: 'xnum', key: 'aOppHint', params: { constant: plusText(con0.v), opposite: plusText(-con0.v) }, move: 'add' };
+    }
     if (xAlone(s.board)) return { target: 'answer', key: 'aStuckSolved' };
     const con = s.board[xSideOf(s.board)].find((t) => t.kind === 'num');
     if (!con) return null;

@@ -12,7 +12,7 @@ const run = (s, ...actions) => actions.reduce(reduce, s);
 const typed = (text) => [...text].map((ch) => (/\d/.test(ch) ? { type: 'digit', digit: Number(ch) } : { type: 'toggleSign' }));
 const start = () => newLightsSession({ ...makeAddBoth('x+a', 8, 3), logLevel: 2 }, { level: 2 });   // x + 8 = 11, x = 3
 const choose = { type: 'choose', move: 'add' };
-const steps = (s) => run(s, { type: 'nextLine' }, { type: 'nextLine' }, { type: 'nextLine' });
+const steps = (s) => run(s, { type: 'placeValue' }, { type: 'nextLine' }, { type: 'nextLine' });
 
 describe('Add to both sides: no Guess x / Use a move choice (idea C)', () => {
   it('opens on "Find x." with x = live and the Add move usable at once', () => {

@@ -215,16 +215,16 @@ function sumHelp(s, level) {
 
 // ---------- x alone with two numbers on the other side (x = −3 + 5): Party/Battle by the problem, then Count it's counters ----------
 // (Build C, Part 3; replaces Build A's text-only sum help.) The numbers are read from the current row; the app never writes the value.
-const alonePair = (board) => { const nums = otherNums(board); return nums.length >= 2 ? [nums[0], nums[1]] : null; };
+export const alonePair = (board) => { const nums = otherNums(board); return nums.length >= 2 ? [nums[0], nums[1]] : null; };
 // 1. the question floats at the two numbers: "−3 + 5: party or battle?"
-function aloneAsk(s) {
+export function aloneAsk(s) {
   const [a, b] = alonePair(s.board);
   s.alone = { a: a.id, b: b.id, kind: null, step: 'pb', walk: null };
   s.hint = { kind: 'sum', ids: [a.id, b.id] };
   s.menu = null;
   s.typing = null;
   if (!s.supportsShown.includes('hint')) s.supportsShown.push('hint');
-  return say(s, 'aAlonePB', { sum: `${signed(a.v)} + ${signed(b.v)}` });
+  return say(s, 'aAlonePB', { sum: `${signed(a.v)} ${b.v < 0 ? '−' : '+'} ${Math.abs(b.v)}` });   // as the row reads: 11 − 8
 }
 // 3. Count it's counters walk on the two numbers, in a tray above them, from the counters (Party/Battle is skipped once answered).
 // Numbers past Count it's counter limit get the sum in words instead.
@@ -632,14 +632,20 @@ export function reduceAddBoth(state, action) {
     case 'check':
       return check(s, applyCombine);
 
-    // ----- the substitution, a line a click (Next): the first line, the second, then Balanced or Not balanced -----
+    // ----- the value is dragged into x (or x is tapped): the copy of the equation is written on the right, with its first line -----
+    case 'placeValue': {
+      if (!s.sub?.placing) return state;
+      s.sub = { ...s.sub, placing: false, step: 1 };
+      return s.sub.ok || s.sub.kind === 'value' ? say(s, 'aPlugIn', { typed: signed(s.sub.typed) }) : say(s, 'aGuessed', { typed: signed(s.sub.typed) }, true);
+    }
+    // ----- the substitution, a line a click (Next): the second line, then Balanced or Not balanced -----
     case 'nextLine': {
-      if (!s.sub || s.sub.step >= 3) return state;
+      if (!s.sub || s.sub.placing || s.sub.step >= 3) return state;
       s.sub = { ...s.sub, step: s.sub.step + 1 };
       if (s.sub.step < 3) return s;
       const { kind, ok, typed, tag } = s.sub;
       if (ok) return finish(s, 'aCorrect');
-      if (kind === 'guess') return say(s, 'aUndoGuess', { typed: signed(typed) });
+      if (kind === 'guess') return say(s, 'aUndoGuess', { typed: signed(typed), tag });
       s.entry = '';                                                          // a wrong value: the row clears so the student retypes
       return say(s, 'aWrong', { typed: signed(typed), tag, value: signed(typed + constantOf(s.problem)) }, true);
     }
@@ -764,8 +770,9 @@ function check(s, applyCombine) {
   if (!correct) { s.wrongs += 1; s.tag = tag; s.tags.push(tag); s.answers.push({ typed: s.entry, tag }); }
   // every typed value is plugged back in, a line a click. A first guess (x not alone yet) slides onto x.
   const kind = xAlone(s.board) || s.scaffold ? 'value' : 'guess';
-  s.sub = { kind, typed, ok: correct, tag, lines: substitutionSteps(s.problem, typed), parts: substitutionParts(s.problem, typed), step: 0 };
-  return correct ? say(s, 'aPlugIn', { typed: signed(typed) }) : say(s, kind === 'guess' ? 'aGuessed' : 'aPlugIn', { typed: signed(typed) }, kind === 'guess');
+  // the value is first dragged into x (Build D, Part 2): the check is written beside the original equation once it is in
+  s.sub = { kind, typed, ok: correct, tag, lines: substitutionSteps(s.problem, typed), parts: substitutionParts(s.problem, typed), step: 0, placing: true };
+  return say(s, 'aPlace', { typed: signed(typed) });
 }
 
 export { formatAddBoth, tagAddBoth };

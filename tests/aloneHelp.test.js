@@ -20,7 +20,7 @@ describe('the counters walk at x = 11 + −8', () => {
     for (let k = 0; k < 8; k++) s = run(s, cnt({ type: 'tapCounter', zone: 0, index: k }), cnt({ type: 'tapCounter', zone: 1, index: k }));
     expect([s.alone.walk.step, s.feedback.key, s.entry]).toEqual(['answer', 'aAloneCount', '']);   // never the value
     expect(run(s, cnt({ type: 'digit', digit: 3 }))).toBe(s);                         // the value goes in x =, not the walk
-    s = run(s, ...typed('3'), { type: 'check' }, { type: 'nextLine' }, { type: 'nextLine' }, { type: 'nextLine' });
+    s = run(s, ...typed('3'), { type: 'check' }, { type: 'placeValue' }, { type: 'nextLine' }, { type: 'nextLine' });
     expect(s.stage).toBe('done');
     const r = makeRecord(s, { t: 0, pack: 'add-both', level: 2, problem: 'x + 8 = 11' });
     expect(r.supports).toEqual(['hint', 'model', 'crossoff']);                          // the existing words only; crossoff because they cancelled

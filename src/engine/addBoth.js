@@ -44,9 +44,11 @@ export const balances = (p, typed) => xSideValue(p, typed) === p.b;
 //   untouched    gave the other side as x
 //   sign-flipped the right size on the wrong team (the opposite of x)
 //   sizes-added  treated a Battle as a Party: added the sizes of the two numbers (only for a Battle)
+//   gave-opposite gave the opposite of the number next to x (−8 for x + 8 = …): the amount to add, not the value (Build D; last, so a
+//                number that fits an older slip keeps its tag on the class sheet)
 export function slipsOf(p) {
   const wrongOp = p.b + constantOf(p);
-  const slips = { 'wrong-op': wrongOp, untouched: p.b, 'sign-flipped': -p.x };
+  const slips = { 'gave-opposite': oppositeOf(p), 'wrong-op': wrongOp, untouched: p.b, 'sign-flipped': -p.x };
   if (isBattle(p)) slips['sizes-added'] = Math.abs(p.b) + p.a;       // (for a Party the sizes do add up: that is the answer)
   return slips;
 }
@@ -55,7 +57,7 @@ export function slipsOf(p) {
 export function tagAddBoth(p, typed) {
   if (typed === p.x) return null;
   const slips = slipsOf(p);
-  for (const tag of ['wrong-op', 'untouched', 'sign-flipped', 'sizes-added']) if (slips[tag] === typed) return tag;
+  for (const tag of ['wrong-op', 'untouched', 'sign-flipped', 'sizes-added', 'gave-opposite']) if (slips[tag] === typed) return tag;
   if (isBattle(p) && -(Math.abs(p.b) + p.a) === typed) return 'sizes-added';
   return 'unmatched';
 }

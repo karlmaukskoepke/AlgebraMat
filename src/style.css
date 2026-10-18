@@ -3504,3 +3504,17 @@ body[data-input='touch'] #play.is-light #controls .btn-pad { min-width: 48px; mi
 .dv-light .lb-subst { font-size: 28px; line-height: 1.35; list-style: none; padding: 4px 0 0; margin: 0; text-align: left; }
 .dv-light .lb-subst .lb-checkhead { display: none; }
 .dv-light .sv-diagram { min-height: 0; border: 0; padding: 0; }
+/* checking a value (Build D, Part 2): the value and every x blink until it is in; an x it went into changes colour */
+.ui-light .lb-x.is-plugx { color: inherit; }
+.ui-light .lb-x.is-droptarget { color: #0072b2; outline: 4px dashed #0072b2; outline-offset: 4px; border-radius: 8px; animation: sv-blink 1s ease-in-out infinite; }
+.ui-light .lb-x.is-placed { color: #0072b2; }
+.ui-light .ab-typed.is-chip { animation: sv-blink 1s ease-in-out infinite; background: #eef7fd; }
+@keyframes sv-blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
+@media (prefers-reduced-motion: reduce) { .ui-light .lb-x.is-droptarget, .ui-light .ab-typed.is-chip { animation: none; } }
+.ui-light .sv-checklist { margin: 0; padding: 6px 0 0; list-style: none; text-align: left; font: 700 34px/1.3 'Kalam', 'Lexend', system-ui, sans-serif; }
+.ui-light .sv-checklist .sv-checkrow { min-height: 0; white-space: nowrap; }
+.ui-light .sv-checklist .is-blue { color: #0072b2; }
+.ui-light .sv-mark.is-good { color: #1b6e3a; }
+.ui-light .sv-mark.is-bad { color: #a3281b; }
+.ui-light .lb-rowwrap.is-plugrow { outline: 0; background: none; }
+.ui-light .sv-checklist li { width: fit-content; }

@@ -96,8 +96,10 @@ function workBottom(o) {
 }
 
 // What a pop-up must never cover: every row of the work and of the check; and, unless it is an error (which greys them), the controls.
-function protectedRects(o, error) {
-  const sel = `.lb-stack .lb-rowwrap .lb-eq, .lx-ghost.is-chosen .lb-eq, .lx-ghost.is-preview .lb-eq, .sv-check .sv-checkrow, .ab-boardwrap svg${error ? '' : ', .lx-answer, .lx-panel, .lx-corners .btn:not(:disabled), .lb-fractionrow:not(.is-off)'}`;
+// (A question asked at a place floats right above it, over the greyed rows: only the controls are kept clear.)
+function protectedRects(o, error, kind) {
+  const rows = kind === 'ask' ? '' : '.lb-stack .lb-rowwrap .lb-eq, .lx-ghost.is-chosen .lb-eq, .lx-ghost.is-preview .lb-eq, .sv-check .sv-checkrow, .ab-boardwrap svg, ';
+  const sel = `${rows}${error ? '.lb-stack .lb-rowwrap .lb-eq' : '.lx-answer, .lx-panel, .lx-corners .btn:not(:disabled), .lb-fractionrow:not(.is-off)'}`;
   const out = [];
   for (const n of o.root.querySelectorAll(sel)) {
     const k = contentRect(n);
@@ -107,7 +109,7 @@ function protectedRects(o, error) {
 }
 // The part of an element that is ink: the union of its children's boxes (an equation row is as wide as the screen; its terms are not).
 function contentRect(n) {
-  const kids = [...n.querySelectorAll('.lx-tok, .lb-num, .lb-x, .lb-plus, .lb-equals, .lx-box, .lb-coef, .lb-frac, .lb-landed, .lx-paren')];
+  const kids = [...n.querySelectorAll('.lx-tok, .lb-num, .lb-x, .lb-plus, .lb-equals, .lx-box, .lb-coef, .lb-frac, .lx-paren, .sv-checkrow')];
   const rects = (kids.length ? kids : [n]).map((k) => k.getBoundingClientRect()).filter((q) => q.width && q.height);
   if (!rects.length) return null;
   return { left: Math.min(...rects.map((q) => q.left)), top: Math.min(...rects.map((q) => q.top)), right: Math.max(...rects.map((q) => q.right)), bottom: Math.max(...rects.map((q) => q.bottom)) };
@@ -142,7 +144,7 @@ export function spotlightLayer(spot, o) {
   const kind = spot.kind;
   const error = kind === 'error';
   const layer = el('div', `spot-layer is-${kind}`, [], { 'data-spot': spot.target ?? '' });
-  const dimStrength = error ? 'strong' : kind === 'intro' || spot.dim === 'strong' ? 'medium' : kind === 'ask' || spot.dim === 'light' ? 'light' : null;
+  const dimStrength = error ? 'strong' : kind === 'intro' || kind === 'ask' || spot.dim === 'strong' ? 'medium' : spot.dim === 'light' ? 'light' : null;
   const dim = dimStrength ? dimmer(dimStrength) : null;
   if (dim) layer.append(dim);
   const frame = spot.target && kind !== 'note' && kind !== 'nudge' && kind !== 'intro'
@@ -165,7 +167,7 @@ export function spotlightLayer(spot, o) {
     arrow.append(svg);
   }
   if (frame) layer.append(frame);
-  layer.append(box);
+  if (o.text) layer.append(box);
   if (arrow) layer.append(arrow);
 
   const find = (t) => (typeof t === 'string' ? o.find(o.root, t) : t);
@@ -175,7 +177,8 @@ export function spotlightLayer(spot, o) {
     const vw = window.innerWidth;
     const vh = window.innerHeight;
     const pad = 6;
-    const r = target?.getBoundingClientRect();
+    const c = target ? contentRect(target) : null;                 // the ink of the target, not its whole row
+    const r = c ? { left: c.left, top: c.top, right: c.right, bottom: c.bottom, width: c.right - c.left, height: c.bottom - c.top } : null;
     if (frame) {
       if (!r) frame.hidden = true;
       else {
@@ -211,7 +214,8 @@ export function spotlightLayer(spot, o) {
     // One rule (Build D, Part 1): the message goes below wherever the action is; with no room there, the nearest free space that covers
     // no equation and no work (nor, unless it is an error, the controls still in use: x =, the green button, the moves, Undo).
     const labelBottom = frame && r ? r.bottom + pad + (frame.querySelector('.spot-label')?.offsetHeight ?? 0) + 4 : 0;
-    const keep = protectedRects(o, error);
+    const keep = protectedRects(o, error, kind);
+    if (r) keep.push({ left: r.left - pad, top: r.top - pad, right: r.right + pad, bottom: labelBottom || r.bottom + pad });
     const undoCopy = layer.querySelector('.spot-undo');
     if (undoCopy) { const ur = undoCopy.getBoundingClientRect(); keep.push({ left: ur.left, top: ur.top, right: ur.right + 70, bottom: ur.bottom }); }
     const area = o.root.querySelector(o.work ?? '.lb-main')?.getBoundingClientRect() ?? { left: 0, right: vw, width: vw };
@@ -253,6 +257,7 @@ export function findSolveTarget(root, target, s = null) {
     case 'otherSide': return sides(newest).find((sd) => !hasX(sd)) ?? newest;
     case 'lastMove': return rows.filter((r) => r.classList.contains('has-work')).at(-1) ?? newest;
     case 'newest': return newest?.querySelector('.lb-eq') ?? newest;
+    case 'plugrow': return root.querySelector('.is-plugrow .lb-eq');
     case 'original': return eqRows[0]?.querySelector('.lb-eq') ?? eqRows[0] ?? null;
     case 'preview': return root.querySelector('.lx-ghost.is-preview .lb-eq, .lx-ghost.is-near .lb-eq, .lx-ghost.is-chosen .lb-eq');
     case 'subst': return root.querySelector('.sv-check .sv-mark, .lx-subst li:last-child, .lb-subst li:last-child') ?? root.querySelector('.lx-subst, .lb-subst');

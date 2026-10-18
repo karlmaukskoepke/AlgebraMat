@@ -216,3 +216,17 @@ Problems, save codes, class-sheet records and the engine traces are unchanged (t
 | `screen:div-failed-stuck@1366x650` | the Build C screen | the light design | Part 1 |
 | `screen:div-alone-stuck-1@1366x768` | the Build C screen | the light design | Part 1 |
 | `screen:div-alone-stuck-1@1366x650` | the Build C screen | the light design | Part 1 |
+
+## Build D, Part 2 (2026-10-18): checking a value side by side
+
+Problems, save codes and the class-sheet records are unchanged (PASS). The class sheet gains one slip word, `gave-opposite` (the
+opposite of the number next to x typed as the value), which Karl asked for; it is tried last, so a number that fits an older slip
+keeps its old tag. The engine traces change from each run's Check on, and every such step was already covered by the `#N-` rows above
+(Build A and Build C), so no new trace row is needed; for the record:
+
+- **Check** now says `aPlace` ("Drag your value into each x.") and the value waits in `sub.placing`; **placeValue** writes the copy and
+  its first line at once (step 1). Add's scripted check is `check, placeValue, nextLine, nextLine` (it was `check, nextLine ×3`);
+  Divide's loses its "landed" step (the value no longer sits on x first: the copy is written beside it).
+- A finished wrong guess says `aUndoGuess` with the slip's tag; a wrong value's error lights the Not balanced line (it lit x =).
+- At x alone the Party/Battle question reads the sum as the row reads it ("11 − 8", was "11 + −8").
+- The screen states `add-wrong-guess`, `add-wrong-guess-undone`, `add-forced-move` and `add-end` tap x after Check (listed under Part 1).

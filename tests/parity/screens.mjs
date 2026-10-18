@@ -29,6 +29,7 @@ const teach = ['click', '[data-action="teach"]'];
 const next = ['click', '[data-action="nextLine"]'];
 const check = ['click', '[data-action="check"]'];
 const undo = ['click', '[data-action="undo"]'];
+const place = ['click', '[data-action="placeValue"]'];          // (Build D: the value is dragged into x, or x is tapped)
 
 export const STATES = {
   'add-opening': [ADD4, []],
@@ -40,10 +41,10 @@ export const STATES = {
   'add-stuck-3': [ADD4, [stuck, stuck, stuck]],
   'add-stuck-4': [ADD4, [stuck, stuck, stuck, stuck]],
   'add-teach': [ADD4, [teach]],
-  'add-wrong-guess': [ADD4, [['type', 4], check, next, next, next]],
-  'add-wrong-guess-undone': [ADD4, [['type', 4], check, next, next, next, undo]],
-  'add-forced-move': [ADD4, [['type', -12], check, next, next, next, ['click', '[data-action="next"]']]],
-  'add-end': [ADD4, [...add(-8), ['type', -12], check, next, next, next]],
+  'add-wrong-guess': [ADD4, [['type', 4], check, place, next, next]],
+  'add-wrong-guess-undone': [ADD4, [['type', 4], check, place, next, next, undo]],
+  'add-forced-move': [ADD4, [['type', -12], check, place, next, next, ['click', '[data-action="next"]']]],
+  'add-end': [ADD4, [...add(-8), ['type', -12], check, place, next, next]],
   'add-partial-stuck-4': [ADD4, [...add(-5), stuck, stuck, stuck, stuck]],
   'add-partial-teach': [ADD4, [...add(-5), teach]],
   'add-alone-stuck-1': [ADD4, [...add(-8), stuck]],

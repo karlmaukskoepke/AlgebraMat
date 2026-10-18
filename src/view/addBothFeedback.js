@@ -20,7 +20,11 @@ const SLIP = {
   'sizes-added': (p) => `${p.opp} and ${p.other} are opposites, so it's a Battle, not a Party. Take the bigger side's sign.`,
   unmatched: (p) => `${NOT(p)} Cancel the ${p.con} with its opposite, ${p.opp}, on both sides.`,
 };
-const slip = (p) => (SLIP[p.tag] ?? SLIP.unmatched)(p);
+export const slip = (p) => (SLIP[p.tag] ?? SLIP.unmatched)(p);
+// The pop-up when a checked value does not balance. Typing the opposite of the number next to x gets its own words (Build D).
+const notBalanced = (p) => (p.tag === 'gave-opposite'
+  ? `${p.typed} is an important number, but it’s not the value of x. It’s what we add to both sides to find x.`
+  : `When x = ${p.typed}, the equation is not balanced.`);
 
 // Why a move waits for Undo, in one sentence (aUndoFirstHelp).
 const UNDO_REASON = {
@@ -117,9 +121,10 @@ const M = {
   aUndoFirstHelp: (p) => `${UNDO_REASON[p.reason] ?? UNDO_REASON.red} Let’s undo it first: press Undo.`,
   aTeach: (p) => `Step by step: the ${p.constant} next to x cancels with its opposite, ${p.opposite}. Add ${p.opposite} to the left, then to the right, then Go.`,
   // typing the answer early (the drag-check)
-  aWrong: slip,
+  // a value that does not balance (Build D, Part 2): what the check showed, never "put it back into x"; the slip shapes the hint after Undo
+  aWrong: (p) => notBalanced(p),
   aGuessed: (p) => `You guessed x = ${p.typed}. This unbalances the equation.`,
-  aUndoGuess: () => 'Press Undo to take your guess back.',
+  aUndoGuess: (p) => notBalanced(p),
   aSimplerFirst: () => 'Let’s make the equation simpler first, and then find the solution.',
   aPlugIn: (p) => `Let’s plug ${p.typed} back in for x, into the original equation. Click Next for each line.`,
   aCorrect: (p) => `Yes! x = ${p.answer}, and it balances.`,

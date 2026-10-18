@@ -41,7 +41,9 @@ const M = {
   dDiag2: (p) => `Share the ${p.size} counters into ${p.n} equal groups: tap a group to give it a counter. Then keep 1 of the ${p.n} groups.`,
   dDiag3: (p) => `The counters are already in ${p.n} equal groups, with 1 of the ${p.n} kept. Count it, and type what x is.`,
   dDiagKept: (p) => `You kept 1 of the groups: that is ${p.frac} of it. Count what is in it, and type x.`,
-  dWrong: (p) => (SLIP[p.tag] ?? SLIP.unmatched)(p),
+  // a value that does not balance (Build D, Part 2): what the check showed; the slip's own words are kept for the class's notes
+  dWrong: (p) => `When x = ${p.typed}, the equation is not balanced.`,
+  dSlip: (p) => (SLIP[p.tag] ?? SLIP.unmatched)(p),
 };
 
 export function divideFeedbackText(fb) {

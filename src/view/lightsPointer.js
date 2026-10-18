@@ -8,6 +8,7 @@
 import { bindAddBothMat } from './addBothPointer.js';
 import { bindGrab } from './lightsGrabPointer.js';
 import { bindHelpTimer } from './helpTimer.js';
+import { bindValueDrag } from './solveScreen.js';
 
 const ADD = '.lb-move[data-move="add"]';
 
@@ -15,6 +16,7 @@ export function bindLightsMat(root, dispatch, getSession) {
   const unbindGrab = bindGrab(root, dispatch, getSession);   // first: a held term's keys are its own
   const unbindDrag = bindAddBothMat(root, dispatch, getSession);
   const unbindHelp = bindHelpTimer(root);
+  const unbindValue = bindValueDrag(root, dispatch);          // the value checked is dragged into x
   let pointerType = 'mouse';
   let keyboard = false;          // was the last input a key (so a focus is the keyboard's, not a click's)?
   let lastKey = null;            // data-fk of the element that had focus, to give it back after a redraw
@@ -117,6 +119,7 @@ export function bindLightsMat(root, dispatch, getSession) {
     const f = root.querySelector('.btn-forward');
     if (f && !f.disabled) { f.click(); return; }
     if (f?.dataset.action === 'go' && root.querySelector('.lx-ghost.is-chosen')) dispatch({ type: 'go' });
+    root.querySelector('[data-x][data-action="placeValue"]')?.click();          // the keyboard's way to put the value into x
   };
   window.addEventListener('keydown', onKey, true);
 
@@ -142,6 +145,7 @@ export function bindLightsMat(root, dispatch, getSession) {
     unbindGrab?.();
     unbindDrag?.();
     unbindHelp();
+    unbindValue();
     obs.disconnect();
     document.removeEventListener('pointerdown', onPointerDown, true);
     root.removeEventListener('pointerover', onOver);

@@ -31,13 +31,8 @@ function termsOf(side, s, o) {
     } else if (t.kind === 'x') {
       const dropOn = o.plug && s.sub?.placing;
       const c = t.coef ?? 1;
-      // the value has landed on this x: it takes x's place in the row (blue, in parentheses when negative) until Next writes the first check row
-      if (o.plug && s.sub?.landed) {
-        const v = s.sub.typed;
-        out.push(html('span', 'lb-landed', [c > 1 ? `${c} × ` : '', html('span', 'is-blue lb-landed-val', [v < 0 ? `(${signed(v)})` : String(v)])]));
-        return;
-      }
-      const xel = html('span', `lb-x${o.plug ? ' is-plugx' : ''}${dropOn ? ' is-droptarget' : ''}`, ['x'], { 'data-x': '1', ...(dropOn ? { 'data-action': 'placeValue', role: 'button', tabindex: '0', 'aria-label': 'Put your value on x' } : {}) });
+      // the value is dragged into each x of the equation being checked; an x it went into changes colour (Build D, Part 2)
+      const xel = html('span', `lb-x${o.plug ? ' is-plugx' : ''}${dropOn ? ' is-droptarget' : ''}${o.plug && s.sub && !s.sub.placing ? ' is-placed' : ''}`, ['x'], { 'data-x': '1', ...(dropOn ? { 'data-action': 'placeValue', role: 'button', tabindex: '0', 'aria-label': 'Put your value into x' } : {}) });
       if (c > 1) out.push(html('span', 'lb-coef', [o.live && s.hint?.kind === 'coef' ? html('span', 'lb-hintbox', [String(c)]) : String(c), xel]));
       else out.push(xel);
     } else {
@@ -80,17 +75,19 @@ export function stackRows(s) {
 
 // ---------- the answer row, Check, Next, the substitution ----------
 
-// The substitution lines: the operation about to happen is bold in the accent colour, and the result of the one before shares it.
-// The equation being checked is named on its own line above the check rows ("Checking in 3x = 12"), never over an equation row.
+// The substitution lines, in the checking space beside the equation being checked (Build D, Part 2): the first is the copy of the
+// equation with the value in parentheses in place of each x; then one operation a press of the green Next, the operation about to
+// happen bold in the accent colour; then Balanced or Not balanced. No labels.
 function substList(s, sub, view) {
-  const list = html('ol', 'lb-subst');
-  const target = sub.target === 'current' ? s.board : s.rows[0].board;
-  list.append(html('li', 'lb-checkhead', [`Checking in ${boardText(target)}`]));
-  view.lines.forEach((line, i) => {
-    const marks = i === view.last ? ' is-current' : '';
-    list.append(html('li', `lb-sline${marks}`, line.segs.map((seg) => (seg.cls ? html('span', seg.cls, [seg.text]) : seg.text))));
-  });
-  if (view.mark) list.append(html('li', sub.ok ? 'is-good' : 'is-bad', [sub.ok ? '✓ Balanced' : '✗ Not balanced']));
+  return checkSpace(view.lines.map((line) => line.segs.map((seg) => (seg.cls ? html('span', seg.cls, [seg.text]) : seg.text))), view.mark ? sub.ok : null, view.last);
+}
+
+// The checking space's rows (shared by every Solve it card): `lines` is a list of rows (each a list of nodes or text), `mark` is true
+// (Balanced), false (Not balanced) or null (not yet), `current` the row being worked.
+export function checkSpace(lines, mark, current = lines.length - 1) {
+  const list = html('ol', 'lb-subst sv-checklist');
+  lines.forEach((kids, i) => list.append(html('li', `sv-checkrow lb-sline${i === current ? ' is-current' : ''}`, kids)));
+  if (mark !== null) list.append(html('li', `sv-checkrow sv-mark ${mark ? 'is-good' : 'is-bad'}`, [mark ? '✓ Balanced' : '✗ Not balanced']));
   return list;
 }
 
@@ -191,6 +188,7 @@ export function undoRow(s, { wrongGuess, cue }) {
 
 // The pop-up texts of the light design's two openings: the very first problem of a visit, and the problem after a correct guess.
 export const FIRST_TEXT = 'Find the value of x.';
+export const PLACE_TEXT = 'Drag your value into each x.';
 export const FORCED_TEXT = 'Your mental math is very strong.\nLet’s try solving this next problem using a move first.';
 
 // The line, kept for screen readers only: what the card says is shown in pop-ups now.
@@ -230,6 +228,7 @@ export function bindForwardKey(root) {
     e.preventDefault();
     e.stopImmediatePropagation();
     if (!f.disabled) f.click();
+    else root.querySelector('[data-x][data-action="placeValue"]')?.click();     // the keyboard's way to put the value into x
   };
   window.addEventListener('keydown', onKey, true);
   return () => window.removeEventListener('keydown', onKey, true);

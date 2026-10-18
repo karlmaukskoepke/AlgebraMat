@@ -39,7 +39,7 @@ describe('the bare screen', () => {
     expect(run(start(), { type: 'greyMove' }).feedback.key).toBe('aLater');
   });
   it('owes a move after a correct guess, and only then', () => {
-    const win = (s) => { let t = run(s, ...typed('−9'), { type: 'check' }); while (t.stage !== 'done') t = run(t, { type: 'nextLine' }); return t; };
+    const win = (s) => { let t = run(s, ...typed('−9'), { type: 'check' }); while (t.stage !== 'done') t = run(t, t.sub?.placing ? { type: 'placeValue' } : { type: 'nextLine' }); return t; };
     expect(owesMove(win(start()))).toBe(true);
     expect(owesMove(start())).toBe(false);
     expect(owesMove(finishByMove(start()))).toBe(false);
@@ -132,16 +132,17 @@ describe('undo and the wrong-move handling', () => {
 });
 
 // a correct value typed, then the substitution clicked through to the end
-const clickThrough = (s) => { let t = s; while (t.sub && t.sub.step < 3) t = run(t, { type: 'nextLine' }); return t; };
+const clickThrough = (s) => { let t = s; while (t.sub && t.sub.step < 3) t = run(t, t.sub.placing ? { type: 'placeValue' } : { type: 'nextLine' }); return t; };
 const finishByMove = (s) => clickThrough(answer(move(s, oppositeOf(s.problem)), String(s.problem.x)));
 
 describe('plugging a typed value back in: a line a click', () => {
   it('a right value when x is alone: the row shows it, then two lines and Balanced, a click each, then the problem is done', () => {
     let s = answer(move(start(), -3), '−9');
-    expect([s.stage, s.sub.kind, s.sub.step, s.sub.ok, s.feedback.key]).toEqual(['moves', 'value', 0, true, 'aPlugIn']);
+    expect([s.stage, s.sub.kind, s.sub.step, s.sub.ok, s.sub.placing, s.feedback.key]).toEqual(['moves', 'value', 0, true, true, 'aPlace']);
     expect(run(s, ...typed('2'))).toBe(s);                                                   // typing waits for the clicks
     expect(run(s, { type: 'check' })).toEqual(s);
-    s = run(s, { type: 'nextLine' }, { type: 'nextLine' });
+    expect(run(s, { type: 'nextLine' })).toBe(s);                                            // the value goes into x first (Build D)
+    s = run(s, { type: 'placeValue' }, { type: 'nextLine' });
     expect([s.stage, s.sub.step]).toEqual(['moves', 2]);
     s = run(s, { type: 'nextLine' });
     expect([s.stage, s.step, s.finalText, s.feedback.key, s.clean]).toEqual(['done', 'done', '−9', 'aCorrect', true]);
@@ -149,16 +150,16 @@ describe('plugging a typed value back in: a line a click', () => {
   });
   it('a right guess is the same: no walkthrough, the next problem is owed a move', () => {
     let s = answer(run(start()), '−9');
-    expect([s.sub.kind, s.sub.ok, s.feedback.key]).toEqual(['guess', true, 'aPlugIn']);
+    expect([s.sub.kind, s.sub.ok, s.feedback.key]).toEqual(['guess', true, 'aPlace']);
     s = clickThrough(s);
     expect([s.stage, owesMove(s)]).toEqual(['done', true]);
   });
   it('a wrong guess: named, equations a click at a time, Not balanced on its own line, then Undo takes it back to the move', () => {
     let s = answer(start(), '5');
-    expect([s.feedback.key, s.sub.typed, s.sub.step, s.sub.lines.length, s.wrongs, s.stuck]).toEqual(['aGuessed', 5, 0, 2, 1, 0]);
+    expect([s.feedback.key, s.sub.typed, s.sub.step, s.sub.lines.length, s.wrongs, s.stuck]).toEqual(['aPlace', 5, 0, 2, 1, 0]);
     expect(s.feedback.params.typed).toBe('5');
     expect(run(s, { type: 'undo' })).toBe(s);                                              // Undo only once the substitution is shown
-    s = run(s, { type: 'nextLine' }, { type: 'nextLine' });
+    s = run(s, { type: 'placeValue' }, { type: 'nextLine' });
     expect([s.sub.step, s.feedback.key]).toEqual([2, 'aGuessed']);
     s = run(s, { type: 'nextLine' });
     expect([s.sub.step, s.feedback.key]).toEqual([3, 'aUndoGuess']);
@@ -282,7 +283,7 @@ describe('I\'m stuck and Teach me bring in the scaffold, one rung at a time', ()
   });
   it('x alone with two numbers (Build C, Part 3): Party/Battle at the numbers, then x =, then Count it\'s counters; never the value', () => {
     let s = run(move(start(), -3), { type: 'stuck' });                                     // x = −6 + −3
-    expect([s.scaffold, s.feedback.key, s.feedback.params.sum, s.alone.step, s.hint.kind]).toEqual([false, 'aAlonePB', '−6 + −3', 'pb', 'sum']);
+    expect([s.scaffold, s.feedback.key, s.feedback.params.sum, s.alone.step, s.hint.kind]).toEqual([false, 'aAlonePB', '−6 − 3', 'pb', 'sum']);
     expect(run(s, { type: 'kind', value: 'battle' }).feedback).toMatchObject({ key: 'aKindWrong', bad: true });
     s = run(s, { type: 'kind', value: 'party' });
     expect([s.feedback.key, s.alone.step, s.typing, boardText(s.board), s.entry]).toEqual(['aAloneRight', 'type', 'answer', 'x = −6 + −3', '']);
@@ -292,7 +293,7 @@ describe('I\'m stuck and Teach me bring in the scaffold, one rung at a time', ()
   });
   it('the question is about the numbers on the current row', () => {
     const s = run(move(start(P('x+a', 3, 4)), -3), { type: 'stuck' });                     // x = 4 + −3
-    expect([s.feedback.key, s.feedback.params.sum]).toEqual(['aAlonePB', '4 + −3']);
+    expect([s.feedback.key, s.feedback.params.sum]).toEqual(['aAlonePB', '4 − 3']);
   });
 });
 

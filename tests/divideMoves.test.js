@@ -107,9 +107,7 @@ describe('plugging a typed value back in (loop §4)', () => {
     expect([s.sub.kind, s.sub.ok, s.sub.placing, s.sub.target, s.feedback.key]).toEqual(['value', true, true, 'original', 'aPlace']);
     expect(shown(s)).toEqual([]);                                                            // nothing is written until the value is placed on x
     s = run(s, { type: 'placeValue' });
-    expect([s.sub.landed, subView(s.sub).landed, shown(s)]).toEqual([true, true, []]);      // the value sits on the original's x first (D1)
-    s = run(s, { type: 'nextLine' });
-    expect([s.sub.landed, shown(s)]).toEqual([false, ['3 × (−4) = −12']]);                  // then the first check row is written
+    expect(shown(s)).toEqual(['3 × (−4) = −12']);                                           // the copy is written beside it at once (Build D)
     s = run(s, { type: 'nextLine' });
     expect(shown(s)).toEqual(['3 × (−4) = −12', '−12 = −12']);
     s = run(s, { type: 'nextLine' });
@@ -118,11 +116,11 @@ describe('plugging a typed value back in (loop §4)', () => {
   it('B1: a correct guess renders the equation as written, with the coefficient, on every form, at the first state and after a partial move', () => {
     for (const [a, x] of [[2, -5], [3, 4], [4, -6], [5, 3], [6, -3], [3, -4]]) {
       const p = P(a, x);
-      const first = shown(run(start(p), ...typed(String(x)), { type: 'check' }, { type: 'placeValue' }, { type: 'nextLine' }))[0];
+      const first = shown(run(start(p), ...typed(String(x)), { type: 'check' }, { type: 'placeValue' }))[0];
       expect(first).toBe(`${a} × ${x < 0 ? `(−${-x})` : x} = ${p.b < 0 ? `−${-p.b}` : p.b}`);
     }
     // after a partial move: a correct guess is plugged into the ORIGINAL equation, not the simplified one
-    const s = run(take(start(P(6, -3)), 2), ...typed('−3'), { type: 'check' }, { type: 'placeValue' }, { type: 'nextLine' });
+    const s = run(take(start(P(6, -3)), 2), ...typed('−3'), { type: 'check' }, { type: 'placeValue' });
     expect([s.sub.target, shown(s)[0]]).toEqual(['original', '6 × (−3) = −18']);
   });
   it('a wrong guess is plugged into the CURRENT equation, ends red, asks for Undo, then points at the move', () => {

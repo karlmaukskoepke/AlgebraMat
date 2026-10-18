@@ -38,13 +38,13 @@ describe('Add to both sides: errors and the hint after Undo', () => {
   it('partly cancelling, zeroing the other side and a wrong guess are errors too, each lighting its own thing', () => {
     expect(spotOf(move(start(), -5), ADD_SPOT)).toMatchObject({ target: 'xnum', label: 'still here' });
     expect(spotOf(move(start(), 4), ADD_SPOT)).toMatchObject({ target: 'otherSide', label: 'now 0' });
-    const g = run(add, start(), ...typed('4'), { type: 'check' }, { type: 'nextLine' }, { type: 'nextLine' }, { type: 'nextLine' });
-    expect(spotOf(g, ADD_SPOT)).toMatchObject({ target: 'subst', label: 'not balanced' });
+    const g = run(add, start(), ...typed('4'), { type: 'check' }, { type: 'placeValue' }, { type: 'nextLine' }, { type: 'nextLine' });
+    expect(spotOf(g, ADD_SPOT)).toMatchObject({ kind: 'error', target: 'subst' });
     expect(spotOf(run(add, g, { type: 'undo' }), ADD_SPOT)).toMatchObject({ kind: 'hint', target: 'xnum' });
   });
   it('a wrong value: Undo only closes the pop-up (nothing to take back), then the x-alone reminder', () => {
-    let s = run(add, move(start(), -8), { type: 'lxNext' }, ...typed('3'), { type: 'check' }, { type: 'nextLine' }, { type: 'nextLine' }, { type: 'nextLine' });
-    expect(spotOf(s, ADD_SPOT)).toMatchObject({ target: 'answer', label: 'check this' });
+    let s = run(add, move(start(), -8), { type: 'lxNext' }, ...typed('3'), { type: 'check' }, { type: 'placeValue' }, { type: 'nextLine' }, { type: 'nextLine' });
+    expect(spotOf(s, ADD_SPOT)).toMatchObject({ kind: 'error', target: 'subst' });
     s = run(add, s, { type: 'undo' });
     expect([s.rows.length, spotOf(s, ADD_SPOT)?.target, s.feedback.key]).toEqual([3, 'answer', 'aStuckSolved']);
   });
@@ -64,5 +64,29 @@ describe('Divide it: a fraction that does not split', () => {
     s = run(div, s, { type: 'undo' });
     expect(spotOf(s, DIVIDE_SPOT)).toMatchObject({ kind: 'hint', target: 'coef', move: 'fraction' });
     expect([s.feedback.key, s.hint.kind, s.reds]).toEqual(['dPickFraction', 'coef', 1]);
+  });
+});
+
+// Build D, Part 2: checking a value, and the slips that shape the hint after Undo
+describe('Build D: the value checked is dragged into x; a slip shapes the hint after Undo', () => {
+  it('the value waits to be dragged into x, then the copy and a line a Next', () => {
+    let s = run(add, start(), ...typed('4'), { type: 'check' });
+    expect([s.sub.placing, s.sub.step, s.feedback.key]).toEqual([true, 0, 'aPlace']);
+    expect(run(add, s, { type: 'nextLine' })).toBe(s);
+    s = run(add, s, { type: 'placeValue' });
+    expect([s.sub.placing, s.sub.step]).toEqual([false, 1]);
+  });
+  it('typing the opposite of the number next to x: its own words, then the Add move with that amount in the blank', () => {
+    let s = run(add, start(), ...typed('−8'), { type: 'check' }, { type: 'placeValue' }, { type: 'nextLine' }, { type: 'nextLine' });
+    expect([s.sub.tag, s.feedback.key, spotOf(s, ADD_SPOT)?.kind]).toEqual(['gave-opposite', 'aUndoGuess', 'error']);
+    s = run(add, s, { type: 'undo' });
+    expect([s.feedback.key, s.menu, s.amountEntry, s.spot.move]).toEqual(['aOppHint', 'add', '-8', 'add']);
+  });
+  it('added sizes at x alone: after Undo, party or battle at the two numbers', () => {
+    const eleven = newLightsSession({ ...makeAddBoth('x+a', 8, 3), logLevel: 2 }, { level: 2 });            // x + 8 = 11 → x = 11 − 8
+    let s = run(add, move(eleven, -8), { type: 'lxNext' }, ...typed('19'), { type: 'check' }, { type: 'placeValue' }, { type: 'nextLine' }, { type: 'nextLine' });
+    expect([s.feedback.key, s.feedback.params.tag]).toEqual(['aWrong', 'wrong-op']);                         // 19 is also 11 + 8: the tag stays
+    s = run(add, s, { type: 'undo' });
+    expect([s.feedback.key, s.alone?.step, spotOf(s, ADD_SPOT)?.kind]).toEqual(['aAlonePB', 'pb', 'ask']);
   });
 });

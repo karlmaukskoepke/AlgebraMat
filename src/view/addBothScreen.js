@@ -20,7 +20,7 @@ import { lightsFeedbackText } from './addBothLightsFeedback.js';
 import { spotlightLayer, findSolveTarget } from './spotlight.js';
 import { boardBlock, trayFor, html } from './addBothMat.js';
 import { narrowPanel } from './narrowPanel.js';
-import { forwardButton, srLine, notePopup, FORCED_TEXT, FIRST_TEXT } from './solveScreen.js';
+import { forwardButton, srLine, notePopup, checkSpace, FORCED_TEXT, FIRST_TEXT, PLACE_TEXT } from './solveScreen.js';
 import { firstOpen } from './visit.js';
 // Count it's counters Mat and its words, read-only, for the help at x alone (Build C, Part 3)
 import { renderMat as renderCountersMat } from './mat.js';
@@ -39,7 +39,7 @@ export const introOpen = (s) => moveOwed(s) && !s.introSeen && !s.drill;
 const firstUp = (s) => firstOpen() && !s.drill && !s.lx.forced && s.rows.length === 1 && s.history.length === 0 && !s.sub && !s.entry && s.stage === 'moves' && !s.scaffold;
 
 // What the card says that needs no pop-up: the screen itself shows it (the blank, the rule line, the green button's word, x = live).
-const SILENT = new Set(['aFindX', 'lxMustMove', 'aMustMove', 'aPickAmount', 'aAmountSet', 'aGreen', 'aSolvedBoard', 'aUndone', 'lxUndone',
+const SILENT = new Set(['aPlace', 'aFindX', 'lxMustMove', 'aMustMove', 'aPickAmount', 'aAmountSet', 'aGreen', 'aSolvedBoard', 'aUndone', 'lxUndone',
   'aStartedOver', 'aPlugIn', 'aPlugCurrent', 'aGuessed', 'lxCombineAsk', 'lxCombined', 'lxCombinedAlone', 'aCorrect', 'aSimplerFirst',
   'aZeroUndone', 'aAloneCounters', 'aAloneCount', 'aAlonePB', 'aAloneRight', 'aUndoGuess', 'dxProducts', 'dxRight', 'dxCrossed', 'aTraded']);
 // Input nudges with nothing to undo: a small pop-up next to where the student is, no dimming.
@@ -57,6 +57,12 @@ function popups(s, wrap) {
   if (introOpen(s)) {
     const lit = ['newest', 'panel', 'forward', ...(s.ui?.preview ? ['preview'] : [])];
     wrap.append(spotlightLayer({ kind: 'intro', lit }, { ...o, text: FORCED_TEXT }));
+    return;
+  }
+  // checking a value: everything greys out but the equation being checked and the checking space (and, while the value waits to be
+  // dragged in, the value; once it is in, the green Next)
+  if (s.sub && s.sub.step < 3) {
+    wrap.append(spotlightLayer({ kind: 'intro', lit: ['plugrow', 'check', s.sub.placing ? 'answer' : 'forward'] }, { ...o, text: s.sub.placing ? PLACE_TEXT : null }));
     return;
   }
   const note = notePopup(s, { silent: SILENT, nudge: NUDGE, text: lightsFeedbackText, scaffold: s.scaffold ? 'board' : null });
@@ -191,9 +197,12 @@ function rowsOf(s) {
     let eq;
     if (live) eq = eqRow(liveSide(s, 'left'), liveSide(s, 'right'), `lx-live${chars}${s.ui?.carry ? ' is-carrying' : ''}`, { role: 'group', 'aria-label': 'The equation: its terms can be picked up' });
     else {
-      const side = (terms) => (plug && s.sub.kind === 'guess'
-        ? sideEls(terms).map((el) => (el.classList.contains('lb-x') ? html('span', 'lb-x lb-guess', [signed(s.sub.typed)]) : el))
-        : sideEls(terms, s.lx.negIds));                          // a term keeps how it was shown in every row it is in
+      // the equation being checked: the value is dragged into its x (or x is tapped), which then changes colour (Build D, Part 2)
+      const side = (terms) => sideEls(terms, s.lx.negIds).map((el) => {
+        if (!plug || !el.classList.contains('lb-x')) return el;
+        if (s.sub.placing) return html('span', 'lb-x is-plugx is-droptarget', ['x'], { 'data-x': '1', 'data-action': 'placeValue', role: 'button', tabindex: '0', 'aria-label': 'Put your value into x' });
+        return html('span', 'lb-x is-plugx is-placed', ['x'], { 'data-x': '1' });
+      });
       eq = eqRow(side(row.board.left), side(row.board.right), chars, { role: 'img', 'aria-label': 'The equation' });
     }
     return html('div', `${cls}${plug ? ' is-plugrow' : ''}`, [eq]);
@@ -304,11 +313,15 @@ export function forwardOf(s) {
   if (s.stage === 'done') return { label: 'Next problem', action: 'next', enabled: true };
   if (sp?.kind === 'error') return { label: 'Check', action: 'check', enabled: false };
   if (introOpen(s)) return { label: 'Next', action: 'introNext', enabled: true };
-  if (sp?.kind === 'hint') return { label: 'Got it', action: 'spotDismiss', enabled: true };
-  if (s.sub) {
-    const stepping = s.sub.step < 3;
-    if (stepping) return { label: 'Next', action: 'nextLine', enabled: true };
+  if (sp?.kind === 'hint') {
+    const f = forwardCore(s);
+    return f.enabled ? f : { label: 'Got it', action: 'spotDismiss', enabled: true };
   }
+  return forwardCore(s);
+}
+function forwardCore(s) {
+  if (s.sub?.placing) return { label: 'Next', action: 'nextLine', enabled: false };
+  if (s.sub && s.sub.step < 3) return { label: 'Next', action: 'nextLine', enabled: true };
   if (s.lx.distribute) return { label: 'Multiply', action: 'lxApply', enabled: s.lx.distribute.entries.every(valid) };
   if (s.lx.combine) return { label: 'Combine', action: 'lxApply', enabled: valid(s.lx.combine.entry) && !s.lx.combine.wrong };
   if (s.combining?.step === 'count') return { label: 'Check', action: 'check', enabled: valid(s.combining.entry) };
@@ -326,26 +339,24 @@ function answerRow(s) {
   const text = counting ? s.combining.entry : s.sub && !live ? String(s.sub.typed) : s.entry;
   // x = never blinks or pulses, except at the last step: x alone on its side
   const last = live && !amountMode(s) && (xAlone(s.board) || counting);
-  const typed = html('button', `ab-typed lb-typed lx-field${text ? '' : ' is-empty'}${last ? ' is-focus' : ''}${last && !text ? ' is-blink' : ''}${live ? '' : ' is-off'}`, [shown(text)], {
-    type: 'button', 'data-action': 'focus', 'data-target': 'answer', 'aria-label': 'Your answer for x', 'data-fk': 'answer', 'data-lx-field': '1',
-  });
-  typed.disabled = !live;
+  const placing = Boolean(s.sub?.placing);                 // the typed value is what is dragged into x
+  const typed = html('button', `ab-typed lb-typed lx-field${text ? '' : ' is-empty'}${last ? ' is-focus' : ''}${last && !text ? ' is-blink' : ''}${live || placing ? '' : ' is-off'}${placing ? ' is-chip' : ''}`, [shown(text)], placing
+    ? { type: 'button', 'data-chip': '1', 'data-fk': 'answer', 'data-lx-field': '1', 'aria-label': `Your value ${shown(text)}: drag it into x` }
+    : { type: 'button', 'data-action': 'focus', 'data-target': 'answer', 'aria-label': 'Your answer for x', 'data-fk': 'answer', 'data-lx-field': '1' });
+  typed.disabled = !live && !placing;
   if (live && s.ui?.focus === 'answer') typed.dataset.lxFocus = '1';
   const f = forwardButton(forwardOf(s));
   if (!f.disabled && ['next', 'nextLine', 'lxNext', 'introNext'].includes(f.dataset.action)) f.dataset.lxFocus = '1';   // the one thing to do
-  return html('div', 'lb-answerrow lx-answer', [html('strong', `lb-prompt${live ? '' : ' is-off'}`, ['x =']), typed, f]);
+  return html('div', 'lb-answerrow lx-answer', [html('strong', `lb-prompt${live || placing ? '' : ' is-off'}`, ['x =']), typed, f]);
 }
 
-// the substitution (a line a click, then Balanced or Not balanced), in the checking space; its Next is the green button
+// The checking space: once the value is in x, the copy of the equation with the value in parentheses, then a line a press of the green
+// Next, then Balanced or Not balanced
 function substBlock(s) {
   const sub = s.sub;
-  const list = html('ol', 'lb-subst lx-subst');
-  if (sub) {
-    const lines = sub.lines.slice(0, Math.min(sub.step, 2));
-    lines.forEach((l, i) => list.append(html('li', 'sv-checkrow', i === 0 && sub.parts ? sub.parts.map((p) => (p.blue ? html('span', 'is-blue', [p.text]) : p.text)) : [l])));
-    if (sub.step >= 3) list.append(html('li', `sv-checkrow sv-mark ${sub.ok ? 'is-good' : 'is-bad'}`, [sub.ok ? '✓ Balanced' : '✗ Not balanced']));
-  }
-  return list;
+  if (!sub) return checkSpace([], null);
+  const lines = sub.lines.slice(0, Math.min(sub.step, 2)).map((l, i) => (i === 0 && sub.parts ? sub.parts.map((p) => (p.blue ? html('span', 'is-blue', [p.text]) : p.text)) : [l]));
+  return checkSpace(lines, sub.step >= 3 ? sub.ok : null);
 }
 
 // The corners: Undo bottom-left; Start over and the help, small and quiet, bottom-right. Teach me appears only after a second error on

@@ -205,17 +205,16 @@ export function createSolveLoop(card) {
       // the value goes onto x (dragged, or tapped there)
       case 'placeValue': {
         if (!s.sub?.placing) return state;
-        s.sub = { ...s.sub, placing: false, landed: true, step: 0 };               // the value lands on the x of that row, and stays there until Next
+        s.sub = { ...s.sub, placing: false, step: 1 };                             // the copy of the equation is written beside it, its first line (Build D)
         return say(s, s.sub.ok || s.sub.kind === 'value' ? 'aPlugIn' : 'aPlugCurrent', { typed: signed(s.sub.typed), where: s.sub.target });
       }
       case 'nextLine': {
         if (!s.sub || s.sub.placing || s.sub.step >= subTotal(s.sub)) return state;
-        if (s.sub.landed) { s.sub = { ...s.sub, landed: false, step: 1 }; return s; }   // the first check row is written; the top row goes back to x
         s.sub = { ...s.sub, step: s.sub.step + 1 };
         if (s.sub.step < subTotal(s.sub)) return s;
         const { kind, ok, typed, tag } = s.sub;
         if (ok) return finish(s, 'aCorrect');
-        if (kind === 'guess') return say(s, 'aUndoGuess', { typed: signed(typed) });
+        if (kind === 'guess') return say(s, 'aUndoGuess', { typed: signed(typed), tag });
         s.entry = '';                                                                       // a wrong value: the row clears so the student retypes
         const m = card.slip(s, typed, tag);
         return say(s, m.key, m.params, true);
