@@ -116,6 +116,37 @@
           ]
         },
         {
+          "name": "Scaffolds in the light design (Build D, Part 5)",
+          "about": "Party or Battle floats right at the numbers or counters with the rest greyed; a battle's pairs stay crossed off; Teach me fills the Add blank and says Do it; the seesaw's tray adds a piece every tap; numbers past 12 get Count it's big-number walk.",
+          "links": [
+            {
+              "label": "Teach me",
+              "query": "?pack=add-both&level=4&seed=7&nosignin=1",
+              "look": "Make two errors (Add 8, Undo, Add 8, Undo) so Teach me appears, then press it: “To cancel the +8 we add its opposite, −8, to both sides”, −8 already in the blank, the green button says Do it. Then party or battle at −4 − 8; it never writes −12."
+            },
+            {
+              "label": "Party or Battle on the seesaw",
+              "query": "?pack=add-both&level=4&seed=7&nosignin=1",
+              "look": "I’m stuck twice (the seesaw), Add −8 to the left and to the right, Go: the question floats at the two groups, the rest greyed. Battle: the pairs stay on the balance, crossed off, until Next."
+            },
+            {
+              "label": "The tray adds a piece every tap",
+              "query": "?pack=add-both&level=2&seed=7&nosignin=1",
+              "look": "I’m stuck twice, pick +, then tap the left side three times: three counters, and + stays picked."
+            },
+            {
+              "label": "Numbers past 12",
+              "query": "?pack=add-both&level=6&seed=2&nosignin=1",
+              "look": "Add 13, Enter, Enter, then I’m stuck: party or battle; again: Add or Subtract, then the sign, beside the numbers. Then type x yourself."
+            },
+            {
+              "label": "Counters crossed off at x alone",
+              "query": "?pack=add-both&level=2&seed=7&nosignin=1",
+              "look": "Add −8, Enter, Enter, I’m stuck, Battle, I’m stuck: draw the counters, Check, tap pairs: crossed-off counters stay, slashed."
+            }
+          ]
+        },
+        {
           "name": "The narrow panel (was lights round 2)",
           "about": "Kept (Build D): the narrow panel with its small round lights is the only panel on Add to both sides and Divide it.",
           "links": [

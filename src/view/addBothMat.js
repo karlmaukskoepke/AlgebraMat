@@ -310,7 +310,7 @@ export function trayFor(s) {
 // While two groups are being combined and the student has asked to cross them off: the pairs struck, as counts per group id.
 function struckCounts(s) {
   const c = s.combining;
-  if (!c || !c.crossed || c.kind !== 'battle') return {};
+  if (!c || !c.crossed || c.kind !== 'battle') return {};   // (the scaffold's battle beside x: crossed off and kept, Build D)
   const find = (id) => [...s.board.left, ...s.board.right].find((t) => t.id === id);
   const a = find(c.a);
   const b = find(c.b);

@@ -26,16 +26,20 @@ describe('the counters walk at x = 11 + −8', () => {
     expect(r.supports).toEqual(['hint', 'model', 'crossoff']);                          // the existing words only; crossoff because they cancelled
     expect(r.answers).toEqual([]);                                                      // the walk's tries stay in the walk
   });
-  it('Teach me starts at the counters and keeps the walk\'s own Party/Battle (it was not answered)', () => {
+  it('Teach me asks party or battle first; asked again, the counters keep the walk\'s own Party/Battle (it was not answered)', () => {
     let s = run(alone(), { type: 'teach' });
+    expect(s.alone.step).toBe('pb');                                                    // Build D: the bubble at the numbers first
+    s = run(s, { type: 'teach' });
     s = run(draw(draw(s, '+', 0, 11), '-', 1, 8), cnt({ type: 'check' }));
     expect(s.alone.walk.step).toBe('partyBattle');
     expect(run(s, cnt({ type: 'choose', choice: 'battle' })).alone.walk.step).toBe('cancel');
   });
-  it('numbers past Count it\'s 12 a side get the sum in words instead; Undo clears the help', () => {
+  it('numbers past Count it\'s 12 a side get Count it\'s big-number walk (Build D): the add or subtract and the sign, never the value', () => {
     let s = run(newAddBoth(makeAddBoth('x+a', 3, 11), { level: 4 }), { type: 'choose', move: 'add' }, ...typed('-3'), { type: 'go' });   // x = 14 + −3
-    s = run(s, { type: 'stuck' }, { type: 'stuck' });
-    expect([boardText(s.board), s.alone, s.feedback.key]).toEqual(['x = 14 + −3', null, 'aStuckSum']);
+    s = run(s, { type: 'stuck' }, { type: 'kind', value: 'battle' }, { type: 'stuck' });
+    expect([boardText(s.board), s.alone.step, s.alone.big.step, s.feedback.key]).toEqual(['x = 14 + −3', 'big', 'addSub', 'aAloneBig']);
+    s = run(s, cnt({ type: 'chooseOp', op: 'subtract' }), cnt({ type: 'chooseSign', sign: '+' }));
+    expect([s.alone.big.step, s.feedback.key, s.entry]).toEqual(['answer', 'aAloneCount', '']);
     const u = run(run(alone(), { type: 'stuck' }), { type: 'undo' });
     expect(u.alone).toBe(null);
   });

@@ -27,12 +27,12 @@ export const ADD_SCENARIOS = {
   'stuck-x4-then-solve': {
     problem: P, opts: { level: 4 },
     actions: [...times(4, { type: 'stuck' }), { type: 'addTo', side: 'left' }, { type: 'addTo', side: 'right' }, { type: 'go' },
-      { type: 'kind', value: 'battle' }, { type: 'kind', value: 'party' }, ...addCheck(-12)],
+      { type: 'kind', value: 'battle' }, { type: 'crossNext' }, { type: 'kind', value: 'party' }, ...addCheck(-12)],   // (Build D: crossed off, then Next)
   },
+  // Build D: Teach me puts the move in the Add blank ("Do it"), then asks party or battle at the numbers
   'teach-me': {
     problem: P, opts: { level: 4 },
-    actions: [{ type: 'teach' }, { type: 'addTo', side: 'left' }, { type: 'addTo', side: 'right' }, { type: 'go' },
-      { type: 'kind', value: 'battle' }, { type: 'kind', value: 'party' }, ...addCheck(-12)],
+    actions: [{ type: 'teach' }, { type: 'go' }, { type: 'kind', value: 'party' }, ...addCheck(-12)],
   },
   'forced-move': { problem: A('x-a', 5, 3), opts: { level: 4, forceMove: true }, actions: [...addMove(5), ...addCheck(3)] },
   // the states Build A changes: a partial move, x alone with two numbers, a red move waiting for Undo

@@ -19,6 +19,8 @@ import { newCombineSession } from './combineSession.js';
 import { reduce as reduceWalk } from './session.js';
 import { makeProblem } from './expr.js';
 import { MAX_PER_ZONE } from './moves.js';
+// Count it's big-number walk (no counters), for numbers past the counters' limit at x alone (Build D, Part 5): the same read-only use
+import { newBigSession, reduceBig } from './bigSession.js';
 
 
 // ---------- the board ----------
@@ -232,8 +234,19 @@ function aloneCounters(s) {
   const pair = s.alone ? [s.alone.a, s.alone.b].map((id) => find(s.board, id)) : alonePair(s.board);
   if (!pair || !pair[0] || !pair[1]) return sumHelp(s, 3);
   const [a, b] = pair;
-  if (Math.abs(a.v) > MAX_PER_ZONE || Math.abs(b.v) > MAX_PER_ZONE) { s.alone = null; return sumHelp(s, 3); }
-  if (s.alone?.walk) return say(s, 'aAloneCounters');
+  if (s.alone?.walk || s.alone?.big) return say(s, s.alone.big ? 'aAloneBig' : 'aAloneCounters');
+  if (Math.abs(a.v) > MAX_PER_ZONE || Math.abs(b.v) > MAX_PER_ZONE) {
+    // past the counters' limit: Count it's big-number walk, from Party or Battle (the numbers are on screen already, so no circling)
+    let big = newBigSession({ mode: 'integers-big', terms: [{ kind: 'int', op: '+', value: a.v }, { kind: 'int', op: '+', value: b.v }] });
+    big = { ...big, step: 'partyBattle', feedback: { key: 'bigPartyIntro' } };
+    if (s.alone?.kind) big = reduceBig(big, { type: 'choose', choice: s.alone.kind });
+    s.alone = { a: a.id, b: b.id, kind: s.alone?.kind ?? null, step: 'big', walk: null, big };
+    s.hint = { kind: 'sum', ids: [a.id, b.id] };
+    s.menu = null;
+    s.typing = null;
+    if (!s.supportsShown.includes('model')) s.supportsShown.push('model');
+    return say(s, 'aAloneBig');
+  }
   s.alone = { a: a.id, b: b.id, kind: s.alone?.kind ?? null, step: 'counters', walk: newCombineSession(makeProblem(a.v, '+', b.v)) };
   s.hint = { kind: 'sum', ids: [a.id, b.id] };
   s.menu = null;
@@ -244,8 +257,17 @@ function aloneCounters(s) {
 // An action of the counters walk: drawing, checking the drawing, Party/Battle (only if it was not answered), cancelling pairs.
 // The walk stops at its answer step: the student types the value in x =, not in the walk.
 const WALK_ACTIONS = new Set(['pickSign', 'tapZone', 'tapCounter', 'check', 'choose']);
+const BIG_ACTIONS = new Set(['choose', 'chooseOp', 'chooseSign']);
 function walkStep(s, act) {
   const al = s.alone;
+  // the big-number walk stops at its answer step too: the value is typed in x =
+  if (al?.big) {
+    if (!BIG_ACTIONS.has(act?.type) || ['answer', 'done'].includes(al.big.step)) return null;
+    const b = reduceBig(al.big, act);
+    if (b === al.big) return null;
+    s.alone = { ...al, big: b, kind: b.choice ?? al.kind };
+    return say(s, b.step === 'answer' ? 'aAloneCount' : 'aAloneBig');
+  }
   if (!al?.walk || !WALK_ACTIONS.has(act?.type) || al.walk.step === 'answer' || al.walk.step === 'done') return null;
   if (act.type === 'check' && al.walk.step !== 'draw') return null;
   let w = reduceWalk(al.walk, act);
@@ -342,7 +364,7 @@ export function reduceAddBoth(state, action) {
   }
 
   // While two groups are being combined, only that is going on (and help, Undo, and giving it up).
-  if (s.combining && !['kind', 'crossOff', 'abandon', 'check', 'stuck', 'teach', 'undo'].includes(action.type)) return state;
+  if (s.combining && !['kind', 'crossOff', 'crossNext', 'abandon', 'check', 'stuck', 'teach', 'undo'].includes(action.type)) return state;
 
   switch (action.type) {
     case 'focus': {
@@ -533,11 +555,17 @@ export function reduceAddBoth(state, action) {
         const after = judged.feedback;                                                     // how the move went, said after the confirmation
         return say(judged, 'aKindRight', { kind: right, alone: xAlone(s.board), after: after && !xAlone(s.board) ? { key: after.key, params: after.params } : null }, Boolean(after?.bad));
       }
-      s.history.push(snapshot(s));
-      s.board = combineTerms(s.board, a.id, b.id);
-      s.combining = null;
-      s.combinedNote = { kind: right, g1: params.g1, g2: params.g2, total: params.total };
-      return startPair(s);
+      // a battle: the pairs are crossed off and stay on the balance, struck, until the green Next (Build D, Part 5: never just gone)
+      if (right === 'battle') {
+        s.combining = { ...s.combining, step: 'struck', crossed: true, kind: 'battle' };
+        return say(s, 'aStruck', params);
+      }
+      return combineNow(s, a, b, right, params);
+    }
+    case 'crossNext': {
+      if (s.combining?.step !== 'struck') return state;
+      const { a, b } = combineTerms2(s);
+      return combineNow(s, a, b, 'battle', combineParams(s));
     }
     // 3. the counters walk at x alone (Count it's engine, unchanged)
     case 'cnt':
@@ -609,12 +637,25 @@ export function reduceAddBoth(state, action) {
       s.helped = true;
       if (!s.supportsShown.includes('forced')) s.supportsShown.push('forced');
       // x is alone: there is nothing to add, so Teach me gives the sum help in full
+      // x is alone: party or battle at the two numbers (Build D, Part 5); asked again, Count it's counters
       if (xAlone(s.board) && !s.combining) {
-        if (alonePair(s.board)) return aloneCounters(s);                        // 4. Teach me here starts at the counters
+        if (alonePair(s.board)) return s.alone ? aloneCounters(s) : aloneAsk(s);
         s.sumAsks = 3;
         return sumHelp(s, 3);
       }
       s.forced = true;
+      // Teach me in the light design (Build D, Part 5): the move that cancels the number next to x, already in the Add move's blank
+      // (its preview on the equation), with "Do it" on the green button; then party or battle at the numbers. Never the value.
+      if (!s.scaffold) {
+        const con = xConstantTerm(s.board);
+        s.forcedAmount = cancelAmount(s.board);
+        s.teachFlow = true;
+        s.menu = 'add';
+        s.typing = null;
+        s.amountEntry = String(s.forcedAmount);
+        s.hint = con ? { kind: 'cancel', id: con.id } : null;
+        return say(s, 'aTeachDo', { opposite: plus(s.forcedAmount), constant: con ? plus(con.v) : '' });
+      }
       enterScaffold(s);
       // the move that cancels the number now next to x (after a partial move, not the original one)
       const constant = xConstantTerm(s.board);
@@ -687,6 +728,15 @@ function buildStep(s, problem) {
     return say(s, 'aBuilt');
   }
   return say(s, 'aBuilding', { have: s.built.constant, other: s.built.other });
+}
+
+// The pair beside x is combined (the scaffold's ritual) and the next pair is asked about.
+function combineNow(s, a, b, kind, params) {
+  s.history.push(snapshot(s));
+  s.board = combineTerms(s.board, a.id, b.id);
+  s.combining = null;
+  s.combinedNote = { kind, g1: params.g1, g2: params.g2, total: params.total };
+  return startPair(s);
 }
 
 const combineTerms2 = (s) => ({ a: find(s.board, s.combining.a), b: find(s.board, s.combining.b) });

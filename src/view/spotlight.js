@@ -99,7 +99,7 @@ function workBottom(o) {
 // (A question asked at a place floats right above it, over the greyed rows: only the controls are kept clear.)
 function protectedRects(o, error, kind) {
   const rows = kind === 'ask' ? '' : '.lb-stack .lb-rowwrap .lb-eq, .lx-ghost.is-chosen .lb-eq, .lx-ghost.is-preview .lb-eq, .sv-check .sv-checkrow, .ab-boardwrap svg, ';
-  const sel = `${rows}${error ? '.lb-stack .lb-rowwrap .lb-eq' : '.lx-answer, .lx-panel, .lx-corners .btn:not(:disabled), .lb-fractionrow:not(.is-off)'}`;
+  const sel = `${rows}${error ? '.lb-stack .lb-rowwrap .lb-eq' : '.lx-answer, .lx-panel, .lx-corners .btn:not(:disabled), .lb-fractionrow:not(.is-off), .ab-tray, .ab-sidebtns, .alone-tray'}`;
   const out = [];
   for (const n of o.root.querySelectorAll(sel)) {
     const k = contentRect(n);
@@ -276,6 +276,7 @@ export function findSolveTarget(root, target, s = null) {
     case 'answer': return root.querySelector('[data-fk="answer"], .lb-typed');
     case 'forward': return root.querySelector('.btn-forward');
     case 'panel': return root.querySelector('.lx-panel');
+    case 'combining': return [...root.querySelectorAll('.ab-boardwrap .is-combining')];
     case 'pair': return [...root.querySelectorAll('.lx-live .lx-tok.is-pair')];
     case 'sumbox': return root.querySelector('.lx-box.is-sum');
     case 'blank': return root.querySelector('.lx-ghost.is-chosen .lx-box:not(.is-mirror)');

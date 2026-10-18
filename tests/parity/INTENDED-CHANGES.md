@@ -248,3 +248,15 @@ and sheet words are as before. Changes in play (the traces that reach them were 
 - After a fraction that did not split, Undo's hint is `dWhichFraction` (it was `dPickFraction`) with the move open (`menu: 'fraction'`):
   the boxes bracketed, "We want only one of the five x boxes.", "What fraction of these boxes should we find?" and ½ ⅓ ¼ ⅕ ⅙, the tried
   ones crossed off. A choice from the list is `take` with `fromList`; the right one leaves its picture (1 of the 5 boxes kept) until Next.
+
+## Build D, Part 5 (2026-10-18): scaffolds
+
+| Key | Before | After | Why |
+|---|---|---|---|
+| `event:add-both/teach-me` | supports `forced` | supports `forced, hint` | Teach me's move is in the Add blank ("Do it"), then party or battle is asked at the numbers (recorded as `hint`, as at x alone since Build C) |
+
+Traces (already covered by the Build A/C rows): Teach me on a bare screen no longer opens the seesaw (`teach` gives `aTeachDo` with the
+amount in the blank; Go commits it; at x alone `aAlonePB`); Teach me at x alone asks party or battle first (`aAlonePB`, it was
+`aAloneCounters`); in the seesaw a battle beside x is `step: 'struck'` (crossed off, kept) until `crossNext`. The scripted runs
+`stuck-x4-then-solve` (adds `crossNext`) and `teach-me` (now `teach, go, kind party, check`) follow the new flow. Numbers past 12 at x
+alone get Count it's big-number walk (no scripted run reaches it).

@@ -78,17 +78,20 @@ export const addBothPlay = {
       case 'undo': return { type: 'undo' };
       case 'addTo': return { type: 'addTo', side: d.side };
       // Count it's counters at x alone (Build C, Part 3): its Mat's taps and the tray's buttons go to the walk
-      case 'zone': return d.zone !== undefined ? { type: 'cnt', act: { type: 'tapZone', zone: Number(d.zone) } } : { type: 'zone', side: d.side };
+      case 'zone': return /^\d+$/.test(d.zone ?? '') ? { type: 'cnt', act: { type: 'tapZone', zone: Number(d.zone) } } : { type: 'zone', side: d.side };   // (the seesaw's sides are named, the counters' zones numbered)
       case 'counter': return { type: 'cnt', act: { type: 'tapCounter', zone: Number(d.zone), index: Number(d.index) } };
       case 'cntPick': return { type: 'cnt', act: { type: 'pickSign', sign: d.sign } };
       case 'cntCheck': return { type: 'cnt', act: { type: 'check' } };
       case 'cntChoose': return { type: 'cnt', act: { type: 'choose', choice: d.value } };
+      case 'bigOp': return { type: 'cnt', act: { type: 'chooseOp', op: d.value } };
+      case 'bigSign': return { type: 'cnt', act: { type: 'chooseSign', sign: d.value } };
       case 'pickPiece': return { type: 'pickPiece', piece: d.piece };
       case 'buildRemove': return { type: 'buildRemove', side: d.side, what: d.what };
       case 'buildTap': return { type: 'buildTap', group: d.group, sign: d.sign, remove: Boolean(d.remove) };
       case 'select': return { type: 'select', id: d.id };
       case 'kind': return { type: 'kind', value: d.value };
       case 'crossOff': return { type: 'crossOff' };
+      case 'crossNext': return { type: 'crossNext' };
       case 'abandon': return { type: 'abandon' };
       default: return null;
     }

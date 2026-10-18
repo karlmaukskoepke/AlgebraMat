@@ -15,6 +15,7 @@ const answer = (s, text) => run(s, ...typed(text), { type: 'check' });
 
 // the scaffold's way: the next two numbers on a side are highlighted and the student says Party or Battle; the right answer combines them
 function combineOne(s) {
+  if (s.combining?.step === 'struck') return run(s, { type: 'crossNext' });       // a battle's pairs stay crossed off until Next (Build D)
   const a = s.board[s.combining ? (s.board.left.some((t) => t.id === s.combining.a) ? 'left' : 'right') : 'left'].find((t) => t.id === s.combining.a);
   const b = [...s.board.left, ...s.board.right].find((t) => t.id === s.combining.b);
   return run(s, { type: 'kind', value: kindOf(a.v, b.v) });
@@ -258,6 +259,9 @@ describe('I\'m stuck and Teach me bring in the scaffold, one rung at a time', ()
     expect(run(s, { type: 'kind', value: 'party' }).feedback.key).toBe('aKindWrong');
     expect(run(s, { type: 'kind', value: 'party' }).combining).toEqual(first);
     s = run(s, { type: 'kind', value: 'battle' });                                         // +3 and −3: a Battle, they cancel
+    expect([s.combining.step, s.combining.crossed, s.feedback.key, boardText(s.board)]).toEqual(['struck', true, 'aStruck', 'x + 3 + −3 = −6 + −3']);   // crossed off, kept (Build D)
+    expect(run(s, { type: 'kind', value: 'party' })).toBe(s);
+    s = run(s, { type: 'crossNext' });
     expect(boardText(s.board)).toBe('x = −6 + −3');
     expect(s.feedback.params.before).toBe('Battle! 3 and −3 make 0.');
     expect(s.combining.step).toBe('kind');                                                 // now the other side
@@ -268,12 +272,11 @@ describe('I\'m stuck and Teach me bring in the scaffold, one rung at a time', ()
     const s = run(start(), { type: 'stuck' }, { type: 'stuck' });
     expect(run(s, ...typed('5')).entry).toBe('');
   });
-  it('Teach me: the scaffold on a forced path, only the right amount, and it counts as a Teach me', () => {
-    let s = run(start(), { type: 'teach' });
-    expect([s.taught, s.forced, s.scaffold, s.menu, s.amountEntry]).toEqual([1, true, true, 'add', '-3']);
-    s = run(s, ...[{ type: 'toggleSign' }]);
-    s = run(start(), { type: 'teach' }, { type: 'backspace' }, { type: 'backspace' }, ...typed('2'), { type: 'addTo', side: 'left' });
-    expect(s.feedback.key).toBe('aForced');
+  it('Teach me (Build D): the cancelling move in the Add blank, no seesaw, only that amount, and it counts as a Teach me', () => {
+    const s = run(start(), { type: 'teach' });
+    expect([s.taught, s.forced, s.scaffold, s.menu, s.amountEntry, s.teachFlow, s.feedback.key]).toEqual([1, true, false, 'add', '-3', true, 'aTeachDo']);
+    expect(run(s, { type: 'backspace' }, { type: 'backspace' }, ...typed('2'), { type: 'go' }).feedback.key).toBe('aForced');
+    expect(boardText(run(s, { type: 'go' }).board)).toBe('x = −6 + −3');
   });
   it('a typed answer once the scaffold has got x alone is plugged back in, and then finishes the problem', () => {
     let s = run(start(), { type: 'stuck' }, { type: 'stuck' }, { type: 'choose', move: 'add' }, ...typed('−3'), { type: 'addTo', side: 'left' }, { type: 'addTo', side: 'right' }, { type: 'go' });

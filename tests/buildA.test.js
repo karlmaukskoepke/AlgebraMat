@@ -20,8 +20,9 @@ const start = () => newAddBoth(makeAddBoth('x+a', 8, -12), { level: 4 });
 const partial = () => add(start(), ...addMove(-5));
 
 // A partial move made inside the seesaw: −5 to both sides, the +8 and −5 beside x combine to +3, the other side stays −4 + −5.
+// (Build D: a battle's pairs stay crossed off until Next)
 const scaffoldPartial = () => add(start(), stuck, stuck, { type: 'choose', move: 'add' }, ...type(-5), { type: 'addTo', side: 'left' }, { type: 'addTo', side: 'right' }, { type: 'go' },
-  { type: 'kind', value: 'battle' }, { type: 'kind', value: 'party' });
+  { type: 'kind', value: 'battle' }, { type: 'crossNext' }, { type: 'kind', value: 'party' });
 
 describe('Add: the guided rung and Teach me use the number now next to x', () => {
   it('after a partial move in the seesaw, the guided rung offers the opposite of the +3 now there, not of the original +8', () => {
@@ -55,16 +56,17 @@ describe('Add: x alone with two numbers on the other side (Build C, Part 3 repla
     expect([s.feedback.key, s.alone.walk.step, boardText(s.board)]).toEqual(['aAloneCounters', 'draw', 'x = −4 + −8']);
     for (const k of ['aAlonePB', 'aAloneRight', 'aAloneCounters', 'aAloneCount']) expect(addBothFeedbackText({ key: k, params: { sum: '−4 + −8', kind: 'party' } })).not.toContain('12');
   });
-  it('Teach me starts at the counters, never says to add again, and counts as a Teach me', () => {
+  it('Teach me starts at party or battle at the numbers (Build D), never says to add again, and counts as a Teach me', () => {
     const s = add(alone(), { type: 'teach' });
-    expect([s.feedback.key, s.alone.step, s.forced, s.scaffold, s.taught, s.amountEntry]).toEqual(['aAloneCounters', 'counters', false, false, 1, '']);
+    expect([s.feedback.key, s.alone.step, s.forced, s.scaffold, s.taught, s.amountEntry]).toEqual(['aAlonePB', 'pb', false, false, 1, '']);
+    expect(add(s, { type: 'teach' }).alone.step).toBe('counters');                       // asked again: the counters
   });
 });
 
 describe('Add: Party / Battle never writes the answer', () => {
   it('a right pick on the other side confirms; the numbers stay and x = is still empty', () => {
     let s = add(start(), stuck, stuck, { type: 'choose', move: 'add' }, ...type(-8), { type: 'addTo', side: 'left' }, { type: 'addTo', side: 'right' }, { type: 'go' });
-    s = add(s, { type: 'kind', value: 'battle' });                                      // +8 and −8 beside x cancel, as before
+    s = add(s, { type: 'kind', value: 'battle' }, { type: 'crossNext' });               // +8 and −8 beside x cancel (crossed off, then Next)
     expect(boardText(s.board)).toBe('x = −4 + −8');
     expect(add(s, { type: 'kind', value: 'battle' }).feedback.key).toBe('aKindWrong');   // a wrong pick: the old nudge
     s = add(s, { type: 'kind', value: 'party' });

@@ -25,6 +25,8 @@ import { firstOpen } from './visit.js';
 // Count it's counters Mat and its words, read-only, for the help at x alone (Build C, Part 3)
 import { renderMat as renderCountersMat } from './mat.js';
 import { feedbackText as countersText } from './feedback.js';
+import { bigFeedbackText } from './bigFeedback.js';
+import { bigNotes } from '../play/bigPlay.js';
 
 const btn = (label, action, cls, attrs = {}) => html('button', cls, [label], { type: 'button', 'data-action': action, ...attrs });
 const shown = (v) => (v ? v.replace('-', MINUS) : ' ');
@@ -39,7 +41,7 @@ export const introOpen = (s) => moveOwed(s) && !s.introSeen && !s.drill;
 const firstUp = (s) => firstOpen() && !s.drill && !s.lx.forced && s.rows.length === 1 && s.history.length === 0 && !s.sub && !s.entry && s.stage === 'moves' && !s.scaffold;
 
 // What the card says that needs no pop-up: the screen itself shows it (the blank, the rule line, the green button's word, x = live).
-const SILENT = new Set(['aPlace', 'aFindX', 'lxMustMove', 'aMustMove', 'aPickAmount', 'aAmountSet', 'aGreen', 'aSolvedBoard', 'aUndone', 'lxUndone',
+const SILENT = new Set(['aTeachDo', 'aAloneBig', 'aPlace', 'aFindX', 'lxMustMove', 'aMustMove', 'aPickAmount', 'aAmountSet', 'aGreen', 'aSolvedBoard', 'aUndone', 'lxUndone',
   'aStartedOver', 'aPlugIn', 'aPlugCurrent', 'aGuessed', 'lxCombineAsk', 'lxCombined', 'lxCombinedAlone', 'aCorrect', 'aSimplerFirst',
   'aZeroUndone', 'aAloneCounters', 'aAloneCount', 'aAlonePB', 'aAloneRight', 'aUndoGuess', 'dxProducts', 'dxRight', 'dxCrossed', 'aTraded']);
 // Input nudges with nothing to undo: a small pop-up next to where the student is, no dimming.
@@ -69,6 +71,11 @@ function popups(s, wrap) {
   // dragged in, the value; once it is in, the green Next)
   if (s.sub && s.sub.step < 3) {
     wrap.append(spotlightLayer({ kind: 'intro', lit: ['plugrow', 'check', s.sub.placing ? 'answer' : 'forward'] }, { ...o, text: s.sub.placing ? PLACE_TEXT : null }));
+    return;
+  }
+  // Teach me: the move to make, in the Add move's blank, with Add lit; the green button says Do it
+  if (s.teachFlow && blankOpen(s)) {
+    wrap.append(spotlightLayer({ kind: 'hint', target: 'xnum', move: 'add', place: 'below' }, { ...o, text: lightsFeedbackText(s.feedback) }));
     return;
   }
   // the drill's end: a negative in front of x: a hint lights Flip everything
@@ -361,6 +368,9 @@ function forwardCore(s) {
   if (s.lx.distribute) return { label: 'Multiply', action: 'lxApply', enabled: s.lx.distribute.entries.every(valid) };
   if (s.lx.combine) return { label: 'Combine', action: 'lxApply', enabled: valid(s.lx.combine.entry) && !s.lx.combine.wrong };
   if (s.combining?.step === 'count') return { label: 'Check', action: 'check', enabled: valid(s.combining.entry) };
+  if (s.combining?.step === 'struck') return { label: 'Next', action: 'crossNext', enabled: true };
+  if (s.combining) return { label: 'Check', action: 'check', enabled: false };
+  if (s.teachFlow && blankOpen(s) && amountMode(s)) return { label: 'Do it', action: 'go', enabled: valid(s.amountEntry) };
   if (s.scaffold && s.stage === 'moves' && s.menu === 'add') return { label: 'Go', action: 'go', enabled: Boolean(s.pending?.both) && s.leftDelta === s.rightDelta };
   if (blankOpen(s) && amountMode(s)) return { label: 'Go', action: 'go', enabled: valid(s.amountEntry) };
   if (s.lx.awaitNext !== null) return { label: 'Next', action: 'lxNext', enabled: true };
@@ -449,7 +459,43 @@ function panel(s) {
 // Count it's counters walk on the two numbers at x alone, in a tray directly above them (below them if there is no room above). An
 // overlay: nothing on the page moves. The walk's own palette is left behind; the tray has only what the walk needs here: + and −
 // to draw, Check for the drawing, Party / Battle if it was not answered at the numbers. Counters are tapped on the Mat to cancel.
+// Numbers past the counters' limit (Build D, Part 5): Count it's big-number walk in the same tray, without counters: Party or Battle,
+// Add or Subtract, the sign; then the value is typed in x = (the walk never writes it).
+function bigTray(s, wrap) {
+  const b = s.alone.big;
+  const tools = html('div', 'alone-tools');
+  const choice = (label, action, value, cls = '') => html('button', `btn ${cls}`.trim(), [label], { type: 'button', 'data-action': action, 'data-value': value });
+  if (b.step === 'partyBattle') tools.append(choice('Party!', 'cntChoose', 'party', 'btn-party'), choice('Battle!', 'cntChoose', 'battle', 'btn-battle'));
+  else if (b.step === 'addSub') tools.append(choice('Add', 'bigOp', 'add'), choice('Subtract', 'bigOp', 'subtract'));
+  else if (b.step === 'sign') tools.append(choice('+', 'bigSign', '+'), choice('−', 'bigSign', '-'));
+  const notes = bigNotes(b).map((n) => html('p', 'alone-note', [n]));
+  const caption = b.step === 'answer' ? 'Now type x.' : b.feedback?.key === 'bigPartyIntro' ? 'Look at the signs: the same (a Party) or different (a Battle)?' : bigFeedbackText(b.feedback);
+  const tray = html('div', 'alone-tray is-big', [...notes, html('p', 'alone-caption', [caption]), tools], { role: 'group', 'aria-label': 'Working out the two numbers' });
+  wrap.append(tray);
+  placeTray(tray, wrap);
+}
+function placeTray(tray, wrap) {
+  const place = () => {
+    if (!tray.isConnected) return;
+    const nums = findSolveTarget(wrap, 'otherSide');
+    if (!nums) return;
+    const r = nums.getBoundingClientRect();
+    const h = tray.offsetHeight;
+    const w = tray.offsetWidth;
+    // directly above the numbers; with no room there, beside them on the right (never over x = and the green button)
+    const panel = wrap.querySelector('.lx-panel')?.getBoundingClientRect();
+    let left = r.left + r.width / 2 - w / 2;
+    let top = r.top - 10 - h;
+    if (top < 8) { left = r.right + 16; top = Math.max(8, r.top + r.height / 2 - h / 2); if (panel && left + w > panel.left - 8) left = panel.left - 8 - w; }
+    Object.assign(tray.style, { left: `${Math.min(Math.max(8, left), window.innerWidth - w - 8)}px`, top: `${top}px` });
+  };
+  requestAnimationFrame(place);
+  setTimeout(place, 400);
+  setTimeout(place, 1800);
+}
+
 function aloneTray(s, wrap) {
+  if (s.alone?.big && s.stage !== 'done') { bigTray(s, wrap); return; }
   const w = s.alone?.walk;
   if (!w || s.stage === 'done') return;
   const tools = html('div', 'alone-tools');
@@ -467,18 +513,7 @@ function aloneTray(s, wrap) {
   mat.setAttribute('viewBox', '100 44 500 160');
   const tray = html('div', 'alone-tray', [mat, html('p', 'alone-caption', [w.step === 'answer' ? 'Count who is left. Type it in x =.' : countersText(w.feedback)]), tools], { role: 'group', 'aria-label': 'Counters for the two numbers' });
   wrap.append(tray);
-  const place = () => {
-    if (!tray.isConnected) return;
-    const nums = findSolveTarget(wrap, 'otherSide');
-    if (!nums) return;
-    const r = nums.getBoundingClientRect();
-    const h = tray.offsetHeight;
-    const left = Math.min(Math.max(8, r.left + r.width / 2 - tray.offsetWidth / 2), window.innerWidth - tray.offsetWidth - 8);
-    const top = r.top - 10 - h >= 8 ? r.top - 10 - h : r.bottom + 10;
-    Object.assign(tray.style, { left: `${left}px`, top: `${top}px` });
-  };
-  requestAnimationFrame(place);
-  setTimeout(place, 400);
+  placeTray(tray, wrap);
 }
 
 export function renderAddBothScreen(s) {

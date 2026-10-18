@@ -175,6 +175,13 @@ export function withLights(reduce = reduceAddBoth) {
           lx.awaitNext = s.rows.length - 1;
           s.ui.focus = 'next';
         }
+        // Teach me's move is done for the student's "Do it": committed at once; at x alone, party or battle at the numbers (Build D)
+        if (s.teachFlow) {
+          s.teachFlow = false;
+          s.forced = false;
+          commit(s, 'implicit');
+          if (xAlone(s.board) && alonePair(s.board)) aloneAsk(s);
+        }
         break;
       }
       case 'undo':
@@ -435,6 +442,8 @@ export const ADD_SPOT = {
   prompt: (s) => (moveOwed(s) ? 'lxMustMove' : 'aFindX'),
   // the help at x alone (Build C, Part 3): "Party or battle?" floats at the two numbers, then "Now type x." at the field
   ask(s) {
+    // the scaffold's pair: party or battle, floating right above the two groups on the balance (Build D, Part 5)
+    if (s.scaffold && s.combining?.step === 'kind') return { kind: 'ask', target: 'combining', choices: [['Party!', 'party'], ['Battle!', 'battle']] };
     if (s.alone?.step === 'pb') return { kind: 'ask', target: 'otherSide', choices: [['Party!', 'party'], ['Battle!', 'battle']] };
     if (s.alone?.step === 'type') return { kind: 'ask', target: 'answer' };
     return null;
