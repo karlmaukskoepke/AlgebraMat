@@ -51,3 +51,28 @@ Format: decision, why, date. All dated 2026-10-11 unless noted.
 - **Tutorials play once per student, then by choice** (replay button). Applies to every card's tutorial. (Karl)
 - **Add to both sides screen redesigned** after Karl's first look: balance and seesaw on the dashed border, board above the equation, drag-up tray, Balancing moves panel, checkboxes. (Karl)
 - **Divide it** spec saved (`SPEC-DIVIDE-IT.md`); review and defaults in `SPEC-DIVIDE-IT-BUILD-NOTES.md`.
+
+## 2026-10-18: the light design (Karl, after testing Builds C and the round-2 experiment live)
+
+The direction every later build serves. **Principles:** fewer elements on screen; a much smaller moves panel; fewer buttons; more
+space for the problem; no banner at the top, only just-in-time pop-ups; the screen greys out and the relevant thing is lit during any
+feedback loop; previews of moves on mouseover; manipulable equations with previews built in.
+
+**Successes (keep, and only tweak from now on):**
+- Hover-preview of a move on the equation, and filling the blank in that row.
+- Error pop-ups that dim the page, light the error and are cleared only by a pulsing Undo, followed by a hint pop-up.
+- The narrow moves panel.
+- Dragging terms: reorder, cross the midline, combine.
+- Distributing by dragging the factor onto the parentheses, after tapping the minus to make it a negative.
+- Party/Battle shown right at the numbers.
+- Level 1 going straight to problems, with "See why it works" as a button.
+- The test-links page and its Live / Testing / Retired list.
+- Divide's first feedback box (the "can't split 5x in half evenly" box).
+- Dragging the tested value into every x (from Divide).
+
+**Retired:**
+- Guess x / Use a move.
+- The tucked layout.
+- The banner for feedback.
+- The Why? lights column and the goal labels in the student view. (The engine may keep judging internally, for messages and
+  class-sheet tags; nothing of it is shown.)
