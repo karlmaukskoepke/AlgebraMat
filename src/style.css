@@ -3416,9 +3416,12 @@ body {
   border: 2px solid var(--ink); border-radius: 999px; background: #fff; color: var(--ink); font: 800 15px 'Lexend', system-ui, sans-serif; box-shadow: 0 3px 10px rgba(0, 0, 0, 0.18); pointer-events: none; z-index: -1; }
 .lx-dot:hover, .lx-dot:focus-visible { z-index: 40; }
 /* the pointer near a move: it jumps up a little, and its preview starts faintly */
-.ui-light .lx-panel .lx-move.is-near { transform: translateY(-3px); box-shadow: 0 4px 0 #bdb7a4; transition: transform 0.12s; }
+/* (only the picture inside jumps: the button itself stays put, so its edge never runs away from the pointer) */
+.ui-light .lx-panel .lx-move .lb-icon { transition: transform 0.12s; }
+.ui-light .lx-panel .lx-move.is-near .lb-icon { transform: translateY(-4px); }
+.ui-light .lx-panel .lx-move.is-near { box-shadow: 0 3px 0 #bdb7a4; }
 .ui-light .lx-ghost.is-near { visibility: visible; opacity: 0.45; }
-@media (prefers-reduced-motion: reduce) { .ui-light .lx-panel .lx-move.is-near { transform: none; } }
+@media (prefers-reduced-motion: reduce) { .ui-light .lx-panel .lx-move.is-near .lb-icon { transform: none; } }
 /* the work: left, the solving space; right, the checking space (no labels; a faint dotted line only while checking) */
 .ui-light .sv-work { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); width: 100%; align-items: start; }
 .ui-light .sv-solve { min-width: 0; }
@@ -3479,10 +3482,12 @@ body[data-input='touch'] #play.is-light #controls { position: fixed; left: 50%; 
 body[data-input='touch'] #play.is-light[data-pad='closed'] #controls { display: none; }
 body[data-input='touch'] #play.is-light #controls .btn-pad { min-width: 48px; min-height: 48px; }
 /* the header and the level dots fade to a thin strip after the start of a problem; the top of the screen brings them back */
-#play.is-light .topbar { transition: opacity 0.4s, max-height 0.4s, padding 0.4s; max-height: 80px; overflow: hidden; }
-#play.is-light:not(.hdr-show) .topbar:not(:focus-within) { opacity: 0.25; max-height: 8px; padding-bottom: 0; }
-#play.is-light:not(.hdr-show) .topbar:not(:focus-within) > * { visibility: hidden; }
-@media (prefers-reduced-motion: reduce) { #play.is-light .topbar { transition: none; } }
+/* (it fades in place: nothing on the page moves when it goes, so a click never lands somewhere else) */
+#play.is-light .topbar > * { transition: opacity 0.4s, visibility 0s; }
+#play.is-light .topbar { transition: border-color 0.4s; }
+#play.is-light:not(.hdr-show) .topbar:not(:focus-within) { border-bottom-color: #d8d4c6; }
+#play.is-light:not(.hdr-show) .topbar:not(:focus-within) > * { opacity: 0; visibility: hidden; transition: opacity 0.4s, visibility 0s 0.4s; }
+@media (prefers-reduced-motion: reduce) { #play.is-light .topbar, #play.is-light .topbar > * { transition: none; } }
 /* the freed space goes to the problem */
 .ui-light .lb-rowwrap .lb-eq, .ui-light .lx-ghosteq { font-size: 46px; }
 .ui-light .lb-rowwrap.has-work .lb-eq { font-size: 32px; }

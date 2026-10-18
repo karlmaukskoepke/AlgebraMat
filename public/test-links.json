@@ -147,6 +147,180 @@
           ]
         },
         {
+          "name": "Build D screenshots",
+          "about": "The acceptance screenshots of the real site, one button each (they open on GitHub; the full report is docs/build-d/BUILD-D-REPORT.md).",
+          "links": [
+            {
+              "label": "01 · opening no banner",
+              "query": "https://github.com/karlmaukskoepke/AlgebraMat/blob/main/docs/build-d/bd-01-opening-no-banner-768.png",
+              "look": "The 1366×768 screenshot (the 1366×650 one is next to it, ending in 650).",
+              "notLive": "Opens the picture on GitHub, not the app; GitHub may ask you to sign in."
+            },
+            {
+              "label": "02 · green go",
+              "query": "https://github.com/karlmaukskoepke/AlgebraMat/blob/main/docs/build-d/bd-02-green-go-768.png",
+              "look": "The 1366×768 screenshot (the 1366×650 one is next to it, ending in 650).",
+              "notLive": "Opens the picture on GitHub, not the app; GitHub may ask you to sign in."
+            },
+            {
+              "label": "03 · green next",
+              "query": "https://github.com/karlmaukskoepke/AlgebraMat/blob/main/docs/build-d/bd-03-green-next-768.png",
+              "look": "The 1366×768 screenshot (the 1366×650 one is next to it, ending in 650).",
+              "notLive": "Opens the picture on GitHub, not the app; GitHub may ask you to sign in."
+            },
+            {
+              "label": "04 · green check",
+              "query": "https://github.com/karlmaukskoepke/AlgebraMat/blob/main/docs/build-d/bd-04-green-check-768.png",
+              "look": "The 1366×768 screenshot (the 1366×650 one is next to it, ending in 650).",
+              "notLive": "Opens the picture on GitHub, not the app; GitHub may ask you to sign in."
+            },
+            {
+              "label": "05 · error arrow below work",
+              "query": "https://github.com/karlmaukskoepke/AlgebraMat/blob/main/docs/build-d/bd-05-error-arrow-below-work-768.png",
+              "look": "The 1366×768 screenshot (the 1366×650 one is next to it, ending in 650).",
+              "notLive": "Opens the picture on GitHub, not the app; GitHub may ask you to sign in."
+            },
+            {
+              "label": "06 · check drag into x",
+              "query": "https://github.com/karlmaukskoepke/AlgebraMat/blob/main/docs/build-d/bd-06-check-drag-into-x-768.png",
+              "look": "The 1366×768 screenshot (the 1366×650 one is next to it, ending in 650).",
+              "notLive": "Opens the picture on GitHub, not the app; GitHub may ask you to sign in."
+            },
+            {
+              "label": "07 · check dragging",
+              "query": "https://github.com/karlmaukskoepke/AlgebraMat/blob/main/docs/build-d/bd-07-check-dragging-768.png",
+              "look": "The 1366×768 screenshot (the 1366×650 one is next to it, ending in 650).",
+              "notLive": "Opens the picture on GitHub, not the app; GitHub may ask you to sign in."
+            },
+            {
+              "label": "08 · check copy on the right",
+              "query": "https://github.com/karlmaukskoepke/AlgebraMat/blob/main/docs/build-d/bd-08-check-copy-on-the-right-768.png",
+              "look": "The 1366×768 screenshot (the 1366×650 one is next to it, ending in 650).",
+              "notLive": "Opens the picture on GitHub, not the app; GitHub may ask you to sign in."
+            },
+            {
+              "label": "09 · check stepping",
+              "query": "https://github.com/karlmaukskoepke/AlgebraMat/blob/main/docs/build-d/bd-09-check-stepping-768.png",
+              "look": "The 1366×768 screenshot (the 1366×650 one is next to it, ending in 650).",
+              "notLive": "Opens the picture on GitHub, not the app; GitHub may ask you to sign in."
+            },
+            {
+              "label": "10 · check balanced",
+              "query": "https://github.com/karlmaukskoepke/AlgebraMat/blob/main/docs/build-d/bd-10-check-balanced-768.png",
+              "look": "The 1366×768 screenshot (the 1366×650 one is next to it, ending in 650).",
+              "notLive": "Opens the picture on GitHub, not the app; GitHub may ask you to sign in."
+            },
+            {
+              "label": "11 · not balanced",
+              "query": "https://github.com/karlmaukskoepke/AlgebraMat/blob/main/docs/build-d/bd-11-not-balanced-768.png",
+              "look": "The 1366×768 screenshot (the 1366×650 one is next to it, ending in 650).",
+              "notLive": "Opens the picture on GitHub, not the app; GitHub may ask you to sign in."
+            },
+            {
+              "label": "12 · other wrong hint",
+              "query": "https://github.com/karlmaukskoepke/AlgebraMat/blob/main/docs/build-d/bd-12-other-wrong-hint-768.png",
+              "look": "The 1366×768 screenshot (the 1366×650 one is next to it, ending in 650).",
+              "notLive": "Opens the picture on GitHub, not the app; GitHub may ask you to sign in."
+            },
+            {
+              "label": "13 · opposite error",
+              "query": "https://github.com/karlmaukskoepke/AlgebraMat/blob/main/docs/build-d/bd-13-opposite-error-768.png",
+              "look": "The 1366×768 screenshot (the 1366×650 one is next to it, ending in 650).",
+              "notLive": "Opens the picture on GitHub, not the app; GitHub may ask you to sign in."
+            },
+            {
+              "label": "14 · opposite hint",
+              "query": "https://github.com/karlmaukskoepke/AlgebraMat/blob/main/docs/build-d/bd-14-opposite-hint-768.png",
+              "look": "The 1366×768 screenshot (the 1366×650 one is next to it, ending in 650).",
+              "notLive": "Opens the picture on GitHub, not the app; GitHub may ask you to sign in."
+            },
+            {
+              "label": "15 · sizes added error",
+              "query": "https://github.com/karlmaukskoepke/AlgebraMat/blob/main/docs/build-d/bd-15-sizes-added-error-768.png",
+              "look": "The 1366×768 screenshot (the 1366×650 one is next to it, ending in 650).",
+              "notLive": "Opens the picture on GitHub, not the app; GitHub may ask you to sign in."
+            },
+            {
+              "label": "16 · sizes added party or battle",
+              "query": "https://github.com/karlmaukskoepke/AlgebraMat/blob/main/docs/build-d/bd-16-sizes-added-party-or-battle-768.png",
+              "look": "The 1366×768 screenshot (the 1366×650 one is next to it, ending in 650).",
+              "notLive": "Opens the picture on GitHub, not the app; GitHub may ask you to sign in."
+            },
+            {
+              "label": "17 · forced move",
+              "query": "https://github.com/karlmaukskoepke/AlgebraMat/blob/main/docs/build-d/bd-17-forced-move-768.png",
+              "look": "The 1366×768 screenshot (the 1366×650 one is next to it, ending in 650).",
+              "notLive": "Opens the picture on GitHub, not the app; GitHub may ask you to sign in."
+            },
+            {
+              "label": "18 · drag red over the line",
+              "query": "https://github.com/karlmaukskoepke/AlgebraMat/blob/main/docs/build-d/bd-18-drag-red-over-the-line-768.png",
+              "look": "The 1366×768 screenshot (the 1366×650 one is next to it, ending in 650).",
+              "notLive": "Opens the picture on GitHub, not the app; GitHub may ask you to sign in."
+            },
+            {
+              "label": "19 · combine",
+              "query": "https://github.com/karlmaukskoepke/AlgebraMat/blob/main/docs/build-d/bd-19-combine-768.png",
+              "look": "The 1366×768 screenshot (the 1366×650 one is next to it, ending in 650).",
+              "notLive": "Opens the picture on GitHub, not the app; GitHub may ask you to sign in."
+            },
+            {
+              "label": "20 · divide half fails",
+              "query": "https://github.com/karlmaukskoepke/AlgebraMat/blob/main/docs/build-d/bd-20-divide-half-fails-768.png",
+              "look": "The 1366×768 screenshot (the 1366×650 one is next to it, ending in 650).",
+              "notLive": "Opens the picture on GitHub, not the app; GitHub may ask you to sign in."
+            },
+            {
+              "label": "21 · divide half crossed",
+              "query": "https://github.com/karlmaukskoepke/AlgebraMat/blob/main/docs/build-d/bd-21-divide-half-crossed-768.png",
+              "look": "The 1366×768 screenshot (the 1366×650 one is next to it, ending in 650).",
+              "notLive": "Opens the picture on GitHub, not the app; GitHub may ask you to sign in."
+            },
+            {
+              "label": "22 · divide third fails",
+              "query": "https://github.com/karlmaukskoepke/AlgebraMat/blob/main/docs/build-d/bd-22-divide-third-fails-768.png",
+              "look": "The 1366×768 screenshot (the 1366×650 one is next to it, ending in 650).",
+              "notLive": "Opens the picture on GitHub, not the app; GitHub may ask you to sign in."
+            },
+            {
+              "label": "23 · divide half and third crossed",
+              "query": "https://github.com/karlmaukskoepke/AlgebraMat/blob/main/docs/build-d/bd-23-divide-half-and-third-crossed-768.png",
+              "look": "The 1366×768 screenshot (the 1366×650 one is next to it, ending in 650).",
+              "notLive": "Opens the picture on GitHub, not the app; GitHub may ask you to sign in."
+            },
+            {
+              "label": "24 · divide fifth applied",
+              "query": "https://github.com/karlmaukskoepke/AlgebraMat/blob/main/docs/build-d/bd-24-divide-fifth-applied-768.png",
+              "look": "The 1366×768 screenshot (the 1366×650 one is next to it, ending in 650).",
+              "notLive": "Opens the picture on GitHub, not the app; GitHub may ask you to sign in."
+            },
+            {
+              "label": "25 · party or battle at the counters",
+              "query": "https://github.com/karlmaukskoepke/AlgebraMat/blob/main/docs/build-d/bd-25-party-or-battle-at-the-counters-768.png",
+              "look": "The 1366×768 screenshot (the 1366×650 one is next to it, ending in 650).",
+              "notLive": "Opens the picture on GitHub, not the app; GitHub may ask you to sign in."
+            },
+            {
+              "label": "26 · battle pairs crossed off",
+              "query": "https://github.com/karlmaukskoepke/AlgebraMat/blob/main/docs/build-d/bd-26-battle-pairs-crossed-off-768.png",
+              "look": "The 1366×768 screenshot (the 1366×650 one is next to it, ending in 650).",
+              "notLive": "Opens the picture on GitHub, not the app; GitHub may ask you to sign in."
+            },
+            {
+              "label": "27 · counters crossed off",
+              "query": "https://github.com/karlmaukskoepke/AlgebraMat/blob/main/docs/build-d/bd-27-counters-crossed-off-768.png",
+              "look": "The 1366×768 screenshot (the 1366×650 one is next to it, ending in 650).",
+              "notLive": "Opens the picture on GitHub, not the app; GitHub may ask you to sign in."
+            },
+            {
+              "label": "28 · teach me",
+              "query": "https://github.com/karlmaukskoepke/AlgebraMat/blob/main/docs/build-d/bd-28-teach-me-768.png",
+              "look": "The 1366×768 screenshot (the 1366×650 one is next to it, ending in 650).",
+              "notLive": "Opens the picture on GitHub, not the app; GitHub may ask you to sign in."
+            }
+          ]
+        },
+        {
           "name": "The narrow panel (was lights round 2)",
           "about": "Kept (Build D): the narrow panel with its small round lights is the only panel on Add to both sides and Divide it.",
           "links": [

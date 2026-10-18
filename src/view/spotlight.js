@@ -234,7 +234,6 @@ export function spotlightLayer(spot, o) {
     const fits = (c) => c.left >= 8 && c.top >= 8 && c.left + bw <= vw - 8 && c.top + bh <= vh - 8
       && !keep.some((k) => c.left < k.right + 4 && c.left + bw > k.left - 4 && c.top < k.bottom + 4 && c.top + bh > k.top - 4);
     const pick = cands.find(fits) ?? cands[0];
-    if (typeof window !== 'undefined' && window.__spotDebug) window.__spotDebug.push({ cands, keep, bw, bh, pick: pick.name });
     let { left, top } = pick;
     box.dataset.side = pick.name;
     left = Math.min(Math.max(8, left), vw - bw - 8);

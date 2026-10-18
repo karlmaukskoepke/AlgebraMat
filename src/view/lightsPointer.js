@@ -36,12 +36,14 @@ export function bindLightsMat(root, dispatch, getSession) {
 
   const onOver = (e) => {
     if (e.pointerType !== 'mouse' || !lights()) return;
-    if (e.target.closest?.(ADD)) preview(true);
+    if (e.target.closest?.(ADD) && getSession?.()?.ui?.preview !== true) preview(true);
   };
   const onOut = (e) => {
     if (e.pointerType !== 'mouse' || !lights()) return;
     const from = e.target.closest?.(ADD);
-    if (from && !(e.relatedTarget && from.contains(e.relatedTarget))) dispatch({ type: 'ui', patch: { preview: 'near' } });   // still near
+    // (a redraw swaps the icon under a still pointer: going from the old icon to the new one is not leaving it)
+    if (!from || !from.isConnected || e.relatedTarget?.closest?.(ADD) || (e.relatedTarget && from.contains(e.relatedTarget))) return;
+    if (getSession?.()?.ui?.preview === true) dispatch({ type: 'ui', patch: { preview: 'near' } });   // still near
   };
   root.addEventListener('pointerover', onOver);
   root.addEventListener('pointerout', onOut);
@@ -85,7 +87,7 @@ export function bindLightsMat(root, dispatch, getSession) {
   const onFocusOut = (e) => {
     if (!lights()) return;
     // (a redraw removing the focused icon fires this too, mid-redraw: wait, then check the focus really left the icon)
-    if (e.target.matches?.(ADD) && keyboard) queueMicrotask(() => { if (!document.activeElement?.matches?.(ADD)) preview(false); });
+    if (e.target.matches?.(ADD) && keyboard && e.target.isConnected) setTimeout(() => { if (!document.activeElement?.matches?.(ADD) && !root.querySelector(`${ADD}:hover`)) preview(false); }, 0);
     if (e.relatedTarget && !root.contains(e.relatedTarget)) lastKey = null;
   };
   root.addEventListener('focusin', onFocusIn);
