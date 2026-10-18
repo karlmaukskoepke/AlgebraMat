@@ -25,6 +25,10 @@ export function bindGrab(root, dispatch, getSession) {
   function slotAt(e) {
     const row = live();
     if (!row || !drag) return null;
+    if (drag.factor) {                                              // a factor goes onto its own parenthesis, or back (B6)
+      const paren = row.querySelector(`[data-paren="${drag.factor}"]`)?.getBoundingClientRect();
+      return paren && e.clientX >= paren.left - 8 && e.clientX <= paren.right + 8 && e.clientY >= paren.top - 30 && e.clientY <= paren.bottom + 30 ? { paren: drag.factor } : null;
+    }
     const box = row.getBoundingClientRect();
     if (e.clientY < box.top - REACH || e.clientY > box.bottom + REACH) return null;
     const border = row.querySelector('.lb-border').getBoundingClientRect();
@@ -46,6 +50,8 @@ export function bindGrab(root, dispatch, getSession) {
     const row = live();
     if (!row || !slot) { drag.ghost.classList.add('is-away'); return; }
     drag.ghost.classList.remove('is-away');
+    drag.ghost.lastChild.hidden = true;
+    if (slot.paren) { row.querySelector(`[data-paren="${slot.paren}"]`)?.classList.add('is-combine-target'); return; }
     const crossing = slot.side !== drag.src.dataset.side;
     drag.ghost.classList.toggle('is-crossing', crossing);
     drag.ghost.firstChild.textContent = crossing && drag.term.kind === 'num' ? crossedText(drag.term.v) : drag.text;
@@ -69,20 +75,22 @@ export function bindGrab(root, dispatch, getSession) {
     const src = e.target.closest?.('.lx-live [data-tok]');
     const s = getSession();
     if (!src || !s || !canGrab(s) || src.classList.contains('is-gap')) return;
-    const term = findTerm(s.board, src.dataset.tok)?.term;
+    const factor = src.dataset.factor ?? null;
+    const term = findTerm(s.board, factor ?? src.dataset.tok)?.term;
     if (!term) return;
-    drag = { id: term.id, term, pid: e.pointerId, x0: e.clientX, y0: e.clientY, started: false, minus: e.target.closest('[data-minus]')?.dataset.minus ?? null, src, text: src.textContent.trim(), slot: null };
+    drag = { id: term.id, term, factor, pid: e.pointerId, x0: e.clientX, y0: e.clientY, started: false, minus: e.target.closest('[data-minus]')?.dataset.minus ?? null, src, text: src.textContent.trim(), slot: null };
   };
   const onMove = (e) => {
     if (!drag || e.pointerId !== drag.pid) return;
     if (!drag.started) {
       if (Math.hypot(e.clientX - drag.x0, e.clientY - drag.y0) < THRESHOLD) return;
       drag.started = true;
-      drag.src = live()?.querySelector(`[data-tok="${drag.id}"]`) ?? drag.src;     // (the row may have been redrawn since the press)
+      drag.src = live()?.querySelector(`[data-tok="${drag.src.dataset.tok}"]`) ?? drag.src;     // (the row may have been redrawn since the press)
       const ghost = document.createElement('div');
       ghost.className = 'lx-dragghost';
       ghost.append(document.createElement('span'), Object.assign(document.createElement('span'), { className: 'lx-swap', textContent: '⇄' }));
       ghost.firstChild.textContent = drag.text;
+      ghost.lastChild.hidden = true;
       document.body.append(ghost);
       drag.ghost = ghost;
       drag.src.classList.add('is-lifted');
@@ -96,7 +104,7 @@ export function bindGrab(root, dispatch, getSession) {
   };
   const finish = (e, cancelled) => {
     if (!drag || e.pointerId !== drag.pid) return;
-    const { id, started, minus } = drag;
+    const { id, started, minus, factor } = drag;
     const slot = started && !cancelled ? slotAt(e) : null;
     end();
     if (!started) {
@@ -107,7 +115,8 @@ export function bindGrab(root, dispatch, getSession) {
     const swallow = (ev) => { ev.stopPropagation(); ev.preventDefault(); };
     window.addEventListener('click', swallow, { capture: true, once: true });
     setTimeout(() => window.removeEventListener('click', swallow, { capture: true }), 0);
-    dispatch({ type: 'lxDrop', id, slot, how: 'pointer' });
+    if (factor) dispatch(slot ? { type: 'lxDistribute', id, how: 'pointer' } : { type: 'lxDrop', id, slot: null, how: 'pointer' });
+    else dispatch({ type: 'lxDrop', id, slot, how: 'pointer' });
   };
   const onUp = (e) => finish(e, false);
   const onCancel = (e) => finish(e, true);
@@ -125,7 +134,14 @@ export function bindGrab(root, dispatch, getSession) {
     const focused = document.activeElement?.closest?.('.lx-live [data-tok]');
     const stop = () => { e.preventDefault(); e.stopImmediatePropagation(); };
     if (carry) {
-      if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+      const factor = carry.id.endsWith(':f') ? carry.id.slice(0, -2) : null;   // a factor: back, or onto its parenthesis (B6)
+      if (factor && (e.key === 'ArrowLeft' || e.key === 'ArrowRight')) {
+        stop();
+        dispatch({ type: 'ui', patch: { carry: { id: carry.id, slot: e.key === 'ArrowRight' ? { paren: factor } : { home: true } } } });
+      } else if (factor && e.key === 'Enter' && !e.repeat) {
+        stop();
+        dispatch(carry.slot.paren ? { type: 'lxDistribute', id: factor, how: 'key' } : { type: 'lxDrop', id: factor, slot: null, how: 'key' });
+      } else if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
         stop();
         const slots = slotsFor(s.board, carry.id);
         const k = slots.findIndex((x) => sameSlot(x, carry.slot));
@@ -138,12 +154,13 @@ export function bindGrab(root, dispatch, getSession) {
       return;                                                      // Esc: lightsPointer's lxCancel puts it back
     }
     if (!focused || !canGrab(s)) return;
+    const factor = focused.dataset.factor ?? null;
     if (e.key === 'Enter' && !e.repeat) {
       stop();
-      dispatch({ type: 'ui', patch: { carry: { id: focused.dataset.tok, slot: homeSlot(s.board, focused.dataset.tok) } } });
+      dispatch({ type: 'ui', patch: { carry: { id: focused.dataset.tok, slot: factor ? { home: true } : homeSlot(s.board, focused.dataset.tok) } } });
     } else if (e.key === '-' || e.key === '−') {
       stop();
-      dispatch({ type: 'lxMinus', id: focused.dataset.tok });
+      dispatch({ type: 'lxMinus', id: factor ?? focused.dataset.tok });
     }
   };
   window.addEventListener('keydown', onKey, true);

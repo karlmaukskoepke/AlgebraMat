@@ -20,7 +20,7 @@ export const findTerm = (board, id) => {
 };
 
 // Like terms: two numbers, or two x terms with the same variable part.
-export const likeKey = (t) => (t.kind === 'num' ? 'num' : t.kind === 'x' ? 'x' : null);
+export const likeKey = (t) => (t.kind === 'num' ? 'num' : t.kind === 'x' ? 'x' : null);    // (a parenthesis is like nothing)
 export const isLike = (a, b) => Boolean(a && b && a.id !== b.id && likeKey(a) && likeKey(a) === likeKey(b));
 
 // Every slot a held term can go to, in reading order (left side, then right): for each side, a gap before each term and after the
@@ -67,27 +67,36 @@ export function reorderBoard(board, id, to) {
 }
 
 let counter = 0;
-// The board with two like terms replaced by their sum, in the place of the first of them (a sum of 0 leaves nothing; a side is never
-// empty, so an empty side says 0).
+export const newId = () => `g${++counter}`;
+// The board with two like terms replaced by their sum (a number, or the x coefficient), in the place of the first of them (a sum of 0
+// leaves nothing; a side is never empty, so an empty side says 0).
 export function combineBoard(board, a, b, total) {
   const fa = findTerm(board, a);
   const fb = findTerm(board, b);
   const first = Math.min(fa.at, fb.at);
   const terms = [];
   board[fa.side].forEach((t, i) => {
-    if (i === first && total !== 0) terms.push({ id: `g${++counter}`, kind: 'num', v: total });
+    if (i === first && total !== 0) terms.push(fa.term.kind === 'x' ? { id: newId(), kind: 'x', coef: total } : { id: newId(), kind: 'num', v: total });
     if (t.id !== a && t.id !== b) terms.push(t);
   });
-  return { ...board, [fa.side]: terms.length ? terms : [{ id: `g${++counter}`, kind: 'num', v: 0 }] };
+  return { ...board, [fa.side]: terms.length ? terms : [{ id: newId(), kind: 'num', v: 0 }] };
 }
 
-// How a term is written in a row (B4): a negative number after the first term is written as subtraction, "− 2", unless its minus
-// was tapped to show it as a negative number, "+ −2". `op` is the sign before the term (null for the first), `body` the term.
+// How a term is written in a row (B4): a negative term after the first is written as subtraction, "− 2", "− 2x", "− 2(x + 2)", unless
+// its minus was tapped to show it as a negative, "+ −2". `op` is the sign before the term (null for the first), `body` the term.
+export const valueOf = (t) => (t.kind === 'num' ? t.v : t.kind === 'x' ? (t.coef ?? 1) : t.factor);
+const coefText = (c) => (c === 1 ? '' : c === -1 ? MINUS : signed(c));
+function bodyOf(t, v) {
+  if (t.kind === 'num') return signed(v);
+  if (t.kind === 'x') return `${coefText(v)}x`;
+  return `${coefText(v)}(${sideText(t.inner)})`;
+}
 export function termText(t, i, negShown = false) {
-  const body = t.kind === 'x' ? `${t.coef > 1 ? t.coef : ''}x` : signed(t.v);
-  if (i === 0) return { op: null, body, neg: t.kind === 'num' && t.v < 0 };
-  if (t.kind === 'num' && t.v < 0 && !negShown) return { op: MINUS, body: String(-t.v), subtracted: true };
-  return { op: '+', body, neg: t.kind === 'num' && t.v < 0 };
+  const v = valueOf(t);
+  const neg = v < 0;
+  if (i === 0) return { op: null, body: bodyOf(t, v), neg };
+  if (neg && !negShown) return { op: MINUS, body: bodyOf(t, -v), subtracted: true };
+  return { op: '+', body: bodyOf(t, v), neg };
 }
 // A side as it reads, "11 − 8".
 export const sideText = (terms, negIds = []) => terms.map((t, i) => {

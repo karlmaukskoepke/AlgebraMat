@@ -5,7 +5,7 @@ import {
   encodeProgress, decodeProgress, doneCount,
 } from './engine/progress.js';
 import { createStore } from './storage.js';
-import { PACKS, SECTIONS, packById, levelNumber, isWhyLevel, WHY_LABEL } from './packs/index.js';
+import { PACKS, SECTIONS, HIDDEN_PACKS, packById, levelNumber, isWhyLevel, WHY_LABEL } from './packs/index.js';
 import { flipitPlay } from './play/flipitPlay.js';
 import { combinePlay } from './play/combinePlay.js';
 import { lightPlay, flipLightPlay } from './play/lightPlay.js';
@@ -21,6 +21,7 @@ import { solveLightPlay } from './play/solveLightPlay.js';
 import { switchPlay } from './play/switchPlay.js';
 import { addBothPlay } from './play/addBothPlay.js';
 import { addBothLightsPlay } from './play/addBothLightsPlay.js';
+import { distributeDrillPack, distributeDrillPlay } from './play/distributeDrillPlay.js';
 import { divideMovesPlay } from './play/divideMovesPlay.js';
 import { divideNumericPlay } from './play/divideNumericPlay.js';
 import { addBothNumericPlay } from './play/addBothNumericPlay.js';
@@ -80,6 +81,9 @@ const PLAY = {
   'add-both': (level) => (level === 1 ? addBothNumericPlay : UI_LIGHTS && level <= 3 ? addBothLightsPlay : addBothPlay),   // Level 1 is numeric (no x)
   'distribute-combine': (level) => (level >= 4 ? distributeTypedPlay : LIGHT ? distributeLightPlay : distributePlay),
 };
+// ?ui=lights&drill=distribute: the Distribute drill of the lights experiment (round 2, B6), a hidden pack that exists only with the flag.
+const DRILL = UI_LIGHTS && new URLSearchParams(location.search).get('drill') === 'distribute';
+if (DRILL) { HIDDEN_PACKS.push(distributeDrillPack); PLAY[distributeDrillPack.id] = distributeDrillPlay; }
 const adapterFor = (packId, level) => (typeof PLAY[packId] === 'function' ? PLAY[packId](level) : PLAY[packId]);
 const newSeed = () => Math.floor(Math.random() * 2 ** 32);
 // Every problem knows which level it was played at, for the anonymous log. (Not `level`: a few packs read that to
@@ -588,7 +592,9 @@ sync.request();   // signed in to a class sheet? catch up
 const urlLevel = Number(params.get('level'));
 const urlPack = packById(params.get('pack') === 'groupit' ? 'lasso' : params.get('pack') ?? 'flipit');
 const resume = savedCurrent();
-if (urlPack && PLAY[urlPack.id] && Number.isInteger(urlLevel) && urlLevel >= 1 && urlLevel <= urlPack.levels) {
+if (DRILL) {
+  startLevel(distributeDrillPack.id, 1);
+} else if (urlPack && PLAY[urlPack.id] && Number.isInteger(urlLevel) && urlLevel >= 1 && urlLevel <= urlPack.levels) {
   startLevel(urlPack.id, urlLevel);
 } else if (resume) {
   startLevel(resume.pack, resume.level, resume);

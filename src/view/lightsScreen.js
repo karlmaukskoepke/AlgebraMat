@@ -11,7 +11,8 @@ import { MINUS } from '../engine/expr.js';
 import { signed } from '../engine/addBoth.js';
 import { helpOk } from '../engine/addBothMoves.js';
 import { lightsAnswerLive, blankOpen, canChoose, moveOwed, amountMode, canGrab } from '../engine/addBothLights.js';
-import { termText, findTerm, likeKey, crossedText } from '../engine/lightsGrab.js';
+import { termText, findTerm, likeKey, crossedText, sideText } from '../engine/lightsGrab.js';
+import { productLabels } from '../engine/distributeDrill.js';
 import { lightsFeedbackText } from './addBothLightsFeedback.js';
 import { boardBlock, trayFor, html } from './addBothMat.js';
 import { moveIcon } from './lightScreen.js';
@@ -41,9 +42,16 @@ const sideEls = (terms, negIds = []) => {
 };
 
 // The line a move leaves above the new equation: the amount (blue) on both sides, x's numbers struck as they combine.
-const workEls = (items) => {
+const workEls = (items, negIds = []) => {
   const out = [];
   items.forEach((t, i) => {
+    if (t.term) {                                                   // (the drill writes its work rows with whole terms)
+      const { op, body } = termText(t.term, i, negIds.includes(t.term.id));
+      const cls = `${t.added ? ' is-added' : ''}${t.struck ? ' is-struck' : ''}`;
+      if (op) out.push(html('span', `lb-plus${t.added ? ' is-added' : ''}`, [op]));
+      out.push(html('span', `${t.term.kind === 'num' ? 'lb-num' : 'lb-x'}${cls}`, [body]));
+      return;
+    }
     const sub = i > 0 && !t.x && t.v < 0;
     if (i > 0) out.push(html('span', `lb-plus${t.added ? ' is-added' : ''}`, [sub ? MINUS : '+']));
     out.push(t.x ? html('span', 'lb-x', ['x']) : html('span', `lb-num${t.added ? ' is-added' : ''}${t.struck ? ' is-struck' : ''}`, [sub ? String(-t.v) : signed(t.v)]));
@@ -57,16 +65,18 @@ function eqRow(leftEls, rightEls, cls = '', attrs = {}) {
   return eq;
 }
 const eqClass = (chars) => (chars > 30 ? ' is-xlong' : chars > 20 ? ' is-long' : '');
-const charsOf = (list) => list.map((x) => (x.kind === 'x' || x.x ? 1 : String(signed(x.v)).length + 3)).reduce((a, b) => a + b, 0);
+const charsOf = (list) => list.map((x) => (x.term ? charsOf([x.term]) : x.kind === 'group' ? 6 + charsOf(x.inner) : x.kind === 'x' || x.x ? 2 : String(signed(x.v)).length + 3)).reduce((a, b) => a + b, 0);
 
 // A token of the newest row (B0): the whole signed term, grabbed with its sign. A subtracted number's minus (or, once tapped, the
 // minus of the negative number) is the tap target of B4.
 function token(s, t, i, side, held) {
   const neg = s.lx.negIds.includes(t.id);
-  const { op, body, subtracted } = termText(t, i, neg);
+  const { op, body, subtracted, neg: isNeg } = termText(t, i, neg);
   const kids = [];
   if (op) kids.push(html('span', 'lx-op', [op], subtracted ? { 'data-minus': t.id } : {}));
-  if (t.kind === 'num' && neg) kids.push(html('span', 'lx-body lx-negnum', [html('span', 'lx-negsign', [MINUS], { 'data-minus': t.id }), String(-t.v)]));
+  const shownNeg = op === '+' && isNeg;                             // a negative shown on request (B4): its minus taps back
+  if (t.kind === 'group') kids.push(...groupEls(s, t, i, subtracted, shownNeg));
+  else if (shownNeg) kids.push(html('span', 'lx-body lx-negnum', [html('span', 'lx-negsign', [MINUS], { 'data-minus': t.id }), body.slice(1)]));
   else kids.push(html('span', `lx-body${t.kind === 'x' ? ' lb-x' : ' lb-num'}`, [body]));
   const hint = (s.hint?.kind === 'cancel' && s.hint.id === t.id) || (s.hint?.kind === 'sum' && s.hint.ids.includes(t.id));
   const c = s.lx.combine;
@@ -77,6 +87,22 @@ function token(s, t, i, side, held) {
   });
   if (s.ui?.focus === `tok:${t.id}` || held) el.dataset.lxFocus = '1';
   return el;
+}
+
+// A factor times a parenthesis (the drill, B6): the factor is its own grab handle (dragged onto the parenthesis to distribute), the
+// parenthesis is where it is dropped.
+function groupEls(s, t, i, subtracted, shownNeg) {
+  const carry = s.ui?.carry;
+  const holding = carry?.id === `${t.id}:f`;
+  const f = t.factor;
+  const text = subtracted ? [String(-f)] : f < 0 ? [html('span', 'lx-negsign', [MINUS], i > 0 ? { 'data-minus': t.id } : {}), String(-f)] : [String(f)];
+  const factor = html('span', `lx-factor${shownNeg ? ' lx-negnum' : ''}${holding ? ' is-held' : ''}`, text, {
+    'data-tok': `${t.id}:f`, 'data-factor': t.id, 'data-side': findTerm(s.board, t.id)?.side, 'data-fk': `tok:${t.id}:f`, tabindex: canGrab(s) ? '0' : undefined, role: 'button',
+    'aria-label': `The factor ${signed(f).replace(MINUS, 'negative ')}. Enter picks it up; drop it on the parenthesis to distribute.`,
+  });
+  if (holding || s.ui?.focus === `tok:${t.id}:f`) factor.dataset.lxFocus = '1';
+  const paren = html('span', `lx-paren${holding && carry.slot?.paren ? ' is-combine-target' : ''}`, [`(${sideText(t.inner)})`], { 'data-paren': t.id });
+  return [factor, paren];
 }
 
 // The newest row's side as tokens. While a term is carried by the keyboard (B0), it is drawn lifted at the slot it is over: in a
@@ -120,7 +146,7 @@ function rowsOf(s) {
     const newest = s.rows.length > 1 && (i === last || (i === last - 1 && row.type === 'work'));
     const cls = `lb-rowwrap${!newest || settledNow ? ' is-settled' : ''}${row.type === 'work' ? ' has-work' : ''}`;
     if (row.type === 'work') {
-      return html('div', cls, [eqRow(workEls(row.work.left), workEls(row.work.right), `lb-work${eqClass(charsOf([...row.work.left, ...row.work.right]))}`, { 'aria-hidden': 'true' })]);
+      return html('div', cls, [eqRow(workEls(row.work.left, s.lx.negIds), workEls(row.work.right, s.lx.negIds), `lb-work${eqClass(charsOf([...row.work.left, ...row.work.right]))}`, { 'aria-hidden': 'true' })]);
     }
     const plug = i === 0 && Boolean(s.sub);                    // the original equation is the one the value goes back into
     const live = i === last && !plug && s.stage !== 'done';
@@ -130,7 +156,7 @@ function rowsOf(s) {
     else {
       const side = (terms) => (plug && s.sub.kind === 'guess'
         ? sideEls(terms).map((el) => (el.classList.contains('lb-x') ? html('span', 'lb-x lb-guess', [signed(s.sub.typed)]) : el))
-        : sideEls(terms, i === last ? s.lx.negIds : []));
+        : sideEls(terms, s.lx.negIds));                          // a term keeps how it was shown in every row it is in
       eq = eqRow(side(row.board.left), side(row.board.right), chars, { role: 'img', 'aria-label': 'The equation' });
     }
     return html('div', `${cls}${plug ? ' is-plugrow' : ''}`, plug ? [html('span', 'lb-plugtag', ['plugging back into this equation']), eq] : [eq]);
@@ -155,7 +181,8 @@ function sumRow(s) {
     if (t.id === c.a || t.id === c.b) {
       if (findTerm(s.board, t.id).at !== first) return;
       if (k > 0) els.push(html('span', 'lb-plus', ['+']));
-      els.push(valid && !c.wrong ? html('span', 'lx-boxwrap', [box, btn('✓', 'lxApply', 'btn lx-apply', { 'aria-label': 'Apply the sum', 'data-fk': 'apply' })]) : box);
+      const xTerm = t.kind === 'x' ? [html('span', 'lb-x', ['x'])] : [];           // an x sum: only the number in front of x is typed
+      els.push(valid && !c.wrong ? html('span', 'lx-boxwrap', [box, ...xTerm, btn('✓', 'lxApply', 'btn lx-apply', { 'aria-label': 'Apply the sum', 'data-fk': 'apply' })]) : html('span', 'lx-boxwrap', [box, ...xTerm]));
     } else {
       const { op, body } = termText(t, k, false);
       if (op) els.push(html('span', 'lb-plus', [op]));
@@ -168,7 +195,42 @@ function sumRow(s) {
   return html('div', 'lx-ghost is-chosen is-sum', [eq]);
 }
 
+// The drill's products (B6): one blank per term of the parenthesis, each labelled with what it is; the x blank has its x printed.
+function productRow(s) {
+  const d = s.lx.distribute;
+  const f = findTerm(s.board, d.group);
+  const g = f.term;
+  const labels = productLabels(g);
+  const allIn = d.entries.every((e) => /^-?\d+$/.test(e));
+  const els = [];
+  let k = 0;
+  const pushText = (t) => {
+    const { op, body } = termText(t, k, s.lx.negIds.includes(t.id));
+    if (op) els.push(html('span', 'lb-plus', [op]));
+    els.push(html('span', t.kind === 'num' ? 'lb-num' : 'lb-x', [body]));
+    k += 1;
+  };
+  s.board[f.side].forEach((t) => {
+    if (t.id !== g.id) { pushText(t); return; }
+    g.inner.forEach((term, j) => {
+      if (k > 0) els.push(html('span', 'lb-plus', ['+']));
+      const text = d.entries[j];
+      const box = html('button', `lx-box is-sum${d.wrong === j ? ' is-wrong' : ''}${d.focus === j ? ' is-focus' : ''}${s.ui?.shake && d.focus === j ? ' is-shake' : ''}${text ? '' : ' is-empty'}${d.focus === j && !text ? ' is-blink' : ''}`, [shown(text)], {
+        type: 'button', 'data-action': 'focus', 'data-target': 'dist', 'data-index': String(j), 'data-fk': `prod:${j}`, 'data-lx-field': '1', 'aria-label': `${labels[j]}: type the product`,
+      });
+      if (s.ui?.focus === `prod:${j}`) box.dataset.lxFocus = '1';
+      els.push(html('span', 'lx-prod', [html('span', 'lx-prodlabel', [labels[j].replace('-', MINUS)]), html('span', 'lx-prodbox', term.kind === 'x' ? [box, html('span', 'lb-x', ['x'])] : [box])]));
+      k += 1;
+    });
+  });
+  if (allIn) els.push(btn('✓', 'lxApply', 'btn lx-apply lx-prodapply', { 'aria-label': 'Apply the products', 'data-fk': 'apply' }));
+  const other = sideEls(s.board[otherSideOf(f.side)], s.lx.negIds);
+  return html('div', 'lx-ghost is-chosen is-sum is-products', [eqRow(f.side === 'left' ? els : other, f.side === 'left' ? other : els, 'lx-ghosteq lx-sumeq')]);
+}
+const otherSideOf = (side) => (side === 'left' ? 'right' : 'left');
+
 function ghostRow(s) {
+  if (s.lx.distribute) return productRow(s);
   if (s.lx.combine) return sumRow(s);
   const open = blankOpen(s);
   const preview = !open && canChoose(s) && s.ui?.preview;
@@ -213,7 +275,7 @@ function workStack(s) {
 
 function bottomRow(s) {
   const done = s.stage === 'done';
-  const helpOff = done || (s.stage === 'build' && s.scaffold) || !helpOk(s);
+  const helpOff = done || (s.stage === 'build' && s.scaffold) || !helpOk(s) || Boolean(s.drill);   // (the drill has no help ladder)
   const counting = s.combining?.step === 'count';
   const live = lightsAnswerLive(s);
   const owed = moveOwed(s);
@@ -332,7 +394,7 @@ function panel(s) {
       b = html('button', `btn btn-move lb-move lx-move${menu === 'add' ? ' is-on' : ''}${canChoose(s) && s.ui?.preview ? ' is-preview' : ''}${target ? ' is-target is-ring' : ''}`, [miniIcon('add')], {
         type: 'button', 'data-action': 'choose', 'data-move': 'add', 'aria-label': m.label, 'data-fk': 'add', 'aria-pressed': String(menu === 'add'),
       });
-      b.disabled = disabled;
+      b.disabled = disabled || Boolean(s.drill);                        // (the drill is done by grabbing terms)
       if (s.ui?.focus === 'add') b.dataset.lxFocus = '1';
     } else {
       b = html('button', 'btn lb-move lx-move is-grey', [miniIcon(m.id)], { type: 'button', 'data-action': 'greyMove', 'data-move': m.id, 'aria-disabled': 'true', 'aria-label': m.label, 'data-tip': m.label });

@@ -13,7 +13,7 @@ import { addBothPlay } from './addBothPlay.js';
 
 // The first test's log (§6): one line a problem, on this device only (never synced), newest 500 kept.
 export const LIGHTS_LOG_KEY = 'mat.lights.v1';
-function logLights(line) {
+export function logLights(line) {
   try {
     const list = JSON.parse(localStorage.getItem(LIGHTS_LOG_KEY) ?? '[]');
     const next = [...(Array.isArray(list) ? list : []), line].slice(-500);

@@ -208,6 +208,26 @@
           "look": "Press Tab until “− 4” is outlined, Enter to pick it up, → twice to carry it over the line, Enter to drop. Esc puts it back."
         }
       ]
+    },
+    {
+      "title": "Lights experiment, round 2: the Distribute drill (B6)",
+      "links": [
+        {
+          "label": "Drill: 5 − 2(x + 2) = 3",
+          "query": "?ui=lights&drill=distribute&nosignin=1",
+          "look": "Drag the 2 onto the parentheses: it refuses until you tap the minus. Tap it (−2 turns purple), drag −2 onto (x + 2), type −2 and −4 in the labelled blanks, then combine and carry terms until −2x = 2 and type x = −1."
+        },
+        {
+          "label": "Drill: keyboard only",
+          "query": "?ui=lights&drill=distribute&nosignin=1",
+          "look": "Tab to the 2, press the minus key, then Enter, → (the parentheses go green), Enter: the two product blanks open."
+        },
+        {
+          "label": "Drill: 3(x + 1) = 9",
+          "query": "?ui=lights&drill=distribute&nosignin=1",
+          "look": "Finish the first problem and press Next problem: 3(x + 1) = 9 has no minus to tap; drag the 3 straight onto the parentheses."
+        }
+      ]
     }
   ]
 }

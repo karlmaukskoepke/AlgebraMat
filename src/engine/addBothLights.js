@@ -16,7 +16,7 @@
 
 import { reduceAddBoth, newAddBoth, xAlone, xSideOf } from './addBothMoves.js';
 import { isTyping, typeInto } from './entry.js';
-import { findTerm, outcomeOf, reorderBoard, combineBoard, pairText } from './lightsGrab.js';
+import { findTerm, outcomeOf, reorderBoard, combineBoard, pairText, valueOf } from './lightsGrab.js';
 
 const UI0 = { preview: false, focus: null, shake: false, light: null, hoverMove: null, carry: null };
 const ui = (s) => s.ui ?? UI0;
@@ -54,7 +54,7 @@ export const canChoose = (s) => s.stage === 'moves' && !s.scaffold && !s.sub && 
 // The move is owed (the problem after a correct guess) until one is committed: x = [ ] is greyed and Add has a steady ring (A1).
 export const moveOwed = (s) => Boolean(s.lx?.forced) && !s.lx.movedOnce && s.stage === 'moves';
 // Can the terms of the newest row be grabbed (B0)? Not while help, a substitution, a half-made move or a combine is going on.
-export const canGrab = (s) => s.stage === 'moves' && !s.scaffold && !s.sub && !s.pending && !s.combining && !s.resolving && !s.lx?.combine;
+export const canGrab = (s) => s.stage === 'moves' && !s.scaffold && !s.sub && !s.pending && !s.combining && !s.resolving && !s.lx?.combine && !s.lx?.distribute;
 export const combineOpen = (s) => Boolean(s.lx?.combine);
 // Do keys go to the blank (true) or to x = (false)? The open blank wins until it is applied or cancelled, or x = is tapped.
 export const amountMode = (s) => s.menu === 'add' && s.typing !== 'answer' && (!s.pending || s.pending.second) && !s.combining;
@@ -63,7 +63,7 @@ export const amountMode = (s) => s.menu === 'add' && s.typing !== 'answer' && (!
 // scaffold until x is alone (as built).
 export function lightsAnswerLive(s) {
   if (s.stage === 'done' || s.stage === 'build') return false;
-  if (s.lx?.combine) return false;
+  if (s.lx?.combine || s.lx?.distribute) return false;
   if (s.combining) return s.combining.step === 'count';
   if (s.sub) return s.sub.kind === 'value' && s.sub.step >= 3 && !s.sub.ok;
   if (moveOwed(s)) return false;
@@ -243,9 +243,7 @@ function grabAction(state, action, wrapped) {
     const c = lx.combine;
     if (!/^-?\d+$/.test(c.entry)) return withUi(state, { shake: true });
     const s = structuredClone(state);
-    const a = findTerm(s.board, c.a).term;
-    const b = findTerm(s.board, c.b).term;
-    const total = a.v + b.v;
+    const total = valueOf(findTerm(s.board, c.a).term) + valueOf(findTerm(s.board, c.b).term);
     if (Number(c.entry) !== total) {
       s.lx.combine = { ...c, wrong: true };
       s.lx.log.sumsWrong += 1;
