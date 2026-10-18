@@ -14,9 +14,11 @@
 
 import { reduceAddBoth, newAddBoth, xAlone, xSideOf, aloneAsk, alonePair } from './addBothMoves.js';
 import { isTyping, typeInto } from './entry.js';
-import { findTerm, outcomeOf, reorderBoard, combineBoard, pairText, valueOf } from './lightsGrab.js';
+import { findTerm, outcomeOf, reorderBoard, combineBoard, pairText, valueOf, crossBoard, otherSide } from './lightsGrab.js';
 
-const UI0 = { preview: false, focus: null, shake: false, light: null, hoverMove: null, carry: null };
+const slotSide = (board, id) => otherSide(findTerm(board, id).side);
+
+const UI0 = { preview: false, focus: null, shake: false, light: null, hoverMove: null, carry: null, drag: null };
 const ui = (s) => s.ui ?? UI0;
 const withUi = (s, patch) => ({ ...s, ui: { ...ui(s), ...patch } });
 const sameUi = (a, b) => JSON.stringify(ui(a)) === JSON.stringify(ui(b));
@@ -61,7 +63,7 @@ export const amountMode = (s) => s.menu === 'add' && s.typing !== 'answer' && (!
 // scaffold until x is alone (as built).
 export function lightsAnswerLive(s) {
   if (s.stage === 'done' || s.stage === 'build') return false;
-  if (s.lx?.combine || s.lx?.distribute) return false;
+  if (s.lx?.combine || s.lx?.distribute || s.lx?.mult) return false;
   if (s.combining) return s.combining.step === 'count';
   if (s.sub) return s.sub.kind === 'value' && s.sub.step >= 3 && !s.sub.ok;
   if (moveOwed(s)) return false;
@@ -90,7 +92,7 @@ export function withLights(reduce = reduceAddBoth) {
     if (action.type === 'ui') {
       const patch = { ...action.patch };
       if (patch.preview && !canChoose(state)) return state;
-      if (patch.carry && !canGrab(state)) return state;
+      if ((patch.carry || patch.drag) && !canGrab(state)) return state;
       const next = withUi(state, patch);
       if (sameUi(next, state)) return state;
       if (patch.light && patch.light !== ui(state).light) countHover(next, 'lightHovers', patch.light);
@@ -299,7 +301,18 @@ function grabAction(state, action, wrapped) {
   if (out.kind === 'none' || out.kind === 'snapX') {
     const s = logged(structuredClone(state));
     s.ui = { ...UI0, focus: `tok:${action.id}` };
-    return out.kind === 'snapX' ? say(s, 'lxXCross') : s;
+    return out.kind === 'snapX' ? say(s, 'lxXCross', { side: findTerm(state.board, action.id)?.side ?? 'left' }) : s;
+  }
+  if (out.kind === 'crossX') {
+    // x carried across when the other side has x too (no card has such an equation yet): the opposite lands in its slot
+    const s = logged(structuredClone(state));
+    if (s.lx.awaitNext !== null) commit(s, 'implicit');
+    s.history.push({ lxKind: 'reorder', board: s.board, rows: [...s.rows], prevBoard: s.prevBoard });
+    s.board = crossBoard(s.board, action.id, out.at);
+    s.rows.push({ type: 'eq', board: s.board });
+    s.prevBoard = s.board;
+    s.ui = { ...UI0 };
+    return s;
   }
   if (out.kind === 'cross') {
     // the engine's own move, with the amount from the term: the same rows the Add button writes, judged the same way
@@ -311,6 +324,16 @@ function grabAction(state, action, wrapped) {
       const back = logged(structuredClone(state));
       back.feedback = s.feedback;
       return back;
+    }
+    // the term lands where it was dropped (Build D): the amount the engine added at the end of the side without x moves to the slot
+    const dest = slotSide(state.board, action.id);
+    const added = s.board[dest];
+    if (dest !== xSideOf(s.board) && added.length > 1 && out.at < added.length - 1 && added.at(-1).v === out.amount) {
+      const moved = [...added];
+      moved.splice(out.at, 0, moved.pop());
+      s.board = { ...s.board, [dest]: moved };
+      s.rows[s.rows.length - 1] = { ...s.rows[s.rows.length - 1], board: s.board };
+      s.prevBoard = s.board;
     }
     return logged(s);
   }
@@ -372,6 +395,7 @@ const ADD_ERRORS = {
   aUndoFirstHelp: { target: 'lastMove', label: 'waiting for Undo' },
   aUndoGuess: { target: 'subst' },
   aWrong: { target: 'subst', clear: true },
+  lxCombineWrong: { target: 'sumbox', label: 'check this' },
 };
 const plusText = (v) => (v < 0 ? `−${-v}` : `+${v}`);
 export const ADD_SPOT = {

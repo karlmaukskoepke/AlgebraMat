@@ -79,6 +79,32 @@
           ]
         },
         {
+          "name": "Dragging terms: see where it lands (Build D, Part 3)",
+          "about": "While you drag a term, the equation it would make shows in grey right under it; the token is green while positive and turns red with its new sign across the line; the line shows only while dragging.",
+          "links": [
+            {
+              "label": "Drag a number",
+              "query": "?pack=add-both&level=2&seed=7&nosignin=1",
+              "look": "Drag the + 8: before x the grey row shows 8 + x; over the line it turns red (− 8) and the grey row shows x = −8 + 11 or x = 11 − 8, depending on where you hold it."
+            },
+            {
+              "label": "x stays",
+              "query": "?pack=add-both&level=2&seed=7&nosignin=1",
+              "look": "Drag x across the line: “x is already on the left side of the equation…”, no dimming."
+            },
+            {
+              "label": "Combine",
+              "query": "?pack=add-both&level=3&seed=7&nosignin=1",
+              "look": "Drag − 4 across, Next, then drop the 4 on the −3: the two are lit with Combine over them, the rest greys, a box under them; type 1 and press the green Combine. A wrong sum is an error with Undo."
+            },
+            {
+              "label": "Drill: finish with Flip and Multiply",
+              "query": "?drill=distribute&nosignin=1",
+              "look": "At −2x = 2 a hint lights Flip everything; then Multiply, type 2 (1 over 2), Go: x = −1."
+            }
+          ]
+        },
+        {
           "name": "The narrow panel (was lights round 2)",
           "about": "Kept (Build D): the narrow panel with its small round lights is the only panel on Add to both sides and Divide it.",
           "links": [

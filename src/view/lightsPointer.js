@@ -118,7 +118,7 @@ export function bindLightsMat(root, dispatch, getSession) {
     // Enter presses the one green button (an empty blank shakes instead)
     const f = root.querySelector('.btn-forward');
     if (f && !f.disabled) { f.click(); return; }
-    if (f?.dataset.action === 'go' && root.querySelector('.lx-ghost.is-chosen')) dispatch({ type: 'go' });
+    if (f && root.querySelector('.lx-ghost.is-chosen')) dispatch({ type: 'go' });   // an empty blank shakes; a filled product goes to the next
     root.querySelector('[data-x][data-action="placeValue"]')?.click();          // the keyboard's way to put the value into x
   };
   window.addEventListener('keydown', onKey, true);

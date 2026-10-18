@@ -13,8 +13,8 @@ import { MINUS } from '../engine/expr.js';
 import { signed } from '../engine/addBoth.js';
 import { helpOk, tradeAvailable, tradePending, xAlone } from '../engine/addBothMoves.js';
 import { lightsAnswerLive, blankOpen, canChoose, moveOwed, amountMode, canGrab, ADD_SPOT } from '../engine/addBothLights.js';
-import { termText, findTerm, likeKey, crossedText, sideText } from '../engine/lightsGrab.js';
-import { productLabels } from '../engine/distributeDrill.js';
+import { termText, findTerm, likeKey, crossedText, sideText, previewBoard } from '../engine/lightsGrab.js';
+import { productLabels, needsFlip } from '../engine/distributeDrill.js';
 import { spotOf } from '../engine/spotlight.js';
 import { lightsFeedbackText } from './addBothLightsFeedback.js';
 import { spotlightLayer, findSolveTarget } from './spotlight.js';
@@ -44,6 +44,7 @@ const SILENT = new Set(['aPlace', 'aFindX', 'lxMustMove', 'aMustMove', 'aPickAmo
   'aZeroUndone', 'aAloneCounters', 'aAloneCount', 'aAlonePB', 'aAloneRight', 'aUndoGuess', 'dxProducts', 'dxRight', 'dxCrossed', 'aTraded']);
 // Input nudges with nothing to undo: a small pop-up next to where the student is, no dimming.
 const NUDGE = {
+  dxMultNo: 'newest',
   typeAnswer: 'answer', answerUnreadable: 'answer', aFinishMoveFirst: 'answer', aUndoFirst: 'answer', aPickKind: 'answer', typeCount: 'answer',
   aAmountBig: 'blank', aAmountZero: 'blank', aGoNotYet: 'forward', aOtherSide: 'forward',
   aTradeFirst: 'panel', aTradeNot: 'panel', aTradeIntro: 'panel', aLater: 'panel', aNotNeeded: 'panel', aChooseMoveFirst: 'panel', dxDragOnly: 'panel',
@@ -59,10 +60,20 @@ function popups(s, wrap) {
     wrap.append(spotlightLayer({ kind: 'intro', lit }, { ...o, text: FORCED_TEXT }));
     return;
   }
+  // combining two terms dropped together: they are lit with "Combine" over them, the box for their sum under them, the rest greyed
+  if (s.lx.combine && !s.lx.combine.wrong) {
+    wrap.append(spotlightLayer({ kind: 'intro', target: 'pair', label: 'Combine', labelTop: true, lit: ['sumbox', 'forward'] }, { ...o, text: null }));
+    return;
+  }
   // checking a value: everything greys out but the equation being checked and the checking space (and, while the value waits to be
   // dragged in, the value; once it is in, the green Next)
   if (s.sub && s.sub.step < 3) {
     wrap.append(spotlightLayer({ kind: 'intro', lit: ['plugrow', 'check', s.sub.placing ? 'answer' : 'forward'] }, { ...o, text: s.sub.placing ? PLACE_TEXT : null }));
+    return;
+  }
+  // the drill's end: a negative in front of x: a hint lights Flip everything
+  if (s.drill && s.stage !== 'done' && !s.lx.mult && needsFlip(s.board)) {
+    wrap.append(spotlightLayer({ kind: 'hint', target: 'newest', move: 'flip', place: 'below' }, { ...o, text: lightsFeedbackText({ key: 'dxFlipHint' }) }));
     return;
   }
   const note = notePopup(s, { silent: SILENT, nudge: NUDGE, text: lightsFeedbackText, scaffold: s.scaffold ? 'board' : null });
@@ -76,9 +87,11 @@ function popups(s, wrap) {
 const sideEls = (terms, negIds = []) => {
   const out = [];
   terms.forEach((t, i) => {
-    const { op, body } = termText(t, i, negIds.includes(t.id));
-    if (op) out.push(html('span', 'lb-plus', [op]));
-    out.push(t.kind === 'x' ? html('span', 'lb-x', [body]) : html('span', 'lb-num', [body]));
+    // a term just carried across the line (a drag's preview) is shown as the negative or positive it now is, in red or green
+    const { op, body } = termText(t, i, negIds.includes(t.id) || Boolean(t.fresh));
+    const fresh = t.fresh ? ` is-fresh ${(t.kind === 'x' ? t.coef ?? 1 : t.v) < 0 ? 'is-neg' : 'is-pos'}` : '';
+    if (op) out.push(html('span', `lb-plus${fresh}`, [op]));
+    out.push(t.kind === 'x' ? html('span', `lb-x${fresh}`, [body]) : html('span', `lb-num${fresh}`, [body]));
   });
   return out;
 };
@@ -123,13 +136,16 @@ function token(s, t, i, side, held) {
   const hint = (s.hint?.kind === 'cancel' && s.hint.id === t.id) || (s.hint?.kind === 'sum' && s.hint.ids.includes(t.id));
   const c = s.lx.combine;
   const said = op ? `${op === '+' ? 'plus' : 'minus'} ${body.replace(MINUS, 'negative ')}` : body.replace(MINUS, 'negative ');
-  const el = html('span', `lx-tok${hint ? ' is-hint' : ''}${c && (c.a === t.id || c.b === t.id) ? ' is-dim' : ''}${held ? ' is-held' : ''}`, kids, {
+  const lifted = s.ui?.drag?.id === t.id;                                          // the term being dragged leaves a dashed gap
+  const el = html('span', `lx-tok${hint ? ' is-hint' : ''}${c && (c.a === t.id || c.b === t.id) ? ' is-pair' : ''}${held ? ' is-held' : ''}${lifted ? ' is-lifted' : ''}${valueOfTerm(t) < 0 ? ' is-neg' : ' is-pos'}`, kids, {
     'data-tok': t.id, 'data-side': side, 'data-like': likeKey(t), 'data-fk': `tok:${t.id}`, tabindex: canGrab(s) ? '0' : undefined,
     role: 'button', 'aria-label': `${said}. Enter picks it up${subtracted || neg ? '; the minus key shows it as a negative number' : ''}.`,
   });
   if (s.ui?.focus === `tok:${t.id}` || held) el.dataset.lxFocus = '1';
   return el;
 }
+
+const valueOfTerm = (t) => (t.kind === 'num' ? t.v : t.kind === 'x' ? (t.coef ?? 1) : t.factor);
 
 // A factor times a parenthesis (the drill): the factor is its own grab handle (dragged onto the parenthesis to distribute), the
 // parenthesis is where it is dropped.
@@ -271,9 +287,28 @@ function productRow(s) {
   return html('div', 'lx-ghost is-chosen is-sum is-products', [eqRow(f.side === 'left' ? els : other, f.side === 'left' ? other : els, 'lx-ghosteq lx-sumeq')]);
 }
 
+// The drill's Multiply: both sides times 1 over the number typed, each side in parentheses.
+function multRow(s) {
+  const text = s.lx.mult.entry;
+  let first = true;
+  const box = () => {
+    const b = html('button', `lx-box is-sum lx-frac1d${text ? '' : ' is-empty is-blink'} is-focus`, [shown(text)], { type: 'button', 'data-lx-field': '1', 'data-fk': first ? 'mult' : undefined, 'aria-label': 'Multiply by 1 over this number', ...(first ? {} : { tabindex: '-1', 'aria-hidden': 'true' }) });
+    if (first && s.ui?.focus === 'mult') b.dataset.lxFocus = '1';
+    first = false;
+    return html('span', 'lx-frac1', [html('span', 'lx-frac1n', ['1']), b]);
+  };
+  const side = (terms) => [box(), html('span', 'lb-plus', ['(']), ...sideEls(terms, s.lx.negIds), html('span', 'lb-plus', [')'])];
+  return html('div', 'lx-ghost is-chosen is-sum', [eqRow(side(s.board.left), side(s.board.right), 'lx-ghosteq lx-sumeq')]);
+}
+
 function ghostRow(s) {
+  if (s.lx.mult) return multRow(s);
   if (s.lx.distribute) return productRow(s);
   if (s.lx.combine) return sumRow(s);
+  // a term being dragged: what the equation would become if it were dropped here, in grey, right under it (Build D, Part 3)
+  const drag = s.ui?.drag;
+  const shape = drag && previewBoard(s.board, drag.id, drag.slot);
+  if (shape) return html('div', 'lx-ghost is-preview is-dragpreview', [eqRow(sideEls(shape.left, s.lx.negIds), sideEls(shape.right, s.lx.negIds), 'lx-ghosteq')], { 'aria-hidden': 'true' });
   const open = blankOpen(s);
   const preview = !open && canChoose(s) && s.ui?.preview === true;
   const near = !open && canChoose(s) && s.ui?.preview === 'near';             // the pointer is coming: a faint preview
@@ -322,6 +357,7 @@ export function forwardOf(s) {
 function forwardCore(s) {
   if (s.sub?.placing) return { label: 'Next', action: 'nextLine', enabled: false };
   if (s.sub && s.sub.step < 3) return { label: 'Next', action: 'nextLine', enabled: true };
+  if (s.lx.mult) return { label: 'Go', action: 'go', enabled: valid(s.lx.mult.entry) && Number(s.lx.mult.entry) !== 0 };
   if (s.lx.distribute) return { label: 'Multiply', action: 'lxApply', enabled: s.lx.distribute.entries.every(valid) };
   if (s.lx.combine) return { label: 'Combine', action: 'lxApply', enabled: valid(s.lx.combine.entry) && !s.lx.combine.wrong };
   if (s.combining?.step === 'count') return { label: 'Check', action: 'check', enabled: valid(s.combining.entry) };
@@ -388,7 +424,7 @@ function helpButtons(s) {
 
 function panel(s) {
   const building = s.stage === 'build';
-  const disabled = building || s.stage === 'done' || Boolean(s.combining) || Boolean(s.pending) || Boolean(s.sub) || Boolean(s.lx.combine) || Boolean(s.lx.distribute);
+  const disabled = building || s.stage === 'done' || Boolean(s.combining) || Boolean(s.pending) || Boolean(s.sub) || Boolean(s.lx.combine) || Boolean(s.lx.distribute) || (Boolean(s.lx.mult) && !s.drill);
   const menu = s.scaffold || blankOpen(s) ? s.menu : null;
   const moves = {
     add: {
@@ -398,6 +434,11 @@ function panel(s) {
   };
   // Trade places is live from Level 4 when x is on the right; the first time, it is the move to click
   if (tradeAvailable(s)) moves.trade = { live: true, pulse: tradePending(s) };
+  // the drill finishes with Flip everything and Multiply (Build D, Part 3)
+  if (s.drill) {
+    moves.multiply = { live: true, pressed: Boolean(s.lx.mult), label: 'Multiply both sides by 1 over a number' };
+    moves.flip = { live: true, label: 'Flip everything (× −1)' };
+  }
   const lights = building ? {} : { fewer: s.lights.fewer, fewerHand: s.lx.hand.fewer, solved: s.lights.solved };
   const flash = ['red', 'neutral'].includes(s.lights.fewer) && s.history.length > 0 ? ['fewer'] : [];
   const el = narrowPanel(moves, { disabled, lights, open: s.ui?.light ?? null, flash });

@@ -3518,3 +3518,20 @@ body[data-input='touch'] #play.is-light #controls .btn-pad { min-width: 48px; mi
 .ui-light .sv-mark.is-bad { color: #a3281b; }
 .ui-light .lb-rowwrap.is-plugrow { outline: 0; background: none; }
 .ui-light .sv-checklist li { width: fit-content; }
+/* dragging a term (Build D, Part 3): the token green while positive, red while negative (it flips across the line); the grey preview
+   of the equation it would make, right under it, with the term that crossed in its new colour */
+.lx-dragghost.is-pos { border-color: #1b6e3a; color: #1b6e3a; background: #e3f4ea; }
+.lx-dragghost.is-neg { border-color: #a3281b; color: #a3281b; background: #fbe9e7; }
+.ui-light .lx-ghost.is-dragpreview { visibility: visible; }
+.ui-light .lx-ghost.is-dragpreview .lb-eq { color: #9a968a; }
+.ui-light .lx-ghost.is-dragpreview .is-fresh.is-neg { color: #c0392b; }
+.ui-light .lx-ghost.is-dragpreview .is-fresh.is-pos { color: #1b8a4a; }
+.ui-light .lb-side.is-drop-side { background: #e7f2fb; outline: 3px dashed #0072b2; border-radius: 12px; }
+.ui-light .lx-tok.is-pair { outline: 4px solid #0072b2; background: #fff; border-radius: 10px; }
+.spot-label.is-top { top: auto; bottom: calc(100% + 6px); border-color: #0b5f8f; color: #0b5f8f; font-size: 18px; }
+.spot-layer.is-intro .spot-frame { border-color: #0b5f8f; }
+.ui-light .lx-frac1 { display: inline-flex; flex-direction: column; align-items: center; line-height: 1; margin-right: 2px; }
+.ui-light .lx-frac1n { font: 800 22px 'Lexend', system-ui, sans-serif; color: #0072b2; border-bottom: 3px solid #0072b2; padding: 0 6px; }
+.ui-light .lx-frac1d { min-height: 38px; font-size: 22px; }
+.ui-light .lb-move[data-move="flip"].spot-move, .ui-light .lb-move.spot-move { outline: 4px solid #0072b2 !important; }
+.ui-light .lx-tok, .ui-light .lb-side > * { flex-shrink: 0; }

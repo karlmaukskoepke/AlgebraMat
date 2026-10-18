@@ -26,7 +26,8 @@ describe('rows are written as they are said (B4)', () => {
 
 describe('cross the border (B2)', () => {
   it('dropping the number across writes the same rows as the Add move, and is judged as one', () => {
-    const s = drop(plus(), 'left', 1, { side: 'right', at: 0 });
+    expect(boardText(drop(plus(), 'left', 1, { side: 'right', at: 0 }).board)).toBe('x = −8 + 11');   // it lands where it is dropped (Build D)
+    const s = drop(plus(), 'left', 1, { side: 'right', at: 1 });
     expect(boardText(s.board)).toBe('x = 11 + −8');
     expect(s.rows.map((r) => r.type)).toEqual(['eq', 'work', 'eq']);
     expect(s.work.amount).toBe(-8);
@@ -103,7 +104,7 @@ describe('reorder (B1) and the minus (B4)', () => {
 });
 
 describe('combine like terms (B3)', () => {
-  const crossed = () => run(drop(plus(), 'left', 1, { side: 'right', at: 0 }), { type: 'lxNext' });   // x = 11 + −8, committed
+  const crossed = () => run(drop(plus(), 'left', 1, { side: 'right', at: 1 }), { type: 'lxNext' });   // x = 11 + −8, committed
   it('a number dropped onto a like term opens a blank for the sum; the pad types into it; x = waits', () => {
     const c = crossed();
     const s = drop(c, 'right', 1, { side: 'right', onto: id(c, 'right', 0) });

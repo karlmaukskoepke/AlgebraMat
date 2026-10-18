@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { newDrill, reduceDrill, DRILL_PROBLEMS, productLabels, drillSummary } from '../src/engine/distributeDrill.js';
+import { newDrill, reduceDrill, DRILL_PROBLEMS, productLabels, drillSummary, needsFlip } from '../src/engine/distributeDrill.js';
 import { sideText } from '../src/engine/lightsGrab.js';
 
 // The Distribute drill of the lights experiment (SPEC-LIGHTS-EXPERIMENT-ADD-rev02.md B6).
@@ -72,5 +72,20 @@ describe('the Distribute drill: 3(x + 1) = 9', () => {
     expect(text(s)).toBe('3(x + 1) = 9');
     s = run(s, { type: 'lxDistribute', id: term(s, 'left', 0) }, ...typed('3'), { type: 'go' }, ...typed('3'), { type: 'go' });
     expect(text(s)).toBe('3x + 3 = 9');
+  });
+});
+
+// Build D, Part 3: the drill can be finished with Flip everything and Multiply
+describe('Build D: Flip everything and Multiply in the drill', () => {
+  it('flips every term, and multiplies both sides by 1 over a number only when every term splits', () => {
+    let s = newDrill({ ...DRILL_PROBLEMS[0], board: () => ({ left: [{ id: 'a', kind: 'x', coef: -2 }], right: [{ id: 'b', kind: 'num', v: 2 }] }) });
+    expect(needsFlip(s.board)).toBe(true);
+    s = reduceDrill(s, { type: 'choose', move: 'flip' });
+    expect([s.board.left[0].coef, s.board.right[0].v, needsFlip(s.board)]).toEqual([2, -2, false]);
+    s = reduceDrill(s, { type: 'choose', move: 'multiply' });
+    s = reduceDrill(reduceDrill(s, { type: 'digit', digit: 3 }), { type: 'go' });
+    expect(s.feedback.key).toBe('dxMultNo');
+    s = reduceDrill(reduceDrill(reduceDrill(s, { type: 'backspace' }), { type: 'digit', digit: 2 }), { type: 'go' });
+    expect([s.board.left[0].coef, s.board.right[0].v, s.lx.mult]).toEqual([1, -1, null]);
   });
 });

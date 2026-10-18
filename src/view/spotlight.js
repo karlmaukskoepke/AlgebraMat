@@ -114,6 +114,13 @@ function contentRect(n) {
   if (!rects.length) return null;
   return { left: Math.min(...rects.map((q) => q.left)), top: Math.min(...rects.map((q) => q.top)), right: Math.max(...rects.map((q) => q.right)), bottom: Math.max(...rects.map((q) => q.bottom)) };
 }
+// The box round several elements.
+function unionRect(list) {
+  const rs = list.map((n) => contentRect(n)).filter(Boolean);
+  if (!rs.length) return null;
+  return { left: Math.min(...rs.map((q) => q.left)), top: Math.min(...rs.map((q) => q.top)), right: Math.max(...rs.map((q) => q.right)), bottom: Math.max(...rs.map((q) => q.bottom)) };
+}
+
 // Where a pop-up may go, best first.
 function candidates({ kind, spot, r, pad, labelBottom, bw, bh, area, side, workBottom: wb, vw, vh, anchorTop }) {
   const out = [];
@@ -147,8 +154,8 @@ export function spotlightLayer(spot, o) {
   const dimStrength = error ? 'strong' : kind === 'intro' || kind === 'ask' || spot.dim === 'strong' ? 'medium' : spot.dim === 'light' ? 'light' : null;
   const dim = dimStrength ? dimmer(dimStrength) : null;
   if (dim) layer.append(dim);
-  const frame = spot.target && kind !== 'note' && kind !== 'nudge' && kind !== 'intro'
-    ? el('div', 'spot-frame', spot.label ? [el('span', 'spot-label', [spot.label])] : []) : null;
+  const frame = spot.target && kind !== 'note' && kind !== 'nudge' && (kind !== 'intro' || spot.label)
+    ? el('div', 'spot-frame', spot.label ? [el('span', `spot-label${spot.labelTop ? ' is-top' : ''}`, [spot.label])] : []) : null;
   const textId = `spot-text-${Math.random().toString(36).slice(2, 8)}`;
   const box = el('div', `spot-box${kind === 'nudge' ? ' is-small' : ''}`, [el('p', 'spot-text', [o.text], { id: textId })], error
     ? { role: 'alertdialog', 'aria-modal': 'true', 'aria-labelledby': textId }
@@ -171,13 +178,14 @@ export function spotlightLayer(spot, o) {
   if (arrow) layer.append(arrow);
 
   const find = (t) => (typeof t === 'string' ? o.find(o.root, t) : t);
+  const box0 = (n) => (Array.isArray(n) ? unionRect(n) : n ? contentRect(n) : null);
   const run = () => {
     if (!layer.isConnected) return;
     const target = spot.target ? find(spot.target) : null;
     const vw = window.innerWidth;
     const vh = window.innerHeight;
     const pad = 6;
-    const c = target ? contentRect(target) : null;                 // the ink of the target, not its whole row
+    const c = box0(target);                                         // the ink of the target, not its whole row
     const r = c ? { left: c.left, top: c.top, right: c.right, bottom: c.bottom, width: c.right - c.left, height: c.bottom - c.top } : null;
     if (frame) {
       if (!r) frame.hidden = true;
@@ -187,7 +195,7 @@ export function spotlightLayer(spot, o) {
       }
     }
     // what is lit: the target, and whatever else the spot names (the problem, the moves, the green button)
-    const lit = mergeRects([...(frame && r ? [r] : []), ...(spot.lit ?? []).map((t) => { const n = find(t); return n && (contentRect(n) ?? null); }).filter(Boolean).map((q) => ({ left: q.left, top: q.top, width: q.right - q.left, height: q.bottom - q.top, right: q.right, bottom: q.bottom }))]);
+    const lit = mergeRects([...(frame && r ? [r] : []), ...(spot.lit ?? []).map((t) => box0(find(t))).filter(Boolean).map((q) => ({ left: q.left, top: q.top, width: q.right - q.left, height: q.bottom - q.top, right: q.right, bottom: q.bottom }))]);
     if (error) {
       // Undo above the dimming: a copy at the very place of the real one, pulsing, with the focus, and the arrow hopping at it
       layer.querySelector('.spot-undo')?.remove();
@@ -265,6 +273,8 @@ export function findSolveTarget(root, target, s = null) {
     case 'answer': return root.querySelector('[data-fk="answer"], .lb-typed');
     case 'forward': return root.querySelector('.btn-forward');
     case 'panel': return root.querySelector('.lx-panel');
+    case 'pair': return [...root.querySelectorAll('.lx-live .lx-tok.is-pair')];
+    case 'sumbox': return root.querySelector('.lx-box.is-sum');
     case 'blank': return root.querySelector('.lx-ghost.is-chosen .lx-box:not(.is-mirror)');
     case 'fractions': return root.querySelector('.lb-fractionrow');
     case 'board': return root.querySelector('.ab-boardwrap, .sv-diagram .gd');

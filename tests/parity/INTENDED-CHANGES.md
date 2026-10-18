@@ -230,3 +230,10 @@ keeps its old tag. The engine traces change from each run's Check on, and every 
 - A finished wrong guess says `aUndoGuess` with the slip's tag; a wrong value's error lights the Not balanced line (it lit x =).
 - At x alone the Party/Battle question reads the sum as the row reads it ("11 − 8", was "11 + −8").
 - The screen states `add-wrong-guess`, `add-wrong-guess-undone`, `add-forced-move` and `add-end` tap x after Check (listed under Part 1).
+
+## Build D, Part 3 (2026-10-18): dragging terms
+
+No data change (PASS); no scripted run drags a term. On screen (listed under Part 1): the dashed midline is gone except while dragging.
+In play: a dropped number lands in the slot it was dropped on (`x = −8 + 11` when dropped before the 11; the Add move still writes it
+last); x dragged across is refused with "x is already on the left side…"; a wrong sum is a spotlight error; the drill has Flip
+everything and Multiply.

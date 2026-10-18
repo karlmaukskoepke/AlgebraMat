@@ -34,7 +34,7 @@ export function bindGrab(root, dispatch, getSession) {
     const border = row.querySelector('.lb-border').getBoundingClientRect();
     const side = e.clientX < border.left + border.width / 2 ? 'left' : 'right';
     if (side !== drag.src.dataset.side) return { side, at: 0 };
-    const others = [...row.querySelectorAll(`[data-side="${side}"] [data-tok]`)].filter((n) => n !== drag.src && !n.classList.contains('is-gap'));
+    const others = [...row.querySelectorAll(`[data-side="${side}"] [data-tok]`)].filter((n) => n.dataset.tok !== drag.src.dataset.tok && !n.classList.contains('is-gap'));
     for (const n of others) {
       const r = n.getBoundingClientRect();
       if (n.dataset.like === drag.src.dataset.like && e.clientX >= r.left - 4 && e.clientX <= r.right + 4 && e.clientY >= r.top - 24 && e.clientY <= r.bottom + 24) return { side, onto: n.dataset.tok };
@@ -55,14 +55,21 @@ export function bindGrab(root, dispatch, getSession) {
     const crossing = slot.side !== drag.src.dataset.side;
     drag.ghost.classList.toggle('is-crossing', crossing);
     drag.ghost.firstChild.textContent = crossing && drag.term.kind === 'num' ? crossedText(drag.term.v) : drag.text;
+    // the token is coloured by its sign: green while positive; across the line it flips sign (and colour)
+    const v = drag.term.kind === 'num' ? drag.term.v : drag.term.coef ?? 1;
+    const shownV = crossing ? -v : v;
+    drag.ghost.classList.toggle('is-pos', shownV > 0);
+    drag.ghost.classList.toggle('is-neg', shownV < 0);
     drag.ghost.lastChild.hidden = !crossing;
     if (crossing) { row.querySelector(`.lb-side[data-side="${slot.side}"]`)?.classList.add('is-drop-side'); return; }
     if (slot.onto) { row.querySelector(`[data-tok="${slot.onto}"]`)?.classList.add('is-combine-target'); return; }
-    const others = [...row.querySelectorAll(`[data-side="${slot.side}"] [data-tok]`)].filter((n) => n !== drag.src);
+    if (drag.previewed) return;                                     // the grey preview row shows where it goes
+    const others = [...row.querySelectorAll(`[data-side="${slot.side}"] [data-tok]`)].filter((n) => n.dataset.tok !== drag.src.dataset.tok);
     if (others[slot.at]) others[slot.at].classList.add('is-gap-before'); else others[others.length - 1]?.classList.add('is-gap-after');
   }
 
   function end() {
+    if (drag?.previewed) dispatch({ type: 'ui', patch: { drag: null } });
     drag?.ghost?.remove();
     drag?.src?.classList.remove('is-lifted');
     root.classList.remove('is-grabbing');
@@ -99,7 +106,10 @@ export function bindGrab(root, dispatch, getSession) {
     e.preventDefault();
     const g = drag.ghost;
     g.style.transform = `translate(${e.clientX - g.offsetWidth / 2}px, ${e.clientY - LIFT - g.offsetHeight}px)`;
-    drag.slot = slotAt(e);
+    const slot = slotAt(e);
+    const changed = JSON.stringify(slot) !== JSON.stringify(drag.slot);
+    drag.slot = slot;
+    if (changed && !drag.factor) { drag.previewed = true; dispatch({ type: 'ui', patch: { drag: slot ? { id: drag.id, slot } : null } }); }   // the grey preview follows the slot
     mark(drag.slot);
   };
   const finish = (e, cancelled) => {

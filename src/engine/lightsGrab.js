@@ -42,13 +42,15 @@ export function slotsFor(board, id) {
 export const homeSlot = (board, id) => { const f = findTerm(board, id); return f ? { side: f.side, at: f.at } : null; };
 export const sameSlot = (a, b) => Boolean(a && b) && a.side === b.side && a.at === b.at && a.onto === b.onto;
 
-// What dropping `id` on `slot` does: cross (constants only), snap back an x that crossed, combine onto a like term, reorder, or nothing.
+// What dropping `id` on `slot` does: cross (a number), snap back an x that would leave the only side with x, carry an x across when
+// the other side has x too (crossX: no card uses it yet, Build D), combine onto a like term, reorder, or nothing.
 export function outcomeOf(board, id, slot) {
   const f = findTerm(board, id);
   if (!f || !slot) return { kind: 'none' };
   if (slot.side !== f.side) {
+    if (f.term.kind === 'x') return board[slot.side].some((t) => t.kind === 'x') ? { kind: 'crossX', side: slot.side, at: slot.at ?? board[slot.side].length } : { kind: 'snapX' };
     if (f.term.kind !== 'num') return { kind: 'snapX' };
-    return { kind: 'cross', amount: -f.term.v };
+    return { kind: 'cross', amount: -f.term.v, at: slot.at ?? board[slot.side].length };
   }
   if (slot.onto) {
     const target = findTerm(board, slot.onto)?.term;
@@ -56,6 +58,27 @@ export function outcomeOf(board, id, slot) {
   }
   if (!Number.isInteger(slot.at) || slot.at === f.at) return { kind: 'none' };
   return { kind: 'reorder', side: f.side, from: f.at, to: slot.at };
+}
+
+// A term carried across the line: gone from its side (a side left empty says 0), its opposite in the slot on the other side. The new
+// term is marked `fresh` (a preview draws it in red).
+export function crossBoard(board, id, at) {
+  const f = findTerm(board, id);
+  const to = otherSide(f.side);
+  const moved = f.term.kind === 'x' ? { id: newId(), kind: 'x', coef: -(f.term.coef ?? 1), fresh: true } : { id: newId(), kind: 'num', v: -f.term.v, fresh: true };
+  const from = board[f.side].filter((t) => t.id !== id);
+  const dest = [...board[to]];
+  dest.splice(Math.max(0, Math.min(at, dest.length)), 0, moved);
+  return { ...board, [f.side]: from.length ? from : [{ id: newId(), kind: 'num', v: 0 }], [to]: dest };
+}
+
+// What the equation would look like if the held term were dropped on `slot` (Build D, Part 3): drawn in grey in place while dragging.
+// null when nothing would change shape (back where it was, onto a like term, an x that cannot cross).
+export function previewBoard(board, id, slot) {
+  const out = outcomeOf(board, id, slot);
+  if (out.kind === 'reorder') return reorderBoard(board, id, out.to);
+  if (out.kind === 'cross' || out.kind === 'crossX') return crossBoard(board, id, out.at);
+  return null;
 }
 
 // The board with a term moved within its side (`to` counts the side's terms without it).

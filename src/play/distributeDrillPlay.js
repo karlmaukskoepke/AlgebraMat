@@ -31,7 +31,7 @@ export const distributeDrillPlay = {
   reduce: reduceDrill,
   feedbackText: lightsFeedbackText,
   // the pad types into x = [ ], a sum's blank and the products' blanks
-  buildControls: makeAddBothControls((s) => lightsAnswerLive(s) || combineOpen(s) || Boolean(s.lx?.distribute)),
+  buildControls: makeAddBothControls((s) => lightsAnswerLive(s) || combineOpen(s) || Boolean(s.lx?.distribute) || Boolean(s.lx?.mult)),
   bindMat: (root, dispatch, getSession) => bindLightsMat(root, dispatch, getSession),
   effects(before, s) {
     if (before && before.step !== 'done' && s.step === 'done') logLights(drillSummary(s));   // this device only, never the class sheet
@@ -43,7 +43,8 @@ export const distributeDrillPlay = {
       case 'focus': return { type: 'focus', target: d.target, index: d.index };
       case 'lxApply': return { type: 'lxApply' };
       case 'go': return { type: 'go' };
-      case 'undo': case 'check': case 'next': case 'greyMove': case 'choose': return { type: d.action };
+      case 'choose': return { type: 'choose', move: d.move };
+      case 'undo': case 'check': case 'next': case 'greyMove': return { type: d.action };
       default: return null;
     }
   },

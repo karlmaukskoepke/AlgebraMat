@@ -33,7 +33,7 @@ export function newDrill(problem) {
     menu: null, amountEntry: '', typing: null, board, rows: [{ type: 'eq', board }], history: [], work: null,
     lights: { fewer: 'off', solved: 'off' }, undoCue: false, startOver: false, hint: null, entry: '', clean: true, wrongs: 0,
     lx: {
-      awaitNext: null, rules: [], forced: false, movedOnce: true, moves: 0, negIds: [], combine: null, distribute: null, hand: { fewer: 'off' },
+      awaitNext: null, rules: [], forced: false, movedOnce: true, moves: 0, negIds: [], combine: null, distribute: null, mult: null, hand: { fewer: 'off' },
       log: {
         drags: 0, outcomes: { reorder: 0, cross: 0, combine: 0, distribute: 0, snapBack: 0, keyboard: 0 }, minusTaps: 0,
         lightHovers: {}, moveHovers: {}, sumsWrong: 0, productsWrong: 0, refusedMinus: 0,
@@ -45,7 +45,19 @@ export function newDrill(problem) {
   return say(s, 'dxStart');
 }
 
-const canGrab = (s) => s.stage === 'moves' && !s.lx.combine && !s.lx.distribute;
+const canGrab = (s) => s.stage === 'moves' && !s.lx.combine && !s.lx.distribute && !s.lx.mult;
+// Flip everything and Multiply (Build D, Part 3), so the drill can be finished from `−2x = 2`: every term on both sides.
+const mapTerms = (board, f) => ({ left: board.left.map(f), right: board.right.map(f) });
+const flipTerm = (t) => (t.kind === 'num' ? { ...t, v: -t.v } : t.kind === 'x' ? { ...t, coef: -(t.coef ?? 1) } : { ...t, factor: -t.factor });
+const splits = (t, n) => (t.kind === 'num' ? t.v % n === 0 : t.kind === 'x' ? (t.coef ?? 1) % n === 0 : t.factor % n === 0);
+const divTerm = (t, n) => (t.kind === 'num' ? { ...t, v: t.v / n } : t.kind === 'x' ? { ...t, coef: (t.coef ?? 1) / n } : { ...t, factor: t.factor / n });
+// The end of the drill: x alone with a negative in front, the other side a number: Flip everything is the move (a hint lights it).
+export const needsFlip = (board) => {
+  const xSide = board.left.some((t) => t.kind === 'x') ? 'left' : 'right';
+  const xs = board[xSide];
+  const other = board[xSide === 'left' ? 'right' : 'left'];
+  return xs.length === 1 && xs[0].kind === 'x' && (xs[0].coef ?? 1) < 0 && other.length === 1 && other[0].kind === 'num';
+};
 const snapshot = (s) => ({ board: s.board, rows: [...s.rows], negIds: [...s.lx.negIds], work: s.work });
 // The labels over the product blanks: "−2 · x", "−2 · 2".
 export const productLabels = (g) => g.inner.map((t) => `${signed(g.factor)} · ${t.kind === 'x' ? 'x' : signed(t.v)}`);
@@ -82,8 +94,13 @@ export function reduceDrill(state, action) {
   const s = structuredClone(state);
   s.ui = { ...UI0 };
 
-  // ----- typing: the products of a distribute, the sum of a combine, or x = -----
+  // ----- typing: the products of a distribute, the sum of a combine, the number of a multiply, or x = -----
   if (isTyping(action)) {
+    if (lx.mult) {
+      s.lx.mult = { entry: typeInto(lx.mult.entry, action, 'integer') };
+      s.ui.focus = 'mult';
+      return s;
+    }
     if (lx.distribute) {
       const d = s.lx.distribute;
       const entry = typeInto(d.wrong === d.focus ? '' : d.entries[d.focus], action, 'integer');
@@ -112,12 +129,23 @@ export function reduceDrill(state, action) {
       if (action.target === 'answer') { s.ui.focus = 'answer'; return s; }
       return state;
     }
-    case 'choose':
+    case 'choose': {
+      if (action.move === 'flip' && canGrab(state)) {
+        s.history.push(snapshot(state));
+        s.board = mapTerms(s.board, flipTerm);
+        s.lx.negIds = [];
+        s.rows.push({ type: 'eq', board: s.board });
+        return say(s, 'dxFlipped');
+      }
+      if (action.move === 'multiply' && canGrab(state)) { s.lx.mult = { entry: '' }; s.ui.focus = 'mult'; return say(s, 'dxMultAsk'); }
+      if (action.move === 'multiply' && lx.mult) { s.lx.mult = null; return say(s, 'dxStart'); }
+      return say(s, 'dxDragOnly');
+    }
     case 'greyMove':
       return say(s, 'dxDragOnly');
     case 'lxCancel':
       if (state.ui.carry) return { ...state, ui: { ...state.ui, carry: null } };
-      if (lx.combine || lx.distribute) { s.lx.combine = null; s.lx.distribute = null; return say(s, 'dxStart'); }
+      if (lx.combine || lx.distribute || lx.mult) { s.lx.combine = null; s.lx.distribute = null; s.lx.mult = null; return say(s, 'dxStart'); }
       return state;
 
     // ----- B4: a minus shown as a negative (and back) -----
@@ -154,6 +182,18 @@ export function reduceDrill(state, action) {
     }
     case 'lxApply':
     case 'go': {
+      if (lx.mult) {
+        const n = Number(lx.mult.entry);
+        if (!/^-?\d+$/.test(lx.mult.entry) || n === 0) { s.ui = { ...UI0, shake: true, focus: 'mult' }; return s; }
+        if (![...s.board.left, ...s.board.right].every((t) => splits(t, n))) return say(s, 'dxMultNo', { n: signed(n) }, true);
+        s.history.push(snapshot(state));
+        s.board = mapTerms(s.board, (t) => divTerm(t, n));
+        s.lx.negIds = [];
+        s.rows.push({ type: 'eq', board: s.board });
+        s.lx.mult = null;
+        s.ui.focus = 'answer';
+        return say(s, 'dxMultiplied');
+      }
       if (lx.distribute) {
         const d = s.lx.distribute;
         const g = findTerm(s.board, d.group).term;
@@ -237,7 +277,7 @@ export function reduceDrill(state, action) {
     }
 
     case 'undo': {
-      if (lx.combine || lx.distribute) { s.lx.combine = null; s.lx.distribute = null; return say(s, 'dxStart'); }
+      if (lx.combine || lx.distribute || lx.mult) { s.lx.combine = null; s.lx.distribute = null; s.lx.mult = null; return say(s, 'dxStart'); }
       const snap = s.history.pop();
       if (!snap) return state;
       Object.assign(s, { board: snap.board, rows: snap.rows, work: snap.work });
