@@ -10,7 +10,7 @@ describe('progress', () => {
   it('starts with every level of every pack unfinished', () => {
     expect(fresh).toEqual({
       v: 1,
-      packs: { combineit: { levels: Array(5).fill(false) }, flipit: { levels: Array(5).fill(false) }, lasso: { levels: Array(7).fill(false) }, boxes: { levels: Array(6).fill(false) }, 'groups-of-terms': { levels: Array(8).fill(false) }, 'distribute-combine': { levels: Array(5).fill(false) }, value: { levels: Array(4).fill(false) }, 'add-both': { levels: Array(6).fill(false) }, 'divide-it': { levels: Array(6).fill(false) }, 'one-step': { levels: Array(5).fill(false), first: 3 }, 'two-step': { levels: Array(7).fill(false) }, switch: { levels: Array(6).fill(false) } },
+      packs: { combineit: { levels: Array(5).fill(false) }, flipit: { levels: Array(5).fill(false) }, lasso: { levels: Array(7).fill(false) }, boxes: { levels: Array(6).fill(false) }, 'groups-of-terms': { levels: Array(8).fill(false) }, 'distribute-combine': { levels: Array(5).fill(false) }, value: { levels: Array(4).fill(false) }, 'add-both': { levels: Array(6).fill(false), first: 2 }, 'divide-it': { levels: Array(6).fill(false), first: 2 }, 'one-step': { levels: Array(5).fill(false), first: 3 }, 'two-step': { levels: Array(7).fill(false) }, switch: { levels: Array(6).fill(false) } },
     });
   });
 
@@ -86,8 +86,9 @@ describe('Add to both sides takes over from One-step equations and Switch sides 
   it('opens the levels below what was credited, so the numeric level is not a gate', () => {
     const p = withOld([1, 2], [1, 2, 4]);
     expect(p.packs['add-both'].open).toBe(5);
-    expect([1, 2, 3, 4, 5, 6].map((l) => isLevelUnlocked(p, 'add-both', l))).toEqual(Array(6).fill(true));
-    expect(isLevelUnlocked(withOld(), 'add-both', 2)).toBe(false);       // nothing earned: Level 1 comes first
+    expect([2, 3, 4, 5, 6].map((l) => isLevelUnlocked(p, 'add-both', l))).toEqual(Array(5).fill(true));
+    expect([2, 3].map((l) => isLevelUnlocked(withOld(), 'add-both', l))).toEqual([true, false]);   // nothing earned: the card opens at Level 2
+    expect(isLevelUnlocked(withOld(), 'add-both', 1)).toBe(false);       // the numeric level is "See why it works", not a level on offer
     expect(withOld().packs['add-both'].open).toBeUndefined();
   });
   it('leaves the old cards\' own levels alone (they are still saved, in codes and on the class sheet)', () => {
@@ -140,5 +141,23 @@ describe('old One-step progress counts for Divide it', () => {
     expect(old([3, 5]).packs['divide-it'].levels).toEqual([false, true, true, false, false, false]);
     expect(old([3, 5]).packs['divide-it'].open).toBe(3);
     expect(old([4]).packs['divide-it'].levels.some(Boolean)).toBe(false);
+  });
+});
+
+describe('"See why it works" (Add to both sides and Divide it open at their first equation level, Karl 2026-10-18)', () => {
+  it('opens at Level 2, shown as Level 1; the numeric walkthrough is not a gate, and its saved level keeps its meaning', async () => {
+    const { levelNumber, packById, isWhyLevel } = await import('../src/packs/index.js');
+    for (const id of ['add-both', 'divide-it']) {
+      const fresh = newProgress(PACKS);
+      expect([1, 2, 3].map((l) => isLevelUnlocked(fresh, id, l))).toEqual([false, true, false]);
+      expect(nextLevel(fresh, id)).toBe(2);
+      expect(levelNumber(packById(id), 2)).toBe(1);
+      expect(isWhyLevel(packById(id), 1)).toBe(true);
+      expect(isWhyLevel(packById(id), 2)).toBe(false);
+      let p = fresh;
+      for (const l of [2, 3, 4, 5, 6]) p = completeLevel(p, id, l);
+      expect(isPackComplete(p, id)).toBe(true);                       // finished without the walkthrough
+      expect(isLevelDone(completeLevel(fresh, id, 1), id, 1)).toBe(true);   // finishing it is still saved, as before
+    }
   });
 });

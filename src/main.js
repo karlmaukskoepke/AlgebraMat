@@ -5,7 +5,7 @@ import {
   encodeProgress, decodeProgress, doneCount,
 } from './engine/progress.js';
 import { createStore } from './storage.js';
-import { PACKS, SECTIONS, packById, levelNumber } from './packs/index.js';
+import { PACKS, SECTIONS, packById, levelNumber, isWhyLevel, WHY_LABEL } from './packs/index.js';
 import { flipitPlay } from './play/flipitPlay.js';
 import { combinePlay } from './play/combinePlay.js';
 import { lightPlay, flipLightPlay } from './play/lightPlay.js';
@@ -256,7 +256,7 @@ function startLevel(packId, level, resume = null) {
   };
   useControls(adapter);
   useMat(adapter);
-  $('title').textContent = `${pack.title.toUpperCase()} · Level ${levelNumber(pack, level)}`;
+  $('title').textContent = `${pack.title.toUpperCase()} · ${isWhyLevel(pack, level) ? WHY_LABEL : `Level ${levelNumber(pack, level)}`}`;
   persist();
   showScreen('play');
   render();

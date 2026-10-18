@@ -11,7 +11,7 @@ const state = (flipit, lasso = Array(7).fill(false), boxes = Array(6).fill(false
   v: 1,
   packs: {
     combineit: { levels: pad(combine, 5) }, flipit: { levels: pad(flipit, 5) }, lasso: { levels: lasso }, boxes: { levels: pad(boxes, 6) },
-    'groups-of-terms': { levels: terms }, 'distribute-combine': { levels: distribute }, value: { levels: [false, false, false, false] }, 'add-both': { levels: Array(6).fill(false) }, 'divide-it': { levels: Array(6).fill(false) }, 'one-step': { levels: Array(5).fill(false), first: 3 }, 'two-step': { levels: Array(7).fill(false) }, switch: { levels: Array(6).fill(false) },
+    'groups-of-terms': { levels: terms }, 'distribute-combine': { levels: distribute }, value: { levels: [false, false, false, false] }, 'add-both': { levels: Array(6).fill(false), first: 2 }, 'divide-it': { levels: Array(6).fill(false), first: 2 }, 'one-step': { levels: Array(5).fill(false), first: 3 }, 'two-step': { levels: Array(7).fill(false) }, switch: { levels: Array(6).fill(false) },
   },
 });
 const state3 = state;

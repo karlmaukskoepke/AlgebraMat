@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex" />
+    <title>The Mat · Test links</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <!-- Karl's test page: one click opens the app on the right card, level and seed (CLAUDE.md, Working with Karl).
+         Not linked from the app. The links live in test-links.json; every build adds or updates its own. -->
+    <style>
+      :root { --ink: #1d1d1d; --muted: #5d6470; --paper: #fff; --line: #d5dee9; --warn: #9a4a00; }
+      * { box-sizing: border-box; }
+      body { margin: 0; background: var(--paper); color: var(--ink); font: 400 18px/1.4 'Lexend', system-ui, sans-serif; }
+      main { max-width: 1100px; margin: 0 auto; padding: 28px 16px 64px; }
+      h1 { margin: 0; font-weight: 800; font-size: 40px; }
+      .intro { margin: 6px 0 24px; color: var(--muted); font-size: 18px; }
+      .bar { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-bottom: 8px; }
+      h2 { margin: 36px 0 12px; padding-bottom: 6px; border-bottom: 2px solid var(--line); font-weight: 700; font-size: 26px; }
+      .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 18px; }
+      .item { display: flex; flex-direction: column; gap: 8px; }
+      .go {
+        display: block; padding: 18px 20px; border: 3px solid var(--ink); border-radius: 14px; background: var(--paper);
+        color: var(--ink); text-decoration: none; font: 700 22px/1.2 'Lexend', system-ui, sans-serif; cursor: pointer; text-align: left;
+      }
+      .go:hover, .go:focus-visible { background: #f3f6fa; outline: none; }
+      .go.reset { border-style: dashed; font-size: 18px; padding: 12px 18px; }
+      .look { margin: 0; font-size: 17px; }
+      .not-live { margin: 0; color: var(--warn); font-weight: 600; font-size: 16px; }
+      .url { margin: 0; color: var(--muted); font-size: 13px; overflow-wrap: anywhere; }
+      .note { color: var(--muted); font-size: 16px; }
+      #done { font-weight: 600; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Test links</h1>
+      <p class="intro">Click a button to open the app already on that screen. Sign-in is skipped. Under each, what to look for.</p>
+      <div class="bar">
+        <button class="go reset" type="button" id="reset">Reset my progress</button>
+        <span class="note" id="done" role="status"></span>
+      </div>
+      <p class="note">Reset clears finished levels, the diagnostic and streaks in this browser only. If this browser is signed in to a
+        class sheet, the sheet brings finished levels back.</p>
+      <div id="groups"><p class="note">Loading the links…</p></div>
+    </main>
+    <script>
+      // This browser's progress (the keys the app saves under). Sign-in and unsent class-sheet records are left alone.
+      const PROGRESS_KEYS = ['mat.v1', 'mat.v1.backup', 'mat.diag.v1', 'mat.diag.v2', 'mat.streaks.v1', 'mat.skills.v1',
+        'mat.lights.v1', 'mat.tour.v1', 'mat.tips.v1'];
+      function resetProgress() {
+        try { PROGRESS_KEYS.forEach((k) => localStorage.removeItem(k)); return true; } catch { return false; }
+      }
+      document.getElementById('reset').addEventListener('click', () => {
+        document.getElementById('done').textContent = resetProgress() ? 'Done: this browser starts fresh.' : 'This browser blocks saved data, so there was nothing to reset.';
+      });
+
+      const el = (tag, attrs = {}, text) => {
+        const e = Object.assign(document.createElement(tag), attrs);
+        if (text) e.textContent = text;
+        return e;
+      };
+      const app = new URL('./', location.href);       // the app sits next to this page
+
+      fetch('test-links.json', { cache: 'no-store' })
+        .then((r) => r.json())
+        .then((data) => {
+          const root = document.getElementById('groups');
+          root.replaceChildren();
+          for (const g of data.groups) {
+            root.append(el('h2', {}, g.title));
+            const grid = el('div', { className: 'grid' });
+            for (const l of g.links) {
+              const href = new URL(l.query, app).href;
+              const a = el('a', { className: 'go', href }, l.label);
+              if (l.reset) a.addEventListener('click', () => resetProgress());   // a fresh student: clear, then open
+              const item = el('div', { className: 'item' });
+              item.append(a);
+              if (l.notLive) item.append(el('p', { className: 'not-live' }, l.notLive));
+              item.append(el('p', { className: 'look' }, (l.reset ? 'Starts fresh. ' : '') + l.look));
+              item.append(el('p', { className: 'url' }, href));
+              grid.append(item);
+            }
+            root.append(grid);
+          }
+          if (data.updated) root.append(el('p', { className: 'note' }, `Links updated ${data.updated}.`));
+        })
+        .catch(() => {
+          document.getElementById('groups').replaceChildren(el('p', { className: 'not-live' }, 'The list of links didn’t load. Reload the page.'));
+        });
+    </script>
+  </body>
+</html>

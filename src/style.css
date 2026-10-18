@@ -153,6 +153,17 @@ body {
   margin: 0;
 }
 
+/* "See why it works": a small button by the level dots (the walkthrough is optional, not a level) */
+.btn.why-btn {
+  min-height: 34px;
+  padding: 4px 12px;
+  border-width: 2px;
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 15px;
+  white-space: nowrap;
+}
+
 .dot.locked {
   border-style: dashed;
   border-color: var(--muted);

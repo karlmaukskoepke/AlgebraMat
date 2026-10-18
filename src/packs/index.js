@@ -103,8 +103,12 @@ export const oneStep = {
 
 // Add to both sides (SPEC-ADD-TO-BOTH-SIDES.md): the pilot of the moves-based Solve it. Level 1 is numeric (no x); levels 2–6 are
 // the equations. It replaces One-step equations' first two levels and Switch sides (see engine/progress.js, withLegacyCredit).
+// The card opens at the equations (Level 2, shown as Level 1); the numeric walkthrough is the optional "See why it works"
+// button on the card (Karl, 2026-10-18). Its saved level keeps its number, so save codes and the class sheet are unchanged.
 export const addBoth = {
   id: 'add-both',
+  firstLevel: 2,
+  whyLevel: 1,
   title: 'Add to both sides',
   subtitle: 'Cancel the number next to x with its opposite',
   blurb: 'Add the opposite to both sides, and cancel the pairs.',
@@ -137,8 +141,11 @@ export const twoStep = {
 };
 
 // Divide it (SPEC-DIVIDE-IT.md, light build): Level 1 is numeric; levels 2–6 are the five equation levels (the generator's 1–5).
+// Like Add to both sides, the card opens at Level 2 (shown as Level 1) and the numeric level is "See why it works".
 export const divideIt = {
   id: 'divide-it',
+  firstLevel: 2,
+  whyLevel: 1,
   title: 'Divide it',
   subtitle: 'Taking a fraction of both sides',
   blurb: 'Take a fraction of both sides until one box is left.',
@@ -176,6 +183,9 @@ export const sectionById = (id) => SECTIONS.find((s) => s.id === id);
 export const sectionOf = (packId) => SECTIONS.find((s) => s.packs.includes(packId));
 // Packs still being built are reachable by ?pack= but are not on the home screen, in progress or in save codes (none now).
 export const HIDDEN_PACKS = [];
+// A card's "See why it works" walkthrough: a level before the one it opens at, played from a button on the card, not a level dot.
+export const isWhyLevel = (pack, level) => Boolean(pack?.whyLevel) && level === pack.whyLevel;
+export const WHY_LABEL = 'See why it works';
 // The number a level is called on screen: a card that opens at a later level counts from 1.
 export const levelNumber = (pack, level) => level - ((pack?.firstLevel ?? 1) - 1);
 export const packById = (id) => PACKS.find((p) => p.id === id) ?? HIDDEN_PACKS.find((p) => p.id === id);

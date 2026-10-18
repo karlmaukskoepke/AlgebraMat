@@ -1,0 +1,99 @@
+{
+  "_about": "The test-links page (test-links.html) reads this list. Every build that gives Karl something to test adds or updates its entries here (see CLAUDE.md, Working with Karl). Each link is the part after the address: it opens the app on that card, level and seed, with sign-in skipped. `level` in a link is the card's saved level number, which can differ from the number on screen (Add to both sides and Divide it: link level 2 is shown as Level 1). `reset: true` clears this browser's progress first. `notLive` says plainly why a link won't work on the live site yet.",
+  "updated": "2026-10-18",
+  "groups": [
+    {
+      "title": "New: Level 1 is problems, the walkthrough is a button",
+      "links": [
+        {
+          "label": "Home screen, as a brand-new student",
+          "query": "?nosignin=1",
+          "reset": true,
+          "look": "Hover Solve it. Add to both sides and Divide it both start at Level 1 = their first real problems, with a small “See why it works” button by the dots."
+        },
+        {
+          "label": "Reload test",
+          "query": "?nosignin=1",
+          "reset": true,
+          "look": "Hover Solve it, click “See why it works” on Add to both sides, then reload the page: you should land on the home screen, not the walkthrough."
+        },
+        {
+          "label": "Add to both sides · Level 1",
+          "query": "?pack=add-both&level=2&seed=7&nosignin=1",
+          "look": "The header says Level 1 and the first problem is x + 8 = 11. (This was Level 2 before.)"
+        },
+        {
+          "label": "Add to both sides · See why it works",
+          "query": "?pack=add-both&level=1&seed=7&nosignin=1",
+          "look": "The header says “See why it works” and it’s the numbers-only balance walkthrough. At the end it says “Now you’ve seen why it works!” with a Level 1 button."
+        },
+        {
+          "label": "Divide it · Level 1",
+          "query": "?pack=divide-it&level=2&seed=7&nosignin=1",
+          "look": "The header says Level 1 and the first problem is 3x = 12. (This was Level 2 before.)"
+        },
+        {
+          "label": "Divide it · See why it works",
+          "query": "?pack=divide-it&level=1&seed=7&nosignin=1",
+          "look": "The header says “See why it works” and it’s the numbers-only walkthrough."
+        }
+      ]
+    },
+    {
+      "title": "Add to both sides, every level",
+      "links": [
+        { "label": "Level 1 · x + a = b", "query": "?pack=add-both&level=2&seed=7&nosignin=1", "look": "Five problems; the first is x + 8 = 11." },
+        { "label": "Level 2 · x − a = b", "query": "?pack=add-both&level=3&seed=7&nosignin=1", "look": "Five problems; the first is x − 4 = −3." },
+        { "label": "Level 3 · both forms", "query": "?pack=add-both&level=4&seed=7&nosignin=1", "look": "A mix; the first is x + 8 = −4." },
+        { "label": "Level 4 · x on the right", "query": "?pack=add-both&level=5&seed=7&nosignin=1", "look": "Some problems have x on the right side; the first is x + 3 = 10." },
+        { "label": "Level 5 · all four forms, bigger", "query": "?pack=add-both&level=6&seed=7&nosignin=1", "look": "Everything mixed, bigger numbers; the first is x − 9 = −13." }
+      ]
+    },
+    {
+      "title": "Divide it, every level",
+      "links": [
+        { "label": "Level 1 · a = 2 or 3", "query": "?pack=divide-it&level=2&seed=7&nosignin=1", "look": "Five problems; the first is 3x = 12." },
+        { "label": "Level 2 · a = 2 to 5", "query": "?pack=divide-it&level=3&seed=7&nosignin=1", "look": "The first is 5x = −15." },
+        { "label": "Level 3 · bigger numbers", "query": "?pack=divide-it&level=4&seed=7&nosignin=1", "look": "Bigger numbers; the first two are 3x = 6 and 2x = 30." },
+        { "label": "Level 4 · a = 4 or 6", "query": "?pack=divide-it&level=5&seed=7&nosignin=1", "look": "The number on x is 4 or 6; the first is 4x = 8." },
+        { "label": "Level 5 · all mixed", "query": "?pack=divide-it&level=6&seed=7&nosignin=1", "look": "Everything mixed; the first is 6x = −18." }
+      ]
+    },
+    {
+      "title": "Lights experiment (round 1), Add to both sides",
+      "links": [
+        {
+          "label": "Lights · Level 1",
+          "query": "?pack=add-both&level=2&seed=7&ui=lights&nosignin=1",
+          "look": "No Guess x / Use a move buttons; hover Add to see a grey preview row, click it and type the amount."
+        },
+        {
+          "label": "Lights · Level 2",
+          "query": "?pack=add-both&level=3&seed=7&ui=lights&nosignin=1",
+          "look": "The same lights screen on x − a = b problems. (Other levels show the normal screen.)"
+        }
+      ]
+    },
+    {
+      "title": "Tucked layout pilot, Divide it",
+      "links": [
+        {
+          "label": "Tucked · Level 2",
+          "query": "?pack=divide-it&level=3&seed=7&layout=tucked&nosignin=1",
+          "look": "One work column with a slim Why? column on the right; Use a move opens a Moves drawer, I’m stuck slides up a counter tray."
+        }
+      ]
+    },
+    {
+      "title": "Add to both sides: help fixes (Build A)",
+      "links": [
+        {
+          "label": "Help reads the equation on screen",
+          "query": "?pack=add-both&level=4&seed=7&nosignin=1",
+          "notLive": "Not on the live site yet: this build is waiting to be merged, so this link shows today’s help, not the fix.",
+          "look": "Press I’m stuck after a move: the help should use the numbers now on screen."
+        }
+      ]
+    }
+  ]
+}

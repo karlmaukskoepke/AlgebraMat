@@ -3,7 +3,7 @@ import { isLevelDone, isLevelUnlocked, isPackComplete } from '../engine/progress
 import { installBar } from './installPrompt.js';
 import { accountLabel } from './account.js';
 import { CARD_CHALLENGES, challengeById } from '../engine/fluency.js';
-import { levelNumber } from '../packs/index.js';
+import { levelNumber, isWhyLevel, WHY_LABEL } from '../packs/index.js';
 
 const firstOf = (pack) => pack.firstLevel ?? 1;                       // a card that opens at a later level counts from 1 on screen
 
@@ -63,7 +63,11 @@ function packCard(progress, pack, bests) {
   }
   return h('article', { class: 'pack-card' },
     h('div', { class: 'pack-head' }, h('h2', {}, pack.title),
-      complete ? h('span', { class: 'tag' }, 'Complete ✓') : levelDots(progress, pack)),
+      complete ? h('span', { class: 'tag' }, 'Complete ✓') : levelDots(progress, pack),
+      // The walkthrough of why the move works: always open, never needed for a level (it plays as its old level, so it is saved as before).
+      pack.whyLevel ? h('button', {
+        type: 'button', class: 'btn why-btn', dataset: { pack: pack.id, level: String(pack.whyLevel) }, 'aria-label': `${pack.title}: ${WHY_LABEL}`,
+      }, isLevelDone(progress, pack.id, pack.whyLevel) ? `✓ ${WHY_LABEL}` : WHY_LABEL) : null),
     h('p', { class: 'subtitle' }, pack.subtitle),
     h('p', { class: 'blurb' }, pack.blurb),
     // The scroll box is a plain wrapper, so the grid inside sizes its rows to their text
@@ -200,9 +204,12 @@ export function renderLevelDone(root, { pack, level, packComplete, nextPack, bes
   buttons.append(h('button', { type: 'button', class: hasNext ? 'btn' : 'btn btn-primary', 'data-go': 'practice' }, 'Keep practicing'));
   buttons.append(h('button', { type: 'button', class: 'btn', 'data-go': 'map' }, 'Pack map'));
 
+  const why = isWhyLevel(pack, level);
   const panel = h('section', { class: 'level-done', 'aria-live': 'polite' },
-    h('h2', {}, `Level ${levelNumber(pack, level)} complete!`),
-    h('p', {}, hasNext
+    h('h2', {}, why ? 'Now you’ve seen why it works!' : `Level ${levelNumber(pack, level)} complete!`),
+    h('p', {}, why
+      ? `Try Level ${levelNumber(pack, level + 1)}, or go through this again.`
+      : hasNext
       ? `Level ${levelNumber(pack, level + 1)} is open. Move on, or keep practicing this level as long as you like.`
       : packComplete && nextPack?.comingSoon
         ? `You finished ${pack.title}! ${nextPack.title} is coming soon.`
