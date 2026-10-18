@@ -23,6 +23,14 @@ const SLIP = {
 };
 const slip = (p) => (SLIP[p.tag] ?? SLIP.unmatched)(p);
 
+// Why a move waits for Undo, in one sentence (aUndoFirstHelp).
+const UNDO_REASON = {
+  red: 'That move made the equation bigger.',
+  partial: 'That move only partly cancelled the number next to x.',
+  zero: 'That move made the other side 0, but x isn’t alone.',
+  fail: 'That fraction doesn’t split evenly.',
+};
+
 const M = {
   // building the equation (L1–L2)
   aBuild: (p) => `Build the equation on the balance: drag the □, the + and the − up onto the sides (or tap one, then tap a side). ${p.mirror ? `The □ goes on the right.` : `The □ goes on the left.`}`,
@@ -97,6 +105,16 @@ const M = {
   aStuck2: () => 'Choose "Add ___ to both sides" and pick an amount. Do you know x now?',
   aStuck3: (p) => `${p.opposite} cancels the ${p.constant}. Add it to both sides yourself.`,
   aStuckSolved: () => 'x is alone. Work out what x is and type it.',
+  // x alone with numbers still to put together (Build A): the sum in plain words, a little more each ask; never the value
+  aStuckSum: (p) => [
+    p.many ? `What is ${p.sum}? Put them together two at a time: is each a party (same signs) or a battle (opposite signs)?`
+      : `What is ${p.sum}? Is it a party (same signs) or a battle (opposite signs)?`,
+    p.level >= 2 ? (p.party ? 'In a party the teams join.' : 'In a battle the bigger team wins.') : '',
+    p.level >= 3 ? 'Think of each number as counters, and count each side.' : '',
+  ].filter(Boolean).join(' '),
+  aKindRight: (p) => `${p.kind === 'party' ? 'Yes, a party: the teams join.' : 'Yes, a battle: the bigger team wins.'}${p.alone ? ' Work it out and type x.' : p.after && M[p.after.key] ? ` ${M[p.after.key](p.after.params ?? {})}` : ''}`,
+  // I'm stuck or Teach me while a move waits for Undo (shared with every card on the loop)
+  aUndoFirstHelp: (p) => `${UNDO_REASON[p.reason] ?? UNDO_REASON.red} Let’s undo it first: press Undo.`,
   aTeach: (p) => `Step by step: the ${p.constant} next to x cancels with its opposite, ${p.opposite}. Add ${p.opposite} to the left, then to the right, then Go.`,
   // typing the answer early (the drag-check)
   aWrong: slip,

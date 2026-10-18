@@ -30,9 +30,19 @@ import { signed, substitutionLines, boardText } from './solveTerms.js';
 //   answerBlocked(s)   something of the card's is open that holds the typing row back (an amount, a pending deal)
 //   answerOpen(s)      the card lets the typing row be live although x is not alone (a reminder scaffold, a diagram)
 //   nextNeeded(s)      after a wrong guess is undone: mark the next needed move
+//   waitingForUndo(s)  a try of the card's own waits for Undo outside `needUndo` (Divide's failed fraction); undoReason(s) says why
 // The choice prompt: one string for every card and every state (loop §1A). No state may reword it.
 export const CHOICE_PROMPT = 'Would you like to guess the solution (the value of x), or use a move to make the problem simpler?';
 export const CHOICE_BUTTONS = [['Guess x', 'guess'], ['Use a move', 'move']];
+
+// I'm stuck or Teach me while a move waits for Undo (Build A): the first rung is one sentence saying what happened, with Undo the
+// one highlighted target, and no other help opens. It counts as the click it was, and the class sheet records it as a reminder
+// ('hint'). Used by every card on the loop, and by Add to both sides, which is not on the loop yet.
+export function undoFirst(s, say, reason) {
+  s.helped = true;
+  if (!s.supportsShown.includes('hint')) s.supportsShown.push('hint');
+  return say(s, 'aUndoFirstHelp', { reason });
+}
 
 export function createSolveLoop(card) {
   const say = (s, key, params = {}, bad = false) => { s.feedback = { key, params: { ...(card.params?.(s) ?? {}), ...params }, bad }; return s; };
@@ -106,6 +116,8 @@ export function createSolveLoop(card) {
     return s;
   }
   const tryStuck = (s) => s.reds >= 3;
+  // A move (or the card's own try) waits for Undo.
+  const waiting = (s) => !s.sub && (s.needUndo || card.waitingForUndo?.(s) === true);
 
   // A move gets in only on the move path, with nothing waiting on Next or Undo.
   function blockMove(s) {
@@ -238,7 +250,9 @@ export function createSolveLoop(card) {
         }
         if (!s.history.length) return state;
         const wasScaffold = s.scaffold;
+        const wasWaiting = waiting(s);
         restore(s, s.history.pop());
+        if (wasWaiting && !wasScaffold) s.rung = 0;                                          // the ladder starts again for this state
         s.needUndo = false;
         s.unfolded = false;
         if (!wasScaffold) { s.path = null; s.menu = null; }                                 // the same state, with the choice showing again
@@ -259,6 +273,7 @@ export function createSolveLoop(card) {
       // ----- help -----
       case 'stuck': {
         if (!helpOk(s)) return state;
+        if (waiting(s)) { s.stuck += 1; return undoFirst(s, say, card.undoReason?.(s) ?? 'red'); }
         fold(s);
         moveMode(s);
         s.stuck += 1;
@@ -269,6 +284,7 @@ export function createSolveLoop(card) {
       }
       case 'teach': {
         if (!helpOk(s)) return state;
+        if (waiting(s)) { s.taught += 1; return undoFirst(s, say, card.undoReason?.(s) ?? 'red'); }
         fold(s);
         moveMode(s);
         s.taught += 1;

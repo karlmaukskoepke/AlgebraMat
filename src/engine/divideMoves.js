@@ -83,6 +83,9 @@ const loop = createSolveLoop({
   undoKey: () => 'dUndone',
   // with the counters up the student may type the answer at any point, and Check works after any deal (loop §6, rev 1.2)
   answerOpen: (s) => s.scaffold,
+  // a fraction that did not split waits for Undo (or a new try): I'm stuck then says so first (Build A)
+  waitingForUndo: (s) => Boolean(s.fail),
+  undoReason: () => 'fail',
   tag: (p, typed) => tagDivide(p, typed),
   slip: (s, typed, tag) => {
     const p = s.problem;

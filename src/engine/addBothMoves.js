@@ -11,6 +11,7 @@ import { emptySkills } from './skills.js';
 import {
   constantOf, oppositeOf, checkAddBoth, tagAddBoth, formatAddBoth, answerText, signed, isBattle,
 } from './addBoth.js';
+import { undoFirst } from './solveLoop.js';
 
 
 // ---------- the board ----------
@@ -134,7 +135,7 @@ export const tilt = (s) => s.leftDelta - s.rightDelta;            // positive: t
 export const balanced = (s) => tilt(s) === 0;
 
 function startOverBoard(s) {
-  Object.assign(s, { board: s.base, rows: [{ type: 'eq', board: s.base }], history: [], pending: null, leftDelta: 0, rightDelta: 0, prevBoard: s.base, resolving: false, menu: null, amountEntry: '', typing: null, startOver: false, reds: 0, sub: null, entry: '', zeroOther: false, work: null, undoCue: false, lights: { fewer: 'off', solved: 'off' }, hint: null, combining: null, selected: null });
+  Object.assign(s, { board: s.base, rows: [{ type: 'eq', board: s.base }], history: [], pending: null, leftDelta: 0, rightDelta: 0, prevBoard: s.base, resolving: false, menu: null, amountEntry: '', typing: null, startOver: false, reds: 0, sub: null, entry: '', zeroOther: false, work: null, undoCue: false, lights: { fewer: 'off', solved: 'off' }, hint: null, combining: null, selected: null, sumAsks: 0 });
   s.path = s.mustMove || s.scaffold ? 'move' : null;                       // Start over returns to the choice (§9)
   return say(s, s.path ? 'aStartedOver' : 'aChoose');
 }
@@ -156,7 +157,7 @@ function resolve(s) {
     return say(s, s.reds >= 3 ? 'aRed3' : 'aRed', { amount: signed(s.lastAmount) }, true);
   }
   if (lights.solved === 'green') return say(s, 'aSolvedBoard');
-  if (lights.fewer === 'neutral') return say(s, 'aPartial', { amount: signed(s.lastAmount) });
+  if (lights.fewer === 'neutral') return say(s, 'aPartial', { amount: signed(s.lastAmount), con: plus(xConstantTerm(s.board)?.v ?? 0) });
   return say(s, 'aGreen');
 }
 
@@ -187,6 +188,28 @@ function enterScaffold(s) {
   return s;
 }
 
+// Help reads the equation on screen, never the original problem (Build A): the number now next to x, and the move that cancels it.
+const xConstantTerm = (board) => board[xSideOf(board)].find((t) => t.kind === 'num') ?? null;
+const cancelAmount = (board) => { const c = xConstantTerm(board); return c ? -c.v : null; };
+const otherNums = (board) => board[xSideOf(board) === 'left' ? 'right' : 'left'].filter((t) => t.kind === 'num');
+
+// x is alone but the other side still holds numbers to put together (`x = −4 + −8`): the numbers are outlined and the line asks for
+// their sum in plain words, a little more explicitly each time. No seesaw, no counters, and the value is never written.
+function sumHelp(s, level) {
+  const nums = otherNums(s.board);
+  if (nums.length < 2) return say(s, 'aStuckSolved');
+  s.hint = { kind: 'sum', ids: nums.map((t) => t.id) };
+  s.menu = null;
+  s.typing = null;
+  const same = nums.every((t) => Math.sign(t.v) === Math.sign(nums[0].v));
+  return say(s, 'aStuckSum', { sum: nums.map((t) => signed(t.v)).join(' + '), many: nums.length > 2, party: same, level: Math.min(level, 3) });
+}
+
+// I'm stuck or Teach me while a move waits for Undo (red, partly cancelled, or the other side zeroed): Undo first, and nothing else
+// opens. After Undo the ladder starts again for the state it returns to.
+const waitingForUndo = (s) => s.undoCue && s.history.length > 0 && !s.scaffold && !s.sub;
+const undoReason = (s) => (s.zeroOther ? 'zero' : s.lights.fewer === 'red' ? 'red' : 'partial');
+
 // What a stuck click does at each rung (§4): 1 model it, 2 choose the move, 3 the guided amount.
 function climb(s) {
   s.helped = true;
@@ -196,34 +219,35 @@ function climb(s) {
     s.hintGiven = true;
     if (!s.supportsShown.includes('hint')) s.supportsShown.push('hint');
     const con = s.board[xSideOf(s.board)].find((t) => t.kind === 'num');
-    if (xAlone(s.board)) return say(s, 'aStuckSolved');
+    if (xAlone(s.board)) { s.sumAsks = 0; return say(s, 'aStuckSolved'); }
     s.hint = con ? { kind: 'cancel', id: con.id } : null;
     s.menu = 'add';
     s.typing = null;
     s.amountEntry = '';
     return say(s, 'aStuckHint', { constant: con ? plus(con.v) : '' });
   }
+  // x alone with two numbers on the other side: the sum in plain words (no seesaw, nothing to add). It is a text reminder, so the
+  // class sheet records it with the reminder's word.
+  if (xAlone(s.board) && !s.combining) {
+    s.sumAsks = (s.sumAsks ?? 0) + 1;
+    if (!s.supportsShown.includes('hint')) s.supportsShown.push('hint');
+    return sumHelp(s, s.sumAsks);
+  }
   const rung = Math.min(s.rung + 1, 3);
   const fresh = rung !== s.rung;
   s.rung = rung;
   const names = ['', 'model', 'move', 'guided'];
   if (fresh && !s.supportsShown.includes(names[rung])) s.supportsShown.push(names[rung]);
-  const wasScaffold = s.scaffold;
   enterScaffold(s);
   if (s.stage === 'build') return say(s, 'aBuild');
-  const constant = s.board[xSideOf(s.board)].find((t) => t.kind === 'num');
-  const p = { constant: constant ? plus(constant.v) : '', opposite: plus(oppositeOf(s.problem)) };
-  if (xAlone(s.board)) {
-    // x is alone but the other side still has numbers to put together: with the model up, the next ask walks them through it
-    // (Party or Battle? then it combines for them) and asks for the answer one last time
-    if (wasScaffold && !s.combining && combinable(s.board).length) { s.helpCombine = true; s.resolving = true; return startPair(s); }
-    return say(s, 'aStuckSolved', p);
-  }
+  const constant = xConstantTerm(s.board);
+  const amount = cancelAmount(s.board);
+  const p = { constant: constant ? plus(constant.v) : '', opposite: amount === null ? '' : plus(amount) };
   if (rung === 1) { s.hint = constant ? { kind: 'cancel', id: constant.id } : null; return say(s, 'aStuck1', p); }
   if (rung === 2) { s.menu = 'add'; return say(s, 'aStuck2', p); }
   s.menu = 'add';
-  s.hint = { kind: 'amount', amount: oppositeOf(s.problem) };
-  s.amountEntry = String(oppositeOf(s.problem));
+  s.hint = { kind: 'amount', amount };
+  s.amountEntry = String(amount);
   return say(s, 'aStuck3', p);
 }
 
@@ -370,7 +394,7 @@ export function reduceAddBoth(state, action) {
       if (amount === null || amount === 0) return say(s, 'aAmountZero', {}, true);
       if (action.chip && (action.chip === '-') !== (amount < 0)) return say(s, 'aChipSign', { amount: signed(amount), chip: action.chip === '-' ? 'minus' : 'plus' }, true);
       if (Math.abs(amount) > 15) return say(s, 'aAmountBig', {}, true);
-      if (s.forced && amount !== oppositeOf(s.problem)) return say(s, 'aForced', { amount: signed(oppositeOf(s.problem)) }, true);
+      if (s.forced && amount !== s.forcedAmount) return say(s, 'aForced', { amount: signed(s.forcedAmount) }, true);
       if (s.pending && s.pending.side === side) return say(s, 'aOtherSide', {}, true);
       const snap = snapshot(s);
       const term = num(amount);
@@ -407,7 +431,7 @@ export function reduceAddBoth(state, action) {
       const amount = amountOf(s.amountEntry);                        // (?ui=lights allows a 0: it just doesn't help)
       if (amount === null || (amount === 0 && !s.allowZero)) return say(s, 'aAmountZero', {}, true);
       if (Math.abs(amount) > 15) return say(s, 'aAmountBig', {}, true);
-      if (s.forced && amount !== oppositeOf(s.problem)) return say(s, 'aForced', { amount: signed(oppositeOf(s.problem)) }, true);
+      if (s.forced && amount !== s.forcedAmount) return say(s, 'aForced', { amount: signed(s.forcedAmount) }, true);
       s.history.push(snapshot(s));
       s.work = workLine(s.board, amount);
       const after = lightBoard(s.board, amount);
@@ -446,6 +470,17 @@ export function reduceAddBoth(state, action) {
         return say(s, 'aKindWrong', { ...combineParams(s), picked: action.value }, true);
       }
       const params = combineParams(s);
+      // The pair beside x cancels on its own, as before. The pair on the other side is the answer being worked out: a right
+      // pick only confirms it, and the numbers stay for the student to put together and type (the app never writes the value).
+      if (sideOf(s.board, a.id) !== xSideOf(s.board)) {
+        s.combining = null;
+        s.hint = { kind: 'sum', ids: [a.id, b.id] };
+        const judged = s.resolving && !s.helpCombine ? resolve(s) : s;
+        s.resolving = false;
+        s.helpCombine = false;
+        const after = judged.feedback;                                                     // how the move went, said after the confirmation
+        return say(judged, 'aKindRight', { kind: right, alone: xAlone(s.board), after: after && !xAlone(s.board) ? { key: after.key, params: after.params } : null }, Boolean(after?.bad));
+      }
       s.history.push(snapshot(s));
       s.board = combineTerms(s.board, a.id, b.id);
       s.combining = null;
@@ -478,7 +513,10 @@ export function reduceAddBoth(state, action) {
       }
       if (!s.history.length) return state;
       const wasZero = s.zeroOther;
+      const wasWaiting = waitingForUndo(s);
       restore(s, s.history.pop());
+      s.sumAsks = 0;
+      if (wasWaiting) { s.hintGiven = false; s.rung = 0; }                  // the ladder starts again for the state Undo returns to
       s.zeroOther = false;
       s.helpCombine = false;
       s.selected = null;
@@ -502,6 +540,7 @@ export function reduceAddBoth(state, action) {
     case 'stuck': {
       if (s.stage === 'build' && s.scaffold) return state;
       if (!helpOk(s)) return state;
+      if (waitingForUndo(s)) { s.stuck += 1; return undoFirst(s, say, undoReason(s)); }
       moveMode(s);
       s.stuck += 1;
       return climb(s);
@@ -509,18 +548,24 @@ export function reduceAddBoth(state, action) {
     case 'teach': {
       if (s.stage === 'build' && s.scaffold) return state;
       if (!helpOk(s)) return state;
+      if (waitingForUndo(s)) { s.taught += 1; return undoFirst(s, say, undoReason(s)); }
       moveMode(s);
       s.taught += 1;
-      s.forced = true;
       s.helped = true;
-      enterScaffold(s);
       if (!s.supportsShown.includes('forced')) s.supportsShown.push('forced');
-      const params = { opposite: plus(oppositeOf(s.problem)), constant: plus(constantOf(s.problem)) };
+      // x is alone: there is nothing to add, so Teach me gives the sum help in full
+      if (xAlone(s.board) && !s.combining) { s.sumAsks = 3; return sumHelp(s, 3); }
+      s.forced = true;
+      enterScaffold(s);
+      // the move that cancels the number now next to x (after a partial move, not the original one)
+      const constant = xConstantTerm(s.board);
+      s.forcedAmount = cancelAmount(s.board);
+      const params = { opposite: plus(s.forcedAmount), constant: constant ? plus(constant.v) : '' };
       if (s.stage === 'build') return say(s, 'aBuild');
       s.menu = 'add';
       s.rung = 3;
-      s.hint = { kind: 'amount', amount: oppositeOf(s.problem) };
-      s.amountEntry = String(oppositeOf(s.problem));
+      s.hint = { kind: 'amount', amount: s.forcedAmount };
+      s.amountEntry = String(s.forcedAmount);
       return say(s, 'aTeach', params);
     }
 
@@ -573,7 +618,7 @@ function buildStep(s, problem) {
     s.stage = 'moves';
     s.step = 'moves';
     s.pick = null;
-    if (s.forced) { s.menu = 'add'; s.rung = 3; s.hint = { kind: 'amount', amount: oppositeOf(p) }; s.amountEntry = String(oppositeOf(p)); }
+    if (s.forced) { s.menu = 'add'; s.rung = 3; s.hint = { kind: 'amount', amount: s.forcedAmount }; s.amountEntry = String(s.forcedAmount); }
     return say(s, 'aBuilt');
   }
   return say(s, 'aBuilding', { have: s.built.constant, other: s.built.other });
@@ -589,7 +634,8 @@ function combineParams(s) {
 
 // The next two numbers on a side that can combine (the left side first) are highlighted and the student is asked: Party or Battle?
 function startPair(s) {
-  const pair = combinable(s.board)[0];
+  const pairs = combinable(s.board);
+  const pair = pairs.find((q) => q.side === xSideOf(s.board)) ?? pairs[0];   // the pair beside x first: it cancels on its own
   if (!pair) {
     s.combining = null;
     if (s.helpCombine) { s.helpCombine = false; s.resolving = false; return say(s, 'aSolvedBoard'); }   // help only: no judging

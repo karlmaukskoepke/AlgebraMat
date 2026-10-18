@@ -1,6 +1,7 @@
 // The parity harness (tests/parity/README.md). One command:
 //   npm run parity                  compare everything with the baseline; PASS / FAIL per check
 //   npm run parity -- --no-screens  the same without the screenshots (no browser needed)
+//   npm run parity -- --list        print every difference (not just the first 15)
 //   npm run parity -- --record      write a new baseline (only on purpose: it accepts whatever the code does now)
 // A difference is a failure unless INTENDED-CHANGES.md lists its key.
 
@@ -15,6 +16,7 @@ const SHOTS = path.join(BASE, 'screens');
 const OUT = path.join(HERE, 'out');
 const args = new Set(process.argv.slice(2));
 const record = args.has('--record');
+const list = args.has('--list');                         // print every difference, not the first 15
 const screens = !args.has('--no-screens');
 const TOLERANCE = 0.002;                                  // a screen may differ in at most 0.2% of its pixels
 
@@ -72,14 +74,14 @@ function report(name, diffs) {
   for (const d of diffs) if (isAllowed(d.key)) used.add(matchOf(d.key));
   const ok = diffs.length - bad.length;
   console.log(`${bad.length ? 'FAIL' : 'PASS'}  ${name}${ok ? ` (${ok} intended change${ok === 1 ? '' : 's'})` : ''}`);
-  for (const d of bad.slice(0, 15)) {
+  for (const d of list ? bad : bad.slice(0, 15)) {
     console.log(`      ${d.key}`);
     if (d.before !== undefined || d.after !== undefined) console.log(`        before: ${short(d.before)}\n        after:  ${short(d.after)}`);
   }
-  if (bad.length > 15) console.log(`      … and ${bad.length - 15} more`);
+  if (!list && bad.length > 15) console.log(`      … and ${bad.length - 15} more`);
   if (bad.length) process.exitCode = 1;
 }
-const short = (v) => { const s = JSON.stringify(v?.state?.feedback ?? v) ?? 'none'; return s.length > 200 ? `${s.slice(0, 200)}…` : s; };
+function short(v) { const s = JSON.stringify(v?.state?.feedback ?? v) ?? 'none'; return s.length > 200 ? `${s.slice(0, 200)}…` : s; }
 
 if (screens) {
   const { takeScreens, pixelDiff } = await import('./screens.mjs');
