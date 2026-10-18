@@ -358,3 +358,36 @@ export function lightsSummary(s) {
     drags: l.drags, outcomes: l.outcomes, minusTaps: l.minusTaps, lightHovers: l.lightHovers, moveHovers: l.moveHovers, sumsWrong: l.sumsWrong,
   };
 }
+
+// ---------- the spotlight (Build C, Part 2: engine/spotlight.js) ----------
+// Which messages are errors on Add to both sides, what each lights up and its small label, and the hint after Undo: the card's
+// reminder rung for the state Undo returned to (the number next to x outlined, "What would we add to both sides to eliminate it?").
+// The scaffold (the seesaw) keeps its own messages on the line.
+const ADD_ERRORS = {
+  aRed: { target: 'xnum', label: 'got bigger' },
+  aRed3: { target: 'xnum', label: 'got bigger' },
+  aPartial: { target: 'xnum', label: 'still here' },
+  lxZero: { target: 'xnum', label: 'no change' },
+  aZeroOther: { target: 'otherSide', label: 'now 0' },
+  aUndoFirstHelp: { target: 'lastMove', label: 'waiting for Undo' },
+  aUndoGuess: { target: 'subst', label: 'not balanced' },
+  aWrong: { target: 'answer', label: 'check this', clear: true },
+};
+const plusText = (v) => (v < 0 ? `−${-v}` : `+${v}`);
+export const ADD_SPOT = {
+  error: (s) => (s.scaffold ? null : ADD_ERRORS[s.feedback?.key] ?? null),
+  keepsReds: (s) => ['aRed', 'aRed3', 'aZeroOther', 'lxZero', 'aPartial'].includes(s.feedback?.key),
+  startOverAt: 3,
+  clear: (s) => { s.entry = ''; },
+  hint(s) {
+    if (xAlone(s.board)) return { target: 'answer', key: 'aStuckSolved' };
+    const con = s.board[xSideOf(s.board)].find((t) => t.kind === 'num');
+    if (!con) return null;
+    s.hint = { kind: 'cancel', id: con.id };
+    s.menu = 'add';
+    s.amountEntry = '';
+    s.typing = null;
+    return { target: 'xnum', key: 'aStuckHint', params: { constant: plusText(con.v) }, move: 'add' };
+  },
+  prompt: (s) => (moveOwed(s) ? 'lxMustMove' : 'aFindX'),
+};

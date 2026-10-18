@@ -10,6 +10,9 @@ import { signed } from '../engine/addBoth.js';
 import { helpOk, tradeAvailable, tradePending } from '../engine/addBothMoves.js';
 import { lightsAnswerLive, blankOpen, canChoose, moveOwed, amountMode } from '../engine/addBothLights.js';
 import { lightsFeedbackText } from './addBothLightsFeedback.js';
+import { spotlightLayer, findSolveTarget } from './spotlight.js';
+import { spotOf } from '../engine/spotlight.js';
+import { ADD_SPOT } from '../engine/addBothLights.js';
 import { boardBlock, trayFor, html } from './addBothMat.js';
 import { stackRows, movePanel } from './lightScreen.js';
 
@@ -18,10 +21,23 @@ const shown = (v) => (v ? v.replace('-', MINUS) : ' ');
 
 // ---------- the line: only what to do, no choice buttons ----------
 
+// While a spotlight is up, its message is in the pop-up and the line holds the prompt only (Build C, Part 2).
 function line(s) {
-  const el = html('div', `lb-line${s.feedback?.bad ? ' is-bad' : ''}${s.stage === 'done' ? ' is-good' : ''}`, [], { role: 'status', 'aria-live': 'polite' });
-  el.append(html('p', 'lb-text', [lightsFeedbackText(s.feedback)]));
+  const spot = spotOf(s, ADD_SPOT);
+  const fb = spot ? { key: ADD_SPOT.prompt(s), params: {} } : s.feedback;
+  const el = html('div', `lb-line${fb?.bad ? ' is-bad' : ''}${s.stage === 'done' ? ' is-good' : ''}`, [], { role: 'status', 'aria-live': 'polite' });
+  el.append(html('p', 'lb-text', [lightsFeedbackText(fb)]));
   return el;
+}
+
+// The spotlight: an error (dimmed page, the wrong thing lit, Undo the only way out) or the hint after it.
+function spot(s, wrap) {
+  const sp = spotOf(s, ADD_SPOT);
+  if (!sp) return;
+  wrap.append(spotlightLayer(sp, {
+    root: wrap, find: findSolveTarget, text: lightsFeedbackText(s.feedback), undo: '.lx-undo',
+    moveSel: (m) => `[data-move="${m}"]`,
+  }));
 }
 
 // ---------- the ghost row (§2): the newest equation with a box after each side ----------
@@ -180,5 +196,6 @@ export function renderLightsScreen(s) {
   main.append(bottomRow(s), substBlock(s), corners(s));
   body.append(main, panel(s));
   wrap.append(body);
+  spot(s, wrap);
   return wrap;
 }

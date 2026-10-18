@@ -4,7 +4,8 @@
 
 import { formatAddBoth } from '../engine/addBoth.js';
 import { reduceAddBoth } from '../engine/addBothMoves.js';
-import { newLightsSession, withLights, lightsAnswerLive, lightsSummary, combineOpen } from '../engine/addBothLights.js';
+import { newLightsSession, withLights, lightsAnswerLive, lightsSummary, combineOpen, ADD_SPOT } from '../engine/addBothLights.js';
+import { withSpotlight } from '../engine/spotlight.js';
 import { renderLightsScreen } from '../view/lightsScreen.js';
 import { renderGrabScreen } from '../view/grabScreen.js';
 import { lightsFeedbackText } from '../view/addBothLightsFeedback.js';
@@ -24,7 +25,8 @@ export function logLights(line) {
   } catch { /* storage blocked or full */ }
 }
 
-const reduce = withLights(reduceAddBoth);
+// the card's layer round the engine, and the spotlight round both: an error waits for Undo, then a hint (Build C, Part 2)
+const reduce = withSpotlight(withLights(reduceAddBoth), ADD_SPOT);
 let taught = null;      // what this level has already shown the student (the first Trade places is pointed out once)
 
 export const addBothPlay = {
@@ -59,6 +61,7 @@ export const addBothPlay = {
       case 'greyMove': return { type: 'greyMove' };
       case 'lxNext': return { type: 'lxNext' };
       case 'lxApply': return { type: 'lxApply' };
+      case 'spotDismiss': return { type: 'spotDismiss' };
       case 'nextLine': return { type: 'nextLine' };
       case 'next': return { type: 'next' };
       case 'check': return { type: 'check' };

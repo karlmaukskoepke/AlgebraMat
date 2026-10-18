@@ -112,3 +112,20 @@ Problems and save codes are unchanged (PASS). The class-sheet records are unchan
 | `screen:div-failed@1366x768` | the classic screen with the choice | no Guess x / Use a move buttons in the line | Build C, Part 1 |
 | `screen:div-opening@1366x650` | the classic screen with the choice | no Guess x / Use a move buttons in the line | Build C, Part 1 |
 | `screen:div-opening@1366x768` | the classic screen with the choice | no Guess x / Use a move buttons in the line | Build C, Part 1 |
+
+## Build C, Part 2 (2026-10-18): errors are spotlight pop-ups, and Undo is the only way out
+
+The scripted runs now go through the spotlight (`withSpotlight`) as students play. While an error is up, every action but Undo is ignored, so the runs that press I'm stuck or Teach me over a waiting move count fewer of them. These keys are already listed above (Build A, Part 1); the Part 2 change in each:
+
+| Key | Before (Part 1) | After | Why |
+|---|---|---|---|
+| `event:add-both/partial-then-stuck-x4` | supports `hint`, stuck 4 | supports none, stuck 0 | the four I'm stuck presses over the partly cancelling move are ignored until Undo |
+| `event:add-both/partial-then-teach` | supports `hint`, taught 1 | supports none, taught 0 | the same for Teach me |
+| `event:add-both/red-then-stuck` | supports `hint`, stuck 3 | supports `hint`, stuck 1 | the two presses over the red move are ignored; the one after Undo counts |
+| `event:add-both/zero-other-then-undo-stuck` | stuck 2 | stuck 1 | the same |
+| `event:divide-it/failed-then-stuck` | supports `hint, model`, stuck 3 | supports `model`, stuck 1 | the same over the fraction that didn't split |
+
+No new class-sheet words. The hint after Undo is not asked for, so it adds nothing to `supports`. Traces: after an error's Undo the line's message is the hint (`aStuckHint`, `dPickFraction`, `aStuckSolved`), and on Add the move stays open with its blank cleared (the scripted runs `red-then-undo` and `wrong-guess-then-undo` type the amount straight in). Screens with an error (`add-red-move`, `add-partial-move`, `add-wrong-guess`, `div-failed`) show the dimmed page, the lit part and the pop-up.
+| `screen:div-wrong-guess@1366x768` | the substitution ending “Not balanced” | the same, dimmed, the failing line lit (“not balanced”), the pop-up beside it, Undo pulsing | Part 2 |
+| `screen:div-wrong-guess@1366x650` | as above | as above | Part 2 |
+| `screen:div-failed@1366x650` | the failed row, in red | the same, dimmed, the row lit (“doesn’t split”), the pop-up beside it, Undo pulsing | Part 2 |

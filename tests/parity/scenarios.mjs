@@ -21,7 +21,8 @@ export const ADD_SCENARIOS = {
   'clean-move': { problem: P, opts: { level: 4 }, actions: [...addMove(-8), ...addCheck(-12)] },
   // after Undo the move stays chosen and its blank is cleared: the student types the new amount straight away
   'red-then-undo': { problem: P, opts: { level: 4 }, actions: [...addMove(8), { type: 'undo' }, ...type(-8), { type: 'go' }, ...addCheck(-12)] },
-  'wrong-guess-then-undo': { problem: P, opts: { level: 4 }, actions: [...addCheck(4), { type: 'undo' }, ...addMove(-8), ...addCheck(-12)] },
+  // after the Undo the hint opens the Add move with its blank cleared: the amount is typed straight in
+  'wrong-guess-then-undo': { problem: P, opts: { level: 4 }, actions: [...addCheck(4), { type: 'undo' }, ...type(-8), { type: 'go' }, ...addCheck(-12)] },
   'correct-guess': { problem: P, opts: { level: 4 }, actions: [...addCheck(-12)] },
   'stuck-x4-then-solve': {
     problem: P, opts: { level: 4 },

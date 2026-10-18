@@ -238,3 +238,24 @@ export const reduceDivide = loop.reduce;
 export const solve = loop;
 export const { answerLive, helpOk, startOverOk, subView, subTotal, touched, owesMove } = loop;
 export { formatDivide, legalFractions, FRACTIONS };
+
+// The spotlight on Divide it (Build C, Part 2: engine/spotlight.js): its errors, and the hint after Undo (the number in front of x
+// outlined, with the card's own prompt for the move: "Pick a fraction of both sides. Which one leaves one box?").
+const DIVIDE_ERRORS = {
+  dFail: { target: 'failSide', label: 'doesn’t split' },
+  dFail3: { target: 'failSide', label: 'doesn’t split' },
+  aUndoFirstHelp: { target: 'lastMove', label: 'waiting for Undo' },
+  aUndoGuess: { target: 'subst', label: 'not balanced' },
+  dWrong: { target: 'answer', label: 'check this', clear: true },
+};
+export const DIVIDE_SPOT = {
+  error: (s) => DIVIDE_ERRORS[s.feedback?.key] ?? null,
+  keepsReds: (s) => ['dFail', 'dFail3'].includes(s.feedback?.key),
+  clear: (s) => { s.entry = ''; },
+  hint(s) {
+    if (xAlone(s.board)) return { target: 'answer', key: 'aStuckSolved' };
+    s.hint = { kind: 'coef' };
+    return { target: 'coef', key: 'dPickFraction', move: 'fraction' };
+  },
+  prompt: (s) => (loop.moveOwed(s) ? 'aMustMove' : 'aFindX'),
+};

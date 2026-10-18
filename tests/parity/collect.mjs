@@ -9,9 +9,10 @@ import { PACKS, addBoth, divideIt } from '../../src/packs/index.js';
 import { newProgress, completeLevel, encodeProgress, decodeProgress } from '../../src/engine/progress.js';
 import { makeRecord } from '../../src/engine/eventlog.js';
 import { reduceAddBoth, boardText as addBoardText } from '../../src/engine/addBothMoves.js';
-import { newLightsSession, withLights } from '../../src/engine/addBothLights.js';
+import { newLightsSession, withLights, ADD_SPOT } from '../../src/engine/addBothLights.js';
+import { withSpotlight } from '../../src/engine/spotlight.js';
 import { formatAddBoth } from '../../src/engine/addBoth.js';
-import { newDivide, reduceDivide, boardText as divBoardText } from '../../src/engine/divideMoves.js';
+import { newDivide, reduceDivide, boardText as divBoardText, DIVIDE_SPOT } from '../../src/engine/divideMoves.js';
 import { formatDivide } from '../../src/engine/divide.js';
 import { ADD_SCENARIOS, DIVIDE_SCENARIOS } from './scenarios.mjs';
 
@@ -86,8 +87,8 @@ function run(scenarios, start, reduce, boardText, pack, format) {
 
 export function collect() {
   // Add to both sides as students play it since Build C: the card's layer (preview, blank, Next, forced move) round the engine
-  const add = run(ADD_SCENARIOS, newLightsSession, withLights(reduceAddBoth), addBoardText, 'add-both', formatAddBoth);
-  const div = run(DIVIDE_SCENARIOS, (p, o) => newDivide(p, o), reduceDivide, divBoardText, 'divide-it', formatDivide);
+  const add = run(ADD_SCENARIOS, newLightsSession, withSpotlight(withLights(reduceAddBoth), ADD_SPOT), addBoardText, 'add-both', formatAddBoth);
+  const div = run(DIVIDE_SCENARIOS, (p, o) => newDivide(p, o), withSpotlight(reduceDivide, DIVIDE_SPOT), divBoardText, 'divide-it', formatDivide);
   return {
     problems: problems(),
     savecodes: savecodes(),

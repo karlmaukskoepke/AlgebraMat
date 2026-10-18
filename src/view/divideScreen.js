@@ -9,7 +9,9 @@ import { movePanel } from './lightScreen.js';
 import { lineBlock, stackRows, answerBlock, helpRow, undoRow } from './solveScreen.js';
 import { groupDiagram } from './groupDiagram.js';
 import { divideFeedbackText } from './divideFeedback.js';
-import { solve, xAlone, coefOf, pileSize, DEAL_ROUND_LEVEL } from '../engine/divideMoves.js';
+import { solve, xAlone, coefOf, pileSize, DEAL_ROUND_LEVEL, DIVIDE_SPOT } from '../engine/divideMoves.js';
+import { spotOf } from '../engine/spotlight.js';
+import { spotlightLayer, findSolveTarget } from './spotlight.js';
 import { FRACTIONS } from '../engine/divide.js';
 import { fractionText } from '../engine/solveTerms.js';
 
@@ -95,7 +97,9 @@ function panelBlock(s) {
 
 export function renderDivideScreen(s) {
   const wrap = html('div', 'lb-game lb-eqcard sv-card');
-  wrap.append(lineBlock(s, divideFeedbackText));
+  // while a spotlight is up, its message is in the pop-up and the line holds the prompt only (Build C, Part 2)
+  const sp = spotOf(s, DIVIDE_SPOT);
+  wrap.append(lineBlock(sp ? { ...s, feedback: { key: DIVIDE_SPOT.prompt(s), params: {} } } : s, divideFeedbackText));
   const body = html('div', 'lb-body');
   const main = html('div', 'lb-main');
   main.append(bareBlock(s), helpRow(s, solve));
@@ -103,5 +107,11 @@ export function renderDivideScreen(s) {
   if (solve.moveOwed(s)) panel.classList.add('is-owed');
   body.append(main, html('div', 'sv-side', [panel, diagramBlock(s)]));
   wrap.append(body);
+  if (sp) {
+    wrap.append(spotlightLayer(sp, {
+      root: wrap, find: (root, target) => findSolveTarget(root, target, s), text: divideFeedbackText(s.feedback), undo: '.btn-undo',
+      moveSel: (m) => `[data-move="${m}"]`,
+    }));
+  }
   return wrap;
 }

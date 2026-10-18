@@ -1,6 +1,7 @@
 // The play adapter for Divide it's equation levels (engine/divideMoves.js, view/divideScreen.js).
 
-import { newDivide, reduceDivide, owesMove } from '../engine/divideMoves.js';
+import { newDivide, reduceDivide, owesMove, DIVIDE_SPOT } from '../engine/divideMoves.js';
+import { withSpotlight } from '../engine/spotlight.js';
 import { formatDivide } from '../engine/divide.js';
 import { renderDivideScreen } from '../view/divideScreen.js';
 import { buildDivideControls } from '../view/divideControls.js';
@@ -16,7 +17,7 @@ export const divideMovesPlay = {
   owesMove,
   steps: () => [],
   newSession: (problem, { forceMove = false } = {}) => newDivide(problem, { level: problem.logLevel ?? 2, forceMove }),
-  reduce: reduceDivide,
+  reduce: withSpotlight(reduceDivide, DIVIDE_SPOT),            // an error waits for Undo, then a hint (Build C, Part 2)
   feedbackText: divideFeedbackText,
   buildControls: buildDivideControls,
   effects(before, s) {
@@ -45,6 +46,7 @@ export const divideMovesPlay = {
       case 'teach': return { type: 'teach' };
       case 'startOver': return { type: 'startOver' };
       case 'undo': return { type: 'undo' };
+      case 'spotDismiss': return { type: 'spotDismiss' };
       default: return null;
     }
   },
