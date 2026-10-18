@@ -95,7 +95,7 @@ export function withLights(reduce = reduceAddBoth) {
       if (sameUi(next, state)) return state;
       if (patch.light && patch.light !== ui(state).light) countHover(next, 'lightHovers', patch.light);
       if (patch.hoverMove && patch.hoverMove !== ui(state).hoverMove) countHover(next, 'moveHovers', patch.hoverMove);
-      return patch.preview ? countPreview(next) : next;
+      return patch.preview === true ? countPreview(next) : next;
     }
     if (state.stage === 'done') return state;
     const grab = grabAction(state, action, wrapped);

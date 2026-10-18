@@ -3284,38 +3284,38 @@ body {
 @keyframes lx-ringpulse { 0%, 100% { box-shadow: 0 0 0 4px rgba(0, 114, 178, 0.55); } 50% { box-shadow: 0 0 0 11px rgba(0, 114, 178, 0); } }
 @media (prefers-reduced-motion: reduce) { .ui-lights .lb-panel.is-owed .lb-move.is-target { animation: none; box-shadow: 0 0 0 4px #0072b2; } }
 
-/* ---------- ?ui=grab: lights round 2 (SPEC-LIGHTS-EXPERIMENT-ADD-rev02.md): the narrow panel, the line in front of "=", grabbing terms ---------- */
+/* ---------- lights round 2 (SPEC-LIGHTS-EXPERIMENT-ADD-rev02.md; the default since Build D): the line in front of "=", grabbing terms ---------- */
 /* A2: the dashed centre line is drawn in front of the "=" (it is the drop line) */
 .ui-grab .lb-border::before { z-index: 2; }
 .ui-grab .lb-equals { background: transparent; z-index: 1; }
 /* A3: the panel is only as wide as its narrow moves and their lights */
 .ui-grab .lb-body { grid-template-columns: minmax(0, 1fr) auto; }
 .ui-grab .lx-panel { width: max-content; max-width: 150px; padding: 6px 8px 8px; gap: 6px; }
-.ui-grab .lx-phead { display: flex; justify-content: space-between; gap: 6px; font: 800 11px 'Lexend', system-ui, sans-serif; letter-spacing: 0.05em; text-transform: uppercase; color: var(--muted, #555); padding-bottom: 3px; border-bottom: 2px dashed #bdb7a4; }
-.ui-grab .lx-pgrid { display: grid; grid-template-columns: 66px auto; grid-auto-rows: 44px; gap: 6px 8px; align-items: center; }
+.lx-phead { display: flex; justify-content: space-between; gap: 6px; font: 800 11px 'Lexend', system-ui, sans-serif; letter-spacing: 0.05em; text-transform: uppercase; color: var(--muted, #555); padding-bottom: 3px; border-bottom: 2px dashed #bdb7a4; }
+.lx-pgrid { display: grid; grid-template-columns: 66px auto; grid-auto-rows: 44px; gap: 6px 8px; align-items: center; }
 .ui-grab .lx-move { width: 66px; height: 44px; min-height: 0; min-width: 0; padding: 0; display: grid; place-items: center; position: relative; overflow: visible; }
 .ui-grab .lx-move .lb-icon { max-height: 30px; }
 .ui-grab .lx-move.is-ring { box-shadow: 0 0 0 4px #0072b2, 0 0 0 7px #fff, 0 0 0 9px #0072b2; }   /* A1: a ring that stays, and the pulse */
-.ui-grab .lx-dots { display: flex; flex-direction: column; justify-content: center; align-items: flex-start; gap: 3px; }
-.ui-grab .lx-dots.is-row { flex-direction: row; gap: 8px; }
-.ui-grab .lx-dot { position: relative; width: 18px; height: 18px; min-width: 0; min-height: 0; padding: 0; border-radius: 50%; border: 2px solid var(--ink); background: #fff; display: grid; place-items: center; cursor: pointer; font: 800 11px/1 'Lexend', system-ui, sans-serif; color: var(--ink); }
-.ui-grab .lx-pgrid .lx-dots:not(:has(> :nth-child(2))) .lx-dot { width: 22px; height: 22px; font-size: 13px; }
-.ui-grab .lx-dot.is-green { background: #3aa76d; border-color: #1b6e3a; color: #fff; }
-.ui-grab .lx-dot.is-red { background: #d9534f; border-color: #a3281b; color: #fff; }
-.ui-grab .lx-dot.is-neutral { background: #ececec; }
-.ui-grab .lx-dot.is-off { border-style: dashed; border-color: #9a9a9a; background: transparent; }
-.ui-grab .lx-dot.is-flash { animation: sw-pulse 0.9s ease-in-out 3; }
-.ui-grab .lx-dot:focus-visible { outline: 3px solid #0072b2; outline-offset: 2px; }
+.lx-dots { display: flex; flex-direction: column; justify-content: center; align-items: flex-start; gap: 3px; }
+.lx-dots.is-row { flex-direction: row; gap: 8px; }
+.lx-dot { position: relative; width: 18px; height: 18px; min-width: 0; min-height: 0; padding: 0; border-radius: 50%; border: 2px solid var(--ink); background: #fff; display: grid; place-items: center; cursor: pointer; font: 800 11px/1 'Lexend', system-ui, sans-serif; color: var(--ink); }
+.lx-pgrid .lx-dots:not(:has(> :nth-child(2))) .lx-dot { width: 22px; height: 22px; font-size: 13px; }
+.lx-dot.is-green { background: #3aa76d; border-color: #1b6e3a; color: #fff; }
+.lx-dot.is-red { background: #d9534f; border-color: #a3281b; color: #fff; }
+.lx-dot.is-neutral { background: #ececec; }
+.lx-dot.is-off { border-style: dashed; border-color: #9a9a9a; background: transparent; }
+.lx-dot.is-flash { animation: sw-pulse 0.9s ease-in-out 3; }
+.lx-dot:focus-visible { outline: 3px solid #0072b2; outline-offset: 2px; }
 /* a light opened in place: a pill with its goal, growing to the left over the moves (one at a time) */
-.ui-grab .lx-pill { display: none; }
-.ui-grab .lx-dot.is-open { z-index: 40; }
-.ui-grab .lx-dot.is-open .lx-pill { display: flex; align-items: center; gap: 6px; position: absolute; right: -6px; top: 50%; transform: translateY(-50%); white-space: nowrap; padding: 4px 30px 4px 12px;
+.lx-pill { display: none; }
+.lx-dot.is-open { z-index: 40; }
+.lx-dot.is-open .lx-pill { display: flex; align-items: center; gap: 6px; position: absolute; right: -6px; top: 50%; transform: translateY(-50%); white-space: nowrap; padding: 4px 30px 4px 12px;
   border: 2px solid var(--ink); border-radius: 999px; background: #fff; color: var(--ink); font: 800 15px 'Lexend', system-ui, sans-serif; box-shadow: 0 3px 10px rgba(0, 0, 0, 0.18); pointer-events: none; z-index: -1; }
-.ui-grab .lx-dot.is-open.is-green .lx-pill { border-color: #1b6e3a; }
-.ui-grab .lx-dot.is-open.is-red .lx-pill { border-color: #a3281b; }
-.ui-grab .lx-hand { display: flex; justify-content: flex-end; padding: 4px 4px 0; border-top: 2px dashed #bdb7a4; }
-.ui-grab .lx-solvedrow { display: flex; align-items: center; justify-content: space-between; gap: 6px; padding-top: 4px; border-top: 2px dashed #bdb7a4; }
-.ui-grab .lx-solvedlabel { font: 800 12px 'Lexend', system-ui, sans-serif; white-space: nowrap; }
+.lx-dot.is-open.is-green .lx-pill { border-color: #1b6e3a; }
+.lx-dot.is-open.is-red .lx-pill { border-color: #a3281b; }
+.lx-hand { display: flex; justify-content: flex-end; padding: 4px 4px 0; border-top: 2px dashed #bdb7a4; }
+.lx-solvedrow { display: flex; align-items: center; justify-content: space-between; gap: 6px; padding-top: 4px; border-top: 2px dashed #bdb7a4; }
+.lx-solvedlabel { font: 800 12px 'Lexend', system-ui, sans-serif; white-space: nowrap; }
 .ui-grab .lx-panel .ab-sub { display: flex; flex-direction: column; gap: 4px; }
 .ui-grab .lx-panel .ab-sub .btn { min-width: 0; padding: 0 6px; font-size: 14px; }
 .ui-grab .lx-move[data-tip]:hover::after, .ui-grab .lx-move[data-tip]:focus-visible::after { right: calc(100% + 10px); }
@@ -3368,9 +3368,9 @@ body {
 .spot-layer { position: fixed; inset: 0; z-index: 900; pointer-events: none; }
 .spot-dim { position: fixed; inset: 0; pointer-events: auto; background: transparent; }          /* catches every tap outside Undo */
 .spot-frame { position: fixed; border: 4px solid #0b5f8f; border-radius: 12px; pointer-events: none; background: transparent; }
-.spot-layer.is-error .spot-frame { box-shadow: 0 0 0 200vmax rgba(18, 22, 28, 0.6); border-color: #fff; outline: 4px solid #a3281b; }
+.spot-layer.is-error .spot-frame { border-color: #fff; outline: 4px solid #a3281b; }
 .spot-layer.is-hint .spot-frame { border-style: dashed; }
-.spot-label { position: absolute; left: -4px; bottom: calc(100% + 4px); white-space: nowrap; padding: 2px 10px; border-radius: 8px; background: #fff;
+.spot-label { position: absolute; left: -4px; top: calc(100% + 4px); white-space: nowrap; padding: 2px 10px; border-radius: 8px; background: #fff;
   border: 3px solid #a3281b; color: #a3281b; font: 800 15px 'Lexend', system-ui, sans-serif; }
 .spot-layer.is-hint .spot-label { border-color: #0b5f8f; color: #0b5f8f; }
 .spot-box { position: fixed; width: 340px; box-sizing: border-box; padding: 14px 16px; border: 3px solid var(--ink); border-radius: 14px; background: #fff;
@@ -3380,7 +3380,7 @@ body {
 .spot-way { margin: 8px 0 0; font: 600 15px 'Lexend', system-ui, sans-serif; color: var(--muted, #555); }
 .spot-gotit { margin-top: 10px; min-height: 44px; padding: 0 16px; font-size: 17px; font-weight: 800; }
 /* Undo above the dimming: a copy at the real one's place, pulsing (a steady ring when motion is reduced) */
-.spot-undo { position: fixed !important; z-index: 2; margin: 0 !important; pointer-events: auto; background: #fff !important; opacity: 1 !important;
+.spot-undo { position: fixed !important; z-index: 2; margin: 0 !important; pointer-events: auto; background: #fff !important; opacity: 1 !important; color: var(--ink) !important; border-color: var(--ink) !important;
   box-shadow: 0 0 0 4px #0072b2; animation: spot-pulse 1.1s ease-in-out infinite; }
 @keyframes spot-pulse { 0%, 100% { box-shadow: 0 0 0 4px #0072b2; } 50% { box-shadow: 0 0 0 11px rgba(0, 114, 178, 0.25); } }
 @media (prefers-reduced-motion: reduce) { .spot-undo { animation: none; box-shadow: 0 0 0 5px #0072b2; } }
@@ -3391,7 +3391,7 @@ body {
 .spot-layer.is-late { animation: spot-in 0.3s 1.7s both; }
 @keyframes spot-in { from { opacity: 0; } to { opacity: 1; } }
 /* the card's question at a place (Build C, Part 3): a light dim, nothing held back */
-.spot-layer.is-ask .spot-frame { box-shadow: 0 0 0 200vmax rgba(18, 22, 28, 0.18); border-color: #0b5f8f; }
+.spot-layer.is-ask .spot-frame { border-color: #0b5f8f; }
 .spot-choices { display: flex; gap: 10px; margin-top: 10px; }
 .spot-choices .btn { min-height: 48px; flex: 1; font-size: 19px; font-weight: 800; }
 /* Count it's counters, in a tray directly above the two numbers (Build C, Part 3) */
@@ -3402,3 +3402,105 @@ body {
 .alone-tray .alone-tools { display: flex; justify-content: center; gap: 8px; }
 .alone-tray .alone-tools .btn { min-height: 44px; min-width: 52px; font-size: 20px; font-weight: 800; }
 .alone-tray .alone-tools .btn[aria-pressed='true'] { background: #fff6b8; border-width: 3px; }
+
+/* ---------- The light design (Build D, 2026-10-18): no banner, one green button, the narrow panel, pop-ups ---------- */
+.sr-only { position: absolute !important; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+.ui-light.lb-game { gap: 0; }
+.ui-light .lb-body { grid-template-columns: minmax(0, 1fr) auto; gap: 14px; }
+.ui-light .lb-main { gap: 8px; }
+.ui-light .lb-stack { min-height: 250px; }
+/* the moves panel: the icons one under the other (44 px targets, a little apart), the collapsed lights beside them */
+.ui-light .lx-panel { width: max-content; max-width: none; padding: 8px 8px 8px; gap: 8px; border-width: 3px; }
+.ui-light .lx-pgrid { grid-template-columns: 58px auto; grid-auto-rows: 46px; gap: 12px 8px; }
+.lx-dot:hover .lx-pill, .lx-dot:focus-visible .lx-pill { display: flex; align-items: center; gap: 6px; position: absolute; right: -6px; top: 50%; transform: translateY(-50%); white-space: nowrap; padding: 4px 30px 4px 12px;
+  border: 2px solid var(--ink); border-radius: 999px; background: #fff; color: var(--ink); font: 800 15px 'Lexend', system-ui, sans-serif; box-shadow: 0 3px 10px rgba(0, 0, 0, 0.18); pointer-events: none; z-index: -1; }
+.lx-dot:hover, .lx-dot:focus-visible { z-index: 40; }
+/* the pointer near a move: it jumps up a little, and its preview starts faintly */
+.ui-light .lx-panel .lx-move.is-near { transform: translateY(-3px); box-shadow: 0 4px 0 #bdb7a4; transition: transform 0.12s; }
+.ui-light .lx-ghost.is-near { visibility: visible; opacity: 0.45; }
+@media (prefers-reduced-motion: reduce) { .ui-light .lx-panel .lx-move.is-near { transform: none; } }
+/* the work: left, the solving space; right, the checking space (no labels; a faint dotted line only while checking) */
+.ui-light .sv-work { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); width: 100%; align-items: start; }
+.ui-light .sv-solve { min-width: 0; }
+.ui-light .sv-check { min-width: 0; align-self: stretch; padding-left: 18px; border-left: 2px dotted transparent; }
+.ui-light .sv-work.is-checking .sv-check { border-left-color: #c9c3ae; }
+.ui-light .sv-check .lb-subst { margin: 0; padding: 4px 0 0; list-style: none; text-align: left; font-size: 28px; line-height: 1.35; }
+.ui-light .sv-check.is-under { border: 0; padding: 0; }
+/* earlier lines in lighter ink, so the newest stands out (pop-ups and highlights stay full strength) */
+.ui-light .lb-rowwrap.is-old:not(.is-plugrow) .lb-eq { color: #8d897d; }
+.ui-light .lb-rowwrap.is-old.has-work .lb-eq { opacity: 0.6; }
+/* the dashed midline only while a term is dragged (otherwise the = reads as ≠): strong, with the side it would land on tinted */
+.ui-light .lb-border::before { display: none; }
+.ui-light .lx-live.is-carrying .lb-border::before, .is-grabbing .ui-light .lx-live .lb-border::before { display: block; border-left: 6px solid var(--ink); transform: translateX(-3px); }
+/* the answer row, centred: x = [ ] and the green button */
+.ui-light .lx-answer { justify-content: center; margin-top: 4px; }
+.ui-light .lb-prompt.is-off, .ui-light .lx-field.is-off { opacity: 0.45; }
+.ui-light .lx-field.is-off { border-style: dashed; }
+/* the corners: Undo; Start over and the help, small and quiet */
+.ui-light .lx-corners { align-items: center; }
+.ui-light .lx-cornerright { display: flex; gap: 8px; }
+.ui-light .lx-corner { min-height: 40px; font-size: 15px; color: var(--muted, #555); border-color: #bdb7a4; }
+.ui-light .lx-help.is-idle, .ui-light .lx-help.is-new { color: var(--ink); border-color: #0072b2; animation: lx-gentle 1.6s ease-in-out infinite; }
+.ui-light .lx-help.is-new { animation-iteration-count: 3; }
+@keyframes lx-gentle { 0%, 100% { box-shadow: 0 0 0 0 rgba(0, 114, 178, 0); } 50% { box-shadow: 0 0 0 6px rgba(0, 114, 178, 0.35); background: #eef7fd; } }
+@media (prefers-reduced-motion: reduce) { .ui-light .lx-help.is-idle, .ui-light .lx-help.is-new { animation: none; box-shadow: 0 0 0 3px #0072b2; background: #eef7fd; } }
+.ui-light .lx-panel .lx-move { width: 58px; height: 46px; min-height: 0; min-width: 0; padding: 0; display: grid; place-items: center; position: relative; overflow: visible; }
+.ui-light .lx-panel .lx-move .lb-icon { max-height: 28px; }
+.ui-light .lx-panel .lx-move[data-tip]:hover::after, .ui-light .lx-panel .lx-move[data-tip]:focus-visible::after { right: calc(100% + 10px); left: auto; }
+.ui-light .lx-panel .lx-move.is-ring { box-shadow: 0 0 0 4px #0072b2, 0 0 0 7px #fff, 0 0 0 9px #0072b2; }
+/* the one green button: right of x =, the same height, always in the same place; greyed when there is nothing to move forward */
+.btn-forward { min-height: 52px; min-width: 150px; padding: 0 22px; font: 800 22px 'Lexend', system-ui, sans-serif; white-space: nowrap; border-width: 3px; }
+.btn-forward:disabled { background: #e3e1d8; border-color: #c4c0b2; color: #8f8b7e; }
+.ui-light .lx-answer .lb-typed { min-height: 52px; min-width: 3.6ch; }
+.ui-light .lx-bottom { padding-top: 8px; }
+.ui-light .lx-substblock { min-height: 72px; }
+/* the scaffold's own Go and Undo: the green button and the corner Undo do their work */
+.ui-light .ab-boardwrap .ab-actions { display: none; }
+/* pop-ups */
+.spot-dimsvg { position: fixed; left: 0; top: 0; pointer-events: none; }
+.spot-dimsvg path { fill: rgba(18, 22, 28, 0.6); }
+.spot-dimsvg.is-medium path { fill: rgba(18, 22, 28, 0.5); }
+.spot-dimsvg.is-light path { fill: rgba(18, 22, 28, 0.18); }
+.spot-text { white-space: pre-line; }
+.spot-box.is-small { padding: 10px 12px; border-width: 2px; box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2); }
+.spot-box.is-small .spot-text { font-size: 17px; }
+.spot-layer.is-note .spot-box, .spot-layer.is-intro .spot-box { border-color: #0b5f8f; }
+.spot-layer.is-intro .spot-text { font-size: 22px; }
+/* the hopping arrow at the pulsing Undo (a steady arrow when motion is reduced) */
+.spot-arrow { position: fixed; z-index: 3; pointer-events: none; animation: spot-hop 0.8s ease-in-out infinite; }
+.spot-arrow path { fill: #0072b2; stroke: #fff; stroke-width: 2; }
+@keyframes spot-hop { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(12px); } }
+@media (prefers-reduced-motion: reduce) { .spot-arrow { animation: none; } }
+
+/* keyboard first: on a keyboard the pad is gone; on touch a compact keypad pops up only while a field is in use */
+body[data-input='keys'] #play.is-light #controls { display: none; }
+body[data-input='touch'] #play.is-light #controls { position: fixed; left: 50%; bottom: 8px; transform: translateX(-50%); z-index: 850; padding: 8px 10px; border: 3px solid var(--ink); border-radius: 16px;
+  background: #fffdf2; box-shadow: 0 8px 22px rgba(0, 0, 0, 0.22); }
+body[data-input='touch'] #play.is-light[data-pad='closed'] #controls { display: none; }
+body[data-input='touch'] #play.is-light #controls .btn-pad { min-width: 48px; min-height: 48px; }
+/* the header and the level dots fade to a thin strip after the start of a problem; the top of the screen brings them back */
+#play.is-light .topbar { transition: opacity 0.4s, max-height 0.4s, padding 0.4s; max-height: 80px; overflow: hidden; }
+#play.is-light:not(.hdr-show) .topbar:not(:focus-within) { opacity: 0.25; max-height: 8px; padding-bottom: 0; }
+#play.is-light:not(.hdr-show) .topbar:not(:focus-within) > * { visibility: hidden; }
+@media (prefers-reduced-motion: reduce) { #play.is-light .topbar { transition: none; } }
+/* the freed space goes to the problem */
+.ui-light .lb-rowwrap .lb-eq, .ui-light .lx-ghosteq { font-size: 46px; }
+.ui-light .lb-rowwrap.has-work .lb-eq { font-size: 32px; }
+.ui-light .lb-stack { min-height: 300px; }
+/* Divide it in the light design: the same frame as Add */
+.dv-light { --accent: #7b3fb0; }
+.ui-light .lx-corners { display: flex; justify-content: space-between; width: 100%; }
+.ui-light .lx-corner { min-height: 40px; padding: 0 12px; font-weight: 700; background: transparent; }
+.ui-light .lx-corner:disabled { opacity: 0.4; }
+.ui-light .lx-answer { display: flex; align-items: center; gap: 10px; font-size: 26px; }
+.dv-light .lb-rows { display: flex; flex-direction: column; gap: 0; min-height: 300px; }
+.dv-light .lb-rowwrap .lb-eq { font-size: 46px; }
+.dv-light .lb-rowwrap.has-work .lb-eq { font-size: 32px; }
+.dv-light .lb-rowwrap.is-fold .lb-eq { font-size: 32px; }
+.dv-light .lb-side { padding: 2px 6px; }
+.dv-light .lb-fractionrow { justify-content: center; font-size: 16px; min-height: 60px; gap: 6px; margin: 0; flex-wrap: nowrap; }
+.dv-light .lb-fractionrow.is-off { visibility: hidden; }
+.dv-light .lb-frac-btn { min-width: 50px; min-height: 54px; padding: 2px 4px; }
+.dv-light .lb-subst { font-size: 28px; line-height: 1.35; list-style: none; padding: 4px 0 0; margin: 0; text-align: left; }
+.dv-light .lb-subst .lb-checkhead { display: none; }
+.dv-light .sv-diagram { min-height: 0; border: 0; padding: 0; }

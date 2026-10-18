@@ -40,10 +40,12 @@ export function withSpotlight(reduce, card) {
       return s;
     }
     if (state.spot && action.type === 'spotDismiss') return { ...state, spot: null, feedback: { key: card.prompt(state), params: state.feedback?.params ?? {}, bad: false } };
-    const s = reduce(state, action);
+    let s = reduce(state, action);
+    // errors on this problem are counted (Teach me appears after the second: Build D, Part 1)
+    if (s !== state && s.stage !== 'done' && card.error(s)) s = { ...s, errors: (state.errors ?? 0) + 1 };
     if (s === state || !s.spot) return s;
     // the hint goes once the student starts the move (a hover on the highlighted move counts) or does anything else
-    const preview = action.type === 'ui' && action.patch?.preview;
+    const preview = action.type === 'ui' && action.patch?.preview === true;
     if (preview || STARTS_THE_MOVE.has(action.type) || action.type === 'undo' || action.type === 'startOver') {
       // the hint's words go with it: the line goes back to the prompt, unless the action said something of its own
       const said = JSON.stringify(s.feedback) !== JSON.stringify(state.feedback);

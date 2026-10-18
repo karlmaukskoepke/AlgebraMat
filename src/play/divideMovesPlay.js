@@ -1,12 +1,14 @@
 // The play adapter for Divide it's equation levels (engine/divideMoves.js, view/divideScreen.js).
 
-import { newDivide, reduceDivide, owesMove, DIVIDE_SPOT } from '../engine/divideMoves.js';
+import { newDivide, reduceDivide, owesMove, DIVIDE_SPOT, solve } from '../engine/divideMoves.js';
 import { withSpotlight } from '../engine/spotlight.js';
 import { formatDivide } from '../engine/divide.js';
-import { renderDivideScreen } from '../view/divideScreen.js';
+import { renderDivideScreen, introOpen } from '../view/divideScreen.js';
 import { buildDivideControls } from '../view/divideControls.js';
 import { divideFeedbackText } from '../view/divideFeedback.js';
-import { bindValueDrag } from '../view/solveScreen.js';
+import { bindValueDrag, bindForwardKey } from '../view/solveScreen.js';
+import { bindHelpTimer } from '../view/helpTimer.js';
+import { withIntro } from './withIntro.js';
 import { recordProblem } from '../lightStore.js';
 
 export const divideMovesPlay = {
@@ -14,10 +16,13 @@ export const divideMovesPlay = {
   noSteps: true,
   noAuto: true,
   lineInMat: true,
+  lightDesign: true,    // no pad on a keyboard, a pop-up keypad on touch, the header fades (Build D)
+  padOpen: (s) => s.stage !== 'done' && !s.sub && solve.answerLive(s) && (s.typing === 'answer' || solve.alone(s)),
   owesMove,
   steps: () => [],
   newSession: (problem, { forceMove = false } = {}) => newDivide(problem, { level: problem.logLevel ?? 2, forceMove }),
-  reduce: withSpotlight(reduceDivide, DIVIDE_SPOT),            // an error waits for Undo, then a hint (Build C, Part 2)
+  // an error waits for Undo, then a hint (Build C, Part 2); the openings' pop-ups round it (Build D, Part 1)
+  reduce: withIntro(withSpotlight(reduceDivide, DIVIDE_SPOT), introOpen),
   feedbackText: divideFeedbackText,
   buildControls: buildDivideControls,
   effects(before, s) {
@@ -27,7 +32,10 @@ export const divideMovesPlay = {
     return { hint: null };
   },
   renderMat: (s) => renderDivideScreen(s),
-  bindMat: (root, dispatch) => bindValueDrag(root, dispatch),
+  bindMat: (root, dispatch) => {
+    const off = [bindValueDrag(root, dispatch), bindForwardKey(root), bindHelpTimer(root)];
+    return () => off.forEach((f) => f());
+  },
   matAction(d) {
     switch (d.action) {
       case 'choose': return { type: 'choose', move: d.move };
@@ -47,6 +55,7 @@ export const divideMovesPlay = {
       case 'startOver': return { type: 'startOver' };
       case 'undo': return { type: 'undo' };
       case 'spotDismiss': return { type: 'spotDismiss' };
+      case 'introNext': return { type: 'introNext' };
       default: return null;
     }
   },

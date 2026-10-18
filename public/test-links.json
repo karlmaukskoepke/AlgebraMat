@@ -6,18 +6,98 @@
       "title": "Live",
       "items": [
         {
+          "name": "The light design (Build D, Part 1)",
+          "about": "No banner: every message is a pop-up; one green button right of x =; the narrow panel with its small lights; help tucked in the corner; no number pad on a keyboard.",
+          "links": [
+            {
+              "label": "Add · Level 1 · x + 8 = 11",
+              "query": "?pack=add-both&level=2&seed=7&nosignin=1",
+              "reset": true,
+              "look": "A small “Find the value of x.” goes at your first action. The header fades after 3 seconds (move to the top to bring it back). Type straight from the keyboard: no pad."
+            },
+            {
+              "label": "The one green button",
+              "query": "?pack=add-both&level=4&seed=7&nosignin=1",
+              "look": "Hover near Add: the preview starts faintly, then fully on the icon. Click Add, type −8: the button says Go. Enter: it says Next. Enter, type −12: Check, then Next, then Next problem. Always the same place."
+            },
+            {
+              "label": "An error below the work",
+              "query": "?pack=add-both&level=4&seed=7&nosignin=1",
+              "look": "Add 8 and Enter: the page dims, +16 is lit with “got bigger” under it, the message is below the work and an arrow hops at Undo."
+            },
+            {
+              "label": "Partly cancelled",
+              "query": "?pack=add-both&level=4&seed=7&nosignin=1",
+              "look": "Add −5: “still here” sits under the +3, not on it."
+            },
+            {
+              "label": "The move after a correct guess",
+              "query": "?pack=add-both&level=4&seed=7&nosignin=1",
+              "look": "Type −12, Enter four times, then Next problem: everything greys except the problem and the moves, with “Your mental math is very strong.” Hover Add: its preview is lit too. Next or a move brings everything back."
+            },
+            {
+              "label": "Help in the corner",
+              "query": "?pack=add-both&level=4&seed=7&nosignin=1",
+              "look": "Wait 10 seconds: I’m stuck flashes gently. Teach me appears (and flashes) only after a second error: try Add 8, Undo, Add 8."
+            },
+            {
+              "label": "Divide it in the light design",
+              "query": "?pack=divide-it&level=3&seed=7&nosignin=1",
+              "look": "The same frame: the narrow panel (Multiply is the live move), x = with the green button, help in the corner, the counters on the right when you ask for help."
+            }
+          ]
+        },
+        {
+          "name": "The narrow panel (was lights round 2)",
+          "about": "Kept (Build D): the narrow panel with its small round lights is the only panel on Add to both sides and Divide it.",
+          "links": [
+            {
+              "label": "Narrow panel · x − 4 = −3",
+              "query": "?pack=add-both&level=3&seed=7&nosignin=1",
+              "look": "Hover a dot: it opens into its goal. The dashed line only shows while you drag a term."
+            }
+          ]
+        },
+        {
+          "name": "Grab the terms (was lights round 2)",
+          "about": "Kept (Build D): drag a number across the line, onto another number to combine, or along its side to reorder; tap a minus to see it as a negative.",
+          "links": [
+            {
+              "label": "Drag across, combine, minus",
+              "query": "?pack=add-both&level=3&seed=7&nosignin=1",
+              "look": "Drag “− 4” over the line, drop, Next, then drop the 4 onto the −3, type 1 and press the green Combine."
+            },
+            {
+              "label": "Reorder, and x can’t cross",
+              "query": "?pack=add-both&level=2&seed=7&nosignin=1",
+              "look": "Drag “+ 8” before x: 8 + x = 11 in place. Drag x across: “That moves x. Try the number.”"
+            }
+          ]
+        },
+        {
+          "name": "The Distribute drill",
+          "about": "Kept (Build D): two drill problems solved only by grabbing terms. It has no level button; this link is the way in.",
+          "links": [
+            {
+              "label": "Drill: 5 − 2(x + 2) = 3",
+              "query": "?drill=distribute&nosignin=1",
+              "look": "Dragging the 2 is refused until you tap its minus; then two labelled blanks, −2 and −4, and on to x = −1."
+            }
+          ]
+        },
+        {
           "name": "Errors pop up next to the mistake (spotlight)",
           "about": "A move that makes things worse dims the page, lights up what went wrong, and only Undo goes on; after Undo a hint pops up at the number to work on.",
           "links": [
             {
               "label": "A move the wrong way",
               "query": "?pack=add-both&level=4&seed=7&nosignin=1",
-              "look": "On x + 8 = −4, Add 8 and ✓: the page dims, +16 is lit with “got bigger”, the message sits beside it and Undo pulses. Press Undo (or Enter): a hint at the +8 with Got it."
+              "look": "On x + 8 = −4, Add 8 and Enter: the page dims, +16 is lit with “got bigger”, the message sits beside it and Undo pulses. Press Undo (or Enter): a hint at the +8 with Got it."
             },
             {
               "label": "Partly cancelled",
               "query": "?pack=add-both&level=4&seed=7&nosignin=1",
-              "look": "Add −5 and ✓: the +3 still next to x is lit, “still here”."
+              "look": "Add −5 and Enter: the +3 still next to x is lit, “still here”."
             },
             {
               "label": "A wrong guess",
@@ -27,7 +107,7 @@
             {
               "label": "A wrong value",
               "query": "?pack=add-both&level=2&seed=7&nosignin=1",
-              "look": "Add −8, ✓, Next, then type 19 and Check, click through: x = is lit, “check this”; Undo closes it and says to work out x."
+              "look": "Add −8, Enter, Enter, then type 19 and Check, click through: x = is lit, “check this”; Undo closes it and says to work out x."
             },
             {
               "label": "Divide: a fraction that doesn’t split",
@@ -43,12 +123,12 @@
             {
               "label": "x = 11 + −8",
               "query": "?pack=add-both&level=2&seed=7&nosignin=1",
-              "look": "Add −8, ✓, Next, then I’m stuck: pick Battle (a wrong pick gets a nudge), then I’m stuck again: draw 11 + counters and 8 − counters, Check, cancel the pairs, count, type 3. The app never writes 3."
+              "look": "Add −8, Enter, Enter, then I’m stuck: pick Battle (a wrong pick gets a nudge), then I’m stuck again: draw 11 + counters and 8 − counters, Check, cancel the pairs, count, type 3. The app never writes 3."
             },
             {
               "label": "Teach me starts at the counters",
               "query": "?pack=add-both&level=2&seed=7&nosignin=1",
-              "look": "Add −8, ✓, Next, then Teach me: the counters tray opens straight away, with its own Party or Battle step."
+              "look": "Add −8, Enter, Enter, then Teach me: the counters tray opens straight away, with its own Party or Battle step."
             }
           ]
         },
@@ -136,7 +216,7 @@
             {
               "label": "Partly cancelled: Undo first",
               "query": "?pack=add-both&level=4&seed=7&nosignin=1",
-              "look": "On x + 8 = −4 add −5 (✓), then I’m stuck: it names the +3 that’s left and says to press Undo first."
+              "look": "On x + 8 = −4 add −5 (Enter), then I’m stuck: it names the +3 that’s left and says to press Undo first."
             },
             {
               "label": "Divide it: a fraction that doesn’t split",
@@ -195,50 +275,27 @@
     },
     {
       "title": "Testing",
-      "items": [
-        {
-          "name": "Lights round 2: the narrow panel",
-          "about": "Four small moves and round dots that open into their goal on hover or tap; the equation reads x − 4 and the dashed line runs in front of the =.",
-          "links": [
-            {
-              "label": "Narrow panel · x − 4 = −3",
-              "query": "?pack=add-both&level=3&seed=7&ui=grab&nosignin=1",
-              "look": "Hover a dot: it opens into its goal. Note the = with the line through it."
-            }
-          ]
-        },
-        {
-          "name": "Lights round 2: grab the terms",
-          "about": "Drag a number across the line to add its opposite to both sides, onto another number to combine them, or along its side to reorder; tap a minus to see it as a negative.",
-          "links": [
-            {
-              "label": "Drag across, combine, minus",
-              "query": "?pack=add-both&level=3&seed=7&ui=grab&nosignin=1",
-              "look": "Drag “− 4” over the line (it turns into “+ 4 ⇄”), drop, Next, then drop the 4 onto the −3 and type 1."
-            },
-            {
-              "label": "Reorder, and x can’t cross",
-              "query": "?pack=add-both&level=2&seed=7&ui=grab&nosignin=1",
-              "look": "Drag “+ 8” before x: 8 + x = 11 in place. Drag x across: “That moves x. Try the number.”"
-            }
-          ]
-        },
-        {
-          "name": "Lights round 2: the Distribute drill",
-          "about": "Two drill problems solved only by grabbing terms: tap the minus, drag −2 onto the parentheses, type each product.",
-          "links": [
-            {
-              "label": "Drill: 5 − 2(x + 2) = 3",
-              "query": "?ui=grab&drill=distribute&nosignin=1",
-              "look": "Dragging the 2 is refused until you tap its minus; then two labelled blanks, −2 and −4, and on to x = −1."
-            }
-          ]
-        }
-      ]
+      "items": []
     },
     {
       "title": "Retired",
       "items": [
+        {
+          "name": "The banner",
+          "about": "The yellow message box at the top of Add to both sides and Divide it is deleted: every message is a pop-up (Build D)."
+        },
+        {
+          "name": "The wide Move / Why? panel",
+          "about": "Replaced on both cards by the narrow panel with its small lights (Build D)."
+        },
+        {
+          "name": "The ✓ under the blank, and the separate Next and Check buttons",
+          "about": "One green button right of x = does all of it (Build D)."
+        },
+        {
+          "name": "The ?ui=grab link",
+          "about": "Not needed any more: round 2 is how Add to both sides plays (Build D)."
+        },
         {
           "name": "Guess x / Use a move",
           "about": "The choice at the start of every Solve it problem is deleted on Add to both sides and Divide it (Build C)."

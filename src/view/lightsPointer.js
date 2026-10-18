@@ -1,19 +1,20 @@
 // Pointer and keyboard for the Add to both sides screen (the lights layout, SPEC-LIGHTS-EXPERIMENT-ADD.md §2), on top of the card's own dragging
 // (addBothPointer.js: a number dragged from the equation into the blank still fills it).
 //   Mouse: hovering the Add icon previews the move; a click chooses it.
-//   Keyboard: Tab onto the Add icon previews it; Enter or Space chooses; Enter applies; Esc cancels. Enter does the first of:
-//   apply the blank, Next, Check (and the substitution's Next).
+//   Keyboard: Tab onto the Add icon previews it; Enter or Space chooses; Esc cancels. Enter presses the one green button.
 //   Touch: the first tap on the Add icon previews, the second chooses; a tap anywhere else removes the preview.
 // The Mat is redrawn on every change, so focus is put back where it was (or where the screen asks for it: data-lx-focus).
 
 import { bindAddBothMat } from './addBothPointer.js';
 import { bindGrab } from './lightsGrabPointer.js';
+import { bindHelpTimer } from './helpTimer.js';
 
 const ADD = '.lb-move[data-move="add"]';
 
-export function bindLightsMat(root, dispatch, getSession, { grab = false } = {}) {
-  const unbindGrab = grab ? bindGrab(root, dispatch, getSession) : null;   // first: a held term's keys are its own (?ui=grab)
+export function bindLightsMat(root, dispatch, getSession) {
+  const unbindGrab = bindGrab(root, dispatch, getSession);   // first: a held term's keys are its own
   const unbindDrag = bindAddBothMat(root, dispatch, getSession);
+  const unbindHelp = bindHelpTimer(root);
   let pointerType = 'mouse';
   let keyboard = false;          // was the last input a key (so a focus is the keyboard's, not a click's)?
   let lastKey = null;            // data-fk of the element that had focus, to give it back after a redraw
@@ -38,10 +39,27 @@ export function bindLightsMat(root, dispatch, getSession, { grab = false } = {})
   const onOut = (e) => {
     if (e.pointerType !== 'mouse' || !lights()) return;
     const from = e.target.closest?.(ADD);
-    if (from && !(e.relatedTarget && from.contains(e.relatedTarget))) preview(false);
+    if (from && !(e.relatedTarget && from.contains(e.relatedTarget))) dispatch({ type: 'ui', patch: { preview: 'near' } });   // still near
   };
   root.addEventListener('pointerover', onOver);
   root.addEventListener('pointerout', onOut);
+  // the preview begins on approach: within about 40 px of the Add icon it starts faintly (and the icon jumps up a little)
+  const NEAR = 40;
+  const onMove = (e) => {
+    if (e.pointerType !== 'mouse' || !lights()) return;
+    const add = root.querySelector(`${ADD}:not(:disabled)`);
+    const s = getSession?.();
+    if (!add || !s) return;
+    const r = add.getBoundingClientRect();
+    const dx = Math.max(r.left - e.clientX, 0, e.clientX - r.right);
+    const dy = Math.max(r.top - e.clientY, 0, e.clientY - r.bottom);
+    const d = Math.hypot(dx, dy);
+    const cur = s.ui?.preview;
+    if (d === 0 || cur === true) return;                              // on the icon: the full preview (pointerover)
+    if (d <= NEAR && cur !== 'near') dispatch({ type: 'ui', patch: { preview: 'near' } });
+    else if (d > NEAR && cur === 'near') preview(false);
+  };
+  document.addEventListener('pointermove', onMove);
 
   // a touch tap on the icon goes to the reducer marked as a tap (first tap previews, second chooses)
   const onClick = (e) => {
@@ -71,7 +89,7 @@ export function bindLightsMat(root, dispatch, getSession, { grab = false } = {})
   root.addEventListener('focusin', onFocusIn);
   root.addEventListener('focusout', onFocusOut);
 
-  // Enter and Esc. Runs before the page's own keys (capture), so Enter does the first of: apply, Next, the substitution's Next, Check.
+  // Enter and Esc. Runs before the page's own keys (capture), so Enter presses the green button.
   const onKey = (e) => {
     if (e.key === 'Tab') keyboard = true;
     if (!lights() || root.closest('[hidden]') || document.querySelector('dialog[open]') || e.ctrlKey || e.metaKey || e.altKey) return;
@@ -95,12 +113,10 @@ export function bindLightsMat(root, dispatch, getSession, { grab = false } = {})
     if (a instanceof HTMLElement && a.matches('button, a') && !root.contains(a) && !a.closest('#controls')) return;
     e.preventDefault();
     e.stopImmediatePropagation();
-    if (root.querySelector('.lx-ghost.is-chosen')) { dispatch({ type: 'go' }); return; }
-    const order = ['[data-action="lxNext"]', '[data-action="nextLine"]', '[data-action="next"]', '[data-action="check"]'];
-    for (const sel of order) {
-      const b = root.querySelector(sel);
-      if (b && !b.disabled) { b.click(); return; }
-    }
+    // Enter presses the one green button (an empty blank shakes instead)
+    const f = root.querySelector('.btn-forward');
+    if (f && !f.disabled) { f.click(); return; }
+    if (f?.dataset.action === 'go' && root.querySelector('.lx-ghost.is-chosen')) dispatch({ type: 'go' });
   };
   window.addEventListener('keydown', onKey, true);
 
@@ -125,10 +141,12 @@ export function bindLightsMat(root, dispatch, getSession, { grab = false } = {})
   return () => {
     unbindGrab?.();
     unbindDrag?.();
+    unbindHelp();
     obs.disconnect();
     document.removeEventListener('pointerdown', onPointerDown, true);
     root.removeEventListener('pointerover', onOver);
     root.removeEventListener('pointerout', onOut);
+    document.removeEventListener('pointermove', onMove);
     root.removeEventListener('click', onClick, true);
     root.removeEventListener('focusin', onFocusIn);
     root.removeEventListener('focusout', onFocusOut);

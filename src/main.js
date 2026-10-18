@@ -63,8 +63,6 @@ const $ = (id) => document.getElementById(id);
 // wrong answer or I'm stuck calls for them, and the card's full walk as the last rung. ?light=0 plays the old
 // step-by-step way instead. (Distribute's typed Rounds 4 and 5 were already typed.)
 const LIGHT = new URLSearchParams(location.search).get('light') !== '0';
-// ?ui=grab: lights round 2 on Add to both sides, being tested (grabbing terms; SPEC-LIGHTS-EXPERIMENT-ADD-rev02.md). Off, nothing changes.
-const UI_GRAB = new URLSearchParams(location.search).get('ui') === 'grab';
 const PLAY = {
   combineit: (level) => (level >= 5 ? (LIGHT ? bigLightPlay : bigPlay) : level === 4 ? (LIGHT ? combineIntegerLightPlay : integerPlay)
     : LIGHT ? lightPlay : combinePlay),
@@ -80,8 +78,8 @@ const PLAY = {
   'add-both': (level) => (level === 1 ? addBothNumericPlay : addBothPlay),   // Level 1 is numeric (no x): "See why it works"
   'distribute-combine': (level) => (level >= 4 ? distributeTypedPlay : LIGHT ? distributeLightPlay : distributePlay),
 };
-// ?ui=grab&drill=distribute: the Distribute drill of lights round 2 (B6), a hidden pack that exists only with the flag.
-const DRILL = UI_GRAB && new URLSearchParams(location.search).get('drill') === 'distribute';
+// ?drill=distribute: the Distribute drill of lights round 2 (B6), a hidden pack that exists only with the link.
+const DRILL = new URLSearchParams(location.search).get('drill') === 'distribute';
 if (DRILL) { HIDDEN_PACKS.push(distributeDrillPack); PLAY[distributeDrillPack.id] = distributeDrillPlay; }
 const adapterFor = (packId, level) => (typeof PLAY[packId] === 'function' ? PLAY[packId](level) : PLAY[packId]);
 const newSeed = () => Math.floor(Math.random() * 2 ** 32);
@@ -494,9 +492,42 @@ window.matchMedia('(orientation: portrait)').addEventListener('change', () => {
   fitMatToPhone(matRoot.firstElementChild);
 });
 
+// The light design (Build D, Part 1): keyboard first, the keypad only when needed; the header fades to a thin strip.
+// On a device with a physical keyboard the number pad is gone and the student types straight into the fields; on a touch screen with
+// no keyboard a compact keypad pops up only while a field is in use (the adapter's `padOpen`), and goes on Check and Next.
+let inputMode = window.matchMedia('(pointer: coarse)').matches && !window.matchMedia('(hover: hover)').matches ? 'touch' : 'keys';
+document.body.dataset.input = inputMode;
+document.addEventListener('keydown', (e) => {
+  if (inputMode !== 'keys' && /^[0-9]$/.test(e.key)) { inputMode = 'keys'; document.body.dataset.input = inputMode; }
+}, true);
+// The header and the level dots show at the start of each problem for about 3 seconds, then fade to a thin strip; the pointer at the
+// top of the screen (or the keyboard in the header) brings them back.
+let headerTimer = null;
+let headerHover = false;
+function showHeader() {
+  clearTimeout(headerTimer);
+  $('play').classList.add('hdr-show');
+  headerTimer = setTimeout(() => { if (!headerHover) $('play').classList.remove('hdr-show'); headerTimer = null; }, 3000);
+}
+document.addEventListener('mousemove', (e) => {
+  if (!play?.adapter?.lightDesign) return;
+  const bar = document.querySelector('#play .topbar');
+  const near = e.clientY < 28 || (headerHover && bar && e.clientY < bar.getBoundingClientRect().bottom + 12);
+  if (near === headerHover) return;
+  headerHover = near;
+  if (near) $('play').classList.add('hdr-show');
+  else if (!headerTimer) $('play').classList.remove('hdr-show');
+});
+let shownFor = null;
+
 function render(before) {
   const { session, finished } = play;
   const { adapter } = play;
+  $('play').classList.toggle('is-light', Boolean(adapter.lightDesign));
+  if (adapter.lightDesign) {
+    $('play').dataset.pad = !finished && adapter.padOpen?.(session) ? 'open' : 'closed';
+    if (shownFor !== session.problem) { shownFor = session.problem; showHeader(); }     // a new problem: the header shows for a moment
+  }
   const fx = adapter.effects(before, session);
   // A problem just finished: the streak grows with a clean answer and goes back to zero after any other.
   if (session.step === 'done' && before && before.step !== 'done' && 'clean' in session && !adapter.noStreak) {

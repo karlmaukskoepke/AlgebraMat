@@ -138,3 +138,81 @@ No new class-sheet words. The hint after Undo is not asked for, so it adds nothi
 | `event:add-both/x-alone-then-teach` | supports `forced` | supports `forced, model` | Teach me at x alone starts at the counters |
 
 Traces of those two runs (already listed) and the screens `add-alone-stuck-1/2/3`, `add-alone-teach` (already listed) show the question bubble at the two numbers, then the counters tray, in place of Build A's words-only help. `crossoff` is added only when the student cancels a pair in the walk.
+
+## Build D, Part 1 (2026-10-18): the light design
+
+Problems, save codes, class-sheet records and the engine traces are unchanged (the engines were not touched: the openings' pop-ups, the error count for Teach me and the faint preview on approach are view state). Every screen of Add to both sides and Divide it changed on purpose:
+
+- **No banner.** The line is kept for screen readers only; every message is a pop-up (errors below the work with a hopping arrow at Undo; hints, notes and nudges in the nearest free space that covers no equation or work).
+- **One green button** right of x = (Check, Go, Next, Got it, Combine, Next problem); the ✓ under the blank, the Next on the rule line and the Next beside the check are gone.
+- **The narrow panel** (round 2) with its collapsed lights is the only panel; the wide Move / Why? panel is gone from both cards.
+- **Round 2 is the default** on Add: rows read "x − 4", terms can be grabbed; the dashed midline shows only while a term is dragged.
+- **The work on the left, the checking space on the right**; earlier lines in lighter ink; bigger equations.
+- **Help in the corner:** I'm stuck and Start over small, bottom right; Teach me appears after a second error (so the `*-teach` states show no Teach me button and the screen stays as it was before it).
+- **No pad on a keyboard** (the screens are taken with a mouse); the header fades to a strip after 3 seconds (the screens are taken before that).
+- **x = blinks only at the last step**; the first problem of a visit shows "Find the value of x.".
+
+| Key | Before | After | Why |
+|---|---|---|---|
+| `screen:add-opening@1366x768` | the Build C screen | the light design | Part 1 |
+| `screen:add-opening@1366x650` | the Build C screen | the light design | Part 1 |
+| `screen:add-helpful-move@1366x768` | the Build C screen | the light design | Part 1 |
+| `screen:add-helpful-move@1366x650` | the Build C screen | the light design | Part 1 |
+| `screen:add-red-move@1366x768` | the Build C screen | the light design | Part 1 |
+| `screen:add-red-move@1366x650` | the Build C screen | the light design | Part 1 |
+| `screen:add-partial-move@1366x768` | the Build C screen | the light design | Part 1 |
+| `screen:add-partial-move@1366x650` | the Build C screen | the light design | Part 1 |
+| `screen:add-stuck-1@1366x768` | the Build C screen | the light design | Part 1 |
+| `screen:add-stuck-1@1366x650` | the Build C screen | the light design | Part 1 |
+| `screen:add-stuck-2@1366x768` | the Build C screen | the light design | Part 1 |
+| `screen:add-stuck-2@1366x650` | the Build C screen | the light design | Part 1 |
+| `screen:add-stuck-3@1366x768` | the Build C screen | the light design | Part 1 |
+| `screen:add-stuck-3@1366x650` | the Build C screen | the light design | Part 1 |
+| `screen:add-stuck-4@1366x768` | the Build C screen | the light design | Part 1 |
+| `screen:add-stuck-4@1366x650` | the Build C screen | the light design | Part 1 |
+| `screen:add-teach@1366x768` | the Build C screen | the light design | Part 1 |
+| `screen:add-teach@1366x650` | the Build C screen | the light design | Part 1 |
+| `screen:add-wrong-guess@1366x768` | the Build C screen | the light design | Part 1 |
+| `screen:add-wrong-guess@1366x650` | the Build C screen | the light design | Part 1 |
+| `screen:add-wrong-guess-undone@1366x768` | the Build C screen | the light design | Part 1 |
+| `screen:add-wrong-guess-undone@1366x650` | the Build C screen | the light design | Part 1 |
+| `screen:add-forced-move@1366x768` | the Build C screen | the light design | Part 1 |
+| `screen:add-forced-move@1366x650` | the Build C screen | the light design | Part 1 |
+| `screen:add-end@1366x768` | the Build C screen | the light design | Part 1 |
+| `screen:add-end@1366x650` | the Build C screen | the light design | Part 1 |
+| `screen:add-partial-stuck-4@1366x768` | the Build C screen | the light design | Part 1 |
+| `screen:add-partial-stuck-4@1366x650` | the Build C screen | the light design | Part 1 |
+| `screen:add-partial-teach@1366x768` | the Build C screen | the light design | Part 1 |
+| `screen:add-partial-teach@1366x650` | the Build C screen | the light design | Part 1 |
+| `screen:add-alone-stuck-1@1366x768` | the Build C screen | the light design | Part 1 |
+| `screen:add-alone-stuck-1@1366x650` | the Build C screen | the light design | Part 1 |
+| `screen:add-alone-stuck-2@1366x768` | the Build C screen | the light design | Part 1 |
+| `screen:add-alone-stuck-2@1366x650` | the Build C screen | the light design | Part 1 |
+| `screen:add-alone-stuck-3@1366x768` | the Build C screen | the light design | Part 1 |
+| `screen:add-alone-stuck-3@1366x650` | the Build C screen | the light design | Part 1 |
+| `screen:add-alone-teach@1366x768` | the Build C screen | the light design | Part 1 |
+| `screen:add-alone-teach@1366x650` | the Build C screen | the light design | Part 1 |
+| `screen:add-red-stuck@1366x768` | the Build C screen | the light design | Part 1 |
+| `screen:add-red-stuck@1366x650` | the Build C screen | the light design | Part 1 |
+| `screen:add-L2-stuck-2@1366x768` | the Build C screen | the light design | Part 1 |
+| `screen:add-L2-stuck-2@1366x650` | the Build C screen | the light design | Part 1 |
+| `screen:div-opening@1366x768` | the Build C screen | the light design | Part 1 |
+| `screen:div-opening@1366x650` | the Build C screen | the light design | Part 1 |
+| `screen:div-helpful-move@1366x768` | the Build C screen | the light design | Part 1 |
+| `screen:div-helpful-move@1366x650` | the Build C screen | the light design | Part 1 |
+| `screen:div-failed@1366x768` | the Build C screen | the light design | Part 1 |
+| `screen:div-failed@1366x650` | the Build C screen | the light design | Part 1 |
+| `screen:div-stuck-1@1366x768` | the Build C screen | the light design | Part 1 |
+| `screen:div-stuck-1@1366x650` | the Build C screen | the light design | Part 1 |
+| `screen:div-stuck-2@1366x768` | the Build C screen | the light design | Part 1 |
+| `screen:div-stuck-2@1366x650` | the Build C screen | the light design | Part 1 |
+| `screen:div-teach@1366x768` | the Build C screen | the light design | Part 1 |
+| `screen:div-teach@1366x650` | the Build C screen | the light design | Part 1 |
+| `screen:div-wrong-guess@1366x768` | the Build C screen | the light design | Part 1 |
+| `screen:div-wrong-guess@1366x650` | the Build C screen | the light design | Part 1 |
+| `screen:div-end@1366x768` | the Build C screen | the light design | Part 1 |
+| `screen:div-end@1366x650` | the Build C screen | the light design | Part 1 |
+| `screen:div-failed-stuck@1366x768` | the Build C screen | the light design | Part 1 |
+| `screen:div-failed-stuck@1366x650` | the Build C screen | the light design | Part 1 |
+| `screen:div-alone-stuck-1@1366x768` | the Build C screen | the light design | Part 1 |
+| `screen:div-alone-stuck-1@1366x650` | the Build C screen | the light design | Part 1 |

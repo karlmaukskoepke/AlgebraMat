@@ -1,13 +1,22 @@
-// The spotlight message (Build C, Part 2), the view half; the logic is engine/spotlight.js. Shared by every Solve it card: a card's
-// screen appends `spotlightLayer(...)` to its own root. An overlay, so nothing on the page moves to make room.
-//   ERROR: the page dims (about 60%); the wrong thing is lit (an outline and a small label, never colour alone); the message pops up
-//   right beside it, never over it (right, else left, else below, else above). Undo, the only way out, is drawn above the dimming,
-//   pulsing (a steady ring for reduced motion), and has the focus: Enter or Space presses it. role="alertdialog", said once.
-//   HINT: no dimming; the thing it is about is outlined, the move to make is highlighted, and the hint pops up beside it with Got it.
-//   ASK: a question the card is asking at a place (a light dim, nothing held back), with its answer buttons in the bubble.
+// The pop-ups of the light design (Build C, Part 2; Build D, Part 1), the view half; the logic is engine/spotlight.js. Shared by every
+// Solve it card: a card's screen appends `spotlightLayer(...)` to its own root. An overlay, so nothing on the page moves to make room.
+// There is no banner: every message is one of these.
+//   ERROR: the page dims (about 60%); the wrong thing is lit (an outline and a small label under it, never colour alone); the message
+//   pops up BELOW the equation and the work, never over an equation or any work (it may cover greyed things, like x =). Undo, the
+//   only way out, is drawn above the dimming, pulsing (a steady ring for reduced motion), with a hopping arrow pointing at it (a
+//   steady arrow for reduced motion), and has the focus: Enter or Space presses it. role="alertdialog", said once.
+//   HINT: no dimming; the thing it is about is outlined, the move to make is highlighted, and the hint pops up beside it. The green
+//   button says Got it.
+//   ASK: a question the card is asking at a place (a light dim, nothing held back), floating directly above it, with its answer
+//   buttons in the bubble.
+//   INTRO: the page greys out except what it lights (the problem, the moves); nothing is held back. Below the work.
+//   NOTE: a message with nothing lit and nothing dimmed, below the work. NUDGE: a small note next to the x = field (type a number,
+//   too big...), with nothing to undo.
 
 const BOX_W = 340;
+const NUDGE_W = 270;
 const GAP = 14;
+const SVG_NS = 'http://www.w3.org/2000/svg';
 
 let place = null;                     // the latest layer's placement, run again when the window changes size
 if (typeof window !== 'undefined') {
@@ -30,70 +39,193 @@ const el = (tag, cls, kids = [], attrs = {}) => {
   n.append(...kids);
   return n;
 };
+const svgEl = (name, attrs = {}) => {
+  const n = document.createElementNS(SVG_NS, name);
+  for (const [k, v] of Object.entries(attrs)) n.setAttribute(k, v);
+  return n;
+};
 
-// spot: { kind: 'error' | 'hint', target, label, move }; o: { root, find(root, target) → Element, text, undo: selector, moveSel(move) → selector }
+// A rounded rectangle as a path (for the holes in the dimming).
+const roundRect = (x, y, w, h, r) => `M${x + r} ${y}H${x + w - r}Q${x + w} ${y} ${x + w} ${y + r}V${y + h - r}Q${x + w} ${y + h} ${x + w - r} ${y + h}H${x + r}Q${x} ${y + h} ${x} ${y + h - r}V${y + r}Q${x} ${y} ${x + r} ${y}Z`;
+
+// The greying: the whole page, with a hole at each lit rectangle. Purely visual (taps go through), except under an error, where a
+// transparent catcher holds every tap back.
+function dimmer(strength) {
+  const svg = svgEl('svg', { class: `spot-dimsvg is-${strength}`, 'aria-hidden': 'true' });
+  svg.append(svgEl('path', { 'fill-rule': 'evenodd' }));
+  return svg;
+}
+function drawDim(svg, rects) {
+  const vw = window.innerWidth;
+  const vh = window.innerHeight;
+  svg.setAttribute('viewBox', `0 0 ${vw} ${vh}`);
+  svg.setAttribute('width', vw);
+  svg.setAttribute('height', vh);
+  const holes = rects.filter(Boolean).map((r) => roundRect(r.left - 6, r.top - 6, r.width + 12, r.height + 12, 10)).join('');
+  svg.firstChild.setAttribute('d', `M0 0H${vw}V${vh}H0Z${holes}`);
+}
+
+// Lit rectangles that touch or nearly touch become one hole (a problem and its preview row are lit as one).
+function mergeRects(list) {
+  const rs = list.map((q) => ({ left: q.left, top: q.top, right: q.right ?? q.left + q.width, bottom: q.bottom ?? q.top + q.height }));
+  for (let changed = true; changed;) {
+    changed = false;
+    for (let i = 0; i < rs.length && !changed; i++) {
+      for (let j = i + 1; j < rs.length; j++) {
+        const a = rs[i]; const b = rs[j];
+        if (a.left < b.right + 16 && b.left < a.right + 16 && a.top < b.bottom + 16 && b.top < a.bottom + 16) {
+          rs[i] = { left: Math.min(a.left, b.left), top: Math.min(a.top, b.top), right: Math.max(a.right, b.right), bottom: Math.max(a.bottom, b.bottom) };
+          rs.splice(j, 1);
+          changed = true;
+          break;
+        }
+      }
+    }
+  }
+  return rs.map((q) => ({ left: q.left, top: q.top, width: q.right - q.left, height: q.bottom - q.top }));
+}
+
+// The bottom of what is written so far (the rows of the work and of the check), so a pop-up placed below never covers any of it.
+function workBottom(o) {
+  let bottom = 0;
+  for (const n of o.root.querySelectorAll(o.workRows ?? '.lb-stack .lb-rowwrap, .lx-ghost.is-chosen, .lx-ghost.is-preview, .sv-check .sv-checkrow, .lx-subst li, .lb-subst li')) {
+    const r = n.getBoundingClientRect();
+    if (r.height && n.offsetParent !== null) bottom = Math.max(bottom, r.bottom);
+  }
+  return bottom;
+}
+
+// What a pop-up must never cover: every row of the work and of the check; and, unless it is an error (which greys them), the controls.
+function protectedRects(o, error) {
+  const sel = `.lb-stack .lb-rowwrap .lb-eq, .lx-ghost.is-chosen .lb-eq, .lx-ghost.is-preview .lb-eq, .sv-check .sv-checkrow, .ab-boardwrap svg${error ? '' : ', .lx-answer, .lx-panel, .lx-corners .btn:not(:disabled), .lb-fractionrow:not(.is-off)'}`;
+  const out = [];
+  for (const n of o.root.querySelectorAll(sel)) {
+    const k = contentRect(n);
+    if (k) out.push(k);
+  }
+  return out;
+}
+// The part of an element that is ink: the union of its children's boxes (an equation row is as wide as the screen; its terms are not).
+function contentRect(n) {
+  const kids = [...n.querySelectorAll('.lx-tok, .lb-num, .lb-x, .lb-plus, .lb-equals, .lx-box, .lb-coef, .lb-frac, .lb-landed, .lx-paren')];
+  const rects = (kids.length ? kids : [n]).map((k) => k.getBoundingClientRect()).filter((q) => q.width && q.height);
+  if (!rects.length) return null;
+  return { left: Math.min(...rects.map((q) => q.left)), top: Math.min(...rects.map((q) => q.top)), right: Math.max(...rects.map((q) => q.right)), bottom: Math.max(...rects.map((q) => q.bottom)) };
+}
+// Where a pop-up may go, best first.
+function candidates({ kind, spot, r, pad, labelBottom, bw, bh, area, side, workBottom: wb, vw, vh, anchorTop }) {
+  const out = [];
+  const mid = (x) => x - bw / 2;
+  const sideAt = (top) => side && side.width > 200 && { name: 'side', left: side.left + 12, top: Math.min(Math.max(8, top), vh - bh - 8) };
+  if (kind === 'error' || !r) {
+    out.push({ name: 'below', left: mid(spot.alignTarget && r ? r.left + r.width / 2 : area.left + area.width / 2), top: Math.max(wb, labelBottom) + GAP });
+    out.push(sideAt(r ? r.top - 4 : anchorTop));
+    out.push({ name: 'low', left: mid(area.left + area.width / 2), top: vh - 8 - bh });
+    return out.filter(Boolean);
+  }
+  const below = { name: 'below', left: mid(r.left + r.width / 2), top: Math.max(labelBottom, r.bottom + pad) + GAP };
+  const above = { name: 'above', left: mid(r.left + r.width / 2), top: r.top - pad - GAP - bh };
+  const right = { name: 'right', left: r.right + pad + GAP, top: r.top + r.height / 2 - bh / 2 };
+  const leftOf = { name: 'left', left: r.left - pad - GAP - bw, top: r.top + r.height / 2 - bh / 2 };
+  const where = spot.place ?? (kind === 'ask' ? 'above' : kind === 'nudge' ? 'field' : 'below');
+  if (where === 'above') out.push(above, below, sideAt(r.top), right, leftOf);
+  else if (where === 'field') out.push(above, right, leftOf, below);
+  else if (where === 'beside') out.push(right, leftOf, below, above, sideAt(r.top));
+  else out.push(below, sideAt(r.top), right, leftOf, above);
+  out.push({ name: 'workbelow', left: mid(area.left + area.width / 2), top: wb + GAP }, { name: 'low', left: mid(area.left + area.width / 2), top: vh - 8 - bh });
+  return out.filter(Boolean);
+}
+
+// spot: { kind, target, label, move, lit: [targets], place, buttons } ; o: { root, find(root, target) → Element, text, undo: selector,
+// moveSel(move) → selector, work: selector of the work area }
 export function spotlightLayer(spot, o) {
-  const error = spot.kind === 'error';
-  const layer = el('div', `spot-layer is-${spot.kind}`, [], { 'data-spot': spot.target });
-  const frame = el('div', 'spot-frame', spot.label ? [el('span', 'spot-label', [spot.label])] : []);
+  const kind = spot.kind;
+  const error = kind === 'error';
+  const layer = el('div', `spot-layer is-${kind}`, [], { 'data-spot': spot.target ?? '' });
+  const dimStrength = error ? 'strong' : kind === 'intro' || spot.dim === 'strong' ? 'medium' : kind === 'ask' || spot.dim === 'light' ? 'light' : null;
+  const dim = dimStrength ? dimmer(dimStrength) : null;
+  if (dim) layer.append(dim);
+  const frame = spot.target && kind !== 'note' && kind !== 'nudge' && kind !== 'intro'
+    ? el('div', 'spot-frame', spot.label ? [el('span', 'spot-label', [spot.label])] : []) : null;
   const textId = `spot-text-${Math.random().toString(36).slice(2, 8)}`;
-  const box = el('div', 'spot-box', [el('p', 'spot-text', [o.text], { id: textId })], error
+  const box = el('div', `spot-box${kind === 'nudge' ? ' is-small' : ''}`, [el('p', 'spot-text', [o.text], { id: textId })], error
     ? { role: 'alertdialog', 'aria-modal': 'true', 'aria-labelledby': textId }
     : { role: 'status', 'aria-live': 'polite' });
-  if (spot.kind === 'ask') {
-    if (spot.choices) box.append(el('div', 'spot-choices', spot.choices.map(([label, value]) => el('button', `btn ${value === 'party' ? 'btn-party' : value === 'battle' ? 'btn-battle' : ''}`, [label], { type: 'button', 'data-action': 'kind', 'data-value': value }))));
-  } else if (error) {
-    const dim = el('div', 'spot-dim');                                          // catches every tap outside Undo, and gives Undo the focus back
-    dim.addEventListener('pointerdown', (e) => { e.preventDefault(); layer.querySelector('.spot-undo')?.focus({ preventScroll: true }); });
-    layer.append(dim);
-    box.append(el('p', 'spot-way', ['Press Undo to go on.']));
-  } else {
-    box.append(el('button', 'btn spot-gotit', ['Got it'], { type: 'button', 'data-action': 'spotDismiss' }));
+  if (kind === 'ask' && spot.choices) {
+    box.append(el('div', 'spot-choices', spot.choices.map(([label, value]) => el('button', `btn ${value === 'party' ? 'btn-party' : value === 'battle' ? 'btn-battle' : ''}`, [label], { type: 'button', 'data-action': spot.choiceAction ?? 'kind', 'data-value': value }))));
   }
-  layer.append(frame, box);
+  let arrow = null;
+  if (error) {
+    const catcher = el('div', 'spot-dim');                                     // catches every tap outside Undo, and gives Undo the focus back
+    catcher.addEventListener('pointerdown', (e) => { e.preventDefault(); layer.querySelector('.spot-undo')?.focus({ preventScroll: true }); });
+    layer.append(catcher);
+    arrow = el('div', 'spot-arrow', [], { 'aria-hidden': 'true' });
+    const svg = svgEl('svg', { viewBox: '0 0 48 36', width: 48, height: 36 });
+    svg.append(svgEl('path', { d: 'M4 18 L20 4 V12 H44 V24 H20 V32 Z' }));
+    arrow.append(svg);
+  }
+  if (frame) layer.append(frame);
+  layer.append(box);
+  if (arrow) layer.append(arrow);
 
+  const find = (t) => (typeof t === 'string' ? o.find(o.root, t) : t);
   const run = () => {
     if (!layer.isConnected) return;
-    const target = o.find(o.root, spot.target);
+    const target = spot.target ? find(spot.target) : null;
     const vw = window.innerWidth;
     const vh = window.innerHeight;
-    if (!target) { frame.hidden = true; Object.assign(box.style, { left: `${(vw - BOX_W) / 2}px`, top: '120px' }); }
-    else {
-      const r = target.getBoundingClientRect();
-      const pad = 6;
-      Object.assign(frame.style, { left: `${r.left - pad}px`, top: `${r.top - pad}px`, width: `${r.width + 2 * pad}px`, height: `${r.height + 2 * pad}px` });
-      // beside it: right, else left, else below, else above; never over it, and never taller than the room it has
-      const bh = box.offsetHeight;
-      // the label sits on the frame's top edge and may be wider than it: the box clears it too
-      const lw = frame.querySelector('.spot-label')?.offsetWidth ?? 0;
-      const right = Math.max(r.right + pad, r.left - pad - 4 + lw);
-      const fitsV = (top) => top >= 8 && top + bh <= vh - 8;
-      const midTop = Math.min(Math.max(8, r.top + r.height / 2 - bh / 2), vh - 8 - bh);
-      let left; let top;
-      if (right + GAP + BOX_W <= vw - 8 && fitsV(midTop)) { left = right + GAP; top = midTop; box.dataset.side = 'right'; }
-      else if (r.left - pad - GAP - BOX_W >= 8 && fitsV(midTop)) { left = r.left - pad - GAP - BOX_W; top = midTop; box.dataset.side = 'left'; }
-      else if (r.bottom + pad + GAP + bh <= vh - 8) { left = r.left + r.width / 2 - BOX_W / 2; top = r.bottom + pad + GAP; box.dataset.side = 'below'; }
-      else { left = r.left + r.width / 2 - BOX_W / 2; top = Math.max(8, r.top - pad - GAP - bh); box.dataset.side = 'above'; }
-      Object.assign(box.style, { left: `${Math.min(Math.max(8, left), vw - BOX_W - 8)}px`, top: `${top}px` });
+    const pad = 6;
+    const r = target?.getBoundingClientRect();
+    if (frame) {
+      if (!r) frame.hidden = true;
+      else {
+        frame.hidden = false;
+        Object.assign(frame.style, { left: `${r.left - pad}px`, top: `${r.top - pad}px`, width: `${r.width + 2 * pad}px`, height: `${r.height + 2 * pad}px` });
+      }
     }
+    // what is lit: the target, and whatever else the spot names (the problem, the moves, the green button)
+    const lit = mergeRects([...(frame && r ? [r] : []), ...(spot.lit ?? []).map((t) => { const n = find(t); return n && (contentRect(n) ?? null); }).filter(Boolean).map((q) => ({ left: q.left, top: q.top, width: q.right - q.left, height: q.bottom - q.top, right: q.right, bottom: q.bottom }))]);
     if (error) {
-      // Undo above the dimming: a copy at the very place of the real one, pulsing, with the focus
+      // Undo above the dimming: a copy at the very place of the real one, pulsing, with the focus, and the arrow hopping at it
       layer.querySelector('.spot-undo')?.remove();
       const real = o.root.querySelector(o.undo);
       if (real) {
-        const r = real.getBoundingClientRect();
+        const ur = real.getBoundingClientRect();
         const copy = real.cloneNode(true);
         copy.classList.add('spot-undo');
         copy.disabled = false;
         copy.removeAttribute('data-lx-focus');
-        Object.assign(copy.style, { left: `${r.left}px`, top: `${r.top}px`, width: `${r.width}px`, height: `${r.height}px` });
+        Object.assign(copy.style, { left: `${ur.left}px`, top: `${ur.top}px`, width: `${ur.width}px`, height: `${ur.height}px` });
         layer.append(copy);
-        if (had || !layer.dataset.focused) copy.focus({ preventScroll: true });
+        Object.assign(arrow.style, { left: `${ur.right + 10}px`, top: `${ur.top + ur.height / 2 - 18}px` });
+        if (!layer.dataset.focused) copy.focus({ preventScroll: true });
         layer.dataset.focused = '1';
+        lit.push(ur);
       }
-    } else if (spot.move && o.moveSel) {
-      o.root.querySelector(o.moveSel(spot.move))?.classList.add('spot-move');
     }
+    if (dim) drawDim(dim, lit);
+
+    const bw = kind === 'nudge' ? NUDGE_W : BOX_W;
+    box.style.width = `${bw}px`;
+    const bh = box.offsetHeight;
+    // One rule (Build D, Part 1): the message goes below wherever the action is; with no room there, the nearest free space that covers
+    // no equation and no work (nor, unless it is an error, the controls still in use: x =, the green button, the moves, Undo).
+    const labelBottom = frame && r ? r.bottom + pad + (frame.querySelector('.spot-label')?.offsetHeight ?? 0) + 4 : 0;
+    const keep = protectedRects(o, error);
+    const undoCopy = layer.querySelector('.spot-undo');
+    if (undoCopy) { const ur = undoCopy.getBoundingClientRect(); keep.push({ left: ur.left, top: ur.top, right: ur.right + 70, bottom: ur.bottom }); }
+    const area = o.root.querySelector(o.work ?? '.lb-main')?.getBoundingClientRect() ?? { left: 0, right: vw, width: vw };
+    const side = o.root.querySelector('.sv-work:not(.is-checking) .sv-check')?.getBoundingClientRect();
+    const cands = candidates({ kind, spot, r, pad, labelBottom, bw, bh, area, side, workBottom: workBottom(o), vw, vh, anchorTop: lit[0]?.top ?? area.top });
+    const fits = (c) => c.left >= 8 && c.top >= 8 && c.left + bw <= vw - 8 && c.top + bh <= vh - 8
+      && !keep.some((k) => c.left < k.right + 4 && c.left + bw > k.left - 4 && c.top < k.bottom + 4 && c.top + bh > k.top - 4);
+    const pick = cands.find(fits) ?? cands[0];
+    let { left, top } = pick;
+    box.dataset.side = pick.name;
+    left = Math.min(Math.max(8, left), vw - bw - 8);
+    top = Math.min(Math.max(8, top), vh - bh - 8);
+    Object.assign(box.style, { left: `${left}px`, top: `${top}px` });
+    if (!error && spot.move && o.moveSel) o.root.querySelector(o.moveSel(spot.move))?.classList.add('spot-move');
   };
   place = run;
   requestAnimationFrame(run);
@@ -112,16 +244,25 @@ export function findSolveTarget(root, target, s = null) {
   const eqRows = rows.filter((r) => !r.classList.contains('has-work'));
   const newest = eqRows.at(-1) ?? null;
   const sides = (row) => [...(row?.querySelectorAll('.lb-side') ?? [])];
-  const hasX = (side) => Boolean(side.querySelector('.lb-x, [data-x]'));
+  const hasX = (side) => Boolean(side.querySelector('.lb-x, [data-x], .lx-tok[data-like="x"]'));
   switch (target) {
     case 'xnum': {
       const side = sides(newest).find(hasX);
-      return side?.querySelector('.lb-num') ?? side ?? newest;
+      return side?.querySelector('.lx-tok[data-like="num"], .lb-num') ?? side ?? newest;
     }
     case 'otherSide': return sides(newest).find((sd) => !hasX(sd)) ?? newest;
     case 'lastMove': return rows.filter((r) => r.classList.contains('has-work')).at(-1) ?? newest;
-    case 'subst': return root.querySelector('.lx-subst li:last-child, .lb-subst li:last-child') ?? root.querySelector('.lx-subst, .lb-subst');
+    case 'newest': return newest?.querySelector('.lb-eq') ?? newest;
+    case 'original': return eqRows[0]?.querySelector('.lb-eq') ?? eqRows[0] ?? null;
+    case 'preview': return root.querySelector('.lx-ghost.is-preview .lb-eq, .lx-ghost.is-near .lb-eq, .lx-ghost.is-chosen .lb-eq');
+    case 'subst': return root.querySelector('.sv-check .sv-mark, .lx-subst li:last-child, .lb-subst li:last-child') ?? root.querySelector('.lx-subst, .lb-subst');
+    case 'check': return root.querySelector('.sv-check');
     case 'answer': return root.querySelector('[data-fk="answer"], .lb-typed');
+    case 'forward': return root.querySelector('.btn-forward');
+    case 'panel': return root.querySelector('.lx-panel');
+    case 'blank': return root.querySelector('.lx-ghost.is-chosen .lx-box:not(.is-mirror)');
+    case 'fractions': return root.querySelector('.lb-fractionrow');
+    case 'board': return root.querySelector('.ab-boardwrap, .sv-diagram .gd');
     case 'failSide': {
       const row = root.querySelector('.lb-work.is-failed');
       if (!row || !s?.fail) return row;

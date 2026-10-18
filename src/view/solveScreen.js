@@ -186,3 +186,51 @@ export function undoRow(s, { wrongGuess, cue }) {
   if (!undo.disabled && (cue || wrongGuess)) undo.classList.add('is-target');
   return row;
 }
+
+// ---------- the light design (Build D, Part 1): no banner, one green button ----------
+
+// The pop-up texts of the light design's two openings: the very first problem of a visit, and the problem after a correct guess.
+export const FIRST_TEXT = 'Find the value of x.';
+export const FORCED_TEXT = 'Your mental math is very strong.\nLet’s try solving this next problem using a move first.';
+
+// The line, kept for screen readers only: what the card says is shown in pop-ups now.
+export const srLine = (text) => html('div', 'lb-line sr-only', [html('p', 'lb-text', [text])], { role: 'status', 'aria-live': 'polite' });
+
+// The one forward button: big, green, in the same place on every screen (right of x =). Only its word changes; it is greyed when there
+// is nothing to move forward. f: { label, action, enabled }.
+export function forwardButton(f) {
+  const b = html('button', `btn btn-go btn-forward${f.enabled ? '' : ' is-off'}`, [f.label], { type: 'button', 'data-action': f.action, 'data-fk': 'forward' });
+  b.disabled = !f.enabled;
+  return b;
+}
+
+// What the card says, as a pop-up with nothing dimmed (errors, hints and questions are the spotlight's): a NUDGE (type a number, too
+// big...) next to where the student is, or a NOTE below the work (beside the scaffold's picture while it is up). Messages the screen
+// already shows say nothing. o: { silent: Set, nudge: { key: target }, text(fb), scaffold: target of the scaffold's picture, or null }.
+export function notePopup(s, o) {
+  const fb = s.feedback;
+  if (!fb?.key || s.stage === 'done' || o.silent.has(fb.key)) return null;
+  const text = o.text(fb);
+  if (!text) return null;
+  const target = o.nudge[fb.key];
+  if (target) return { spot: { kind: 'nudge', target, place: ['panel', 'newest', 'fractions'].includes(target) ? 'beside' : 'field' }, text };
+  return { spot: o.scaffold ? { kind: 'note', target: o.scaffold, place: 'beside' } : { kind: 'note', place: 'below' }, text };
+}
+
+// Enter presses the green button, wherever the focus is on the Mat (a field, the problem), unless it is on another action button
+// (Undo, a move, I'm stuck), which keeps its own Enter.
+export function bindForwardKey(root) {
+  const onKey = (e) => {
+    if (e.key !== 'Enter' || e.repeat || e.ctrlKey || e.metaKey || e.altKey) return;
+    if (!root.isConnected || root.closest('[hidden]') || document.querySelector('dialog[open]') || document.querySelector('.spot-layer.is-error')) return;
+    const f = root.querySelector('.btn-forward');
+    if (!f) return;
+    const a = document.activeElement;
+    if (a instanceof HTMLElement && a !== f && a.matches('button, a, [role="button"]') && !a.dataset.lxField && !a.closest('#controls') && !a.matches('[data-action="focus"], [data-x]')) return;
+    e.preventDefault();
+    e.stopImmediatePropagation();
+    if (!f.disabled) f.click();
+  };
+  window.addEventListener('keydown', onKey, true);
+  return () => window.removeEventListener('keydown', onKey, true);
+}
