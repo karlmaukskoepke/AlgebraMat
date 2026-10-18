@@ -3,7 +3,7 @@
 
 import { formatAddBoth } from '../engine/addBoth.js';
 import { reduceAddBoth } from '../engine/addBothMoves.js';
-import { newLightsSession, withLights, lightsAnswerLive, lightsSummary } from '../engine/addBothLights.js';
+import { newLightsSession, withLights, lightsAnswerLive, lightsSummary, combineOpen } from '../engine/addBothLights.js';
 import { renderLightsScreen } from '../view/lightsScreen.js';
 import { lightsFeedbackText } from '../view/addBothLightsFeedback.js';
 import { makeAddBothControls } from '../view/addBothControls.js';
@@ -26,11 +26,12 @@ const reduce = withLights(reduceAddBoth);
 
 export const addBothLightsPlay = {
   ...addBothPlay,
-  owesMove: () => false,          // a correct guess asks for the move on the same problem instead (§3)
-  newSession: (problem) => newLightsSession(problem, { level: problem.logLevel ?? 2 }),
+  // a correct first guess makes the next problem a move (round 2, A1: the card's own owesMove)
+  newSession: (problem, opts = {}) => newLightsSession(problem, { level: problem.logLevel ?? 2, forceMove: Boolean(opts.forceMove) }),
   reduce,
   feedbackText: lightsFeedbackText,
-  buildControls: makeAddBothControls(lightsAnswerLive),
+  // the pad types into x = [ ], and into the blank of a sum being combined (B3)
+  buildControls: makeAddBothControls((s) => lightsAnswerLive(s) || combineOpen(s)),
   bindMat: bindLightsMat,
   effects(before, s) {
     if (before && before.step !== 'done' && s.step === 'done') {
@@ -43,6 +44,7 @@ export const addBothLightsPlay = {
   renderMat: (s) => renderLightsScreen(s),
   matAction(d) {
     if (d.action === 'lxNext') return { type: 'lxNext' };
+    if (d.action === 'lxApply') return { type: 'lxApply' };
     return addBothPlay.matAction(d);
   },
 };

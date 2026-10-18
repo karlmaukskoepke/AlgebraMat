@@ -7,10 +7,12 @@
 // The Mat is redrawn on every change, so focus is put back where it was (or where the screen asks for it: data-lx-focus).
 
 import { bindAddBothMat } from './addBothPointer.js';
+import { bindGrab } from './lightsGrabPointer.js';
 
 const ADD = '.lb-move[data-move="add"]';
 
 export function bindLightsMat(root, dispatch, getSession) {
+  const unbindGrab = bindGrab(root, dispatch, getSession);            // first: a held term's keys are its own (round 2, B0)
   const unbindDrag = bindAddBothMat(root, dispatch, getSession);
   let pointerType = 'mouse';
   let keyboard = false;          // was the last input a key (so a focus is the keyboard's, not a click's)?
@@ -121,6 +123,7 @@ export function bindLightsMat(root, dispatch, getSession) {
   obs.observe(root, { childList: true });
 
   return () => {
+    unbindGrab();
     unbindDrag?.();
     obs.disconnect();
     document.removeEventListener('pointerdown', onPointerDown, true);

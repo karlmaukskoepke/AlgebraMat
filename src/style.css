@@ -3336,3 +3336,76 @@ body {
 .ui-lights .lx-substblock { min-height: 88px; }
 .ui-lights .lx-boxwrap { position: relative; display: inline-flex; }
 .ui-lights .lx-boxwrap .lx-apply { position: absolute; top: calc(100% + 6px); left: 50%; transform: translateX(-50%); margin: 0; z-index: 2; }
+
+/* ---------- ?ui=lights, round 2 (SPEC-LIGHTS-EXPERIMENT-ADD-rev02.md): the narrow panel, the line in front of "=", grabbing terms ---------- */
+/* A2: the dashed centre line is drawn in front of the "=" (it is the drop line) */
+.ui-lights .lb-border::before { z-index: 2; }
+.ui-lights .lb-equals { background: transparent; z-index: 1; }
+/* A3: the panel is only as wide as its narrow moves and their lights */
+.ui-lights .lb-body { grid-template-columns: minmax(0, 1fr) auto; }
+.ui-lights .lx-panel { width: max-content; max-width: 150px; padding: 6px 8px 8px; gap: 6px; }
+.ui-lights .lx-phead { display: flex; justify-content: space-between; gap: 6px; font: 800 11px 'Lexend', system-ui, sans-serif; letter-spacing: 0.05em; text-transform: uppercase; color: var(--muted, #555); padding-bottom: 3px; border-bottom: 2px dashed #bdb7a4; }
+.ui-lights .lx-pgrid { display: grid; grid-template-columns: 66px auto; grid-auto-rows: 44px; gap: 6px 8px; align-items: center; }
+.ui-lights .lx-move { width: 66px; height: 44px; min-height: 0; min-width: 0; padding: 0; display: grid; place-items: center; position: relative; overflow: visible; }
+.ui-lights .lx-move .lb-icon { max-height: 30px; }
+.ui-lights .lx-move.is-ring { box-shadow: 0 0 0 4px #0072b2, 0 0 0 7px #fff, 0 0 0 9px #0072b2; }   /* A1: a ring that stays, and the pulse */
+.ui-lights .lx-dots { display: flex; flex-direction: column; justify-content: center; align-items: flex-start; gap: 3px; }
+.ui-lights .lx-dots.is-row { flex-direction: row; gap: 8px; }
+.ui-lights .lx-dot { position: relative; width: 18px; height: 18px; min-width: 0; min-height: 0; padding: 0; border-radius: 50%; border: 2px solid var(--ink); background: #fff; display: grid; place-items: center; cursor: pointer; font: 800 11px/1 'Lexend', system-ui, sans-serif; color: var(--ink); }
+.ui-lights .lx-pgrid .lx-dots:not(:has(> :nth-child(2))) .lx-dot { width: 22px; height: 22px; font-size: 13px; }
+.ui-lights .lx-dot.is-green { background: #3aa76d; border-color: #1b6e3a; color: #fff; }
+.ui-lights .lx-dot.is-red { background: #d9534f; border-color: #a3281b; color: #fff; }
+.ui-lights .lx-dot.is-neutral { background: #ececec; }
+.ui-lights .lx-dot.is-off { border-style: dashed; border-color: #9a9a9a; background: transparent; }
+.ui-lights .lx-dot.is-flash { animation: sw-pulse 0.9s ease-in-out 3; }
+.ui-lights .lx-dot:focus-visible { outline: 3px solid #0072b2; outline-offset: 2px; }
+/* a light opened in place: a pill with its goal, growing to the left over the moves (one at a time) */
+.ui-lights .lx-pill { display: none; }
+.ui-lights .lx-dot.is-open { z-index: 40; }
+.ui-lights .lx-dot.is-open .lx-pill { display: flex; align-items: center; gap: 6px; position: absolute; right: -6px; top: 50%; transform: translateY(-50%); white-space: nowrap; padding: 4px 30px 4px 12px;
+  border: 2px solid var(--ink); border-radius: 999px; background: #fff; color: var(--ink); font: 800 15px 'Lexend', system-ui, sans-serif; box-shadow: 0 3px 10px rgba(0, 0, 0, 0.18); pointer-events: none; z-index: -1; }
+.ui-lights .lx-dot.is-open.is-green .lx-pill { border-color: #1b6e3a; }
+.ui-lights .lx-dot.is-open.is-red .lx-pill { border-color: #a3281b; }
+.ui-lights .lx-hand { display: flex; justify-content: flex-end; padding: 4px 4px 0; border-top: 2px dashed #bdb7a4; }
+.ui-lights .lx-solvedrow { display: flex; align-items: center; justify-content: space-between; gap: 6px; padding-top: 4px; border-top: 2px dashed #bdb7a4; }
+.ui-lights .lx-solvedlabel { font: 800 12px 'Lexend', system-ui, sans-serif; white-space: nowrap; }
+.ui-lights .lx-panel .ab-sub { display: flex; flex-direction: column; gap: 4px; }
+.ui-lights .lx-panel .ab-sub .btn { min-width: 0; padding: 0 6px; font-size: 14px; }
+.ui-lights .lx-move[data-tip]:hover::after, .ui-lights .lx-move[data-tip]:focus-visible::after { right: calc(100% + 10px); }
+/* A1: x = waits for one move, with a one-line note under it */
+.ui-lights .lx-answer { position: relative; }
+.ui-lights .lx-owednote { position: absolute; left: 50%; top: calc(100% + 2px); transform: translateX(-50%); white-space: nowrap; font: 700 15px 'Lexend', system-ui, sans-serif; color: var(--muted, #555); }
+/* B0: the terms of the newest row are tokens */
+.ui-lights .lx-tok { display: inline-flex; align-items: center; gap: 0.18em; padding: 0 0.12em; border-radius: 10px; touch-action: none; cursor: grab; user-select: none; -webkit-user-select: none; outline-offset: 2px; }
+.ui-lights .lx-tok:hover { background: #eef7fd; }
+.ui-lights .lx-tok:focus-visible { outline: 3px solid #0072b2; }
+.ui-lights .lx-tok.is-hint { outline: 3px solid #0072b2; }
+.ui-lights .lx-tok .lx-op[data-minus], .ui-lights .lx-negsign { cursor: pointer; border-radius: 6px; padding: 0 0.08em; }
+.ui-lights .lx-tok .lx-op[data-minus]:hover, .ui-lights .lx-negsign:hover { background: #fff6b8; }
+.ui-lights .lx-negnum { color: #6b2f8f; border-bottom: 3px solid #6b2f8f; line-height: 1.05; }      /* a negative number, shown on request (B4) */
+.ui-lights .lx-tok.is-lifted, .ui-lights .lx-tok.is-gap { color: transparent; outline: 3px dashed #9a968a; background: none; min-width: 1.4ch; }
+.ui-lights .lx-tok.is-lifted * { color: transparent; border-color: transparent; }
+.ui-lights .lx-tok.is-held { outline: 3px solid #0072b2; background: #fff; box-shadow: 0 6px 14px rgba(0, 0, 0, 0.22); transform: translateY(-14px); }
+.ui-lights .lx-tok.is-crossing { color: #0072b2; }
+.ui-lights .lx-swap { font: 800 0.45em 'Lexend', system-ui, sans-serif; color: #0072b2; margin-left: 0.15em; }
+.ui-lights .lx-tok.is-combine-target { outline: 3px solid #1b6e3a; background: #e3f4ea; }
+.ui-lights .lx-tok.is-drop, .ui-lights .lb-side.is-drop-side { background: #eef7fd; }
+.ui-lights .lb-side.is-drop-side { outline: 3px dashed #0072b2; border-radius: 12px; }
+.ui-lights .lx-tok.is-gap-before { box-shadow: -6px 0 0 -2px #0072b2; }
+.ui-lights .lx-tok.is-gap-after { box-shadow: 6px 0 0 -2px #0072b2; }
+.ui-lights .lx-tok.is-dim { opacity: 0.35; }
+.is-grabbing, .is-grabbing * { cursor: grabbing !important; }
+.lx-dragghost { position: fixed; left: 0; top: 0; z-index: 1000; pointer-events: none; display: inline-flex; align-items: center; gap: 4px; padding: 2px 12px; border: 3px solid var(--ink); border-radius: 12px;
+  background: #fff; box-shadow: 0 8px 18px rgba(0, 0, 0, 0.25); font: 700 40px/1.2 'Kalam', 'Lexend', system-ui, sans-serif; color: var(--ink); }
+.lx-dragghost.is-crossing { border-color: #0072b2; color: #0072b2; }
+.lx-dragghost.is-away { opacity: 0.6; }
+.lx-dragghost .lx-swap { font-size: 18px; }
+/* B3: the blank for a sum */
+.ui-lights .lx-box.is-sum { border-style: solid; background: #fff; }
+.ui-lights .lx-box.is-wrong { border-color: #a3281b; color: #a3281b; background: #fbe9e7; }
+.ui-lights .lx-sumeq .lb-side .lb-x, .ui-lights .lx-sumeq .lb-side > .lb-num { color: #9a968a; }
+/* four rows or more (a combine adds one): the rows get a little smaller, so the pad stays on a 1366×650 screen */
+.ui-lights .lb-stack:has(> .lb-rowwrap:nth-child(4)) .lb-rowwrap .lb-eq { font-size: 32px; line-height: 1.1; }
+.ui-lights .lb-stack:has(> .lb-rowwrap:nth-child(4)) .lb-rowwrap.has-work .lb-eq { font-size: 24px; }
+.ui-lights .lb-stack:has(> .lb-rowwrap:nth-child(4)) .lb-side { padding: 2px 6px; }
+.ui-lights .lb-stack:has(> .lb-rowwrap:nth-child(4)) .lx-ghost { min-height: 52px; }

@@ -100,17 +100,17 @@
       ]
     },
     {
-      "title": "Lights experiment (round 1), Add to both sides",
+      "title": "Lights experiment, Add to both sides (round 1 is now updated to round 2)",
       "links": [
         {
-          "label": "Lights · Level 1",
+          "label": "Lights · Level 1 (x + 8 = 11)",
           "query": "?pack=add-both&level=2&seed=7&ui=lights&nosignin=1",
-          "look": "No Guess x / Use a move buttons; hover Add to see a grey preview row, click it and type the amount."
+          "look": "The panel is now narrow: four small moves and round dots. Hover Add for the grey preview, as before."
         },
         {
-          "label": "Lights · Level 2",
+          "label": "Lights · Level 2 (x − 4 = −3)",
           "query": "?pack=add-both&level=3&seed=7&ui=lights&nosignin=1",
-          "look": "The same lights screen on x − a = b problems. (Other levels show the normal screen.)"
+          "look": "The equation reads x − 4 = −3 (it used to say x + −4), and the dashed line runs in front of the =."
         }
       ]
     },
@@ -156,6 +156,56 @@
           "label": "Divide it: a fraction that doesn’t split",
           "query": "?pack=divide-it&level=3&seed=7&nosignin=1",
           "look": "On 5x = −15: take ½ of both sides (it fails), then I’m stuck: “That fraction doesn’t split evenly… press Undo.” After Undo, I’m stuck shows the counters."
+        }
+      ]
+    },
+    {
+      "title": "Lights experiment, round 2: the narrow panel (Part A)",
+      "links": [
+        {
+          "label": "Goals light up on hover",
+          "query": "?pack=add-both&level=3&seed=7&ui=lights&nosignin=1",
+          "look": "Hover a round dot: it opens into its goal (“Fewer terms”). On a touch screen, tap it open and tap again to close."
+        },
+        {
+          "label": "Forced move after a correct guess",
+          "query": "?pack=add-both&level=2&seed=7&ui=lights&nosignin=1",
+          "look": "Type 3 and Check, step through, then Next problem. On the new problem Add has a ring, and x = is grey with “Make one move first.” until you make one move and press Next."
+        }
+      ]
+    },
+    {
+      "title": "Lights experiment, round 2: grab the terms (Part B)",
+      "links": [
+        {
+          "label": "Drag a number across the line",
+          "query": "?pack=add-both&level=3&seed=7&ui=lights&nosignin=1",
+          "look": "Drag “− 4” over the line: it turns into “+ 4 ⇄”. Drop it: the app writes x − 4 + 4 = −3 + 4, then x = −3 + 4, and Fewer terms goes green."
+        },
+        {
+          "label": "Combine two numbers",
+          "query": "?pack=add-both&level=3&seed=7&ui=lights&nosignin=1",
+          "look": "After the drag above, press Next, then drop the 4 onto the −3. Type a wrong sum (red, it names the sum), then 1 and Enter: a new row x = 1."
+        },
+        {
+          "label": "Reorder",
+          "query": "?pack=add-both&level=2&seed=7&ui=lights&nosignin=1",
+          "look": "Drag “+ 8” to the left of x: the row becomes 8 + x = 11 in place, no new row, no light changes. Undo puts it back."
+        },
+        {
+          "label": "x can’t cross",
+          "query": "?pack=add-both&level=2&seed=7&ui=lights&nosignin=1",
+          "look": "Drag x across the line: it snaps back and the line says “That moves x. Try the number.”"
+        },
+        {
+          "label": "Minus as a negative",
+          "query": "?pack=add-both&level=3&seed=7&ui=lights&nosignin=1",
+          "look": "Tap the minus in x − 4: it becomes x + −4 with −4 underlined in purple. Tap that minus again to go back."
+        },
+        {
+          "label": "Keyboard only",
+          "query": "?pack=add-both&level=3&seed=7&ui=lights&nosignin=1",
+          "look": "Press Tab until “− 4” is outlined, Enter to pick it up, → twice to carry it over the line, Enter to drop. Esc puts it back."
         }
       ]
     }

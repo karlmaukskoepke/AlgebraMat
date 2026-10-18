@@ -5,6 +5,7 @@ import {
   newLightsSession, withLights, lightsAnswerLive, blankOpen, moveOwed, lightsSummary,
 } from '../src/engine/addBothLights.js';
 import { makeRecord } from '../src/engine/eventlog.js';
+import { owesMove as addBothLightsOwes } from '../src/engine/addBothMoves.js';
 
 const reduce = withLights(reduceAddBoth);
 const run = (s, ...actions) => actions.reduce(reduce, s);
@@ -29,19 +30,24 @@ describe('?ui=lights: no Guess x / Use a move choice (idea C)', () => {
     expect([s.sub, s.entry, s.feedback.key]).toEqual([null, '', 'aSimplerFirst']);
     expect(lightsSummary(s).typedBeforeMove).toBe(true);
   });
-  it('a correct guess on the original asks for the move on the same problem: x = greys, Add pulses, then it comes back', () => {
-    let s = steps(run(start(), ...typed('3'), { type: 'check' }));
-    expect(s.stage).toBe('moves');
-    expect(s.feedback.key).toBe('lxShowMove');
+  it('a correct guess finishes the problem and makes the next one a move (rev 0.2 A1): x = greys, Add rings, until one move is committed', () => {
+    const s0 = steps(run(start(), ...typed('3'), { type: 'check' }));
+    expect(s0.stage).toBe('done');
+    expect(lightsSummary(s0).guessedRight).toBe(true);
+    expect(addBothLightsOwes(s0)).toBe(true);
+    let s = newLightsSession({ ...makeAddBoth('x+a', 8, 3), logLevel: 2 }, { level: 2, forceMove: true });
+    expect(s.feedback.key).toBe('lxMustMove');
     expect(moveOwed(s)).toBe(true);
     expect(lightsAnswerLive(s)).toBe(false);
     expect(run(s, ...typed('3'))).toBe(s);                                   // greyed: typing does nothing
     s = run(s, choose, ...typed('-8'), { type: 'go' });
+    expect(moveOwed(s)).toBe(true);                                          // applied, not yet committed
+    s = run(s, { type: 'lxNext' });
     expect(moveOwed(s)).toBe(false);
     expect(lightsAnswerLive(s)).toBe(true);
     s = steps(run(s, ...typed('3'), { type: 'check' }));
     expect(s.stage).toBe('done');
-    expect(s.lx.guessedRight).toBe(true);
+    expect(lightsSummary(s).forced).toBe(true);
   });
 });
 

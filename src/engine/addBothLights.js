@@ -5,13 +5,20 @@
 //   (B) the amount typed into a blank in that equation row, applied with Enter or ✓, then a rule line and a green Next that commits
 //       the move (Undo no longer reaches it); typing in x = or Check commits it too;
 //   (C) no Guess x / Use a move choice: the engine's `path` is set just in time from "is x alone on the newest row?", so x = [ ] and
-//       the Add move are both live from the first frame. A correct guess on the original asks for the move on the same problem.
-// It also counts what the first classroom test needs (`s.lx.log`). No DOM here.
+//       the Add move are both live from the first frame.
+// Round 2 (SPEC-LIGHTS-EXPERIMENT-ADD-rev02.md):
+//   (A1) a correct first guess makes the NEXT problem a move (the card's own owesMove): on it x = [ ] is greyed until one move is
+//        committed (Next, or going on without it) or a combine is applied;
+//   (B)  the terms of the newest row can be grabbed (engine/lightsGrab.js): reordered in place (B1), carried across the line (B2: the
+//        engine's own `go`, with the amount from the term), dropped on a like term to combine them by typing the sum (B3); a minus can
+//        be shown as a negative number (B4). Reorder, minus and combine are undone here; everything else is the engine's.
+// It also counts what the classroom tests need (`s.lx.log`). No DOM here.
 
 import { reduceAddBoth, newAddBoth, xAlone, xSideOf } from './addBothMoves.js';
-import { isTyping } from './entry.js';
+import { isTyping, typeInto } from './entry.js';
+import { findTerm, outcomeOf, reorderBoard, combineBoard, pairText } from './lightsGrab.js';
 
-const UI0 = { preview: false, focus: null, shake: false };
+const UI0 = { preview: false, focus: null, shake: false, light: null, hoverMove: null, carry: null };
 const ui = (s) => s.ui ?? UI0;
 const withUi = (s, patch) => ({ ...s, ui: { ...ui(s), ...patch } });
 const sameUi = (a, b) => JSON.stringify(ui(a)) === JSON.stringify(ui(b));
@@ -19,26 +26,36 @@ const sameUi = (a, b) => JSON.stringify(ui(a)) === JSON.stringify(ui(b));
 const say = (s, key, params = {}, bad = false) => { s.feedback = { key, params: { ...(s.feedback?.params ?? {}), ...params }, bad }; return s; };
 
 export function newLightsSession(problem, opts = {}) {
-  const s = newAddBoth(problem, { ...opts, forceMove: false });
+  const s = newAddBoth(problem, { level: opts.level, forceMove: false });
   s.allowZero = true;                     // a 0 in the blank is allowed (it simply does not help)
   s.lx = {
     awaitNext: null,                      // the row a just-applied move left, waiting for its Next
     rules: [],                            // rows whose move was committed (a solid rule line under each)
-    guessedRight: false,                  // a correct guess on the original: the problem is still done with a move
-    lastSub: null,                        // that guess's substitution, still shown while the move is owed
+    forced: Boolean(opts.forceMove),      // the problem after a correct guess: shown with a move first (A1)
+    movedOnce: false,                     // a move was committed (or a combine applied) on this problem
     moves: 0,                             // moves applied (Undo does not take them back off this count)
-    log: { previews: 0, chosenAfterPreview: 0, chosenCold: 0, typedBeforeMove: false, sameSignRed: 0, nextPressed: 0, implicitCommits: 0, stuck: 0, teach: 0 },
+    negIds: [],                           // terms whose minus was tapped: shown as "+ −2" (B4)
+    combine: null,                        // two like terms dropped together: { a, b, side, entry, wrong } (B3)
+    hand: { fewer: 'off' },               // the by-hand Fewer terms light (a combine), beside Each side simplified
+    log: {
+      previews: 0, chosenAfterPreview: 0, chosenCold: 0, typedBeforeMove: false, sameSignRed: 0, nextPressed: 0, implicitCommits: 0, stuck: 0, teach: 0,
+      drags: 0, outcomes: { reorder: 0, cross: 0, combine: 0, distribute: 0, snapBack: 0, keyboard: 0 }, minusTaps: 0,
+      lightHovers: {}, moveHovers: {}, sumsWrong: 0,
+    },
   };
   s.ui = { ...UI0 };
-  return say(s, 'lxFindX');
+  return say(s, s.lx.forced ? 'lxMustMove' : 'lxFindX');
 }
 
 // Is the bare move open (S2/S3): the blank in the equation row holds the cursor?
 export const blankOpen = (s) => s.menu === 'add' && !s.scaffold && s.stage === 'moves' && !s.sub && !s.pending && !s.combining;
 // Can the Add move be previewed or chosen right now (S0)?
 export const canChoose = (s) => s.stage === 'moves' && !s.scaffold && !s.sub && !s.pending && !s.combining && !s.resolving && s.menu !== 'add';
-// The move is owed (a correct guess on the original) and x is not alone yet: x = [ ] is greyed and Add pulses.
-export const moveOwed = (s) => Boolean(s.lx?.guessedRight) && s.stage === 'moves' && !xAlone(s.board);
+// The move is owed (the problem after a correct guess) until one is committed: x = [ ] is greyed and Add has a steady ring (A1).
+export const moveOwed = (s) => Boolean(s.lx?.forced) && !s.lx.movedOnce && s.stage === 'moves';
+// Can the terms of the newest row be grabbed (B0)? Not while help, a substitution, a half-made move or a combine is going on.
+export const canGrab = (s) => s.stage === 'moves' && !s.scaffold && !s.sub && !s.pending && !s.combining && !s.resolving && !s.lx?.combine;
+export const combineOpen = (s) => Boolean(s.lx?.combine);
 // Do keys go to the blank (true) or to x = (false)? The open blank wins until it is applied or cancelled, or x = is tapped.
 export const amountMode = (s) => s.menu === 'add' && s.typing !== 'answer' && (!s.pending || s.pending.second) && !s.combining;
 
@@ -46,6 +63,7 @@ export const amountMode = (s) => s.menu === 'add' && s.typing !== 'answer' && (!
 // scaffold until x is alone (as built).
 export function lightsAnswerLive(s) {
   if (s.stage === 'done' || s.stage === 'build') return false;
+  if (s.lx?.combine) return false;
   if (s.combining) return s.combining.step === 'count';
   if (s.sub) return s.sub.kind === 'value' && s.sub.step >= 3 && !s.sub.ok;
   if (moveOwed(s)) return false;
@@ -62,6 +80,7 @@ function commit(s, how) {
   s.lx.rules = [...s.lx.rules, s.lx.awaitNext];
   s.lx.awaitNext = null;
   s.history = [];
+  s.lx.movedOnce = true;
   if (how === 'next') s.lx.log.nextPressed += 1; else s.lx.log.implicitCommits += 1;
   return s;
 }
@@ -70,25 +89,32 @@ function commit(s, how) {
 const pathFor = (s, answer) => (s.scaffold || !answer ? 'move' : xAlone(s.board) ? 'move' : 'guess');
 
 export function withLights(reduce = reduceAddBoth) {
-  return (state, action) => {
+  const wrapped = (state, action) => {
     // ----- view state only -----
     if (action.type === 'ui') {
       const patch = { ...action.patch };
       if (patch.preview && !canChoose(state)) return state;
+      if (patch.carry && !canGrab(state)) return state;
       const next = withUi(state, patch);
       if (sameUi(next, state)) return state;
+      if (patch.light && patch.light !== ui(state).light) countHover(next, 'lightHovers', patch.light);
+      if (patch.hoverMove && patch.hoverMove !== ui(state).hoverMove) countHover(next, 'moveHovers', patch.hoverMove);
       return patch.preview ? countPreview(next) : next;
     }
     if (state.stage === 'done') return state;
+    const grab = grabAction(state, action, wrapped);
+    if (grab) return grab;
 
     // Esc (or a second tap on the icon): S2 goes back to S0; a preview just goes away.
     const cancel = (st) => {
       const s = structuredClone(st);
       s.menu = null; s.amountEntry = ''; s.typing = null; s.hint = null;
       s.ui = { ...UI0, focus: 'add' };                              // focus goes back to the Add icon
-      return say(s, moveOwed(s) ? 'lxShowMove' : 'lxFindX');
+      return say(s, moveOwed(s) ? 'lxMustMove' : 'lxFindX');
     };
     if (action.type === 'lxCancel') {
+      if (ui(state).carry) return withUi(state, { carry: null });
+      if (state.lx.combine) return closeCombine(state);
       if (blankOpen(state)) return cancel(state);
       return ui(state).preview ? withUi(state, { preview: false }) : state;
     }
@@ -119,6 +145,7 @@ export function withLights(reduce = reduceAddBoth) {
     if (state.lx.awaitNext !== null && (typingAnswer || ['check', 'choose', 'stuck', 'teach'].includes(action.type))) {
       commit(prep(), 'implicit');
     }
+    if (state.lx.combine && ['stuck', 'teach', 'choose', 'check'].includes(action.type)) prep().lx.combine = null;   // help closes the sum
     if (!state.sub) {
       const answer = typingAnswer || action.type === 'check' || (action.type === 'focus' && action.target === 'answer');
       const path = pathFor(state, answer);
@@ -164,16 +191,10 @@ export function withLights(reduce = reduceAddBoth) {
       case 'startOver':
         lx.awaitNext = null;
         lx.rules = [];
-        say(s, moveOwed(s) ? 'lxShowMove' : 'lxFindX');
-        break;
-      case 'nextLine':
-        // a correct guess on the original: not done yet, the move is owed on this problem (the field greys, Add pulses)
-        if (s.stage === 'done' && s.sub?.kind === 'guess' && s.sub.ok) {
-          lx.guessedRight = true;
-          lx.lastSub = s.sub;
-          Object.assign(s, { stage: 'moves', step: 'moves', sub: null, entry: '', path: 'move', menu: null, typing: null, finalText: null });
-          say(s, 'lxShowMove');
-        }
+        lx.negIds = [];
+        lx.combine = null;
+        lx.hand = { fewer: 'off' };
+        say(s, moveOwed(s) ? 'lxMustMove' : 'lxFindX');
         break;
       case 'stuck':
         lx.log.stuck += 1;
@@ -188,10 +209,145 @@ export function withLights(reduce = reduceAddBoth) {
         break;
     }
     if (typingAnswer && s.entry !== state.entry && lx.moves === 0 && !s.scaffold) lx.log.typedBeforeMove = true;
-    if (!moveOwed(s)) lx.lastSub = null;
-    if (s.feedback?.key === 'aChoose') say(s, 'lxFindX');
+    if (s.feedback?.key === 'aChoose') say(s, moveOwed(s) ? 'lxMustMove' : 'lxFindX');
     return s;
   };
+  return wrapped;
+}
+
+// ---------- Part B: grab the terms ----------
+
+const closeCombine = (state) => {
+  const s = structuredClone(state);
+  s.lx.combine = null;
+  s.ui = { ...UI0 };
+  return say(s, moveOwed(s) ? 'lxMustMove' : 'lxFindX');
+};
+const sumParams = (s) => ({ sum: pairText(s.board, s.lx.combine.a, s.lx.combine.b) });
+
+// The actions that are the wrapper's own: a drop (pointer or keyboard), a minus tap, the sum of a combine typed and applied, and the
+// Undo of a reorder, a minus tap or a combine. Returns null for anything else.
+function grabAction(state, action, wrapped) {
+  const lx = state.lx;
+  // ----- the sum of a combine: typed into its blank, applied with Enter or ✓ -----
+  if (lx.combine && isTyping(action)) {
+    const entry = typeInto(lx.combine.wrong ? '' : lx.combine.entry, action, 'integer');
+    if (entry === lx.combine.entry && !lx.combine.wrong) return state;
+    const s = structuredClone(state);
+    s.lx.combine = { ...s.lx.combine, entry, wrong: false };
+    s.ui = { ...UI0 };
+    return say(s, 'lxCombineAsk', sumParams(s));
+  }
+  if (action.type === 'lxApply' || (action.type === 'go' && lx.combine)) {
+    if (!lx.combine) return state;
+    const c = lx.combine;
+    if (!/^-?\d+$/.test(c.entry)) return withUi(state, { shake: true });
+    const s = structuredClone(state);
+    const a = findTerm(s.board, c.a).term;
+    const b = findTerm(s.board, c.b).term;
+    const total = a.v + b.v;
+    if (Number(c.entry) !== total) {
+      s.lx.combine = { ...c, wrong: true };
+      s.lx.log.sumsWrong += 1;
+      s.ui = { ...UI0 };
+      return say(s, 'lxCombineWrong', { ...sumParams(s), typed: c.entry }, true);
+    }
+    s.history.push({ lxKind: 'combine', board: s.board, rows: [...s.rows], prevBoard: s.prevBoard, lights: s.lights, hand: s.lx.hand });
+    const next = combineBoard(s.board, c.a, c.b, total);
+    s.board = next;
+    s.prevBoard = next;
+    s.rows.push({ type: 'eq', board: next });
+    s.lights = { ...s.lights, solved: xAlone(next) ? 'green' : 'off' };
+    s.lx.hand = { fewer: 'green' };                         // the by-hand part of Fewer terms (A3): one term fewer
+    s.lx.combine = null;
+    s.lx.movedOnce = true;
+    s.ui = { ...UI0, focus: 'answer' };
+    return say(s, xAlone(next) ? 'lxCombinedAlone' : 'lxCombined');
+  }
+
+  // ----- Undo: a combine being typed closes; a reorder, a minus tap or a combine is taken back here -----
+  if (action.type === 'undo') {
+    if (lx.combine) return closeCombine(state);
+    const top = state.history[state.history.length - 1];
+    if (state.sub || !top?.lxKind) return null;
+    const s = structuredClone(state);
+    s.history.pop();
+    if (top.lxKind === 'minus') s.lx.negIds = s.lx.negIds.includes(top.id) ? s.lx.negIds.filter((x) => x !== top.id) : [...s.lx.negIds, top.id];
+    else {
+      Object.assign(s, { board: top.board, rows: top.rows, prevBoard: top.prevBoard });
+      if (top.lxKind === 'combine') { s.lights = top.lights; s.lx.hand = top.hand; }
+    }
+    s.ui = { ...UI0 };
+    return say(s, 'lxUndone');
+  }
+
+  // ----- a minus tapped (B4): "x − 2" ⇄ "x + −2", display only -----
+  if (action.type === 'lxMinus') {
+    const f = findTerm(state.board, action.id);
+    if (!canGrab(state) || !f || f.at === 0 || f.term.kind !== 'num' || f.term.v >= 0) return state;
+    const s = structuredClone(state);
+    if (s.lx.awaitNext !== null) commit(s, 'implicit');
+    const shown = s.lx.negIds.includes(action.id);
+    s.lx.negIds = shown ? s.lx.negIds.filter((x) => x !== action.id) : [...s.lx.negIds, action.id];
+    s.history.push({ lxKind: 'minus', id: action.id });
+    s.lx.log.minusTaps += 1;
+    s.ui = { ...UI0, focus: `tok:${action.id}` };
+    return shown ? s : say(s, 'lxNegShown', { neg: `−${-f.term.v}` });
+  }
+
+  // ----- a term dropped (B1–B3): a pointer drag, or the keyboard's Enter on a carried term -----
+  if (action.type !== 'lxDrop') return null;
+  if (!canGrab(state)) return withUi(state, { carry: null });
+  const out = outcomeOf(state.board, action.id, action.slot);
+  const logged = (s) => {
+    s.lx.log.drags += 1;
+    const o = s.lx.log.outcomes;
+    if (out.kind === 'snapX' || out.kind === 'none') o.snapBack += 1; else o[out.kind] += 1;
+    if (action.how === 'key') o.keyboard += 1;
+    return s;
+  };
+  if (out.kind === 'none' || out.kind === 'snapX') {
+    const s = logged(structuredClone(state));
+    s.ui = { ...UI0, focus: `tok:${action.id}` };
+    return out.kind === 'snapX' ? say(s, 'lxXCross') : s;
+  }
+  if (out.kind === 'cross') {
+    // the engine's own move, with the amount from the term: the same rows the Add button writes, judged the same way
+    const s0 = structuredClone(state);
+    if (s0.lx.awaitNext !== null) commit(s0, 'implicit');
+    Object.assign(s0, { path: 'move', menu: 'add', typing: null, amountEntry: String(out.amount), hint: null, ui: { ...UI0 } });
+    const s = wrapped(s0, { type: 'go' });
+    if (s.history.length <= s0.history.length) {                      // the engine said no (too big): nothing moves
+      const back = logged(structuredClone(state));
+      back.feedback = s.feedback;
+      return back;
+    }
+    return logged(s);
+  }
+  const s = logged(structuredClone(state));
+  if (s.lx.awaitNext !== null) commit(s, 'implicit');
+  s.ui = { ...UI0 };
+  if (out.kind === 'reorder') {
+    // the same equation in a new order: the newest row is replaced in place, and nothing is judged (B1)
+    s.history.push({ lxKind: 'reorder', board: s.board, rows: [...s.rows], prevBoard: s.prevBoard });
+    const was = s.board;
+    s.board = reorderBoard(s.board, action.id, out.to);
+    s.rows[s.rows.length - 1] = { ...s.rows[s.rows.length - 1], board: s.board };
+    if (s.prevBoard === was) s.prevBoard = s.board;
+    s.ui.focus = `tok:${action.id}`;
+    return s;
+  }
+  // combine: a blank for the sum, the two terms dimmed (B3)
+  Object.assign(s, { menu: null, amountEntry: '', typing: null, hint: null });
+  s.lx.combine = { a: out.a, b: out.b, side: out.side, entry: '', wrong: false };
+  s.ui.focus = 'sum';
+  return say(s, 'lxCombineAsk', sumParams(s));
+}
+
+// A hover on a light or a move is counted once per look (A3, logging).
+function countHover(s, key, id) {
+  s.lx = { ...s.lx, log: { ...s.lx.log, [key]: { ...s.lx.log[key], [id]: (s.lx.log[key][id] ?? 0) + 1 } } };
+  return s;
 }
 
 // A preview is counted once per episode: hovering on and off the icon again before doing anything else is the same look.
@@ -207,6 +363,8 @@ export function lightsSummary(s) {
   return {
     t: Date.now(), level: s.problem.logLevel ?? s.level, previews: l.previews, previewedBeforeChoose: l.chosenAfterPreview > 0,
     chosenCold: l.chosenCold, typedBeforeMove: l.typedBeforeMove, sameSignRed: l.sameSignRed,
-    nextPressed: l.nextPressed, implicitCommits: l.implicitCommits, stuck: l.stuck, teach: l.teach, guessedRight: s.lx.guessedRight,
+    nextPressed: l.nextPressed, implicitCommits: l.implicitCommits, stuck: l.stuck, teach: l.teach,
+    guessedRight: s.path === 'guess' && s.stage === 'done', forced: s.lx.forced,
+    drags: l.drags, outcomes: l.outcomes, minusTaps: l.minusTaps, lightHovers: l.lightHovers, moveHovers: l.moveHovers, sumsWrong: l.sumsWrong,
   };
 }
