@@ -107,6 +107,11 @@ const M = {
     p.level >= 2 ? (p.party ? 'In a party the teams join.' : 'In a battle the bigger team wins.') : '',
     p.level >= 3 ? 'Think of each number as counters, and count each side.' : '',
   ].filter(Boolean).join(' '),
+  // the help at x alone (Build C, Part 3): Party/Battle at the two numbers, then x =, then Count it's counters
+  aAlonePB: (p) => `${p.sum}: party or battle?`,
+  aAloneRight: (p) => `${p.kind === 'party' ? 'Yes, a party: the teams join.' : 'Yes, a battle: the bigger team wins.'} Now type x.`,
+  aAloneCounters: () => 'Make the two numbers with counters, cancel the pairs, and count what is left. Then type x.',
+  aAloneCount: () => 'Count what is left, then type x.',
   aKindRight: (p) => `${p.kind === 'party' ? 'Yes, a party: the teams join.' : 'Yes, a battle: the bigger team wins.'}${p.alone ? ' Work it out and type x.' : p.after && M[p.after.key] ? ` ${M[p.after.key](p.after.params ?? {})}` : ''}`,
   // I'm stuck or Teach me while a move waits for Undo (shared with every card on the loop)
   aUndoFirstHelp: (p) => `${UNDO_REASON[p.reason] ?? UNDO_REASON.red} Let’s undo it first: press Undo.`,

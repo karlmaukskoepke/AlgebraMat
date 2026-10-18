@@ -4,6 +4,7 @@
 //   right beside it, never over it (right, else left, else below, else above). Undo, the only way out, is drawn above the dimming,
 //   pulsing (a steady ring for reduced motion), and has the focus: Enter or Space presses it. role="alertdialog", said once.
 //   HINT: no dimming; the thing it is about is outlined, the move to make is highlighted, and the hint pops up beside it with Got it.
+//   ASK: a question the card is asking at a place (a light dim, nothing held back), with its answer buttons in the bubble.
 
 const BOX_W = 340;
 const GAP = 14;
@@ -39,7 +40,9 @@ export function spotlightLayer(spot, o) {
   const box = el('div', 'spot-box', [el('p', 'spot-text', [o.text], { id: textId })], error
     ? { role: 'alertdialog', 'aria-modal': 'true', 'aria-labelledby': textId }
     : { role: 'status', 'aria-live': 'polite' });
-  if (error) {
+  if (spot.kind === 'ask') {
+    if (spot.choices) box.append(el('div', 'spot-choices', spot.choices.map(([label, value]) => el('button', `btn ${value === 'party' ? 'btn-party' : value === 'battle' ? 'btn-battle' : ''}`, [label], { type: 'button', 'data-action': 'kind', 'data-value': value }))));
+  } else if (error) {
     const dim = el('div', 'spot-dim');                                          // catches every tap outside Undo, and gives Undo the focus back
     dim.addEventListener('pointerdown', (e) => { e.preventDefault(); layer.querySelector('.spot-undo')?.focus({ preventScroll: true }); });
     layer.append(dim);

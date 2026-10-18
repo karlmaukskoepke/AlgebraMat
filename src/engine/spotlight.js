@@ -16,7 +16,8 @@ export function spotOf(s, card) {
   if (s.stage === 'done') return null;
   const err = card.error(s);
   if (err) return { kind: 'error', ...err };
-  return s.spot?.kind === 'hint' ? s.spot : null;
+  if (s.spot?.kind === 'hint') return s.spot;
+  return card.ask?.(s) ?? null;                     // a question the card is asking at a place on the screen (light dim, no gate)
 }
 
 export function withSpotlight(reduce, card) {

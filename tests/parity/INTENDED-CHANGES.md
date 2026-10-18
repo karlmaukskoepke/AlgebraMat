@@ -129,3 +129,12 @@ No new class-sheet words. The hint after Undo is not asked for, so it adds nothi
 | `screen:div-wrong-guess@1366x768` | the substitution ending “Not balanced” | the same, dimmed, the failing line lit (“not balanced”), the pop-up beside it, Undo pulsing | Part 2 |
 | `screen:div-wrong-guess@1366x650` | as above | as above | Part 2 |
 | `screen:div-failed@1366x650` | the failed row, in red | the same, dimmed, the row lit (“doesn’t split”), the pop-up beside it, Undo pulsing | Part 2 |
+
+## Build C, Part 3 (2026-10-18): help at x alone is Party/Battle at the numbers, then Count it's counters
+
+| Key | Before (Part 2) | After | Why |
+|---|---|---|---|
+| `event:add-both/x-alone-then-stuck-x4` | supports `hint` | supports `hint, model` | the second I'm stuck at `x = −4 + −8` opens Count it's counters walk (recorded with the existing `model` word); stuck still 4 |
+| `event:add-both/x-alone-then-teach` | supports `forced` | supports `forced, model` | Teach me at x alone starts at the counters |
+
+Traces of those two runs (already listed) and the screens `add-alone-stuck-1/2/3`, `add-alone-teach` (already listed) show the question bubble at the two numbers, then the counters tray, in place of Build A's words-only help. `crossoff` is added only when the student cancels a pair in the walk.

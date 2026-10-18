@@ -46,23 +46,18 @@ describe('Add: the guided rung and Teach me use the number now next to x', () =>
   });
 });
 
-describe('Add: x alone with two numbers on the other side', () => {
+describe('Add: x alone with two numbers on the other side (Build C, Part 3 replaces the words-only help)', () => {
   const alone = () => add(start(), ...addMove(-8));
-  it('asks for the sum in words, a bit more each time, with the two numbers outlined and no seesaw', () => {
+  it('asks Party or battle at the numbers, then the counters; the value is never written', () => {
     let s = add(alone(), stuck);
-    expect(s.feedback.key).toBe('aStuckSolved');                                         // rung 0 as before
-    const texts = [];
-    for (let i = 0; i < 3; i++) { s = add(s, stuck); texts.push(addBothFeedbackText(s.feedback)); }
-    expect(texts[0]).toBe('What is −4 + −8? Is it a party (same signs) or a battle (opposite signs)?');
-    expect(texts[1]).toContain('In a party the teams join.');
-    expect(texts[2]).toContain('count each side');
-    expect([s.scaffold, s.hint.kind, s.hint.ids.length, boardText(s.board)]).toEqual([false, 'sum', 2, 'x = −4 + −8']);
-    for (const t of texts) expect(t).not.toContain('12');                                 // never the value
+    expect(s.feedback.key).toBe('aAlonePB');
+    s = add(s, { type: 'kind', value: 'party' }, stuck);
+    expect([s.feedback.key, s.alone.walk.step, boardText(s.board)]).toEqual(['aAloneCounters', 'draw', 'x = −4 + −8']);
+    for (const k of ['aAlonePB', 'aAloneRight', 'aAloneCounters', 'aAloneCount']) expect(addBothFeedbackText({ key: k, params: { sum: '−4 + −8', kind: 'party' } })).not.toContain('12');
   });
-  it('Teach me never says to add again: it gives the sum help in full and counts as a Teach me', () => {
+  it('Teach me starts at the counters, never says to add again, and counts as a Teach me', () => {
     const s = add(alone(), { type: 'teach' });
-    expect([s.feedback.key, s.feedback.params.level, s.forced, s.scaffold, s.taught, s.amountEntry]).toEqual(['aStuckSum', 3, false, false, 1, '']);
-    expect(addBothFeedbackText(s.feedback)).not.toMatch(/Add|12/);
+    expect([s.feedback.key, s.alone.step, s.forced, s.scaffold, s.taught, s.amountEntry]).toEqual(['aAloneCounters', 'counters', false, false, 1, '']);
   });
 });
 

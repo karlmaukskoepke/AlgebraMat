@@ -390,4 +390,10 @@ export const ADD_SPOT = {
     return { target: 'xnum', key: 'aStuckHint', params: { constant: plusText(con.v) }, move: 'add' };
   },
   prompt: (s) => (moveOwed(s) ? 'lxMustMove' : 'aFindX'),
+  // the help at x alone (Build C, Part 3): "Party or battle?" floats at the two numbers, then "Now type x." at the field
+  ask(s) {
+    if (s.alone?.step === 'pb') return { kind: 'ask', target: 'otherSide', choices: [['Party!', 'party'], ['Battle!', 'battle']] };
+    if (s.alone?.step === 'type') return { kind: 'ask', target: 'answer' };
+    return null;
+  },
 };

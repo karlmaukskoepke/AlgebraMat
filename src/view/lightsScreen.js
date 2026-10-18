@@ -11,6 +11,9 @@ import { helpOk, tradeAvailable, tradePending } from '../engine/addBothMoves.js'
 import { lightsAnswerLive, blankOpen, canChoose, moveOwed, amountMode } from '../engine/addBothLights.js';
 import { lightsFeedbackText } from './addBothLightsFeedback.js';
 import { spotlightLayer, findSolveTarget } from './spotlight.js';
+// Count it's counters Mat and its words, read-only, for the help at x alone (Build C, Part 3)
+import { renderMat as renderCountersMat } from './mat.js';
+import { feedbackText as countersText } from './feedback.js';
 import { spotOf } from '../engine/spotlight.js';
 import { ADD_SPOT } from '../engine/addBothLights.js';
 import { boardBlock, trayFor, html } from './addBothMat.js';
@@ -28,6 +31,41 @@ function line(s) {
   const el = html('div', `lb-line${fb?.bad ? ' is-bad' : ''}${s.stage === 'done' ? ' is-good' : ''}`, [], { role: 'status', 'aria-live': 'polite' });
   el.append(html('p', 'lb-text', [lightsFeedbackText(fb)]));
   return el;
+}
+
+// Count it's counters walk on the two numbers at x alone, in a tray directly above them (below them if there is no room above). An
+// overlay: nothing on the page moves. The walk's own palette is left behind; the tray has only what the walk needs here: + and −
+// to draw, Check for the drawing, Party / Battle if it was not answered at the numbers. Counters are tapped on the Mat to cancel.
+function aloneTray(s, wrap) {
+  const w = s.alone?.walk;
+  if (!w || s.stage === 'done') return;
+  const tools = html('div', 'alone-tools');
+  if (w.step === 'draw') {
+    for (const [sign, label] of [['+', '+'], ['-', '−']]) {
+      tools.append(html('button', 'btn', [label], { type: 'button', 'data-action': 'cntPick', 'data-sign': sign, 'aria-pressed': String(w.drawSign === sign), 'aria-label': sign === '+' ? 'Draw plus counters' : 'Draw minus counters' }));
+    }
+    tools.append(html('button', 'btn btn-primary', ['Check ✓'], { type: 'button', 'data-action': 'cntCheck', 'aria-label': 'Check the drawing' }));
+  } else if (w.step === 'partyBattle') {
+    tools.append(html('button', 'btn btn-party', ['Party!'], { type: 'button', 'data-action': 'cntChoose', 'data-value': 'party' }),
+      html('button', 'btn btn-battle', ['Battle!'], { type: 'button', 'data-action': 'cntChoose', 'data-value': 'battle' }));
+  }
+  // only the counter zones of Count it's Mat: the two numbers themselves are right under the tray, in the equation
+  const mat = renderCountersMat(w, {});
+  mat.setAttribute('viewBox', '100 44 500 160');
+  const tray = html('div', 'alone-tray', [mat, html('p', 'alone-caption', [w.step === 'answer' ? 'Count who is left. Type it in x =.' : countersText(w.feedback)]), tools], { role: 'group', 'aria-label': 'Counters for the two numbers' });
+  wrap.append(tray);
+  const place = () => {
+    if (!tray.isConnected) return;
+    const nums = findSolveTarget(wrap, 'otherSide');
+    if (!nums) return;
+    const r = nums.getBoundingClientRect();
+    const h = tray.offsetHeight;
+    const left = Math.min(Math.max(8, r.left + r.width / 2 - tray.offsetWidth / 2), window.innerWidth - tray.offsetWidth - 8);
+    const top = r.top - 10 - h >= 8 ? r.top - 10 - h : r.bottom + 10;
+    Object.assign(tray.style, { left: `${left}px`, top: `${top}px` });
+  };
+  requestAnimationFrame(place);
+  setTimeout(place, 400);
 }
 
 // The spotlight: an error (dimmed page, the wrong thing lit, Undo the only way out) or the hint after it.
@@ -196,6 +234,7 @@ export function renderLightsScreen(s) {
   main.append(bottomRow(s), substBlock(s), corners(s));
   body.append(main, panel(s));
   wrap.append(body);
+  aloneTray(s, wrap);
   spot(s, wrap);
   return wrap;
 }

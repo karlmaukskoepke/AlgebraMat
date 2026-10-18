@@ -13,6 +13,12 @@ import {
   constantOf, oppositeOf, checkAddBoth, tagAddBoth, formatAddBoth, answerText, signed, isBattle,
 } from './addBoth.js';
 import { undoFirst } from './solveLoop.js';
+// Count it's Combine it counters walk, used read-only for the help at x alone (Build C, Part 3): its engine runs unchanged on the
+// two numbers, and its tags stay inside `s.alone.walk` (never in this card's tags, the device skills or the class sheet).
+import { newCombineSession } from './combineSession.js';
+import { reduce as reduceWalk } from './session.js';
+import { makeProblem } from './expr.js';
+import { MAX_PER_ZONE } from './moves.js';
 
 
 // ---------- the board ----------
@@ -107,6 +113,7 @@ export function newAddBoth(problem, { level = 2, introTrade = false } = {}) {
     prevBoard: board, lights: { fewer: 'off', solved: 'off' }, reds: 0,
     counterMode: false, startOver: false, forced: false, hint: null, rung: 0,
     entry: '', hintGiven: false, helpCombine: false, sub: null, work: null, undoCue: false, selected: null, combining: null, kindMisses: 0, countMisses: 0,
+    alone: null,                                  // the help at x alone: { a, b, kind, step: 'pb' | 'type' | 'typing' | 'counters', walk }
     skipped: [], wrongs: 0, tag: null, tags: [], stuck: 0, taught: 0, helped: false, clean: false,
     on: { ...emptySkills(), partyBattle: false, sign: false }, answers: [], supportsShown: [],
     finalText: null, lastAmount: null,
@@ -136,6 +143,7 @@ export const tilt = (s) => s.leftDelta - s.rightDelta;            // positive: t
 export const balanced = (s) => tilt(s) === 0;
 
 function startOverBoard(s) {
+  s.alone = null;
   Object.assign(s, { board: s.base, rows: [{ type: 'eq', board: s.base }], history: [], pending: null, leftDelta: 0, rightDelta: 0, prevBoard: s.base, resolving: false, menu: null, amountEntry: '', typing: null, startOver: false, reds: 0, sub: null, entry: '', zeroOther: false, work: null, undoCue: false, lights: { fewer: 'off', solved: 'off' }, hint: null, combining: null, selected: null, sumAsks: 0 });
   return say(s, 'aStartedOver');
 }
@@ -205,6 +213,49 @@ function sumHelp(s, level) {
   return say(s, 'aStuckSum', { sum: nums.map((t) => signed(t.v)).join(' + '), many: nums.length > 2, party: same, level: Math.min(level, 3) });
 }
 
+// ---------- x alone with two numbers on the other side (x = −3 + 5): Party/Battle by the problem, then Count it's counters ----------
+// (Build C, Part 3; replaces Build A's text-only sum help.) The numbers are read from the current row; the app never writes the value.
+const alonePair = (board) => { const nums = otherNums(board); return nums.length >= 2 ? [nums[0], nums[1]] : null; };
+// 1. the question floats at the two numbers: "−3 + 5: party or battle?"
+function aloneAsk(s) {
+  const [a, b] = alonePair(s.board);
+  s.alone = { a: a.id, b: b.id, kind: null, step: 'pb', walk: null };
+  s.hint = { kind: 'sum', ids: [a.id, b.id] };
+  s.menu = null;
+  s.typing = null;
+  if (!s.supportsShown.includes('hint')) s.supportsShown.push('hint');
+  return say(s, 'aAlonePB', { sum: `${signed(a.v)} + ${signed(b.v)}` });
+}
+// 3. Count it's counters walk on the two numbers, in a tray above them, from the counters (Party/Battle is skipped once answered).
+// Numbers past Count it's counter limit get the sum in words instead.
+function aloneCounters(s) {
+  const pair = s.alone ? [s.alone.a, s.alone.b].map((id) => find(s.board, id)) : alonePair(s.board);
+  if (!pair || !pair[0] || !pair[1]) return sumHelp(s, 3);
+  const [a, b] = pair;
+  if (Math.abs(a.v) > MAX_PER_ZONE || Math.abs(b.v) > MAX_PER_ZONE) { s.alone = null; return sumHelp(s, 3); }
+  if (s.alone?.walk) return say(s, 'aAloneCounters');
+  s.alone = { a: a.id, b: b.id, kind: s.alone?.kind ?? null, step: 'counters', walk: newCombineSession(makeProblem(a.v, '+', b.v)) };
+  s.hint = { kind: 'sum', ids: [a.id, b.id] };
+  s.menu = null;
+  s.typing = null;
+  if (!s.supportsShown.includes('model')) s.supportsShown.push('model');
+  return say(s, 'aAloneCounters');
+}
+// An action of the counters walk: drawing, checking the drawing, Party/Battle (only if it was not answered), cancelling pairs.
+// The walk stops at its answer step: the student types the value in x =, not in the walk.
+const WALK_ACTIONS = new Set(['pickSign', 'tapZone', 'tapCounter', 'check', 'choose']);
+function walkStep(s, act) {
+  const al = s.alone;
+  if (!al?.walk || !WALK_ACTIONS.has(act?.type) || al.walk.step === 'answer' || al.walk.step === 'done') return null;
+  if (act.type === 'check' && al.walk.step !== 'draw') return null;
+  let w = reduceWalk(al.walk, act);
+  if (w === al.walk) return null;
+  if (w.step === 'partyBattle' && al.kind) w = reduceWalk(w, { type: 'choose', choice: al.kind });   // already answered at the numbers
+  if (act.type === 'tapCounter' && w.zones.some((z) => z.some((c) => c.canceled)) && !s.supportsShown.includes('crossoff')) s.supportsShown.push('crossoff');
+  s.alone = { ...al, walk: w };
+  return say(s, w.step === 'answer' ? 'aAloneCount' : 'aAloneCounters');
+}
+
 // I'm stuck or Teach me while a move waits for Undo (red, partly cancelled, or the other side zeroed): Undo first, and nothing else
 // opens. After Undo the ladder starts again for the state it returns to.
 const waitingForUndo = (s) => s.undoCue && s.history.length > 0 && !s.scaffold && !s.sub;
@@ -219,19 +270,17 @@ function climb(s) {
     s.hintGiven = true;
     if (!s.supportsShown.includes('hint')) s.supportsShown.push('hint');
     const con = s.board[xSideOf(s.board)].find((t) => t.kind === 'num');
-    if (xAlone(s.board)) { s.sumAsks = 0; return say(s, 'aStuckSolved'); }
+    if (xAlone(s.board)) { s.sumAsks = 0; return alonePair(s.board) ? aloneAsk(s) : say(s, 'aStuckSolved'); }
     s.hint = con ? { kind: 'cancel', id: con.id } : null;
     s.menu = 'add';
     s.typing = null;
     s.amountEntry = '';
     return say(s, 'aStuckHint', { constant: con ? plus(con.v) : '' });
   }
-  // x alone with two numbers on the other side: the sum in plain words (no seesaw, nothing to add). It is a text reminder, so the
-  // class sheet records it with the reminder's word.
+  // x alone with two numbers on the other side: Party/Battle at the numbers, then Count it's counters (Build C, Part 3)
   if (xAlone(s.board) && !s.combining) {
-    s.sumAsks = (s.sumAsks ?? 0) + 1;
-    if (!s.supportsShown.includes('hint')) s.supportsShown.push('hint');
-    return sumHelp(s, s.sumAsks);
+    if (!alonePair(s.board)) return say(s, 'aStuckSolved');
+    return s.alone ? aloneCounters(s) : aloneAsk(s);
   }
   const rung = Math.min(s.rung + 1, 3);
   const fresh = rung !== s.rung;
@@ -287,6 +336,7 @@ export function reduceAddBoth(state, action) {
     const entry = typeInto(s[key], action, 'integer');
     if (entry === s[key]) return state;
     s[key] = entry;
+    if (key === 'entry' && s.alone?.step === 'type') s.alone = { ...s.alone, step: 'typing' };   // "Now type x." has done its job
     if (key === 'amountEntry' && !s.scaffold) s.hint = null;
     return s;
   }
@@ -423,6 +473,7 @@ export function reduceAddBoth(state, action) {
       if (Math.abs(amount) > 15) return say(s, 'aAmountBig', {}, true);
       if (s.forced && amount !== s.forcedAmount) return say(s, 'aForced', { amount: signed(s.forcedAmount) }, true);
       s.history.push(snapshot(s));
+      s.alone = null;
       s.work = workLine(s.board, amount);
       const after = lightBoard(s.board, amount);
       s.zeroOther = !xAlone(after) && sumNums(s.board[xSideOf(s.board) === 'left' ? 'right' : 'left']) + amount === 0;
@@ -452,6 +503,17 @@ export function reduceAddBoth(state, action) {
     }
     // Party or Battle? A right answer combines the two highlighted groups for the student (no count to type) and moves to the next pair.
     case 'kind': {
+      // 2. the question at x alone: a right pick confirms (nothing is combined, no value written) and moves to x =; a wrong one nudges
+      if (s.alone?.step === 'pb') {
+        const a = find(s.board, s.alone.a);
+        const b = find(s.board, s.alone.b);
+        const right = kindOf(a.v, b.v);
+        const params = { g1: signed(a.v), g2: signed(b.v), kind: right, picked: action.value };
+        if (action.value !== right) { s.kindMisses += 1; return say(s, 'aKindWrong', params, true); }
+        s.alone = { ...s.alone, kind: right, step: 'type' };
+        s.typing = 'answer';
+        return say(s, 'aAloneRight', params);
+      }
       if (s.combining?.step !== 'kind') return state;
       const { a, b } = combineTerms2(s);
       const right = kindOf(a.v, b.v);
@@ -477,6 +539,9 @@ export function reduceAddBoth(state, action) {
       s.combinedNote = { kind: right, g1: params.g1, g2: params.g2, total: params.total };
       return startPair(s);
     }
+    // 3. the counters walk at x alone (Count it's engine, unchanged)
+    case 'cnt':
+      return walkStep(s, action.act) ?? state;
     case 'crossOff': {
       if (s.combining?.step !== 'count' || s.combining.crossed) return state;
       s.combining = { ...s.combining, crossed: true };
@@ -505,6 +570,7 @@ export function reduceAddBoth(state, action) {
       const wasWaiting = waitingForUndo(s);
       restore(s, s.history.pop());
       s.sumAsks = 0;
+      s.alone = null;
       if (wasWaiting) { s.hintGiven = false; s.rung = 0; }                  // the ladder starts again for the state Undo returns to
       s.zeroOther = false;
       s.helpCombine = false;
@@ -543,7 +609,11 @@ export function reduceAddBoth(state, action) {
       s.helped = true;
       if (!s.supportsShown.includes('forced')) s.supportsShown.push('forced');
       // x is alone: there is nothing to add, so Teach me gives the sum help in full
-      if (xAlone(s.board) && !s.combining) { s.sumAsks = 3; return sumHelp(s, 3); }
+      if (xAlone(s.board) && !s.combining) {
+        if (alonePair(s.board)) return aloneCounters(s);                        // 4. Teach me here starts at the counters
+        s.sumAsks = 3;
+        return sumHelp(s, 3);
+      }
       s.forced = true;
       enterScaffold(s);
       // the move that cancels the number now next to x (after a partial move, not the original one)

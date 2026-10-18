@@ -280,17 +280,19 @@ describe('I\'m stuck and Teach me bring in the scaffold, one rung at a time', ()
     expect(s.stage).toBe('done');
     expect(s.clean).toBe(false);
   });
-  it('x alone with numbers still to put together: stuck 1 reminds; later asks outline the two numbers and ask for the sum in words, never the seesaw or the value (Build A)', () => {
-    let s = run(move(start(), -3), { type: 'stuck' });
-    expect([s.scaffold, s.feedback.key]).toEqual([false, 'aStuckSolved']);
+  it('x alone with two numbers (Build C, Part 3): Party/Battle at the numbers, then x =, then Count it\'s counters; never the value', () => {
+    let s = run(move(start(), -3), { type: 'stuck' });                                     // x = −6 + −3
+    expect([s.scaffold, s.feedback.key, s.feedback.params.sum, s.alone.step, s.hint.kind]).toEqual([false, 'aAlonePB', '−6 + −3', 'pb', 'sum']);
+    expect(run(s, { type: 'kind', value: 'battle' }).feedback).toMatchObject({ key: 'aKindWrong', bad: true });
+    s = run(s, { type: 'kind', value: 'party' });
+    expect([s.feedback.key, s.alone.step, s.typing, boardText(s.board), s.entry]).toEqual(['aAloneRight', 'type', 'answer', 'x = −6 + −3', '']);
     s = run(s, { type: 'stuck' });
-    expect([s.scaffold, s.feedback.key, s.feedback.params.sum, s.feedback.params.level, s.hint.kind, s.hint.ids.length]).toEqual([false, 'aStuckSum', '−6 + −3', 1, 'sum', 2]);
-    s = run(s, { type: 'stuck' }, { type: 'stuck' }, { type: 'stuck' });
-    expect([s.scaffold, s.combining, s.feedback.params.level, boardText(s.board)]).toEqual([false, null, 3, 'x = −6 + −3']);
-    expect(s.supportsShown).toEqual(['hint']);
+    expect([s.feedback.key, s.alone.step, s.alone.walk.step, s.scaffold]).toEqual(['aAloneCounters', 'counters', 'draw', false]);
+    expect(s.supportsShown).toEqual(['hint', 'model']);
   });
-  it('help while x is alone says to work it out', () => {
-    expect(run(move(start(), -3), { type: 'stuck' }).feedback.key).toBe('aStuckSolved');
+  it('the question is about the numbers on the current row', () => {
+    const s = run(move(start(P('x+a', 3, 4)), -3), { type: 'stuck' });                     // x = 4 + −3
+    expect([s.feedback.key, s.feedback.params.sum]).toEqual(['aAlonePB', '4 + −3']);
   });
 });
 

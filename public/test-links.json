@@ -37,6 +37,22 @@
           ]
         },
         {
+          "name": "Help when x is alone: party or battle, then counters",
+          "about": "At x = 11 + −8, I’m stuck asks “party or battle?” right at the two numbers, then says “Now type x.”; asked again, Count it’s counters appear in a small tray above the numbers.",
+          "links": [
+            {
+              "label": "x = 11 + −8",
+              "query": "?pack=add-both&level=2&seed=7&nosignin=1",
+              "look": "Add −8, ✓, Next, then I’m stuck: pick Battle (a wrong pick gets a nudge), then I’m stuck again: draw 11 + counters and 8 − counters, Check, cancel the pairs, count, type 3. The app never writes 3."
+            },
+            {
+              "label": "Teach me starts at the counters",
+              "query": "?pack=add-both&level=2&seed=7&nosignin=1",
+              "look": "Add −8, ✓, Next, then Teach me: the counters tray opens straight away, with its own Party or Battle step."
+            }
+          ]
+        },
+        {
           "name": "Add to both sides: preview on hover, fill the blank",
           "about": "Every level now plays this way: hover Add to see the move on the equation, type the amount in the box in that row, then press the green Next.",
           "links": [
@@ -121,11 +137,6 @@
               "label": "Partly cancelled: Undo first",
               "query": "?pack=add-both&level=4&seed=7&nosignin=1",
               "look": "On x + 8 = −4 add −5 (✓), then I’m stuck: it names the +3 that’s left and says to press Undo first."
-            },
-            {
-              "label": "x alone: help with the sum",
-              "query": "?pack=add-both&level=2&seed=7&nosignin=1",
-              "look": "Add −8, Next, then I’m stuck twice at x = 11 + −8: the two numbers are outlined and it asks the sum; it never writes 3."
             },
             {
               "label": "Divide it: a fraction that doesn’t split",
