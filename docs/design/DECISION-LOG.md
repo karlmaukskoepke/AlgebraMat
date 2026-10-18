@@ -74,5 +74,6 @@ feedback loop; previews of moves on mouseover; manipulable equations with previe
 - Guess x / Use a move.
 - The tucked layout.
 - The banner for feedback.
-- The Why? lights column and the goal labels in the student view. (The engine may keep judging internally, for messages and
-  class-sheet tags; nothing of it is shown.)
+
+**Kept after all (Karl, rev 2 of the brief):** the lights stay, as the small collapsed column of dots beside the narrow panel (hover
+opens a dot into its goal; no new labels). Now that they take little room, Karl likes them as a curiosity.
