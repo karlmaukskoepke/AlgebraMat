@@ -1,44 +1,64 @@
-// The play adapter for Add to both sides, "light build" (engine/addBothMoves.js, view/lightScreen.js).
+// The play adapter for Add to both sides, every equation level (engine/addBothMoves.js under the layer in engine/addBothLights.js,
+// view/lightsScreen.js). This was the "lights" experiment; Build C (2026-10-18) made it the only way the card plays. ?ui=grab draws
+// lights round 2 instead (view/grabScreen.js, with the terms grabbed by pointer or keyboard), while it is being tested.
 
-import { newAddBoth, reduceAddBoth, owesMove } from '../engine/addBothMoves.js';
 import { formatAddBoth } from '../engine/addBoth.js';
-import { renderLightScreen } from '../view/lightScreen.js';
-import { buildAddBothControls } from '../view/addBothControls.js';
-import { bindAddBothMat } from '../view/addBothPointer.js';
-import { addBothFeedbackText } from '../view/addBothFeedback.js';
+import { reduceAddBoth } from '../engine/addBothMoves.js';
+import { newLightsSession, withLights, lightsAnswerLive, lightsSummary, combineOpen } from '../engine/addBothLights.js';
+import { renderLightsScreen } from '../view/lightsScreen.js';
+import { renderGrabScreen } from '../view/grabScreen.js';
+import { lightsFeedbackText } from '../view/addBothLightsFeedback.js';
+import { makeAddBothControls } from '../view/addBothControls.js';
+import { bindLightsMat } from '../view/lightsPointer.js';
 import { recordProblem } from '../lightStore.js';
 
+export const GRAB = typeof location !== 'undefined' && new URLSearchParams(location.search).get('ui') === 'grab';
+
+// A log of how the moves are made: one line a problem, on this device only (never synced), newest 500 kept.
+export const LIGHTS_LOG_KEY = 'mat.lights.v1';
+export function logLights(line) {
+  try {
+    const list = JSON.parse(localStorage.getItem(LIGHTS_LOG_KEY) ?? '[]');
+    const next = [...(Array.isArray(list) ? list : []), line].slice(-500);
+    localStorage.setItem(LIGHTS_LOG_KEY, JSON.stringify(next));
+  } catch { /* storage blocked or full */ }
+}
+
+const reduce = withLights(reduceAddBoth);
 let taught = null;      // what this level has already shown the student (the first Trade places is pointed out once)
 
 export const addBothPlay = {
   noStreak: true,       // no streaks on this card: the stuck count is what is kept
   noSteps: true,        // no steps bar
   noAuto: true,         // nothing advances on a timer: every pause ends with a green Next
-  owesMove,             // a correct guess makes the next problem a move (and adds one if it was the last)
   lineInMat: true,      // the line (every message) is on the Mat, above the equation
+  owesMove: (s) => s.stage === 'done' && s.sub?.kind === 'guess' && s.sub.ok,   // a correct guess makes the next problem a move
   steps: () => [],
   newSession: (problem, { forceMove = false, flags = null } = {}) => {
     taught = flags ?? taught ?? {};
-    return newAddBoth(problem, { level: problem.logLevel ?? 2, forceMove, introTrade: !taught.trade });
+    return newLightsSession(problem, { level: problem.logLevel ?? 2, forceMove, introTrade: !taught.trade });
   },
-  reduce: reduceAddBoth,
-  feedbackText: addBothFeedbackText,
-  buildControls: buildAddBothControls,
-  bindMat: bindAddBothMat,
+  reduce,
+  feedbackText: lightsFeedbackText,
+  // the pad types into x = [ ] (and, with ?ui=grab, into the blank of a sum being combined)
+  buildControls: makeAddBothControls((s) => lightsAnswerLive(s) || combineOpen(s)),
+  bindMat: (root, dispatch, getSession) => bindLightsMat(root, dispatch, getSession, { grab: GRAB }),
   effects(before, s) {
     if (before && before.step !== 'done' && s.step === 'done') {
       recordProblem(s, { pack: 'add-both', level: s.problem.logLevel ?? null, problem: formatAddBoth(s.problem) });
+      logLights({ ...lightsSummary(s), problem: formatAddBoth(s.problem), grab: GRAB });
     }
     if (s.tradeCount > 0 && taught) taught.trade = true;
     return { hint: null };
   },
-  renderMat: (s) => renderLightScreen(s),
-  // A tap on a button, a group, the x (the guess's drop) or a chip comes to the Mat's click handler as data-*.
+  renderMat: (s) => (GRAB ? renderGrabScreen(s) : renderLightsScreen(s)),
+  // A tap on a button, a group or a chip comes to the Mat's click handler as data-*.
   matAction(d) {
     switch (d.action) {
       case 'choose': return { type: 'choose', move: d.move };
       case 'greyMove': return { type: 'greyMove' };
-      case 'path': return { type: 'path', value: d.value };
+      case 'lxNext': return { type: 'lxNext' };
+      case 'lxApply': return { type: 'lxApply' };
       case 'nextLine': return { type: 'nextLine' };
       case 'next': return { type: 'next' };
       case 'check': return { type: 'check' };

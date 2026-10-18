@@ -1,232 +1,110 @@
 {
-  "_about": "The test-links page (test-links.html) reads this list. Every build that gives Karl something to test adds or updates its entries here (see CLAUDE.md, Working with Karl). Each link is the part after the address: it opens the app on that card, level and seed, with sign-in skipped. `level` in a link is the card's saved level number, which can differ from the number on screen (Add to both sides and Divide it: link level 2 is shown as Level 1). `reset: true` clears this browser's progress first. `notLive` says plainly why a link won't work on the live site yet.",
+  "_about": "The test-links page (test-links.html) reads this list: Karl's change list. Live = on the site for everyone. Testing = behind a flag, waiting for Karl to keep or retire it. Retired = deleted. Every build adds or updates its entries (CLAUDE.md, Working with Karl). Each entry is a name, one plain sentence (`about`) and, for Live and Testing, its buttons. A button's `query` is the part after the address: card, level, seed, flags, sign-in skipped. `level` in a link is the saved level number (Add to both sides and Divide it: link level 2 is shown as Level 1). `reset: true` clears this browser's progress first; `look` is one sentence on what to look for; `notLive` says plainly why a link won't work on the live site.",
   "updated": "2026-10-18",
-  "groups": [
+  "sections": [
     {
-      "title": "New: Level 1 is problems, the walkthrough is a button",
-      "links": [
+      "title": "Live",
+      "items": [
         {
-          "label": "Home screen, as a brand-new student",
-          "query": "?nosignin=1",
-          "reset": true,
-          "look": "Hover Solve it. Add to both sides and Divide it both start at Level 1 = their first real problems, with a small “See why it works” button by the dots."
+          "name": "Add to both sides: preview on hover, fill the blank",
+          "about": "Every level now plays this way: hover Add to see the move on the equation, type the amount in the box in that row, then press the green Next.",
+          "links": [
+            { "label": "Level 1 · x + 8 = 11", "query": "?pack=add-both&level=2&seed=7&nosignin=1", "look": "No Guess x / Use a move buttons: the line just says “Find x.”, and both Add and x = work at once." },
+            { "label": "Level 3 · x + 8 = −4", "query": "?pack=add-both&level=4&seed=7&nosignin=1", "look": "The same screen on the mixed level (it used to be the old screen)." },
+            { "label": "Level 5 · bigger", "query": "?pack=add-both&level=6&seed=7&nosignin=1", "look": "The same screen on the last level." }
+          ]
         },
         {
-          "label": "Reload test",
-          "query": "?nosignin=1",
-          "reset": true,
-          "look": "Hover Solve it, click “See why it works” on Add to both sides, then reload the page: you should land on the home screen, not the walkthrough."
+          "name": "Trade places when x is on the right",
+          "about": "From Level 4, when x is on the right, the line asks you to trade places first; Add waits until you do.",
+          "links": [
+            { "label": "Level 4 · −2 = x + −6", "query": "?pack=add-both&level=5&seed=1&nosignin=1", "reset": true, "look": "Click Add first: it says to trade places. Click the Trade places move (it pulses): the sides swap, then Add works." }
+          ]
         },
         {
-          "label": "Add to both sides · Level 1",
-          "query": "?pack=add-both&level=2&seed=7&nosignin=1",
-          "look": "The header says Level 1 and the first problem is x + 8 = 11. (This was Level 2 before.)"
+          "name": "The move after a correct guess",
+          "about": "Guess right and the next problem must be shown with a move: the move has a steady ring and x = stays grey until you make one.",
+          "links": [
+            { "label": "Guess, then the next problem", "query": "?pack=add-both&level=4&seed=7&nosignin=1", "look": "Type −12 and Check, click through, then Next problem: Add has a ring, x = is grey with “Make one move first.”, until a good move and Next." }
+          ]
         },
         {
-          "label": "Add to both sides · See why it works",
-          "query": "?pack=add-both&level=1&seed=7&nosignin=1",
-          "look": "The header says “See why it works” and it’s the numbers-only balance walkthrough. At the end it says “Now you’ve seen why it works!” with a Level 1 button."
+          "name": "Divide it: no choice",
+          "about": "Divide it has no Guess x / Use a move either: the fraction move and x = are both live from the start.",
+          "links": [
+            { "label": "Divide it · Level 2 · 5x = −15", "query": "?pack=divide-it&level=3&seed=7&nosignin=1", "look": "The line says “Find x.”; you can type a guess or pick Take a fraction straight away." }
+          ]
         },
         {
-          "label": "Divide it · Level 1",
-          "query": "?pack=divide-it&level=2&seed=7&nosignin=1",
-          "look": "The header says Level 1 and the first problem is 3x = 12. (This was Level 2 before.)"
+          "name": "Level 1 is problems; the walkthrough is “See why it works”",
+          "about": "Add to both sides and Divide it open on real problems; the numbers-only walkthrough is a small button on the card.",
+          "links": [
+            { "label": "Home screen, as a brand-new student", "query": "?nosignin=1", "reset": true, "look": "Hover Solve it: both cards start at Level 1 with a “See why it works” button by the dots. Open it, reload: you land on the home screen." },
+            { "label": "Add to both sides · See why it works", "query": "?pack=add-both&level=1&seed=7&nosignin=1", "look": "The header says “See why it works”: the balance walkthrough." },
+            { "label": "Divide it · See why it works", "query": "?pack=divide-it&level=1&seed=7&nosignin=1", "look": "The header says “See why it works”: the numbers-only walkthrough." }
+          ]
         },
         {
-          "label": "Divide it · See why it works",
-          "query": "?pack=divide-it&level=1&seed=7&nosignin=1",
-          "look": "The header says “See why it works” and it’s the numbers-only walkthrough."
+          "name": "Help that reads the equation on screen (Build A)",
+          "about": "I'm stuck now uses the numbers on screen, says Undo first after a bad move, and never writes the answer.",
+          "links": [
+            { "label": "Partly cancelled: Undo first", "query": "?pack=add-both&level=4&seed=7&nosignin=1", "look": "On x + 8 = −4 add −5 (✓), then I’m stuck: it names the +3 that’s left and says to press Undo first." },
+            { "label": "x alone: help with the sum", "query": "?pack=add-both&level=2&seed=7&nosignin=1", "look": "Add −8, Next, then I’m stuck twice at x = 11 + −8: the two numbers are outlined and it asks the sum; it never writes 3." },
+            { "label": "Divide it: a fraction that doesn’t split", "query": "?pack=divide-it&level=3&seed=7&nosignin=1", "look": "On 5x = −15 take ½ (it fails), then I’m stuck: it says to press Undo first." }
+          ]
+        },
+        {
+          "name": "Every level",
+          "about": "One button per level of the two Solve it cards, on the same problems every time.",
+          "links": [
+            { "label": "Add · Level 1", "query": "?pack=add-both&level=2&seed=7&nosignin=1" },
+            { "label": "Add · Level 2", "query": "?pack=add-both&level=3&seed=7&nosignin=1" },
+            { "label": "Add · Level 3", "query": "?pack=add-both&level=4&seed=7&nosignin=1" },
+            { "label": "Add · Level 4", "query": "?pack=add-both&level=5&seed=7&nosignin=1" },
+            { "label": "Add · Level 5", "query": "?pack=add-both&level=6&seed=7&nosignin=1" },
+            { "label": "Divide · Level 1", "query": "?pack=divide-it&level=2&seed=7&nosignin=1" },
+            { "label": "Divide · Level 2", "query": "?pack=divide-it&level=3&seed=7&nosignin=1" },
+            { "label": "Divide · Level 3", "query": "?pack=divide-it&level=4&seed=7&nosignin=1" },
+            { "label": "Divide · Level 4", "query": "?pack=divide-it&level=5&seed=7&nosignin=1" },
+            { "label": "Divide · Level 5", "query": "?pack=divide-it&level=6&seed=7&nosignin=1" }
+          ]
         }
       ]
     },
     {
-      "title": "Add to both sides, every level",
-      "links": [
+      "title": "Testing",
+      "items": [
         {
-          "label": "Level 1 · x + a = b",
-          "query": "?pack=add-both&level=2&seed=7&nosignin=1",
-          "look": "Five problems; the first is x + 8 = 11."
+          "name": "Lights round 2: the narrow panel",
+          "about": "Four small moves and round dots that open into their goal on hover or tap; the equation reads x − 4 and the dashed line runs in front of the =.",
+          "links": [
+            { "label": "Narrow panel · x − 4 = −3", "query": "?pack=add-both&level=3&seed=7&ui=grab&nosignin=1", "look": "Hover a dot: it opens into its goal. Note the = with the line through it." }
+          ]
         },
         {
-          "label": "Level 2 · x − a = b",
-          "query": "?pack=add-both&level=3&seed=7&nosignin=1",
-          "look": "Five problems; the first is x − 4 = −3."
+          "name": "Lights round 2: grab the terms",
+          "about": "Drag a number across the line to add its opposite to both sides, onto another number to combine them, or along its side to reorder; tap a minus to see it as a negative.",
+          "links": [
+            { "label": "Drag across, combine, minus", "query": "?pack=add-both&level=3&seed=7&ui=grab&nosignin=1", "look": "Drag “− 4” over the line (it turns into “+ 4 ⇄”), drop, Next, then drop the 4 onto the −3 and type 1." },
+            { "label": "Reorder, and x can’t cross", "query": "?pack=add-both&level=2&seed=7&ui=grab&nosignin=1", "look": "Drag “+ 8” before x: 8 + x = 11 in place. Drag x across: “That moves x. Try the number.”" }
+          ]
         },
         {
-          "label": "Level 3 · both forms",
-          "query": "?pack=add-both&level=4&seed=7&nosignin=1",
-          "look": "A mix; the first is x + 8 = −4."
-        },
-        {
-          "label": "Level 4 · x on the right",
-          "query": "?pack=add-both&level=5&seed=7&nosignin=1",
-          "look": "Some problems have x on the right side; the first is x + 3 = 10."
-        },
-        {
-          "label": "Level 5 · all four forms, bigger",
-          "query": "?pack=add-both&level=6&seed=7&nosignin=1",
-          "look": "Everything mixed, bigger numbers; the first is x − 9 = −13."
+          "name": "Lights round 2: the Distribute drill",
+          "about": "Two drill problems solved only by grabbing terms: tap the minus, drag −2 onto the parentheses, type each product.",
+          "links": [
+            { "label": "Drill: 5 − 2(x + 2) = 3", "query": "?ui=grab&drill=distribute&nosignin=1", "look": "Dragging the 2 is refused until you tap its minus; then two labelled blanks, −2 and −4, and on to x = −1." }
+          ]
         }
       ]
     },
     {
-      "title": "Divide it, every level",
-      "links": [
-        {
-          "label": "Level 1 · a = 2 or 3",
-          "query": "?pack=divide-it&level=2&seed=7&nosignin=1",
-          "look": "Five problems; the first is 3x = 12."
-        },
-        {
-          "label": "Level 2 · a = 2 to 5",
-          "query": "?pack=divide-it&level=3&seed=7&nosignin=1",
-          "look": "The first is 5x = −15."
-        },
-        {
-          "label": "Level 3 · bigger numbers",
-          "query": "?pack=divide-it&level=4&seed=7&nosignin=1",
-          "look": "Bigger numbers; the first two are 3x = 6 and 2x = 30."
-        },
-        {
-          "label": "Level 4 · a = 4 or 6",
-          "query": "?pack=divide-it&level=5&seed=7&nosignin=1",
-          "look": "The number on x is 4 or 6; the first is 4x = 8."
-        },
-        {
-          "label": "Level 5 · all mixed",
-          "query": "?pack=divide-it&level=6&seed=7&nosignin=1",
-          "look": "Everything mixed; the first is 6x = −18."
-        }
-      ]
-    },
-    {
-      "title": "Lights experiment, Add to both sides (round 1 is now updated to round 2)",
-      "links": [
-        {
-          "label": "Lights · Level 1 (x + 8 = 11)",
-          "query": "?pack=add-both&level=2&seed=7&ui=lights&nosignin=1",
-          "look": "The panel is now narrow: four small moves and round dots. Hover Add for the grey preview, as before."
-        },
-        {
-          "label": "Lights · Level 2 (x − 4 = −3)",
-          "query": "?pack=add-both&level=3&seed=7&ui=lights&nosignin=1",
-          "look": "The equation reads x − 4 = −3 (it used to say x + −4), and the dashed line runs in front of the =."
-        }
-      ]
-    },
-    {
-      "title": "Tucked layout pilot, Divide it",
-      "links": [
-        {
-          "label": "Tucked · Level 2",
-          "query": "?pack=divide-it&level=3&seed=7&layout=tucked&nosignin=1",
-          "look": "One work column with a slim Why? column on the right; Use a move opens a Moves drawer, I’m stuck slides up a counter tray."
-        }
-      ]
-    },
-    {
-      "title": "Add to both sides: help fixes (Build A)",
-      "links": [
-        {
-          "label": "Partly cancelled: Undo first",
-          "query": "?pack=add-both&level=4&seed=7&nosignin=1",
-          "look": "On x + 8 = −4: Use a move, Add −5, Go, then I’m stuck. The line names the +3 that’s left and says to press Undo first, with Undo highlighted."
-        },
-        {
-          "label": "A move the wrong way: Undo first",
-          "query": "?pack=add-both&level=4&seed=7&nosignin=1",
-          "look": "Use a move, Add 8, Go (it goes red), then I’m stuck: “That move made the equation bigger… press Undo.” After Undo, I’m stuck starts again at the first hint."
-        },
-        {
-          "label": "x alone: help with the sum",
-          "query": "?pack=add-both&level=2&seed=7&nosignin=1",
-          "look": "On x + 8 = 11: Use a move, Add −8, Go. At x = 11 + −8, press I’m stuck twice: 11 and −8 are outlined and it asks the sum. It never writes the answer, and no seesaw opens."
-        },
-        {
-          "label": "x alone: Teach me",
-          "query": "?pack=add-both&level=2&seed=7&nosignin=1",
-          "look": "Same as above, but press Teach me at x = 11 + −8: all three sum sentences show and you can type 3 to finish."
-        },
-        {
-          "label": "Only two lights judged",
-          "query": "?pack=add-both&level=4&seed=7&nosignin=1",
-          "look": "Make the helpful move (Add −8): only Fewer terms and Solved for x change; the other six lights stay dashed."
-        },
-        {
-          "label": "Divide it: a fraction that doesn’t split",
-          "query": "?pack=divide-it&level=3&seed=7&nosignin=1",
-          "look": "On 5x = −15: take ½ of both sides (it fails), then I’m stuck: “That fraction doesn’t split evenly… press Undo.” After Undo, I’m stuck shows the counters."
-        }
-      ]
-    },
-    {
-      "title": "Lights experiment, round 2: the narrow panel (Part A)",
-      "links": [
-        {
-          "label": "Goals light up on hover",
-          "query": "?pack=add-both&level=3&seed=7&ui=lights&nosignin=1",
-          "look": "Hover a round dot: it opens into its goal (“Fewer terms”). On a touch screen, tap it open and tap again to close."
-        },
-        {
-          "label": "Forced move after a correct guess",
-          "query": "?pack=add-both&level=2&seed=7&ui=lights&nosignin=1",
-          "look": "Type 3 and Check, step through, then Next problem. On the new problem Add has a ring, and x = is grey with “Make one move first.” until you make one move and press Next."
-        }
-      ]
-    },
-    {
-      "title": "Lights experiment, round 2: grab the terms (Part B)",
-      "links": [
-        {
-          "label": "Drag a number across the line",
-          "query": "?pack=add-both&level=3&seed=7&ui=lights&nosignin=1",
-          "look": "Drag “− 4” over the line: it turns into “+ 4 ⇄”. Drop it: the app writes x − 4 + 4 = −3 + 4, then x = −3 + 4, and Fewer terms goes green."
-        },
-        {
-          "label": "Combine two numbers",
-          "query": "?pack=add-both&level=3&seed=7&ui=lights&nosignin=1",
-          "look": "After the drag above, press Next, then drop the 4 onto the −3. Type a wrong sum (red, it names the sum), then 1 and Enter: a new row x = 1."
-        },
-        {
-          "label": "Reorder",
-          "query": "?pack=add-both&level=2&seed=7&ui=lights&nosignin=1",
-          "look": "Drag “+ 8” to the left of x: the row becomes 8 + x = 11 in place, no new row, no light changes. Undo puts it back."
-        },
-        {
-          "label": "x can’t cross",
-          "query": "?pack=add-both&level=2&seed=7&ui=lights&nosignin=1",
-          "look": "Drag x across the line: it snaps back and the line says “That moves x. Try the number.”"
-        },
-        {
-          "label": "Minus as a negative",
-          "query": "?pack=add-both&level=3&seed=7&ui=lights&nosignin=1",
-          "look": "Tap the minus in x − 4: it becomes x + −4 with −4 underlined in purple. Tap that minus again to go back."
-        },
-        {
-          "label": "Keyboard only",
-          "query": "?pack=add-both&level=3&seed=7&ui=lights&nosignin=1",
-          "look": "Press Tab until “− 4” is outlined, Enter to pick it up, → twice to carry it over the line, Enter to drop. Esc puts it back."
-        }
-      ]
-    },
-    {
-      "title": "Lights experiment, round 2: the Distribute drill (B6)",
-      "links": [
-        {
-          "label": "Drill: 5 − 2(x + 2) = 3",
-          "query": "?ui=lights&drill=distribute&nosignin=1",
-          "look": "Drag the 2 onto the parentheses: it refuses until you tap the minus. Tap it (−2 turns purple), drag −2 onto (x + 2), type −2 and −4 in the labelled blanks, then combine and carry terms until −2x = 2 and type x = −1."
-        },
-        {
-          "label": "Drill: keyboard only",
-          "query": "?ui=lights&drill=distribute&nosignin=1",
-          "look": "Tab to the 2, press the minus key, then Enter, → (the parentheses go green), Enter: the two product blanks open."
-        },
-        {
-          "label": "Drill: 3(x + 1) = 9",
-          "query": "?ui=lights&drill=distribute&nosignin=1",
-          "look": "Finish the first problem and press Next problem: 3(x + 1) = 9 has no minus to tap; drag the 3 straight onto the parentheses."
-        }
+      "title": "Retired",
+      "items": [
+        { "name": "Guess x / Use a move", "about": "The choice at the start of every Solve it problem is deleted on Add to both sides and Divide it (Build C)." },
+        { "name": "The tucked layout", "about": "The Divide it pilot with the slim Why? column, Moves drawer and counter tray (?layout=tucked) is deleted (Build C)." },
+        { "name": "The ?ui=lights link", "about": "Not needed any more: what it showed is now how Add to both sides always plays (see Live)." },
+        { "name": "The move owed on the same problem", "about": "Lights round 1 asked for the move on the same problem after a correct guess; now it is the next problem, as everywhere else." }
       ]
     }
   ]

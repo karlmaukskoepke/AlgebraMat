@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { makeAddBoth } from '../src/engine/addBoth.js';
 import { oppositeOf } from '../src/engine/addBoth.js';
 import {
-  newAddBoth, reduceAddBoth, boardText, kindOf, balanced, tilt, xTerms, substitutionSteps, owesMove, answerLive, tradePending, tradeAvailable,
+  newAddBoth, reduceAddBoth, boardText, kindOf, balanced, tilt, xTerms, substitutionSteps, owesMove, tradePending, tradeAvailable,
 } from '../src/engine/addBothMoves.js';
 
 const run = (s, ...actions) => actions.reduce(reduceAddBoth, s);
@@ -10,7 +10,7 @@ const typed = (text) => [...text.replace(/−/g, '-')].map((ch) => (/\d/.test(ch
 const P = (form, a, b, mirror = false) => makeAddBoth(form, a, form === 'x+a' ? b - a : b + a, mirror);
 const start = (p = P('x+a', 3, -6), level = 4) => newAddBoth(p, { level });
 // the bare move: choose Add, type the amount, Go
-const move = (s, amount) => run(s, ...(s.path ? [] : [{ type: 'path', value: 'move' }]), { type: 'choose', move: 'add' }, ...typed(String(amount)), { type: 'go' });
+const move = (s, amount) => run(s, { type: 'choose', move: 'add' }, ...typed(String(amount)), { type: 'go' });
 const answer = (s, text) => run(s, ...typed(text), { type: 'check' });
 
 // the scaffold's way: the next two numbers on a side are highlighted and the student says Party or Battle; the right answer combines them
@@ -22,34 +22,24 @@ function combineOne(s) {
 const combineAll = (s) => { let t = s; while (t.combining) t = combineOne(t); return t; };
 
 describe('the bare screen', () => {
-  it('starts with the choice prompt, the equation as written, nothing scaffolded, and the lights off', () => {
+  it('starts on "Find x.", the equation as written, nothing scaffolded, and the lights off', () => {
     const s = start();
-    expect(s.feedback.key).toBe('aChoose');
-    expect([s.scaffold, s.stage, s.counterMode, s.path]).toEqual([false, 'moves', false, null]);
+    expect(s.feedback.key).toBe('aFindX');
+    expect([s.scaffold, s.stage, s.counterMode]).toEqual([false, 'moves', false]);
     expect(s.lights).toEqual({ fewer: 'off', solved: 'off' });
     expect(boardText(s.board)).toBe('x + 3 = −6');
     expect(boardText(start(P('x-a', 5, -2)).board)).toBe('x + −5 = −2');
     expect(boardText(start(P('x+a', 3, 7, true)).board)).toBe('7 = x + 3');
   });
-  it('the choice is made once and is fixed; the path not chosen is greyed (its taps only explain)', () => {
-    expect(run(start(), { type: 'choose', move: 'add' }).feedback.key).toBe('aChooseFirst');
-    expect(run(start(), ...typed('5')).entry).toBe('');                                       // the x = row is greyed before the choice
-    const g = run(start(), { type: 'path', value: 'guess' });
-    expect([g.path, g.typing, g.feedback.key]).toEqual(['guess', 'answer', 'aGuessPrompt']);
-    expect(run(g, { type: 'choose', move: 'add' }).feedback.key).toBe('aGuessing');          // "You're guessing this one."
-    expect(run(g, { type: 'path', value: 'move' })).toBe(g);                                 // fixed for the problem
-    const m = run(start(), { type: 'path', value: 'move' });
-    expect([m.path, m.feedback.key]).toEqual(['move', 'aMovePrompt']);
-    expect(run(m, ...typed('5')).entry).toBe('');                                            // greyed until x is alone
+  it('there is no choice (Build C): the move and the x = row are both live at once; a greyed move only explains', () => {
+    expect(run(start(), { type: 'choose', move: 'add' }).menu).toBe('add');
+    expect(run(start(), ...typed('5')).entry).toBe('5');                                      // a value typed now is a guess
+    const s0 = start();
+    expect(run(s0, { type: 'path', value: 'guess' })).toBe(s0);                               // the old choice is gone: nothing happens
     expect(run(start(), { type: 'greyMove' }).feedback.key).toBe('aLater');
   });
-  it('a forced-move problem starts on the move path with its own line', () => {
-    const s = newAddBoth(P('x+a', 3, -6), { level: 4, forceMove: true });
-    expect([s.path, s.mustMove, s.feedback.key]).toEqual(['move', true, 'aMustMove']);
-    expect(run(s, { type: 'path', value: 'guess' })).toBe(s);
-  });
   it('owes a move after a correct guess, and only then', () => {
-    const win = (s) => { let t = run(s, { type: 'path', value: 'guess' }, ...typed('−9'), { type: 'check' }); while (t.stage !== 'done') t = run(t, { type: 'nextLine' }); return t; };
+    const win = (s) => { let t = run(s, ...typed('−9'), { type: 'check' }); while (t.stage !== 'done') t = run(t, { type: 'nextLine' }); return t; };
     expect(owesMove(win(start()))).toBe(true);
     expect(owesMove(start())).toBe(false);
     expect(owesMove(finishByMove(start()))).toBe(false);
@@ -87,21 +77,20 @@ describe('path B: one move in one action', () => {
     expect(xTerms(move(start(), -3).board)).toBe(1);
   });
   it('never takes 0, nothing, or a huge number', () => {
-    const open = () => run(start(), { type: 'path', value: 'move' }, { type: 'choose', move: 'add' });
+    const open = () => run(start(), { type: 'choose', move: 'add' });
     expect(run(open(), { type: 'go' }).feedback.key).toBe('aAmountZero');
     expect(run(open(), ...typed('0'), { type: 'go' }).feedback.key).toBe('aAmountZero');
     expect(run(open(), ...typed('99'), { type: 'go' }).feedback.key).toBe('aAmountBig');
   });
-  it('a number dragged into the blank fills it (on the move path)', () => {
-    const s = run(start(), { type: 'path', value: 'move' }, { type: 'setAmount', value: 3 });
+  it('a number dragged into the blank fills it', () => {
+    const s = run(start(), { type: 'setAmount', value: 3 });
     expect([s.menu, s.amountEntry]).toEqual(['add', '3']);
-    expect(run(start(), { type: 'setAmount', value: 3 }).menu).toBeNull();
   });
   it('typing goes to the blank while the move is open, to the answer once x is alone, unless a field was tapped', () => {
-    let s = run(start(), { type: 'path', value: 'move' }, { type: 'choose', move: 'add' }, ...typed('4'));
+    let s = run(start(), { type: 'choose', move: 'add' }, ...typed('4'));
     expect([s.amountEntry, s.entry]).toEqual(['4', '']);
     expect(run(move(start(), -3), ...typed('5')).entry).toBe('5');
-    s = run(start(), { type: 'path', value: 'guess' }, ...typed('2'));
+    s = run(start(), ...typed('2'));
     expect(s.entry).toBe('2');
   });
   it('catches zeroing the side without x: shown, Undo, the blank is cleared, the number next to x is highlighted', () => {
@@ -128,12 +117,12 @@ describe('undo and the wrong-move handling', () => {
     expect(s.lights).toEqual({ fewer: 'off', solved: 'off' });
     expect(run(move(start(), -3), { type: 'undo' }).feedback.key).toBe('aUndone');
   });
-  it('three reds in a row offer Start over (back to the choice) and point to I\'m stuck', () => {
+  it('three reds in a row offer Start over and point to I\'m stuck', () => {
     let s = start();
     for (let i = 0; i < 3; i++) s = move(s, 3);
     expect([s.reds, s.startOver, s.feedback.key]).toEqual([3, true, 'aRed3']);
     s = run(s, { type: 'startOver' });
-    expect([boardText(s.board), s.startOver, s.path, s.feedback.key, s.rows.length]).toEqual(['x + 3 = −6', false, null, 'aChoose', 1]);
+    expect([boardText(s.board), s.startOver, s.feedback.key, s.rows.length]).toEqual(['x + 3 = −6', false, 'aStartedOver', 1]);
   });
   it('a good move in between starts the count again', () => {
     let s = move(move(start(), 3), 3);
@@ -159,13 +148,13 @@ describe('plugging a typed value back in: a line a click', () => {
     expect(run(s, { type: 'nextLine' })).toBe(s);
   });
   it('a right guess is the same: no walkthrough, the next problem is owed a move', () => {
-    let s = answer(run(start(), { type: 'path', value: 'guess' }), '−9');
+    let s = answer(run(start()), '−9');
     expect([s.sub.kind, s.sub.ok, s.feedback.key]).toEqual(['guess', true, 'aPlugIn']);
     s = clickThrough(s);
     expect([s.stage, owesMove(s)]).toEqual(['done', true]);
   });
   it('a wrong guess: named, equations a click at a time, Not balanced on its own line, then Undo takes it back to the move', () => {
-    let s = answer(run(start(), { type: 'path', value: 'guess' }), '5');
+    let s = answer(start(), '5');
     expect([s.feedback.key, s.sub.typed, s.sub.step, s.sub.lines.length, s.wrongs, s.stuck]).toEqual(['aGuessed', 5, 0, 2, 1, 0]);
     expect(s.feedback.params.typed).toBe('5');
     expect(run(s, { type: 'undo' })).toBe(s);                                              // Undo only once the substitution is shown
@@ -175,7 +164,7 @@ describe('plugging a typed value back in: a line a click', () => {
     expect([s.sub.step, s.feedback.key]).toEqual([3, 'aUndoGuess']);
     expect(run(s, { type: 'nextLine' })).toBe(s);
     s = run(s, { type: 'undo' });
-    expect([s.sub, s.path, s.feedback.key, s.stuck, s.history.length, s.entry]).toEqual([null, 'move', 'aSimplerFirst', 0, 0, '']);
+    expect([s.sub, s.feedback.key, s.stuck, s.history.length, s.entry]).toEqual([null, 'aSimplerFirst', 0, 0, '']);
     s = run(s, { type: 'choose', move: 'add' });
     expect(s.menu).toBe('add');                                                            // the move is open as usual
   });
@@ -198,10 +187,10 @@ describe('plugging a typed value back in: a line a click', () => {
     expect([s.sub.ok, s.sub.step]).toEqual([true, 0]);
     expect(clickThrough(s).stage).toBe('done');
   });
-  it('help from the guess path moves the problem to the move path', () => {
-    const g = run(start(), { type: 'path', value: 'guess' }, ...typed('4'));
+  it('help after a value is typed opens the scaffold as usual', () => {
+    const g = run(start(), ...typed('4'));
     const s = run(g, { type: 'stuck' }, { type: 'stuck' });
-    expect([s.path, s.entry, s.scaffold, s.stuck]).toEqual(['move', '', true, 2]);
+    expect([s.scaffold, s.stuck]).toEqual([true, 2]);
     expect(run(answer(g, '4'), { type: 'stuck' }).stuck).toBe(0);                          // not while the lines are being clicked through
   });
   it('a move shows its work line: the added amount on both sides, x\'s numbers struck as they combine', () => {
@@ -211,14 +200,14 @@ describe('plugging a typed value back in: a line a click', () => {
     expect(run(s, { type: 'undo' }).work).toBeNull();
   });
   it('reads unreadable answers', () => {
-    expect(run(start(), { type: 'path', value: 'guess' }, { type: 'check' }).feedback.key).toBe('typeAnswer');
+    expect(run(start(), { type: 'check' }).feedback.key).toBe('typeAnswer');
   });
 });
 
 describe('I\'m stuck and Teach me bring in the scaffold, one rung at a time', () => {
   it('the first I\'m stuck is only a reminder: the number next to x outlined, "what would we add to eliminate it?", the Add blank open, no model', () => {
     const s = run(start(), { type: 'stuck' });
-    expect([s.scaffold, s.stuck, s.menu, s.path, s.feedback.key, s.feedback.params.constant]).toEqual([false, 1, 'add', 'move', 'aStuckHint', '+3']);
+    expect([s.scaffold, s.stuck, s.menu, s.feedback.key, s.feedback.params.constant]).toEqual([false, 1, 'add', 'aStuckHint', '+3']);
     expect(s.hint).toEqual({ kind: 'cancel', id: s.board.left.find((t) => t.kind === 'num').id });
     expect(run(s, ...typed('2')).hint).toBeNull();                                         // the outline goes once they start typing
     expect(run(move(start(), -3), { type: 'stuck' }).scaffold).toBe(false);                // x alone: just "work out what x is"
@@ -274,10 +263,9 @@ describe('I\'m stuck and Teach me bring in the scaffold, one rung at a time', ()
     s = run(s, { type: 'kind', value: 'party' });
     expect([boardText(s.board), s.combining, s.feedback.key, s.hint.kind]).toEqual(['x = −6 + −3', null, 'aKindRight', 'sum']);   // never writes x = −9
   });
-  it('while x is not alone the answer row stays greyed, scaffold or not', () => {
+  it('in the scaffold the answer row waits until x is alone', () => {
     const s = run(start(), { type: 'stuck' }, { type: 'stuck' });
     expect(run(s, ...typed('5')).entry).toBe('');
-    expect(answerLive(s)).toBe(false);
   });
   it('Teach me: the scaffold on a forced path, only the right amount, and it counts as a Teach me', () => {
     let s = run(start(), { type: 'teach' });
@@ -298,7 +286,7 @@ describe('I\'m stuck and Teach me bring in the scaffold, one rung at a time', ()
     s = run(s, { type: 'stuck' });
     expect([s.scaffold, s.feedback.key, s.feedback.params.sum, s.feedback.params.level, s.hint.kind, s.hint.ids.length]).toEqual([false, 'aStuckSum', '−6 + −3', 1, 'sum', 2]);
     s = run(s, { type: 'stuck' }, { type: 'stuck' }, { type: 'stuck' });
-    expect([s.scaffold, s.combining, s.feedback.params.level, boardText(s.board), answerLive(s)]).toEqual([false, null, 3, 'x = −6 + −3', true]);
+    expect([s.scaffold, s.combining, s.feedback.params.level, boardText(s.board)]).toEqual([false, null, 3, 'x = −6 + −3']);
     expect(s.supportsShown).toEqual(['hint']);
   });
   it('help while x is alone says to work it out', () => {
@@ -328,8 +316,8 @@ describe('building the equation in the scaffold (L2–L3)', () => {
 
 describe('Trade places (Level 5 on: x on the right)', () => {
   const mirror = () => newAddBoth(P('x+a', 3, 7, true), { level: 5, introTrade: true });
-  it('is pointed out the first time: after Use a move the line says so and Add waits until the sides are traded', () => {
-    let s = run(mirror(), { type: 'path', value: 'move' });
+  it('is pointed out the first time: the line says so from the start and Add waits until the sides are traded', () => {
+    let s = mirror();
     expect([s.feedback.key, tradePending(s), tradeAvailable(s)]).toEqual(['aTradeIntro', true, true]);
     expect(run(s, { type: 'choose', move: 'add' }).feedback.key).toBe('aTradeFirst');
     s = run(s, { type: 'choose', move: 'trade' });
@@ -341,10 +329,10 @@ describe('Trade places (Level 5 on: x on the right)', () => {
     expect(run(s, { type: 'undo' }).board.left.length).toBe(2);
   });
   it('is not offered with x on the left, below Level 5, or in the scaffold; after the first time it is optional', () => {
-    expect(tradeAvailable(run(newAddBoth(P('x+a', 3, 7), { level: 5, introTrade: true }), { type: 'path', value: 'move' }))).toBe(false);
-    expect(tradeAvailable(run(newAddBoth(P('x+a', 3, 7, true), { level: 4 }), { type: 'path', value: 'move' }))).toBe(false);
-    const later = run(newAddBoth(P('x+a', 3, 7, true), { level: 5, introTrade: false }), { type: 'path', value: 'move' });
-    expect([later.feedback.key, tradePending(later), tradeAvailable(later)]).toEqual(['aMovePrompt', false, true]);
+    expect(tradeAvailable(newAddBoth(P('x+a', 3, 7), { level: 5, introTrade: true }))).toBe(false);
+    expect(tradeAvailable(newAddBoth(P('x+a', 3, 7, true), { level: 4 }))).toBe(false);
+    const later = newAddBoth(P('x+a', 3, 7, true), { level: 5, introTrade: false });
+    expect([later.feedback.key, tradePending(later), tradeAvailable(later)]).toEqual(['aFindX', false, true]);
     expect(run(later, { type: 'stuck' }, { type: 'stuck' }).scaffold).toBe(true);
   });
 });

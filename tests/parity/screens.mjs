@@ -22,8 +22,6 @@ async function loadPlaywright() {
 // A state is reached by opening a URL and clicking through. Steps: ['click', selector] or ['type', n].
 const ADD4 = 'pack=add-both&level=4&seed=7';          // x + 8 = −4
 const DIV3 = 'pack=divide-it&level=3&seed=7';          // 5x = −15
-const move = ['click', '[data-action="path"][data-value="move"]'];
-const guess = ['click', '[data-action="path"][data-value="guess"]'];
 const add = (k) => [['click', '[data-action="choose"][data-move="add"]'], ['type', k], ['click', '[data-action="go"]']];
 const take = (n) => [['click', '[data-action="choose"][data-move="fraction"]'], ['click', `[data-action="take"][data-n="${n}"]`]];
 const stuck = ['click', '[data-action="stuck"]'];
@@ -34,36 +32,36 @@ const undo = ['click', '[data-action="undo"]'];
 
 export const STATES = {
   'add-opening': [ADD4, []],
-  'add-helpful-move': [ADD4, [move, ...add(-8)]],
-  'add-red-move': [ADD4, [move, ...add(8)]],
-  'add-partial-move': [ADD4, [move, ...add(-5)]],
+  'add-helpful-move': [ADD4, [...add(-8)]],
+  'add-red-move': [ADD4, [...add(8)]],
+  'add-partial-move': [ADD4, [...add(-5)]],
   'add-stuck-1': [ADD4, [stuck]],
   'add-stuck-2': [ADD4, [stuck, stuck]],
   'add-stuck-3': [ADD4, [stuck, stuck, stuck]],
   'add-stuck-4': [ADD4, [stuck, stuck, stuck, stuck]],
   'add-teach': [ADD4, [teach]],
-  'add-wrong-guess': [ADD4, [guess, ['type', 4], check, next, next, next]],
-  'add-wrong-guess-undone': [ADD4, [guess, ['type', 4], check, next, next, next, undo]],
-  'add-forced-move': [ADD4, [guess, ['type', -12], check, next, next, next, ['click', '[data-action="next"]']]],
-  'add-end': [ADD4, [move, ...add(-8), ['type', -12], check, next, next, next]],
-  'add-partial-stuck-4': [ADD4, [move, ...add(-5), stuck, stuck, stuck, stuck]],
-  'add-partial-teach': [ADD4, [move, ...add(-5), teach]],
-  'add-alone-stuck-1': [ADD4, [move, ...add(-8), stuck]],
-  'add-alone-stuck-2': [ADD4, [move, ...add(-8), stuck, stuck]],
-  'add-alone-stuck-3': [ADD4, [move, ...add(-8), stuck, stuck, stuck]],
-  'add-alone-teach': [ADD4, [move, ...add(-8), teach]],
-  'add-red-stuck': [ADD4, [move, ...add(8), stuck]],
+  'add-wrong-guess': [ADD4, [['type', 4], check, next, next, next]],
+  'add-wrong-guess-undone': [ADD4, [['type', 4], check, next, next, next, undo]],
+  'add-forced-move': [ADD4, [['type', -12], check, next, next, next, ['click', '[data-action="next"]']]],
+  'add-end': [ADD4, [...add(-8), ['type', -12], check, next, next, next]],
+  'add-partial-stuck-4': [ADD4, [...add(-5), stuck, stuck, stuck, stuck]],
+  'add-partial-teach': [ADD4, [...add(-5), teach]],
+  'add-alone-stuck-1': [ADD4, [...add(-8), stuck]],
+  'add-alone-stuck-2': [ADD4, [...add(-8), stuck, stuck]],
+  'add-alone-stuck-3': [ADD4, [...add(-8), stuck, stuck, stuck]],
+  'add-alone-teach': [ADD4, [...add(-8), teach]],
+  'add-red-stuck': [ADD4, [...add(8), stuck]],
   'add-L2-stuck-2': ['pack=add-both&level=2&seed=7', [stuck, stuck]],
   'div-opening': [DIV3, []],
-  'div-helpful-move': [DIV3, [move, ...take(5)]],
-  'div-failed': [DIV3, [move, ...take(2)]],
+  'div-helpful-move': [DIV3, [...take(5)]],
+  'div-failed': [DIV3, [...take(2)]],
   'div-stuck-1': [DIV3, [stuck]],
   'div-stuck-2': [DIV3, [stuck, stuck]],
   'div-teach': [DIV3, [teach]],
-  'div-wrong-guess': [DIV3, [guess, ['type', 4], check, ['click', '[data-action="placeValue"]'], next, next, next, next]],
-  'div-end': [DIV3, [move, ...take(5), ['type', -3], check, ['click', '[data-action="placeValue"]'], next, next, next, next]],
-  'div-failed-stuck': [DIV3, [move, ...take(2), stuck]],
-  'div-alone-stuck-1': [DIV3, [move, ...take(5), stuck]],
+  'div-wrong-guess': [DIV3, [['type', 4], check, ['click', '[data-action="placeValue"]'], next, next, next, next]],
+  'div-end': [DIV3, [...take(5), ['type', -3], check, ['click', '[data-action="placeValue"]'], next, next, next, next]],
+  'div-failed-stuck': [DIV3, [...take(2), stuck]],
+  'div-alone-stuck-1': [DIV3, [...take(5), stuck]],
 };
 
 const FREEZE = '*,*::before,*::after{animation:none!important;transition:none!important;caret-color:transparent!important}';

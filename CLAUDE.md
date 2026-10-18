@@ -11,10 +11,14 @@ Karl is a middle school math teacher and designer, not a developer. He tests by 
    decision. No branch names, commit ids or file paths there (only the links he should click). Details go below, under a line.
 2. **Everything he should test gets a full clickable link and an entry on the test-links page** (`/test-links.html`, built from
    `public/test-links.json`). Finishing a build includes adding or updating its entries there. The page is not linked from the app.
+   It is a change list in three sections: **Live** (on the site for everyone), **Testing** (behind a flag) and **Retired**
+   (deleted); each entry is a name, one plain sentence and, for Live and Testing, its buttons. Karl tells the design chat which
+   Testing items to keep or retire. **Anything Karl says to keep becomes the default and loses its flag. Anything retired is
+   deleted** (its code, tests, styles and links), and its entry moves to Retired.
 3. **He never types an address or picks a level or seed.** Each link carries the card, level, seed, flags and `nosignin=1`. A link
    that needs a fresh student uses `"reset": true`. Note that `level` in a link is the saved level number, which can differ from the
    number on screen (Add to both sides and Divide it: link `level=2` is shown as Level 1).
-4. **Experiments ship behind flags that default off** (like `?ui=lights`, `?layout=tucked`), so they can go to `main` safely and the
+4. **Experiments ship behind flags that default off** (like `?ui=grab`), so they can go to `main` safely and the
    student-facing site doesn't change.
 5. **A change with no flag goes to `main` only after `npm run parity` passes**, and the report says which parity differences were
    intended (listed in `tests/parity/INTENDED-CHANGES.md`).

@@ -14,10 +14,10 @@ const start = () => newLightsSession({ ...makeAddBoth('x+a', 8, 3), logLevel: 2 
 const choose = { type: 'choose', move: 'add' };
 const steps = (s) => run(s, { type: 'nextLine' }, { type: 'nextLine' }, { type: 'nextLine' });
 
-describe('?ui=lights: no Guess x / Use a move choice (idea C)', () => {
+describe('Add to both sides: no Guess x / Use a move choice (idea C)', () => {
   it('opens on "Find x." with x = live and the Add move usable at once', () => {
     const s = start();
-    expect(s.feedback.key).toBe('lxFindX');
+    expect(s.feedback.key).toBe('aFindX');
     expect(lightsAnswerLive(s)).toBe(true);
     expect(run(s, choose).menu).toBe('add');
   });
@@ -51,7 +51,7 @@ describe('?ui=lights: no Guess x / Use a move choice (idea C)', () => {
   });
 });
 
-describe('?ui=lights: the preview and the blank (ideas A and B)', () => {
+describe('Add to both sides: the preview and the blank (ideas A and B)', () => {
   it('the preview is view state only; on touch the first tap previews and the second chooses', () => {
     const s = start();
     const p = run(s, { type: 'ui', patch: { preview: true } });
@@ -71,7 +71,7 @@ describe('?ui=lights: the preview and the blank (ideas A and B)', () => {
     const open = run(start(), choose, ...typed('-8'));
     expect(open.amountEntry).toBe('-8');
     for (const s of [run(open, choose), run(open, { type: 'lxCancel' })]) {
-      expect([s.menu, s.amountEntry, blankOpen(s), s.feedback.key]).toEqual([null, '', false, 'lxFindX']);
+      expect([s.menu, s.amountEntry, blankOpen(s), s.feedback.key]).toEqual([null, '', false, 'aFindX']);
     }
   });
   it('digits go to the open blank first; a tap on x = takes them there', () => {
@@ -127,14 +127,12 @@ describe('?ui=lights: the preview and the blank (ideas A and B)', () => {
   });
 });
 
-describe('?ui=lights: the log', () => {
-  it('a finished problem\'s summary, and typedBeforeMove rides on the card\'s own record only when set', () => {
+describe('Add to both sides: the log', () => {
+  it('a finished problem\'s summary stays on this device; the class-sheet record keeps its fields', () => {
     const s = steps(run(start(), { type: 'ui', patch: { preview: true } }, choose, ...typed('-8'), { type: 'go' }, { type: 'lxNext' }, ...typed('3'), { type: 'check' }));
     expect(s.stage).toBe('done');
     expect(lightsSummary(s)).toMatchObject({ level: 2, previews: 1, previewedBeforeChoose: true, typedBeforeMove: false, sameSignRed: 0, nextPressed: 1, stuck: 0, teach: 0 });
     const meta = { t: 1, pack: 'add-both', level: 2, problem: 'x + 8 = 11' };
-    expect(makeRecord({ ...s, typedBeforeMove: false }, meta).typedBeforeMove).toBe(false);
-    const plain = newAddBoth(makeAddBoth('x+a', 8, 3), { level: 2 });
-    expect('typedBeforeMove' in makeRecord(plain, meta)).toBe(false);
+    expect('typedBeforeMove' in makeRecord({ ...s, typedBeforeMove: false }, meta)).toBe(false);
   });
 });

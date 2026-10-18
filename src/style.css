@@ -3204,72 +3204,10 @@ body {
 /* The equation being checked is named on its own line above the check rows, never over an equation row (brief c, any layout) */
 .lb-subst .lb-checkhead { font: 700 15px 'Lexend', system-ui, sans-serif; color: var(--muted, #555); min-height: 0; }
 
-/* ---------- The tucked layout (pilot, ?layout=tucked; BUILD-BRIEF-DIVIDE-IT-2026-10-12-c) ----------
-   One work column (the original equation pinned on top, the stack, the controls), a slim Why? column, and two things that slide in
-   only on demand: the Moves drawer (from the right) and the counter tray (from the foot of the work column). Same tokens, fonts,
-   buttons and panel look as the rest of the site (the ink border, #fffdf2 panel paper, the 44 px buttons). */
-.mat-wrap:has(.tk-shell) { flex: 1 1 auto; min-height: 0; align-items: stretch; }
-.screen:has(.tk-shell) { max-width: 1320px; }
-.tk-shell { position: relative; width: 100%; height: 100%; min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr) 210px; gap: 14px; }
-.tk-work { min-width: 0; min-height: 0; display: flex; flex-direction: column; gap: 6px; }
-.tk-stack { flex: 1 1 auto; min-height: 120px; overflow-y: auto; overscroll-behavior: contain; }
-.tk-stackin { display: flex; flex-direction: column; align-items: stretch; }
-.tk-shell .lb-rows { min-height: 0; }
-.tk-original { flex: none; }
-.tk-shell .tk-original .lb-rowwrap .lb-eq { font-size: 48px; }
-.tk-drawer .lb-panel .lb-head { display: none; }
-.sv-card.tk-shell .lb-line { min-height: 98px; }
-.tk-shell .lb-subst { min-height: 0; }
-.tk-controls { flex: none; display: flex; flex-direction: column; gap: 6px; }
-.sv-card.tk-shell .lb-line { padding: 6px 16px; }
-.tk-shell .tk-helper { flex-wrap: wrap; justify-content: center; margin-top: 0; padding-top: 6px; }
-.tk-shell .tk-helper .btn-undo { min-height: 40px; }
-.tk-shell .lb-answerrows { display: flex; align-items: center; justify-content: center; gap: 14px; }
-.tk-shell .lb-answerrows .lb-answerrow, .tk-shell .lb-answerrows .lb-checkrow { margin: 0; }
-/* the slim Why? column: light names and states only, the Moves tab at its foot */
-.tk-why { min-height: 0; border: 3px solid var(--ink); border-radius: 16px; padding: 10px 12px; background: #fffdf2; display: flex; flex-direction: column; gap: 8px; }
-.tk-whyhead { font: 800 15px 'Lexend', system-ui, sans-serif; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted, #555); }
-.tk-lights { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
-.tk-lights .ab-goal { font-size: 16px; }
-.tk-lights .tk-light:last-child { margin-top: 6px; padding-top: 10px; border-top: 2px dashed #bdb7a4; font-weight: 800; }
-.tk-movestab { margin-top: auto; width: 100%; font-weight: 800; }
-/* the Moves drawer: over the Why? column and part of the work column */
-.tk-drawer { position: absolute; top: 0; right: 0; bottom: 0; z-index: 5; width: min(470px, 70%); overflow-y: auto; border: 3px solid var(--ink); border-radius: 16px; padding: 8px 12px 12px; background: #fffdf2; box-shadow: -10px 0 24px rgba(0, 0, 0, 0.12); display: flex; flex-direction: column; gap: 8px; }
-.tk-drawer .lb-panel { border: 0; padding: 0; background: none; }
-.tk-drawer .lb-fractionrow { flex-wrap: wrap; }
-.tk-drawerhead, .tk-trayhead { display: flex; align-items: center; justify-content: space-between; font: 800 18px 'Lexend', system-ui, sans-serif; }
-.tk-close { min-width: 44px; font-size: 22px; }
-/* the counter tray: at the foot of the work column; the stack above it shrinks and scrolls, its text never gets smaller */
-.tk-tray { flex: none; height: min(44%, 220px); overflow-y: auto; border: 3px solid var(--ink); border-radius: 16px; padding: 4px 12px 8px; background: #fffdf2; }
-.tk-tray .sv-diagram { min-height: 0; border: 0; padding: 0; }
-.tk-tray .lb-fractionrow { margin: 0; }
-.tk-traytab { align-self: center; flex: none; }
-.tk-drawer:focus, .tk-tray:focus { outline: 3px solid var(--ink); outline-offset: 2px; }
-/* the slides: about 250 ms, and none at all for a student who has asked for less motion */
-.tk-drawer.is-entering { animation: tk-slide-in 0.25s ease-out; }
-.tk-tray.is-entering { animation: tk-slide-up 0.25s ease-out; }
-@keyframes tk-slide-in { from { transform: translateX(100%); } to { transform: none; } }
-@keyframes tk-slide-up { from { transform: translateY(40%); opacity: 0; } to { transform: none; opacity: 1; } }
-@media (prefers-reduced-motion: reduce) { .tk-drawer.is-entering, .tk-tray.is-entering { animation: none; } }
-/* narrow screens: the Why? column becomes a row above the work, and the drawer takes the full width */
-@media (max-width: 900px) {
-  .tk-shell { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); gap: 8px; }
-  .tk-why { order: -1; flex-direction: row; flex-wrap: wrap; align-items: center; padding: 6px 10px; gap: 6px 14px; }
-  .tk-whyhead { display: none; }
-  .tk-lights { flex-direction: row; flex-wrap: wrap; gap: 6px 14px; }
-  .tk-lights .tk-light:last-child { margin: 0; padding: 0; border: 0; }
-  .tk-movestab { margin: 0 0 0 auto; width: auto; }
-  .tk-drawer { width: 100%; }
-}
-.tk-tray .gd-svg { max-height: 150px; }
-.tk-tray .tk-trayhead { font-size: 16px; }
-.tk-tray .tk-close { min-height: 40px; }
-/* the classic Divide it screen has no spare line under its stack (at 1366×768 the label's line pushes the pad 17 px off the screen,
-   and beside the check rows it overlaps them), so there the outlined row and the line's words ("into the original equation") name the
-   equation, and the label shows only in the tucked layout */
-.sv-card:not(.tk-shell) .lb-subst .lb-checkhead { display: none; }
+/* the check rows' "which equation" label: the outlined row and the line's words name the equation instead */
+.sv-card .lb-subst .lb-checkhead { display: none; }
 
-/* ---------- ?ui=lights: the "Lights" experiment on Add to both sides, L2–L3 (SPEC-LIGHTS-EXPERIMENT-ADD.md). Scoped to .ui-lights. ---------- */
+/* ---------- Add to both sides: the lights layout (SPEC-LIGHTS-EXPERIMENT-ADD.md, round 1; the default since Build C). Scoped to .ui-lights. ---------- */
 .ui-lights.lb-game { gap: 8px; }
 .ui-lights .lb-line { min-height: 72px; padding: 8px 16px; }
 .ui-lights .lb-text { font-size: 24px; }
@@ -3337,63 +3275,69 @@ body {
 .ui-lights .lx-boxwrap { position: relative; display: inline-flex; }
 .ui-lights .lx-boxwrap .lx-apply { position: absolute; top: calc(100% + 6px); left: 50%; transform: translateX(-50%); margin: 0; z-index: 2; }
 
-/* ---------- ?ui=lights, round 2 (SPEC-LIGHTS-EXPERIMENT-ADD-rev02.md): the narrow panel, the line in front of "=", grabbing terms ---------- */
-/* A2: the dashed centre line is drawn in front of the "=" (it is the drop line) */
-.ui-lights .lb-border::before { z-index: 2; }
-.ui-lights .lb-equals { background: transparent; z-index: 1; }
-/* A3: the panel is only as wide as its narrow moves and their lights */
-.ui-lights .lb-body { grid-template-columns: minmax(0, 1fr) auto; }
-.ui-lights .lx-panel { width: max-content; max-width: 150px; padding: 6px 8px 8px; gap: 6px; }
-.ui-lights .lx-phead { display: flex; justify-content: space-between; gap: 6px; font: 800 11px 'Lexend', system-ui, sans-serif; letter-spacing: 0.05em; text-transform: uppercase; color: var(--muted, #555); padding-bottom: 3px; border-bottom: 2px dashed #bdb7a4; }
-.ui-lights .lx-pgrid { display: grid; grid-template-columns: 66px auto; grid-auto-rows: 44px; gap: 6px 8px; align-items: center; }
-.ui-lights .lx-move { width: 66px; height: 44px; min-height: 0; min-width: 0; padding: 0; display: grid; place-items: center; position: relative; overflow: visible; }
-.ui-lights .lx-move .lb-icon { max-height: 30px; }
-.ui-lights .lx-move.is-ring { box-shadow: 0 0 0 4px #0072b2, 0 0 0 7px #fff, 0 0 0 9px #0072b2; }   /* A1: a ring that stays, and the pulse */
-.ui-lights .lx-dots { display: flex; flex-direction: column; justify-content: center; align-items: flex-start; gap: 3px; }
-.ui-lights .lx-dots.is-row { flex-direction: row; gap: 8px; }
-.ui-lights .lx-dot { position: relative; width: 18px; height: 18px; min-width: 0; min-height: 0; padding: 0; border-radius: 50%; border: 2px solid var(--ink); background: #fff; display: grid; place-items: center; cursor: pointer; font: 800 11px/1 'Lexend', system-ui, sans-serif; color: var(--ink); }
-.ui-lights .lx-pgrid .lx-dots:not(:has(> :nth-child(2))) .lx-dot { width: 22px; height: 22px; font-size: 13px; }
-.ui-lights .lx-dot.is-green { background: #3aa76d; border-color: #1b6e3a; color: #fff; }
-.ui-lights .lx-dot.is-red { background: #d9534f; border-color: #a3281b; color: #fff; }
-.ui-lights .lx-dot.is-neutral { background: #ececec; }
-.ui-lights .lx-dot.is-off { border-style: dashed; border-color: #9a9a9a; background: transparent; }
-.ui-lights .lx-dot.is-flash { animation: sw-pulse 0.9s ease-in-out 3; }
-.ui-lights .lx-dot:focus-visible { outline: 3px solid #0072b2; outline-offset: 2px; }
-/* a light opened in place: a pill with its goal, growing to the left over the moves (one at a time) */
-.ui-lights .lx-pill { display: none; }
-.ui-lights .lx-dot.is-open { z-index: 40; }
-.ui-lights .lx-dot.is-open .lx-pill { display: flex; align-items: center; gap: 6px; position: absolute; right: -6px; top: 50%; transform: translateY(-50%); white-space: nowrap; padding: 4px 30px 4px 12px;
-  border: 2px solid var(--ink); border-radius: 999px; background: #fff; color: var(--ink); font: 800 15px 'Lexend', system-ui, sans-serif; box-shadow: 0 3px 10px rgba(0, 0, 0, 0.18); pointer-events: none; z-index: -1; }
-.ui-lights .lx-dot.is-open.is-green .lx-pill { border-color: #1b6e3a; }
-.ui-lights .lx-dot.is-open.is-red .lx-pill { border-color: #a3281b; }
-.ui-lights .lx-hand { display: flex; justify-content: flex-end; padding: 4px 4px 0; border-top: 2px dashed #bdb7a4; }
-.ui-lights .lx-solvedrow { display: flex; align-items: center; justify-content: space-between; gap: 6px; padding-top: 4px; border-top: 2px dashed #bdb7a4; }
-.ui-lights .lx-solvedlabel { font: 800 12px 'Lexend', system-ui, sans-serif; white-space: nowrap; }
-.ui-lights .lx-panel .ab-sub { display: flex; flex-direction: column; gap: 4px; }
-.ui-lights .lx-panel .ab-sub .btn { min-width: 0; padding: 0 6px; font-size: 14px; }
-.ui-lights .lx-move[data-tip]:hover::after, .ui-lights .lx-move[data-tip]:focus-visible::after { right: calc(100% + 10px); }
-/* A1: x = waits for one move, with a one-line note under it */
+/* ---------- Add to both sides (the lights layout, the default since Build C): the forced move ---------- */
+/* x = waits for one move, with a one-line note under it */
 .ui-lights .lx-answer { position: relative; }
 .ui-lights .lx-owednote { position: absolute; left: 50%; top: calc(100% + 2px); transform: translateX(-50%); white-space: nowrap; font: 700 15px 'Lexend', system-ui, sans-serif; color: var(--muted, #555); }
+/* the move needed: a ring that stays, and a pulse around it (never only a pulse that fades) */
+.ui-lights .lb-panel.is-owed .lb-move.is-target { animation: lx-ringpulse 1.2s ease-in-out infinite; outline: 3px solid #0072b2; outline-offset: 3px; box-shadow: none; }
+@keyframes lx-ringpulse { 0%, 100% { box-shadow: 0 0 0 4px rgba(0, 114, 178, 0.55); } 50% { box-shadow: 0 0 0 11px rgba(0, 114, 178, 0); } }
+@media (prefers-reduced-motion: reduce) { .ui-lights .lb-panel.is-owed .lb-move.is-target { animation: none; box-shadow: 0 0 0 4px #0072b2; } }
+
+/* ---------- ?ui=grab: lights round 2 (SPEC-LIGHTS-EXPERIMENT-ADD-rev02.md): the narrow panel, the line in front of "=", grabbing terms ---------- */
+/* A2: the dashed centre line is drawn in front of the "=" (it is the drop line) */
+.ui-grab .lb-border::before { z-index: 2; }
+.ui-grab .lb-equals { background: transparent; z-index: 1; }
+/* A3: the panel is only as wide as its narrow moves and their lights */
+.ui-grab .lb-body { grid-template-columns: minmax(0, 1fr) auto; }
+.ui-grab .lx-panel { width: max-content; max-width: 150px; padding: 6px 8px 8px; gap: 6px; }
+.ui-grab .lx-phead { display: flex; justify-content: space-between; gap: 6px; font: 800 11px 'Lexend', system-ui, sans-serif; letter-spacing: 0.05em; text-transform: uppercase; color: var(--muted, #555); padding-bottom: 3px; border-bottom: 2px dashed #bdb7a4; }
+.ui-grab .lx-pgrid { display: grid; grid-template-columns: 66px auto; grid-auto-rows: 44px; gap: 6px 8px; align-items: center; }
+.ui-grab .lx-move { width: 66px; height: 44px; min-height: 0; min-width: 0; padding: 0; display: grid; place-items: center; position: relative; overflow: visible; }
+.ui-grab .lx-move .lb-icon { max-height: 30px; }
+.ui-grab .lx-move.is-ring { box-shadow: 0 0 0 4px #0072b2, 0 0 0 7px #fff, 0 0 0 9px #0072b2; }   /* A1: a ring that stays, and the pulse */
+.ui-grab .lx-dots { display: flex; flex-direction: column; justify-content: center; align-items: flex-start; gap: 3px; }
+.ui-grab .lx-dots.is-row { flex-direction: row; gap: 8px; }
+.ui-grab .lx-dot { position: relative; width: 18px; height: 18px; min-width: 0; min-height: 0; padding: 0; border-radius: 50%; border: 2px solid var(--ink); background: #fff; display: grid; place-items: center; cursor: pointer; font: 800 11px/1 'Lexend', system-ui, sans-serif; color: var(--ink); }
+.ui-grab .lx-pgrid .lx-dots:not(:has(> :nth-child(2))) .lx-dot { width: 22px; height: 22px; font-size: 13px; }
+.ui-grab .lx-dot.is-green { background: #3aa76d; border-color: #1b6e3a; color: #fff; }
+.ui-grab .lx-dot.is-red { background: #d9534f; border-color: #a3281b; color: #fff; }
+.ui-grab .lx-dot.is-neutral { background: #ececec; }
+.ui-grab .lx-dot.is-off { border-style: dashed; border-color: #9a9a9a; background: transparent; }
+.ui-grab .lx-dot.is-flash { animation: sw-pulse 0.9s ease-in-out 3; }
+.ui-grab .lx-dot:focus-visible { outline: 3px solid #0072b2; outline-offset: 2px; }
+/* a light opened in place: a pill with its goal, growing to the left over the moves (one at a time) */
+.ui-grab .lx-pill { display: none; }
+.ui-grab .lx-dot.is-open { z-index: 40; }
+.ui-grab .lx-dot.is-open .lx-pill { display: flex; align-items: center; gap: 6px; position: absolute; right: -6px; top: 50%; transform: translateY(-50%); white-space: nowrap; padding: 4px 30px 4px 12px;
+  border: 2px solid var(--ink); border-radius: 999px; background: #fff; color: var(--ink); font: 800 15px 'Lexend', system-ui, sans-serif; box-shadow: 0 3px 10px rgba(0, 0, 0, 0.18); pointer-events: none; z-index: -1; }
+.ui-grab .lx-dot.is-open.is-green .lx-pill { border-color: #1b6e3a; }
+.ui-grab .lx-dot.is-open.is-red .lx-pill { border-color: #a3281b; }
+.ui-grab .lx-hand { display: flex; justify-content: flex-end; padding: 4px 4px 0; border-top: 2px dashed #bdb7a4; }
+.ui-grab .lx-solvedrow { display: flex; align-items: center; justify-content: space-between; gap: 6px; padding-top: 4px; border-top: 2px dashed #bdb7a4; }
+.ui-grab .lx-solvedlabel { font: 800 12px 'Lexend', system-ui, sans-serif; white-space: nowrap; }
+.ui-grab .lx-panel .ab-sub { display: flex; flex-direction: column; gap: 4px; }
+.ui-grab .lx-panel .ab-sub .btn { min-width: 0; padding: 0 6px; font-size: 14px; }
+.ui-grab .lx-move[data-tip]:hover::after, .ui-grab .lx-move[data-tip]:focus-visible::after { right: calc(100% + 10px); }
 /* B0: the terms of the newest row are tokens */
-.ui-lights .lx-tok { display: inline-flex; align-items: center; gap: 0.18em; padding: 0 0.12em; border-radius: 10px; touch-action: none; cursor: grab; user-select: none; -webkit-user-select: none; outline-offset: 2px; }
-.ui-lights .lx-tok:hover { background: #eef7fd; }
-.ui-lights .lx-tok:focus-visible { outline: 3px solid #0072b2; }
-.ui-lights .lx-tok.is-hint { outline: 3px solid #0072b2; }
-.ui-lights .lx-tok .lx-op[data-minus], .ui-lights .lx-negsign { cursor: pointer; border-radius: 6px; padding: 0 0.08em; }
-.ui-lights .lx-tok .lx-op[data-minus]:hover, .ui-lights .lx-negsign:hover { background: #fff6b8; }
-.ui-lights .lx-negnum { color: #6b2f8f; border-bottom: 3px solid #6b2f8f; line-height: 1.05; }      /* a negative number, shown on request (B4) */
-.ui-lights .lx-tok.is-lifted, .ui-lights .lx-tok.is-gap { color: transparent; outline: 3px dashed #9a968a; background: none; min-width: 1.4ch; }
-.ui-lights .lx-tok.is-lifted * { color: transparent; border-color: transparent; }
-.ui-lights .lx-tok.is-held { outline: 3px solid #0072b2; background: #fff; box-shadow: 0 6px 14px rgba(0, 0, 0, 0.22); transform: translateY(-14px); }
-.ui-lights .lx-tok.is-crossing { color: #0072b2; }
-.ui-lights .lx-swap { font: 800 0.45em 'Lexend', system-ui, sans-serif; color: #0072b2; margin-left: 0.15em; }
-.ui-lights .lx-tok.is-combine-target { outline: 3px solid #1b6e3a; background: #e3f4ea; }
-.ui-lights .lx-tok.is-drop, .ui-lights .lb-side.is-drop-side { background: #eef7fd; }
-.ui-lights .lb-side.is-drop-side { outline: 3px dashed #0072b2; border-radius: 12px; }
-.ui-lights .lx-tok.is-gap-before { box-shadow: -6px 0 0 -2px #0072b2; }
-.ui-lights .lx-tok.is-gap-after { box-shadow: 6px 0 0 -2px #0072b2; }
-.ui-lights .lx-tok.is-dim { opacity: 0.35; }
+.ui-grab .lx-tok { display: inline-flex; align-items: center; gap: 0.18em; padding: 0 0.12em; border-radius: 10px; touch-action: none; cursor: grab; user-select: none; -webkit-user-select: none; outline-offset: 2px; }
+.ui-grab .lx-tok:hover { background: #eef7fd; }
+.ui-grab .lx-tok:focus-visible { outline: 3px solid #0072b2; }
+.ui-grab .lx-tok.is-hint { outline: 3px solid #0072b2; }
+.ui-grab .lx-tok .lx-op[data-minus], .ui-grab .lx-negsign { cursor: pointer; border-radius: 6px; padding: 0 0.08em; }
+.ui-grab .lx-tok .lx-op[data-minus]:hover, .ui-grab .lx-negsign:hover { background: #fff6b8; }
+.ui-grab .lx-negnum { color: #6b2f8f; border-bottom: 3px solid #6b2f8f; line-height: 1.05; }      /* a negative number, shown on request (B4) */
+.ui-grab .lx-tok.is-lifted, .ui-grab .lx-tok.is-gap { color: transparent; outline: 3px dashed #9a968a; background: none; min-width: 1.4ch; }
+.ui-grab .lx-tok.is-lifted * { color: transparent; border-color: transparent; }
+.ui-grab .lx-tok.is-held { outline: 3px solid #0072b2; background: #fff; box-shadow: 0 6px 14px rgba(0, 0, 0, 0.22); transform: translateY(-14px); }
+.ui-grab .lx-tok.is-crossing { color: #0072b2; }
+.ui-grab .lx-swap { font: 800 0.45em 'Lexend', system-ui, sans-serif; color: #0072b2; margin-left: 0.15em; }
+.ui-grab .lx-tok.is-combine-target { outline: 3px solid #1b6e3a; background: #e3f4ea; }
+.ui-grab .lx-tok.is-drop, .ui-grab .lb-side.is-drop-side { background: #eef7fd; }
+.ui-grab .lb-side.is-drop-side { outline: 3px dashed #0072b2; border-radius: 12px; }
+.ui-grab .lx-tok.is-gap-before { box-shadow: -6px 0 0 -2px #0072b2; }
+.ui-grab .lx-tok.is-gap-after { box-shadow: 6px 0 0 -2px #0072b2; }
+.ui-grab .lx-tok.is-dim { opacity: 0.35; }
 .is-grabbing, .is-grabbing * { cursor: grabbing !important; }
 .lx-dragghost { position: fixed; left: 0; top: 0; z-index: 1000; pointer-events: none; display: inline-flex; align-items: center; gap: 4px; padding: 2px 12px; border: 3px solid var(--ink); border-radius: 12px;
   background: #fff; box-shadow: 0 8px 18px rgba(0, 0, 0, 0.25); font: 700 40px/1.2 'Kalam', 'Lexend', system-ui, sans-serif; color: var(--ink); }
@@ -3401,21 +3345,21 @@ body {
 .lx-dragghost.is-away { opacity: 0.6; }
 .lx-dragghost .lx-swap { font-size: 18px; }
 /* B3: the blank for a sum */
-.ui-lights .lx-box.is-sum { border-style: solid; background: #fff; }
-.ui-lights .lx-box.is-wrong { border-color: #a3281b; color: #a3281b; background: #fbe9e7; }
-.ui-lights .lx-sumeq .lb-side .lb-x, .ui-lights .lx-sumeq .lb-side > .lb-num { color: #9a968a; }
+.ui-grab .lx-box.is-sum { border-style: solid; background: #fff; }
+.ui-grab .lx-box.is-wrong { border-color: #a3281b; color: #a3281b; background: #fbe9e7; }
+.ui-grab .lx-sumeq .lb-side .lb-x, .ui-grab .lx-sumeq .lb-side > .lb-num { color: #9a968a; }
 /* four rows or more (a combine adds one): the rows get a little smaller, so the pad stays on a 1366×650 screen */
-.ui-lights .lb-stack:has(> .lb-rowwrap:nth-child(4)) .lb-rowwrap .lb-eq { font-size: 32px; line-height: 1.1; }
-.ui-lights .lb-stack:has(> .lb-rowwrap:nth-child(4)) .lb-rowwrap.has-work .lb-eq { font-size: 24px; }
-.ui-lights .lb-stack:has(> .lb-rowwrap:nth-child(4)) .lb-side { padding: 2px 6px; }
-.ui-lights .lb-stack:has(> .lb-rowwrap:nth-child(4)) .lx-ghost { min-height: 52px; }
+.ui-grab .lb-stack:has(> .lb-rowwrap:nth-child(4)) .lb-rowwrap .lb-eq { font-size: 32px; line-height: 1.1; }
+.ui-grab .lb-stack:has(> .lb-rowwrap:nth-child(4)) .lb-rowwrap.has-work .lb-eq { font-size: 24px; }
+.ui-grab .lb-stack:has(> .lb-rowwrap:nth-child(4)) .lb-side { padding: 2px 6px; }
+.ui-grab .lb-stack:has(> .lb-rowwrap:nth-child(4)) .lx-ghost { min-height: 52px; }
 /* B6: the products, one blank per term, each with its label above */
-.ui-lights .lx-prod { display: inline-flex; flex-direction: column; align-items: center; gap: 2px; margin-top: -26px; }
-.ui-lights .lx-prodlabel { font: 800 16px 'Lexend', system-ui, sans-serif; color: #0072b2; white-space: nowrap; }
-.ui-lights .lx-prodbox { display: inline-flex; align-items: center; gap: 2px; }
-.ui-lights .lx-ghost.is-products { min-height: 84px; padding-top: 22px; }
-.ui-lights .lx-prodapply { align-self: center; }
-.ui-lights .lx-factor { border-radius: 8px; padding: 0 0.08em; cursor: grab; touch-action: none; }
-.ui-lights .lx-factor:hover { background: #fff6b8; }
-.ui-lights .lx-factor.is-held { outline: 3px solid #0072b2; background: #fff; transform: translateY(-14px); box-shadow: 0 6px 14px rgba(0, 0, 0, 0.22); }
-.ui-lights .lx-paren.is-combine-target { outline: 3px solid #1b6e3a; background: #e3f4ea; border-radius: 10px; }
+.ui-grab .lx-prod { display: inline-flex; flex-direction: column; align-items: center; gap: 2px; margin-top: -26px; }
+.ui-grab .lx-prodlabel { font: 800 16px 'Lexend', system-ui, sans-serif; color: #0072b2; white-space: nowrap; }
+.ui-grab .lx-prodbox { display: inline-flex; align-items: center; gap: 2px; }
+.ui-grab .lx-ghost.is-products { min-height: 84px; padding-top: 22px; }
+.ui-grab .lx-prodapply { align-self: center; }
+.ui-grab .lx-factor { border-radius: 8px; padding: 0 0.08em; cursor: grab; touch-action: none; }
+.ui-grab .lx-factor:hover { background: #fff6b8; }
+.ui-grab .lx-factor.is-held { outline: 3px solid #0072b2; background: #fff; transform: translateY(-14px); box-shadow: 0 6px 14px rgba(0, 0, 0, 0.22); }
+.ui-grab .lx-paren.is-combine-target { outline: 3px solid #1b6e3a; background: #e3f4ea; border-radius: 10px; }

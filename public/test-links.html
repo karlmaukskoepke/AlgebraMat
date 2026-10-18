@@ -4,13 +4,13 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="robots" content="noindex" />
-    <title>The Mat · Test links</title>
+    <title>The Mat · Changes</title>
     <link
       href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;600;700;800&display=swap"
       rel="stylesheet"
     />
-    <!-- Karl's test page: one click opens the app on the right card, level and seed (CLAUDE.md, Working with Karl).
-         Not linked from the app. The links live in test-links.json; every build adds or updates its own. -->
+    <!-- Karl's change list: Live, Testing, Retired. One click opens the app on the right card, level and seed (CLAUDE.md,
+         Working with Karl). Not linked from the app. The entries live in test-links.json; every build adds or updates its own. -->
     <style>
       :root { --ink: #1d1d1d; --muted: #5d6470; --paper: #fff; --line: #d5dee9; --warn: #9a4a00; }
       * { box-sizing: border-box; }
@@ -19,7 +19,11 @@
       h1 { margin: 0; font-weight: 800; font-size: 40px; }
       .intro { margin: 6px 0 24px; color: var(--muted); font-size: 18px; }
       .bar { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-bottom: 8px; }
-      h2 { margin: 36px 0 12px; padding-bottom: 6px; border-bottom: 2px solid var(--line); font-weight: 700; font-size: 26px; }
+      h2 { margin: 40px 0 6px; padding-bottom: 6px; border-bottom: 3px solid var(--ink); font-weight: 800; font-size: 32px; }
+      .section-about { margin: 0 0 8px; color: var(--muted); font-size: 17px; }
+      h3 { margin: 26px 0 4px; font-weight: 700; font-size: 23px; }
+      .about { margin: 0 0 12px; font-size: 18px; }
+      .retired h3 { color: var(--muted); text-decoration: line-through; text-decoration-thickness: 2px; }
       .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 18px; }
       .item { display: flex; flex-direction: column; gap: 8px; }
       .go {
@@ -37,8 +41,8 @@
   </head>
   <body>
     <main>
-      <h1>Test links</h1>
-      <p class="intro">Click a button to open the app already on that screen. Sign-in is skipped. Under each, what to look for.</p>
+      <h1>Changes</h1>
+      <p class="intro"><strong>Live</strong> is on the site for everyone. <strong>Testing</strong> is waiting for you: tell the design chat which to keep (it becomes the normal way, no flag) or retire (it is deleted). <strong>Retired</strong> is gone. Every button opens the app already on that screen, sign-in skipped.</p>
       <div class="bar">
         <button class="go reset" type="button" id="reset">Reset my progress</button>
         <span class="note" id="done" role="status"></span>
@@ -70,23 +74,30 @@
         .then((data) => {
           const root = document.getElementById('groups');
           root.replaceChildren();
-          for (const g of data.groups) {
-            root.append(el('h2', {}, g.title));
-            const grid = el('div', { className: 'grid' });
-            for (const l of g.links) {
-              const href = new URL(l.query, app).href;
-              const a = el('a', { className: 'go', href }, l.label);
-              if (l.reset) a.addEventListener('click', () => resetProgress());   // a fresh student: clear, then open
-              const item = el('div', { className: 'item' });
-              item.append(a);
-              if (l.notLive) item.append(el('p', { className: 'not-live' }, l.notLive));
-              item.append(el('p', { className: 'look' }, (l.reset ? 'Starts fresh. ' : '') + l.look));
-              item.append(el('p', { className: 'url' }, href));
-              grid.append(item);
+          const ABOUT = { Live: 'On the site for every student.', Testing: 'Behind a test switch: students don’t see these.', Retired: 'Deleted from the app.' };
+          for (const sec of data.sections) {
+            const box = el('section', { className: sec.title.toLowerCase() });
+            box.append(el('h2', {}, sec.title), el('p', { className: 'section-about' }, ABOUT[sec.title] ?? ''));
+            for (const item of sec.items) {
+              box.append(el('h3', {}, item.name), el('p', { className: 'about' }, item.about));
+              if (!item.links?.length) continue;
+              const grid = el('div', { className: 'grid' });
+              for (const l of item.links) {
+                const href = new URL(l.query, app).href;
+                const a = el('a', { className: 'go', href }, l.label);
+                if (l.reset) a.addEventListener('click', () => resetProgress());   // a fresh student: clear, then open
+                const cell = el('div', { className: 'item' });
+                cell.append(a);
+                if (l.notLive) cell.append(el('p', { className: 'not-live' }, l.notLive));
+                if (l.look || l.reset) cell.append(el('p', { className: 'look' }, (l.reset ? 'Starts fresh. ' : '') + (l.look ?? '')));
+                cell.append(el('p', { className: 'url' }, href));
+                grid.append(cell);
+              }
+              box.append(grid);
             }
-            root.append(grid);
+            root.append(box);
           }
-          if (data.updated) root.append(el('p', { className: 'note' }, `Links updated ${data.updated}.`));
+          if (data.updated) root.append(el('p', { className: 'note' }, `Updated ${data.updated}.`));
         })
         .catch(() => {
           document.getElementById('groups').replaceChildren(el('p', { className: 'not-live' }, 'The list of links didn’t load. Reload the page.'));

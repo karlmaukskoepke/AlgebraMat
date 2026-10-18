@@ -1,5 +1,4 @@
-// The screen pieces every card of the Solve it loop shares (SPEC-SOLVE-IT-LOOP.md §2-§4): the line with the one choice prompt and its two
-// buttons, the work stack (the equation, each folded move as one row, the current move's work, a failed attempt in red), the
+// The screen pieces every card of the Solve it loop shares (SPEC-SOLVE-IT-LOOP.md §2-§4): the line, the work stack (the equation, each folded move as one row, the current move's work, a failed attempt in red), the
 // x = [▁] row with Check under it and Next beside it, the substitution written a line a click with the step highlighted, the
 // value placed on x by a drag (or a tap), and the help row. A card (view/divideScreen.js, ...) composes these and adds only its own
 // pictures. Cards never draw these themselves. Plain HTML, so every target is a real 44 px and the text can be big.
@@ -8,21 +7,16 @@ import { html, actionRow } from './addBothMat.js';
 import { equationRow } from './lightScreen.js';
 import { MINUS } from '../engine/expr.js';
 import { signed, fractionText, boardText } from '../engine/solveTerms.js';
-import { CHOICE_BUTTONS } from '../engine/solveLoop.js';
 
-// ---------- the line: actions only, one sentence, and the choice ----------
+// ---------- the line: actions only, one sentence ----------
 
 // The operation is blue wherever it shows (loop §3D): on this card, the fractions ½ ⅓ ¼ ⅕ ⅙ in any sentence of the line.
 const FRACTION_GLYPHS = /([½⅓¼⅕⅙])/;
 export const blueFractions = (text) => String(text).split(FRACTION_GLYPHS).map((part) => (FRACTION_GLYPHS.test(part) ? html('span', 'is-blue', [part]) : part));
 
-export function lineBlock(s, textOf, loop) {
+export function lineBlock(s, textOf) {
   const line = html('div', `lb-line${s.feedback?.bad ? ' is-bad' : ''}${s.stage === 'done' ? ' is-good' : ''}`, [], { role: 'status', 'aria-live': 'polite' });
   line.append(html('p', 'lb-text', blueFractions(textOf(s.feedback))));
-  const choosing = s.stage === 'moves' && !s.path && !loop.alone(s) && !s.sub && !s.needUndo;
-  if (choosing) {
-    line.append(html('div', 'lb-linebtns', CHOICE_BUTTONS.map(([label, value]) => html('button', 'btn lb-choice', [label], { type: 'button', 'data-action': 'path', 'data-value': value }))));
-  }
   return line;
 }
 
@@ -180,16 +174,6 @@ export function helpRow(s, loop) {
     return b;
   };
   row.append(mk('I’m stuck', 'stuck', 's'), mk('Teach me step-by-step', 'teach', 't'), mk('Start over', 'startOver', null, { cls: 'btn-quiet', off: done || !loop.startOverOk(s) }));
-  return row;
-}
-
-// The tucked layout's one helper row: I'm stuck, Teach me, Undo, Start over, in that order.
-export function helperRow(s, loop, undoOpts) {
-  const help = helpRow(s, loop);
-  const undo = undoRow(s, undoOpts).querySelector('.btn-undo');
-  const [stuck, teach, startOver] = help.children;
-  const row = html('div', 'lb-helprow tk-helper');
-  row.append(stuck, teach, undo, startOver);
   return row;
 }
 

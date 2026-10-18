@@ -1,4 +1,4 @@
-// Pointer and keyboard for the ?ui=lights screen (SPEC-LIGHTS-EXPERIMENT-ADD.md §2), on top of the card's own dragging
+// Pointer and keyboard for the Add to both sides screen (the lights layout, SPEC-LIGHTS-EXPERIMENT-ADD.md §2), on top of the card's own dragging
 // (addBothPointer.js: a number dragged from the equation into the blank still fills it).
 //   Mouse: hovering the Add icon previews the move; a click chooses it.
 //   Keyboard: Tab onto the Add icon previews it; Enter or Space chooses; Enter applies; Esc cancels. Enter does the first of:
@@ -11,8 +11,8 @@ import { bindGrab } from './lightsGrabPointer.js';
 
 const ADD = '.lb-move[data-move="add"]';
 
-export function bindLightsMat(root, dispatch, getSession) {
-  const unbindGrab = bindGrab(root, dispatch, getSession);            // first: a held term's keys are its own (round 2, B0)
+export function bindLightsMat(root, dispatch, getSession, { grab = false } = {}) {
+  const unbindGrab = grab ? bindGrab(root, dispatch, getSession) : null;   // first: a held term's keys are its own (?ui=grab)
   const unbindDrag = bindAddBothMat(root, dispatch, getSession);
   let pointerType = 'mouse';
   let keyboard = false;          // was the last input a key (so a focus is the keyboard's, not a click's)?
@@ -123,7 +123,7 @@ export function bindLightsMat(root, dispatch, getSession) {
   obs.observe(root, { childList: true });
 
   return () => {
-    unbindGrab();
+    unbindGrab?.();
     unbindDrag?.();
     obs.disconnect();
     document.removeEventListener('pointerdown', onPointerDown, true);

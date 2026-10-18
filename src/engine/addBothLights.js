@@ -1,15 +1,13 @@
-// The "Lights" experiment on Add to both sides (SPEC-LIGHTS-EXPERIMENT-ADD.md, behind ?ui=lights, Levels 2–3 only). A wrapper round
-// the card's own reducer (addBothMoves.js), which runs unchanged: the move still goes through its `go`, Undo through its `undo`.
-// What the wrapper adds:
-//   (A) a preview of the move on the equation: pure view state, `s.ui.preview` (the tuckedLayout.js pattern);
+// How a student works on Add to both sides, every equation level (the "lights" experiment, graduated in Build C, 2026-10-18). A
+// layer round the card's own reducer (addBothMoves.js): the move still goes through its `go`, Undo through its `undo`. It adds:
+//   (A) a preview of the move on the equation on hover: pure view state, `s.ui.preview`;
 //   (B) the amount typed into a blank in that equation row, applied with Enter or ✓, then a rule line and a green Next that commits
 //       the move (Undo no longer reaches it); typing in x = or Check commits it too;
-//   (C) no Guess x / Use a move choice: the engine's `path` is set just in time from "is x alone on the newest row?", so x = [ ] and
-//       the Add move are both live from the first frame.
-// Round 2 (SPEC-LIGHTS-EXPERIMENT-ADD-rev02.md):
-//   (A1) a correct first guess makes the NEXT problem a move (the card's own owesMove): on it x = [ ] is greyed until one move is
-//        committed (Next, or going on without it) or a combine is applied;
-//   (B)  the terms of the newest row can be grabbed (engine/lightsGrab.js): reordered in place (B1), carried across the line (B2: the
+//   (C) the move and x = [ ] both live from the first frame (there is no choice to make);
+//   (D) the forced move: a correct guess makes the NEXT problem a move (the card's own owesMove): on it x = [ ] is greyed and the
+//       move has a steady ring until one move is committed (Next, or going on without it) or a combine is applied.
+// Behind ?ui=grab only (lights round 2, SPEC-LIGHTS-EXPERIMENT-ADD-rev02.md, still being tested):
+//   (E)  the terms of the newest row can be grabbed (engine/lightsGrab.js): reordered in place (B1), carried across the line (B2: the
 //        engine's own `go`, with the amount from the term), dropped on a like term to combine them by typing the sum (B3); a minus can
 //        be shown as a negative number (B4). Reorder, minus and combine are undone here; everything else is the engine's.
 // It also counts what the classroom tests need (`s.lx.log`). No DOM here.
@@ -26,7 +24,7 @@ const sameUi = (a, b) => JSON.stringify(ui(a)) === JSON.stringify(ui(b));
 const say = (s, key, params = {}, bad = false) => { s.feedback = { key, params: { ...(s.feedback?.params ?? {}), ...params }, bad }; return s; };
 
 export function newLightsSession(problem, opts = {}) {
-  const s = newAddBoth(problem, { level: opts.level, forceMove: false });
+  const s = newAddBoth(problem, { level: opts.level, introTrade: opts.introTrade });
   s.allowZero = true;                     // a 0 in the blank is allowed (it simply does not help)
   s.lx = {
     awaitNext: null,                      // the row a just-applied move left, waiting for its Next
@@ -44,7 +42,7 @@ export function newLightsSession(problem, opts = {}) {
     },
   };
   s.ui = { ...UI0 };
-  return say(s, s.lx.forced ? 'lxMustMove' : 'lxFindX');
+  return s.feedback?.key === 'aTradeIntro' ? s : say(s, s.lx.forced ? 'lxMustMove' : 'aFindX');
 }
 
 // Is the bare move open (S2/S3): the blank in the equation row holds the cursor?
@@ -85,8 +83,6 @@ function commit(s, how) {
   return s;
 }
 
-// The engine's path, set just in time: a typed value is a guess while x is not alone on the newest row, a final value once it is.
-const pathFor = (s, answer) => (s.scaffold || !answer ? 'move' : xAlone(s.board) ? 'move' : 'guess');
 
 export function withLights(reduce = reduceAddBoth) {
   const wrapped = (state, action) => {
@@ -110,7 +106,7 @@ export function withLights(reduce = reduceAddBoth) {
       const s = structuredClone(st);
       s.menu = null; s.amountEntry = ''; s.typing = null; s.hint = null;
       s.ui = { ...UI0, focus: 'add' };                              // focus goes back to the Add icon
-      return say(s, moveOwed(s) ? 'lxMustMove' : 'lxFindX');
+      return say(s, moveOwed(s) ? 'lxMustMove' : 'aFindX');
     };
     if (action.type === 'lxCancel') {
       if (ui(state).carry) return withUi(state, { carry: null });
@@ -137,20 +133,16 @@ export function withLights(reduce = reduceAddBoth) {
     if (action.type === 'go' && blankOpen(state) && amountOf(state.amountEntry) === null) return withUi(state, { shake: true, preview: false, focus: 'blank' });
 
     const typingAnswer = isTyping(action) && !amountMode(state);
-    if ((typingAnswer || (action.type === 'focus' && action.target === 'answer')) && moveOwed(state)) return state;   // greyed
+    // greyed while the move is owed; a good move waiting for its Next counts once the student goes on (it is committed below)
+    if ((typingAnswer || (action.type === 'focus' && action.target === 'answer')) && moveOwed(state) && state.lx.awaitNext === null) return state;
 
-    // the input to the engine: the path set just in time, the waiting move committed when the student goes on without Next
+    // the input to the engine: the waiting move committed when the student goes on without Next
     let input = state;
     const prep = () => { if (input === state) input = structuredClone(state); return input; };
     if (state.lx.awaitNext !== null && (typingAnswer || ['check', 'choose', 'stuck', 'teach'].includes(action.type))) {
       commit(prep(), 'implicit');
     }
     if (state.lx.combine && ['stuck', 'teach', 'choose', 'check'].includes(action.type)) prep().lx.combine = null;   // help closes the sum
-    if (!state.sub) {
-      const answer = typingAnswer || action.type === 'check' || (action.type === 'focus' && action.target === 'answer');
-      const path = pathFor(state, answer);
-      if (state.path !== path) prep().path = path;
-    }
 
     const s = reduce(input, action);
     if (s === input) return input;                                  // the engine did nothing (an implicit commit still counts)
@@ -194,7 +186,7 @@ export function withLights(reduce = reduceAddBoth) {
         lx.negIds = [];
         lx.combine = null;
         lx.hand = { fewer: 'off' };
-        say(s, moveOwed(s) ? 'lxMustMove' : 'lxFindX');
+        say(s, moveOwed(s) ? 'lxMustMove' : 'aFindX');
         break;
       case 'stuck':
         lx.log.stuck += 1;
@@ -209,7 +201,7 @@ export function withLights(reduce = reduceAddBoth) {
         break;
     }
     if (typingAnswer && s.entry !== state.entry && lx.moves === 0 && !s.scaffold) lx.log.typedBeforeMove = true;
-    if (s.feedback?.key === 'aChoose') say(s, moveOwed(s) ? 'lxMustMove' : 'lxFindX');
+    if (s.feedback?.key === 'aFindX' && moveOwed(s)) say(s, 'lxMustMove');
     return s;
   };
   return wrapped;
@@ -221,7 +213,7 @@ const closeCombine = (state) => {
   const s = structuredClone(state);
   s.lx.combine = null;
   s.ui = { ...UI0 };
-  return say(s, moveOwed(s) ? 'lxMustMove' : 'lxFindX');
+  return say(s, moveOwed(s) ? 'lxMustMove' : 'aFindX');
 };
 const sumParams = (s) => ({ sum: pairText(s.board, s.lx.combine.a, s.lx.combine.b) });
 
@@ -313,7 +305,7 @@ function grabAction(state, action, wrapped) {
     // the engine's own move, with the amount from the term: the same rows the Add button writes, judged the same way
     const s0 = structuredClone(state);
     if (s0.lx.awaitNext !== null) commit(s0, 'implicit');
-    Object.assign(s0, { path: 'move', menu: 'add', typing: null, amountEntry: String(out.amount), hint: null, ui: { ...UI0 } });
+    Object.assign(s0, { menu: 'add', typing: null, amountEntry: String(out.amount), hint: null, ui: { ...UI0 } });
     const s = wrapped(s0, { type: 'go' });
     if (s.history.length <= s0.history.length) {                      // the engine said no (too big): nothing moves
       const back = logged(structuredClone(state));
@@ -362,7 +354,7 @@ export function lightsSummary(s) {
     t: Date.now(), level: s.problem.logLevel ?? s.level, previews: l.previews, previewedBeforeChoose: l.chosenAfterPreview > 0,
     chosenCold: l.chosenCold, typedBeforeMove: l.typedBeforeMove, sameSignRed: l.sameSignRed,
     nextPressed: l.nextPressed, implicitCommits: l.implicitCommits, stuck: l.stuck, teach: l.teach,
-    guessedRight: s.path === 'guess' && s.stage === 'done', forced: s.lx.forced,
+    guessedRight: s.stage === 'done' && s.sub?.kind === 'guess' && s.sub.ok, forced: s.lx.forced,
     drags: l.drags, outcomes: l.outcomes, minusTaps: l.minusTaps, lightHovers: l.lightHovers, moveHovers: l.moveHovers, sumsWrong: l.sumsWrong,
   };
 }

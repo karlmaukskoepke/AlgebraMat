@@ -1,10 +1,6 @@
-// The controls for Add to both sides, "light build": the "Amount to add" row (only while a move is waiting for its number) and the
-// number pad. The answer row (x = [  ] with Check) lives in the work stack on the Mat and the help row (I'm stuck, Teach me, Start
-// over) sits at the bottom of the equation mat (SPEC-ADD-TO-BOTH-SIDES.md §1, revision 2.3). The pad types into the amount blank
-// while the move is open and into the answer otherwise.
+// The controls for Add to both sides: the number pad. The answer row (x = [  ] with Check) and the help buttons are on the Mat. The pad
+// types into the amount blank while the move is open and into the answer otherwise.
 
-import { MINUS } from '../engine/expr.js';
-import { answerLive } from '../engine/addBothMoves.js';
 
 function button(label, action, extra = {}) {
   const b = document.createElement('button');
@@ -17,8 +13,7 @@ function button(label, action, extra = {}) {
   return b;
 }
 
-// `liveOf`: is the x = [ ] row live? (?ui=lights has its own rule: x = is live from the first frame.)
-export const buildAddBothControls = (root, dispatch) => makeAddBothControls(answerLive)(root, dispatch);
+// `liveOf`: is the x = [ ] row live? (engine/addBothLights.js: from the first frame, unless a move is owed.)
 
 export const makeAddBothControls = (liveOf) => (root, dispatch) => {
   root.innerHTML = '';

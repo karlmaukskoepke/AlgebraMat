@@ -15,7 +15,6 @@ const SLIP = {
 };
 
 const M = {
-  dMovePrompt: () => 'Choose “Take a fraction of both sides”.',
   dPickFraction: () => 'Pick a fraction of both sides. Which one leaves one box?',
   dUndone: () => 'Undone. Pick a different fraction.',
   dForced: (p) => `For this one, take ${p.frac} of both sides.`,

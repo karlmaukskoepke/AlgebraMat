@@ -17,7 +17,7 @@ const stuck = { type: 'stuck' };
 
 // x + 8 = −4 (answer −12); adding −5 leaves x + 3 = −4 + −5
 const start = () => newAddBoth(makeAddBoth('x+a', 8, -12), { level: 4 });
-const partial = () => add(start(), { type: 'path', value: 'move' }, ...addMove(-5));
+const partial = () => add(start(), ...addMove(-5));
 
 // A partial move made inside the seesaw: −5 to both sides, the +8 and −5 beside x combine to +3, the other side stays −4 + −5.
 const scaffoldPartial = () => add(start(), stuck, stuck, { type: 'choose', move: 'add' }, ...type(-5), { type: 'addTo', side: 'left' }, { type: 'addTo', side: 'right' }, { type: 'go' },
@@ -47,7 +47,7 @@ describe('Add: the guided rung and Teach me use the number now next to x', () =>
 });
 
 describe('Add: x alone with two numbers on the other side', () => {
-  const alone = () => add(start(), { type: 'path', value: 'move' }, ...addMove(-8));
+  const alone = () => add(start(), ...addMove(-8));
   it('asks for the sum in words, a bit more each time, with the two numbers outlined and no seesaw', () => {
     let s = add(alone(), stuck);
     expect(s.feedback.key).toBe('aStuckSolved');                                         // rung 0 as before
@@ -79,7 +79,7 @@ describe('Add: Party / Battle never writes the answer', () => {
 
 describe('Undo first', () => {
   it('Add: I\'m stuck after a red move says so, opens nothing, and counts; after Undo the ladder starts again', () => {
-    let s = add(start(), { type: 'path', value: 'move' }, ...addMove(8));
+    let s = add(start(), ...addMove(8));
     s = add(s, stuck);
     expect([s.feedback.key, s.feedback.params.reason, s.scaffold, s.hint, s.stuck, s.supportsShown]).toEqual(['aUndoFirstHelp', 'red', false, null, 1, ['hint']]);
     expect(addBothFeedbackText(s.feedback)).toBe('That move made the equation bigger. Let’s undo it first: press Undo.');
@@ -87,11 +87,11 @@ describe('Undo first', () => {
     expect([boardText(s.board), s.feedback.key, s.stuck]).toEqual(['x + 8 = −4', 'aStuckHint', 2]);   // rung 0 on the restored state
   });
   it('Add: the other side zeroed, and Teach me, give the same first rung', () => {
-    const s = add(start(), { type: 'path', value: 'move' }, ...addMove(4), { type: 'teach' });
+    const s = add(start(), ...addMove(4), { type: 'teach' });
     expect([s.feedback.params.reason, s.taught, s.forced, s.scaffold]).toEqual(['zero', 1, false, false]);
   });
   it('Divide (shared loop): a fraction that does not split, then I\'m stuck, then Undo and I\'m stuck again', () => {
-    let s = div(newDivide(makeDivide(5, -3), { level: 3 }), { type: 'path', value: 'move' }, { type: 'choose', move: 'fraction' }, { type: 'take', n: 2 }, stuck);
+    let s = div(newDivide(makeDivide(5, -3), { level: 3 }), { type: 'choose', move: 'fraction' }, { type: 'take', n: 2 }, stuck);
     expect([s.feedback.key, s.scaffold, s.stuck, s.supportsShown]).toEqual(['aUndoFirstHelp', false, 1, ['hint']]);
     expect(divideFeedbackText(s.feedback)).toBe('That fraction doesn’t split evenly. Let’s undo it first: press Undo.');
     s = div(s, { type: 'undo' }, stuck);

@@ -20,7 +20,6 @@ import { valueLightPlay } from './play/valueLightPlay.js';
 import { solveLightPlay } from './play/solveLightPlay.js';
 import { switchPlay } from './play/switchPlay.js';
 import { addBothPlay } from './play/addBothPlay.js';
-import { addBothLightsPlay } from './play/addBothLightsPlay.js';
 import { distributeDrillPack, distributeDrillPlay } from './play/distributeDrillPlay.js';
 import { divideMovesPlay } from './play/divideMovesPlay.js';
 import { divideNumericPlay } from './play/divideNumericPlay.js';
@@ -64,8 +63,8 @@ const $ = (id) => document.getElementById(id);
 // wrong answer or I'm stuck calls for them, and the card's full walk as the last rung. ?light=0 plays the old
 // step-by-step way instead. (Distribute's typed Rounds 4 and 5 were already typed.)
 const LIGHT = new URLSearchParams(location.search).get('light') !== '0';
-// ?ui=lights: the "Lights" experiment on Add to both sides, Levels 2 and 3 only (SPEC-LIGHTS-EXPERIMENT-ADD.md). Off, nothing changes.
-const UI_LIGHTS = new URLSearchParams(location.search).get('ui') === 'lights';
+// ?ui=grab: lights round 2 on Add to both sides, being tested (grabbing terms; SPEC-LIGHTS-EXPERIMENT-ADD-rev02.md). Off, nothing changes.
+const UI_GRAB = new URLSearchParams(location.search).get('ui') === 'grab';
 const PLAY = {
   combineit: (level) => (level >= 5 ? (LIGHT ? bigLightPlay : bigPlay) : level === 4 ? (LIGHT ? combineIntegerLightPlay : integerPlay)
     : LIGHT ? lightPlay : combinePlay),
@@ -78,11 +77,11 @@ const PLAY = {
   'two-step': solveLightPlay,
   switch: switchPlay,
   'divide-it': (level) => (level === 1 ? divideNumericPlay : divideMovesPlay),   // Level 1 is numeric (no x)
-  'add-both': (level) => (level === 1 ? addBothNumericPlay : UI_LIGHTS && level <= 3 ? addBothLightsPlay : addBothPlay),   // Level 1 is numeric (no x)
+  'add-both': (level) => (level === 1 ? addBothNumericPlay : addBothPlay),   // Level 1 is numeric (no x): "See why it works"
   'distribute-combine': (level) => (level >= 4 ? distributeTypedPlay : LIGHT ? distributeLightPlay : distributePlay),
 };
-// ?ui=lights&drill=distribute: the Distribute drill of the lights experiment (round 2, B6), a hidden pack that exists only with the flag.
-const DRILL = UI_LIGHTS && new URLSearchParams(location.search).get('drill') === 'distribute';
+// ?ui=grab&drill=distribute: the Distribute drill of lights round 2 (B6), a hidden pack that exists only with the flag.
+const DRILL = UI_GRAB && new URLSearchParams(location.search).get('drill') === 'distribute';
 if (DRILL) { HIDDEN_PACKS.push(distributeDrillPack); PLAY[distributeDrillPack.id] = distributeDrillPlay; }
 const adapterFor = (packId, level) => (typeof PLAY[packId] === 'function' ? PLAY[packId](level) : PLAY[packId]);
 const newSeed = () => Math.floor(Math.random() * 2 ** 32);

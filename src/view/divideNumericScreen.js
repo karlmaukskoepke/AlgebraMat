@@ -16,7 +16,6 @@ const SVG_NS = 'http://www.w3.org/2000/svg';
 const svgEl = (name, attrs = {}) => { const n = document.createElementNS(SVG_NS, name); for (const [k, v] of Object.entries(attrs)) n.setAttribute(k, v); return n; };
 const blue = (parts) => parts.map((part) => (part.blue ? html('span', 'is-blue', [part.text]) : part.text));
 const segEls = (segs) => segs.map((seg) => (seg.blue ? html('span', 'is-blue', [seg.text]) : seg.text));
-const alone = { alone: () => false };
 
 // ---------- the work stack: the equation with the fraction in blue, then what each side comes to ----------
 
@@ -137,7 +136,7 @@ function walkDiagram(s) {
 export function renderDivideNumericScreen(s) {
   const wrap = html('div', 'lb-game lb-eqcard sv-card');
   const walking = s.stage === 'walk' || s.walk?.step === 'end';
-  const line = lineBlock({ ...s, path: 'move' }, divideNumericFeedbackText, alone);
+  const line = lineBlock(s, divideNumericFeedbackText);
   if (walking) line.append(html('span', 'lb-walktag', ['Walkthrough']));          // a label on the line's edge, so nothing moves
   wrap.append(line);
   const body = html('div', 'lb-body');

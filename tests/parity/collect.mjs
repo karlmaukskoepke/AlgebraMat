@@ -8,7 +8,8 @@
 import { PACKS, addBoth, divideIt } from '../../src/packs/index.js';
 import { newProgress, completeLevel, encodeProgress, decodeProgress } from '../../src/engine/progress.js';
 import { makeRecord } from '../../src/engine/eventlog.js';
-import { newAddBoth, reduceAddBoth, boardText as addBoardText } from '../../src/engine/addBothMoves.js';
+import { reduceAddBoth, boardText as addBoardText } from '../../src/engine/addBothMoves.js';
+import { newLightsSession, withLights } from '../../src/engine/addBothLights.js';
 import { formatAddBoth } from '../../src/engine/addBoth.js';
 import { newDivide, reduceDivide, boardText as divBoardText } from '../../src/engine/divideMoves.js';
 import { formatDivide } from '../../src/engine/divide.js';
@@ -57,7 +58,7 @@ function savecodes() {
 }
 
 // What a trace keeps of a state: what the student sees and what help is doing, not the engine's bookkeeping.
-const LOOK = ['stage', 'step', 'path', 'menu', 'typing', 'amountEntry', 'entry', 'scaffold', 'rung', 'hint', 'lights', 'reds', 'undoCue', 'zeroOther',
+const LOOK = ['stage', 'step', 'menu', 'typing', 'amountEntry', 'entry', 'scaffold', 'rung', 'hint', 'lights', 'reds', 'undoCue', 'zeroOther',
   'needUndo', 'unfolded', 'forced', 'pending', 'combining', 'diag', 'deal', 'fail', 'pic', 'stuck', 'taught', 'wrongs', 'tags', 'supportsShown'];
 
 function view(s, boardText) {
@@ -84,7 +85,8 @@ function run(scenarios, start, reduce, boardText, pack, format) {
 }
 
 export function collect() {
-  const add = run(ADD_SCENARIOS, newAddBoth, reduceAddBoth, addBoardText, 'add-both', formatAddBoth);
+  // Add to both sides as students play it since Build C: the card's layer (preview, blank, Next, forced move) round the engine
+  const add = run(ADD_SCENARIOS, newLightsSession, withLights(reduceAddBoth), addBoardText, 'add-both', formatAddBoth);
   const div = run(DIVIDE_SCENARIOS, (p, o) => newDivide(p, o), reduceDivide, divBoardText, 'divide-it', formatDivide);
   return {
     problems: problems(),

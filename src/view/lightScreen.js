@@ -1,15 +1,11 @@
-// The Add to both sides screen, "light build" (SPEC-ADD-TO-BOTH-SIDES.md, revision 2.2). Bare: the line (a coloured box, the one
-// place to read, above the equation), the equation with Undo and Go under it, the move list with its Why? boxes, and (in the
-// controls, below) the answer row. The scaffold (the seesaw with the equation as counters, the tray, the two-action move) is
-// drawn only after I'm stuck or Teach me. Whenever the next step is a button, that button is the one highlighted (pulsing).
-// Plain HTML, so every target is a real 44 px and the text can be big.
+// The shared pieces of the Solve it screens (SPEC-ADD-TO-BOTH-SIDES.md, revision 2.2, "light build"): the move list with its pictograms
+// and Why? boxes, the work stack's rows, an equation row, the "Add [  ] to both sides" phrase of the numeric level. (Add to both sides
+// itself is drawn by view/lightsScreen.js since Build C.) Plain HTML, so every target is a real 44 px and the text can be big.
 
 import { MINUS } from '../engine/expr.js';
 import { signed } from '../engine/addBoth.js';
 import { fractionText } from '../engine/divide.js';
-import { xSideOf, answerLive, helpOk, tradeAvailable, tradePending } from '../engine/addBothMoves.js';
-import { addBothFeedbackText } from './addBothFeedback.js';
-import { boardBlock, trayFor, html, actionRow } from './addBothMat.js';
+import { html } from './addBothMat.js';
 
 const btn = (label, action, cls = 'btn', data = {}) => html('button', cls, [label], { type: 'button', 'data-action': action, ...Object.fromEntries(Object.entries(data).map(([k, v]) => [`data-${k}`, v])) });
 
@@ -71,18 +67,6 @@ export function addPhrase(s) {
   const row = html('div', `lb-addphrase${on ? '' : ' is-hidden'}`, [html('strong', '', ['Add']), blank, html('strong', '', ['to both sides'])]);
   if (!on) row.setAttribute('aria-hidden', 'true');
   return row;
-}
-
-export const validAmount = (entry) => /^-?\d+$/.test(entry ?? '') && Number(entry) !== 0;
-
-// ---------- the line ----------
-
-export function lineBlock(s, textOf = addBothFeedbackText) {
-  const line = html('div', `lb-line${s.feedback?.bad ? ' is-bad' : ''}${s.stage === 'done' ? ' is-good' : ''}`, [], { role: 'status', 'aria-live': 'polite' });
-  line.append(html('p', 'lb-text', [textOf(s.feedback)]));
-  const atStart = s.stage === 'moves' && !s.scaffold && !s.path;
-  if (atStart) line.append(html('div', 'lb-linebtns', [btn('Guess x', 'path', 'btn lb-choice', { value: 'guess' }), btn('Use a move', 'path', 'btn lb-choice', { value: 'move' })]));
-  return line;
 }
 
 // ---------- the bare equation ----------
@@ -167,80 +151,6 @@ export function stackRows(s) {
   });
 }
 
-// "x = [ ▁ ]  Check ✓", the substitution under it (a line a click, then the mark), and the green Next. Used on the bare screen and
-// after the scaffold (it ends with the pad).
-export function answerBlock(s, liveOf = answerLive) {
-  const block = html('div', 'lb-answerblock');
-  const done = s.stage === 'done';
-  const counting = s.combining?.step === 'count';
-  const live = liveOf(s);
-  const text = counting ? s.combining.entry : s.sub && !live ? String(s.sub.typed) : s.entry;
-  const ready = live && /^-?\d+$/.test(text);
-  const row = html('div', `lb-answerrow${live ? '' : ' is-dim'}`);
-  row.append(html('strong', 'lb-prompt', ['x =']));
-  const typed = html('button', `ab-typed lb-typed${text ? '' : ' is-empty'}${live && !text ? ' is-blink' : ''}`, [text ? text.replace('-', MINUS) : ' '], { type: 'button', 'data-action': 'focus', 'data-target': 'answer', 'aria-label': 'Your answer for x' });
-  typed.disabled = !live;
-  const check = html('button', `btn lb-check${ready ? ' btn-go is-target' : ' btn-primary'}`, ['Check ✓'], { type: 'button', 'data-action': 'check' });
-  check.disabled = !ready;
-  row.append(typed);
-  // Check sits under the x = row, not beside it, and Next (a line a click, then the next problem) sits right next to it
-  const next = nextButton(s);
-  block.append(row, html('div', 'lb-checkrow', next ? [check, next] : [check]));
-
-  // the substitution: a line a click, then Balanced or Not balanced on its own line
-  if (s.sub) {
-    const shown = s.sub.lines.slice(0, Math.min(s.sub.step, 2));
-    const list = html('ol', 'lb-subst', shown.map((line, i) => html('li', '', i === 0 && s.sub.parts ? s.sub.parts.map((part) => (part.blue ? html('span', 'is-blue', [part.text]) : part.text)) : [line])));
-    if (s.sub.step >= 3) list.append(html('li', s.sub.ok ? 'is-good' : 'is-bad', [s.sub.ok ? '✓ Balanced' : '✗ Not balanced']));
-    block.append(list);
-  } else block.append(html('ol', 'lb-subst'));
-  return block;
-}
-
-// The one green Next: a line a click while the substitution is stepped, "Ready for the next problem" at the end (§3G).
-export function nextButton(s) {
-  const stepping = s.sub && s.sub.step < 3;
-  const done = s.stage === 'done';
-  if (!stepping && !done) return null;
-  const b = html('button', 'btn btn-go is-target lb-next', [done ? 'Next problem ▸' : 'Next ▸'], { type: 'button', 'data-action': done ? 'next' : 'nextLine' });
-  return b;
-}
-
-// The help row (§1 item 5): permanent, always in the same place; whatever is not an option is greyed.
-export function helpRow(s, helpOkOf = helpOk) {
-  const done = s.stage === 'done';
-  const off = done || (s.stage === 'build' && s.scaffold) || !helpOkOf(s);
-  const row = html('div', 'lb-helprow');
-  const mk = (label, action, key, extra = {}) => {
-    const b = html('button', `btn ${extra.cls ?? ''}`.trim(), [label], { type: 'button', 'data-action': action, ...(key ? { 'data-key': key } : {}) });
-    b.disabled = extra.off ?? off;
-    return b;
-  };
-  row.append(mk('I’m stuck', 'stuck', 's'), mk('Teach me step-by-step', 'teach', 't'), mk('Start over', 'startOver', null, { cls: 'btn-quiet', off: done || !s.startOver }));
-  return row;
-}
-
-function bareBlock(s) {
-  const block = html('div', 'lb-eqblock');
-  block.append(html('div', 'lb-stack', [...stackRows(s), answerBlock(s)]));
-  const done = s.stage === 'done';
-  const row = actionRow({
-    undo: true,
-    go: s.stage === 'moves' && s.menu === 'add' && !s.sub ? 'Go ▶' : null,
-    goAction: 'go',
-    goDisabled: !validAmount(s.amountEntry),
-  });
-  const go = row.querySelector('.btn-go');
-  const undo = row.querySelector('.btn-undo');
-  const wrongGuess = s.sub?.kind === 'guess' && !s.sub.ok && s.sub.step >= 3;
-  undo.disabled = done || !((s.history.length > 0 && !s.sub) || wrongGuess);
-  // the one next place to click is the one highlighted
-  if (go && validAmount(s.amountEntry)) go.classList.add('is-target');
-  if (!undo.disabled && (s.undoCue || wrongGuess)) undo.classList.add('is-target');
-  block.append(addPhrase(s), row);
-  return block;
-}
-
 // ---------- the move panel ----------
 
 export function checkbox(state) {
@@ -262,7 +172,7 @@ const WHYS = [
 // locked, lights: { fewer, solved }, off (draw the boxes as not yet available), flash, target (point at Add), sub }.
 export function movePanel(o) {
   const panel = html('aside', 'lb-panel', [], { 'aria-label': 'Moves' });
-  panel.append(html('div', 'lb-head', o.noWhys ? [html('span', '', ['Move'])] : [html('span', '', ['Move']), html('span', '', ['Why?'])]));
+  panel.append(html('div', 'lb-head', [html('span', '', ['Move']), html('span', '', ['Why?'])]));
   const grid = html('div', 'lb-grid');
   const fewer = o.off ? 'off' : o.lights.fewer;
   MOVES.forEach(([id, label], i) => {
@@ -282,8 +192,7 @@ export function movePanel(o) {
   });
   // each group of Why? boxes sits centred beside the moves it goes with. Only the lights a card judges show a state; the rest stay
   // faint outlines.
-  // the tucked layout shows the lights in its own Why? column, so its Moves drawer leaves the boxes out (`noWhys`)
-  for (const g of o.noWhys ? [] : WHYS) {
+  for (const g of WHYS) {
     const items = g.boxes.map(([key, name]) => {
       const state = o.whys?.[key] ?? (key === 'fewer' ? fewer : 'off');   // a light this card doesn't judge stays off (Build A)
       return html('li', `ab-goal is-${state}${key === 'fewer' && o.flash ? ' is-flash' : ''}`, [checkbox(state), html('span', 'ab-goal-label', [name])]);
@@ -292,46 +201,7 @@ export function movePanel(o) {
   }
   panel.append(grid);
   const solved = o.off ? 'off' : o.lights.solved;
-  if (!o.noWhys) panel.append(html('div', 'lb-row lb-solved', [html('span', 'lb-solved-label', ['Solved for x']), html('ul', 'ab-goals', [html('li', `ab-goal is-${solved}`, [checkbox(solved)])])]));
+  panel.append(html('div', 'lb-row lb-solved', [html('span', 'lb-solved-label', ['Solved for x']), html('ul', 'ab-goals', [html('li', `ab-goal is-${solved}`, [checkbox(solved)])])]));
   if (o.sub) panel.append(o.sub);
   return panel;
-}
-
-function panelBlock(s) {
-  const building = s.stage === 'build';
-  let sub = null;
-  // the scaffold's combining ritual
-  if (s.combining) {
-    sub = html('div', 'ab-sub');
-    if (s.combining.step === 'kind') {
-      sub.append(btn('Party!', 'kind', 'btn btn-party', { value: 'party' }), btn('Battle!', 'kind', 'btn btn-battle', { value: 'battle' }));
-    }
-  }
-  return movePanel({
-    menu: s.menu, typing: s.typing, amountEntry: s.amountEntry, path: s.path,
-    disabled: building || s.stage === 'done' || Boolean(s.combining) || Boolean(s.pending) || Boolean(s.sub),
-    locked: !s.scaffold && s.stage === 'moves' && (s.path !== 'move' || tradePending(s)),   // before the choice, on the guess path, and until Trade places is clicked
-    tradeOn: tradeAvailable(s), tradeTarget: tradePending(s),
-    target: s.path === 'move' && !tradePending(s) && !s.menu && !s.combining && !s.resolving && s.lights.solved !== 'green' && !s.undoCue && !s.sub && s.stage === 'moves' && !s.hint,
-    lights: s.lights, off: building, flash: ['red', 'neutral'].includes(s.lights.fewer) && s.history.length > 0, sub,
-  });
-}
-
-export function renderLightScreen(s) {
-  const wrap = html('div', 'lb-game lb-eqcard');
-  wrap.append(lineBlock(s));
-  const body = html('div', 'lb-body');
-  const main = html('div', 'lb-main');
-  if (s.scaffold) {
-    main.append(boardBlock(s));
-    const tray = trayFor(s);
-    if (tray) main.append(tray);
-    if (s.stage !== 'build') {
-      main.append(answerBlock(s));
-    }
-  } else main.append(bareBlock(s));
-  main.append(helpRow(s));
-  body.append(main, panelBlock(s));
-  wrap.append(body);
-  return wrap;
 }

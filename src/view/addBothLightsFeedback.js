@@ -4,10 +4,9 @@
 import { addBothFeedbackText } from './addBothFeedback.js';
 
 const LX = {
-  lxFindX: () => 'Find x.',
   lxShowMove: () => 'Nice. Now show it with a move.',
   // round 2 (SPEC-LIGHTS-EXPERIMENT-ADD-rev02.md)
-  lxMustMove: () => 'Show this one with a move: use Add, or drag the number across the line.',
+  lxMustMove: () => 'Show this one with a move first.',
   lxXCross: () => 'That moves x. Try the number.',
   lxCombineAsk: (p) => (p.x ? `What is ${p.sum}? Type the number in front of x.` : `What is ${p.sum}? Type it in the box.`),
   lxCombineWrong: (p) => `${p.sum} is not ${String(p.typed).replace('-', '−')}. Try the sum again, or Undo.`,

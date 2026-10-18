@@ -1,11 +1,12 @@
 // The Solve it loop (SPEC-SOLVE-IT-LOOP.md), built once. Every card configures it and never re-implements it. The loop owns:
-//   - the choice at every state where x is not alone (guess x, or use a move), and the greyed-out rules that follow;
+//   - the moves and the x = [ ] row, both live at every state (there is no choice to make: Build C, 2026-10-18); a value typed
+//     while x is not alone is a guess;
 //   - guesses and the final value: the substitution (the value placed on x, then worked out an operation at a time, a click a
 //     line), a wrong guess checked in the CURRENT equation, a wrong value or a correct answer in the ORIGINAL one;
-//   - the forced-move rule (a correct guess at the first state, with no move made, forces the next problem to be a move);
-//   - committing a move: a helpful move writes the new equation and the choice returns at once, with the same prompt; the move
-//     folds to one row the moment the student acts on the choice (guess, move, or help), and Undo reaches only an unfolded
-//     move, returning to the same state with the choice showing; an unhelpful move waits for Undo;
+//   - the forced-move rule (a correct guess at the first state, with no move made, makes the next problem a move: its x = [ ]
+//     is greyed until one helpful move is made);
+//   - committing a move: a helpful move writes the new equation; the move folds to one row the moment the student goes on (a
+//     guess, another move, or help), and Undo reaches only an unfolded move; an unhelpful move waits for Undo;
 //   - Undo (only the current, unfolded move), Start over (always live except on the untouched original), the help ladder
 //     (rungs restart at each state), the stuck count, and the answer row's rules.
 // A card (Add to both sides, Divide it, Flip it, ...) is a config: its board, its moves (`reduce`), its lights, its slips and
@@ -28,13 +29,8 @@ import { signed, substitutionLines, boardText } from './solveTerms.js';
 //   rungs              [reminder, model, choose, guided]: each (s, api) => s, the n-th ask in a state
 //   teach(s, api)      Teach me: the scaffold on a forced path
 //   answerBlocked(s)   something of the card's is open that holds the typing row back (an amount, a pending deal)
-//   answerOpen(s)      the card lets the typing row be live although x is not alone (a reminder scaffold, a diagram)
 //   nextNeeded(s)      after a wrong guess is undone: mark the next needed move
 //   waitingForUndo(s)  a try of the card's own waits for Undo outside `needUndo` (Divide's failed fraction); undoReason(s) says why
-// The choice prompt: one string for every card and every state (loop §1A). No state may reword it.
-export const CHOICE_PROMPT = 'Would you like to guess the solution (the value of x), or use a move to make the problem simpler?';
-export const CHOICE_BUTTONS = [['Guess x', 'guess'], ['Use a move', 'move']];
-
 // I'm stuck or Teach me while a move waits for Undo (Build A): the first rung is one sentence saying what happened, with Undo the
 // one highlighted target, and no other help opens. It counts as the click it was, and the class sheet records it as a reminder
 // ('hint'). Used by every card on the loop, and by Add to both sides, which is not on the loop yet.
@@ -51,13 +47,13 @@ export function createSolveLoop(card) {
   function newSession(problem, { level = 2, forceMove = false, ...opts } = {}) {
     const board = card.startBoard(problem);
     const s = {
-      problem, level, stage: 'moves', step: 'moves', path: forceMove ? 'move' : null, mustMove: forceMove,
+      problem, level, stage: 'moves', step: 'moves', mustMove: forceMove, movedOnce: false,
       board, base: board, rows: [{ type: 'eq', board }], moveStart: 1, history: [], menu: null, typing: null, entry: '', sub: null,
       lights: card.noLights(), reds: 0, hint: null, rung: 0, scaffold: false, forced: false, unfolded: false, foldLabel: '', needUndo: false,
       stuck: 0, taught: 0, wrongs: 0, tag: null, tags: [], answers: [], helped: false, clean: false, skipped: [], supportsShown: [],
       guessedFirst: false, finalText: null, feedback: null, ...card.extra(problem, { level, ...opts }),
     };
-    return say(s, forceMove ? (card.mustMoveKey?.(s) ?? 'aMustMove') : 'aChoose');
+    return say(s, forceMove ? (card.mustMoveKey?.(s) ?? 'aMustMove') : 'aFindX');
   }
 
   const snapshot = (s) => ({ board: s.board, rows: [...s.rows], lights: s.lights, reds: s.reds, menu: s.menu, hint: s.hint, unfolded: false, needUndo: false, ...card.snapshotExtra(s) });
@@ -66,26 +62,27 @@ export function createSolveLoop(card) {
 
   // The state is bare again: nothing chosen, no scaffold, the ladder back at its first rung. (The stuck count is kept.)
   function bareState(s) {
-    Object.assign(s, { path: s.mustMove && s.rows.length === 1 ? 'move' : null, menu: null, typing: null, hint: null, rung: 0, scaffold: false, forced: false, needUndo: false });
+    Object.assign(s, { menu: null, typing: null, hint: null, rung: 0, scaffold: false, forced: false, needUndo: false });
     card.resetState(s);
     return s;
   }
 
   const alone = (s) => card.alone(s.board);
   // Has the student done anything on this problem? Start over is greyed on the untouched original.
-  const touched = (s) => s.rows.length > 1 || s.history.length > 0 || s.path !== null || Boolean(s.sub) || s.entry !== '' || s.unfolded || card.touched?.(s) === true;
+  const touched = (s) => s.rows.length > 1 || s.history.length > 0 || s.stuck > 0 || s.taught > 0 || s.scaffold || Boolean(s.sub) || s.entry !== '' || s.unfolded || card.touched?.(s) === true;
   const helpOk = (s) => s.stage !== 'done' && (!s.sub || (s.sub.step >= subTotal(s.sub) && !s.sub.ok));
   const startOverOk = (s) => s.stage !== 'done' && touched(s);
 
-  // Is the x = [ ] row live? Greyed before the choice (while x is not alone), while a move waits for Next or Undo, while a
-  // substitution is stepped, and when the problem is done.
+  // Is the x = [ ] row live? Always, except while a move waits for Undo, while a substitution is stepped, while something of the
+  // card's holds it back, on a forced-move problem until one move is made, and when the problem is done.
   function answerLive(s) {
     if (s.stage === 'done' || s.needUndo) return false;
     if (s.sub) return s.sub.kind === 'value' && s.sub.step >= subTotal(s.sub) && !s.sub.ok;
     if (card.answerBlocked?.(s)) return false;
-    if (s.unfolded) return alone(s);
-    return s.path === 'guess' || alone(s) || card.answerOpen?.(s) === true;
+    return !moveOwed(s);
   }
+  // The problem after a correct guess: shown with a move first.
+  const moveOwed = (s) => Boolean(s.mustMove) && !s.movedOnce && s.stage === 'moves';
 
   // The substitution: lines, then the mark. Collapsed: the first line, then the mark (a wrong value is always full).
   const subTotal = (sub) => (sub.collapsed ? 2 : sub.lines.length + 1);
@@ -103,12 +100,13 @@ export function createSolveLoop(card) {
     s.hint = null;
     s.typing = null;
     if (helpful) {
+      s.movedOnce = true;
       s.reds = 0;
       s.needUndo = false;
       s.scaffold = false;                                                      // the new equation state starts bare
       s.rung = 0;
       s.forced = false;
-      if (!alone(s)) { s.unfolded = true; s.foldLabel = label; s.path = null; } // a new equation state: the choice returns at once; the move folds when it is acted on
+      if (!alone(s)) { s.unfolded = true; s.foldLabel = label; }               // a new equation state: the move folds when the student goes on
     } else {
       s.reds += 1;
       s.needUndo = true;                                                       // an unhelpful move waits for Undo
@@ -119,12 +117,10 @@ export function createSolveLoop(card) {
   // A move (or the card's own try) waits for Undo.
   const waiting = (s) => !s.sub && (s.needUndo || card.waitingForUndo?.(s) === true);
 
-  // A move gets in only on the move path, with nothing waiting on Next or Undo.
+  // A move gets in with nothing waiting on Undo.
   function blockMove(s) {
     if (s.stage !== 'moves' || s.sub) return 'ignore';
     if (s.needUndo) return say(s, 'aUndoFirst', {}, true);
-    if (!s.path) return say(s, 'aChooseFirst', {}, true);
-    if (s.path === 'guess') return say(s, 'aGuessing');
     return null;
   }
 
@@ -137,7 +133,7 @@ export function createSolveLoop(card) {
   }
 
   // The move just made is folded to one row, and nothing before it can be undone: the equation state it led to is the new
-  // starting point. (Acting on the choice, or asking for help, commits it.)
+  // starting point. (Going on, with a guess, another move or help, commits it.)
   function fold(s) {
     s.pic = null;                                                                       // the scaffold picture the move left behind goes with the fold
     if (!s.unfolded) return;
@@ -147,10 +143,9 @@ export function createSolveLoop(card) {
     s.unfolded = false;
   }
 
-  // Help from the guess path moves the state into move mode.
+  // Asking for help clears a finished substitution (the scaffolds are about moves).
   function moveMode(s) {
     s.sub = null;
-    if (s.path !== 'move') { s.path = 'move'; if (!alone(s)) s.entry = ''; s.typing = null; }
   }
 
   const api = { say, commit, pushHistory, snapshot, restore, blockMove, finish, alone, bareState, tryStuck, fold };
@@ -160,7 +155,8 @@ export function createSolveLoop(card) {
     if (state.stage === 'done') return state;
     const s = structuredClone(state);
 
-    // the card's own actions first (its amount typing, its moves, its scaffold's taps)
+    // the card's own actions first (its amount typing, its moves, its scaffold's taps); choosing a move commits the move before it
+    if (action.type === 'choose' && s.unfolded && !s.scaffold) fold(s);
     const mine = card.reduce(s, action, api);
     if (mine === 'ignore') return state;
     if (mine !== undefined) return mine;
@@ -168,22 +164,15 @@ export function createSolveLoop(card) {
     // typing the value: the row must be live; after a wrong value the first key clears the old substitution
     if (isTyping(action)) {
       if (s.sub) { if (!(s.sub.kind === 'value' && s.sub.step >= subTotal(s.sub) && !s.sub.ok)) return state; s.sub = null; }
-      if (!answerLive(s) && !(s.sub === null && (s.path === 'guess' || alone(s) || card.answerOpen?.(s)) && !s.unfolded && !s.needUndo && !card.answerBlocked?.(s))) return state;
+      if (!answerLive(s)) return state;
       const entry = typeInto(s.entry, action, 'integer');
       if (entry === s.entry) return state;
+      fold(s);                                                                              // typing a value commits the move before it
       s.entry = entry;
       return s;
     }
 
     switch (action.type) {
-      case 'path': {
-        if (s.stage !== 'moves' || s.path || alone(s) || s.needUndo) return state;
-        fold(s);                                                                            // acting on the choice commits the move before it
-        s.path = action.value === 'move' ? 'move' : 'guess';
-        if (s.path === 'guess') { s.typing = 'answer'; return say(s, 'aGuessPrompt'); }
-        s.typing = null;
-        return say(s, card.movePromptKey?.(s) ?? 'aMovePrompt');
-      }
       case 'focus':
         if (action.target !== 'answer' && action.target !== 'amount') return state;
         s.typing = action.target;
@@ -236,7 +225,7 @@ export function createSolveLoop(card) {
       case 'foldNext': {
         if (!s.unfolded && !s.pic) return state;
         fold(s);
-        if (!alone(s)) { bareState(s); return say(s, 'aChoose'); }
+        if (!alone(s)) { bareState(s); return say(s, 'aFindX'); }
         return s;
       }
 
@@ -244,7 +233,7 @@ export function createSolveLoop(card) {
       case 'undo': {
         if (s.sub) {
           if (s.sub.kind !== 'guess' || s.sub.ok || s.sub.step < subTotal(s.sub)) return state;
-          s.sub = null; s.entry = ''; s.path = 'move'; s.typing = null;                   // the guess is taken back; the next needed move is pointed at
+          s.sub = null; s.entry = ''; s.typing = null;                                     // the guess is taken back; the next needed move is pointed at
           card.nextNeeded?.(s);
           return say(s, 'aSimplerFirst');
         }
@@ -255,10 +244,10 @@ export function createSolveLoop(card) {
         if (wasWaiting && !wasScaffold) s.rung = 0;                                          // the ladder starts again for this state
         s.needUndo = false;
         s.unfolded = false;
-        if (!wasScaffold) { s.path = null; s.menu = null; }                                 // the same state, with the choice showing again
+        if (!wasScaffold) s.menu = null;                                                    // the same state, as it was
         s.hint = null;
         card.afterUndo?.(s);
-        return say(s, s.path ? (card.undoKey?.(s) ?? 'aUndone') : 'aChoose');                // the same state: the choice showing again
+        return say(s, card.undoKey?.(s) ?? 'aUndone');
       }
 
       // ----- Start over: always live except on the untouched original; wipes the work, keeps the stuck count -----
@@ -266,8 +255,7 @@ export function createSolveLoop(card) {
         if (!startOverOk(s)) return state;
         Object.assign(s, { board: s.base, rows: [{ type: 'eq', board: s.base }], moveStart: 1, history: [], sub: null, entry: '', reds: 0, unfolded: false, lights: card.noLights() });
         bareState(s);
-        s.path = s.mustMove ? 'move' : null;
-        return say(s, s.path ? 'aStartedOver' : 'aChoose');
+        return say(s, 'aStartedOver');
       }
 
       // ----- help -----
@@ -298,7 +286,7 @@ export function createSolveLoop(card) {
     }
   }
 
-  return { newSession, reduce, answerLive, helpOk, startOverOk, subTotal, subView, touched, alone: (s) => card.alone(s.board), owesMove: (s) => Boolean(s.guessedFirst) && s.stage === 'done', api };
+  return { newSession, reduce, answerLive, moveOwed, helpOk, startOverOk, subTotal, subView, touched, alone: (s) => card.alone(s.board), owesMove: (s) => Boolean(s.guessedFirst) && s.stage === 'done', api };
 }
 
 export { boardText };

@@ -78,11 +78,8 @@ const loop = createSolveLoop({
   snapshotExtra: () => ({ fail: null, deal: null, diag: null, pic: null }),
   resetState: (s) => { s.fail = null; s.deal = null; s.diag = null; s.pic = null; },
   collapse: () => false,                                                          // a single-step card: the check never collapses
-  movePromptKey: () => 'dMovePrompt',
   mustMoveKey: () => 'aMustMove',
   undoKey: () => 'dUndone',
-  // with the counters up the student may type the answer at any point, and Check works after any deal (loop §6, rev 1.2)
-  answerOpen: (s) => s.scaffold,
   // a fraction that did not split waits for Undo (or a new try): I'm stuck then says so first (Build A)
   waitingForUndo: (s) => Boolean(s.fail),
   undoReason: () => 'fail',
@@ -222,7 +219,7 @@ function sayDealt(s, d, total) {
 }
 
 // A move that splits both sides is committed: the work row `⅓(3x) = ⅓(−12)` and the new equation. Smaller numbers goes green with it,
-// and One box when x is alone. A partial move leaves the choice (the same prompt) and folds when the student acts on it.
+// and One box when x is alone. A partial move leaves the prompt, and folds when the student goes on.
 function commitFraction(s, n, api, pic = null) {
   const { work, next } = applyFraction(s.board, n);
   api.commit(s, {
@@ -233,7 +230,7 @@ function commitFraction(s, n, api, pic = null) {
   s.deal = null;
   s.diag = null;
   s.pic = pic;                                                                     // what the student made stays on screen until Next folds the move
-  return say(s, xAlone(next) ? 'aSolvedBoard' : 'aChoose');
+  return say(s, xAlone(next) ? 'aSolvedBoard' : 'aFindX');
 }
 
 export const newDivide = (problem, opts = {}) => loop.newSession(problem, { level: opts.level ?? 2, forceMove: opts.forceMove ?? false });

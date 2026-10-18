@@ -3,7 +3,6 @@
 // Parameters: con (the number next to x, with its sign), opp (its opposite), other (the other side), battle (does the
 // opposite meet a number of the other sign?), g1 and g2 (two groups being combined), amount, tilt, heavier, typed.
 
-import { CHOICE_PROMPT } from '../engine/solveLoop.js';
 
 const NOT = (p) => `Put ${p.typed} back in for x and it doesn't balance.`;
 // "−6 + 3" for the number typed and the number next to x
@@ -45,16 +44,12 @@ const M = {
   aBuildOneSign: () => 'A group is all one sign. Tap a counter to take one off first.',
   aBuilt: () => 'That is the equation. Now choose a move.',
   // the first moves
-  aChoose: () => CHOICE_PROMPT,                                        // one string for every card and every state (loop §1A)
-  aGuessPrompt: () => 'Type your guess for x in the x = row, then press Check.',
-  aMovePrompt: () => 'Choose “Add ___ to both sides” in the move list.',
+  aFindX: () => 'Find x.',                                             // the prompt, on every card and at every state (Build C)
   aTradeIntro: () => 'x is on the right. Click “Trade places” to rewrite the equation with x on the left.',
   aTraded: () => 'The same equation with the sides traded: x is on the left now. Choose “Add ___ to both sides”.',
   aTradeFirst: () => 'First click “Trade places” to put x on the left.',
   aTradeNot: () => 'Trade places is for an equation with x on the right.',
   aMustMove: () => 'Let’s try solving this one using a move.',
-  aChooseFirst: () => 'Choose first: guess x, or use a move.',
-  aGuessing: () => 'You’re guessing this one. Type your guess.',
   aLater: () => 'That move unlocks on a later card.',
   aNotNeeded: () => 'You don’t need that move here.',
   aPlace: (p) => `Drag your answer onto the x in the ${p.where === 'current' ? 'current' : 'original'} equation (or tap your answer, then tap the x).`,

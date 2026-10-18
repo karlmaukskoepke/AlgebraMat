@@ -1,10 +1,11 @@
 // The moves behind Add to both sides (SPEC-ADD-TO-BOTH-SIDES.md, revision 2.3 "light build"), as one pure reducer. The
-// equation is a board of terms (an x, and numbers). The BARE card has two paths: guess x (type it), or use a move: type an
-// amount, press Go, and it is added to both sides in one action; the numbers on x's side cancel on their own and the other
+// equation is a board of terms (an x, and numbers). On the BARE card the move is always live and so is x = [ ]: type an
+// amount and apply it, and it is added to both sides in one action; the numbers on x's side cancel on their own and the other
 // side is left as it is, so the value is never shown. The SCAFFOLD (the seesaw, the counters, the two-action move, the
 // combining ritual) only comes in from I'm stuck or Teach me. The lights (Fewer terms, Solved for x) judge each committed
 // move. Every typed value (a guess, or the value once x is alone) is plugged back in, a line a click, ending Balanced or Not
-// balanced; a correct guess makes the next problem a move. The path (guess or move) is chosen at the start and fixed. No DOM here.
+// balanced. A value typed while x is not alone is a guess; a correct guess makes the next problem a move (addBothLights.js holds
+// that problem's rule, and the screen's interaction layer). No DOM here.
 
 import { typeInto, isTyping } from './entry.js';
 import { emptySkills } from './skills.js';
@@ -92,7 +93,7 @@ export function judge(before, after) {
 
 const amountOf = (entry) => (/^-?\d+$/.test(entry) ? Number(entry) : null);
 
-export function newAddBoth(problem, { level = 2, forceMove = false, introTrade = false } = {}) {
+export function newAddBoth(problem, { level = 2, introTrade = false } = {}) {
   const board = startBoard(problem);
   const s = {
     problem, level, tradeIntro: introTrade && level >= TRADE_LEVEL && Boolean(problem.mirror), tradeCount: 0,
@@ -100,7 +101,7 @@ export function newAddBoth(problem, { level = 2, forceMove = false, introTrade =
     scaffold: false,                              // the seesaw, counters and two-action move: only from I'm stuck or Teach me
     built: { constant: 0, other: 0, x: false }, pick: null,
     board, base: board, history: [], resolving: false,
-    menu: null, amountEntry: '', pending: null, typing: null, path: forceMove ? 'move' : null, mustMove: forceMove,
+    menu: null, amountEntry: '', pending: null, typing: null,
     rows: [{ type: 'eq', board }], zeroOther: false,
     leftDelta: 0, rightDelta: 0,
     prevBoard: board, lights: { fewer: 'off', solved: 'off' }, reds: 0,
@@ -111,19 +112,19 @@ export function newAddBoth(problem, { level = 2, forceMove = false, introTrade =
     finalText: null, lastAmount: null,
     feedback: null,
   };
-  return say(s, forceMove ? (tradePending(s) ? 'aTradeIntro' : 'aMustMove') : 'aChoose');
+  return say(s, tradePending(s) ? 'aTradeIntro' : 'aFindX');
 }
 
 // Trade places (swap the two sides) is offered from Level 5, where x can be on the right. The first time it matters it is
 // pointed out and the student has to click it (SPEC-ADD-TO-BOTH-SIDES.md §3A "later cards"; Karl, 2026-10-12).
 export const TRADE_LEVEL = 5;
-export const tradeAvailable = (s) => s.level >= TRADE_LEVEL && !s.scaffold && s.path === 'move' && s.stage === 'moves' && !s.sub && !s.pending && !s.combining
+export const tradeAvailable = (s) => s.level >= TRADE_LEVEL && !s.scaffold && s.stage === 'moves' && !s.sub && !s.pending && !s.combining
   && !s.resolving && xSideOf(s.board) === 'right';
 // The first time, Add waits until the sides have been traded.
 export const tradePending = (s) => Boolean(s.tradeIntro) && s.tradeCount === 0 && tradeAvailable(s);
 
 // A correct guess owes one problem solved with a move (the next one is forced).
-export const owesMove = (s) => s.path === 'guess' && s.stage === 'done';
+export const owesMove = (s) => s.stage === 'done' && s.sub?.kind === 'guess' && s.sub.ok;
 
 // What every message may say about the problem itself: the number next to x, its opposite, the other side.
 const plus = (v) => (v < 0 ? signed(v) : `+${v}`);
@@ -136,8 +137,7 @@ export const balanced = (s) => tilt(s) === 0;
 
 function startOverBoard(s) {
   Object.assign(s, { board: s.base, rows: [{ type: 'eq', board: s.base }], history: [], pending: null, leftDelta: 0, rightDelta: 0, prevBoard: s.base, resolving: false, menu: null, amountEntry: '', typing: null, startOver: false, reds: 0, sub: null, entry: '', zeroOther: false, work: null, undoCue: false, lights: { fewer: 'off', solved: 'off' }, hint: null, combining: null, selected: null, sumAsks: 0 });
-  s.path = s.mustMove || s.scaffold ? 'move' : null;                       // Start over returns to the choice (§9)
-  return say(s, s.path ? 'aStartedOver' : 'aChoose');
+  return say(s, 'aStartedOver');
 }
 
 // A move has been committed (and, in the scaffold, everything that can combine has): judge it and say how it went.
@@ -282,8 +282,8 @@ export function reduceAddBoth(state, action) {
     }
     const amountMode = s.menu === 'add' && s.typing !== 'answer' && (!s.pending || s.pending.second);
     const key = amountMode ? 'amountEntry' : 'entry';
-    // the answer row is greyed until the guess path is chosen, or (on the move path, scaffold included) until x is alone
-    if (key === 'entry' && (!s.path || (s.path === 'move' && !xAlone(s.board)))) return state;
+    // in the scaffold the answer row waits until x is alone (on the bare card it is always live: a value before then is a guess)
+    if (key === 'entry' && s.scaffold && !xAlone(s.board)) return state;
     const entry = typeInto(s[key], action, 'integer');
     if (entry === s[key]) return state;
     s[key] = entry;
@@ -295,14 +295,6 @@ export function reduceAddBoth(state, action) {
   if (s.combining && !['kind', 'crossOff', 'abandon', 'check', 'stuck', 'teach', 'undo'].includes(action.type)) return state;
 
   switch (action.type) {
-    // ----- the choice at the start: guess x, or use a move -----
-    case 'path': {
-      if (s.stage !== 'moves' || s.path) return state;                                       // chosen once, fixed for the problem
-      s.path = action.value === 'move' ? 'move' : 'guess';
-      if (s.path === 'guess') { s.typing = 'answer'; return say(s, 'aGuessPrompt'); }
-      s.typing = null;
-      return say(s, tradePending(s) ? 'aTradeIntro' : 'aMovePrompt');
-    }
     case 'focus': {
       if (action.target !== 'answer' && action.target !== 'amount') return state;
       s.typing = action.target;
@@ -351,7 +343,7 @@ export function reduceAddBoth(state, action) {
     }
     // A number dragged up into the blank of "Add ___ to both sides" fills it (the student still decides its sign).
     case 'setAmount': {
-      if (s.stage !== 'moves' || s.path !== 'move' || s.resolving || (s.pending && !s.pending.second) || s.sub || s.combining || !Number.isInteger(action.value)) return state;
+      if (s.stage !== 'moves' || s.resolving || (s.pending && !s.pending.second) || s.sub || s.combining || !Number.isInteger(action.value)) return state;
       s.menu = 'add';
       s.typing = null;
       s.amountEntry = String(action.value);
@@ -362,8 +354,6 @@ export function reduceAddBoth(state, action) {
     case 'choose': {
       if (s.stage !== 'moves' || s.pending || s.sub) return state;
       if (action.move !== 'add' && action.move !== 'trade') return state;
-      if (!s.path) return say(s, 'aChooseFirst', {}, true);                                  // the path comes first
-      if (s.path === 'guess') return say(s, 'aGuessing');
       if (s.resolving) return say(s, 'aSimplifyFirst', {}, true);
       if (action.move === 'trade') {
         if (!tradeAvailable(s)) return say(s, 'aTradeNot');
@@ -507,7 +497,6 @@ export function reduceAddBoth(state, action) {
         if (s.sub.kind !== 'guess' || s.sub.ok || s.sub.step < 3) return state;
         s.sub = null;
         s.entry = '';
-        s.path = 'move';
         s.typing = null;
         return say(s, 'aSimplerFirst');
       }
@@ -691,20 +680,9 @@ function checkCount(s, applyCombine) {
 
 // Help is offered unless a substitution is being stepped (a wrong one, once finished, may still ask).
 export const helpOk = (s) => !s.sub || (s.sub.step >= 3 && !s.sub.ok);
-// Is the x = [ ] row live (cursor, pad, Check)? Greyed before the path is chosen, on the move path until x is alone, while the
-// move's amount is being typed, while a substitution is stepped, and when the problem is done. The scaffold ends with the pad.
-export function answerLive(s) {
-  if (s.stage === 'done' || s.stage === 'build') return false;
-  if (s.combining) return s.combining.step === 'count';
-  if (s.sub) return s.sub.kind === 'value' && s.sub.step >= 3 && !s.sub.ok;
-  if (s.menu === 'add' && s.typing !== 'answer') return false;
-  return s.path === 'guess' || (s.path === 'move' && xAlone(s.board) && !s.pending && !s.resolving);
-}
-
-// Asking for help from the guess path moves the problem to the move path (the scaffolds are about moves).
+// Asking for help clears a finished substitution (the scaffolds are about moves).
 function moveMode(s) {
   s.sub = null;
-  if (s.path !== 'move') { s.path = 'move'; s.entry = ''; s.typing = null; }
 }
 
 function check(s, applyCombine) {
