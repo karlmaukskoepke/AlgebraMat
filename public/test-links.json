@@ -42,21 +42,61 @@
     {
       "title": "Add to both sides, every level",
       "links": [
-        { "label": "Level 1 · x + a = b", "query": "?pack=add-both&level=2&seed=7&nosignin=1", "look": "Five problems; the first is x + 8 = 11." },
-        { "label": "Level 2 · x − a = b", "query": "?pack=add-both&level=3&seed=7&nosignin=1", "look": "Five problems; the first is x − 4 = −3." },
-        { "label": "Level 3 · both forms", "query": "?pack=add-both&level=4&seed=7&nosignin=1", "look": "A mix; the first is x + 8 = −4." },
-        { "label": "Level 4 · x on the right", "query": "?pack=add-both&level=5&seed=7&nosignin=1", "look": "Some problems have x on the right side; the first is x + 3 = 10." },
-        { "label": "Level 5 · all four forms, bigger", "query": "?pack=add-both&level=6&seed=7&nosignin=1", "look": "Everything mixed, bigger numbers; the first is x − 9 = −13." }
+        {
+          "label": "Level 1 · x + a = b",
+          "query": "?pack=add-both&level=2&seed=7&nosignin=1",
+          "look": "Five problems; the first is x + 8 = 11."
+        },
+        {
+          "label": "Level 2 · x − a = b",
+          "query": "?pack=add-both&level=3&seed=7&nosignin=1",
+          "look": "Five problems; the first is x − 4 = −3."
+        },
+        {
+          "label": "Level 3 · both forms",
+          "query": "?pack=add-both&level=4&seed=7&nosignin=1",
+          "look": "A mix; the first is x + 8 = −4."
+        },
+        {
+          "label": "Level 4 · x on the right",
+          "query": "?pack=add-both&level=5&seed=7&nosignin=1",
+          "look": "Some problems have x on the right side; the first is x + 3 = 10."
+        },
+        {
+          "label": "Level 5 · all four forms, bigger",
+          "query": "?pack=add-both&level=6&seed=7&nosignin=1",
+          "look": "Everything mixed, bigger numbers; the first is x − 9 = −13."
+        }
       ]
     },
     {
       "title": "Divide it, every level",
       "links": [
-        { "label": "Level 1 · a = 2 or 3", "query": "?pack=divide-it&level=2&seed=7&nosignin=1", "look": "Five problems; the first is 3x = 12." },
-        { "label": "Level 2 · a = 2 to 5", "query": "?pack=divide-it&level=3&seed=7&nosignin=1", "look": "The first is 5x = −15." },
-        { "label": "Level 3 · bigger numbers", "query": "?pack=divide-it&level=4&seed=7&nosignin=1", "look": "Bigger numbers; the first two are 3x = 6 and 2x = 30." },
-        { "label": "Level 4 · a = 4 or 6", "query": "?pack=divide-it&level=5&seed=7&nosignin=1", "look": "The number on x is 4 or 6; the first is 4x = 8." },
-        { "label": "Level 5 · all mixed", "query": "?pack=divide-it&level=6&seed=7&nosignin=1", "look": "Everything mixed; the first is 6x = −18." }
+        {
+          "label": "Level 1 · a = 2 or 3",
+          "query": "?pack=divide-it&level=2&seed=7&nosignin=1",
+          "look": "Five problems; the first is 3x = 12."
+        },
+        {
+          "label": "Level 2 · a = 2 to 5",
+          "query": "?pack=divide-it&level=3&seed=7&nosignin=1",
+          "look": "The first is 5x = −15."
+        },
+        {
+          "label": "Level 3 · bigger numbers",
+          "query": "?pack=divide-it&level=4&seed=7&nosignin=1",
+          "look": "Bigger numbers; the first two are 3x = 6 and 2x = 30."
+        },
+        {
+          "label": "Level 4 · a = 4 or 6",
+          "query": "?pack=divide-it&level=5&seed=7&nosignin=1",
+          "look": "The number on x is 4 or 6; the first is 4x = 8."
+        },
+        {
+          "label": "Level 5 · all mixed",
+          "query": "?pack=divide-it&level=6&seed=7&nosignin=1",
+          "look": "Everything mixed; the first is 6x = −18."
+        }
       ]
     },
     {
@@ -88,10 +128,34 @@
       "title": "Add to both sides: help fixes (Build A)",
       "links": [
         {
-          "label": "Help reads the equation on screen",
+          "label": "Partly cancelled: Undo first",
           "query": "?pack=add-both&level=4&seed=7&nosignin=1",
-          "notLive": "Not on the live site yet: this build is waiting to be merged, so this link shows today’s help, not the fix.",
-          "look": "Press I’m stuck after a move: the help should use the numbers now on screen."
+          "look": "On x + 8 = −4: Use a move, Add −5, Go, then I’m stuck. The line names the +3 that’s left and says to press Undo first, with Undo highlighted."
+        },
+        {
+          "label": "A move the wrong way: Undo first",
+          "query": "?pack=add-both&level=4&seed=7&nosignin=1",
+          "look": "Use a move, Add 8, Go (it goes red), then I’m stuck: “That move made the equation bigger… press Undo.” After Undo, I’m stuck starts again at the first hint."
+        },
+        {
+          "label": "x alone: help with the sum",
+          "query": "?pack=add-both&level=2&seed=7&nosignin=1",
+          "look": "On x + 8 = 11: Use a move, Add −8, Go. At x = 11 + −8, press I’m stuck twice: 11 and −8 are outlined and it asks the sum. It never writes the answer, and no seesaw opens."
+        },
+        {
+          "label": "x alone: Teach me",
+          "query": "?pack=add-both&level=2&seed=7&nosignin=1",
+          "look": "Same as above, but press Teach me at x = 11 + −8: all three sum sentences show and you can type 3 to finish."
+        },
+        {
+          "label": "Only two lights judged",
+          "query": "?pack=add-both&level=4&seed=7&nosignin=1",
+          "look": "Make the helpful move (Add −8): only Fewer terms and Solved for x change; the other six lights stay dashed."
+        },
+        {
+          "label": "Divide it: a fraction that doesn’t split",
+          "query": "?pack=divide-it&level=3&seed=7&nosignin=1",
+          "look": "On 5x = −15: take ½ of both sides (it fails), then I’m stuck: “That fraction doesn’t split evenly… press Undo.” After Undo, I’m stuck shows the counters."
         }
       ]
     }
