@@ -23,7 +23,8 @@ async function loadPlaywright() {
 const ADD4 = 'pack=add-both&level=4&seed=7';          // x + 8 = −4
 const DIV3 = 'pack=divide-it&level=3&seed=7';          // 5x = −15
 const add = (k) => [['click', '[data-action="choose"][data-move="add"]'], ['type', k], ['click', '[data-action="go"]']];
-const take = (n) => [['click', '[data-action="choose"][data-move="fraction"]'], ['click', `[data-action="take"][data-n="${n}"]`]];
+// (Build D: the fraction is typed into the move's blank, 1 then n, and the green Go takes it)
+const take = (n) => [['click', '[data-action="choose"][data-move="fraction"]'], ['type', 1], ['type', n], ['click', '[data-action="go"]']];
 const stuck = ['click', '[data-action="stuck"]'];
 const teach = ['click', '[data-action="teach"]'];
 const next = ['click', '[data-action="nextLine"]'];

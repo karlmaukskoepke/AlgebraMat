@@ -57,13 +57,13 @@ describe('Add to both sides: errors and the hint after Undo', () => {
 
 describe('Divide it: a fraction that does not split', () => {
   const div = withSpotlight(reduceDivide, DIVIDE_SPOT);
-  it('lights the side that broke; Undo, then "Pick a fraction of both sides…" at the number in front, the fraction move to make', () => {
+  it('lights the side that broke; Undo, then the boxes and the fractions to choose from (Build D)', () => {
     let s = run(div, newDivide(makeDivide(5, -3), { level: 3 }), { type: 'choose', move: 'fraction' }, { type: 'take', n: 2 });
     expect(spotOf(s, DIVIDE_SPOT)).toMatchObject({ kind: 'error', target: 'failSide' });
     expect(run(div, s, { type: 'take', n: 5 })).toBe(s);
     s = run(div, s, { type: 'undo' });
-    expect(spotOf(s, DIVIDE_SPOT)).toMatchObject({ kind: 'hint', target: 'coef', move: 'fraction' });
-    expect([s.feedback.key, s.hint.kind, s.reds]).toEqual(['dPickFraction', 'coef', 1]);
+    expect(spotOf(s, DIVIDE_SPOT)).toMatchObject({ kind: 'hint', target: 'coef', choose: true });
+    expect([s.feedback.key, s.hint.kind, s.reds]).toEqual(['dWhichFraction', 'coef', 1]);
   });
 });
 

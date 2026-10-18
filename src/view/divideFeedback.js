@@ -14,7 +14,11 @@ const SLIP = {
   unmatched: (p) => `Put ${p.typed} back in: ${p.a} boxes of ${p.typed} is ${p.product}, not ${p.b}. Share the ${p.b} evenly among the ${p.a} boxes.`,
 };
 
+const WORDS = { 2: 'two', 3: 'three', 4: 'four', 5: 'five', 6: 'six' };
+
 const M = {
+  dWhichFraction: (p) => `We want only one of the ${WORDS[p.boxes] ?? p.boxes} x boxes.\nWhat fraction of these boxes should we find?`,
+  dBlankBad: () => 'Type a fraction of both sides: 1 over 2, 3, 4, 5 or 6 (like 1/5).',
   dPickFraction: () => 'Pick a fraction of both sides. Which one leaves one box?',
   dUndone: () => 'Undone. Pick a different fraction.',
   dForced: (p) => `For this one, take ${p.frac} of both sides.`,

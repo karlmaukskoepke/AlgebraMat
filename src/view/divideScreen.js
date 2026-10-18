@@ -5,7 +5,9 @@
 // collapsed lights. No banner: what the card says is a pop-up (view/spotlight.js); the line is kept for screen readers only.
 
 import { html } from './addBothMat.js';
-import { stackRows, substBlock, forwardButton, srLine, notePopup, FORCED_TEXT, FIRST_TEXT, PLACE_TEXT } from './solveScreen.js';
+import { stackRows, substBlock, forwardButton, srLine, notePopup, sideTerms, FORCED_TEXT, FIRST_TEXT, PLACE_TEXT } from './solveScreen.js';
+import { equationRow } from './lightScreen.js';
+import { fracOpen, canPreview, fracOf } from '../engine/divideBlank.js';
 import { groupDiagram } from './groupDiagram.js';
 import { divideFeedbackText } from './divideFeedback.js';
 import { narrowPanel } from './narrowPanel.js';
@@ -20,19 +22,48 @@ import { firstOpen } from './visit.js';
 const btn = (label, action, cls, attrs = {}) => html('button', cls, [label], { type: 'button', 'data-action': action, ...attrs });
 const valid = (t) => /^-?\d+$/.test(t ?? '');
 
-// "Take [½][⅓][¼][⅕][⅙] of both sides": shown once the move is chosen.
-function fractionRow(s) {
-  const on = s.stage === 'moves' && s.menu === 'fraction' && !s.sub && !s.deal;
-  const row = html('div', `lb-fractionrow${on ? '' : ' is-off'}`, [html('strong', '', ['Take'])]);
-  const forcedOnly = s.forced && !xAlone(s.board) ? coefOf(s.board) : null;
+// The move's row under the newest equation (Build D, Part 4): its preview while the move is hovered (dashed, grey), then the blank, a
+// fraction of both sides (top and bottom; "1/5" typed), the right side's fraction mirroring the left's.
+function fracBox(s, mirror) {
+  const fb = s.fb ?? { num: '', den: '', part: 'num' };
+  const open = fracOpen(s);
+  const part = (p) => {
+    const text = fb[p];
+    const focus = open && !mirror && fb.part === p;
+    return html(mirror ? 'span' : 'button', `lx-box dv-fracpart${focus ? ' is-focus' : ''}${text ? '' : ' is-empty'}${focus && !text ? ' is-blink' : ''}${mirror ? ' is-mirror' : ''}`, [text || ' '],
+      mirror ? { 'aria-hidden': 'true' } : { type: 'button', 'data-action': 'focus', 'data-target': p, 'data-lx-field': '1', 'aria-label': p === 'num' ? 'The top of the fraction' : 'The bottom of the fraction', ...(open ? {} : { tabindex: '-1' }) });
+  };
+  return html('span', `dv-fracblank${mirror ? ' is-mirror' : ''}`, [part('num'), html('span', 'dv-fracbar'), part('den')]);
+}
+function moveRow(s) {
+  const open = fracOpen(s);
+  const preview = !open && canPreview(s) && s.ui?.preview;
+  const slot = html('div', `lx-ghost dv-ghost${open ? ' is-chosen' : preview ? ' is-preview' : ''}`);
+  if (!open && !preview) return slot;
+  const side = (terms, mirror) => [fracBox(s, mirror), html('span', 'lb-plus', ['(']), ...sideTerms(terms, s), html('span', 'lb-plus', [')'])];
+  slot.append(equationRow(side(s.board.left, false), side(s.board.right, true), 'lx-ghosteq'));
+  if (!open) slot.setAttribute('aria-hidden', 'true');
+  return slot;
+}
+
+// After a fraction that did not split, the hint shows the boxes and the counters, the boxes bracketed, and the fractions to choose from:
+// the ones already tried are crossed off and greyed (Build D, Part 4).
+function fractionChoices(s) {
+  const b = s.board;
+  const size = pileSize(b);
+  const wrap = html('div', 'dv-choose');
+  const [want, ask] = divideFeedbackText({ key: 'dWhichFraction', params: { boxes: coefOf(b) } }).split('\n');
+  wrap.append(groupDiagram({ n: 1, boxes: coefOf(b), size, neg: b.right[0].kind === 'num' && b.right[0].v < 0, groups: null, pile: size, kept: null, tap: null, bracketBoxes: true }),
+    html('p', 'spot-text', [want]), html('p', 'spot-text', [ask]));
+  const row = html('div', 'dv-choices');
   for (const n of FRACTIONS) {
-    const b = html('button', `btn lb-frac-btn${s.hint?.kind === 'fraction' && s.hint.n === n && on ? ' is-target' : ''}`, [html('span', 'lb-frac-main', [`× ${fractionText(n)}`]), html('span', 'lb-frac-sub', [`÷ ${n}`])], { type: 'button', 'data-action': 'take', 'data-n': n, 'aria-label': `Take ${fractionText(n)} of both sides` });
-    b.disabled = !on || (forcedOnly !== null && n !== forcedOnly);
-    row.append(b);
+    const tried = s.tried.includes(n);
+    const btn = html('button', `btn dv-choice${tried ? ' is-tried' : ''}`, [fractionText(n)], { type: 'button', 'data-action': 'take', 'data-n': n, 'data-from': 'list', 'aria-label': `${fractionText(n)}${tried ? ', tried already' : ''}` });
+    btn.disabled = tried;
+    row.append(btn);
   }
-  row.append(html('strong', '', ['of both sides']));
-  if (!on) row.setAttribute('aria-hidden', 'true');
-  return row;
+  wrap.append(row);
+  return wrap;
 }
 
 // ---------- the group diagram, in the checking space while the counters are up ----------
@@ -96,6 +127,7 @@ export function forwardOf(s) {
   return forwardCore(s);
 }
 function forwardCore(s) {
+  if (fracOpen(s)) return { label: 'Go', action: 'go', enabled: Boolean(fracOf(s.fb)) };
   if (s.sub?.placing) return { label: 'Next', action: 'nextLine', enabled: false };
   if (s.sub && s.sub.step < solve.subTotal(s.sub)) return { label: 'Next', action: 'nextLine', enabled: true };
   if (!s.sub && (s.unfolded || s.pic)) return { label: 'Next', action: 'foldNext', enabled: true };
@@ -143,7 +175,7 @@ function corners(s) {
 function panel(s) {
   const mapLight = (v) => (v === 'neutral' ? 'off' : v);
   const owed = solve.moveOwed(s) && !s.menu && !s.sub && !xAlone(s.board) && !s.scaffold;
-  const el = narrowPanel({ multiply: { live: true, move: 'fraction', label: 'Take a fraction of both sides', pressed: s.menu === 'fraction', ring: owed } }, {
+  const el = narrowPanel({ multiply: { live: true, move: 'fraction', label: 'Multiply both sides by a fraction', pressed: s.menu === 'fraction', ring: owed, preview: canPreview(s) && s.ui?.preview } }, {
     disabled: s.stage === 'done' || Boolean(s.sub),
     lights: { smaller: mapLight(s.lights.smaller), onebox: mapLight(s.lights.onebox), solved: xAlone(s.board) ? 'green' : 'off' },
   });
@@ -156,6 +188,7 @@ function panel(s) {
 const SILENT = new Set(['aPlace', 'aFindX', 'aMustMove', 'dPickFraction', 'aPlugIn', 'aPlugCurrent', 'aSolvedBoard', 'dUndone', 'aCorrect', 'aStartedOver',
   'aUndone', 'aSimplerFirst', 'aUndoGuess']);
 const NUDGE = {
+  dBlankBad: 'answer',
   typeAnswer: 'answer', answerUnreadable: 'answer', aUndoFirst: 'answer', aFinishMoveFirst: 'answer',
   aLater: 'panel', aNotNeeded: 'panel', dForced: 'fractions',
 };
@@ -163,7 +196,7 @@ const NUDGE = {
 function popups(s, wrap) {
   const sp = spotOf(s, DIVIDE_SPOT);
   const o = { root: wrap, find: (root, target) => findSolveTarget(root, target, s), undo: '.lx-undo', moveSel: (m) => `[data-move="${m}"]`, work: '.lb-main' };
-  if (sp) { wrap.append(spotlightLayer(sp, { ...o, text: divideFeedbackText(s.feedback) })); return; }
+  if (sp) { wrap.append(spotlightLayer(sp.choose ? { ...sp, place: 'beside' } : sp, { ...o, text: sp.choose ? '' : divideFeedbackText(s.feedback), extra: sp.choose ? fractionChoices(s) : null })); return; }
   if (introOpen(s)) { wrap.append(spotlightLayer({ kind: 'intro', lit: ['newest', 'panel', 'forward'] }, { ...o, text: FORCED_TEXT })); return; }
   // checking a value: everything greys out but the equation being checked and the checking space
   if (s.sub && s.sub.step < solve.subTotal(s.sub)) {
@@ -182,8 +215,8 @@ export function renderDivideScreen(s) {
   const body = html('div', 'lb-body');
   const main = html('div', 'lb-main');
   const check = html('div', 'sv-check', s.sub ? [substBlock(s, solve)] : [diagramBlock(s)].filter(Boolean));
-  main.append(html('div', `sv-work${s.sub ? ' is-checking' : ''}${s.scaffold || s.pic ? ' has-diagram' : ''}`, [html('div', 'sv-solve', [html('div', 'lb-stack', [html('div', 'lb-rows', stackRows(s))])]), check]));
-  main.append(fractionRow(s), answerRow(s), corners(s));
+  main.append(html('div', `sv-work${s.sub ? ' is-checking' : ''}${s.scaffold || s.pic ? ' has-diagram' : ''}`, [html('div', 'sv-solve', [html('div', 'lb-stack', [html('div', 'lb-rows', [...stackRows(s), moveRow(s)])])]), check]));
+  main.append(answerRow(s), corners(s));
   body.append(main, panel(s));
   wrap.append(body);
   popups(s, wrap);

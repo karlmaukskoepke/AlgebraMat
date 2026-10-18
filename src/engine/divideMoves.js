@@ -74,7 +74,7 @@ const loop = createSolveLoop({
   alone: xAlone,
   noLights: () => ({ smaller: 'off', onebox: 'off' }),
   params: (s) => ({ a: s.problem.a, b: signed(s.problem.b) }),
-  extra: () => ({ fail: null, deal: null, diag: null, pic: null, taught: 0 }),
+  extra: () => ({ fail: null, deal: null, diag: null, pic: null, taught: 0, tried: [] }),   // tried: fractions that failed on this problem (Build D)
   snapshotExtra: () => ({ fail: null, deal: null, diag: null, pic: null }),
   resetState: (s) => { s.fail = null; s.deal = null; s.diag = null; s.pic = null; },
   collapse: () => false,                                                          // a single-step card: the check never collapses
@@ -118,6 +118,7 @@ const loop = createSolveLoop({
         api.pushHistory(s);
         s.hint = null;
         if (!check.ok) {
+          if (!s.tried.includes(n)) s.tried = [...s.tried, n];
           s.fail = { n, boxesSplit: check.boxesSplit, countersSplit: check.countersSplit };
           s.reds += 1;
           const work = { left: [fracOf(n, [s.board.left[0]])], right: [fracOf(n, [s.board.right[0]])] };
@@ -126,6 +127,11 @@ const loop = createSolveLoop({
         }
         // with the counters up, the move is done by hand: n empty groups appear, the boxes split into the same n, the pile is dealt
         if (s.scaffold) { s.deal = { n, groups: Array(n).fill(0) }; return say(s, 'dDealPrompt', { n, frac: fractionText(n), boxes: a, size: pileSize(s.board), per: a / n }); }
+        // chosen from the list after a fraction that did not split (Build D): the picture shows 1 of the n boxes and 1/n of the counters
+        if (action.fromList) {
+          const size = pileSize(s.board);
+          return commitFraction(s, n, api, { n, boxes: a, size, neg: s.board.right[0].v < 0, groups: Array(n).fill(size / n), kept: 0 });
+        }
         return commitFraction(s, n, api);
       }
       // ----- dealing: one counter at a time (or a round), then keep one group; also the diagram at x alone -----
@@ -252,9 +258,15 @@ export const DIVIDE_SPOT = {
   error: (s) => DIVIDE_ERRORS[s.feedback?.key] ?? null,
   keepsReds: (s) => ['dFail', 'dFail3'].includes(s.feedback?.key),
   clear: (s) => { s.entry = ''; s.sub = null; },
-  hint(s) {
+  hint(s, before = null) {
     if (xAlone(s.board)) return { target: 'answer', key: 'aStuckSolved' };
     s.hint = { kind: 'coef' };
+    // after a fraction that did not split (Build D, Part 4): the boxes and the counters, "We want only one of the five x boxes.", and the
+    // fractions to choose from, the ones tried crossed off
+    if (before?.fail && s.tried.length) {
+      s.menu = 'fraction';
+      return { target: 'coef', key: 'dWhichFraction', params: { boxes: coefOf(s.board) }, choose: true };
+    }
     return { target: 'coef', key: 'dPickFraction', move: 'fraction' };
   },
   prompt: (s) => (loop.moveOwed(s) ? 'aMustMove' : 'aFindX'),

@@ -105,6 +105,17 @@
           ]
         },
         {
+          "name": "Divide it: the fraction blank and the fraction cycle (Build D, Part 4)",
+          "about": "The fraction buttons are gone: the move is a blank you type a fraction into, with the same hover preview as Add; a fraction that doesn't split leads to the boxes and a list of fractions, the tried ones crossed off.",
+          "links": [
+            {
+              "label": "5x = −15",
+              "query": "?pack=divide-it&level=3&seed=7&nosignin=1",
+              "look": "Hover the move: ▢(5x) = ▢(−15) in grey. Click it, type 1/2, Go: the “can't split” box. Undo: the five boxes bracketed, “We want only one of the five x boxes.”, ½ crossed off. Pick ⅓: the same again, ½ and ⅓ crossed off. Pick ⅕: it applies, 1 of the 5 boxes is kept in the picture, and the green button says Next."
+            }
+          ]
+        },
+        {
           "name": "The narrow panel (was lights round 2)",
           "about": "Kept (Build D): the narrow panel with its small round lights is the only panel on Add to both sides and Divide it.",
           "links": [
@@ -169,7 +180,7 @@
             {
               "label": "Divide: a fraction that doesn’t split",
               "query": "?pack=divide-it&level=3&seed=7&nosignin=1",
-              "look": "Take a fraction, ½: the failed row is lit, “doesn’t split”; after Undo the 5 is outlined and Take a fraction is highlighted."
+              "look": "Type 1/2 in the move’s blank and Go: the failed row is lit, “doesn’t split”; after Undo the boxes and the list of fractions."
             }
           ]
         },
@@ -278,7 +289,7 @@
             {
               "label": "Divide it: a fraction that doesn’t split",
               "query": "?pack=divide-it&level=3&seed=7&nosignin=1",
-              "look": "On 5x = −15 take ½ (it fails), then I’m stuck: it says to press Undo first."
+              "look": "On 5x = −15 type 1/2 in the move’s blank and Go (it fails), then I’m stuck: it says to press Undo first."
             }
           ]
         },

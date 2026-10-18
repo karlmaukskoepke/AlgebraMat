@@ -3535,3 +3535,22 @@ body[data-input='touch'] #play.is-light #controls .btn-pad { min-width: 48px; mi
 .ui-light .lx-frac1d { min-height: 38px; font-size: 22px; }
 .ui-light .lb-move[data-move="flip"].spot-move, .ui-light .lb-move.spot-move { outline: 4px solid #0072b2 !important; }
 .ui-light .lx-tok, .ui-light .lb-side > * { flex-shrink: 0; }
+/* Divide it's move as a blank (Build D, Part 4): a fraction of both sides, its top and bottom */
+.dv-light .lx-ghost { min-height: 92px; visibility: hidden; display: flex; flex-direction: column; justify-content: center; }
+.dv-light .lx-ghost.is-preview, .dv-light .lx-ghost.is-chosen { visibility: visible; }
+.dv-light .lx-ghost.is-preview .lb-eq { color: #9a968a; }
+.dv-light .lx-ghosteq { font-size: 40px; }
+.dv-fracblank { display: inline-flex; flex-direction: column; align-items: center; gap: 2px; margin: 0 4px; vertical-align: middle; }
+.dv-fracbar { width: 100%; min-width: 34px; border-top: 3px solid #0072b2; }
+.dv-light .dv-fracpart { min-width: 34px; min-height: 36px; padding: 0 6px; font: 800 24px 'Lexend', system-ui, sans-serif; color: #0072b2; border: 3px dashed #0072b2; border-radius: 8px; background: transparent; }
+.dv-light .lx-ghost.is-chosen .dv-fracpart:not(.is-mirror) { border-style: solid; background: #fff; }
+.dv-light .dv-fracpart.is-focus { outline: 4px solid #0072b2; outline-offset: 2px; }
+.dv-choose { display: flex; flex-direction: column; gap: 8px; margin-top: 8px; }
+.dv-choose .gd { max-width: 100%; }
+.dv-choices { display: flex; gap: 8px; justify-content: center; }
+.dv-choice { min-width: 48px; min-height: 48px; font: 800 24px 'Lexend', system-ui, sans-serif; }
+.dv-choice.is-tried { text-decoration: line-through; text-decoration-thickness: 3px; color: #a3281b; opacity: 0.6; }
+.dv-light .lb-stack { min-height: 300px; }
+.dv-light .lb-rows { min-height: 0; }
+.dv-choose { margin-top: 0; }
+.dv-choose .gd svg { max-height: 110px; }

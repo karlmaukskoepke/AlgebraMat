@@ -67,7 +67,7 @@ export function groupDiagram(o) {
   const pileRows = pile ? rowsFor(pile, PW, 16) : 0;
   const H = Math.max(total, pileRows * 16 + PAD * 2) + 28;
   const top = (H - total) / 2;
-  const x0 = 12;
+  const x0 = o.bracketBoxes ? 20 : 12;
   const border = hasLeft ? x0 + LW + 30 : 0;
   const pileX = hasLeft ? border + 14 : x0;
   const barX = pileX + (pile ? PW + 12 : 0);
@@ -88,6 +88,8 @@ export function groupDiagram(o) {
     });
     svg.append(el('rect', { x: x0, y: top, width: LW, height: total, rx: 4, class: 'bar-outline' }));
     if (o.outline && !split) svg.append(el('rect', { x: x0 - 5, y: top - 5, width: LW + 10, height: total + 10, rx: 8, class: 'gd-ring' }));
+    // one bracket round all the boxes (Divide's fraction that did not split, Build D): we want one of them
+    if (o.bracketBoxes) svg.append(el('path', { d: `M ${x0 - 2} ${top + 2} H ${x0 - 8} V ${top + total - 2} H ${x0 - 2}`, class: 'take-bracket' }));
     svg.append(el('line', { x1: border, y1: 6, x2: border, y2: H - 6, class: 'gd-border' }));
   }
 

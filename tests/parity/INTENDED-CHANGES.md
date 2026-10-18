@@ -237,3 +237,14 @@ No data change (PASS); no scripted run drags a term. On screen (listed under Par
 In play: a dropped number lands in the slot it was dropped on (`x = −8 + 11` when dropped before the 11; the Add move still writes it
 last); x dragged across is refused with "x is already on the left side…"; a wrong sum is a spotlight error; the drill has Flip
 everything and Multiply.
+
+## Build D, Part 4 (2026-10-18): Divide it's fraction as a blank, and the list after a fraction that does not split
+
+Problems, save codes and class-sheet records unchanged (PASS): the move still goes through Divide's own `take`, so its rows, save bits
+and sheet words are as before. Changes in play (the traces that reach them were already covered by Build A and Build C rows):
+
+- The five fraction buttons are gone: hovering the move previews `▢(5x) = ▢(−15)`; the blank takes `1/5` (or top and bottom), Go takes it.
+  The screen states' `take(n)` now type 1 and n into the blank and press Go.
+- After a fraction that did not split, Undo's hint is `dWhichFraction` (it was `dPickFraction`) with the move open (`menu: 'fraction'`):
+  the boxes bracketed, "We want only one of the five x boxes.", "What fraction of these boxes should we find?" and ½ ⅓ ¼ ⅕ ⅙, the tried
+  ones crossed off. A choice from the list is `take` with `fromList`; the right one leaves its picture (1 of the 5 boxes kept) until Next.

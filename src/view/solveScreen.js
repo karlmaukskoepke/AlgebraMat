@@ -46,6 +46,8 @@ const charsOf = (list) => list.map((x) => (x.kind === 'frac' ? 5 + charsOf(x.inn
 const eqClass = (chars) => (chars > 30 ? ' is-xlong' : chars > 20 ? ' is-long' : '');
 
 const sideEls = (board, s, o) => [termsOf(board.left, s, o), termsOf(board.right, s, o)];
+// A side as written, inert (the move's preview row).
+export const sideTerms = (terms, s) => termsOf(terms, s, { live: false, plug: false });
 
 // The work stack. Every row stays settled (no entrance animation: a re-render never replays one).
 export function stackRows(s) {

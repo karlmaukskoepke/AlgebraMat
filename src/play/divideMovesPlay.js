@@ -9,7 +9,30 @@ import { divideFeedbackText } from '../view/divideFeedback.js';
 import { bindValueDrag, bindForwardKey } from '../view/solveScreen.js';
 import { bindHelpTimer } from '../view/helpTimer.js';
 import { withIntro } from './withIntro.js';
+import { withFractionBlank, fracOpen, canPreview } from '../engine/divideBlank.js';
 import { recordProblem } from '../lightStore.js';
+
+// The fraction blank's keys and the move's preview: "/" goes to the bottom of the fraction; hovering the move (or coming near it)
+// previews it on the equation.
+function bindFractionKeys(root, dispatch, getSession) {
+  const MOVE = '[data-move="fraction"]';
+  const onKey = (e) => {
+    if ((e.key === '/' || e.key === 'Divide') && getSession() && fracOpen(getSession())) { e.preventDefault(); e.stopImmediatePropagation(); dispatch({ type: 'fracSlash' }); }
+  };
+  const onMove = (e) => {
+    if (e.pointerType !== 'mouse') return;
+    const b = root.querySelector(`${MOVE}:not(:disabled)`);
+    const s = getSession();
+    if (!b || !s) return;
+    const r = b.getBoundingClientRect();
+    const d = Math.hypot(Math.max(r.left - e.clientX, 0, e.clientX - r.right), Math.max(r.top - e.clientY, 0, e.clientY - r.bottom));
+    const want = d <= 40 && canPreview(s);
+    if (want !== Boolean(s.ui?.preview)) dispatch({ type: 'ui', patch: { preview: want } });
+  };
+  window.addEventListener('keydown', onKey, true);
+  document.addEventListener('pointermove', onMove);
+  return () => { window.removeEventListener('keydown', onKey, true); document.removeEventListener('pointermove', onMove); };
+}
 
 export const divideMovesPlay = {
   noStreak: true,
@@ -17,12 +40,12 @@ export const divideMovesPlay = {
   noAuto: true,
   lineInMat: true,
   lightDesign: true,    // no pad on a keyboard, a pop-up keypad on touch, the header fades (Build D)
-  padOpen: (s) => s.stage !== 'done' && !s.sub && solve.answerLive(s) && (s.typing === 'answer' || solve.alone(s)),
+  padOpen: (s) => s.stage !== 'done' && !s.sub && (fracOpen(s) || (solve.answerLive(s) && (s.typing === 'answer' || solve.alone(s)))),
   owesMove,
   steps: () => [],
   newSession: (problem, { forceMove = false } = {}) => newDivide(problem, { level: problem.logLevel ?? 2, forceMove }),
   // an error waits for Undo, then a hint (Build C, Part 2); the openings' pop-ups round it (Build D, Part 1)
-  reduce: withIntro(withSpotlight(reduceDivide, DIVIDE_SPOT), introOpen),
+  reduce: withIntro(withSpotlight(withFractionBlank(reduceDivide), DIVIDE_SPOT), introOpen),
   feedbackText: divideFeedbackText,
   buildControls: buildDivideControls,
   effects(before, s) {
@@ -32,8 +55,8 @@ export const divideMovesPlay = {
     return { hint: null };
   },
   renderMat: (s) => renderDivideScreen(s),
-  bindMat: (root, dispatch) => {
-    const off = [bindValueDrag(root, dispatch), bindForwardKey(root), bindHelpTimer(root)];
+  bindMat: (root, dispatch, getSession) => {
+    const off = [bindValueDrag(root, dispatch), bindForwardKey(root), bindHelpTimer(root), bindFractionKeys(root, dispatch, getSession)];
     return () => off.forEach((f) => f());
   },
   matAction(d) {
@@ -42,7 +65,8 @@ export const divideMovesPlay = {
       case 'greyMove': return { type: 'greyMove', move: d.move };
       case 'placeValue': return { type: 'placeValue' };
       case 'foldNext': return { type: 'foldNext' };
-      case 'take': return { type: 'take', n: Number(d.n) };
+      case 'take': return { type: 'take', n: Number(d.n), ...(d.from === 'list' ? { fromList: true } : {}) };
+      case 'go': return { type: 'go' };
       case 'deal': return { type: 'deal', group: Number(d.group) };
       case 'dealRound': return { type: 'dealRound' };
       case 'keep': return { type: 'keep', group: Number(d.group) };

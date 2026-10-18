@@ -126,6 +126,7 @@ function candidates({ kind, spot, r, pad, labelBottom, bw, bh, area, side, workB
   const out = [];
   const mid = (x) => x - bw / 2;
   const sideAt = (top) => side && side.width > 200 && { name: 'side', left: side.left + 12, top: Math.min(Math.max(8, top), vh - bh - 8) };
+  const sideHigh = side && side.width > 200 && { name: 'sidehigh', left: side.left + 12, top: 8 };
   if (kind === 'error' || !r) {
     out.push({ name: 'below', left: mid(spot.alignTarget && r ? r.left + r.width / 2 : area.left + area.width / 2), top: Math.max(wb, labelBottom) + GAP });
     out.push(sideAt(r ? r.top - 4 : anchorTop));
@@ -141,7 +142,7 @@ function candidates({ kind, spot, r, pad, labelBottom, bw, bh, area, side, workB
   else if (where === 'field') out.push(above, right, leftOf, below);
   else if (where === 'beside') out.push(right, leftOf, below, above, sideAt(r.top));
   else out.push(below, sideAt(r.top), right, leftOf, above);
-  out.push({ name: 'workbelow', left: mid(area.left + area.width / 2), top: wb + GAP }, { name: 'low', left: mid(area.left + area.width / 2), top: vh - 8 - bh });
+  out.push(sideHigh, { name: 'workbelow', left: mid(area.left + area.width / 2), top: wb + GAP }, { name: 'low', left: mid(area.left + area.width / 2), top: vh - 8 - bh });
   return out.filter(Boolean);
 }
 
@@ -157,12 +158,13 @@ export function spotlightLayer(spot, o) {
   const frame = spot.target && kind !== 'note' && kind !== 'nudge' && (kind !== 'intro' || spot.label)
     ? el('div', 'spot-frame', spot.label ? [el('span', `spot-label${spot.labelTop ? ' is-top' : ''}`, [spot.label])] : []) : null;
   const textId = `spot-text-${Math.random().toString(36).slice(2, 8)}`;
-  const box = el('div', `spot-box${kind === 'nudge' ? ' is-small' : ''}`, [el('p', 'spot-text', [o.text], { id: textId })], error
+  const box = el('div', `spot-box${kind === 'nudge' ? ' is-small' : ''}`, o.text ? [el('p', 'spot-text', [o.text], { id: textId })] : [], error
     ? { role: 'alertdialog', 'aria-modal': 'true', 'aria-labelledby': textId }
     : { role: 'status', 'aria-live': 'polite' });
   if (kind === 'ask' && spot.choices) {
     box.append(el('div', 'spot-choices', spot.choices.map(([label, value]) => el('button', `btn ${value === 'party' ? 'btn-party' : value === 'battle' ? 'btn-battle' : ''}`, [label], { type: 'button', 'data-action': spot.choiceAction ?? 'kind', 'data-value': value }))));
   }
+  if (o.extra) box.append(o.extra);                       // a card's own content in the bubble (Divide's boxes and its fractions)
   let arrow = null;
   if (error) {
     const catcher = el('div', 'spot-dim');                                     // catches every tap outside Undo, and gives Undo the focus back
@@ -174,7 +176,7 @@ export function spotlightLayer(spot, o) {
     arrow.append(svg);
   }
   if (frame) layer.append(frame);
-  if (o.text) layer.append(box);
+  if (o.text || o.extra) layer.append(box);
   if (arrow) layer.append(arrow);
 
   const find = (t) => (typeof t === 'string' ? o.find(o.root, t) : t);
@@ -232,6 +234,7 @@ export function spotlightLayer(spot, o) {
     const fits = (c) => c.left >= 8 && c.top >= 8 && c.left + bw <= vw - 8 && c.top + bh <= vh - 8
       && !keep.some((k) => c.left < k.right + 4 && c.left + bw > k.left - 4 && c.top < k.bottom + 4 && c.top + bh > k.top - 4);
     const pick = cands.find(fits) ?? cands[0];
+    if (typeof window !== 'undefined' && window.__spotDebug) window.__spotDebug.push({ cands, keep, bw, bh, pick: pick.name });
     let { left, top } = pick;
     box.dataset.side = pick.name;
     left = Math.min(Math.max(8, left), vw - bw - 8);
