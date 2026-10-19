@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { makeAddBoth } from '../src/engine/addBoth.js';
-import { reduceAddBoth } from '../src/engine/addBothMoves.js';
+import { reduceAddBoth } from '../src/engine/cards/add.js';
 import { newLightsSession, withLights, ADD_SPOT } from '../src/engine/addBothLights.js';
 import { makeDivide } from '../src/engine/divide.js';
 import { newDivide, reduceDivide, DIVIDE_SPOT } from '../src/engine/divideMoves.js';

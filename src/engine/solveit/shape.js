@@ -97,7 +97,7 @@ export function shapeOf(s) {
   if (s?.stage === 'build') return { id: 'T0', family: 'add', r: Boolean(s.problem?.mirror), params: { built: s.built } };
   const shape = shapeOfBoard(s?.board);
   if (shape.id === UNKNOWN) return shape;
-  const waiting = Boolean(s.needUndo || s.undoCue || s.fail || s.zeroOther);
+  const waiting = Boolean(s.needUndo || s.fail || s.zeroOther);
   if (s.fail) return { ...shape, id: 'DF', over: shape.id, waiting: true, params: { ...shape.params, n: s.fail.n } };
   if (shape.id === 'T2' && s.pending && !s.pending.both) return { ...shape, id: 'T1', waiting };
   return { ...shape, waiting };

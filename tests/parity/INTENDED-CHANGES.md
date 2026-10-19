@@ -315,3 +315,22 @@ shows the lights are exactly the same.
 No difference (PASS on all five groups). The help ladder (I'm stuck, Teach me, the hint after Undo) is now the loop's, reading
 `engine/solveit/registry.js` by shape; Divide it's rungs moved to `engine/solveit/rungs/divide.js` (D1, D2, DF) with the same messages and
 class-sheet words. Add to both sides joins in P4.
+
+## Build E, P4 (2026-10-19): Add to both sides on the shared loop
+
+PASS on all five groups. Earlier sections already list every Add run with `#0-`, which would hide new differences, so this build was
+also compared directly: the same 25 runs from the commit before P4 against the new code, and the 62 screens taken from both. The
+class-sheet records (events) and the save codes are identical. Every remaining difference:
+
+| Key | Before | After | Why |
+|---|---|---|---|
+| `trace:add-both/*` (every step) | `undoCue: true/false` | `needUndo: true/false`, `unfolded: false` | The loop's own flags replace Add's copy: `needUndo` equals the old `undoCue` at every step of every run (checked); `unfolded` is never true on Add (every helpful Add move leaves x alone) |
+| `trace:add-both/*` (I'm stuck) | `rung` 0, 1, 2, 3 | `rung` 1, 2, 3, 4 | The one ladder (`engine/solveit/registry.js`) counts the reminder click as a rung, as on every card; the rungs given are the same |
+| `trace:add-both/*` (check, place) | `feedback.params` without `where`; `sub.target: null` | `where` and `sub.target` `'original'` / `'current'` | The loop's check (shared with Divide it): it says which equation the value goes into |
+| `trace:add-both/wrong-guess-then-undo#3` | `aGuessed` (bad: "This unbalances the equation") | `aPlugCurrent` | The loop's words: a wrong guess is not judged before its lines are worked through (no verdict before the steps) |
+| `trace:add-both/stuck-x4-then-solve#10-` | `rows` stays at the original equation in the seesaw | the move's work row and `x = −4 + −8` are written | Loop §6: a scaffold never blanks the stack; a move made on the seesaw is written into the work like any other |
+| `screen:add-helpful-move@*`, `screen:add-alone-teach@*` | green Next after the move; dashed rule line; Start over greyed | green Check (greyed until x is typed); solid rule line; Start over live | The loop: a move that leaves x alone is committed at once (the next thing is typing x), and Start over is live once anything has been done (spec §1C). Pairs in `docs/build-e/be-01-…` |
+
+Not in the scripted runs, but changed by the same rules (unit tests updated): a second move while one waits for Undo now says
+`aUndoFirst` (stacking is gone, so shapes S5 and S6 can no longer happen); in the seesaw, a move that only partly helps waits for Undo, and
+one Undo takes the whole seesaw move back; three reds in a row are counted across their Undos by the spotlight, as on the bare screen.

@@ -17,9 +17,10 @@
 
 import { shapeOf, UNKNOWN } from './shape.js';
 import { DIVIDE_RUNGS } from './rungs/divide.js';
+import { ADD_RUNGS } from './rungs/add.js';
 
-export const REGISTRY = { ...DIVIDE_RUNGS };
-// (Add to both sides registers its own entries when it is a card of the loop: see registerRungs.)
+export const REGISTRY = { ...ADD_RUNGS, ...DIVIDE_RUNGS };
+// (a new card adds its own shapes' entries)
 export function registerRungs(entries) {
   for (const [id, entry] of Object.entries(entries)) {
     if (REGISTRY[id] && REGISTRY[id] !== entry) throw new Error(`Shape ${id} is registered twice`);

@@ -8,7 +8,7 @@ import { lightsFeedbackText } from '../view/addBothLightsFeedback.js';
 import { makeAddBothControls } from '../view/addBothControls.js';
 import { bindLightsMat } from '../view/lightsPointer.js';
 import { bindMultiplyHover } from '../view/multiplyOptions.js';
-import { LIGHTS_LOG_KEY, logLights } from './addBothPlay.js';
+import { LIGHTS_LOG_KEY, logLights } from './lightsLog.js';
 
 export const distributeDrillPack = {
   id: 'distribute-drill',

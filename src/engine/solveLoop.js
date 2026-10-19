@@ -32,6 +32,8 @@ import { climb, teach as teachShape } from './solveit/registry.js';
 //   answerBlocked(s)   something of the card's is open that holds the typing row back (an amount, a pending deal)
 //   nextNeeded(s)      after a wrong guess is undone: mark the next needed move
 //   waitingForUndo(s)  a try of the card's own waits for Undo outside `needUndo` (Divide's failed fraction); undoReason(s) says why
+//   helpBlocked(s)     the card holds help back for now (Add to both sides while its seesaw is being built)
+//   afterUndo(s), undoKey(s)  the card's own clean-up after Undo, and what it says
 // I'm stuck or Teach me while a move waits for Undo (Build A): the first rung is one sentence saying what happened, with Undo the
 // one highlighted target, and no other help opens. It counts as the click it was, and the class sheet records it as a reminder
 // ('hint'). Used by every card on the loop, and by Add to both sides, which is not on the loop yet.
@@ -71,7 +73,7 @@ export function createSolveLoop(card) {
   const alone = (s) => card.alone(s.board);
   // Has the student done anything on this problem? Start over is greyed on the untouched original.
   const touched = (s) => s.rows.length > 1 || s.history.length > 0 || s.stuck > 0 || s.taught > 0 || s.scaffold || Boolean(s.sub) || s.entry !== '' || s.unfolded || card.touched?.(s) === true;
-  const helpOk = (s) => s.stage !== 'done' && (!s.sub || (s.sub.step >= subTotal(s.sub) && !s.sub.ok));
+  const helpOk = (s) => s.stage !== 'done' && !card.helpBlocked?.(s) && (!s.sub || (s.sub.step >= subTotal(s.sub) && !s.sub.ok));
   const startOverOk = (s) => s.stage !== 'done' && touched(s);
 
   // Is the x = [ ] row live? Always, except while a move waits for Undo, while a substitution is stepped, while something of the
@@ -93,7 +95,8 @@ export function createSolveLoop(card) {
   // ---------- committing a move ----------
   // A move that the card has worked out: `rows` are the work rows and the new equation, `next` the new board, `label` the folded
   // row's words, `helpful` whether the lights say it helped. Returns the state with its message left to the card.
-  function commit(s, { rows, next, label, helpful, lights }) {
+  // `keepScaffold`: a move made in the card's scaffold keeps the scaffold up (Add to both sides' seesaw stays until the problem ends).
+  function commit(s, { rows, next, label, helpful, lights, keepScaffold = false }) {
     s.rows.push(...rows);
     s.board = next;
     s.lights = lights ?? s.lights;
@@ -104,7 +107,7 @@ export function createSolveLoop(card) {
       s.movedOnce = true;
       s.reds = 0;
       s.needUndo = false;
-      s.scaffold = false;                                                      // the new equation state starts bare
+      if (!keepScaffold) s.scaffold = false;                                   // the new equation state starts bare
       s.rung = 0;
       s.forced = false;
       if (!alone(s)) { s.unfolded = true; s.foldLabel = label; }               // a new equation state: the move folds when the student goes on
@@ -136,7 +139,7 @@ export function createSolveLoop(card) {
   // The move just made is folded to one row, and nothing before it can be undone: the equation state it led to is the new
   // starting point. (Going on, with a guess, another move or help, commits it.)
   function fold(s) {
-    s.pic = null;                                                                       // the scaffold picture the move left behind goes with the fold
+    if (s.pic) s.pic = null;                                                            // the scaffold picture the move left behind goes with the fold
     if (!s.unfolded) return;
     s.rows = [...s.rows.slice(0, s.moveStart), { type: 'fold', label: s.foldLabel, board: s.board }];
     s.moveStart = s.rows.length;

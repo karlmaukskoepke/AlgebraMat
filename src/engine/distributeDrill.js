@@ -31,9 +31,9 @@ export function newDrill(problem) {
   const s = {
     drill: true, problem: { kind: problem.kind, id: problem.id, text: problem.text, x: problem.x }, stage: 'moves', step: 'moves', scaffold: false, sub: null, pending: null, combining: null, resolving: false,
     menu: null, amountEntry: '', typing: null, board, rows: [{ type: 'eq', board }], history: [], work: null,
-    lights: { fewer: 'off', solved: 'off' }, undoCue: false, startOver: false, hint: null, entry: '', clean: true, wrongs: 0,
+    lights: { fewer: 'off', solved: 'off' }, startOver: false, hint: null, entry: '', clean: true, wrongs: 0,
     lx: {
-      awaitNext: null, rules: [], forced: false, movedOnce: true, moves: 0, negIds: [], combine: null, distribute: null, mult: null, hand: { fewer: 'off' },
+      moves: 0, negIds: [], combine: null, distribute: null, mult: null, hand: { fewer: 'off' },
       log: {
         drags: 0, outcomes: { reorder: 0, cross: 0, combine: 0, distribute: 0, snapBack: 0, keyboard: 0 }, minusTaps: 0,
         lightHovers: {}, moveHovers: {}, sumsWrong: 0, productsWrong: 0, refusedMinus: 0,

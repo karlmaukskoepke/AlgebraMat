@@ -1,7 +1,8 @@
 // Build A (docs/build-a/SPEC-BUILD-A-ADD-HELP-AND-PARITY.md, P1): Add's help reads the equation on screen, never writes the value,
 // and says "Undo first" while a move waits for Undo, on Add and on the shared loop (Divide).
 import { describe, it, expect } from 'vitest';
-import { newAddBoth, reduceAddBoth, boardText } from '../src/engine/addBothMoves.js';
+import { boardText } from '../src/engine/addBothMoves.js';
+import { newAddBoth, reduceAddBoth } from '../src/engine/cards/add.js';
 import { makeAddBoth } from '../src/engine/addBoth.js';
 import { newDivide, reduceDivide } from '../src/engine/divideMoves.js';
 import { makeDivide } from '../src/engine/divide.js';
@@ -25,18 +26,21 @@ const scaffoldPartial = () => add(start(), stuck, stuck, { type: 'choose', move:
   { type: 'kind', value: 'battle' }, { type: 'crossNext' }, { type: 'kind', value: 'party' });
 
 describe('Add: the guided rung and Teach me use the number now next to x', () => {
-  it('after a partial move in the seesaw, the guided rung offers the opposite of the +3 now there, not of the original +8', () => {
+  // (Build E: on the shared loop, a move in the seesaw that only partly helps waits for Undo, like every unhelpful move; help then reads the
+  // state Undo returned to, never the original problem)
+  it('after a partial move in the seesaw, I\'m stuck says Undo first; after Undo the guided rung offers the opposite of the number there', () => {
     let s = scaffoldPartial();
-    expect([boardText(s.board), s.lights.fewer]).toEqual(['x + 3 = −4 + −5', 'neutral']);
-    s = add(s, stuck, stuck);
-    expect([s.feedback.key, s.amountEntry, s.hint]).toEqual(['aStuck3', '-3', { kind: 'amount', amount: -3 }]);
-    expect(addBothFeedbackText(s.feedback)).toBe('−3 cancels the +3. Add it to both sides yourself.');
+    expect([boardText(s.board), s.lights.fewer, s.needUndo]).toEqual(['x + 3 = −4 + −5', 'neutral', true]);
+    expect(add(s, stuck).feedback).toMatchObject({ key: 'aUndoFirstHelp', params: { reason: 'partial' } });
+    s = add(s, { type: 'undo' }, stuck, stuck, stuck);
+    expect([boardText(s.board), s.feedback.key, s.amountEntry, s.hint]).toEqual(['x + 8 = −4', 'aStuck3', '-8', { kind: 'amount', amount: -8 }]);
+    expect(addBothFeedbackText(s.feedback)).toBe('−8 cancels the +8. Add it to both sides yourself.');
   });
-  it('Teach me there accepts the amount that works and refuses the original one', () => {
-    let s = add(scaffoldPartial(), { type: 'teach' });
-    expect([s.forcedAmount, s.amountEntry]).toEqual([-3, '-3']);
-    expect(add(s, { type: 'addTo', side: 'left', amount: -8 }).feedback.key).toBe('aForced');
-    s = add(s, { type: 'addTo', side: 'left', amount: -3 }, { type: 'addTo', side: 'right', amount: -3 }, { type: 'go' });
+  it('Teach me in the seesaw offers the amount that works for the equation there and refuses any other', () => {
+    let s = add(scaffoldPartial(), { type: 'undo' }, { type: 'teach' });
+    expect([s.forcedAmount, s.amountEntry]).toEqual([-8, '-8']);
+    expect(add(s, { type: 'addTo', side: 'left', amount: -3 }).feedback.key).toBe('aForced');
+    s = add(s, { type: 'addTo', side: 'left', amount: -8 }, { type: 'addTo', side: 'right', amount: -8 }, { type: 'go' });
     expect(s.feedback.key).toBe('aPartyOrBattle');                                      // accepted: the pair beside x is asked about
   });
   it('a partial move is said in the student\'s numbers: the +8 there was and the −5 added (Build D-2)', () => {

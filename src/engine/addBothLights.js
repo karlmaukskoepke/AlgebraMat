@@ -12,7 +12,7 @@
 //        be shown as a negative number (B4). Reorder, minus and combine are undone here; everything else is the engine's.
 // It also counts what the classroom tests need (`s.lx.log`). No DOM here.
 
-import { reduceAddBoth, newAddBoth, xAlone, xSideOf, aloneAsk, alonePair } from './addBothMoves.js';
+import { reduceAddBoth, newAddBoth, xAlone, xSideOf, solve, hint as hintAfterUndo } from './cards/add.js';
 import { isTyping, typeInto } from './entry.js';
 import { findTerm, outcomeOf, reorderBoard, combineBoard, pairText, valueOf, crossBoard, otherSide } from './lightsGrab.js';
 
@@ -27,33 +27,31 @@ const sameUi = (a, b) => JSON.stringify(ui(a)) === JSON.stringify(ui(b));
 const say = (s, key, params = {}, bad = false) => { s.feedback = { key, params: { ...(s.feedback?.params ?? {}), ...params }, bad }; return s; };
 
 export function newLightsSession(problem, opts = {}) {
-  const s = newAddBoth(problem, { level: opts.level, introTrade: opts.introTrade });
+  // (the problem after a correct guess, shown with a move first, is the loop's: s.mustMove until s.movedOnce)
+  const s = newAddBoth(problem, { level: opts.level, introTrade: opts.introTrade, forceMove: Boolean(opts.forceMove) });
   s.allowZero = true;                     // a 0 in the blank is allowed (it simply does not help)
   s.lx = {
-    awaitNext: null,                      // the row a just-applied move left, waiting for its Next
-    rules: [],                            // rows whose move was committed (a solid rule line under each)
-    forced: Boolean(opts.forceMove),      // the problem after a correct guess: shown with a move first (A1)
-    movedOnce: false,                     // a move was committed (or a combine applied) on this problem
     moves: 0,                             // moves applied (Undo does not take them back off this count)
     negIds: [],                           // terms whose minus was tapped: shown as "+ −2" (B4)
     combine: null,                        // two like terms dropped together: { a, b, side, entry, wrong } (B3)
     hand: { fewer: 'off' },               // the by-hand Fewer terms light (a combine), beside Each side simplified
     log: {
-      previews: 0, chosenAfterPreview: 0, chosenCold: 0, typedBeforeMove: false, sameSignRed: 0, nextPressed: 0, implicitCommits: 0, stuck: 0, teach: 0,
+      previews: 0, chosenAfterPreview: 0, chosenCold: 0, typedBeforeMove: false, sameSignRed: 0, stuck: 0, teach: 0,
       drags: 0, outcomes: { reorder: 0, cross: 0, combine: 0, distribute: 0, snapBack: 0, keyboard: 0 }, minusTaps: 0,
       lightHovers: {}, moveHovers: {}, sumsWrong: 0,
     },
   };
   s.ui = { ...UI0 };
-  return s.feedback?.key === 'aTradeIntro' ? s : say(s, s.lx.forced ? 'lxMustMove' : 'aFindX');
+  return s.feedback?.key === 'aTradeIntro' ? s : say(s, s.mustMove ? 'lxMustMove' : 'aFindX');
 }
 
 // Is the bare move open (S2/S3): the blank in the equation row holds the cursor?
 export const blankOpen = (s) => s.menu === 'add' && !s.scaffold && s.stage === 'moves' && !s.sub && !s.pending && !s.combining;
 // Can the Add move be previewed or chosen right now (S0)?
 export const canChoose = (s) => s.stage === 'moves' && !s.scaffold && !s.sub && !s.pending && !s.combining && !s.resolving && s.menu !== 'add';
-// The move is owed (the problem after a correct guess) until one is committed: x = [ ] is greyed and Add has a steady ring (A1).
-export const moveOwed = (s) => Boolean(s.lx?.forced) && !s.lx.movedOnce && s.stage === 'moves';
+// The move is owed (the problem after a correct guess) until one is committed: x = [ ] is greyed and Add has a steady ring (the loop's
+// rule; the drill has none).
+export const moveOwed = (s) => Boolean(s.mustMove) && !s.movedOnce && s.stage === 'moves';
 // Can the terms of the newest row be grabbed (B0)? Not while help, a substitution, a half-made move or a combine is going on.
 export const canGrab = (s) => s.stage === 'moves' && !s.scaffold && !s.sub && !s.pending && !s.combining && !s.resolving && !s.lx?.combine && !s.lx?.distribute;
 export const combineOpen = (s) => Boolean(s.lx?.combine);
@@ -63,31 +61,16 @@ export const amountMode = (s) => s.menu === 'add' && s.typing !== 'answer' && (!
 // The seesaw's Add is open: one box under each side, the number typed once (Build D-2, Part 5).
 export const seesawAdd = (s) => Boolean(s.scaffold) && s.stage === 'moves' && s.menu === 'add' && !s.combining && !s.resolving && s.pending?.kind !== 'cross' && !s.alone;
 
-// Is x = [ ] live? Always, from the first frame, except while a substitution is stepped, while the move is owed, and in the
-// scaffold until x is alone (as built).
+// Is x = [ ] live? The loop's rule (always, except while a move waits for Undo, a value is being checked, the move is owed, or the
+// seesaw is busy), and not while a sum, products or a multiply of the term layer are open. The drill's x = is live until it is done.
 export function lightsAnswerLive(s) {
-  if (s.stage === 'done' || s.stage === 'build') return false;
   if (s.lx?.combine || s.lx?.distribute || s.lx?.mult) return false;
-  if (s.combining) return s.combining.step === 'count';
-  if (s.sub) return s.sub.kind === 'value' && s.sub.step >= 3 && !s.sub.ok;
-  if (moveOwed(s)) return false;
-  if (s.scaffold) return xAlone(s.board) && !s.pending && !s.resolving;
-  return !s.pending && !s.resolving;
+  if (s.drill) return s.stage !== 'done';
+  return solve.answerLive(s);
 }
 
 const amountOf = (entry) => (/^-?\d+$/.test(entry ?? '') ? Number(entry) : null);
 const xConstant = (board) => board[xSideOf(board)].filter((t) => t.kind === 'num').reduce((a, t) => a + t.v, 0);
-
-// The move waiting for its Next is committed: Undo no longer reaches it and its rule line goes solid.
-function commit(s, how) {
-  if (s.lx.awaitNext === null) return s;
-  s.lx.rules = [...s.lx.rules, s.lx.awaitNext];
-  s.lx.awaitNext = null;
-  s.history = [];
-  s.lx.movedOnce = true;
-  if (how === 'next') s.lx.log.nextPressed += 1; else s.lx.log.implicitCommits += 1;
-  return s;
-}
 
 
 export function withLights(reduce = reduceAddBoth) {
@@ -119,14 +102,6 @@ export function withLights(reduce = reduceAddBoth) {
       if (state.lx.combine) return closeCombine(state);
       if (blankOpen(state)) return cancel(state);
       return ui(state).preview ? withUi(state, { preview: false }) : state;
-    }
-
-    // ----- Next: the move just applied is committed -----
-    if (action.type === 'lxNext') {
-      if (state.lx.awaitNext === null) return state;
-      const s = commit(structuredClone(state), 'next');
-      s.ui = { ...UI0, focus: 'answer' };
-      return s;
     }
 
     // ----- choosing the move: preview first on touch, a second tap (or Esc) cancels -----
@@ -166,19 +141,15 @@ export function withLights(reduce = reduceAddBoth) {
     }
 
     const typingAnswer = isTyping(action) && !amountMode(state);
-    // greyed while the move is owed; a good move waiting for its Next counts once the student goes on (it is committed below)
-    if ((typingAnswer || (action.type === 'focus' && action.target === 'answer')) && moveOwed(state) && state.lx.awaitNext === null) return state;
+    // greyed while the move is owed
+    if ((typingAnswer || (action.type === 'focus' && action.target === 'answer')) && moveOwed(state)) return state;
 
-    // the input to the engine: the waiting move committed when the student goes on without Next
+    // help, a move or a check closes a sum being typed
     let input = state;
-    const prep = () => { if (input === state) input = structuredClone(state); return input; };
-    if (state.lx.awaitNext !== null && (typingAnswer || ['check', 'choose', 'stuck', 'teach'].includes(action.type))) {
-      commit(prep(), 'implicit');
-    }
-    if (state.lx.combine && ['stuck', 'teach', 'choose', 'check'].includes(action.type)) prep().lx.combine = null;   // help closes the sum
+    if (state.lx.combine && ['stuck', 'teach', 'choose', 'check'].includes(action.type)) { input = structuredClone(state); input.lx.combine = null; }
 
     const s = reduce(input, action);
-    if (s === input) return input;                                  // the engine did nothing (an implicit commit still counts)
+    if (s === input) return input;                                  // the engine did nothing (a closed sum still counts)
     s.ui = { ...UI0 };
     const lx = s.lx;
     lx.previewed = false;                                           // the next preview is a new look
@@ -202,27 +173,13 @@ export function withLights(reduce = reduceAddBoth) {
         const amount = s.lastAmount;
         if (s.lights.fewer === 'red' && state.history.length === 0 && Math.sign(amount) === Math.sign(xConstant(before))) lx.log.sameSignRed += 1;
         if (amount === 0) say(s, 'lxZero', {}, false);
-        if (s.lights.fewer === 'green' && !s.zeroOther) {
-          lx.awaitNext = s.rows.length - 1;
-          s.ui.focus = 'next';
-        }
-        // Teach me's move is done for the student's "Do it": committed at once; at x alone, party or battle at the numbers (Build D)
-        if (s.teachFlow) {
-          s.teachFlow = false;
-          s.forced = false;
-          commit(s, 'implicit');
-          if (xAlone(s.board) && alonePair(s.board)) aloneAsk(s);
-        }
+        if (xAlone(s.board)) s.ui.focus = 'answer';                                 // the next thing to do is type x
         break;
       }
       case 'undo':
-        if (lx.awaitNext !== null && lx.awaitNext >= s.rows.length) lx.awaitNext = null;
-        lx.rules = lx.rules.filter((r) => r < s.rows.length);
         if (blankOpen(s)) s.ui.focus = 'blank';                                     // back to S2: the box cleared and focused
         break;
       case 'startOver':
-        lx.awaitNext = null;
-        lx.rules = [];
         lx.negIds = [];
         lx.combine = null;
         lx.hand = { fewer: 'off' };
@@ -293,7 +250,7 @@ function grabAction(state, action, wrapped) {
     s.lights = { ...s.lights, solved: xAlone(next) ? 'green' : 'off' };
     s.lx.hand = { fewer: 'green' };                         // the by-hand part of Fewer terms (A3): one term fewer
     s.lx.combine = null;
-    s.lx.movedOnce = true;
+    s.movedOnce = true;                                     // the student's own combining counts as the move
     s.ui = { ...UI0, focus: 'answer' };
     return say(s, xAlone(next) ? 'lxCombinedAlone' : 'lxCombined');
   }
@@ -319,7 +276,6 @@ function grabAction(state, action, wrapped) {
     const f = findTerm(state.board, action.id);
     if (!canGrab(state) || !f || f.at === 0 || f.term.kind !== 'num' || f.term.v >= 0) return state;
     const s = structuredClone(state);
-    if (s.lx.awaitNext !== null) commit(s, 'implicit');
     const shown = s.lx.negIds.includes(action.id);
     s.lx.negIds = shown ? s.lx.negIds.filter((x) => x !== action.id) : [...s.lx.negIds, action.id];
     s.history.push({ lxKind: 'minus', id: action.id });
@@ -347,7 +303,6 @@ function grabAction(state, action, wrapped) {
   if (out.kind === 'crossX') {
     // x carried across when the other side has x too (no card has such an equation yet): the opposite lands in its slot
     const s = logged(structuredClone(state));
-    if (s.lx.awaitNext !== null) commit(s, 'implicit');
     s.history.push({ lxKind: 'reorder', board: s.board, rows: [...s.rows], prevBoard: s.prevBoard });
     s.board = crossBoard(s.board, action.id, out.at);
     s.rows.push({ type: 'eq', board: s.board });
@@ -358,7 +313,6 @@ function grabAction(state, action, wrapped) {
   if (out.kind === 'cross') {
     // the engine's own move, with the amount from the term: the same rows the Add button writes, judged the same way
     const s0 = structuredClone(state);
-    if (s0.lx.awaitNext !== null) commit(s0, 'implicit');
     Object.assign(s0, { menu: 'add', typing: null, amountEntry: String(out.amount), hint: null, ui: { ...UI0 } });
     const s = wrapped(s0, { type: 'go' });
     if (s.history.length <= s0.history.length) {                      // the engine said no (too big): nothing moves
@@ -379,7 +333,6 @@ function grabAction(state, action, wrapped) {
     return logged(s);
   }
   const s = logged(structuredClone(state));
-  if (s.lx.awaitNext !== null) commit(s, 'implicit');
   s.ui = { ...UI0 };
   if (out.kind === 'reorder') {
     // the same equation in a new order: the newest row is replaced in place, and nothing is judged (B1)
@@ -417,8 +370,8 @@ export function lightsSummary(s) {
   return {
     t: Date.now(), level: s.problem.logLevel ?? s.level, previews: l.previews, previewedBeforeChoose: l.chosenAfterPreview > 0,
     chosenCold: l.chosenCold, typedBeforeMove: l.typedBeforeMove, sameSignRed: l.sameSignRed,
-    nextPressed: l.nextPressed, implicitCommits: l.implicitCommits, stuck: l.stuck, teach: l.teach,
-    guessedRight: s.stage === 'done' && s.sub?.kind === 'guess' && s.sub.ok, forced: s.lx.forced,
+    stuck: l.stuck, teach: l.teach,
+    guessedRight: s.stage === 'done' && s.sub?.kind === 'guess' && s.sub.ok, forced: Boolean(s.mustMove),
     drags: l.drags, outcomes: l.outcomes, minusTaps: l.minusTaps, lightHovers: l.lightHovers, moveHovers: l.moveHovers, sumsWrong: l.sumsWrong,
   };
 }
@@ -439,41 +392,14 @@ const ADD_ERRORS = {
   aWrong: { target: 'subst', clear: true },
   lxCombineWrong: { target: 'sumbox', label: 'check this' },
 };
-const plusText = (v) => (v < 0 ? `−${-v}` : `+${v}`);
 export const ADD_SPOT = {
   error: (s) => (s.scaffold ? null : ADD_ERRORS[s.feedback?.key] ?? null),
   keepsReds: (s) => ['aRed', 'aRed3', 'aZeroOther', 'lxZero', 'aPartial'].includes(s.feedback?.key),
   startOverAt: 3,
   clear: (s) => { s.entry = ''; s.sub = null; },
-  // `before`: the state Undo was pressed on. A value that was a slip shapes the hint (Build D, Part 2): the opposite of the number next
-  // to x lights the Add move with that amount in its blank (its preview); added sizes at x = −8 + 11 ask party or battle at the numbers.
-  hint(s, before = null) {
-    const tag = before?.sub?.tag ?? (before?.feedback?.key === 'aWrong' ? before.feedback.params?.tag : null);
-    // added sizes are read from the numbers on screen (x = 11 − 8 and 19), whatever the tag says (19 is also 11 + 8)
-    const pair = xAlone(s.board) ? alonePair(s.board) : null;
-    const typed = before?.sub?.typed;
-    const sizes = pair && Math.sign(pair[0].v) !== Math.sign(pair[1].v) && Math.abs(typed) === Math.abs(pair[0].v) + Math.abs(pair[1].v);
-    if (sizes || (tag === 'sizes-added' && pair)) {
-      aloneAsk(s);
-      return { ask: true, key: 'aAlonePB', params: { sum: s.feedback.params.sum } };
-    }
-    const con0 = s.board[xSideOf(s.board)].find((t) => t.kind === 'num');
-    if (tag === 'gave-opposite' && con0) {
-      s.hint = { kind: 'cancel', id: con0.id };
-      s.menu = 'add';
-      s.amountEntry = String(-con0.v);
-      s.typing = null;
-      return { target: 'xnum', key: 'aOppHint', params: { constant: plusText(con0.v), opposite: plusText(-con0.v) }, move: 'add' };
-    }
-    if (xAlone(s.board)) return { target: 'answer', key: 'aStuckSolved' };
-    const con = s.board[xSideOf(s.board)].find((t) => t.kind === 'num');
-    if (!con) return null;
-    s.hint = { kind: 'cancel', id: con.id };
-    s.menu = 'add';
-    s.amountEntry = '';
-    s.typing = null;
-    return { target: 'xnum', key: 'aStuckHint', params: { constant: plusText(con.v) }, move: 'add' };
-  },
+  // the hint after Undo is the registry's, for the shape Undo returned to (engine/solveit/rungs/add.js): the reminder at S1 (the opposite
+  // of the number next to x, after a value that was that opposite), Party or Battle at x = −8 + 11 after added sizes
+  hint: (s, before = null) => hintAfterUndo(s, before),
   prompt: (s) => (moveOwed(s) ? 'lxMustMove' : 'aFindX'),
   // the help at x alone (Build C, Part 3): "Party or battle?" floats at the two numbers, then "Now type x." at the field
   ask(s) {

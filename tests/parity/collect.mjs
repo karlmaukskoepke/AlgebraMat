@@ -8,7 +8,8 @@
 import { PACKS, addBoth, divideIt } from '../../src/packs/index.js';
 import { newProgress, completeLevel, encodeProgress, decodeProgress } from '../../src/engine/progress.js';
 import { makeRecord } from '../../src/engine/eventlog.js';
-import { reduceAddBoth, boardText as addBoardText } from '../../src/engine/addBothMoves.js';
+import { boardText as addBoardText } from '../../src/engine/addBothMoves.js';
+import { reduceAddBoth } from '../../src/engine/cards/add.js';
 import { newLightsSession, withLights, ADD_SPOT } from '../../src/engine/addBothLights.js';
 import { withSpotlight } from '../../src/engine/spotlight.js';
 import { formatAddBoth } from '../../src/engine/addBoth.js';

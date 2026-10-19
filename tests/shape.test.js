@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { addBoth, divideIt } from '../src/packs/index.js';
-import { reduceAddBoth } from '../src/engine/addBothMoves.js';
+import { reduceAddBoth } from '../src/engine/cards/add.js';
 import { newLightsSession, withLights } from '../src/engine/addBothLights.js';
 import { newDivide, reduceDivide } from '../src/engine/divideMoves.js';
 import { constantOf } from '../src/engine/addBoth.js';
@@ -50,10 +50,10 @@ describe('Build E, P2: the shape of every state on Add to both sides', () => {
         expect(['S3', 'S4']).toContain(walk(start, reduceAddBoth, addMove(c), `${where} red`).shapes.at(-1));
         if (Math.abs(c) >= 2) expect(['S3', 'S4']).toContain(walk(start, reduceAddBoth, addMove(-Math.sign(c)), `${where} partial`).shapes.at(-1));
         if (c - p.b !== 0) expect(walk(start, reduceAddBoth, addMove(-p.b), `${where} zero`).shapes.at(-1)).toBe('S4');
+        // stacking moves without Undo is no longer possible (Build E: the loop's rule), so S5 and S6 are never reached: a second move waits
         const stacked = walk(start, reduceAddBoth, [...addMove(c), ...addMove(-c)], `${where} stacked`);
-        // (S6, or S3 when the red move had zeroed the other side first; then S5, or S2)
-        expect(['S6', 'S3']).toContain(stacked.shapes.at(-1));
-        expect(['S5', 'S2']).toContain(walk(stacked.s, reduceAddBoth, addMove(-c), `${where} stacked, finished`).shapes.at(-1));
+        expect(['S3', 'S4']).toContain(stacked.shapes.at(-1));
+        expect(stacked.s.feedback.key).toBe('aUndoFirst');
         // the lights layer: the same paths with Next, a wrong guess, Undo
         walk(start, lit, [...addMove(-c), { type: 'lxNext' }, ...check(p.x)], `${where} lights`);
         walk(start, lit, [...check(p.x + 1), { type: 'undo' }, ...addMove(-c)], `${where} wrong guess`);
@@ -152,7 +152,14 @@ describe('Build E, P2: unknown shapes fail loudly, never quietly', () => {
   });
   it('every shape in the list was reached by the walks above (counts for the report)', () => {
     const counts = Object.fromEntries([...seen.entries()].sort());
-    for (const id of Object.keys(SHAPES)) expect(counts[id] ?? 0, `shape ${id}`).toBeGreaterThan(0);
+    // S5 and S6 (moves stacked without Undo) can no longer happen on the shared loop; they stay classified and registered
+    const unreachable = ['S5', 'S6'];
+    for (const id of Object.keys(SHAPES)) {
+      if (unreachable.includes(id)) expect(counts[id] ?? 0, `shape ${id}`).toBe(0);
+      else expect(counts[id] ?? 0, `shape ${id}`).toBeGreaterThan(0);
+    }
+    expect(shapeOfBoard({ left: [{ kind: 'x' }], right: [{ kind: 'num', v: 1 }, { kind: 'num', v: 2 }, { kind: 'num', v: 3 }] }).id).toBe('S5');
+    expect(shapeOfBoard({ left: [{ kind: 'x' }, { kind: 'num', v: 1 }], right: [{ kind: 'num', v: 1 }, { kind: 'num', v: 2 }, { kind: 'num', v: 3 }] }).id).toBe('S6');
     console.log('shape counts', JSON.stringify(counts));
   });
 });

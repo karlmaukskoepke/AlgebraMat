@@ -1,8 +1,12 @@
 import { describe, it, expect } from 'vitest';
 import { makeAddBoth } from '../src/engine/addBoth.js';
 import { oppositeOf } from '../src/engine/addBoth.js';
-import { newAddBoth, reduceAddBoth, boardText, kindOf, balanced, tilt, substitutionSteps, owesMove, tradePending, tradeAvailable } from '../src/engine/addBothMoves.js';
+import { boardText, kindOf, balanced, tilt } from '../src/engine/addBothMoves.js';
+import { newAddBoth, reduceAddBoth, owesMove, tradePending, tradeAvailable, subTotal } from '../src/engine/cards/add.js';
 import { shapeOfBoard } from '../src/engine/solveit/shape.js';
+import { lineText } from '../src/engine/solveTerms.js';
+import { withSpotlight } from '../src/engine/spotlight.js';
+import { ADD_SPOT } from '../src/engine/addBothLights.js';
 
 const run = (s, ...actions) => actions.reduce(reduceAddBoth, s);
 const typed = (text) => [...text.replace(/−/g, '-')].map((ch) => (/\d/.test(ch) ? { type: 'digit', digit: Number(ch) } : { type: 'toggleSign' }));
@@ -65,11 +69,12 @@ describe('path B: one move in one action', () => {
     expect(boardText(s.board)).toBe('x + 6 = −6 + 3');
     expect([s.lights.fewer, s.feedback.key, s.reds]).toEqual(['red', 'aRed', 1]);
   });
-  it('works with x on the right, and after a second move the other side keeps every term', () => {
+  it('works with x on the right; a move that only partly helped waits for Undo before another (the loop\'s rule, Build E)', () => {
     let s = move(start(P('x-a', 5, -2, true)), 1);                                      // −2 = x − 5, add 1 (partial)
     expect(boardText(s.board)).toBe('−2 + 1 = x + −4');
-    s = move(s, 4);
-    expect(boardText(s.board)).toBe('−2 + 1 + 4 = x');
+    expect(move(s, 4).feedback.key).toBe('aUndoFirst');                                // no stacking: Undo first
+    s = move(run(s, { type: 'undo' }), 5);
+    expect(boardText(s.board)).toBe('−2 + 5 = x');
     expect(s.lights.solved).toBe('green');
   });
   it('judges x\'s side only (the other side is never read)', () => {
@@ -97,7 +102,7 @@ describe('path B: one move in one action', () => {
   it('catches zeroing the side without x: shown, Undo, the blank is cleared, the number next to x is highlighted', () => {
     let s = move(start(P('x+a', 3, -5)), 5);                                              // x + 3 = −5, add 5
     expect(boardText(s.board)).toBe('x + 8 = 0');                                          // the 0 they were after, and x + 8
-    expect([s.zeroOther, s.feedback.key, s.undoCue, s.reds]).toEqual([true, 'aZeroOther', true, 1]);
+    expect([s.zeroOther, s.feedback.key, s.needUndo, s.reds]).toEqual([true, 'aZeroOther', true, 1]);
     expect(s.work.right).toEqual([{ v: -5, struck: true }, { v: 5, added: true, struck: true }]);
     s = run(s, { type: 'undo' });
     expect([boardText(s.board), s.feedback.key, s.menu, s.amountEntry, s.zeroOther]).toEqual(['x + 3 = −5', 'aZeroUndone', 'add', '', false]);
@@ -109,21 +114,23 @@ describe('path B: one move in one action', () => {
 describe('undo and the wrong-move handling', () => {
   it('undo reverses the whole move; after a red or grey move the next click to point at is Undo', () => {
     let s = move(start(), 3);
-    expect(s.undoCue).toBe(true);
-    expect(move(start(), -3).undoCue).toBe(false);
+    expect(s.needUndo).toBe(true);
+    expect(move(start(), -3).needUndo).toBe(false);
     s = run(s, { type: 'undo' });
     expect(boardText(s.board)).toBe('x + 3 = −6');
-    expect([s.feedback.key, s.undoCue, s.amountEntry]).toEqual(['aUndone', false, '']);
+    expect([s.feedback.key, s.needUndo, s.amountEntry]).toEqual(['aUndone', false, '']);
     expect(s.rows).toHaveLength(1);
     expect(s.lights).toEqual({ fewer: 'off', solved: 'off' });
     expect(run(move(start(), -3), { type: 'undo' }).feedback.key).toBe('aUndone');
   });
-  it('three reds in a row offer Start over and point to I\'m stuck', () => {
+  it('three reds in a row (each undone; the spotlight keeps the count) point to I\'m stuck; Start over wipes the work', () => {
+    const spot = withSpotlight(reduceAddBoth, ADD_SPOT);
     let s = start();
-    for (let i = 0; i < 3; i++) s = move(s, 3);
-    expect([s.reds, s.startOver, s.feedback.key]).toEqual([3, true, 'aRed3']);
+    for (let i = 0; i < 3; i++) s = [{ type: 'choose', move: 'add' }, ...typed('3'), { type: 'go' }, ...(i < 2 ? [{ type: 'undo' }] : [])].reduce(spot, s);
+    expect([s.reds, s.feedback.key]).toEqual([3, 'aRed3']);
+    expect(run(run(s, { type: 'undo' }), { type: 'startOver' }).feedback.key).toBe('aUndone');      // greyed on the untouched original
     s = run(s, { type: 'startOver' });
-    expect([boardText(s.board), s.startOver, s.feedback.key, s.rows.length]).toEqual(['x + 3 = −6', false, 'aStartedOver', 1]);
+    expect([boardText(s.board), s.feedback.key, s.rows.length]).toEqual(['x + 3 = −6', 'aStartedOver', 1]);
   });
   it('a good move in between starts the count again', () => {
     let s = move(move(start(), 3), 3);
@@ -161,7 +168,7 @@ describe('plugging a typed value back in: a line a click', () => {
     expect(s.feedback.params.typed).toBe('5');
     expect(run(s, { type: 'undo' })).toBe(s);                                              // Undo only once the substitution is shown
     s = run(s, { type: 'placeValue' }, { type: 'nextLine' });
-    expect([s.sub.step, s.feedback.key]).toEqual([2, 'aGuessed']);
+    expect([s.sub.step, s.feedback.key]).toEqual([2, 'aPlugCurrent']);                    // (the loop's words, Build E)
     s = run(s, { type: 'nextLine' });
     expect([s.sub.step, s.feedback.key]).toEqual([3, 'aUndoGuess']);
     expect(run(s, { type: 'nextLine' })).toBe(s);
@@ -170,11 +177,13 @@ describe('plugging a typed value back in: a line a click', () => {
     s = run(s, { type: 'choose', move: 'add' });
     expect(s.menu).toBe('add');                                                            // the move is open as usual
   });
-  it('the substitution is written as the equation is, then what it comes to', () => {
-    expect(substitutionSteps(P('x-a', 5, -2), 5)).toEqual(['5 − 5 = −2', '0 = −2']);
-    expect(substitutionSteps(P('x-a', 5, -2), 3)).toEqual(['3 − 5 = −2', '−2 = −2']);
-    expect(substitutionSteps(P('x+a', 3, -6), -9)).toEqual(['(−9) + 3 = −6', '−6 = −6']);              // a negative goes in parentheses
-    expect(substitutionSteps(P('x+a', 3, 7, true), 10)).toEqual(['7 = 10 + 3', '7 = 13']);
+  it('the substitution is written as the equation is, then what it comes to (the loop\'s check, shared with every card)', () => {
+    const lines = (p, v) => answer(start(p), String(v)).sub.lines.map(lineText);
+    expect(lines(P('x-a', 5, -2), 5)).toEqual(['5 − 5 = −2', '0 = −2']);
+    expect(lines(P('x-a', 5, -2), 3)).toEqual(['3 − 5 = −2', '−2 = −2']);
+    expect(lines(P('x+a', 3, -6), -9)).toEqual(['(−9) + 3 = −6', '−6 = −6']);                       // a negative goes in parentheses
+    expect(lines(P('x+a', 3, 7, true), 10)).toEqual(['7 = 10 + 3', '7 = 13']);
+    expect(subTotal(answer(start(), '5').sub)).toBe(3);                                            // two lines and the mark
   });
   it('a wrong value typed after a move: plugged in, the slip named at the end, the row clears and the student retypes', () => {
     let s = answer(move(start(), -3), '−3');                                               // x + 3 = −6: added instead of the opposite
@@ -182,7 +191,6 @@ describe('plugging a typed value back in: a line a click', () => {
     s = clickThrough(s);
     expect([s.feedback.key, s.feedback.params.tag, s.entry, s.stage, s.wrongs]).toEqual(['aWrong', 'wrong-op', '', 'moves', 1]);
     expect(run(s, { type: 'undo' })).toBe(s);
-    expect(answer(clickThrough(answer(move(start(), -3), '−6')), '').feedback.key).toBe('typeAnswer');
     expect(clickThrough(answer(move(start(), -3), '−6')).feedback.params.tag).toBe('untouched');
     expect(clickThrough(answer(move(start(P('x+a', 4, -2)), -4), '6')).feedback.params.tag).toBe('sign-flipped');
     s = answer(s, '−9');                                                                   // typing again clears the old substitution
@@ -218,7 +226,7 @@ describe('I\'m stuck and Teach me bring in the scaffold, one rung at a time', ()
     const s0 = start();
     expect(s0.scaffold).toBe(false);
     const s = run(s0, { type: 'stuck' }, { type: 'stuck' });
-    expect([s.scaffold, s.counterMode, s.stuck, s.rung, s.stage, s.feedback.key]).toEqual([true, true, 2, 1, 'moves', 'aStuck1']);
+    expect([s.scaffold, s.counterMode, s.stuck, s.rung, s.stage, s.feedback.key]).toEqual([true, true, 2, 2, 'moves', 'aStuck1']);   // (the shared ladder counts the reminder as a rung)
     expect(s.hint.kind).toBe('cancel');
     expect(boardText(s.board)).toBe(boardText(s0.board));                                  // the same equation, pre-built
   });

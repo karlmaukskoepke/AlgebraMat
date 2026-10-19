@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { makeAddBoth } from '../src/engine/addBoth.js';
-import { reduceAddBoth, boardText } from '../src/engine/addBothMoves.js';
+import { boardText } from '../src/engine/addBothMoves.js';
+import { reduceAddBoth } from '../src/engine/cards/add.js';
 import { newLightsSession, withLights, lightsAnswerLive, canGrab, lightsSummary } from '../src/engine/addBothLights.js';
 import { slotsFor, outcomeOf, termText, sideText, crossedText, AUTO_COMBINE_FROM_LEVEL } from '../src/engine/lightsGrab.js';
 
@@ -32,7 +33,7 @@ describe('cross the border (B2)', () => {
     expect(s.rows.map((r) => r.type)).toEqual(['eq', 'work', 'eq']);
     expect(s.work.amount).toBe(-8);
     expect(s.lights).toEqual({ fewer: 'green', solved: 'green' });
-    expect(s.lx.awaitNext).toBe(2);
+    expect(s.needUndo).toBe(false);
     expect(s.lx.log.outcomes).toMatchObject({ cross: 1, keyboard: 0 });
     expect(s.lx.log.drags).toBe(1);
     // the same as choosing Add and typing −8

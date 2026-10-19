@@ -91,6 +91,53 @@
           ]
         },
         {
+          "name": "Add to both sides on the shared loop (Build E)",
+          "about": "Add now runs on the same engine as Divide it: one help ladder that reads the shape of the equation on screen, the same check beside the equation, the same Undo and Start over. What changed for students: after the move that leaves x alone there is no Next (the next thing is typing x); Start over is live as soon as anything has been done; a move that only partly helps waits for Undo, in the seesaw too; a move made in the seesaw is written into the work.",
+          "links": [
+            {
+              "label": "Level 1",
+              "query": "?pack=add-both&level=2&seed=7&nosignin=1",
+              "look": "x + a = b. Add −8 (or the right amount), Go: no Next, the green button says Check until x is typed; the line under the move is solid."
+            },
+            {
+              "label": "Level 2",
+              "query": "?pack=add-both&level=3&seed=7&nosignin=1",
+              "look": "x − a = b. Add the wrong number: the error pop-up, Undo, the hint. Start over is live once you have done anything."
+            },
+            {
+              "label": "Level 3",
+              "query": "?pack=add-both&level=4&seed=7&nosignin=1",
+              "look": "Both forms. I'm stuck four times: the reminder, the seesaw, the two-sided move, the amount filled in. A partly helping move on the seesaw now asks for Undo first."
+            },
+            {
+              "label": "Level 4",
+              "query": "?pack=add-both&level=5&seed=7&nosignin=1",
+              "look": "x on the right: Trade places is pointed out first, then the move."
+            },
+            {
+              "label": "Level 5",
+              "query": "?pack=add-both&level=6&seed=7&nosignin=1",
+              "look": "Bigger numbers: at x alone, I'm stuck twice brings Count it's big-number walk when a number is past 12."
+            },
+            {
+              "label": "Numbers only (See why it works)",
+              "query": "?pack=add-both&level=1&seed=7&nosignin=1",
+              "look": "The numbers-only level is unchanged."
+            },
+            {
+              "label": "Divide it, for comparison",
+              "query": "?pack=divide-it&level=3&seed=7&nosignin=1",
+              "look": "Divide it was already on the shared loop; it now uses the same help registry and the same play adapter as Add. Nothing should look different."
+            },
+            {
+              "label": "Class sheet (signed in)",
+              "query": "?pack=add-both&level=4&seed=7",
+              "look": "Sign in, press I'm stuck twice and finish the problem. On the class sheet the row reads as before (hint, model): the words and tags are unchanged.",
+              "notLive": "Needs a Google sign-in and the class sheet; the record itself is checked by the parity tests."
+            }
+          ]
+        },
+        {
           "name": "Add: what the addition did (Build D-2, Part 1)",
           "about": "An addition that doesn't cancel lights the two numbers added and their (bigger) sum, and says so in the student's numbers; a partial one names both numbers; only real opposites are crossed off.",
           "links": [
@@ -249,6 +296,108 @@
               "label": "Counters crossed off at x alone",
               "query": "?pack=add-both&level=2&seed=7&nosignin=1",
               "look": "Add −8, Enter, Enter, I’m stuck, Battle, I’m stuck: draw the counters, Check, tap pairs: crossed-off counters stay, slashed."
+            }
+          ]
+        },
+        {
+          "name": "Build E screenshots",
+          "about": "The acceptance screenshots: the one state that looks different (before and after), Add on the shared loop, Divide for comparison, and the seesaw's Undo first (they open on GitHub; the report is docs/build-e/BUILD-E-REPORT.md).",
+          "links": [
+            {
+              "label": "01 · after the move before vs after",
+              "query": "https://github.com/karlmaukskoepke/AlgebraMat/blob/main/docs/build-e/be-01-after-the-move-before-vs-after-768.png",
+              "look": "The 1366×768 screenshot (the 1366×650 one is next to it, ending in 650).",
+              "notLive": "Opens the picture on GitHub, not the app; GitHub may ask you to sign in."
+            },
+            {
+              "label": "02 · add opening",
+              "query": "https://github.com/karlmaukskoepke/AlgebraMat/blob/main/docs/build-e/be-02-add-opening-768.png",
+              "look": "The 1366×768 screenshot (the 1366×650 one is next to it, ending in 650).",
+              "notLive": "Opens the picture on GitHub, not the app; GitHub may ask you to sign in."
+            },
+            {
+              "label": "03 · add red move",
+              "query": "https://github.com/karlmaukskoepke/AlgebraMat/blob/main/docs/build-e/be-03-add-red-move-768.png",
+              "look": "The 1366×768 screenshot (the 1366×650 one is next to it, ending in 650).",
+              "notLive": "Opens the picture on GitHub, not the app; GitHub may ask you to sign in."
+            },
+            {
+              "label": "04 · add stuck 1",
+              "query": "https://github.com/karlmaukskoepke/AlgebraMat/blob/main/docs/build-e/be-04-add-stuck-1-768.png",
+              "look": "The 1366×768 screenshot (the 1366×650 one is next to it, ending in 650).",
+              "notLive": "Opens the picture on GitHub, not the app; GitHub may ask you to sign in."
+            },
+            {
+              "label": "05 · add stuck 2",
+              "query": "https://github.com/karlmaukskoepke/AlgebraMat/blob/main/docs/build-e/be-05-add-stuck-2-768.png",
+              "look": "The 1366×768 screenshot (the 1366×650 one is next to it, ending in 650).",
+              "notLive": "Opens the picture on GitHub, not the app; GitHub may ask you to sign in."
+            },
+            {
+              "label": "06 · add stuck 4",
+              "query": "https://github.com/karlmaukskoepke/AlgebraMat/blob/main/docs/build-e/be-06-add-stuck-4-768.png",
+              "look": "The 1366×768 screenshot (the 1366×650 one is next to it, ending in 650).",
+              "notLive": "Opens the picture on GitHub, not the app; GitHub may ask you to sign in."
+            },
+            {
+              "label": "07 · add alone stuck 1",
+              "query": "https://github.com/karlmaukskoepke/AlgebraMat/blob/main/docs/build-e/be-07-add-alone-stuck-1-768.png",
+              "look": "The 1366×768 screenshot (the 1366×650 one is next to it, ending in 650).",
+              "notLive": "Opens the picture on GitHub, not the app; GitHub may ask you to sign in."
+            },
+            {
+              "label": "08 · add alone stuck 2",
+              "query": "https://github.com/karlmaukskoepke/AlgebraMat/blob/main/docs/build-e/be-08-add-alone-stuck-2-768.png",
+              "look": "The 1366×768 screenshot (the 1366×650 one is next to it, ending in 650).",
+              "notLive": "Opens the picture on GitHub, not the app; GitHub may ask you to sign in."
+            },
+            {
+              "label": "09 · add wrong guess",
+              "query": "https://github.com/karlmaukskoepke/AlgebraMat/blob/main/docs/build-e/be-09-add-wrong-guess-768.png",
+              "look": "The 1366×768 screenshot (the 1366×650 one is next to it, ending in 650).",
+              "notLive": "Opens the picture on GitHub, not the app; GitHub may ask you to sign in."
+            },
+            {
+              "label": "10 · add end",
+              "query": "https://github.com/karlmaukskoepke/AlgebraMat/blob/main/docs/build-e/be-10-add-end-768.png",
+              "look": "The 1366×768 screenshot (the 1366×650 one is next to it, ending in 650).",
+              "notLive": "Opens the picture on GitHub, not the app; GitHub may ask you to sign in."
+            },
+            {
+              "label": "11 · add L2 stuck 2",
+              "query": "https://github.com/karlmaukskoepke/AlgebraMat/blob/main/docs/build-e/be-11-add-L2-stuck-2-768.png",
+              "look": "The 1366×768 screenshot (the 1366×650 one is next to it, ending in 650).",
+              "notLive": "Opens the picture on GitHub, not the app; GitHub may ask you to sign in."
+            },
+            {
+              "label": "12 · div opening",
+              "query": "https://github.com/karlmaukskoepke/AlgebraMat/blob/main/docs/build-e/be-12-div-opening-768.png",
+              "look": "The 1366×768 screenshot (the 1366×650 one is next to it, ending in 650).",
+              "notLive": "Opens the picture on GitHub, not the app; GitHub may ask you to sign in."
+            },
+            {
+              "label": "13 · div stuck 1",
+              "query": "https://github.com/karlmaukskoepke/AlgebraMat/blob/main/docs/build-e/be-13-div-stuck-1-768.png",
+              "look": "The 1366×768 screenshot (the 1366×650 one is next to it, ending in 650).",
+              "notLive": "Opens the picture on GitHub, not the app; GitHub may ask you to sign in."
+            },
+            {
+              "label": "14 · div end",
+              "query": "https://github.com/karlmaukskoepke/AlgebraMat/blob/main/docs/build-e/be-14-div-end-768.png",
+              "look": "The 1366×768 screenshot (the 1366×650 one is next to it, ending in 650).",
+              "notLive": "Opens the picture on GitHub, not the app; GitHub may ask you to sign in."
+            },
+            {
+              "label": "15 · seesaw partial move",
+              "query": "https://github.com/karlmaukskoepke/AlgebraMat/blob/main/docs/build-e/be-15-seesaw-partial-move-768.png",
+              "look": "The 1366×768 screenshot (the 1366×650 one is next to it, ending in 650).",
+              "notLive": "Opens the picture on GitHub, not the app; GitHub may ask you to sign in."
+            },
+            {
+              "label": "16 · seesaw partial then stuck undo first",
+              "query": "https://github.com/karlmaukskoepke/AlgebraMat/blob/main/docs/build-e/be-16-seesaw-partial-then-stuck-undo-first-768.png",
+              "look": "The 1366×768 screenshot (the 1366×650 one is next to it, ending in 650).",
+              "notLive": "Opens the picture on GitHub, not the app; GitHub may ask you to sign in."
             }
           ]
         },

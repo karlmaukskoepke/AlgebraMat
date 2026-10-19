@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { makeAddBoth } from '../src/engine/addBoth.js';
-import { reduceAddBoth, newAddBoth, boardText } from '../src/engine/addBothMoves.js';
+import { boardText } from '../src/engine/addBothMoves.js';
+import { reduceAddBoth, newAddBoth } from '../src/engine/cards/add.js';
 import { makeRecord } from '../src/engine/eventlog.js';
 
 // Help at x alone (Build C, Part 3): Party/Battle at the two numbers, then x =, then Count it's counters walk on them (read-only).

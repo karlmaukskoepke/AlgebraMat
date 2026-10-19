@@ -1,11 +1,12 @@
 import { describe, it, expect } from 'vitest';
 import { makeAddBoth } from '../src/engine/addBoth.js';
-import { reduceAddBoth, newAddBoth, boardText } from '../src/engine/addBothMoves.js';
+import { boardText } from '../src/engine/addBothMoves.js';
+import { reduceAddBoth, newAddBoth } from '../src/engine/cards/add.js';
 import {
   newLightsSession, withLights, lightsAnswerLive, blankOpen, moveOwed, lightsSummary,
 } from '../src/engine/addBothLights.js';
 import { makeRecord } from '../src/engine/eventlog.js';
-import { owesMove as addBothLightsOwes } from '../src/engine/addBothMoves.js';
+import { owesMove as addBothLightsOwes } from '../src/engine/cards/add.js';
 
 const reduce = withLights(reduceAddBoth);
 const run = (s, ...actions) => actions.reduce(reduce, s);
@@ -41,9 +42,7 @@ describe('Add to both sides: no Guess x / Use a move choice (idea C)', () => {
     expect(lightsAnswerLive(s)).toBe(false);
     expect(run(s, ...typed('3'))).toBe(s);                                   // greyed: typing does nothing
     s = run(s, choose, ...typed('-8'), { type: 'go' });
-    expect(moveOwed(s)).toBe(true);                                          // applied, not yet committed
-    s = run(s, { type: 'lxNext' });
-    expect(moveOwed(s)).toBe(false);
+    expect(moveOwed(s)).toBe(false);                                         // one helpful move pays it (the loop's commit)
     expect(lightsAnswerLive(s)).toBe(true);
     s = steps(run(s, ...typed('3'), { type: 'check' }));
     expect(s.stage).toBe('done');
@@ -87,24 +86,22 @@ describe('Add to both sides: the preview and the blank (ideas A and B)', () => {
     const s = run(open, { type: 'go' });
     expect([s.ui.shake, s.history.length, s.rows.length, s.feedback]).toEqual([true, 0, 1, open.feedback]);
   });
-  it('the move runs through the card\'s own go: the work row, then x = 11 + −8, then Next commits it', () => {
-    let s = run(start(), choose, ...typed('-8'), { type: 'go' });
+  // (Build E: on the shared loop the move that leaves x alone is committed at once; the next thing to do is type x, so there is no Next)
+  it('the move runs through the card\'s own go: the work row, then x = 11 + −8, and x = is next', () => {
+    const s = run(start(), choose, ...typed('-8'), { type: 'go' });
     expect(s.rows.map((r) => r.type)).toEqual(['eq', 'work', 'eq']);
     expect(boardText(s.board)).toBe('x = 11 + −8');                            // the other side is never combined
     expect(s.lights).toEqual({ fewer: 'green', solved: 'green' });
-    expect([s.lx.awaitNext, s.history.length, s.ui.focus]).toEqual([2, 1, 'next']);
-    s = run(s, { type: 'lxNext' });
-    expect([s.lx.awaitNext, s.lx.rules, s.history.length]).toEqual([null, [2], 0]);
-    expect(run(s, { type: 'undo' })).toBe(s);                                  // Undo no longer reaches it
-    expect(s.lx.log.nextPressed).toBe(1);
+    expect([s.needUndo, s.unfolded, s.history.length, s.ui.focus]).toEqual([false, false, 1, 'answer']);
+    expect(boardText(run(s, { type: 'undo' }).board)).toBe('x + 8 = 11');     // Undo still takes the move back
   });
-  it('typing in x = or Check commits the waiting move instead (never blocks)', () => {
+  it('typing in x = goes straight in after the move', () => {
     const s = run(start(), choose, ...typed('-8'), { type: 'go' }, ...typed('3'));
-    expect([s.entry, s.lx.awaitNext, s.lx.rules, s.lx.log.implicitCommits]).toEqual(['3', null, [2], 1]);
+    expect([s.entry, lightsAnswerLive(s)]).toEqual(['3', true]);
   });
   it('an unhelpful amount is the red path; Undo puts the student back in S2 with the box cleared and focused', () => {
     let s = run(start(), choose, ...typed('8'), { type: 'go' });
-    expect([s.lights.fewer, s.undoCue, s.lx.awaitNext, s.feedback.key]).toEqual(['red', true, null, 'aRed']);
+    expect([s.lights.fewer, s.needUndo, s.feedback.key]).toEqual(['red', true, 'aRed']);
     expect(s.lx.log.sameSignRed).toBe(1);
     s = run(s, { type: 'undo' });
     expect([blankOpen(s), s.amountEntry, s.ui.focus, s.rows.length]).toEqual([true, '', 'blank', 1]);
@@ -112,7 +109,7 @@ describe('Add to both sides: the preview and the blank (ideas A and B)', () => {
   it('a partly cancelling move keeps today\'s grey; a 0 is allowed and simply does not help', () => {
     expect(run(start(), choose, ...typed('-3'), { type: 'go' }).lights.fewer).toBe('neutral');
     const z = run(start(), choose, ...typed('0'), { type: 'go' });
-    expect([z.lights.fewer, z.feedback.key, z.undoCue]).toEqual(['neutral', 'lxZero', true]);
+    expect([z.lights.fewer, z.feedback.key, z.needUndo]).toEqual(['neutral', 'lxZero', true]);
   });
   it('a dragged number fills the blank (from S0 too)', () => {
     const s = run(start(), { type: 'setAmount', value: 8 });
@@ -129,9 +126,9 @@ describe('Add to both sides: the preview and the blank (ideas A and B)', () => {
 
 describe('Add to both sides: the log', () => {
   it('a finished problem\'s summary stays on this device; the class-sheet record keeps its fields', () => {
-    const s = steps(run(start(), { type: 'ui', patch: { preview: true } }, choose, ...typed('-8'), { type: 'go' }, { type: 'lxNext' }, ...typed('3'), { type: 'check' }));
+    const s = steps(run(start(), { type: 'ui', patch: { preview: true } }, choose, ...typed('-8'), { type: 'go' }, ...typed('3'), { type: 'check' }));
     expect(s.stage).toBe('done');
-    expect(lightsSummary(s)).toMatchObject({ level: 2, previews: 1, previewedBeforeChoose: true, typedBeforeMove: false, sameSignRed: 0, nextPressed: 1, stuck: 0, teach: 0 });
+    expect(lightsSummary(s)).toMatchObject({ level: 2, previews: 1, previewedBeforeChoose: true, typedBeforeMove: false, sameSignRed: 0, stuck: 0, teach: 0 });
     const meta = { t: 1, pack: 'add-both', level: 2, problem: 'x + 8 = 11' };
     expect('typedBeforeMove' in makeRecord({ ...s, typedBeforeMove: false }, meta)).toBe(false);
   });
