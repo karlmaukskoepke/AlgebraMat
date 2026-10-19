@@ -20,6 +20,7 @@ import { lightsFeedbackText } from './addBothLightsFeedback.js';
 import { spotlightLayer, findSolveTarget } from './spotlight.js';
 import { boardBlock, trayFor, html } from './addBothMat.js';
 import { narrowPanel } from './narrowPanel.js';
+import { multiplyOptions } from './multiplyOptions.js';
 import { forwardButton, srLine, notePopup, checkSpace, FORCED_TEXT, FIRST_TEXT, placeText } from './solveScreen.js';
 import { firstOpen } from './visit.js';
 // Count it's counters Mat and its words, read-only, for the help at x alone (Build C, Part 3)
@@ -41,7 +42,7 @@ export const introOpen = (s) => moveOwed(s) && !s.introSeen && !s.drill;
 const firstUp = (s) => firstOpen() && !s.drill && !s.lx.forced && s.rows.length === 1 && s.history.length === 0 && !s.sub && !s.entry && s.stage === 'moves' && !s.scaffold;
 
 // What the card says that needs no pop-up: the screen itself shows it (the blank, the rule line, the green button's word, x = live).
-const SILENT = new Set(['aTeachDo', 'aAloneBig', 'aPlace', 'aFindX', 'lxMustMove', 'aMustMove', 'aPickAmount', 'aAmountSet', 'aGreen', 'aSolvedBoard', 'aUndone', 'lxUndone',
+const SILENT = new Set(['dxMultPick', 'dxWholeAsk', 'dxMultAsk', 'dxFlipAsk', 'aTeachDo', 'aAloneBig', 'aPlace', 'aFindX', 'lxMustMove', 'aMustMove', 'aPickAmount', 'aAmountSet', 'aGreen', 'aSolvedBoard', 'aUndone', 'lxUndone',
   'aStartedOver', 'aPlugIn', 'aPlugCurrent', 'aGuessed', 'lxCombineAsk', 'lxCombined', 'lxCombinedAlone', 'aCorrect', 'aSimplerFirst',
   'aZeroUndone', 'aAloneCounters', 'aAloneCount', 'aAlonePB', 'aAloneRight', 'aUndoGuess', 'dxProducts', 'dxRight', 'dxCrossed', 'aTraded']);
 // Input nudges with nothing to undo: a small pop-up next to where the student is, no dimming.
@@ -79,8 +80,8 @@ function popups(s, wrap) {
     return;
   }
   // the drill's end: a negative in front of x: a hint lights Flip everything
-  if (s.drill && s.stage !== 'done' && !s.lx.mult && needsFlip(s.board)) {
-    wrap.append(spotlightLayer({ kind: 'hint', target: 'newest', move: 'flip', place: 'below' }, { ...o, text: lightsFeedbackText({ key: 'dxFlipHint' }) }));
+  if (s.drill && s.stage !== 'done' && !s.lx.mult && !s.lx.mopts && needsFlip(s.board)) {
+    wrap.append(spotlightLayer({ kind: 'hint', target: 'newest', move: 'multiply', place: 'below' }, { ...o, text: lightsFeedbackText({ key: 'dxFlipHint' }) }));
     return;
   }
   const note = notePopup(s, { silent: SILENT, nudge: NUDGE, text: lightsFeedbackText, scaffold: s.scaffold ? 'board' : null });
@@ -236,9 +237,9 @@ function rowsOf(s) {
     const newest = s.rows.length > 1 && (i === last || (i === last - 1 && row.type === 'work'));
     const recent = i === last || (i === last - 1 && row.type === 'work');                   // earlier lines are drawn in lighter ink
     const cls = `lb-rowwrap${!newest || settledNow ? ' is-settled' : ''}${row.type === 'work' ? ' has-work' : ''}${recent ? '' : ' is-old'}`;
-    if (row.type === 'times') {                               // the drill's flip: both sides times (−1), written out (Build D-2)
-      const times = (terms) => [...(terms.length > 1 ? [html('span', 'lb-plus', ['(']), ...sideEls(terms, s.lx.negIds), html('span', 'lb-plus', [')'])] : sideEls(terms, s.lx.negIds)), html('span', 'lb-plus lx-times', ['×']), html('span', 'lb-num is-added', [`(${MINUS}1)`])];
-      return html('div', `${cls} has-work`, [eqRow(times(row.board.left), times(row.board.right), `lb-work${eqClass(charsOf([...row.board.left, ...row.board.right]) + 12)}`, { 'aria-label': 'Both sides times negative 1' })]);
+    if (row.type === 'times') {                               // the drill's flip or whole number: both sides times (−1), written out (Build D-2)
+      const times = (terms) => [...(terms.length > 1 ? [html('span', 'lb-plus', ['(']), ...sideEls(terms, s.lx.negIds), html('span', 'lb-plus', [')'])] : sideEls(terms, s.lx.negIds)), html('span', 'lb-plus lx-times', ['×']), html('span', 'lb-num is-added', [`(${signed(row.factor ?? -1)})`])];
+      return html('div', `${cls} has-work`, [eqRow(times(row.board.left), times(row.board.right), `lb-work${eqClass(charsOf([...row.board.left, ...row.board.right]) + 12)}`, { 'aria-label': `Both sides times ${signed(row.factor ?? -1).replace(MINUS, 'negative ')}` })]);
     }
     if (row.type === 'work') {
       return html('div', cls, [eqRow(workEls(row.work.left, s.lx.negIds), workEls(row.work.right, s.lx.negIds), `lb-work${eqClass(charsOf([...row.work.left, ...row.work.right]))}`, { 'aria-hidden': 'true' })]);
@@ -323,22 +324,30 @@ function productRow(s) {
   return html('div', 'lx-ghost is-chosen is-sum is-products', [eqRow(f.side === 'left' ? els : other, f.side === 'left' ? other : els, 'lx-ghosteq lx-sumeq')]);
 }
 
-// The drill's Multiply: both sides times 1 over the number typed, each side in parentheses.
-function multRow(s) {
-  const text = s.lx.mult.entry;
+// The drill's Multiply (Build D-2, Part 4: one button, three options): both sides times a whole number, 1 over a number, or −1, each
+// side in parentheses. `kind` hovered only (no mult yet): the same row, dashed, as a preview.
+function multRow(s, hovered = null) {
+  const kind = hovered ?? s.lx.mult.kind ?? 'frac';
+  const text = hovered ? '' : s.lx.mult.entry;
   let first = true;
-  const box = () => {
-    const b = html('button', `lx-box is-sum lx-frac1d${text ? '' : ' is-empty is-blink'} is-focus`, [shown(text)], { type: 'button', 'data-lx-field': '1', 'data-fk': first ? 'mult' : undefined, 'aria-label': 'Multiply by 1 over this number', ...(first ? {} : { tabindex: '-1', 'aria-hidden': 'true' }) });
-    if (first && s.ui?.focus === 'mult') b.dataset.lxFocus = '1';
+  const box = (label) => {
+    const live = !hovered && first;
+    const b = html(hovered ? 'span' : 'button', `lx-box is-sum mo-blank${kind === 'frac' ? ' lx-frac1d' : ''}${text ? '' : ' is-empty'}${live && !text ? ' is-blink is-focus' : ''}`, [shown(text)],
+      hovered ? { 'aria-hidden': 'true' } : { type: 'button', 'data-lx-field': '1', 'data-fk': first ? 'mult' : undefined, 'aria-label': label, ...(first ? {} : { tabindex: '-1', 'aria-hidden': 'true' }) });
+    if (live && s.ui?.focus === 'mult') b.dataset.lxFocus = '1';
     first = false;
-    return html('span', 'lx-frac1', [html('span', 'lx-frac1n', ['1']), b]);
+    return b;
   };
-  const side = (terms) => [box(), html('span', 'lb-plus', ['(']), ...sideEls(terms, s.lx.negIds), html('span', 'lb-plus', [')'])];
-  return html('div', 'lx-ghost is-chosen is-sum', [eqRow(side(s.board.left), side(s.board.right), 'lx-ghosteq lx-sumeq')]);
+  const front = () => (kind === 'flip' ? html('span', 'lb-num', [`${MINUS}1`])
+    : kind === 'whole' ? box('Multiply by this whole number')
+      : html('span', 'lx-frac1', [html('span', 'lx-frac1n', ['1']), box('Multiply by 1 over this number')]));
+  const side = (terms) => [front(), html('span', 'lb-plus lx-times', ['×']), html('span', 'lb-plus', ['(']), ...sideEls(terms, s.lx.negIds), html('span', 'lb-plus', [')'])];
+  return html('div', `lx-ghost ${hovered ? 'is-preview' : 'is-chosen is-sum'}`, [eqRow(side(s.board.left), side(s.board.right), 'lx-ghosteq lx-sumeq')], hovered ? { 'aria-hidden': 'true' } : {});
 }
 
 function ghostRow(s) {
   if (s.lx.mult) return multRow(s);
+  if (s.lx.mopts && ['whole', 'frac', 'flip'].includes(s.ui?.preview)) return multRow(s, s.ui.preview);
   if (s.lx.distribute) return productRow(s);
   if (s.lx.combine) return sumRow(s);
   // (a term being dragged shows where it would land in its own row, not here: Build D-2, Part 3)
@@ -391,8 +400,8 @@ export function forwardOf(s) {
 function forwardCore(s) {
   if (s.sub?.placing) return { label: 'Next', action: 'nextLine', enabled: false };
   if (s.sub && s.sub.step < 3) return { label: 'Next', action: 'nextLine', enabled: true };
-  if (s.lx.mult) return { label: 'Go', action: 'go', enabled: valid(s.lx.mult.entry) && Number(s.lx.mult.entry) !== 0 };
-  if (s.lx.distribute) return { label: 'Multiply', action: 'lxApply', enabled: s.lx.distribute.entries.every(valid) };
+  if (s.lx.mult) return { label: 'Go', action: 'go', enabled: s.lx.mult.kind === 'flip' || (valid(s.lx.mult.entry) && Number(s.lx.mult.entry) !== 0) };
+  if (s.lx.distribute) return { label: 'Multiply', action: 'lxApply', enabled: s.lx.distribute.entries.every((e) => /\d|x/.test(e)) };
   if (s.lx.combine) return { label: 'Combine', action: 'lxApply', enabled: valid(s.lx.combine.entry) && !s.lx.combine.wrong };
   if (s.combining?.step === 'count') return { label: 'Check', action: 'check', enabled: valid(s.combining.entry) };
   if (s.combining?.step === 'struck') return { label: 'Next', action: 'crossNext', enabled: true };
@@ -473,8 +482,8 @@ function panel(s) {
   if (tradeAvailable(s)) moves.trade = { live: true, pulse: tradePending(s) };
   // the drill finishes with Flip everything and Multiply (Build D, Part 3)
   if (s.drill) {
-    moves.multiply = { live: true, pressed: Boolean(s.lx.mult), label: 'Multiply both sides by 1 over a number' };
-    moves.flip = { live: true, label: 'Flip everything (× −1)' };
+    // one Multiply button: its three options beside it (Build D-2, Part 4); Flip everything is its −1
+    moves.multiply = { live: true, action: 'multOpen', pressed: Boolean(s.lx.mult) || Boolean(s.lx.mopts), label: 'Multiply', flyout: s.lx.mopts ? multiplyOptions(['whole', 'frac', 'flip'], s.ui?.preview) : null };
   }
   const lights = building ? {} : { fewer: s.lights.fewer, fewerHand: s.lx.hand.fewer, solved: s.lights.solved };
   const flash = ['red', 'neutral'].includes(s.lights.fewer) && s.history.length > 0 ? ['fewer'] : [];

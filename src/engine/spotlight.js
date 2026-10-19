@@ -9,7 +9,7 @@
 // applied to the state Undo returned to (it may also set the card's own outline, `s.hint`). The pop-up's text is the line's message
 // (`s.feedback`); the line itself then shows the prompt. No DOM here.
 
-const STARTS_THE_MOVE = new Set(['choose', 'go', 'take', 'stuck', 'teach', 'check', 'digit', 'toggleSign', 'backspace', 'setAmount']);
+const STARTS_THE_MOVE = new Set(['choose', 'go', 'take', 'stuck', 'teach', 'check', 'digit', 'toggleSign', 'backspace', 'setAmount', 'multOpen', 'multPick']);
 
 // The spotlight the screen draws for this state, or null.
 export function spotOf(s, card) {

@@ -4,13 +4,20 @@
 // like Add's (addBothLights.js): the engine, its rows, its save bits and its class-sheet words are unchanged. No DOM here.
 
 import { isTyping, typeInto } from './entry.js';
-import { xAlone } from './divideMoves.js';
+import { xAlone, coefOf } from './divideMoves.js';
 import { FRACTIONS } from './divide.js';
 
 const FB0 = { num: '', den: '', part: 'num' };
 
+// The one Multiply button (Build D-2, Part 4): a click opens three options beside it, `s.mopts`: a whole number ▢ × ( ), a fraction
+// ▢/▢ × ( ), and −1 × ( ). Hovering one previews it (`ui.preview` is its kind); clicking it makes it solid. The fraction is the move
+// (the card's own `choose`, then the blank); a whole number or −1 is applied to nothing here: Go says why it does not get one x.
+export const MULT_KINDS = ['whole', 'frac', 'flip'];
+export const multOpen = (s) => Boolean(s.mopts);
+const okWhole = (t) => /^-?\d+$/.test(t ?? '');
+
 // Can the move be previewed (hovered) right now? Is its blank open?
-export const canPreview = (s) => s.stage === 'moves' && !s.sub && !s.deal && !s.diag && !s.fail && !s.needUndo && s.menu !== 'fraction' && !xAlone(s.board);
+export const canPreview = (s) => s.stage === 'moves' && !s.sub && !s.deal && !s.diag && !s.fail && !s.needUndo && s.menu !== 'fraction' && !xAlone(s.board) && !s.mopts?.kind;
 export const fracOpen = (s) => s.stage === 'moves' && s.menu === 'fraction' && !s.sub && !s.deal && !s.fail && !s.spot?.choose && s.typing !== 'answer';
 // The fraction in the blank: { n } when it is 1 over 2..6 (a top left empty counts as 1), else null.
 export function fracOf(fb) {
@@ -21,6 +28,39 @@ export function fracOf(fb) {
 }
 
 export function withFractionBlank(reduce) {
+  const inner = fractionBlank(reduce);
+  return (state, action) => {
+    const m = state.mopts;
+    if (action.type === 'multOpen') {
+      if (m && !m.kind) return { ...state, mopts: null, ui: { ...(state.ui ?? {}), preview: false } };     // a second click closes them
+      const base = fracOpen(state) ? { ...state, menu: null, fb: FB0 } : state;
+      const probe = reduce(base, { type: 'choose', move: 'fraction' });
+      if (probe === base || probe.menu !== 'fraction') return probe;                    // not now (the card says why)
+      return { ...base, mopts: { kind: null, entry: '' }, typing: null, feedback: null, ui: { ...(base.ui ?? {}), preview: false } };
+    }
+    if (action.type === 'multPick' && m && MULT_KINDS.includes(action.kind)) {
+      if (action.kind === 'frac') return inner({ ...state, mopts: null }, { type: 'choose', move: 'fraction' });
+      return { ...state, mopts: { kind: action.kind, entry: '' }, feedback: null, ui: { ...(state.ui ?? {}), preview: false } };
+    }
+    if (m?.kind && action.type !== 'ui') {
+      if (m.kind === 'whole' && isTyping(action)) {
+        const entry = typeInto(m.entry, action, 'integer');
+        return entry === m.entry ? state : { ...state, mopts: { ...m, entry }, feedback: null };
+      }
+      if (action.type === 'go') {
+        if (m.kind === 'whole' && !okWhole(m.entry)) return { ...state, feedback: { key: 'dBlankBad', params: {}, bad: true } };
+        const a = coefOf(state.board);
+        const n = m.kind === 'flip' ? -1 : Number(m.entry);
+        return { ...state, feedback: { key: m.kind === 'flip' ? 'dFlipNo' : n === 0 ? 'dZeroNo' : 'dWholeNo', params: { n, a, made: n * a }, bad: true } };
+      }
+      if (action.type === 'undo' || action.type === 'lxCancel') return { ...state, mopts: null, feedback: null };
+    }
+    const s = inner(m && action.type !== 'ui' ? { ...state, mopts: null } : state, action);
+    return s;
+  };
+}
+
+function fractionBlank(reduce) {
   return (state, action) => {
     if (action.type === 'ui') {
       if ('fieldCursor' in (action.patch ?? {})) {
@@ -39,11 +79,17 @@ export function withFractionBlank(reduce) {
       if (isTyping(action) && action.type !== 'toggleSign') {
         if (action.type === 'backspace' && fb[fb.part] === '' && fb.part === 'den') return { ...state, fb: { ...fb, part: 'num' } };
         const v = typeInto(fb[fb.part], action, 'integer');
-        if (v === fb[fb.part] || v.length > 2) return state;
-        // a top of 1 then another digit: the student is typing the bottom (1 then 5 reads as 1/5)
-        if (fb.part === 'num' && fb.num === '1' && action.type === 'digit') return { ...state, fb: { ...fb, den: String(action.digit), part: 'den' } };
-        return { ...state, fb: { ...fb, [fb.part]: v } };
+        if (v === fb[fb.part]) return state;
+        // one digit each (Build D-2, Part 4): a second digit is not a unit fraction (66, 55)
+        if (v.replace('-', '').length > 1) return { ...state, feedback: { key: 'dUnitFraction', params: {}, bad: false } };
+        const done = /\d/.test(v);
+        // the top's digit typed (or − and a digit): the cursor jumps to the bottom
+        if (fb.part === 'num') return { ...state, fb: { ...fb, num: v, part: done ? 'den' : 'num' }, feedback: null };
+        const next = { ...state, fb: { ...fb, den: v } };
+        // a top that is not 1 over a bottom: not a unit fraction
+        return done && fb.num !== '' && fb.num !== '1' ? { ...next, feedback: { key: 'dUnitFraction', params: {}, bad: false } } : { ...next, feedback: null };
       }
+      if (action.type === 'fracStuck') return { ...state, feedback: { key: 'dUnitFraction', params: {}, bad: false } };
       if (action.type === 'focus' && (action.target === 'num' || action.target === 'den')) return { ...state, fb: { ...fb, part: action.target } };
       if (action.type === 'go') {
         const f = fracOf(fb);

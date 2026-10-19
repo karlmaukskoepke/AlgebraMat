@@ -8,6 +8,7 @@ import { html } from './addBothMat.js';
 import { stackRows, substBlock, forwardButton, srLine, notePopup, sideTerms, FORCED_TEXT, FIRST_TEXT, placeText } from './solveScreen.js';
 import { equationRow } from './lightScreen.js';
 import { fracOpen, canPreview, fracOf } from '../engine/divideBlank.js';
+import { multiplyOptions } from './multiplyOptions.js';
 import { groupDiagram } from './groupDiagram.js';
 import { divideFeedbackText } from './divideFeedback.js';
 import { narrowPanel } from './narrowPanel.js';
@@ -35,14 +36,25 @@ function fracBox(s, mirror) {
   };
   return html('span', `dv-fracblank${mirror ? ' is-mirror' : ''}`, [part('num'), html('span', 'dv-fracbar'), part('den')]);
 }
+// The whole-number option's blank (Build D-2, Part 4): typed on the left, mirrored on the right.
+function wholeBox(s, mirror) {
+  const chosen = s.mopts?.kind === 'whole';
+  const text = chosen ? s.mopts.entry : '';
+  return html(mirror ? 'span' : 'button', `lx-box mo-blank${chosen && !mirror ? ' is-focus' : ''}${text ? '' : ' is-empty'}${chosen && !mirror && !text ? ' is-blink' : ''}${mirror ? ' is-mirror' : ''}`,
+    [text ? text.replace('-', MINUS) : ' '], mirror ? { 'aria-hidden': 'true' } : { type: 'button', 'data-lx-field': '1', 'aria-label': 'The whole number to multiply both sides by' });
+}
 function moveRow(s) {
   const open = fracOpen(s);
-  const preview = !open && canPreview(s) && s.ui?.preview;
-  const slot = html('div', `lx-ghost dv-ghost${open ? ' is-chosen' : preview ? ' is-preview' : ''}`);
-  if (!open && !preview) return slot;
-  const side = (terms, mirror) => [fracBox(s, mirror), html('span', 'lb-plus', ['(']), ...sideTerms(terms, s), html('span', 'lb-plus', [')'])];
+  const chosen = s.mopts?.kind ?? (open ? 'frac' : null);
+  // the hovered option (Build D-2: one Multiply button, three options); the fraction was the move's preview before
+  const hovered = !chosen && canPreview(s) ? (s.ui?.preview === true ? 'frac' : s.ui?.preview || null) : null;
+  const kind = chosen ?? hovered;
+  const slot = html('div', `lx-ghost dv-ghost${chosen ? ' is-chosen' : hovered ? ' is-preview' : ''}`);
+  if (!kind) return slot;
+  const front = (mirror) => (kind === 'frac' ? fracBox(s, mirror) : kind === 'whole' ? wholeBox(s, mirror) : html('span', 'lb-num', [`${MINUS}1`]));
+  const side = (terms, mirror) => [front(mirror), html('span', 'lb-plus dv-times', ['×']), html('span', 'lb-plus', ['(']), ...sideTerms(terms, s), html('span', 'lb-plus', [')'])];
   slot.append(equationRow(side(s.board.left, false), side(s.board.right, true), 'lx-ghosteq'));
-  if (!open) slot.setAttribute('aria-hidden', 'true');
+  if (!chosen) slot.setAttribute('aria-hidden', 'true');
   return slot;
 }
 
@@ -127,6 +139,7 @@ export function forwardOf(s) {
   return forwardCore(s);
 }
 function forwardCore(s) {
+  if (s.mopts?.kind) return { label: 'Go', action: 'go', enabled: s.mopts.kind === 'flip' || valid(s.mopts.entry) };
   if (fracOpen(s)) return { label: 'Go', action: 'go', enabled: Boolean(fracOf(s.fb)) };
   if (s.sub?.placing) return { label: 'Next', action: 'nextLine', enabled: false };
   if (s.sub && s.sub.step < solve.subTotal(s.sub)) return { label: 'Next', action: 'nextLine', enabled: true };
@@ -175,7 +188,9 @@ function corners(s) {
 function panel(s) {
   const mapLight = (v) => (v === 'neutral' ? 'off' : v);
   const owed = solve.moveOwed(s) && !s.menu && !s.sub && !xAlone(s.board) && !s.scaffold;
-  const el = narrowPanel({ multiply: { live: true, move: 'fraction', label: 'Multiply both sides by a fraction', pressed: s.menu === 'fraction', ring: owed, preview: canPreview(s) && s.ui?.preview } }, {
+  // one Multiply button: a click opens its three options beside it (Build D-2, Part 4)
+  const flyout = s.mopts && !s.mopts.kind ? multiplyOptions(['whole', 'frac', 'flip'], s.ui?.preview) : null;
+  const el = narrowPanel({ multiply: { live: true, move: 'fraction', action: 'multOpen', label: 'Multiply', pressed: s.menu === 'fraction' || Boolean(s.mopts), ring: owed && !s.mopts, flyout } }, {
     disabled: s.stage === 'done' || Boolean(s.sub),
     lights: { smaller: mapLight(s.lights.smaller), onebox: mapLight(s.lights.onebox), solved: xAlone(s.board) ? 'green' : 'off' },
   });
@@ -188,7 +203,7 @@ function panel(s) {
 const SILENT = new Set(['aPlace', 'aFindX', 'aMustMove', 'dPickFraction', 'aPlugIn', 'aPlugCurrent', 'aSolvedBoard', 'dUndone', 'aCorrect', 'aStartedOver',
   'aUndone', 'aSimplerFirst', 'aUndoGuess']);
 const NUDGE = {
-  dBlankBad: 'answer',
+  dBlankBad: 'answer', dUnitFraction: 'blank', dWholeNo: 'preview', dZeroNo: 'preview', dFlipNo: 'preview',
   typeAnswer: 'answer', answerUnreadable: 'answer', aUndoFirst: 'answer', aFinishMoveFirst: 'answer',
   aLater: 'panel', aNotNeeded: 'panel', dForced: 'fractions',
 };

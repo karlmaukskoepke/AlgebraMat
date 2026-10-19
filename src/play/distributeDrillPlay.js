@@ -7,6 +7,7 @@ import { renderAddBothScreen } from '../view/addBothScreen.js';
 import { lightsFeedbackText } from '../view/addBothLightsFeedback.js';
 import { makeAddBothControls } from '../view/addBothControls.js';
 import { bindLightsMat } from '../view/lightsPointer.js';
+import { bindMultiplyHover } from '../view/multiplyOptions.js';
 import { LIGHTS_LOG_KEY, logLights } from './addBothPlay.js';
 
 export const distributeDrillPack = {
@@ -32,7 +33,10 @@ export const distributeDrillPlay = {
   feedbackText: lightsFeedbackText,
   // the pad types into x = [ ], a sum's blank and the products' blanks
   buildControls: makeAddBothControls((s) => lightsAnswerLive(s) || combineOpen(s) || Boolean(s.lx?.distribute) || Boolean(s.lx?.mult), (s) => Boolean(s.lx?.distribute)),
-  bindMat: (root, dispatch, getSession) => bindLightsMat(root, dispatch, getSession),
+  bindMat: (root, dispatch, getSession) => {
+    const off = [bindLightsMat(root, dispatch, getSession), bindMultiplyHover(root, dispatch, getSession)];
+    return () => off.forEach((f) => f());
+  },
   effects(before, s) {
     if (before && before.step !== 'done' && s.step === 'done') logLights(drillSummary(s));   // this device only, never the class sheet
     return { hint: null };
@@ -44,6 +48,8 @@ export const distributeDrillPlay = {
       case 'lxApply': return { type: 'lxApply' };
       case 'go': return { type: 'go' };
       case 'choose': return { type: 'choose', move: d.move };
+      case 'multOpen': return { type: 'multOpen' };
+      case 'multPick': return { type: 'multPick', kind: d.kind };
       case 'undo': case 'check': case 'next': case 'greyMove': return { type: d.action };
       default: return null;
     }

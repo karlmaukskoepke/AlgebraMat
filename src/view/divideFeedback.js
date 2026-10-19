@@ -14,10 +14,16 @@ const SLIP = {
   unmatched: (p) => `Put ${p.typed} back in: ${p.a} boxes of ${p.typed} is ${p.product}, not ${p.b}. Share the ${p.b} evenly among the ${p.a} boxes.`,
 };
 
+const sg = (v) => (v < 0 ? `−${-v}` : `${v}`);
 const WORDS = { 2: 'two', 3: 'three', 4: 'four', 5: 'five', 6: 'six' };
 
 const M = {
   dWhichFraction: (p) => `We want only one of the ${WORDS[p.boxes] ?? p.boxes} x boxes.\nWhat fraction of these boxes should we find?`,
+  // the Multiply options (Build D-2, Part 4)
+  dUnitFraction: () => 'Enter a unit fraction, like ⅕ or ½.',
+  dWholeNo: (p) => `${sg(p.n)} × (${p.a}x) makes ${sg(p.made)}x: still not one x. Try a fraction.`,
+  dZeroNo: () => 'Times 0 makes both sides 0, and x is gone. Try a fraction.',
+  dFlipNo: (p) => `−1 × (${p.a}x) makes −${p.a}x: the sign changes, but there are still ${p.a} x’s. Try a fraction.`,
   dBlankBad: () => 'Type a fraction of both sides: 1 over 2, 3, 4, 5 or 6 (like 1/5).',
   dPickFraction: () => 'Pick a fraction of both sides. Which one leaves one box?',
   dUndone: () => 'Undone. Pick a different fraction.',

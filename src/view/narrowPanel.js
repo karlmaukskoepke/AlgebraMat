@@ -50,7 +50,7 @@ export function miniIcon(id) {
   return svg;
 }
 
-// moves: { [id]: { live, move (the card's data-move, if not the id), pressed, preview, ring (a steady ring: the move owed), pulse (the
+// moves: { [id]: { live, move (the card's data-move, if not the id), action (its data-action, if not choose), flyout, pressed, preview, ring (a steady ring: the move owed), pulse (the
 // move to click now), focus } } ; anything not named is greyed. `disabled`: every live move is off for now (a check being stepped...).
 // `lights`: { key: state } (a light not named is off); `open`: the light opened by hover or a tap; `flash`: lights that flash once.
 export function narrowPanel(moves, { disabled = false, lights = {}, open = null, flash = [] } = {}) {
@@ -63,10 +63,11 @@ export function narrowPanel(moves, { disabled = false, lights = {}, open = null,
     let b;
     if (o?.live) {
       b = html('button', `btn btn-move lb-move lx-move${o.pressed ? ' is-on' : ''}${o.preview ? ' is-preview' : ''}${o.near ? ' is-near' : ''}${o.ring ? ' is-target is-ring' : ''}${o.pulse ? ' is-target' : ''}`, [miniIcon(m.id)], {
-        type: 'button', 'data-action': 'choose', 'data-move': id, 'aria-label': o.label ?? m.label, 'data-tip': o.label ?? m.label, 'data-fk': id, 'aria-pressed': String(Boolean(o.pressed)),
+        type: 'button', 'data-action': o.action ?? 'choose', 'data-move': id, 'aria-label': o.label ?? m.label, 'data-tip': o.label ?? m.label, 'data-fk': id, 'aria-pressed': String(Boolean(o.pressed)),
       });
       b.disabled = disabled || Boolean(o.off);
       if (o.focus) b.dataset.lxFocus = '1';
+      if (o.flyout) b = html('div', 'lx-movewrap', [b, o.flyout]);          // the Multiply options, beside the button (Build D-2)
     } else {
       b = html('button', 'btn lb-move lx-move is-grey', [miniIcon(m.id)], { type: 'button', 'data-action': 'greyMove', 'data-move': o?.move ?? m.id, 'aria-disabled': 'true', 'aria-label': m.label, 'data-tip': m.label });
     }

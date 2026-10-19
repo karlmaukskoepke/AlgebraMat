@@ -35,3 +35,35 @@ describe('Divide it: the fraction blank and the list after a fraction that does 
     expect([boardText(s.board), s.pic.kept, s.pic.groups, spotOf(s, DIVIDE_SPOT)]).toEqual(['x = ⅕(−15)', 0, [3, 3, 3, 3, 3], null]);
   });
 });
+
+// Build D-2, Part 4: one Multiply button with three options; one digit each in the fraction; the unit-fraction pop-up
+describe('Build D-2: Divide it’s Multiply options and the fraction blank', () => {
+  it('opens three options; the fraction opens the blank; a second click closes them', () => {
+    let s = run(start(), { type: 'multOpen' });
+    expect([Boolean(s.mopts), s.menu]).toEqual([true, null]);
+    expect(run(s, { type: 'multOpen' }).mopts).toBe(null);
+    s = run(s, { type: 'ui', patch: { preview: 'whole' } });
+    expect(s.ui.preview).toBe('whole');
+    s = run(s, { type: 'multPick', kind: 'frac' });
+    expect([s.mopts, fracOpen(s)]).toEqual([null, true]);
+  });
+  it('a whole number or −1 is solid, then Go says why it does not leave one x', () => {
+    let s = run(start(), { type: 'multOpen' }, { type: 'multPick', kind: 'whole' }, digit(3), { type: 'go' });
+    expect(s.feedback).toMatchObject({ key: 'dWholeNo', params: { n: 3, a: 5, made: 15 } });
+    expect(boardText(s.board)).toBe('5x = −15');
+    s = run(start(), { type: 'multOpen' }, { type: 'multPick', kind: 'flip' }, { type: 'go' });
+    expect(s.feedback.key).toBe('dFlipNo');
+    expect(run(s, { type: 'undo' }).mopts).toBe(null);
+  });
+  it('one digit on top, then the cursor is on the bottom; 66 is not a unit fraction', () => {
+    let s = run(start(), { type: 'choose', move: 'fraction' }, digit(1));
+    expect(s.fb).toMatchObject({ num: '1', part: 'den' });
+    s = run(s, digit(5));
+    expect([fracOf(s.fb), s.feedback?.key ?? null]).toEqual([{ n: 5 }, null]);
+    s = run(s, digit(5));
+    expect([s.fb.den, s.feedback.key]).toEqual(['5', 'dUnitFraction']);
+    s = run(start(), { type: 'choose', move: 'fraction' }, digit(6), digit(6));
+    expect([s.fb.num, s.fb.den, s.feedback.key]).toEqual(['6', '6', 'dUnitFraction']);
+    expect(run(start(), { type: 'choose', move: 'fraction' }, { type: 'fracStuck' }).feedback.key).toBe('dUnitFraction');
+  });
+});

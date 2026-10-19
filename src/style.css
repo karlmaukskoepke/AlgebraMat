@@ -3575,3 +3575,22 @@ body[data-input='touch'] #play.is-light #controls .btn-pad { min-width: 48px; mi
 .ui-light .lx-live.is-carrying .lb-border::before, .is-grabbing .ui-light .lx-live .lb-border::before { top: -10px; bottom: calc(50% + 0.5em); }
 .ui-light .lx-live.is-carrying .lb-border::after, .is-grabbing .ui-light .lx-live .lb-border::after { top: calc(50% + 0.5em); bottom: -10px; }
 .ui-light .lx-live .lx-tok.is-shadow .lx-negnum, .ui-light .lx-live .lx-tok.is-shadow .lx-negsign { color: inherit; border: 0; box-shadow: none; text-decoration: none; background: none; }
+
+/* ---------- Build D-2, Part 4: the Multiply options beside the button; no thick outline on a blank (the cursor shows it) ---------- */
+.lx-movewrap { position: relative; display: grid; }
+.mo-flyout { position: absolute; right: calc(100% + 12px); top: 50%; transform: translateY(-50%); z-index: 40; display: flex; flex-direction: column; gap: 6px;
+  padding: 8px; background: #fff; border: 3px solid var(--ink); border-radius: 14px; box-shadow: 0 6px 16px rgba(0, 0, 0, 0.18); }
+.mo-opt { min-height: 46px; padding: 4px 14px; display: inline-flex; align-items: center; justify-content: flex-start; gap: 6px; white-space: nowrap; font: 800 22px 'Lexend', system-ui, sans-serif; background: #fff; }
+.mo-opt.is-preview, .mo-opt:hover, .mo-opt:focus-visible { background: #e7f2fb; border-color: #0072b2; }
+.mo-box { display: inline-block; width: 22px; height: 24px; border: 2px dashed currentColor; border-radius: 5px; vertical-align: middle; }
+.mo-frac { display: inline-flex; flex-direction: column; align-items: center; gap: 2px; }
+.mo-frac .mo-box { width: 18px; height: 14px; }
+.mo-bar { display: block; width: 22px; border-top: 2px solid currentColor; }
+.ui-light .dv-fracpart.is-focus, .ui-light .lx-box.is-focus.mo-blank { outline: none; box-shadow: none; }
+.ui-light .dv-times { padding: 0 6px; }
+.dv-light .mo-blank { display: inline-flex; align-items: center; justify-content: center; min-width: 48px; min-height: 50px; padding: 0 8px; font: 800 30px 'Lexend', system-ui, sans-serif; color: #0072b2; border: 3px dashed #0072b2; border-radius: 10px; background: transparent; vertical-align: middle; }
+.dv-light .lx-ghost.is-chosen .mo-blank:not(.is-mirror) { border-style: solid; background: #fff; }
+.dv-light .lx-box { position: relative; }
+.dv-light .lx-box.is-empty.is-blink::after { content: ''; position: absolute; left: 8px; right: 8px; bottom: 5px; border-bottom: 3px solid #0072b2; animation: ab-blink 1s steps(2, start) infinite; }
+@media (prefers-reduced-motion: reduce) { .dv-light .lx-box.is-empty.is-blink::after { animation: none; } }
+.ui-light .dv-times, .ui-light .lx-times { font-family: 'Lexend', system-ui, sans-serif; font-weight: 700; font-size: 0.8em; }

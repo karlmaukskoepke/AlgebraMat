@@ -1,0 +1,34 @@
+// The one Multiply button's three options (Build D-2, Part 4), beside the button: a whole number ▢ × ( ), a fraction ▢/▢ × ( ), and
+// −1 × ( ). Hovering one previews it on the equation (dashed); clicking it makes it solid. Shared by Divide it and the Distribute drill.
+
+import { html } from './addBothMat.js';
+
+const box = () => html('span', 'mo-box');
+const LOOK = {
+  whole: () => [box(), ' × ( )'],
+  frac: () => [html('span', 'mo-frac', [box(), html('span', 'mo-bar'), box()]), ' × ( )'],
+  flip: () => ['−1 × ( )'],
+};
+const SAID = { whole: 'Multiply both sides by a whole number', frac: 'Multiply both sides by a fraction', flip: 'Multiply both sides by −1' };
+
+// kinds: which options, in order; preview: the kind hovered now.
+export function multiplyOptions(kinds, preview) {
+  return html('div', 'mo-flyout', kinds.map((k) => html('button', `btn mo-opt${preview === k ? ' is-preview' : ''}`, LOOK[k](), {
+    type: 'button', 'data-action': 'multPick', 'data-kind': k, 'data-mopt': k, 'aria-label': SAID[k],
+  })), { role: 'group', 'aria-label': 'Multiply by' });
+}
+
+// Hovering an option (or a keyboard focus on it) previews it: the kind under the pointer, or false.
+export function bindMultiplyHover(root, dispatch, getSession) {
+  const set = (kind) => { if ((getSession()?.ui?.preview ?? false) !== kind) dispatch({ type: 'ui', patch: { preview: kind } }); };
+  const over = (e) => { const o = e.target.closest?.('[data-mopt]'); if (o) set(o.dataset.mopt); };
+  const out = (e) => {
+    const o = e.target.closest?.('[data-mopt]');
+    if (o && !(e.relatedTarget && e.relatedTarget.closest?.('[data-mopt]'))) set(false);
+  };
+  const focus = (e) => { const o = e.target.closest?.('[data-mopt]'); if (o) set(o.dataset.mopt); };
+  root.addEventListener('pointerover', over);
+  root.addEventListener('pointerout', out);
+  root.addEventListener('focusin', focus);
+  return () => { root.removeEventListener('pointerover', over); root.removeEventListener('pointerout', out); root.removeEventListener('focusin', focus); };
+}

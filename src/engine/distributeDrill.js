@@ -50,6 +50,7 @@ const canGrab = (s) => s.stage === 'moves' && !s.lx.combine && !s.lx.distribute 
 const mapTerms = (board, f) => ({ left: board.left.map(f), right: board.right.map(f) });
 const flipTerm = (t) => (t.kind === 'num' ? { ...t, v: -t.v } : t.kind === 'x' ? { ...t, coef: -(t.coef ?? 1) } : { ...t, factor: -t.factor });
 const splits = (t, n) => (t.kind === 'num' ? t.v % n === 0 : t.kind === 'x' ? (t.coef ?? 1) % n === 0 : t.factor % n === 0);
+const mulTerm = (t, n) => (t.kind === 'num' ? { ...t, v: t.v * n } : t.kind === 'x' ? { ...t, coef: (t.coef ?? 1) * n } : { ...t, factor: t.factor * n });
 const divTerm = (t, n) => (t.kind === 'num' ? { ...t, v: t.v / n } : t.kind === 'x' ? { ...t, coef: (t.coef ?? 1) / n } : { ...t, factor: t.factor / n });
 // The end of the drill: x alone with a negative in front, the other side a number: Flip everything is the move (a hint lights it).
 export const needsFlip = (board) => {
@@ -112,7 +113,8 @@ export function reduceDrill(state, action) {
   // ----- typing: the products of a distribute, the sum of a combine, the number of a multiply, or x = -----
   if (isTyping(action)) {
     if (lx.mult) {
-      s.lx.mult = { entry: typeInto(lx.mult.entry, action, 'integer') };
+      if (lx.mult.kind === 'flip') return state;                    // −1: nothing to type
+      s.lx.mult = { ...lx.mult, entry: typeInto(lx.mult.entry, action, 'integer') };
       s.ui.focus = 'mult';
       return s;
     }
@@ -139,7 +141,24 @@ export function reduceDrill(state, action) {
     return s;
   }
 
+  if (lx.mopts && action.type !== 'multPick' && action.type !== 'multOpen') s.lx.mopts = false;    // anything else closes the options
+
   switch (action.type) {
+    // ----- the one Multiply button (Build D-2, Part 4): its options, then the one picked, solid -----
+    case 'multOpen': {
+      if (lx.mopts) { s.lx.mopts = false; return s; }
+      if (!canGrab(state) && !lx.mult) return say(s, 'dxDragOnly');
+      s.lx.mult = null;
+      s.lx.mopts = true;
+      return say(s, 'dxMultPick');
+    }
+    case 'multPick': {
+      if (!lx.mopts || !['whole', 'frac', 'flip'].includes(action.kind)) return state;
+      s.lx.mopts = false;
+      s.lx.mult = { kind: action.kind, entry: '' };
+      s.ui.focus = action.kind === 'flip' ? 'next' : 'mult';
+      return say(s, { whole: 'dxWholeAsk', frac: 'dxMultAsk', flip: 'dxFlipAsk' }[action.kind]);
+    }
     case 'focus': {
       if (action.target === 'dist' && lx.distribute) { s.lx.distribute.focus = Number(action.index) || 0; s.ui.focus = `prod:${s.lx.distribute.focus}`; return s; }
       if (action.target === 'answer') { s.ui.focus = 'answer'; return s; }
@@ -155,7 +174,7 @@ export function reduceDrill(state, action) {
         s.rows.push({ type: 'eq', board: s.board });
         return say(s, 'dxFlipped');
       }
-      if (action.move === 'multiply' && canGrab(state)) { s.lx.mult = { entry: '' }; s.ui.focus = 'mult'; return say(s, 'dxMultAsk'); }
+      if (action.move === 'multiply' && canGrab(state)) { s.lx.mult = { kind: 'frac', entry: '' }; s.ui.focus = 'mult'; return say(s, 'dxMultAsk'); }
       if (action.move === 'multiply' && lx.mult) { s.lx.mult = null; return say(s, 'dxStart'); }
       return say(s, 'dxDragOnly');
     }
@@ -163,6 +182,7 @@ export function reduceDrill(state, action) {
       return say(s, 'dxDragOnly');
     case 'lxCancel':
       if (state.ui.carry) return { ...state, ui: { ...state.ui, carry: null } };
+      if (lx.mopts) return s;
       if (lx.combine || lx.distribute || lx.mult) { s.lx.combine = null; s.lx.distribute = null; s.lx.mult = null; return say(s, 'dxStart'); }
       return state;
 
@@ -200,6 +220,22 @@ export function reduceDrill(state, action) {
     }
     case 'lxApply':
     case 'go': {
+      if (lx.mult?.kind === 'flip') {
+        s.lx.mult = null;
+        return reduceDrill({ ...state, lx: { ...state.lx, mult: null } }, { type: 'choose', move: 'flip' });
+      }
+      if (lx.mult?.kind === 'whole') {
+        const n = Number(lx.mult.entry);
+        if (!/^-?\d+$/.test(lx.mult.entry) || n === 0) { s.ui = { ...UI0, shake: true, focus: 'mult' }; return s; }
+        s.history.push(snapshot(state));
+        s.rows.push({ type: 'times', factor: n, board: s.board });
+        s.board = mapTerms(s.board, (t) => mulTerm(t, n));
+        s.lx.negIds = [];
+        s.rows.push({ type: 'eq', board: s.board });
+        s.lx.mult = null;
+        s.ui.focus = 'answer';
+        return say(s, 'dxTimes', { n: signed(n) });
+      }
       if (lx.mult) {
         const n = Number(lx.mult.entry);
         if (!/^-?\d+$/.test(lx.mult.entry) || n === 0) { s.ui = { ...UI0, shake: true, focus: 'mult' }; return s; }
@@ -303,6 +339,7 @@ export function reduceDrill(state, action) {
     }
 
     case 'undo': {
+      if (lx.mopts) return s;
       if (lx.combine || lx.distribute || lx.mult) { s.lx.combine = null; s.lx.distribute = null; s.lx.mult = null; return say(s, 'dxStart'); }
       const snap = s.history.pop();
       if (!snap) return state;

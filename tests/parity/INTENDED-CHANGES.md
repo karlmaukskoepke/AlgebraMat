@@ -283,3 +283,13 @@ engine already honoured; the drill's own cross now honours it too); a drop up to
 the midline is 2 px, shown only while dragging, in two pieces that stop short of the =. The Distribute drill (a hidden pack, not in
 parity) types each product whole (`−2x`; a number alone in the x blank gets `dxTypeX`, "Type every piece, including the x.") and writes
 Flip everything as a `times` row, both sides × (−1), before the flipped equation.
+
+## Build D-2, Part 4 (2026-10-19): one Multiply button
+
+No data change (PASS): the scripted runs still choose the fraction with the card's own `choose`. On screen: Divide it's Multiply button
+sends `multOpen`, which opens three options beside it (`s.mopts`; `multPick` with `whole`, `frac` or `flip`); hovering one sets
+`ui.preview` to its kind (the old preview when the button itself was approached is gone). The fraction is the card's own move; a whole
+number or −1 is not applied in Divide it (new feedback keys `dWholeNo`, `dZeroNo`, `dFlipNo`). The fraction blank takes one digit (or −
+and a digit) on top, then the cursor jumps to the bottom; a second digit, or a top that is not 1, gives `dUnitFraction` (also after 7 s
+with the blank open and no unit fraction in it: `fracStuck`). No outline on the selected box. In the Distribute drill (not in parity) the
+same three options replace Flip everything and Multiply; a whole number (negatives allowed) and −1 are written as `times` rows.

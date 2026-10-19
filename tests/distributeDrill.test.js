@@ -115,3 +115,19 @@ describe('Build D-2: the drill', () => {
     expect(text(s)).toBe('x = −4 + 9');
   });
 });
+
+describe('Build D-2: the drill’s one Multiply button', () => {
+  const end = () => newDrill({ ...DRILL_PROBLEMS[0], board: () => ({ left: [{ id: 'a', kind: 'x', coef: -2 }], right: [{ id: 'b', kind: 'num', v: 2 }] }) });
+  it('−1 from the options: solid, then Go writes × (−1) and flips', () => {
+    let s = run(end(), { type: 'multOpen' });
+    expect(s.lx.mopts).toBe(true);
+    s = run(s, { type: 'multPick', kind: 'flip' });
+    expect(s.lx.mult).toMatchObject({ kind: 'flip' });
+    s = run(s, { type: 'go' });
+    expect([text(s), s.rows.map((r) => r.type)]).toEqual(['2x = −2', ['eq', 'times', 'eq']]);
+  });
+  it('a whole number multiplies every term, negatives allowed', () => {
+    const s = run(end(), { type: 'multOpen' }, { type: 'multPick', kind: 'whole' }, { type: 'digit', digit: 3 }, { type: 'toggleSign' }, { type: 'go' });
+    expect([text(s), s.rows[1].factor]).toEqual(['6x = −6', -3]);
+  });
+});

@@ -22,6 +22,22 @@
           ]
         },
         {
+          "name": "One Multiply button (Build D-2, Part 4)",
+          "about": "Multiply opens three options beside it: a whole number, a fraction and −1. Hovering one previews it on the equation; clicking it makes it solid. The fraction takes one digit on top and one below (the cursor jumps), with “Enter a unit fraction, like ⅕ or ½.” for 66 or 55, or after a while with nothing done. No thick outline on the selected box: the blinking cursor shows it.",
+          "links": [
+            {
+              "label": "Divide it",
+              "query": "?pack=divide-it&level=3&seed=7&nosignin=1",
+              "look": "Click Multiply: three options. Hover each. Pick ▢/▢: type 6, the cursor jumps down; type 6 again: the unit-fraction pop-up. Pick ▢ × ( ), type 3, Go: “3 × (5x) makes 15x: still not one x. Try a fraction.”"
+            },
+            {
+              "label": "Distribute drill",
+              "query": "?drill=distribute&nosignin=1",
+              "look": "At −2x = 2: Multiply, then −1 × ( ), then Go: both sides × (−1), then 2x = −2. A whole number works too (negatives allowed)."
+            }
+          ]
+        },
+        {
           "name": "Dragging a term (Build D-2, Part 3)",
           "about": "While a term is dragged, the equation itself shows where it would land (no extra row); across the line it turns red and can go before or after the other terms; the line is thin and stops short of the =. In the Distribute drill every product is typed with its x, and Flip everything writes a × (−1) step.",
           "links": [
