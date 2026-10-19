@@ -3561,3 +3561,5 @@ body[data-input='touch'] #play.is-light #controls .btn-pad { min-width: 48px; mi
 .dv-choose .gd svg { max-height: 110px; }
 .alone-tray .alone-note { margin: 0; font: 700 22px/1.2 'Kalam', 'Lexend', system-ui, sans-serif; text-align: center; }
 .alone-tray.is-big { width: 320px; }
+/* Build D-2: an addition that did not cancel: the sum it made, larger */
+.ui-light .lx-tok.is-bigsum { font-size: 1.3em; }

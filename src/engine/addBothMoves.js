@@ -153,6 +153,9 @@ function startOverBoard(s) {
 // A move has been committed (and, in the scaffold, everything that can combine has): judge it and say how it went.
 function resolve(s) {
   const { lights } = judge(s.prevBoard, s.board);
+  // what the addition did, in the student's numbers (Build D-2): the number next to x before the move, and the amount added
+  const before = plus(sumNums(s.prevBoard[xSideOf(s.prevBoard)]));
+  const added = plus(s.lastAmount ?? 0);
   s.lights = lights;
   s.prevBoard = s.board;
   s.resolving = false;
@@ -164,10 +167,10 @@ function resolve(s) {
   }
   if (lights.fewer === 'red') {
     if (s.reds >= 3) s.startOver = true;
-    return say(s, s.reds >= 3 ? 'aRed3' : 'aRed', { amount: signed(s.lastAmount) }, true);
+    return say(s, s.reds >= 3 ? 'aRed3' : 'aRed', { amount: signed(s.lastAmount), before, added }, true);
   }
   if (lights.solved === 'green') return say(s, 'aSolvedBoard');
-  if (lights.fewer === 'neutral') return say(s, 'aPartial', { amount: signed(s.lastAmount), con: plus(xConstantTerm(s.board)?.v ?? 0) });
+  if (lights.fewer === 'neutral') return say(s, 'aPartial', { amount: signed(s.lastAmount), con: plus(xConstantTerm(s.board)?.v ?? 0), before, added });
   return say(s, 'aGreen');
 }
 

@@ -260,3 +260,10 @@ amount in the blank; Go commits it; at x alone `aAlonePB`); Teach me at x alone 
 `aAloneCounters`); in the seesaw a battle beside x is `step: 'struck'` (crossed off, kept) until `crossNext`. The scripted runs
 `stuck-x4-then-solve` (adds `crossNext`) and `teach-me` (now `teach, go, kind party, check`) follow the new flow. Numbers past 12 at x
 alone get Count it's big-number walk (no scripted run reaches it).
+
+## Build D-2, Part 1 (2026-10-19): what an addition did
+
+No data change outside the traces' messages (PASS). `aRed`, `aRed3` and `aPartial` now carry `before` (the number next to x before the
+move) and `added` (the amount), so the pop-ups say "+8 + +8 did not eliminate the term" and "+8 was only partially canceled by the −5
+you added…" (those trace steps were already covered by the Build A/C rows). On screen: the work row strikes numbers only when they
+really cancel; the two numbers added are lit with the sum, which is drawn larger.

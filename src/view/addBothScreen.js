@@ -106,6 +106,10 @@ const sideEls = (terms, negIds = []) => {
 // The line a move leaves above the new equation: the amount (blue) on both sides, x's numbers struck as they combine.
 const workEls = (items, negIds = []) => {
   const out = [];
+  // a cross-off only where the numbers really cancel (+8 and −8), never +8 and +8 (Build D-2)
+  const struckSum = items.filter((t) => t.struck && !t.x && !(t.term && t.term.kind !== 'num')).reduce((a, t) => a + (t.term ? t.term.v : t.v), 0);
+  const cancels = struckSum === 0;
+  items = items.map((t) => (t.struck && !cancels ? { ...t, struck: false } : t));
   items.forEach((t, i) => {
     if (t.term) {                                                   // (the drill writes its work rows with whole terms)
       const { op, body } = termText(t.term, i, negIds.includes(t.term.id));
@@ -144,7 +148,9 @@ function token(s, t, i, side, held) {
   const c = s.lx.combine;
   const said = op ? `${op === '+' ? 'plus' : 'minus'} ${body.replace(MINUS, 'negative ')}` : body.replace(MINUS, 'negative ');
   const lifted = s.ui?.drag?.id === t.id;                                          // the term being dragged leaves a dashed gap
-  const el = html('span', `lx-tok${hint ? ' is-hint' : ''}${c && (c.a === t.id || c.b === t.id) ? ' is-pair' : ''}${held ? ' is-held' : ''}${lifted ? ' is-lifted' : ''}${valueOfTerm(t) < 0 ? ' is-neg' : ' is-pos'}`, kids, {
+  // an addition that did not cancel: the sum it made is drawn larger, under its spotlight (Build D-2)
+  const big = ['aRed', 'aRed3'].includes(s.feedback?.key) && t.kind === 'num' && s.board[side].some((u) => u.kind === 'x');
+  const el = html('span', `lx-tok${hint ? ' is-hint' : ''}${c && (c.a === t.id || c.b === t.id) ? ' is-pair' : ''}${held ? ' is-held' : ''}${lifted ? ' is-lifted' : ''}${big ? ' is-bigsum' : ''}${valueOfTerm(t) < 0 ? ' is-neg' : ' is-pos'}`, kids, {
     'data-tok': t.id, 'data-side': side, 'data-like': likeKey(t), 'data-fk': `tok:${t.id}`, tabindex: canGrab(s) ? '0' : undefined,
     role: 'button', 'aria-label': `${said}. Enter picks it up${subtracted || neg ? '; the minus key shows it as a negative number' : ''}.`,
   });

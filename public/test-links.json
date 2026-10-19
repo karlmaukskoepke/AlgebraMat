@@ -22,6 +22,27 @@
           ]
         },
         {
+          "name": "Add: what the addition did (Build D-2, Part 1)",
+          "about": "An addition that doesn't cancel lights the two numbers added and their (bigger) sum, and says so in the student's numbers; a partial one names both numbers; only real opposites are crossed off.",
+          "links": [
+            {
+              "label": "+8 added to x + 8",
+              "query": "?pack=add-both&level=4&seed=7&nosignin=1",
+              "look": "Add 8, Go: the two 8s and the big 16 are lit; “+8 + +8 did not eliminate the term. Let’s try again.” The 8s are not crossed off."
+            },
+            {
+              "label": "Partly cancelled",
+              "query": "?pack=add-both&level=4&seed=7&nosignin=1",
+              "look": "Add −5, Go: “+8 was only partially canceled by the −5 you added. What value instead of −5 would have completely canceled the +8?” and “still here” under the 3."
+            },
+            {
+              "label": "Real opposites",
+              "query": "?pack=add-both&level=4&seed=7&nosignin=1",
+              "look": "Add −8, Go: the +8 and −8 are crossed off."
+            }
+          ]
+        },
+        {
           "name": "The light design (Build D, Part 1)",
           "about": "No banner: every message is a pop-up; one green button right of x =; the narrow panel with its small lights; help tucked in the corner; no number pad on a keyboard.",
           "links": [

@@ -90,3 +90,11 @@ describe('Build D: the value checked is dragged into x; a slip shapes the hint a
     expect([s.feedback.key, s.alone?.step, spotOf(s, ADD_SPOT)?.kind]).toEqual(['aAlonePB', 'pb', 'ask']);
   });
 });
+
+describe('Build D-2: an addition that did not cancel is said in the student\'s numbers', () => {
+  it('+8 added to x + 8: "+8 + +8 did not eliminate the term", the two added numbers lit with the sum', () => {
+    const s = move(start(), 8);
+    expect([s.feedback.key, s.feedback.params.before, s.feedback.params.added]).toEqual(['aRed', '+8', '+8']);
+    expect(spotOf(s, ADD_SPOT)).toMatchObject({ kind: 'error', target: 'xnum', label: 'got bigger', lit: ['workpair'] });
+  });
+});

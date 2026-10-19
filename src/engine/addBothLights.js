@@ -394,9 +394,10 @@ export function lightsSummary(s) {
 // reminder rung for the state Undo returned to (the number next to x outlined, "What would we add to both sides to eliminate it?").
 // The scaffold (the seesaw) keeps its own messages on the line.
 const ADD_ERRORS = {
-  aRed: { target: 'xnum', label: 'got bigger' },
-  aRed3: { target: 'xnum', label: 'got bigger' },
-  aPartial: { target: 'xnum', label: 'still here' },
+  // the two numbers added are lit too, and the sum (or what is left) carries the label (Build D-2)
+  aRed: { target: 'xnum', label: 'got bigger', lit: ['workpair'] },
+  aRed3: { target: 'xnum', label: 'got bigger', lit: ['workpair'] },
+  aPartial: { target: 'xnum', label: 'still here', lit: ['workpair'] },
   lxZero: { target: 'xnum', label: 'no change' },
   aZeroOther: { target: 'otherSide', label: 'now 0' },
   aUndoFirstHelp: { target: 'lastMove', label: 'waiting for Undo' },

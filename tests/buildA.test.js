@@ -39,8 +39,9 @@ describe('Add: the guided rung and Teach me use the number now next to x', () =>
     s = add(s, { type: 'addTo', side: 'left', amount: -3 }, { type: 'addTo', side: 'right', amount: -3 }, { type: 'go' });
     expect(s.feedback.key).toBe('aPartyOrBattle');                                      // accepted: the pair beside x is asked about
   });
-  it('the grey line after a partial move names the number that is left (+3), not the original (+8)', () => {
-    expect(addBothFeedbackText(partial().feedback)).toBe('The +3 is still there, partly cancelled. What would cancel it all? Undo it and try a different number.');
+  it('a partial move is said in the student\'s numbers: the +8 there was and the −5 added (Build D-2)', () => {
+    expect(addBothFeedbackText(partial().feedback)).toBe('+8 was only partially canceled by the −5 you added. What value instead of −5 would have completely canceled the +8?');
+    expect(partial().feedback.params.con).toBe('+3');                                    // the number left, still named for the hint
   });
   it('on the bare screen the same partial move waits for Undo, so I\'m stuck says Undo first', () => {
     expect([add(partial(), stuck).feedback.key, add(partial(), stuck).feedback.params.reason]).toEqual(['aUndoFirstHelp', 'partial']);

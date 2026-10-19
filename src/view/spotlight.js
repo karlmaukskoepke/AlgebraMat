@@ -276,6 +276,11 @@ export function findSolveTarget(root, target, s = null) {
     case 'forward': return root.querySelector('.btn-forward');
     case 'panel': return root.querySelector('.lx-panel');
     case 'combining': return [...root.querySelectorAll('.ab-boardwrap .is-combining')];
+    case 'workpair': {                                  // the numbers beside x in the latest move's work row: the two that were added
+      const row = rows.filter((r) => r.classList.contains('has-work')).at(-1);
+      const side = sides(row).find(hasX);
+      return side ? [...side.querySelectorAll('.lb-num')] : [];
+    }
     case 'pair': return [...root.querySelectorAll('.lx-live .lx-tok.is-pair')];
     case 'sumbox': return root.querySelector('.lx-box.is-sum');
     case 'blank': return root.querySelector('.lx-ghost.is-chosen .lx-box:not(.is-mirror)');

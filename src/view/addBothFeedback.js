@@ -90,11 +90,15 @@ const M = {
   aCombined: () => 'Combined. Keep going: tap two more groups.',
   // judging the move
   aGreen: () => 'Fewer terms: that move helped. Keep going, or type your guess for x.',
-  aRed: () => 'That didn’t give you fewer terms. Try adding the opposite of the number next to x. Undo it and try a different number to add to both sides.',
+  // an addition that did not cancel, and one that only partly did, in the student's own numbers (Build D-2)
+  aRed: (p) => (p.before ? `Adding to both sides is used to eliminate terms by adding the opposite. ${p.before} + ${p.added} did not eliminate the term. Let’s try again.`
+    : 'That didn’t give you fewer terms. Try adding the opposite of the number next to x. Undo it and try a different number to add to both sides.'),
   aZeroOther: () => 'The right side is 0, but x isn’t any more alone. Look at the left side. Press Undo.',
   aZeroUndone: () => 'What do we add to both sides to eliminate this?',
-  aRed3: () => 'That didn’t give you fewer terms. Undo it and try a different number, or try I’m stuck.',
-  aPartial: (p) => `The ${p.con} is still there, partly cancelled. What would cancel it all? Undo it and try a different number.`,
+  aRed3: (p) => (p.before ? `Adding to both sides is used to eliminate terms by adding the opposite. ${p.before} + ${p.added} did not eliminate the term. Let’s try again, or try I’m stuck.`
+    : 'That didn’t give you fewer terms. Undo it and try a different number, or try I’m stuck.'),
+  aPartial: (p) => (p.before ? `${p.before} was only partially canceled by the ${p.added} you added. What value instead of ${p.added} would have completely canceled the ${p.before}?`
+    : `The ${p.con} is still there, partly cancelled. What would cancel it all? Undo it and try a different number.`),
   aSolvedBoard: () => 'x is alone. What is it? Type it.',
   aStartedOver: () => 'Back to the start. Try again.',
   aUndone: () => 'Undone. Choose “Add ___ to both sides” and try a different number.',
