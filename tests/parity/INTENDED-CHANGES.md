@@ -303,3 +303,9 @@ finished (`aBuilt`) an Add left open from the hint before is closed, so the stud
 and the question. While a value is checked on the seesaw the balance and the checking space sit side by side, and both the x on the
 balance and the equation under it take the value. The walk's box (Party/Battle, big numbers) is gone once the value is being checked.
 I'm stuck is lit in every greyed layer except an error's, when it is enabled.
+
+## Build E, P2 (2026-10-19): the shape classifier
+
+No difference (PASS on all five groups). `engine/solveit/shape.js` reads the shape of every state (Add S1–S7, the seesaw's T0–T2,
+Divide D1, D2, DF), and both cards' lights now come from `lightsOf(shape before, shape after)` instead of each card's own code; parity
+shows the lights are exactly the same.

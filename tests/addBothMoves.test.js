@@ -1,9 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import { makeAddBoth } from '../src/engine/addBoth.js';
 import { oppositeOf } from '../src/engine/addBoth.js';
-import {
-  newAddBoth, reduceAddBoth, boardText, kindOf, balanced, tilt, xTerms, substitutionSteps, owesMove, tradePending, tradeAvailable,
-} from '../src/engine/addBothMoves.js';
+import { newAddBoth, reduceAddBoth, boardText, kindOf, balanced, tilt, substitutionSteps, owesMove, tradePending, tradeAvailable } from '../src/engine/addBothMoves.js';
+import { shapeOfBoard } from '../src/engine/solveit/shape.js';
 
 const run = (s, ...actions) => actions.reduce(reduceAddBoth, s);
 const typed = (text) => [...text.replace(/−/g, '-')].map((ch) => (/\d/.test(ch) ? { type: 'digit', digit: Number(ch) } : { type: 'toggleSign' }));
@@ -74,8 +73,9 @@ describe('path B: one move in one action', () => {
     expect(s.lights.solved).toBe('green');
   });
   it('judges x\'s side only (the other side is never read)', () => {
-    expect(xTerms(start().board)).toBe(2);
-    expect(xTerms(move(start(), -3).board)).toBe(1);
+    // (Build E, P2: read from the shape) x's side holds x and a number, then x alone; the other side is never counted
+    expect([shapeOfBoard(start().board).id, shapeOfBoard(start().board).xNums.length]).toEqual(['S1', 1]);
+    expect([shapeOfBoard(move(start(), -3).board).id, shapeOfBoard(move(start(), -3).board).xNums.length]).toEqual(['S2', 0]);
   });
   it('never takes 0, nothing, or a huge number', () => {
     const open = () => run(start(), { type: 'choose', move: 'add' });

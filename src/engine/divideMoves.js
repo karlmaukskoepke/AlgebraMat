@@ -5,6 +5,7 @@
 // pictures that go with the help rungs. No DOM here.
 
 import { createSolveLoop } from './solveLoop.js';
+import { shapeOfBoard, lightsOf } from './solveit/shape.js';
 import { signed, fractionText, boardText } from './solveTerms.js';
 import { takeFraction, tagDivide, groupsOf, FRACTIONS, legalFractions, formatDivide } from './divide.js';
 
@@ -230,7 +231,7 @@ function commitFraction(s, n, api, pic = null) {
   const { work, next } = applyFraction(s.board, n);
   api.commit(s, {
     rows: [{ type: 'work', board: work }, { type: 'eq', board: next }], next, label: { n }, helpful: true,
-    lights: { smaller: 'green', onebox: xAlone(next) ? 'green' : 'off' },
+    lights: lightsOf(shapeOfBoard(s.board), shapeOfBoard(next)),            // Smaller numbers and One box, from the two shapes (Build E, P2)
   });
   s.fail = null;
   s.deal = null;

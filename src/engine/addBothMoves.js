@@ -13,6 +13,7 @@ import {
   constantOf, oppositeOf, checkAddBoth, tagAddBoth, formatAddBoth, answerText, signed, isBattle,
 } from './addBoth.js';
 import { undoFirst } from './solveLoop.js';
+import { shapeOfBoard, lightsOf } from './solveit/shape.js';
 // Count it's Combine it counters walk, used read-only for the help at x alone (Build C, Part 3): its engine runs unchanged on the
 // two numbers, and its tags stay inside `s.alone.walk` (never in this card's tags, the device skills or the class sheet).
 import { newCombineSession } from './combineSession.js';
@@ -84,17 +85,10 @@ export function boardAnswer(board) {
 
 // ---------- the lights (§3E) ----------
 
-const xSideConstant = (board) => Math.abs(sumNums(board[xSideOf(board)]));
-// The terms on x's side, counted as if its numbers were combined (§3E: only x's side is judged, so zeroing the other side
-// never lights up green and the unsimplified side is never read).
-export const xTerms = (board) => 1 + (sumNums(board[xSideOf(board)]) !== 0 ? 1 : 0);
-
 // Fewer terms: green when x's side has fewer terms, red when it has more or the number next to x got bigger, else grey.
-// Solved for x: green once x is the only term on its side (the student still types the value).
+// Solved for x: green once x is the only term on its side (the student still types the value). Read from the two shapes (Build E, P2).
 export function judge(before, after) {
-  const fewer = xTerms(after) < xTerms(before) ? 'green'
-    : xTerms(after) > xTerms(before) || xSideConstant(after) > xSideConstant(before) ? 'red' : 'neutral';
-  return { lights: { fewer, solved: xAlone(after) ? 'green' : 'off' } };
+  return { lights: lightsOf(shapeOfBoard(before), shapeOfBoard(after)) };
 }
 
 // ---------- the session ----------
