@@ -267,3 +267,10 @@ No data change outside the traces' messages (PASS). `aRed`, `aRed3` and `aPartia
 move) and `added` (the amount), so the pop-ups say "+8 + +8 did not eliminate the term" and "+8 was only partially canceled by the −5
 you added…" (those trace steps were already covered by the Build A/C rows). On screen: the work row strikes numbers only when they
 really cancel; the two numbers added are lit with the sum, which is drawn larger.
+
+## Build D-2, Part 2 (2026-10-19): x = and checking a value
+
+No data change (PASS). On screen only: x = shows no cursor until it is clicked (a view flag, `ui.fieldCursor`, cleared by any other
+action, a press elsewhere or the focus moving on); the last step still blinks. The check's pop-up reads "Let’s check that x = 7 is the
+solution. / Drag the 7 onto an x above." A pointer click on x no longer places the value (Enter still does); after about 4 s idle a faint
+copy of the value travels from x = to the first x, repeating until the student acts.

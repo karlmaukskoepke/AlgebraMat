@@ -3563,3 +3563,6 @@ body[data-input='touch'] #play.is-light #controls .btn-pad { min-width: 48px; mi
 .alone-tray.is-big { width: 320px; }
 /* Build D-2: an addition that did not cancel: the sum it made, larger */
 .ui-light .lx-tok.is-bigsum { font-size: 1.3em; }
+
+/* ---------- Build D-2, Part 2: the value's ghost hint (a faint copy travels from x = to the first x) ---------- */
+.sv-hintghost { left: 0; top: 0; transform: none; box-shadow: none; opacity: 0; z-index: 950; }

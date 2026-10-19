@@ -130,10 +130,18 @@ export function answerBlock(s, loop) {
   return block;
 }
 
-// The value is dragged onto x (every drag has a tap alternative: tap x). While the value is a chip, a pointer drag carries a copy
-// of it; letting go over x places it.
+// The value is dragged onto x (Build D-2, Part 2: dragging only; a click on x no longer places it, though Enter still does, for the
+// keyboard). While the value is a chip, a pointer drag carries a copy of it; letting go over x places it. After about 4 seconds with
+// nothing done, a faint copy of the value travels from x = to the first x, again and again until the student acts.
+const HINT_WAIT = 4000;
+const HINT_EVERY = 2600;
+const reduceMotion = () => typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
+
 export function bindValueDrag(root, dispatch) {
   let ghost = null;
+  let idleSince = Date.now();
+  let lastHint = 0;
+  let chipSeen = false;
   const move = (e) => { if (ghost) { ghost.style.left = `${e.clientX}px`; ghost.style.top = `${e.clientY}px`; } };
   const end = (e) => {
     document.removeEventListener('pointermove', move);
@@ -157,8 +165,59 @@ export function bindValueDrag(root, dispatch) {
     document.addEventListener('pointerup', end);
     document.addEventListener('pointercancel', end);
   };
+  // a pointer click on x does nothing now (a keyboard's Enter, a click with no pointer behind it, still places the value)
+  const click = (e) => {
+    if (e.detail > 0 && e.target.closest?.('[data-x][data-action="placeValue"]')) { e.preventDefault(); e.stopImmediatePropagation(); }
+  };
+  // x = shows its cursor once clicked; a press anywhere else, or the focus moving on, takes it away
+  const away = (e) => {
+    idleSince = Date.now();
+    if (!e.target.closest?.('[data-fk="answer"]')) dispatch({ type: 'ui', patch: { fieldCursor: false } });
+  };
+  const awayFocus = (e) => {
+    if (e.target instanceof Element && root.contains(e.target) && !e.target.closest('[data-fk="answer"]')) dispatch({ type: 'ui', patch: { fieldCursor: false } });
+  };
+  const acted = () => { idleSince = Date.now(); };
+  const hint = () => {
+    const chip = root.isConnected && !root.closest('[hidden]') ? root.querySelector('[data-chip]') : null;
+    if (!chip) { chipSeen = false; return; }
+    if (!chipSeen) { chipSeen = true; idleSince = Date.now(); }
+    const now = Date.now();
+    if (ghost || now - idleSince < HINT_WAIT || now - lastHint < HINT_EVERY) return;
+    const x = root.querySelector('[data-x][data-action="placeValue"]');
+    if (!x) return;
+    lastHint = now;
+    const a = chip.getBoundingClientRect();
+    const b = x.getBoundingClientRect();
+    const g = html('div', 'sv-ghost sv-hintghost', [chip.textContent], { 'aria-hidden': 'true' });
+    document.body.append(g);
+    const at = (r) => `translate(${r.left + r.width / 2}px, ${r.top + r.height / 2}px) translate(-50%, -50%)`;
+    g.style.left = '0px';
+    g.style.top = '0px';
+    const still = reduceMotion();
+    const anim = g.animate(still
+      ? [{ transform: at(b), opacity: 0 }, { transform: at(b), opacity: 0.45 }, { transform: at(b), opacity: 0 }]
+      : [{ transform: at(a), opacity: 0 }, { transform: at(a), opacity: 0.6, offset: 0.15 }, { transform: at(b), opacity: 0.6, offset: 0.8 }, { transform: at(b), opacity: 0 }],
+    { duration: 1800, easing: 'ease-in-out' });
+    anim.onfinish = () => g.remove();
+    anim.oncancel = () => g.remove();
+  };
+  const timer = setInterval(hint, 250);
   root.addEventListener('pointerdown', down);
-  return () => { root.removeEventListener('pointerdown', down); ghost?.remove(); };
+  root.addEventListener('click', click, true);
+  document.addEventListener('pointerdown', away, true);
+  document.addEventListener('focusin', awayFocus);
+  window.addEventListener('keydown', acted, true);
+  return () => {
+    clearInterval(timer);
+    root.removeEventListener('pointerdown', down);
+    root.removeEventListener('click', click, true);
+    document.removeEventListener('pointerdown', away, true);
+    document.removeEventListener('focusin', awayFocus);
+    window.removeEventListener('keydown', acted, true);
+    ghost?.remove();
+    document.querySelectorAll('.sv-hintghost').forEach((g) => g.remove());
+  };
 }
 
 // ---------- the help row: permanent, always in the same place; whatever is not an option is greyed ----------
@@ -190,7 +249,8 @@ export function undoRow(s, { wrongGuess, cue }) {
 
 // The pop-up texts of the light design's two openings: the very first problem of a visit, and the problem after a correct guess.
 export const FIRST_TEXT = 'Find the value of x.';
-export const PLACE_TEXT = 'Drag your value into each x.';
+// The check (Build D-2, Part 2): the value is named, then where it goes.
+export const placeText = (v) => `Let’s check that x = ${String(v).replace('-', MINUS)} is the solution.\nDrag the ${String(v).replace('-', MINUS)} onto an x above.`;
 export const FORCED_TEXT = 'Your mental math is very strong.\nLet’s try solving this next problem using a move first.';
 
 // The line, kept for screen readers only: what the card says is shown in pop-ups now.

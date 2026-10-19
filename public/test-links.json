@@ -22,6 +22,27 @@
           ]
         },
         {
+          "name": "x = and checking a value (Build D-2, Part 2)",
+          "about": "x = has no blinking cursor until it is clicked; the check says what is being checked; the value is dragged onto x (a click on x does nothing), and after 4 seconds a faint copy of it travels to x to show how.",
+          "links": [
+            {
+              "label": "x = cursor",
+              "query": "?pack=add-both&level=2&seed=7&nosignin=1",
+              "look": "No blinking line at first. Click the box after x =: it gets a blue outline and blinks. Click anywhere else, or type: the blinking stops."
+            },
+            {
+              "label": "Check wording and the ghost",
+              "query": "?pack=add-both&level=2&seed=7&nosignin=1",
+              "look": "Type −8, Check: “Let’s check that x = −8 is the solution. Drag the −8 onto an x above.” Wait 4 seconds: a faint −8 floats from x = up to the x, again and again. Clicking the x does nothing; dragging works."
+            },
+            {
+              "label": "Divide it",
+              "query": "?pack=divide-it&level=3&seed=7&nosignin=1",
+              "look": "The same on Divide it: no cursor until x = is clicked; type 4 and Check for the new words and the ghost."
+            }
+          ]
+        },
+        {
           "name": "Add: what the addition did (Build D-2, Part 1)",
           "about": "An addition that doesn't cancel lights the two numbers added and their (bigger) sum, and says so in the student's numbers; a partial one names both numbers; only real opposites are crossed off.",
           "links": [

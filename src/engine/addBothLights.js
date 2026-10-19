@@ -18,7 +18,8 @@ import { findTerm, outcomeOf, reorderBoard, combineBoard, pairText, valueOf, cro
 
 const slotSide = (board, id) => otherSide(findTerm(board, id).side);
 
-const UI0 = { preview: false, focus: null, shake: false, light: null, hoverMove: null, carry: null, drag: null };
+// fieldCursor: x = was clicked, so it shows its blinking cursor until anything else happens (Build D-2, Part 2)
+const UI0 = { preview: false, focus: null, shake: false, light: null, hoverMove: null, carry: null, drag: null, fieldCursor: false };
 const ui = (s) => s.ui ?? UI0;
 const withUi = (s, patch) => ({ ...s, ui: { ...ui(s), ...patch } });
 const sameUi = (a, b) => JSON.stringify(ui(a)) === JSON.stringify(ui(b));
@@ -209,6 +210,7 @@ export function withLights(reduce = reduceAddBoth) {
       default:
         break;
     }
+    if (action.type === 'focus' && action.target === 'answer') s.ui.fieldCursor = true;
     if (typingAnswer && s.entry !== state.entry && lx.moves === 0 && !s.scaffold) lx.log.typedBeforeMove = true;
     if (s.feedback?.key === 'aFindX' && moveOwed(s)) say(s, 'lxMustMove');
     return s;

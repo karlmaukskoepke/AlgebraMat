@@ -23,6 +23,10 @@ export function fracOf(fb) {
 export function withFractionBlank(reduce) {
   return (state, action) => {
     if (action.type === 'ui') {
+      if ('fieldCursor' in (action.patch ?? {})) {
+        const on = Boolean(action.patch.fieldCursor);
+        return (state.ui?.fieldCursor ?? false) === on ? state : { ...state, ui: { ...(state.ui ?? {}), fieldCursor: on } };
+      }
       const preview = action.patch?.preview;
       if (preview && !canPreview(state)) return state;
       if ((state.ui?.preview ?? false) === (preview ?? false)) return state;
@@ -48,8 +52,11 @@ export function withFractionBlank(reduce) {
         return s;
       }
     }
-    const s = reduce(state, action);
-    if (s === state) return state;
+    const r = reduce(state, action);
+    if (r === state) return state;
+    // x = clicked shows its blinking cursor until anything else happens (Build D-2, Part 2)
+    const cursor = action.type === 'focus' && action.target === 'answer';
+    const s = (r.ui?.fieldCursor ?? false) === cursor ? r : { ...r, ui: { ...(r.ui ?? {}), fieldCursor: cursor } };
     if (action.type === 'choose' && s.menu === 'fraction' && state.menu !== 'fraction') return { ...s, fb: FB0, typing: null, ui: { ...(s.ui ?? {}), preview: false } };
     if (s.ui?.preview) return { ...s, ui: { ...s.ui, preview: false } };
     return s;

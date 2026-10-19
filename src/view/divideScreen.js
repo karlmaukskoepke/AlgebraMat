@@ -5,7 +5,7 @@
 // collapsed lights. No banner: what the card says is a pop-up (view/spotlight.js); the line is kept for screen readers only.
 
 import { html } from './addBothMat.js';
-import { stackRows, substBlock, forwardButton, srLine, notePopup, sideTerms, FORCED_TEXT, FIRST_TEXT, PLACE_TEXT } from './solveScreen.js';
+import { stackRows, substBlock, forwardButton, srLine, notePopup, sideTerms, FORCED_TEXT, FIRST_TEXT, placeText } from './solveScreen.js';
 import { equationRow } from './lightScreen.js';
 import { fracOpen, canPreview, fracOf } from '../engine/divideBlank.js';
 import { groupDiagram } from './groupDiagram.js';
@@ -139,7 +139,7 @@ function answerRow(s) {
   const live = solve.answerLive(s);
   const placing = Boolean(s.sub?.placing);
   const text = s.sub && !live ? String(s.sub.typed) : s.entry;
-  const last = live && xAlone(s.board);                    // x = blinks only at the last step: x alone on its side
+  const last = live && (xAlone(s.board) || Boolean(s.ui?.fieldCursor));   // x = blinks once clicked, and at the last step: x alone
   const typed = html('button', `ab-typed lb-typed lx-field${text ? '' : ' is-empty'}${last ? ' is-focus' : ''}${last && !text ? ' is-blink' : ''}${placing ? ' is-chip' : ''}${live || placing ? '' : ' is-off'}`, [text ? text.replace('-', MINUS) : ' '], {
     type: 'button', 'data-fk': 'answer', 'data-lx-field': '1',
     ...(placing ? { 'data-chip': '1', 'data-lx-field': '1', 'aria-label': `Your value ${text}: drag it onto x` } : { 'data-action': 'focus', 'data-target': 'answer', 'aria-label': 'Your answer for x' }),
@@ -200,7 +200,7 @@ function popups(s, wrap) {
   if (introOpen(s)) { wrap.append(spotlightLayer({ kind: 'intro', lit: ['newest', 'panel', 'forward'] }, { ...o, text: FORCED_TEXT })); return; }
   // checking a value: everything greys out but the equation being checked and the checking space
   if (s.sub && s.sub.step < solve.subTotal(s.sub)) {
-    wrap.append(spotlightLayer({ kind: 'intro', lit: ['plugrow', 'check', s.sub.placing ? 'answer' : 'forward'] }, { ...o, text: s.sub.placing ? PLACE_TEXT : null }));
+    wrap.append(spotlightLayer({ kind: 'intro', lit: ['plugrow', 'check', s.sub.placing ? 'answer' : 'forward'] }, { ...o, text: s.sub.placing ? placeText(s.sub.typed) : null }));
     return;
   }
   const note = notePopup(s, { silent: SILENT, nudge: NUDGE, text: divideFeedbackText, scaffold: s.scaffold || s.pic ? 'board' : null });

@@ -20,7 +20,7 @@ import { lightsFeedbackText } from './addBothLightsFeedback.js';
 import { spotlightLayer, findSolveTarget } from './spotlight.js';
 import { boardBlock, trayFor, html } from './addBothMat.js';
 import { narrowPanel } from './narrowPanel.js';
-import { forwardButton, srLine, notePopup, checkSpace, FORCED_TEXT, FIRST_TEXT, PLACE_TEXT } from './solveScreen.js';
+import { forwardButton, srLine, notePopup, checkSpace, FORCED_TEXT, FIRST_TEXT, placeText } from './solveScreen.js';
 import { firstOpen } from './visit.js';
 // Count it's counters Mat and its words, read-only, for the help at x alone (Build C, Part 3)
 import { renderMat as renderCountersMat } from './mat.js';
@@ -70,7 +70,7 @@ function popups(s, wrap) {
   // checking a value: everything greys out but the equation being checked and the checking space (and, while the value waits to be
   // dragged in, the value; once it is in, the green Next)
   if (s.sub && s.sub.step < 3) {
-    wrap.append(spotlightLayer({ kind: 'intro', lit: ['plugrow', 'check', s.sub.placing ? 'answer' : 'forward'] }, { ...o, text: s.sub.placing ? PLACE_TEXT : null }));
+    wrap.append(spotlightLayer({ kind: 'intro', lit: ['plugrow', 'check', s.sub.placing ? 'answer' : 'forward'] }, { ...o, text: s.sub.placing ? placeText(s.sub.typed) : null }));
     return;
   }
   // Teach me: the move to make, in the Add move's blank, with Add lit; the green button says Do it
@@ -389,8 +389,8 @@ function answerRow(s) {
   const counting = s.combining?.step === 'count';
   const live = lightsAnswerLive(s);
   const text = counting ? s.combining.entry : s.sub && !live ? String(s.sub.typed) : s.entry;
-  // x = never blinks or pulses, except at the last step: x alone on its side
-  const last = live && !amountMode(s) && (xAlone(s.board) || counting);
+  // x = shows no cursor at first: it blinks once clicked (until anything else happens), and at the last step, x alone on its side
+  const last = live && !amountMode(s) && (xAlone(s.board) || counting || Boolean(s.ui?.fieldCursor));
   const placing = Boolean(s.sub?.placing);                 // the typed value is what is dragged into x
   const typed = html('button', `ab-typed lb-typed lx-field${text ? '' : ' is-empty'}${last ? ' is-focus' : ''}${last && !text ? ' is-blink' : ''}${live || placing ? '' : ' is-off'}${placing ? ' is-chip' : ''}`, [shown(text)], placing
     ? { type: 'button', 'data-chip': '1', 'data-fk': 'answer', 'data-lx-field': '1', 'aria-label': `Your value ${shown(text)}: drag it into x` }
