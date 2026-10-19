@@ -14,6 +14,7 @@
 
 import { typeInto, isTyping } from './entry.js';
 import { signed, substitutionLines, boardText } from './solveTerms.js';
+import { climb, teach as teachShape } from './solveit/registry.js';
 
 // What a card supplies:
 //   id                 'add-both'
@@ -26,8 +27,8 @@ import { signed, substitutionLines, boardText } from './solveTerms.js';
 //   slip(s, typed, tag) the line for a wrong value: { key, params }
 //   collapse(level)    does the substitution check collapse at this level? (never, on a single-step card)
 //   reduce(s, action, api)  the card's own actions: undefined (not mine), 'ignore' (no change), or the changed state
-//   rungs              [reminder, model, choose, guided]: each (s, api) => s, the n-th ask in a state
-//   teach(s, api)      Teach me: the scaffold on a forced path
+//   (the help rungs and Teach me are not the card's: they are the scaffold registry's, keyed by the shape of the equation on screen,
+//   engine/solveit/registry.js; a card registers its entries there)
 //   answerBlocked(s)   something of the card's is open that holds the typing row back (an amount, a pending deal)
 //   nextNeeded(s)      after a wrong guess is undone: mark the next needed move
 //   waitingForUndo(s)  a try of the card's own waits for Undo outside `needUndo` (Divide's failed fraction); undoReason(s) says why
@@ -265,9 +266,7 @@ export function createSolveLoop(card) {
         moveMode(s);
         s.stuck += 1;
         s.helped = true;
-        const rung = Math.min(s.rung, card.rungs.length - 1);
-        s.rung += 1;
-        return card.rungs[rung](s, api);
+        return climb(s, api);                                                          // the shape's next rung (solveit/registry.js)
       }
       case 'teach': {
         if (!helpOk(s)) return state;
@@ -278,7 +277,7 @@ export function createSolveLoop(card) {
         s.forced = true;
         s.helped = true;
         if (!s.supportsShown.includes('forced')) s.supportsShown.push('forced');
-        return card.teach(s, api);
+        return teachShape(s, api);                                                     // the shape's forced path (solveit/registry.js)
       }
       default:
         return state;

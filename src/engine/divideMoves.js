@@ -7,19 +7,13 @@
 import { createSolveLoop } from './solveLoop.js';
 import { shapeOfBoard, lightsOf } from './solveit/shape.js';
 import { signed, fractionText, boardText } from './solveTerms.js';
+import { startBoard, coefOf, xAlone, pileSize, DEAL_ROUND_LEVEL, xTerm, numTerm, fracOf } from './divideBoard.js';
+import { hintAfterUndo } from './solveit/registry.js';
 import { takeFraction, tagDivide, groupsOf, FRACTIONS, legalFractions, formatDivide } from './divide.js';
 
-// ---------- the board: terms, as on Add to both sides, plus a coefficient and a fraction of a part ----------
+// ---------- the board (engine/divideBoard.js, shared with the help in engine/solveit/rungs/divide.js) ----------
 
-let counter = 0;
-const id = () => `d${++counter}`;
-const xTerm = (coef) => ({ id: id(), kind: 'x', coef });
-const numTerm = (v) => ({ id: id(), kind: 'num', v });
-const fracOf = (n, inner) => ({ id: id(), kind: 'frac', n, inner, blue: true });
-
-export const startBoard = (p) => ({ left: [xTerm(p.a)], right: [numTerm(p.b)] });
-export const coefOf = (board) => board.left[0].coef;
-export const xAlone = (board) => coefOf(board) === 1;
+export { startBoard, coefOf, xAlone, pileSize, DEAL_ROUND_LEVEL } from './divideBoard.js';
 export { boardText, signed };
 
 // The board after taking 1/n of both sides, and the work row that shows it. The right side stays unsimplified on the move that
@@ -36,16 +30,8 @@ function applyFraction(board, n) {
 
 // ---------- the counters: a pile the size of the number on the right, dealt into n groups, one kept ----------
 
-export const DEAL_ROUND_LEVEL = 4;                                              // Deal a round arrives with the bigger levels (spec §2: Level 4)
-export const pileSize = (board) => (board.right[0].kind === 'num' ? Math.min(36, Math.abs(board.right[0].v)) : 0);
 const dealt = (d) => d.groups.reduce((a, b) => a + b, 0);
 const evenGroups = (groups) => groups.every((c) => c === groups[0]);
-
-// At x alone with an unevaluated side (`x = ⅓(6)`): the diagram of the right side only, on every rung (spec §5).
-function diagOf(board) {
-  const t = board.right[0];
-  return { n: t.n, size: Math.min(36, Math.abs(t.inner[0].v)), neg: t.inner[0].v < 0, val: signed(t.inner[0].v), groups: null, kept: null, guided: false };
-}
 
 const EARLIER = ['add', 'cross', 'trade'];                                      // the moves of earlier cards (Add to both sides)
 
@@ -174,50 +160,7 @@ const loop = createSolveLoop({
     }
   },
 
-  // ----- the help ladder: rungs restart at every equation state -----
-  // two rungs (rev 1.2: every rung gives the student something to do, so the picture-only first rung is merged into the next)
-  rungs: [
-    (s) => {                                                                          // 1. Model it and deal it
-      s.scaffold = true;
-      if (xAlone(s.board)) {                                                          // x = ⅓(−18): the counters in a pile, ready to deal at once
-        s.diag = diagOf(s.board);
-        s.diag.groups = Array(s.diag.n).fill(0);
-        return say(s, 'dDiag1', { frac: fractionText(s.diag.n), val: s.diag.val, n: s.diag.n });
-      }
-      s.menu = 'fraction';                                                            // the fractions are live: choose one, deal the counters, keep a group
-      s.hint = { kind: 'coef' };
-      if (!s.supportsShown.includes('model')) s.supportsShown.push('model');
-      return say(s, 'dModel', { boxes: coefOf(s.board), size: pileSize(s.board) });
-    },
-    (s) => {                                                                          // 2. Guided
-      s.scaffold = true;
-      if (xAlone(s.board)) {
-        s.diag = { ...(s.diag ?? diagOf(s.board)) };
-        s.diag.groups = Array(s.diag.n).fill(s.diag.size / s.diag.n);
-        s.diag.kept = 0;
-        s.diag.guided = true;
-        if (!s.supportsShown.includes('guided')) s.supportsShown.push('guided');
-        return say(s, 'dDiag3', { frac: fractionText(s.diag.n), n: s.diag.n });
-      }
-      const a = coefOf(s.board);
-      s.menu = 'fraction';
-      s.hint = { kind: 'fraction', n: a };
-      if (!s.supportsShown.includes('guided')) s.supportsShown.push('guided');
-      return say(s, 'dStuckGuided', { boxes: a, frac: fractionText(a), n: a });
-    },
-  ],
-  teach(s) {                                                                          // the same scaffolds on a forced path
-    s.scaffold = true;
-    if (xAlone(s.board)) {
-      s.diag = diagOf(s.board);
-      s.diag.groups = Array(s.diag.n).fill(0);
-      return say(s, 'dDiag2', { frac: fractionText(s.diag.n), size: s.diag.size, n: s.diag.n });
-    }
-    const a = coefOf(s.board);
-    s.menu = 'fraction';
-    s.hint = { kind: 'fraction', n: a };
-    return say(s, 'dTeach', { boxes: a, frac: fractionText(a), b: signed(s.problem.b) });
-  },
+  // (the help ladder and Teach me are the scaffold registry's: engine/solveit/rungs/divide.js, keyed by the shape on screen)
 });
 
 function sayDealt(s, d, total) {
@@ -259,16 +202,7 @@ export const DIVIDE_SPOT = {
   error: (s) => DIVIDE_ERRORS[s.feedback?.key] ?? null,
   keepsReds: (s) => ['dFail', 'dFail3'].includes(s.feedback?.key),
   clear: (s) => { s.entry = ''; s.sub = null; },
-  hint(s, before = null) {
-    if (xAlone(s.board)) return { target: 'answer', key: 'aStuckSolved' };
-    s.hint = { kind: 'coef' };
-    // after a fraction that did not split (Build D, Part 4): the boxes and the counters, "We want only one of the five x boxes.", and the
-    // fractions to choose from, the ones tried crossed off
-    if (before?.fail && s.tried.length) {
-      s.menu = 'fraction';
-      return { target: 'coef', key: 'dWhichFraction', params: { boxes: coefOf(s.board) }, choose: true };
-    }
-    return { target: 'coef', key: 'dPickFraction', move: 'fraction' };
-  },
+  // the hint after Undo is the registry's, for the shape Undo returned to (engine/solveit/rungs/divide.js)
+  hint: (s, before = null) => hintAfterUndo(s, before),
   prompt: (s) => (loop.moveOwed(s) ? 'aMustMove' : 'aFindX'),
 };

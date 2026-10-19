@@ -309,3 +309,9 @@ I'm stuck is lit in every greyed layer except an error's, when it is enabled.
 No difference (PASS on all five groups). `engine/solveit/shape.js` reads the shape of every state (Add S1–S7, the seesaw's T0–T2,
 Divide D1, D2, DF), and both cards' lights now come from `lightsOf(shape before, shape after)` instead of each card's own code; parity
 shows the lights are exactly the same.
+
+## Build E, P3 (2026-10-19): the scaffold registry and one ladder, Divide first
+
+No difference (PASS on all five groups). The help ladder (I'm stuck, Teach me, the hint after Undo) is now the loop's, reading
+`engine/solveit/registry.js` by shape; Divide it's rungs moved to `engine/solveit/rungs/divide.js` (D1, D2, DF) with the same messages and
+class-sheet words. Add to both sides joins in P4.
