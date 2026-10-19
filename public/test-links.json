@@ -253,6 +253,138 @@
           ]
         },
         {
+          "name": "Build D-2 screenshots",
+          "about": "The acceptance screenshots of the real site at 1366×650, one button each (they open on GitHub; the full report is docs/build-d2/BUILD-D2-REPORT.md).",
+          "links": [
+            {
+              "label": "01 · add8 spotlight",
+              "query": "https://github.com/karlmaukskoepke/AlgebraMat/blob/main/docs/build-d2/d2-01-add8-spotlight.png",
+              "look": "The 1366×650 screenshot.",
+              "notLive": "Opens the picture on GitHub, not the app; GitHub may ask you to sign in."
+            },
+            {
+              "label": "02 · partial cancel",
+              "query": "https://github.com/karlmaukskoepke/AlgebraMat/blob/main/docs/build-d2/d2-02-partial-cancel.png",
+              "look": "The 1366×650 screenshot.",
+              "notLive": "Opens the picture on GitHub, not the app; GitHub may ask you to sign in."
+            },
+            {
+              "label": "03 · x no cursor",
+              "query": "https://github.com/karlmaukskoepke/AlgebraMat/blob/main/docs/build-d2/d2-03-x-no-cursor.png",
+              "look": "The 1366×650 screenshot.",
+              "notLive": "Opens the picture on GitHub, not the app; GitHub may ask you to sign in."
+            },
+            {
+              "label": "04 · x clicked cursor",
+              "query": "https://github.com/karlmaukskoepke/AlgebraMat/blob/main/docs/build-d2/d2-04-x-clicked-cursor.png",
+              "look": "The 1366×650 screenshot.",
+              "notLive": "Opens the picture on GitHub, not the app; GitHub may ask you to sign in."
+            },
+            {
+              "label": "05 · ghost hint",
+              "query": "https://github.com/karlmaukskoepke/AlgebraMat/blob/main/docs/build-d2/d2-05-ghost-hint.png",
+              "look": "The 1366×650 screenshot.",
+              "notLive": "Opens the picture on GitHub, not the app; GitHub may ask you to sign in."
+            },
+            {
+              "label": "06 · check wording",
+              "query": "https://github.com/karlmaukskoepke/AlgebraMat/blob/main/docs/build-d2/d2-06-check-wording.png",
+              "look": "The 1366×650 screenshot.",
+              "notLive": "Opens the picture on GitHub, not the app; GitHub may ask you to sign in."
+            },
+            {
+              "label": "07 · drag in place",
+              "query": "https://github.com/karlmaukskoepke/AlgebraMat/blob/main/docs/build-d2/d2-07-drag-in-place.png",
+              "look": "The 1366×650 screenshot.",
+              "notLive": "Opens the picture on GitHub, not the app; GitHub may ask you to sign in."
+            },
+            {
+              "label": "08 · drag across before",
+              "query": "https://github.com/karlmaukskoepke/AlgebraMat/blob/main/docs/build-d2/d2-08-drag-across-before.png",
+              "look": "The 1366×650 screenshot.",
+              "notLive": "Opens the picture on GitHub, not the app; GitHub may ask you to sign in."
+            },
+            {
+              "label": "09 · drag across after",
+              "query": "https://github.com/karlmaukskoepke/AlgebraMat/blob/main/docs/build-d2/d2-09-drag-across-after.png",
+              "look": "The 1366×650 screenshot.",
+              "notLive": "Opens the picture on GitHub, not the app; GitHub may ask you to sign in."
+            },
+            {
+              "label": "10 · drill type x",
+              "query": "https://github.com/karlmaukskoepke/AlgebraMat/blob/main/docs/build-d2/d2-10-drill-type-x.png",
+              "look": "The 1366×650 screenshot.",
+              "notLive": "Opens the picture on GitHub, not the app; GitHub may ask you to sign in."
+            },
+            {
+              "label": "11 · drill times minus1",
+              "query": "https://github.com/karlmaukskoepke/AlgebraMat/blob/main/docs/build-d2/d2-11-drill-times-minus1.png",
+              "look": "The 1366×650 screenshot.",
+              "notLive": "Opens the picture on GitHub, not the app; GitHub may ask you to sign in."
+            },
+            {
+              "label": "12 · multiply options",
+              "query": "https://github.com/karlmaukskoepke/AlgebraMat/blob/main/docs/build-d2/d2-12-multiply-options.png",
+              "look": "The 1366×650 screenshot.",
+              "notLive": "Opens the picture on GitHub, not the app; GitHub may ask you to sign in."
+            },
+            {
+              "label": "13 · multiply hover whole",
+              "query": "https://github.com/karlmaukskoepke/AlgebraMat/blob/main/docs/build-d2/d2-13-multiply-hover-whole.png",
+              "look": "The 1366×650 screenshot.",
+              "notLive": "Opens the picture on GitHub, not the app; GitHub may ask you to sign in."
+            },
+            {
+              "label": "14 · multiply hover flip",
+              "query": "https://github.com/karlmaukskoepke/AlgebraMat/blob/main/docs/build-d2/d2-14-multiply-hover-flip.png",
+              "look": "The 1366×650 screenshot.",
+              "notLive": "Opens the picture on GitHub, not the app; GitHub may ask you to sign in."
+            },
+            {
+              "label": "15 · fraction cursor jump",
+              "query": "https://github.com/karlmaukskoepke/AlgebraMat/blob/main/docs/build-d2/d2-15-fraction-cursor-jump.png",
+              "look": "The 1366×650 screenshot.",
+              "notLive": "Opens the picture on GitHub, not the app; GitHub may ask you to sign in."
+            },
+            {
+              "label": "16 · unit fraction popup",
+              "query": "https://github.com/karlmaukskoepke/AlgebraMat/blob/main/docs/build-d2/d2-16-unit-fraction-popup.png",
+              "look": "The 1366×650 screenshot.",
+              "notLive": "Opens the picture on GitHub, not the app; GitHub may ask you to sign in."
+            },
+            {
+              "label": "17 · whole number go",
+              "query": "https://github.com/karlmaukskoepke/AlgebraMat/blob/main/docs/build-d2/d2-17-whole-number-go.png",
+              "look": "The 1366×650 screenshot.",
+              "notLive": "Opens the picture on GitHub, not the app; GitHub may ask you to sign in."
+            },
+            {
+              "label": "18 · drill multiply options",
+              "query": "https://github.com/karlmaukskoepke/AlgebraMat/blob/main/docs/build-d2/d2-18-drill-multiply-options.png",
+              "look": "The 1366×650 screenshot.",
+              "notLive": "Opens the picture on GitHub, not the app; GitHub may ask you to sign in."
+            },
+            {
+              "label": "19 · seesaw greyed moves stuck lit",
+              "query": "https://github.com/karlmaukskoepke/AlgebraMat/blob/main/docs/build-d2/d2-19-seesaw-greyed-moves-stuck-lit.png",
+              "look": "The 1366×650 screenshot.",
+              "notLive": "Opens the picture on GitHub, not the app; GitHub may ask you to sign in."
+            },
+            {
+              "label": "20 · seesaw add boxes",
+              "query": "https://github.com/karlmaukskoepke/AlgebraMat/blob/main/docs/build-d2/d2-20-seesaw-add-boxes.png",
+              "look": "The 1366×650 screenshot.",
+              "notLive": "Opens the picture on GitHub, not the app; GitHub may ask you to sign in."
+            },
+            {
+              "label": "21 · seesaw check drop either x",
+              "query": "https://github.com/karlmaukskoepke/AlgebraMat/blob/main/docs/build-d2/d2-21-seesaw-check-drop-either-x.png",
+              "look": "The 1366×650 screenshot.",
+              "notLive": "Opens the picture on GitHub, not the app; GitHub may ask you to sign in."
+            }
+          ]
+        },
+        {
           "name": "Build D screenshots",
           "about": "The acceptance screenshots of the real site, one button each (they open on GitHub; the full report is docs/build-d/BUILD-D-REPORT.md).",
           "links": [
