@@ -210,7 +210,7 @@ const NUDGE = {
 
 function popups(s, wrap) {
   const sp = spotOf(s, DIVIDE_SPOT);
-  const o = { root: wrap, find: (root, target) => findSolveTarget(root, target, s), undo: '.lx-undo', moveSel: (m) => `[data-move="${m}"]`, work: '.lb-main' };
+  const o = { root: wrap, find: (root, target) => findSolveTarget(root, target, s), undo: '.lx-undo', help: true, moveSel: (m) => `[data-move="${m}"]`, work: '.lb-main' };
   if (sp) { wrap.append(spotlightLayer(sp.choose ? { ...sp, place: 'beside' } : sp, { ...o, text: sp.choose ? '' : divideFeedbackText(s.feedback), extra: sp.choose ? fractionChoices(s) : null })); return; }
   if (introOpen(s)) { wrap.append(spotlightLayer({ kind: 'intro', lit: ['newest', 'panel', 'forward'] }, { ...o, text: FORCED_TEXT })); return; }
   // checking a value: everything greys out but the equation being checked and the checking space

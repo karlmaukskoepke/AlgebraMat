@@ -95,7 +95,8 @@ export function boardBlock(s) {
   const [, , vw, vh] = top.getAttribute('viewBox').split(' ').map(Number);
   block.style.setProperty('--ar', String(vw / (vh + 150)));
   block.append(top);
-  if (sideBtnsOn) block.append(sideButtons(geo, s.amountEntry, s.pending));
+  if (seesawAddOpen(s)) block.append(sideBoxes(geo, s));
+  else if (sideBtnsOn) block.append(sideButtons(geo, s.amountEntry, s.pending));
   block.append(bottom);
   const done = s.stage === 'done';
   const flow = !done && s.stage === 'moves' && !s.combining && !s.resolving && (s.menu === 'add' || s.pending?.kind === 'cross');
@@ -236,7 +237,7 @@ export function boardSvg(s) {
   const geo = drawBalance(svg, items, {
     top: 64,
     readout: { text: building ? 'Build the equation' : tiltText(s), cls: building ? '' : balanced(s) ? 'is-good' : 'is-bad' },
-    building, zonesOn: building || (s.stage === 'moves' && s.menu === 'add' && hasAmount(s) && !s.combining),
+    building, zonesOn: building || (s.stage === 'moves' && s.menu === 'add' && hasAmount(s) && !s.combining && !seesawAddOpen(s)),
     early: s.early?.step === 'drag', tapAction, cls, struck: struckCounts(s), angle: tipAngle(s), anim: s.anim,
   });
   const sideBtnsOn = !building && s.stage === 'moves' && s.menu === 'add' && hasAmount(s) && !s.combining && !s.resolving && s.pending?.kind !== 'cross';
@@ -260,6 +261,29 @@ export function actionRow({ undo = false, go = null, goAction = 'go', goDisabled
     g.disabled = goDisabled;
     row.append(g);
   }
+  return row;
+}
+
+// The seesaw's Add in the light design (Build D-2, Part 5): a box under each side and "type the number to add"; the number is typed
+// once (into the left box; the right one shows the same) and its counters go onto both sides.
+const seesawAddOpen = (s) => Boolean(s.scaffold) && s.stage === 'moves' && s.menu === 'add' && !s.combining && !s.resolving && s.pending?.kind !== 'cross' && !s.alone;
+function sideBoxes(geo, s) {
+  const row = html('div', 'ab-sidebtns ab-sideboxes');
+  row.style.setProperty('--left', `${geo.x0 / geo.W * 100}%`);
+  row.style.setProperty('--side', `${geo.lw / geo.W * 100}%`);
+  row.style.setProperty('--gap', `${geo.middle / geo.W * 100}%`);
+  row.style.setProperty('--mid', `${geo.borderX / geo.W * 100}%`);
+  const text = s.amountEntry ?? '';
+  const shown = text ? text.replace('-', MINUS) : ' ';
+  const typing = s.typing !== 'answer';
+  for (const side of ['left', 'right']) {
+    const first = side === 'left';
+    const box = first
+      ? html('button', `lx-box ab-sidebox${text ? '' : ' is-empty'}${typing && !text ? ' is-blink' : ''}`, [shown], { type: 'button', 'data-action': 'focus', 'data-target': 'amount', 'data-blank': '1', 'data-fk': 'blank', 'data-lx-field': '1', 'aria-label': 'Type the number to add to both sides' })
+      : html('span', `lx-box ab-sidebox is-mirror${text ? '' : ' is-empty'}`, [shown], { 'aria-hidden': 'true' });
+    row.append(html('div', 'ab-sideslot', [box]));
+  }
+  row.append(html('p', 'ab-sidelabel', ['↑ type the number to add ↑']));
   return row;
 }
 
@@ -293,7 +317,7 @@ export function trayFor(s) {
     t.append(chip(signed(s.early.typed), { 'data-chip': '1', 'aria-label': `Your answer ${signed(s.early.typed)}` }, 'is-answer'));
     return t;
   }
-  const adding = s.stage === 'moves' && s.menu === 'add' && hasAmount(s) && s.counterMode && !s.combining;
+  const adding = s.stage === 'moves' && s.menu === 'add' && hasAmount(s) && s.counterMode && !s.combining && !seesawAddOpen(s);
   if (s.stage !== 'build' && !adding) return null;
   const t = html('div', 'ab-tray');
   t.append(html('p', 'ab-tray-note', [s.stage === 'build' ? 'Drag up onto a side (or tap one, then tap a side)' : 'Drag a counter up onto each side']));

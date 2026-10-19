@@ -98,3 +98,25 @@ describe('Build D-2: an addition that did not cancel is said in the student\'s n
     expect(spotOf(s, ADD_SPOT)).toMatchObject({ kind: 'error', target: 'xnum', label: 'got bigger', lit: ['workpair'] });
   });
 });
+
+describe('Build D-2, Parts 2 and 5: the x = cursor; the seesaw’s Add typed once', () => {
+  it('x = shows its cursor once clicked, until anything else happens', () => {
+    let s = run(add, start(), { type: 'focus', target: 'answer' });
+    expect(s.ui.fieldCursor).toBe(true);
+    s = run(add, s, { type: 'digit', digit: 3 });
+    expect(s.ui.fieldCursor).toBe(false);
+    s = run(add, start(), { type: 'focus', target: 'answer' }, { type: 'ui', patch: { fieldCursor: false } });
+    expect(s.ui.fieldCursor).toBe(false);
+  });
+  it('the number typed once goes onto both sides; typing again takes it back off first; Go commits it', () => {
+    let s = run(add, start(), { type: 'stuck' }, { type: 'stuck' });
+    expect(s.scaffold).toBeTruthy();
+    if (s.menu !== 'add') s = run(add, s, { type: 'choose', move: 'add' });
+    s = run(add, s, ...typed('-8'));
+    expect([s.pending?.both, s.pending?.auto, s.leftDelta, s.rightDelta]).toEqual([true, true, -8, -8]);
+    s = run(add, s, { type: 'backspace' });
+    expect([s.pending, s.leftDelta, s.rightDelta, s.amountEntry]).toEqual([null, 0, 0, '-']);
+    s = run(add, s, ...typed('8'), { type: 'go' });
+    expect([s.pending, s.menu, s.history.length > 0]).toEqual([null, null, true]);
+  });
+});

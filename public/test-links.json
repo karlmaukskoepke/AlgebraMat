@@ -22,6 +22,22 @@
           ]
         },
         {
+          "name": "The seesaw (Build D-2, Part 5)",
+          "about": "On the seesaw, Add has a box under each side: the number is typed once and its counters go onto both sides. Once built, “Choose a move” greys everything but the moves and the question. At the end, the value can be dragged onto the x on the balance or onto the equation under it. The big-number box is gone once the value is being checked. I’m stuck stays lit while the screen is greyed, wherever it has more help.",
+          "links": [
+            {
+              "label": "Build, choose, add",
+              "query": "?pack=add-both&level=2&seed=7&nosignin=1",
+              "look": "I’m stuck twice, build x + 8 = 11 on the balance: everything greys but the moves (and I’m stuck). Choose Add, type −8: counters on both sides. Go, then Battle twice, type 3, Check: drag the 3 onto the x on the balance."
+            },
+            {
+              "label": "Seesaw from the start",
+              "query": "?pack=add-both&level=4&seed=7&nosignin=1",
+              "look": "I’m stuck twice (the seesaw), choose Add and type −8 once: both sides get −8."
+            }
+          ]
+        },
+        {
           "name": "One Multiply button (Build D-2, Part 4)",
           "about": "Multiply opens three options beside it: a whole number, a fraction and −1. Hovering one previews it on the equation; clicking it makes it solid. The fraction takes one digit on top and one below (the cursor jumps), with “Enter a unit fraction, like ⅕ or ½.” for 66 or 55, or after a while with nothing done. No thick outline on the selected box: the blinking cursor shows it.",
           "links": [

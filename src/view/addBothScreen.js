@@ -56,11 +56,16 @@ const NUDGE = {
 
 function popups(s, wrap) {
   const sp = s.drill ? null : spotOf(s, ADD_SPOT);
-  const o = { root: wrap, find: findSolveTarget, undo: '.lx-undo', moveSel: (m) => `[data-move="${m}"]`, work: '.lb-main' };
+  const o = { root: wrap, find: findSolveTarget, undo: '.lx-undo', help: true, moveSel: (m) => `[data-move="${m}"]`, work: '.lb-main' };
   if (sp) { wrap.append(spotlightLayer(sp, { ...o, text: lightsFeedbackText(s.feedback) })); return; }
   if (introOpen(s)) {
     const lit = ['newest', 'panel', 'forward', ...(s.ui?.preview ? ['preview'] : [])];
     wrap.append(spotlightLayer({ kind: 'intro', lit }, { ...o, text: FORCED_TEXT }));
+    return;
+  }
+  // the seesaw just built and balanced: "Choose a move" with only the moves lit, the rest greyed (Build D-2, Part 5)
+  if (s.scaffold && s.stage === 'moves' && s.feedback?.key === 'aBuilt' && !s.menu) {
+    wrap.append(spotlightLayer({ kind: 'intro', lit: ['panel'] }, { ...o, text: lightsFeedbackText(s.feedback) }));
     return;
   }
   // combining two terms dropped together: they are lit with "Combine" over them, the box for their sum under them, the rest greyed
@@ -407,7 +412,7 @@ function forwardCore(s) {
   if (s.combining?.step === 'struck') return { label: 'Next', action: 'crossNext', enabled: true };
   if (s.combining) return { label: 'Check', action: 'check', enabled: false };
   if (s.teachFlow && blankOpen(s) && amountMode(s)) return { label: 'Go', action: 'go', enabled: valid(s.amountEntry) };   // (Karl: Go, as everywhere)
-  if (s.scaffold && s.stage === 'moves' && s.menu === 'add') return { label: 'Go', action: 'go', enabled: Boolean(s.pending?.both) && s.leftDelta === s.rightDelta };
+  if (s.scaffold && s.stage === 'moves' && s.menu === 'add') return { label: 'Go', action: 'go', enabled: (Boolean(s.pending?.both) && s.leftDelta === s.rightDelta) || (!s.pending && valid(s.amountEntry) && Number(s.amountEntry) !== 0) };
   if (blankOpen(s) && amountMode(s)) return { label: 'Go', action: 'go', enabled: valid(s.amountEntry) };
   if (s.lx.awaitNext !== null) return { label: 'Next', action: 'lxNext', enabled: true };
   return { label: 'Check', action: 'check', enabled: lightsAnswerLive(s) && valid(s.entry) };
@@ -531,6 +536,7 @@ function placeTray(tray, wrap) {
 }
 
 function aloneTray(s, wrap) {
+  if (s.sub) return;                                       // the value is being checked: the walk's box is gone (Build D-2, Part 5)
   if (s.alone?.big && s.stage !== 'done') { bigTray(s, wrap); return; }
   const w = s.alone?.walk;
   if (!w || s.stage === 'done') return;
@@ -559,11 +565,25 @@ export function renderAddBothScreen(s) {
   wrap.append(srLine(lightsFeedbackText(sp ? { key: ADD_SPOT.prompt(s), params: {} } : s.feedback)));
   const body = html('div', 'lb-body');
   const main = html('div', 'lb-main');
-  if (s.scaffold) {
+  if (s.scaffold && s.sub) {
+    // checking the value at the end of the seesaw (Build D-2, Part 5): the balance on the left, the checking space on its right (as
+    // without the seesaw), and both the x on the balance and the equation under it take the value
+    const board = boardBlock(s);
+    board.classList.add('is-plugrow');
+    if (s.sub.placing) {
+      for (const x of board.querySelectorAll('[data-x], .ab-eqsvg')) {
+        Object.assign(x.dataset, { x: '1', action: 'placeValue' });
+        x.classList.add('is-droptarget');
+        x.setAttribute('role', 'button');
+        x.setAttribute('tabindex', '0');
+        x.setAttribute('aria-label', 'Put your value into x');
+      }
+    }
+    main.append(html('div', 'sv-work is-checking', [html('div', 'sv-solve', [board]), html('div', 'sv-check', [substBlock(s)])]));
+  } else if (s.scaffold) {
     main.append(boardBlock(s));
     const tray = trayFor(s);
     if (tray) main.append(tray);
-    if (s.sub) main.append(html('div', 'sv-check is-under', [substBlock(s)]));
   } else {
     // left: the solving space; right: the checking space (and the room the pop-ups use while nothing is being checked)
     main.append(html('div', `sv-work${s.sub ? ' is-checking' : ''}`, [html('div', 'sv-solve', [html('div', 'lb-eqblock', [workStack(s)])]), html('div', 'sv-check', [substBlock(s)])]));

@@ -293,3 +293,13 @@ number or −1 is not applied in Divide it (new feedback keys `dWholeNo`, `dZero
 and a digit) on top, then the cursor jumps to the bottom; a second digit, or a top that is not 1, gives `dUnitFraction` (also after 7 s
 with the blank open and no unit fraction in it: `fracStuck`). No outline on the selected box. In the Distribute drill (not in parity) the
 same three options replace Flip everything and Multiply; a whole number (negatives allowed) and −1 are written as `times` rows.
+
+## Build D-2, Part 5 (2026-10-19): the seesaw
+
+No data change (PASS): the scripted runs use `addTo` directly. On screen and in the light layer: on the seesaw, Add shows a box under
+each side; typing the number once runs the card's own `addTo` left and right (marked `pending.auto`; typing again takes those counters
+back off first), and Go with a number already in the box (Teach me, the guided rung) does the same before committing. When the build is
+finished (`aBuilt`) an Add left open from the hint before is closed, so the student chooses the move; that screen greys all but the moves
+and the question. While a value is checked on the seesaw the balance and the checking space sit side by side, and both the x on the
+balance and the equation under it take the value. The walk's box (Party/Battle, big numbers) is gone once the value is being checked.
+I'm stuck is lit in every greyed layer except an error's, when it is enabled.

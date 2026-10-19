@@ -60,6 +60,9 @@ export const combineOpen = (s) => Boolean(s.lx?.combine);
 // Do keys go to the blank (true) or to x = (false)? The open blank wins until it is applied or cancelled, or x = is tapped.
 export const amountMode = (s) => s.menu === 'add' && s.typing !== 'answer' && (!s.pending || s.pending.second) && !s.combining;
 
+// The seesaw's Add is open: one box under each side, the number typed once (Build D-2, Part 5).
+export const seesawAdd = (s) => Boolean(s.scaffold) && s.stage === 'moves' && s.menu === 'add' && !s.combining && !s.resolving && s.pending?.kind !== 'cross' && !s.alone;
+
 // Is x = [ ] live? Always, from the first frame, except while a substitution is stepped, while the move is owed, and in the
 // scaffold until x is alone (as built).
 export function lightsAnswerLive(s) {
@@ -134,6 +137,33 @@ export function withLights(reduce = reduceAddBoth) {
 
     // ----- apply with an empty or unreadable blank: the box shakes, nothing else -----
     if (action.type === 'go' && blankOpen(state) && amountOf(state.amountEntry) === null) return withUi(state, { shake: true, preview: false, focus: 'blank' });
+
+    // ----- the seesaw's Add (Build D-2, Part 5): the number is typed once; its counters go onto both sides as it is typed -----
+    if (seesawAdd(state) && isTyping(action) && amountMode(state)) {
+      let s0 = structuredClone(state);
+      if (s0.pending?.auto) {                                           // the counters of the number typed before come back off
+        const entry = s0.amountEntry;
+        Object.assign(s0, s0.history.pop());
+        s0.amountEntry = entry;
+      }
+      const s1 = reduce(s0, action);
+      const typed = s1 === s0 ? s0 : s1;
+      if (typed.amountEntry === state.amountEntry && !state.pending?.auto) return state;
+      let out = typed;
+      if (amountOf(typed.amountEntry) !== null) {
+        const left = reduce(typed, { type: 'addTo', side: 'left' });
+        out = left.pending ? reduce(left, { type: 'addTo', side: 'right' }) : left;
+        if (out.pending) out.pending.auto = true;
+      }
+      out.ui = { ...UI0, focus: 'blank' };
+      return out;
+    }
+    if (action.type === 'go' && seesawAdd(state) && !state.pending && amountOf(state.amountEntry) !== null) {
+      const left = reduce(state, { type: 'addTo', side: 'left' });             // a number already in the box (Teach me, the guided rung)
+      if (!left.pending) return left;
+      const both = reduce(left, { type: 'addTo', side: 'right' });
+      return both.pending?.both ? wrapped(both, action) : both;
+    }
 
     const typingAnswer = isTyping(action) && !amountMode(state);
     // greyed while the move is owed; a good move waiting for its Next counts once the student goes on (it is committed below)
@@ -211,6 +241,8 @@ export function withLights(reduce = reduceAddBoth) {
         break;
     }
     if (action.type === 'focus' && action.target === 'answer') s.ui.fieldCursor = true;
+    // the seesaw just built: the student chooses the move (an Add left open from the hint before is closed; Build D-2, Part 5)
+    if (state.stage === 'build' && s.stage === 'moves' && s.feedback?.key === 'aBuilt' && !s.forced) { s.menu = null; s.amountEntry = ''; s.hint = null; }
     if (typingAnswer && s.entry !== state.entry && lx.moves === 0 && !s.scaffold) lx.log.typedBeforeMove = true;
     if (s.feedback?.key === 'aFindX' && moveOwed(s)) say(s, 'lxMustMove');
     return s;

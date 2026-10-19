@@ -197,7 +197,10 @@ export function spotlightLayer(spot, o) {
       }
     }
     // what is lit: the target, and whatever else the spot names (the problem, the moves, the green button)
-    const lit = mergeRects([...(frame && r ? [r] : []), ...(spot.lit ?? []).map((t) => box0(find(t))).filter(Boolean).map((q) => ({ left: q.left, top: q.top, width: q.right - q.left, height: q.bottom - q.top, right: q.right, bottom: q.bottom }))]);
+    // I'm stuck stays lit (and can be clicked) while the screen is greyed, wherever it has more help to give (Build D-2, Part 5); not
+    // under an error's spotlight, where only Undo is
+    const litTargets = [...(spot.lit ?? []), ...(o.help && !error && dim ? ['stuck'] : [])];
+    const lit = mergeRects([...(frame && r ? [r] : []), ...litTargets.map((t) => box0(find(t))).filter(Boolean).map((q) => ({ left: q.left, top: q.top, width: q.right - q.left, height: q.bottom - q.top, right: q.right, bottom: q.bottom }))]);
     if (error) {
       // Undo above the dimming: a copy at the very place of the real one, pulsing, with the focus, and the arrow hopping at it
       layer.querySelector('.spot-undo')?.remove();
@@ -229,7 +232,8 @@ export function spotlightLayer(spot, o) {
     const undoCopy = layer.querySelector('.spot-undo');
     if (undoCopy) { const ur = undoCopy.getBoundingClientRect(); keep.push({ left: ur.left, top: ur.top, right: ur.right + 70, bottom: ur.bottom }); }
     const area = o.root.querySelector(o.work ?? '.lb-main')?.getBoundingClientRect() ?? { left: 0, right: vw, width: vw };
-    const side = o.root.querySelector('.sv-work:not(.is-checking) .sv-check')?.getBoundingClientRect();
+    // (the seesaw's check, Build D-2: while the value is placed, its checking space is still empty)
+    const side = o.root.querySelector('.sv-work:not(.is-checking) .sv-check, .sv-work.is-checking:has(.ab-boardwrap) .sv-check:not(:has(li, .sv-checkrow))')?.getBoundingClientRect();
     const cands = candidates({ kind, spot, r, pad, labelBottom, bw, bh, area, side, workBottom: workBottom(o), vw, vh, anchorTop: lit[0]?.top ?? area.top });
     const fits = (c) => c.left >= 8 && c.top >= 8 && c.left + bw <= vw - 8 && c.top + bh <= vh - 8
       && !keep.some((k) => c.left < k.right + 4 && c.left + bw > k.left - 4 && c.top < k.bottom + 4 && c.top + bh > k.top - 4);
@@ -267,7 +271,8 @@ export function findSolveTarget(root, target, s = null) {
     case 'otherSide': return sides(newest).find((sd) => !hasX(sd)) ?? newest;
     case 'lastMove': return rows.filter((r) => r.classList.contains('has-work')).at(-1) ?? newest;
     case 'newest': return newest?.querySelector('.lb-eq') ?? newest;
-    case 'plugrow': return root.querySelector('.is-plugrow .lb-eq');
+    case 'plugrow': return root.querySelector('.is-plugrow .lb-eq') ?? root.querySelector('.ab-boardwrap.is-plugrow');
+    case 'stuck': return root.querySelector('[data-action="stuck"]:not(:disabled)');
     case 'original': return eqRows[0]?.querySelector('.lb-eq') ?? eqRows[0] ?? null;
     case 'preview': return root.querySelector('.lx-ghost.is-preview .lb-eq, .lx-ghost.is-near .lb-eq, .lx-ghost.is-chosen .lb-eq');
     case 'subst': return root.querySelector('.sv-check .sv-mark, .lx-subst li:last-child, .lb-subst li:last-child') ?? root.querySelector('.lx-subst, .lb-subst');

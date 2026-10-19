@@ -3594,3 +3594,18 @@ body[data-input='touch'] #play.is-light #controls .btn-pad { min-width: 48px; mi
 .dv-light .lx-box.is-empty.is-blink::after { content: ''; position: absolute; left: 8px; right: 8px; bottom: 5px; border-bottom: 3px solid #0072b2; animation: ab-blink 1s steps(2, start) infinite; }
 @media (prefers-reduced-motion: reduce) { .dv-light .lx-box.is-empty.is-blink::after { animation: none; } }
 .ui-light .dv-times, .ui-light .lx-times { font-family: 'Lexend', system-ui, sans-serif; font-weight: 700; font-size: 0.8em; }
+
+/* ---------- Build D-2, Part 5: the seesaw's Add, a box under each side ---------- */
+.ab-sideboxes { height: 104px; }
+.ab-sideboxes::before { display: none; }
+.ab-sideslot { position: absolute; top: 4px; width: var(--side); left: var(--left); display: flex; justify-content: center; }
+.ab-sideslot:nth-child(2) { left: calc(var(--left) + var(--side) + var(--gap)); }
+.ab-sidebox { position: relative; display: inline-flex; align-items: center; justify-content: center; min-width: 64px; min-height: 52px; padding: 0 10px; font: 800 30px 'Lexend', system-ui, sans-serif; color: #0072b2; background: #fff; border: 3px solid #0072b2; border-radius: 10px; }
+.ab-sidebox.is-mirror { border-style: dashed; }
+.ab-sidebox.is-empty.is-blink::after { content: ''; position: absolute; left: 12px; right: 12px; bottom: 7px; border-bottom: 3px solid #0072b2; animation: ab-blink 1s steps(2, start) infinite; }
+.ab-sidelabel { position: absolute; left: 0; right: 0; top: 64px; margin: 0; text-align: center; font: 700 18px 'Lexend', system-ui, sans-serif; color: #0072b2; }
+@media (prefers-reduced-motion: reduce) { .ab-sidebox.is-empty.is-blink::after { animation: none; } }
+.ui-light .ab-x.is-droptarget rect { stroke: #0072b2; stroke-width: 4; stroke-dasharray: 8 5; }
+.ui-light .ab-x.is-droptarget text { fill: #0072b2; }
+.ui-light .ab-eqsvg.is-droptarget { outline: 3px dashed #0072b2; outline-offset: -2px; border-radius: 12px; }
+.ui-light .sv-solve > .ab-boardwrap.is-plugrow { width: 100%; }
