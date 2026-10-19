@@ -6,6 +6,22 @@
       "title": "Live",
       "items": [
         {
+          "name": "Where students go",
+          "about": "Students open the site on GitHub Pages (the link on Karl's website). A push to main shows there about a minute later.",
+          "links": [
+            {
+              "label": "The students’ site",
+              "query": "https://karlmaukskoepke.github.io/AlgebraMat/",
+              "look": "The home screen students see. No Save code or Enter code any more."
+            },
+            {
+              "label": "Save codes (teacher only)",
+              "query": "?codes=1&nosignin=1",
+              "look": "With ?codes=1 the Save code and Enter code buttons come back, for moving a student by hand."
+            }
+          ]
+        },
+        {
           "name": "The light design (Build D, Part 1)",
           "about": "No banner: every message is a pop-up; one green button right of x =; the narrow panel with its small lights; help tucked in the corner; no number pad on a keyboard.",
           "links": [

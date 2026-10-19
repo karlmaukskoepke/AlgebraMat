@@ -190,7 +190,11 @@ function showScreen(name) {
   window.scrollTo(0, 0);
 }
 
-const STORAGE_NOTE = 'Progress won’t be remembered on this device. Use Save code to keep it.';
+// Save codes are hidden from students (Karl, 2026-10-19: Chromebooks remember progress and Google sign-in is the backup). The code
+// itself still works: ?codes=1 brings back Save code and Enter code, for a teacher moving a student by hand.
+const CODES = params.get('codes') === '1';
+$('save-code').hidden = !CODES;
+const STORAGE_NOTE = CODES ? 'Progress won’t be remembered on this device. Use Save code to keep it.' : 'Progress won’t be remembered on this device. Sign in to keep it.';
 
 function diagStatus(section) {
   const d = loadDiag(section);
@@ -216,8 +220,8 @@ function goHome() {
     onDiagnostic: (id) => startDiagnostic(id),
     onFluency: startFluency,
     onPlay: startLevel,
-    onSaveCode: () => showSaveCode(encodeProgress(progress)),
-    onEnterCode: () => askForCode(restoreFromCode),
+    onSaveCode: CODES ? () => showSaveCode(encodeProgress(progress)) : null,
+    onEnterCode: CODES ? () => askForCode(restoreFromCode) : null,
     onAccount: () => showAccount(sync, () => { if (!$('home').hidden) goHome(); }),
     account: sync.status(),
     note: homeNote ?? (store.available ? null : STORAGE_NOTE),

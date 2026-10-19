@@ -63,7 +63,7 @@ export function showAccount(sync, onDone = () => {}, { prompt = false } = {}) {
           <input id="who-number" name="number" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="12" inputmode="text" />`;
       body = info?.retired ? `
         <h2>This class sheet has retired</h2>
-        <p>Your progress is still saved on this device. Use <b>Save code</b> to keep a copy.</p>
+        <p>Your progress is still saved on this device.</p>
         <div class="dialog-actions"><button type="button" class="btn btn-primary" data-close>OK</button></div>` : `
         <form class="code-form" data-form="who">
           <h2>Sign in</h2>

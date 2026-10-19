@@ -370,7 +370,7 @@ function forwardCore(s) {
   if (s.combining?.step === 'count') return { label: 'Check', action: 'check', enabled: valid(s.combining.entry) };
   if (s.combining?.step === 'struck') return { label: 'Next', action: 'crossNext', enabled: true };
   if (s.combining) return { label: 'Check', action: 'check', enabled: false };
-  if (s.teachFlow && blankOpen(s) && amountMode(s)) return { label: 'Do it', action: 'go', enabled: valid(s.amountEntry) };
+  if (s.teachFlow && blankOpen(s) && amountMode(s)) return { label: 'Go', action: 'go', enabled: valid(s.amountEntry) };   // (Karl: Go, as everywhere)
   if (s.scaffold && s.stage === 'moves' && s.menu === 'add') return { label: 'Go', action: 'go', enabled: Boolean(s.pending?.both) && s.leftDelta === s.rightDelta };
   if (blankOpen(s) && amountMode(s)) return { label: 'Go', action: 'go', enabled: valid(s.amountEntry) };
   if (s.lx.awaitNext !== null) return { label: 'Next', action: 'lxNext', enabled: true };

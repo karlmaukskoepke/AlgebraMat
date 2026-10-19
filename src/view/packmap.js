@@ -138,8 +138,8 @@ export function renderPackMap(root, progress, packs, {
         h('p', { class: 'tagline' }, 'Pick a section.')),
       h('div', { class: 'home-actions' },
         onAccount ? h('button', { type: 'button', class: 'btn', 'data-home': 'account' }, accountLabel(account)) : null,
-        h('button', { type: 'button', class: 'btn', 'data-home': 'save' }, 'Save code'),
-        h('button', { type: 'button', class: 'btn', 'data-home': 'enter' }, 'Enter code'))),
+        onSaveCode ? h('button', { type: 'button', class: 'btn', 'data-home': 'save' }, 'Save code') : null,   // (only with ?codes=1)
+        onEnterCode ? h('button', { type: 'button', class: 'btn', 'data-home': 'enter' }, 'Enter code') : null)),
     h('p', { class: 'home-note', role: 'status', hidden: !note }, note ?? ''),
     installBar(h),
     sectionBar(sections, packs, progress, bests, diags),
@@ -190,8 +190,8 @@ export function renderPackMap(root, progress, packs, {
     if (e.target.closest('.home-title')) return closeMenus();
     const act = e.target.closest('[data-home]')?.dataset.home;
     if (act === 'account') onAccount();
-    if (act === 'save') onSaveCode();
-    if (act === 'enter') onEnterCode();
+    if (act === 'save') onSaveCode?.();
+    if (act === 'enter') onEnterCode?.();
     if (act === 'diagnostic') onDiagnostic(e.target.closest('[data-home]').dataset.section);
   };
 }

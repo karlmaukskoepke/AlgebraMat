@@ -22,9 +22,12 @@ Karl is a middle school math teacher and designer, not a developer. He tests by 
    student-facing site doesn't change.
 5. **A change with no flag goes to `main` only after `npm run parity` passes**, and the report says which parity differences were
    intended (listed in `tests/parity/INTENDED-CHANGES.md`).
-6. **Always say which Netlify address to open** (live site: https://eloquent-rugelach-64f88b.netlify.app, test links at
-   https://eloquent-rugelach-64f88b.netlify.app/test-links.html), and say plainly if a link won't work and why (for example, the
-   build isn't merged yet, or the site asks for a Netlify login). On the test-links page, say it with `notLive`.
+6. **Always say which address to open.** Students use GitHub Pages: https://karlmaukskoepke.github.io/AlgebraMat/ (a push to
+   `main` is tested and published by `.github/workflows/ci-deploy.yml` in about a minute; Karl's website links there). Test links:
+   https://karlmaukskoepke.github.io/AlgebraMat/test-links.html. Netlify (https://eloquent-rugelach-64f88b.netlify.app) also builds
+   `main`. Say plainly if a link won't work and why (for example, the build isn't merged yet). On the test-links page, say it with
+   `notLive`.
+7. **Save codes are hidden from students** (2026-10-19). The code still works behind `?codes=1`; don't change what a code means.
 
 Don't change Count it or Build it, what a save code means, the problems a seed generates, or the class-sheet event words, unless
 Karl asks for exactly that.
