@@ -14,7 +14,8 @@ import { slotsFor, homeSlot, sameSlot, findTerm, crossedText } from '../engine/l
 
 const THRESHOLD = 6;
 const LIFT = 40;              // the copy rides this far above the pointer, so a finger never hides it
-const REACH = 90;             // a drop more than this far above or below the row puts the term back
+const REACH = 220;            // a drop more than this far above or below the row puts the term back (Build D-2: a drop a little above
+const SIDEWAYS = 120;         // or below the line still lands in the slot the row shows)
 
 export function bindGrab(root, dispatch, getSession) {
   let drag = null;            // { id, pid, x0, y0, started, minus, src, ghost, slot }
@@ -30,11 +31,16 @@ export function bindGrab(root, dispatch, getSession) {
       return paren && e.clientX >= paren.left - 8 && e.clientX <= paren.right + 8 && e.clientY >= paren.top - 30 && e.clientY <= paren.bottom + 30 ? { paren: drag.factor } : null;
     }
     const box = row.getBoundingClientRect();
-    if (e.clientY < box.top - REACH || e.clientY > box.bottom + REACH) return null;
+    if (e.clientY < box.top - REACH || e.clientY > box.bottom + REACH || e.clientX < box.left - SIDEWAYS || e.clientX > box.right + SIDEWAYS) return null;
     const border = row.querySelector('.lb-border').getBoundingClientRect();
     const side = e.clientX < border.left + border.width / 2 ? 'left' : 'right';
-    if (side !== drag.src.dataset.side) return { side, at: 0 };
-    const others = [...row.querySelectorAll(`[data-side="${side}"] [data-tok]`)].filter((n) => n.dataset.tok !== drag.src.dataset.tok && !n.classList.contains('is-gap'));
+    // over the shadow of the term (where the row already shows it landing): it stays there, so the row does not flicker as it reflows
+    const shadow = row.querySelector('.lx-tok.is-shadow')?.getBoundingClientRect();
+    if (shadow && drag.slot?.side === side && e.clientX >= shadow.left && e.clientX <= shadow.right) return drag.slot;
+    // (the row shows the term where it would land, as a shadow with no data-tok: only the other terms are counted)
+    const others = [...row.querySelectorAll(`.lb-side[data-side="${side}"] [data-tok]`)].filter((n) => n.dataset.tok !== drag.src.dataset.tok && !n.classList.contains('is-gap') && !n.dataset.factor);
+    // across the line: before, between or after the terms there (Build D-2, Part 3)
+    if (side !== drag.src.dataset.side) return { side, at: others.filter((n) => { const r = n.getBoundingClientRect(); return r.left + r.width / 2 < e.clientX; }).length };
     for (const n of others) {
       const r = n.getBoundingClientRect();
       if (n.dataset.like === drag.src.dataset.like && e.clientX >= r.left - 4 && e.clientX <= r.right + 4 && e.clientY >= r.top - 24 && e.clientY <= r.bottom + 24) return { side, onto: n.dataset.tok };

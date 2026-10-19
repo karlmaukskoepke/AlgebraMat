@@ -22,7 +22,7 @@ export const DRILL_PROBLEMS = [
   { kind: 'drill', id: 'd2', text: '3(x + 1) = 9', x: 2, board: () => ({ left: [group(3, [xs(1), num(1)])], right: [num(9)] }) },
 ];
 
-const UI0 = { preview: false, focus: null, shake: false, light: null, hoverMove: null, carry: null };
+const UI0 = { preview: false, focus: null, shake: false, light: null, hoverMove: null, carry: null, fieldCursor: false };
 const say = (s, key, params = {}, bad = false) => { s.feedback = { key, params, bad }; return s; };
 const sideOfX = (board) => (board.left.some((t) => t.kind !== 'num') ? 'left' : 'right');
 
@@ -62,9 +62,22 @@ const snapshot = (s) => ({ board: s.board, rows: [...s.rows], negIds: [...s.lx.n
 // The labels over the product blanks: "−2 · x", "−2 · 2".
 export const productLabels = (g) => g.inner.map((t) => `${signed(g.factor)} · ${t.kind === 'x' ? 'x' : signed(t.v)}`);
 const product = (g, t) => g.factor * valueOf(t);
+// A product typed whole (Build D-2, Part 3): "−4" for a number, "−2x" (or "x", "−x") for an x term. NaN when it is not that.
+export function productOf(entry, t) {
+  if (t.kind !== 'x') return /^-?\d+$/.test(entry) ? Number(entry) : NaN;
+  const m = /^(-?)(\d*)x$/.exec(entry);
+  if (!m) return NaN;
+  return (m[1] ? -1 : 1) * (m[2] === '' ? 1 : Number(m[2]));
+}
+// Typing a product: digits and a leading minus, then an x at the end.
+function typeProduct(entry, action, isX) {
+  if (entry.endsWith('x') && !['backspace', 'toggleSign'].includes(action.type)) return entry;
+  if (action.type === 'typeChar' && action.ch === 'x') return isX ? entry + 'x' : entry;
+  return typeInto(entry, action, 'integer');
+}
 
 // A move across the line: the number and its opposite on the side it left (struck, they cancel), the opposite added on the other side.
-function crossBoard(board, id) {
+function crossBoard(board, id, at = Infinity) {
   const f = findTerm(board, id);
   const amount = -f.term.v;
   const from = board[f.side];
@@ -75,7 +88,9 @@ function crossBoard(board, id) {
     amount,
   };
   const left = from.filter((t) => t.id !== id);
-  return { work, board: { [f.side]: left.length ? left : [num(0)], [otherSide(f.side)]: [...to, num(amount)] } };
+  const dest = [...to];
+  dest.splice(Math.max(0, Math.min(at, dest.length)), 0, num(amount));       // where it was dropped: before, between or after (Build D-2)
+  return { work, board: { [f.side]: left.length ? left : [num(0)], [otherSide(f.side)]: dest } };
 }
 
 export function reduceDrill(state, action) {
@@ -103,7 +118,8 @@ export function reduceDrill(state, action) {
     }
     if (lx.distribute) {
       const d = s.lx.distribute;
-      const entry = typeInto(d.wrong === d.focus ? '' : d.entries[d.focus], action, 'integer');
+      const isX = findTerm(s.board, d.group).term.inner[d.focus]?.kind === 'x';
+      const entry = typeProduct(d.wrong === d.focus ? '' : d.entries[d.focus], action, isX);
       d.entries[d.focus] = entry;
       d.wrong = null;
       s.ui.focus = `prod:${d.focus}`;
@@ -132,6 +148,8 @@ export function reduceDrill(state, action) {
     case 'choose': {
       if (action.move === 'flip' && canGrab(state)) {
         s.history.push(snapshot(state));
+        // the step is written: both sides times (−1), then the flipped equation (Build D-2, Part 3)
+        s.rows.push({ type: 'times', factor: -1, board: s.board });
         s.board = mapTerms(s.board, flipTerm);
         s.lx.negIds = [];
         s.rows.push({ type: 'eq', board: s.board });
@@ -197,7 +215,7 @@ export function reduceDrill(state, action) {
       if (lx.distribute) {
         const d = s.lx.distribute;
         const g = findTerm(s.board, d.group).term;
-        const ok = (k) => /^-?\d+$/.test(d.entries[k]);
+        const ok = (k) => /^-?\d*x?$/.test(d.entries[k]) && /\d|x/.test(d.entries[k]);
         // Enter goes from a filled blank to the next empty one; with every blank filled it applies
         const empty = d.entries.findIndex((_, k) => !ok(k));
         if (empty >= 0) {
@@ -205,7 +223,15 @@ export function reduceDrill(state, action) {
           s.ui = { ...UI0, shake: true, focus: `prod:${empty}` };
           return s;
         }
-        const wrong = g.inner.findIndex((t, k) => Number(d.entries[k]) !== product(g, t));
+        // every piece is typed, the x too: a number alone in an x blank is sent back (Build D-2, Part 3)
+        const noX = g.inner.findIndex((t, k) => t.kind === 'x' && !d.entries[k].endsWith('x'));
+        if (noX >= 0) {
+          d.wrong = noX;
+          d.focus = noX;
+          s.ui.focus = `prod:${noX}`;
+          return say(s, 'dxTypeX', {}, true);
+        }
+        const wrong = g.inner.findIndex((t, k) => productOf(d.entries[k], t) !== product(g, t));
         if (wrong >= 0) {
           d.wrong = wrong;
           d.focus = wrong;
@@ -264,7 +290,7 @@ export function reduceDrill(state, action) {
       }
       if (out.kind === 'cross') {
         s.history.push(snapshot(state));
-        const { work, board } = crossBoard(s.board, action.id);
+        const { work, board } = crossBoard(s.board, action.id, out.at);
         s.work = work;
         s.board = board;
         s.rows.push({ type: 'work', work }, { type: 'eq', board });

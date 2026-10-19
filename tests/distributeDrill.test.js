@@ -4,7 +4,7 @@ import { sideText } from '../src/engine/lightsGrab.js';
 
 // The Distribute drill of the lights experiment (SPEC-LIGHTS-EXPERIMENT-ADD-rev02.md B6).
 const run = (s, ...actions) => actions.reduce(reduceDrill, s);
-const typed = (text) => [...text].map((ch) => (/\d/.test(ch) ? { type: 'digit', digit: Number(ch) } : { type: 'toggleSign' }));
+const typed = (text) => [...text].map((ch) => (/\d/.test(ch) ? { type: 'digit', digit: Number(ch) } : ch === 'x' ? { type: 'typeChar', ch: 'x' } : { type: 'toggleSign' }));
 const text = (s) => `${sideText(s.board.left, s.lx.negIds)} = ${sideText(s.board.right, s.lx.negIds)}`;
 const term = (s, side, i) => s.board[side][i].id;
 
@@ -21,12 +21,12 @@ describe('the Distribute drill: 5 − 2(x + 2) = 3', () => {
     expect(text(shown)).toBe('5 + −2(x + 2) = 3');
     expect(productLabels(shown.board.left[1])).toEqual(['−2 · x', '−2 · 2']);
   });
-  it('distributes by typing each product (the x blank takes only the number), then the rest is grabbed to the answer', () => {
+  it('distributes by typing each product (the x too: −2x), then the rest is grabbed to the answer', () => {
     let s = start();
     const g = term(s, 'left', 1);
     s = run(s, { type: 'lxMinus', id: g }, { type: 'lxDistribute', id: g });
     expect(s.lx.distribute.entries).toEqual(['', '']);
-    s = run(s, ...typed('-2'), { type: 'go' });                          // Enter goes to the next blank
+    s = run(s, ...typed('-2x'), { type: 'go' });                         // Enter goes to the next blank
     expect(s.lx.distribute.focus).toBe(1);
     s = run(s, ...typed('-3'), { type: 'go' });
     expect(s.feedback).toMatchObject({ key: 'dxProductWrong', bad: true, params: { product: '−2 · 2' } });
@@ -53,7 +53,7 @@ describe('the Distribute drill: 5 − 2(x + 2) = 3', () => {
     const g = term(s, 'left', 1);
     s = run(s, { type: 'lxMinus', id: g }, { type: 'lxDistribute', id: g });
     expect(run(s, { type: 'lxCancel' }).lx.distribute).toBe(null);
-    s = run(s, ...typed('-2'), { type: 'go' }, ...typed('-4'), { type: 'go' });
+    s = run(s, ...typed('-2x'), { type: 'go' }, ...typed('-4'), { type: 'go' });
     s = run(s, { type: 'undo' });
     expect(text(s)).toBe('5 + −2(x + 2) = 3');
     s = run(s, { type: 'undo' });
@@ -70,7 +70,7 @@ describe('the Distribute drill: 3(x + 1) = 9', () => {
   it('has no minus to tap; distributing gives 3x + 3 = 9', () => {
     let s = newDrill(DRILL_PROBLEMS[1]);
     expect(text(s)).toBe('3(x + 1) = 9');
-    s = run(s, { type: 'lxDistribute', id: term(s, 'left', 0) }, ...typed('3'), { type: 'go' }, ...typed('3'), { type: 'go' });
+    s = run(s, { type: 'lxDistribute', id: term(s, 'left', 0) }, ...typed('3x'), { type: 'go' }, ...typed('3'), { type: 'go' });
     expect(text(s)).toBe('3x + 3 = 9');
   });
 });
@@ -87,5 +87,31 @@ describe('Build D: Flip everything and Multiply in the drill', () => {
     expect(s.feedback.key).toBe('dxMultNo');
     s = reduceDrill(reduceDrill(reduceDrill(s, { type: 'backspace' }), { type: 'digit', digit: 2 }), { type: 'go' });
     expect([s.board.left[0].coef, s.board.right[0].v, s.lx.mult]).toEqual([1, -1, null]);
+  });
+});
+
+// Build D-2, Part 3: every piece is typed, the x too; a flip is written as both sides times (−1); a carried number lands in its slot
+describe('Build D-2: the drill', () => {
+  it('sends back a number with no x in the x blank, and takes no x in a number blank', () => {
+    let s = newDrill(DRILL_PROBLEMS[1]);
+    s = run(s, { type: 'lxDistribute', id: term(s, 'left', 0) }, ...typed('3'), { type: 'go' }, ...typed('3x'), { type: 'go' });
+    expect(s.lx.distribute.entries).toEqual(['3', '3']);
+    expect(s.feedback).toMatchObject({ key: 'dxTypeX', bad: true });
+    expect(s.lx.distribute.focus).toBe(0);
+    s = run(s, ...typed('3x'), { type: 'go' });
+    expect(text(s)).toBe('3x + 3 = 9');
+  });
+  it('writes the flip as a × (−1) row, and Undo takes it back with the flip', () => {
+    let s = newDrill({ ...DRILL_PROBLEMS[0], board: () => ({ left: [{ id: 'a', kind: 'x', coef: -2 }], right: [{ id: 'b', kind: 'num', v: 2 }] }) });
+    s = reduceDrill(s, { type: 'choose', move: 'flip' });
+    expect(s.rows.map((r) => r.type)).toEqual(['eq', 'times', 'eq']);
+    expect(s.rows[1]).toMatchObject({ factor: -1, board: { left: [{ coef: -2 }] } });
+    s = reduceDrill(s, { type: 'undo' });
+    expect(s.rows.map((r) => r.type)).toEqual(['eq']);
+  });
+  it('carries a number across to the slot it was dropped on', () => {
+    let s = newDrill({ ...DRILL_PROBLEMS[0], board: () => ({ left: [{ id: 'a', kind: 'x', coef: 1 }, { id: 'b', kind: 'num', v: 4 }], right: [{ id: 'c', kind: 'num', v: 9 }] }) });
+    s = run(s, { type: 'lxDrop', id: 'b', slot: { side: 'right', at: 0 } });
+    expect(text(s)).toBe('x = −4 + 9');
   });
 });

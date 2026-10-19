@@ -25,6 +25,7 @@ const LX = {
   dxNegFactor: (p) => `Subtracting is adding a negative: the factor is ${p.neg}. Now drag ${p.neg} onto the parentheses.`,
   dxTapMinusFirst: (p) => `Tap the minus first, so ${p.factor} is a negative number.`,
   dxProducts: () => 'Multiply each term in the parentheses. Type each product; Enter goes to the next.',
+  dxTypeX: () => 'Type every piece, including the x.',
   dxProductWrong: (p) => `${p.product} is not ${p.typed}. Try that one again, or Undo.`,
   dxDistributed: () => 'Distributed. Now put the numbers together: drag one number onto the other.',
   dxCrossed: () => 'Across the line: the pair on that side cancels.',

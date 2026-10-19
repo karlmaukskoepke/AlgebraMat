@@ -274,3 +274,12 @@ No data change (PASS). On screen only: x = shows no cursor until it is clicked (
 action, a press elsewhere or the focus moving on); the last step still blinks. The check's pop-up reads "Let’s check that x = 7 is the
 solution. / Drag the 7 onto an x above." A pointer click on x no longer places the value (Enter still does); after about 4 s idle a faint
 copy of the value travels from x = to the first x, repeating until the student acts.
+
+## Build D-2, Part 3 (2026-10-19): dragging a term
+
+No data change (PASS). On screen only: while a term is dragged the newest row itself shows where it would land (the moved term as a
+shadow; no grey row under it); across the line the slot can be before, between or after the terms there (the drop's `at`, which the Add
+engine already honoured; the drill's own cross now honours it too); a drop up to 220 px above or below the row lands in the slot shown;
+the midline is 2 px, shown only while dragging, in two pieces that stop short of the =. The Distribute drill (a hidden pack, not in
+parity) types each product whole (`−2x`; a number alone in the x blank gets `dxTypeX`, "Type every piece, including the x.") and writes
+Flip everything as a `times` row, both sides × (−1), before the flipped equation.

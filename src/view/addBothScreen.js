@@ -136,7 +136,7 @@ const charsOf = (list) => list.map((x) => (x.term ? charsOf([x.term]) : x.kind =
 // A token of the newest row: the whole signed term, grabbed with its sign. A subtracted number's minus (or, once tapped, the minus of
 // the negative number) can be tapped to show the term as a negative number.
 function token(s, t, i, side, held) {
-  const neg = s.lx.negIds.includes(t.id);
+  const neg = s.lx.negIds.includes(t.id) || Boolean(t.fresh);
   const { op, body, subtracted, neg: isNeg } = termText(t, i, neg);
   const kids = [];
   if (op) kids.push(html('span', 'lx-op', [op], subtracted ? { 'data-minus': t.id } : {}));
@@ -176,9 +176,28 @@ function groupEls(s, t, i, subtracted, shownNeg) {
   return [factor, paren];
 }
 
+// A term being dragged by the pointer: the equation it would make if dropped where it is (Build D-2, Part 3: shown in the row itself,
+// the moved term as a shadow in its new place). null where the drop would change nothing.
+const dragShape = (s) => (s.ui?.drag ? previewBoard(s.board, s.ui.drag.id, s.ui.drag.slot) : null);
+
 // The newest row's side as tokens. While a term is carried by the keyboard, it is drawn lifted at the slot it is over: in a gap, beside
 // a like term it would combine with, or on the other side showing its opposite sign.
 function liveSide(s, side) {
+  const shape = dragShape(s);
+  if (shape) {
+    const home = s.board[side].map((u) => u.id);
+    return shape[side].map((u, i) => {
+      const shadow = u.id === s.ui.drag.id || u.fresh;
+      const el = token(s, u, i, side, false);
+      if (shadow) {
+        el.classList.add('is-shadow');
+        if (u.fresh) el.classList.add('is-fresh');
+      }
+      // the moved term and a 0 left on an emptied side are not slots of their own
+      if (shadow || !home.includes(u.id)) { el.removeAttribute('data-tok'); el.removeAttribute('tabindex'); el.classList.toggle('is-placeholder', !shadow); }
+      return el;
+    });
+  }
   const carry = s.ui?.carry;
   const held = carry ? findTerm(s.board, carry.id) : null;
   const crossing = Boolean(held) && carry.slot.side !== held.side;
@@ -217,6 +236,10 @@ function rowsOf(s) {
     const newest = s.rows.length > 1 && (i === last || (i === last - 1 && row.type === 'work'));
     const recent = i === last || (i === last - 1 && row.type === 'work');                   // earlier lines are drawn in lighter ink
     const cls = `lb-rowwrap${!newest || settledNow ? ' is-settled' : ''}${row.type === 'work' ? ' has-work' : ''}${recent ? '' : ' is-old'}`;
+    if (row.type === 'times') {                               // the drill's flip: both sides times (−1), written out (Build D-2)
+      const times = (terms) => [...(terms.length > 1 ? [html('span', 'lb-plus', ['(']), ...sideEls(terms, s.lx.negIds), html('span', 'lb-plus', [')'])] : sideEls(terms, s.lx.negIds)), html('span', 'lb-plus lx-times', ['×']), html('span', 'lb-num is-added', [`(${MINUS}1)`])];
+      return html('div', `${cls} has-work`, [eqRow(times(row.board.left), times(row.board.right), `lb-work${eqClass(charsOf([...row.board.left, ...row.board.right]) + 12)}`, { 'aria-label': 'Both sides times negative 1' })]);
+    }
     if (row.type === 'work') {
       return html('div', cls, [eqRow(workEls(row.work.left, s.lx.negIds), workEls(row.work.right, s.lx.negIds), `lb-work${eqClass(charsOf([...row.work.left, ...row.work.right]))}`, { 'aria-hidden': 'true' })]);
     }
@@ -269,7 +292,7 @@ function sumRow(s) {
   return html('div', 'lx-ghost is-chosen is-sum', [eq]);
 }
 
-// The drill's products: one blank per term of the parenthesis, each labelled with what it is; the x blank has its x printed.
+// The drill's products: one blank per term of the parenthesis, each labelled with what it is; every piece is typed, the x too (Build D-2).
 function productRow(s) {
   const d = s.lx.distribute;
   const f = findTerm(s.board, d.group);
@@ -292,7 +315,7 @@ function productRow(s) {
         type: 'button', 'data-action': 'focus', 'data-target': 'dist', 'data-index': String(j), 'data-fk': `prod:${j}`, 'data-lx-field': '1', 'aria-label': `${labels[j]}: type the product`,
       });
       if (s.ui?.focus === `prod:${j}`) box.dataset.lxFocus = '1';
-      els.push(html('span', 'lx-prod', [html('span', 'lx-prodlabel', [labels[j].replace('-', MINUS)]), html('span', 'lx-prodbox', term.kind === 'x' ? [box, html('span', 'lb-x', ['x'])] : [box])]));
+      els.push(html('span', 'lx-prod', [html('span', 'lx-prodlabel', [labels[j].replace('-', MINUS)]), html('span', 'lx-prodbox', [box])]));
       k += 1;
     });
   });
@@ -318,10 +341,8 @@ function ghostRow(s) {
   if (s.lx.mult) return multRow(s);
   if (s.lx.distribute) return productRow(s);
   if (s.lx.combine) return sumRow(s);
-  // a term being dragged: what the equation would become if it were dropped here, in grey, right under it (Build D, Part 3)
-  const drag = s.ui?.drag;
-  const shape = drag && previewBoard(s.board, drag.id, drag.slot);
-  if (shape) return html('div', 'lx-ghost is-preview is-dragpreview', [eqRow(sideEls(shape.left, s.lx.negIds), sideEls(shape.right, s.lx.negIds), 'lx-ghosteq')], { 'aria-hidden': 'true' });
+  // (a term being dragged shows where it would land in its own row, not here: Build D-2, Part 3)
+  if (dragShape(s)) return html('div', 'lx-ghost');
   const open = blankOpen(s);
   const preview = !open && canChoose(s) && s.ui?.preview === true;
   const near = !open && canChoose(s) && s.ui?.preview === 'near';             // the pointer is coming: a faint preview

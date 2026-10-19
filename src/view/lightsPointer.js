@@ -101,7 +101,8 @@ export function bindLightsMat(root, dispatch, getSession) {
     // digits, the sign and Backspace go to the open blank or to x = (the page's own keys skip a focused button on the Mat, and the
     // two fields are buttons), whatever has focus
     const typing = /^[0-9]$/.test(e.key) ? { type: 'digit', digit: Number(e.key) }
-      : e.key === '-' || e.key === '−' ? { type: 'toggleSign' } : e.key === 'Backspace' || e.key === 'Delete' ? { type: 'backspace' } : null;
+      : e.key === '-' || e.key === '−' ? { type: 'toggleSign' } : e.key === 'Backspace' || e.key === 'Delete' ? { type: 'backspace' }
+        : (e.key === 'x' || e.key === 'X') && getSession?.()?.lx?.distribute ? { type: 'typeChar', ch: 'x' } : null;   // the drill's products: −2x
     if (typing) {
       if (e.target instanceof HTMLElement && e.target.matches('input, textarea, select, [contenteditable]')) return;
       e.preventDefault();

@@ -22,6 +22,22 @@
           ]
         },
         {
+          "name": "Dragging a term (Build D-2, Part 3)",
+          "about": "While a term is dragged, the equation itself shows where it would land (no extra row); across the line it turns red and can go before or after the other terms; the line is thin and stops short of the =. In the Distribute drill every product is typed with its x, and Flip everything writes a × (−1) step.",
+          "links": [
+            {
+              "label": "Drag across the line",
+              "query": "?pack=add-both&level=2&seed=7&nosignin=1",
+              "look": "Drag the +8 over the line: −8 appears in red in the equation, before the 11; keep going right past the 11 and it moves after it. Let go a little above or below the line: it lands where it was shown."
+            },
+            {
+              "label": "Distribute drill",
+              "query": "?drill=distribute&nosignin=1",
+              "look": "Tap the minus, drag −2 onto the parentheses, type −2 and Enter: “Type every piece, including the x.” Type −2x. At −2x = 2, Flip everything: a row −2x × (−1) = 2 × (−1), then 2x = −2."
+            }
+          ]
+        },
+        {
           "name": "x = and checking a value (Build D-2, Part 2)",
           "about": "x = has no blinking cursor until it is clicked; the check says what is being checked; the value is dragged onto x (a click on x does nothing), and after 4 seconds a faint copy of it travels to x to show how.",
           "links": [

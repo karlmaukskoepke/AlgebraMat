@@ -170,14 +170,18 @@ export function bindValueDrag(root, dispatch) {
     if (e.detail > 0 && e.target.closest?.('[data-x][data-action="placeValue"]')) { e.preventDefault(); e.stopImmediatePropagation(); }
   };
   // x = shows its cursor once clicked; a press anywhere else, or the focus moving on, takes it away
+  // (on the click, after whatever it pressed has had its turn, and only while the cursor still shows: a redraw on the press itself
+  // would lose the click)
+  const cursorOn = () => Boolean(root.querySelector('[data-fk="answer"].is-blink'));
   const away = (e) => {
-    idleSince = Date.now();
-    if (!e.target.closest?.('[data-fk="answer"]')) dispatch({ type: 'ui', patch: { fieldCursor: false } });
+    if (cursorOn() && !e.target.closest?.('[data-fk="answer"]')) dispatch({ type: 'ui', patch: { fieldCursor: false } });
   };
+  let tabbing = false;                          // the focus moving on by the keyboard (a click's focus waits for its click)
+  const pressed = () => { idleSince = Date.now(); tabbing = false; };
   const awayFocus = (e) => {
-    if (e.target instanceof Element && root.contains(e.target) && !e.target.closest('[data-fk="answer"]')) dispatch({ type: 'ui', patch: { fieldCursor: false } });
+    if (tabbing && cursorOn() && e.target instanceof Element && root.contains(e.target) && !e.target.closest('[data-fk="answer"]')) dispatch({ type: 'ui', patch: { fieldCursor: false } });
   };
-  const acted = () => { idleSince = Date.now(); };
+  const acted = (e) => { idleSince = Date.now(); if (e.key === 'Tab') tabbing = true; };
   const hint = () => {
     const chip = root.isConnected && !root.closest('[hidden]') ? root.querySelector('[data-chip]') : null;
     if (!chip) { chipSeen = false; return; }
@@ -205,14 +209,16 @@ export function bindValueDrag(root, dispatch) {
   const timer = setInterval(hint, 250);
   root.addEventListener('pointerdown', down);
   root.addEventListener('click', click, true);
-  document.addEventListener('pointerdown', away, true);
+  document.addEventListener('pointerdown', pressed, true);
+  document.addEventListener('click', away);
   document.addEventListener('focusin', awayFocus);
   window.addEventListener('keydown', acted, true);
   return () => {
     clearInterval(timer);
     root.removeEventListener('pointerdown', down);
     root.removeEventListener('click', click, true);
-    document.removeEventListener('pointerdown', away, true);
+    document.removeEventListener('pointerdown', pressed, true);
+    document.removeEventListener('click', away);
     document.removeEventListener('focusin', awayFocus);
     window.removeEventListener('keydown', acted, true);
     ghost?.remove();
