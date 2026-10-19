@@ -334,3 +334,79 @@ class-sheet records (events) and the save codes are identical. Every remaining d
 Not in the scripted runs, but changed by the same rules (unit tests updated): a second move while one waits for Undo now says
 `aUndoFirst` (stacking is gone, so shapes S5 and S6 can no longer happen); in the seesaw, a move that only partly helps waits for Undo, and
 one Undo takes the whole seesaw move back; three reds in a row are counted across their Undos by the spotlight, as on the bare screen.
+
+## Build F, Part 1 (2026-10-19): no answer of 0, 1 or −1 on Add to both sides
+
+The loop spec (§8) bans answers of 0, 1 and −1. Add's generator now skips them while picking (the pool and its shuffle are unchanged), so only a set that drew one changes: the first banned problem is replaced by the next allowed one in the same group, and the rest of that set can shift. Seeds 1–30 that changed (the parity check covers these):
+
+| Key | Why |
+|---|---|
+| `problem:add-both/L2/seed2` | this set had an answer of 1 or −1 |
+| `problem:add-both/L2/seed10` | this set had an answer of 1 or −1 |
+| `problem:add-both/L2/seed13` | this set had an answer of 1 or −1 |
+| `problem:add-both/L2/seed26` | this set had an answer of 1 or −1 |
+| `problem:add-both/L2/seed27` | this set had an answer of 1 or −1 |
+| `problem:add-both/L3/seed2` | this set had an answer of 1 or −1 |
+| `problem:add-both/L3/seed3` | this set had an answer of 1 or −1 |
+| `problem:add-both/L3/seed4` | this set had an answer of 1 or −1 |
+| `problem:add-both/L3/seed5` | this set had an answer of 1 or −1 |
+| `problem:add-both/L3/seed7` | this set had an answer of 1 or −1 |
+| `problem:add-both/L3/seed8` | this set had an answer of 1 or −1 |
+| `problem:add-both/L3/seed9` | this set had an answer of 1 or −1 |
+| `problem:add-both/L3/seed10` | this set had an answer of 1 or −1 |
+| `problem:add-both/L3/seed11` | this set had an answer of 1 or −1 |
+| `problem:add-both/L3/seed12` | this set had an answer of 1 or −1 |
+| `problem:add-both/L3/seed13` | this set had an answer of 1 or −1 |
+| `problem:add-both/L3/seed15` | this set had an answer of 1 or −1 |
+| `problem:add-both/L3/seed16` | this set had an answer of 1 or −1 |
+| `problem:add-both/L3/seed17` | this set had an answer of 1 or −1 |
+| `problem:add-both/L3/seed18` | this set had an answer of 1 or −1 |
+| `problem:add-both/L3/seed20` | this set had an answer of 1 or −1 |
+| `problem:add-both/L3/seed21` | this set had an answer of 1 or −1 |
+| `problem:add-both/L3/seed22` | this set had an answer of 1 or −1 |
+| `problem:add-both/L3/seed24` | this set had an answer of 1 or −1 |
+| `problem:add-both/L3/seed29` | this set had an answer of 1 or −1 |
+| `problem:add-both/L3/seed30` | this set had an answer of 1 or −1 |
+| `problem:add-both/L4/seed1` | this set had an answer of 1 or −1 |
+| `problem:add-both/L4/seed2` | this set had an answer of 1 or −1 |
+| `problem:add-both/L4/seed3` | this set had an answer of 1 or −1 |
+| `problem:add-both/L4/seed4` | this set had an answer of 1 or −1 |
+| `problem:add-both/L4/seed5` | this set had an answer of 1 or −1 |
+| `problem:add-both/L4/seed6` | this set had an answer of 1 or −1 |
+| `problem:add-both/L4/seed8` | this set had an answer of 1 or −1 |
+| `problem:add-both/L4/seed10` | this set had an answer of 1 or −1 |
+| `problem:add-both/L4/seed12` | this set had an answer of 1 or −1 |
+| `problem:add-both/L4/seed13` | this set had an answer of 1 or −1 |
+| `problem:add-both/L4/seed16` | this set had an answer of 1 or −1 |
+| `problem:add-both/L4/seed17` | this set had an answer of 1 or −1 |
+| `problem:add-both/L4/seed18` | this set had an answer of 1 or −1 |
+| `problem:add-both/L4/seed21` | this set had an answer of 1 or −1 |
+| `problem:add-both/L4/seed22` | this set had an answer of 1 or −1 |
+| `problem:add-both/L4/seed23` | this set had an answer of 1 or −1 |
+| `problem:add-both/L4/seed24` | this set had an answer of 1 or −1 |
+| `problem:add-both/L4/seed25` | this set had an answer of 1 or −1 |
+| `problem:add-both/L4/seed29` | this set had an answer of 1 or −1 |
+| `problem:add-both/L4/seed30` | this set had an answer of 1 or −1 |
+| `problem:add-both/L5/seed1` | this set had an answer of 1 or −1 |
+| `problem:add-both/L5/seed3` | this set had an answer of 1 or −1 |
+| `problem:add-both/L5/seed7` | this set had an answer of 1 or −1 |
+| `problem:add-both/L5/seed8` | this set had an answer of 1 or −1 |
+| `problem:add-both/L5/seed9` | this set had an answer of 1 or −1 |
+| `problem:add-both/L5/seed10` | this set had an answer of 1 or −1 |
+| `problem:add-both/L5/seed11` | this set had an answer of 1 or −1 |
+| `problem:add-both/L5/seed13` | this set had an answer of 1 or −1 |
+| `problem:add-both/L5/seed16` | this set had an answer of 1 or −1 |
+| `problem:add-both/L5/seed17` | this set had an answer of 1 or −1 |
+| `problem:add-both/L5/seed19` | this set had an answer of 1 or −1 |
+| `problem:add-both/L5/seed21` | this set had an answer of 1 or −1 |
+| `problem:add-both/L5/seed23` | this set had an answer of 1 or −1 |
+| `problem:add-both/L5/seed27` | this set had an answer of 1 or −1 |
+| `problem:add-both/L6/seed3` | this set had an answer of 1 or −1 |
+| `problem:add-both/L6/seed5` | this set had an answer of 1 or −1 |
+| `problem:add-both/L6/seed6` | this set had an answer of 1 or −1 |
+| `problem:add-both/L6/seed13` | this set had an answer of 1 or −1 |
+| `problem:add-both/L6/seed24` | this set had an answer of 1 or −1 |
+| `problem:add-both/L6/seed26` | this set had an answer of 1 or −1 |
+| `problem:add-both/L6/seed29` | this set had an answer of 1 or −1 |
+
+Over seeds 0–1000 the sets that changed are: Level 2 (shown as Level 1) 311, Level 3 615, Level 4 522, Level 5 461, Level 6 390. Seed 7 (the test links and the parity screens) is unchanged at Levels 2, 4 and 6; at Level 3 its first problem is now x − 3 = −1 (it was x − 4 = −3, answer 1), and at Level 5 its fourth problem changed (the test-link words were updated).

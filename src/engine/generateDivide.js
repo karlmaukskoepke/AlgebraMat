@@ -132,3 +132,33 @@ export function worstCaseRows(level, seeds = 40) {
   }
   return worst;
 }
+
+// Slip collisions (loop spec §8; Build F): a wrong value that fits two slips, so the tag order (divide.js tagDivide) decides what the
+// class sheet records. Reported, not prevented.
+export function slipValuesOf(p) {
+  const out = [
+    { tag: 'ignored-front', v: p.b }, { tag: 'wrong-team', v: -p.x }, { tag: 'multiplied', v: p.a * p.b }, { tag: 'gave-boxes', v: p.a },
+    { tag: 'undid-add', v: p.b + p.a }, { tag: 'undid-add', v: p.b - p.a },
+  ];
+  for (const n of FRACTIONS) {
+    if (n === p.a || p.b % n !== 0) continue;
+    out.push({ tag: n < p.a && p.a % n === 0 ? 'halfway' : 'wrong-groups', v: p.b / n });
+  }
+  return out;
+}
+export function slipCollisionsOf(p) {
+  const by = new Map();
+  for (const { tag, v } of slipValuesOf(p)) by.set(v, [...new Set([...(by.get(v) ?? []), tag])]);
+  return [...by.entries()].filter(([v, tags]) => tags.length > 1 || v === p.x).map(([value, tags]) => ({ value, tags }));
+}
+export function slipCollisions(level, seeds = 200) {
+  let problems = 0;
+  const counts = {};
+  for (let seed = 1; seed <= seeds; seed++) {
+    for (const p of generateDivideLevel(level, seed)) {
+      problems += 1;
+      for (const c of slipCollisionsOf(p)) { const k = c.tags.join(' = '); counts[k] = (counts[k] ?? 0) + 1; }
+    }
+  }
+  return { problems, counts };
+}

@@ -248,7 +248,7 @@
             {
               "label": "Combine",
               "query": "?pack=add-both&level=3&seed=7&nosignin=1",
-              "look": "Drag − 4 across, Next, then drop the 4 on the −3: the two are lit with Combine over them, the rest greys, a box under them; type 1 and press the green Combine. A wrong sum is an error with Undo."
+              "look": "Drag − 3 across, then drop the 3 on the −1: the two are lit with Combine over them, the rest greys, a box under them; type 2 and press the green Combine. A wrong sum is an error with Undo."
             },
             {
               "label": "Drill: finish with Flip and Multiply",
@@ -712,7 +712,7 @@
           "about": "Kept (Build D): the narrow panel with its small round lights is the only panel on Add to both sides and Divide it.",
           "links": [
             {
-              "label": "Narrow panel · x − 4 = −3",
+              "label": "Narrow panel · x − 3 = −1",
               "query": "?pack=add-both&level=3&seed=7&nosignin=1",
               "look": "Hover a dot: it opens into its goal. The dashed line only shows while you drag a term."
             }
@@ -725,7 +725,7 @@
             {
               "label": "Drag across, combine, minus",
               "query": "?pack=add-both&level=3&seed=7&nosignin=1",
-              "look": "Drag “− 4” over the line, drop, Next, then drop the 4 onto the −3, type 1 and press the green Combine."
+              "look": "Drag “− 3” over the line, drop, then drop the 3 onto the −1, type 2 and press the green Combine."
             },
             {
               "label": "Reorder, and x can’t cross",

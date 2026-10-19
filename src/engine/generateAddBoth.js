@@ -7,7 +7,8 @@
 // (The equation levels 1–5 below are the card's levels 2–6.)
 
 import { mulberry32, pickSet, PROBLEMS_PER_LEVEL } from './generate.js';
-import { makeAddBoth, isBattle } from './addBoth.js';
+import { makeAddBoth, isBattle, slipsOf } from './addBoth.js';
+import { substitutionLines } from './solveTerms.js';
 
 export const ADD_BOTH_LEVEL_COUNT = 6;
 export const EQUATION_LEVEL_COUNT = 5;
@@ -74,6 +75,9 @@ export const ADD_BOTH_LEVELS = {
   },
 };
 
+// Banned answers (loop spec §8): never 0, 1 or −1.
+export const allowedAnswer = (x) => Math.abs(x) >= 2;
+
 // Answers at most 15 in size (the spec's limit on every number in a problem).
 const withinLimit = (p) => Math.abs(p.x) <= 15 && Math.abs(p.b) <= 15 && p.a <= 14;
 
@@ -82,8 +86,11 @@ export function generateEquationLevel(level, seed) {
   const spec = ADD_BOTH_LEVELS[level];
   if (!spec) throw new Error(`Unknown Add to both sides level: ${level}`);
   const rng = mulberry32((seed ^ Math.imul(level + 120, 0x85ebca6b)) >>> 0);
+  // no answer of 0, 1 or −1 (loop spec §8; Build F). They are skipped while picking, not taken out of the pool, so the pool is shuffled
+  // as before and only a set that drew one of them changes.
+  const groups = spec.groups.map((g) => ({ ...g, test: (p) => allowedAnswer(p.x) && g.test(p) }));
   const set = pickSet({
-    candidates: spec.candidates().filter(withinLimit), groups: spec.groups, answerOf: (p) => p.x, rng, label: `Add to both sides level ${level}`,
+    candidates: spec.candidates().filter(withinLimit), groups, answerOf: (p) => p.x, rng, label: `Add to both sides level ${level}`,
   });
   return set;
 }
@@ -154,3 +161,48 @@ export function generateAddBothLevel(level, seed) {
 }
 
 export { PROBLEMS_PER_LEVEL };
+
+// ---------- the generator's reports (loop spec §3B, §8; Build F) ----------
+
+// Rows of the work stack for one problem on its longest honest path: the original, Trade places when x is on the right (Level 5 up),
+// the move's work row and its new equation; then the x = [ ] row and its button, and the check (a line each, then the mark).
+export function stackRowsFor(p, level) {
+  const trade = p.mirror && level >= 5 ? 1 : 0;
+  const moves = 1 + trade + 2;
+  const xs = [{ kind: 'x' }, { kind: 'num', v: p.form === 'x-a' ? -p.a : p.a }];
+  const board = p.mirror ? { left: [{ kind: 'num', v: p.b }], right: xs } : { left: xs, right: [{ kind: 'num', v: p.b }] };
+  const check = substitutionLines(board, p.x).lines.length + 1;
+  return { moves, answer: 2, check, total: moves + 2 + check };
+}
+// The worst case of a card level over many seeds (the screen reserves it).
+export function worstCaseRows(level, seeds = 200) {
+  let worst = { moves: 0, answer: 0, check: 0, total: 0 };
+  for (let seed = 1; seed <= seeds; seed++) {
+    for (const p of generateAddBothLevel(level, seed)) {
+      const r = stackRowsFor(p, level);
+      if (r.total > worst.total) worst = r;
+    }
+  }
+  return worst;
+}
+
+// Slip collisions: a wrong value that fits two slips (or the answer), so the tag order decides what the class sheet records. Reported,
+// not prevented: the card's tag order (addBoth.js tagAddBoth) is the rule.
+export function slipCollisionsOf(p) {
+  const values = Object.entries(slipsOf(p)).map(([tag, v]) => ({ tag, v }));
+  if (isBattle(p)) values.push({ tag: 'sizes-added', v: -(Math.abs(p.b) + p.a) });
+  const by = new Map();
+  for (const { tag, v } of values) by.set(v, [...new Set([...(by.get(v) ?? []), tag])]);
+  return [...by.entries()].filter(([v, tags]) => tags.length > 1 || v === p.x).map(([value, tags]) => ({ value, tags }));
+}
+export function slipCollisions(level, seeds = 200) {
+  let problems = 0;
+  const counts = {};
+  for (let seed = 1; seed <= seeds; seed++) {
+    for (const p of generateAddBothLevel(level, seed)) {
+      problems += 1;
+      for (const c of slipCollisionsOf(p)) { const k = c.tags.join(' = '); counts[k] = (counts[k] ?? 0) + 1; }
+    }
+  }
+  return { problems, counts };
+}
