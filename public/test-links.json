@@ -356,6 +356,66 @@
           ]
         },
         {
+          "name": "Build F screenshots",
+          "about": "The report and the acceptance screenshots: before and after the seesaw moved beside the work, and the three help gaps (they open on GitHub).",
+          "links": [
+            {
+              "label": "The Build F report",
+              "query": "https://github.com/karlmaukskoepke/AlgebraMat/blob/main/docs/build-f/BUILD-F-REPORT.md",
+              "look": "What changed in each part, the parity differences, the conformance table and the decisions.",
+              "notLive": "Opens the report on GitHub, not the app; GitHub may ask you to sign in."
+            },
+            {
+              "label": "Pair · building the seesaw",
+              "query": "https://github.com/karlmaukskoepke/AlgebraMat/blob/main/docs/build-f/pair-01-build-empty-650.png",
+              "look": "Before and after at 1366×650: before, x = and the green button were pushed off the screen.",
+              "notLive": "Opens the picture on GitHub, not the app; GitHub may ask you to sign in."
+            },
+            {
+              "label": "Pair · the add boxes",
+              "query": "https://github.com/karlmaukskoepke/AlgebraMat/blob/main/docs/build-f/pair-05-add-typed-both-sides-768.png",
+              "look": "Before and after: the seesaw beside the work instead of over it.",
+              "notLive": "Opens the picture on GitHub, not the app; GitHub may ask you to sign in."
+            },
+            {
+              "label": "Pair · checking at the end",
+              "query": "https://github.com/karlmaukskoepke/AlgebraMat/blob/main/docs/build-f/pair-10-check-drag-value-768.png",
+              "look": "Before and after: the check under the seesaw, in the right-hand space.",
+              "notLive": "Opens the picture on GitHub, not the app; GitHub may ask you to sign in."
+            },
+            {
+              "label": "Pair · the counters walk",
+              "query": "https://github.com/karlmaukskoepke/AlgebraMat/blob/main/docs/build-f/pair-17-alone-counters-walk-768.png",
+              "look": "Before and after: the counters in the right-hand space, drawn for the student.",
+              "notLive": "Opens the picture on GitHub, not the app; GitHub may ask you to sign in."
+            },
+            {
+              "label": "Divide it · the reminder after Undo",
+              "query": "https://github.com/karlmaukskoepke/AlgebraMat/blob/main/docs/build-f/f3-01-divide-reminder-after-undo-768.png",
+              "look": "The 1366×768 screenshot (the 1366×650 one is next to it, ending in 650).",
+              "notLive": "Opens the picture on GitHub, not the app; GitHub may ask you to sign in."
+            },
+            {
+              "label": "Seesaw · a partial move's picture",
+              "query": "https://github.com/karlmaukskoepke/AlgebraMat/blob/main/docs/build-f/f3-02-seesaw-partial-picture-768.png",
+              "look": "The 1366×768 screenshot (the 1366×650 one is next to it, ending in 650).",
+              "notLive": "Opens the picture on GitHub, not the app; GitHub may ask you to sign in."
+            },
+            {
+              "label": "Seesaw · a move that made it bigger",
+              "query": "https://github.com/karlmaukskoepke/AlgebraMat/blob/main/docs/build-f/f3-04-seesaw-bigger-picture-768.png",
+              "look": "The 1366×768 screenshot (the 1366×650 one is next to it, ending in 650).",
+              "notLive": "Opens the picture on GitHub, not the app; GitHub may ask you to sign in."
+            },
+            {
+              "label": "Cross off · one pair, then a box",
+              "query": "https://github.com/karlmaukskoepke/AlgebraMat/blob/main/docs/build-f/f3-07-box-crossed-count-768.png",
+              "look": "The 1366×768 screenshot (the 1366×650 one is next to it, ending in 650).",
+              "notLive": "Opens the picture on GitHub, not the app; GitHub may ask you to sign in."
+            }
+          ]
+        },
+        {
           "name": "Build E screenshots",
           "about": "The acceptance screenshots: the one state that looks different (before and after), Add on the shared loop, Divide for comparison, and the seesaw's Undo first (they open on GitHub; the report is docs/build-e/BUILD-E-REPORT.md).",
           "links": [
