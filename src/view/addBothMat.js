@@ -109,6 +109,14 @@ export function boardBlock(s) {
   return block;
 }
 
+// What a tap on a box or a group reaches: the box and half the gap around it, at least HIT tall, so a group of one counter stays 44 px
+// or more when the seesaw is scaled into the space beside the work (Build F, Part 2). Invisible.
+const HIT = 96;
+const hitArea = (x, y, w, h) => {
+  const extra = Math.max(0, HIT - h);
+  return el('rect', { x: x - GAP / 2 + 2, y: y - extra, width: w + GAP - 4, height: h + extra + 8, class: 'ab-hit' });
+};
+
 // The balance (Karl: the models stand on the seesaw). The beam tips; the board's items (the x box, groups of counters or
 // numbers) stand on it, so what is added to a side shows up on that side of the balance. A pivot sits under the middle, and
 // the dashed border runs up and down through it. `ctx`: { top (room for the readout), readout: {text, cls, size}, building,
@@ -159,11 +167,13 @@ export function drawBalance(svg, items, ctx) {
           ? { 'data-action': 'buildRemove', 'data-side': side, 'data-what': 'x', role: 'button', tabindex: '0', 'aria-label': 'Take the box back off' }
           : early ? { 'data-action': 'dropValue', role: 'button', tabindex: '0', 'aria-label': 'Put your answer in for x' } : {};
         const box = el('g', { class: `ab-x${early ? ' is-target' : ''}`, 'data-x': '1', ...attrs });
+        box.append(hitArea(cx, cy, BOX_W, BOX_H));
         box.append(el('rect', { x: cx, y: cy, width: BOX_W, height: BOX_H, rx: 6, class: 'vm-box' }));
         box.append(el('text', { x: cx + BOX_W / 2, y: cy + BOX_H / 2 + 12, 'text-anchor': 'middle', class: 'sv-x' }, ['x']));
         out.append(box);
       } else if (it.type === 'token') {
         const g = el('g', { class: `ab-token${ctx.cls?.(it.id) ?? ''}`, ...(ctx.tapAction?.(it.id) ? { 'data-action': ctx.tapAction(it.id), 'data-id': it.id } : {}), 'data-numval': it.v, role: 'button', tabindex: '0', 'aria-label': `Group ${signed(it.v)}` });
+        g.append(hitArea(cx, cy, it.width, it.height));
         g.append(el('rect', { x: cx, y: cy, width: it.width, height: it.height, rx: 12, class: 'ab-token-box' }));
         g.append(el('text', { x: cx + it.width / 2, y: cy + it.height / 2 + 12, 'text-anchor': 'middle', class: 'ab-token-text' }, [signed(it.v)]));
         out.append(g);
@@ -172,6 +182,7 @@ export function drawBalance(svg, items, ctx) {
           ? { 'data-action': 'buildRemove', 'data-side': side, role: 'button', tabindex: '0', 'aria-label': `Take a counter off the ${side} side` }
           : { ...(ctx.tapAction?.(it.id) ? { 'data-action': ctx.tapAction(it.id), 'data-id': it.id } : {}), 'data-numval': it.v, role: 'button', tabindex: '0', 'aria-label': `Group of ${signed(it.v)}` };
         const g = el('g', { class: `ab-group${ctx.cls?.(it.id) ?? ''}${it.v < 0 ? ' is-negative' : ''}`, ...attrs });
+        g.append(hitArea(cx, cy, it.width, it.height));
         g.append(el('rect', { x: cx, y: cy, width: it.width, height: it.height, rx: 12, class: 'ab-group-box' }));
         const k = ctx.struck?.[it.id] ?? 0;
         for (let n = 0; n < it.n; n++) {

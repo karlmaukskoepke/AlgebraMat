@@ -122,7 +122,7 @@ export function bindLightsMat(root, dispatch, getSession) {
     const f = root.querySelector('.btn-forward');
     if (f && !f.disabled) { f.click(); return; }
     if (f && root.querySelector('.lx-ghost.is-chosen')) dispatch({ type: 'go' });   // an empty blank shakes; a filled product goes to the next
-    root.querySelector('[data-x][data-action="placeValue"]')?.click();          // the keyboard's way to put the value into x
+    root.querySelector('[data-x][data-action="placeValue"]')?.dispatchEvent(new MouseEvent('click', { bubbles: true }));   // (an x on the seesaw is SVG: no .click())          // the keyboard's way to put the value into x
   };
   window.addEventListener('keydown', onKey, true);
 

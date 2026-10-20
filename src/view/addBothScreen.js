@@ -495,12 +495,12 @@ function panel(s) {
   return el;
 }
 
-// Count it's counters walk on the two numbers at x alone, in a tray directly above them (below them if there is no room above). An
-// overlay: nothing on the page moves. The walk's own palette is left behind; the tray has only what the walk needs here: + and −
+// Count it's counters walk on the two numbers at x alone, in a tray in the right-hand space beside the work (Build F, Part 2; it was
+// an overlay above the numbers): its counter zones stand over the two numbers, as on Count it's Mat. The walk's own palette is left behind; the tray has only what the walk needs here: + and −
 // to draw, Check for the drawing, Party / Battle if it was not answered at the numbers. Counters are tapped on the Mat to cancel.
 // Numbers past the counters' limit (Build D, Part 5): Count it's big-number walk in the same tray, without counters: Party or Battle,
 // Add or Subtract, the sign; then the value is typed in x = (the walk never writes it).
-function bigTray(s, wrap) {
+function bigTray(s) {
   const b = s.alone.big;
   const tools = html('div', 'alone-tools');
   const choice = (label, action, value, cls = '') => html('button', `btn ${cls}`.trim(), [label], { type: 'button', 'data-action': action, 'data-value': value });
@@ -509,35 +509,13 @@ function bigTray(s, wrap) {
   else if (b.step === 'sign') tools.append(choice('+', 'bigSign', '+'), choice('−', 'bigSign', '-'));
   const notes = bigNotes(b).map((n) => html('p', 'alone-note', [n]));
   const caption = b.step === 'answer' ? 'Now type x.' : b.feedback?.key === 'bigPartyIntro' ? 'Look at the signs: the same (a Party) or different (a Battle)?' : bigFeedbackText(b.feedback);
-  const tray = html('div', 'alone-tray is-big', [...notes, html('p', 'alone-caption', [caption]), tools], { role: 'group', 'aria-label': 'Working out the two numbers' });
-  wrap.append(tray);
-  placeTray(tray, wrap);
+  return html('div', 'alone-tray is-big', [...notes, html('p', 'alone-caption', [caption]), tools], { role: 'group', 'aria-label': 'Working out the two numbers' });
 }
-function placeTray(tray, wrap) {
-  const place = () => {
-    if (!tray.isConnected) return;
-    const nums = findSolveTarget(wrap, 'otherSide');
-    if (!nums) return;
-    const r = nums.getBoundingClientRect();
-    const h = tray.offsetHeight;
-    const w = tray.offsetWidth;
-    // directly above the numbers; with no room there, beside them on the right (never over x = and the green button)
-    const panel = wrap.querySelector('.lx-panel')?.getBoundingClientRect();
-    let left = r.left + r.width / 2 - w / 2;
-    let top = r.top - 10 - h;
-    if (top < 8) { left = r.right + 16; top = Math.max(8, r.top + r.height / 2 - h / 2); if (panel && left + w > panel.left - 8) left = panel.left - 8 - w; }
-    Object.assign(tray.style, { left: `${Math.min(Math.max(8, left), window.innerWidth - w - 8)}px`, top: `${top}px` });
-  };
-  requestAnimationFrame(place);
-  setTimeout(place, 400);
-  setTimeout(place, 1800);
-}
-
-function aloneTray(s, wrap) {
-  if (s.sub) return;                                       // the value is being checked: the walk's box is gone (Build D-2, Part 5)
-  if (s.alone?.big && s.stage !== 'done') { bigTray(s, wrap); return; }
+function aloneTray(s) {
+  if (s.sub) return null;                                       // the value is being checked: the walk's box is gone (Build D-2, Part 5)
+  if (s.alone?.big && s.stage !== 'done') return bigTray(s);
   const w = s.alone?.walk;
-  if (!w || s.stage === 'done') return;
+  if (!w || s.stage === 'done') return null;
   const tools = html('div', 'alone-tools');
   if (w.step === 'draw') {
     for (const [sign, label] of [['+', '+'], ['-', '−']]) {
@@ -550,10 +528,8 @@ function aloneTray(s, wrap) {
   }
   // only the counter zones of Count it's Mat: the two numbers themselves are right under the tray, in the equation
   const mat = renderCountersMat(w, {});
-  mat.setAttribute('viewBox', '100 44 500 160');
-  const tray = html('div', 'alone-tray', [mat, html('p', 'alone-caption', [w.step === 'answer' ? 'Count who is left. Type it in x =.' : countersText(w.feedback)]), tools], { role: 'group', 'aria-label': 'Counters for the two numbers' });
-  wrap.append(tray);
-  placeTray(tray, wrap);
+  mat.setAttribute('viewBox', '100 44 500 226');           // the counter zones over the two numbers, as on Count it's Mat
+  return html('div', 'alone-tray', [mat, html('p', 'alone-caption', [w.step === 'answer' ? 'Count who is left. Type it in x =.' : countersText(w.feedback)]), tools], { role: 'group', 'aria-label': 'Counters for the two numbers' });
 }
 
 export function renderAddBothScreen(s) {
@@ -563,33 +539,39 @@ export function renderAddBothScreen(s) {
   wrap.append(srLine(lightsFeedbackText(sp ? { key: ADD_SPOT.prompt(s), params: {} } : s.feedback)));
   const body = html('div', 'lb-body');
   const main = html('div', 'lb-main');
-  if (s.scaffold && s.sub) {
-    // checking the value at the end of the seesaw (Build D-2, Part 5): the balance on the left, the checking space on its right (as
-    // without the seesaw), and both the x on the balance and the equation under it take the value
+  const work = html('div', 'sv-solve', [html('div', 'lb-eqblock', [workStack(s)])]);
+  if (s.scaffold) {
+    // The seesaw (and its tray) in the right-hand space beside the work, the slot the check uses: it never covers the equation or the
+    // work (Build F, Part 2). At the end the check shares the slot, under the seesaw: both the x on the balance and the equation under it
+    // take the value (Build D-2, Part 5).
     const board = boardBlock(s);
-    board.classList.add('is-plugrow');
-    if (s.sub.placing) {
-      for (const x of board.querySelectorAll('[data-x], .ab-eqsvg')) {
-        Object.assign(x.dataset, { x: '1', action: 'placeValue' });
-        x.classList.add('is-droptarget');
-        x.setAttribute('role', 'button');
-        x.setAttribute('tabindex', '0');
-        x.setAttribute('aria-label', 'Put your value into x');
+    const right = [board];
+    if (s.sub) {
+      board.classList.add('is-plugrow');
+      if (s.sub.placing) {
+        for (const x of board.querySelectorAll('[data-x], .ab-eqsvg')) {
+          Object.assign(x.dataset, { x: '1', action: 'placeValue' });
+          x.classList.add('is-droptarget');
+          x.setAttribute('role', 'button');
+          x.setAttribute('tabindex', '0');
+          x.setAttribute('aria-label', 'Put your value into x');
+        }
       }
+      right.push(html('div', 'sv-checkspace', [substBlock(s)]));
+    } else {
+      const tray = trayFor(s);
+      if (tray) right.push(tray);
     }
-    main.append(html('div', 'sv-work is-checking', [html('div', 'sv-solve', [board]), html('div', 'sv-check', [substBlock(s)])]));
-  } else if (s.scaffold) {
-    main.append(boardBlock(s));
-    const tray = trayFor(s);
-    if (tray) main.append(tray);
+    main.append(html('div', `sv-work has-seesaw${s.sub ? ' is-checking' : ''}`, [work, html('div', 'sv-check', right)]));
   } else {
-    // left: the solving space; right: the checking space (and the room the pop-ups use while nothing is being checked)
-    main.append(html('div', `sv-work${s.sub ? ' is-checking' : ''}`, [html('div', 'sv-solve', [html('div', 'lb-eqblock', [workStack(s)])]), html('div', 'sv-check', [substBlock(s)])]));
+    // left: the solving space; right: the checking space (and the room the pop-ups use while nothing is being checked), where the
+    // walks at x alone draw too
+    const walk = aloneTray(s);
+    main.append(html('div', `sv-work${s.sub ? ' is-checking' : ''}${walk ? ' has-walk' : ''}`, [work, html('div', 'sv-check', [walk ?? substBlock(s)])]));
   }
   main.append(answerRow(s), corners(s));
   body.append(main, panel(s));
   wrap.append(body);
-  aloneTray(s, wrap);
   popups(s, wrap);
   return wrap;
 }

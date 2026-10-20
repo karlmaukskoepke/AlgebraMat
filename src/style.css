@@ -3605,7 +3605,27 @@ body[data-input='touch'] #play.is-light #controls .btn-pad { min-width: 48px; mi
 .ab-sidebox.is-empty.is-blink::after { content: ''; position: absolute; left: 12px; right: 12px; bottom: 7px; border-bottom: 3px solid #0072b2; animation: ab-blink 1s steps(2, start) infinite; }
 .ab-sidelabel { position: absolute; left: 0; right: 0; top: 64px; margin: 0; text-align: center; font: 700 18px 'Lexend', system-ui, sans-serif; color: #0072b2; }
 @media (prefers-reduced-motion: reduce) { .ab-sidebox.is-empty.is-blink::after { animation: none; } }
-.ui-light .ab-x.is-droptarget rect { stroke: #0072b2; stroke-width: 4; stroke-dasharray: 8 5; }
+.ui-light .ab-x.is-droptarget rect.vm-box { stroke: #0072b2; stroke-width: 4; stroke-dasharray: 8 5; }
 .ui-light .ab-x.is-droptarget text { fill: #0072b2; }
 .ui-light .ab-eqsvg.is-droptarget { outline: 3px dashed #0072b2; outline-offset: -2px; border-radius: 12px; }
 .ui-light .sv-solve > .ab-boardwrap.is-plugrow { width: 100%; }
+
+/* ---------- Build F, Part 2: the seesaw, its tray and the walks at x alone in the right-hand space, beside the work ---------- */
+/* The work keeps its column; the seesaw takes the wider one and scales to it (and, at 650 px tall, to the height). The row keeps the work
+   stack's height, so nothing reflows as the seesaw, the tray or the check come and go. */
+/* The Solve it loop cards use the room a 1366 screen has (the page was 960 wide): one width on both cards and in every state. */
+.screen:has(.lb-eqcard.ui-light) { max-width: min(1280px, calc(100vw - 32px)); }
+.ui-light .sv-work.has-seesaw { grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr); }
+.ui-light .sv-work.has-seesaw .sv-check { padding-left: 12px; display: flex; flex-direction: column; align-items: stretch; gap: 6px; }
+.ui-light .sv-work.has-seesaw .ab-boardwrap { flex: none; min-height: 0; width: 100%; max-width: calc(46vh * var(--ar, 1.1)); }
+.ui-light .sv-work.has-seesaw .ab-boardwrap > svg { flex: none; width: 100%; height: auto; }
+.ui-light .sv-work.has-seesaw.is-checking .ab-boardwrap { max-width: calc(38vh * var(--ar, 1.1)); }
+.ui-light .sv-work.has-seesaw .ab-tray { margin: 0; }
+/* One height for the work and the right-hand space in every state of Add (the tallest is the seesaw with its add boxes): x =, the green
+   button and the corners stay put as the seesaw, its tray, the walks and the check come and go. */
+.ui-light.ui-grab .sv-work { min-height: calc(42vh + 92px); }
+.ui-light .sv-work.has-seesaw .sv-checkspace { display: flex; justify-content: center; }
+.ui-light .sv-work.has-seesaw .sv-checkspace .sv-checklist { font-size: 30px; }
+.ui-light .sv-check > .alone-tray { position: static; width: 100%; max-width: 380px; margin: 4px auto 0; box-shadow: none; }
+@media (max-width: 760px) { .ui-light .sv-work.has-seesaw { grid-template-columns: minmax(0, 1fr); } .ui-light .sv-work.has-seesaw .sv-check { padding-left: 0; } }
+.ab-hit { fill: transparent; stroke: none; }

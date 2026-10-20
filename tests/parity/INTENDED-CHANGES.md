@@ -410,3 +410,74 @@ The loop spec (§8) bans answers of 0, 1 and −1. Add's generator now skips the
 | `problem:add-both/L6/seed29` | this set had an answer of 1 or −1 |
 
 Over seeds 0–1000 the sets that changed are: Level 2 (shown as Level 1) 311, Level 3 615, Level 4 522, Level 5 461, Level 6 390. Seed 7 (the test links and the parity screens) is unchanged at Levels 2, 4 and 6; at Level 3 its first problem is now x − 3 = −1 (it was x − 4 = −3, answer 1), and at Level 5 its fourth problem changed (the test-link words were updated).
+
+## Build F, Part 2: the seesaw beside the work (2026-10-20)
+
+Every screen of both Solve it cards changed, and nothing else did: problems, save codes, class-sheet events and traces are identical to the code before this part (checked by running parity on both and comparing the 62 screens pixel by pixel).
+- **Both cards:** the page is wider (up to 1280 px instead of 960), so the seesaw fits beside the work.
+- **Add:** x =, the green button and the corners sit a little lower, at one height in every state, and the seesaw, its tray and the walks at x alone draw in the right-hand space.
+
+| Key | Why |
+|---|---|
+| `screen:add-L2-stuck-2@1366x650` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
+| `screen:add-L2-stuck-2@1366x768` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
+| `screen:add-alone-stuck-1@1366x650` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
+| `screen:add-alone-stuck-1@1366x768` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
+| `screen:add-alone-stuck-2@1366x650` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
+| `screen:add-alone-stuck-2@1366x768` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
+| `screen:add-alone-stuck-3@1366x650` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
+| `screen:add-alone-stuck-3@1366x768` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
+| `screen:add-alone-teach@1366x650` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
+| `screen:add-alone-teach@1366x768` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
+| `screen:add-end@1366x650` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
+| `screen:add-end@1366x768` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
+| `screen:add-forced-move@1366x650` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
+| `screen:add-forced-move@1366x768` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
+| `screen:add-helpful-move@1366x650` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
+| `screen:add-helpful-move@1366x768` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
+| `screen:add-opening@1366x650` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
+| `screen:add-opening@1366x768` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
+| `screen:add-partial-move@1366x650` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
+| `screen:add-partial-move@1366x768` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
+| `screen:add-partial-stuck-4@1366x650` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
+| `screen:add-partial-stuck-4@1366x768` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
+| `screen:add-partial-teach@1366x650` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
+| `screen:add-partial-teach@1366x768` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
+| `screen:add-red-move@1366x650` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
+| `screen:add-red-move@1366x768` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
+| `screen:add-red-stuck@1366x650` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
+| `screen:add-red-stuck@1366x768` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
+| `screen:add-stuck-1@1366x650` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
+| `screen:add-stuck-1@1366x768` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
+| `screen:add-stuck-2@1366x650` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
+| `screen:add-stuck-2@1366x768` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
+| `screen:add-stuck-3@1366x650` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
+| `screen:add-stuck-3@1366x768` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
+| `screen:add-stuck-4@1366x650` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
+| `screen:add-stuck-4@1366x768` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
+| `screen:add-teach@1366x650` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
+| `screen:add-teach@1366x768` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
+| `screen:add-wrong-guess-undone@1366x650` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
+| `screen:add-wrong-guess-undone@1366x768` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
+| `screen:add-wrong-guess@1366x650` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
+| `screen:add-wrong-guess@1366x768` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
+| `screen:div-alone-stuck-1@1366x650` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
+| `screen:div-alone-stuck-1@1366x768` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
+| `screen:div-end@1366x650` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
+| `screen:div-end@1366x768` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
+| `screen:div-failed-stuck@1366x650` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
+| `screen:div-failed-stuck@1366x768` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
+| `screen:div-failed@1366x650` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
+| `screen:div-failed@1366x768` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
+| `screen:div-helpful-move@1366x650` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
+| `screen:div-helpful-move@1366x768` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
+| `screen:div-opening@1366x650` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
+| `screen:div-opening@1366x768` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
+| `screen:div-stuck-1@1366x650` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
+| `screen:div-stuck-1@1366x768` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
+| `screen:div-stuck-2@1366x650` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
+| `screen:div-stuck-2@1366x768` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
+| `screen:div-teach@1366x650` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
+| `screen:div-teach@1366x768` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
+| `screen:div-wrong-guess@1366x650` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
+| `screen:div-wrong-guess@1366x768` | the wider page; on Add the seesaw and walks beside the work, one height for the work |

@@ -1,6 +1,6 @@
 {
   "_about": "The test-links page (test-links.html) reads this list: Karl's change list. Live = on the site for everyone. Testing = behind a flag, waiting for Karl to keep or retire it. Retired = deleted. Every build adds or updates its entries (CLAUDE.md, Working with Karl). Each entry is a name, one plain sentence (`about`) and, for Live and Testing, its buttons. A button's `query` is the part after the address: card, level, seed, flags, sign-in skipped. `level` in a link is the saved level number (Add to both sides and Divide it: link level 2 is shown as Level 1). `reset: true` clears this browser's progress first; `look` is one sentence on what to look for; `notLive` says plainly why a link won't work on the live site.",
-  "updated": "2026-10-18",
+  "updated": "2026-10-20",
   "sections": [
     {
       "title": "Live",
@@ -18,6 +18,38 @@
               "label": "Save codes (teacher only)",
               "query": "?codes=1&nosignin=1",
               "look": "With ?codes=1 the Save code and Enter code buttons come back, for moving a student by hand."
+            }
+          ]
+        },
+        {
+          "name": "The seesaw beside the work (Build F, Part 2)",
+          "about": "The seesaw, its tray and the counters at x alone now draw in the space on the right, beside the equation, and never cover the work. The page is wider on both Solve it cards, and x =, the green button and the corners stay in one place.",
+          "links": [
+            {
+              "label": "Level 1 · build the seesaw",
+              "query": "?pack=add-both&level=2&seed=7&nosignin=1",
+              "reset": true,
+              "look": "Press I’m stuck twice. The seesaw appears on the right; x + 8 = 11 stays on the left. Build it, add −8, then type 3 and check: the check sits under the seesaw."
+            },
+            {
+              "label": "Level 3 · the seesaw rungs",
+              "query": "?pack=add-both&level=4&seed=7&nosignin=1",
+              "look": "Press I’m stuck three or four times (Model it, Choose the move, Guided). The seesaw is on the right each time; x =, Go and the corners don’t move."
+            },
+            {
+              "label": "Level 3 · counters at x alone",
+              "query": "?pack=add-both&level=4&seed=7&nosignin=1",
+              "look": "Add −8 to both sides, then press I’m stuck, Party, I’m stuck. The counters tray is on the right, its two boxes over −4 and (−8)."
+            },
+            {
+              "label": "Level 5 · big numbers at x alone",
+              "query": "?pack=add-both&level=6&seed=7&nosignin=1",
+              "look": "x − 9 = −13: add 9, then press I’m stuck, Battle, I’m stuck. The Add or Subtract box is on the right, beside x = −13 + 9."
+            },
+            {
+              "label": "Divide it at the wider width",
+              "query": "?pack=divide-it&level=3&seed=7&nosignin=1",
+              "look": "Same as before, on the wider page."
             }
           ]
         },

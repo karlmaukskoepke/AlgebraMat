@@ -98,7 +98,8 @@ function workBottom(o) {
 // What a pop-up must never cover: every row of the work and of the check; and, unless it is an error (which greys them), the controls.
 // (A question asked at a place floats right above it, over the greyed rows: only the controls are kept clear.)
 function protectedRects(o, error, kind) {
-  const rows = kind === 'ask' ? '' : '.lb-stack .lb-rowwrap .lb-eq, .lx-ghost.is-chosen .lb-eq, .lx-ghost.is-preview .lb-eq, .sv-check .sv-checkrow, .ab-boardwrap svg, ';
+  // (the seesaw is never covered, even by a question: it stands beside the work, Build F)
+  const rows = kind === 'ask' ? '.ab-boardwrap svg, ' : '.lb-stack .lb-rowwrap .lb-eq, .lx-ghost.is-chosen .lb-eq, .lx-ghost.is-preview .lb-eq, .sv-check .sv-checkrow, .ab-boardwrap svg, ';
   const sel = `${rows}${error ? '.lb-stack .lb-rowwrap .lb-eq' : '.lx-answer, .lx-panel, .lx-corners .btn:not(:disabled), .lb-fractionrow:not(.is-off), .ab-tray, .ab-sidebtns, .alone-tray'}`;
   const out = [];
   for (const n of o.root.querySelectorAll(sel)) {
@@ -125,8 +126,8 @@ function unionRect(list) {
 function candidates({ kind, spot, r, pad, labelBottom, bw, bh, area, side, workBottom: wb, vw, vh, anchorTop }) {
   const out = [];
   const mid = (x) => x - bw / 2;
-  const sideAt = (top) => side && side.width > 200 && { name: 'side', left: side.left + 12, top: Math.min(Math.max(8, top), vh - bh - 8) };
-  const sideHigh = side && side.width > 200 && { name: 'sidehigh', left: side.left + 12, top: 8 };
+  const sideAt = (top) => side && side.width > 200 && { name: 'side', left: side.left + 12, top: Math.min(Math.max(8, top, side.floor ?? 0), vh - bh - 8) };
+  const sideHigh = side && side.width > 200 && { name: 'sidehigh', left: side.left + 12, top: side.floor ?? 8 };
   if (kind === 'error' || !r) {
     out.push({ name: 'below', left: mid(spot.alignTarget && r ? r.left + r.width / 2 : area.left + area.width / 2), top: Math.max(wb, labelBottom) + GAP });
     out.push(sideAt(r ? r.top - 4 : anchorTop));
@@ -232,8 +233,11 @@ export function spotlightLayer(spot, o) {
     const undoCopy = layer.querySelector('.spot-undo');
     if (undoCopy) { const ur = undoCopy.getBoundingClientRect(); keep.push({ left: ur.left, top: ur.top, right: ur.right + 70, bottom: ur.bottom }); }
     const area = o.root.querySelector(o.work ?? '.lb-main')?.getBoundingClientRect() ?? { left: 0, right: vw, width: vw };
-    // (the seesaw's check, Build D-2: while the value is placed, its checking space is still empty)
-    const side = o.root.querySelector('.sv-work:not(.is-checking) .sv-check, .sv-work.is-checking:has(.ab-boardwrap) .sv-check:not(:has(li, .sv-checkrow))')?.getBoundingClientRect();
+    // (the seesaw's check, Build D-2: while the value is placed, its checking space under the seesaw is still empty; the seesaw and the
+    // walks at x alone fill the side, Build F)
+    const free = o.root.querySelector('.sv-work:not(.is-checking):not(.has-seesaw):not(.has-walk) .sv-check, .sv-work.is-checking.has-seesaw .sv-checkspace:not(:has(li, .sv-checkrow))')?.getBoundingClientRect();
+    const under = o.root.querySelector('.sv-work.has-seesaw:not(.is-checking) .sv-solve, .sv-work.has-walk .sv-solve')?.getBoundingClientRect();
+    const side = free ?? (under && { left: under.left, width: under.width, floor: workBottom(o) + GAP });   // (else the room under the work)
     const cands = candidates({ kind, spot, r, pad, labelBottom, bw, bh, area, side, workBottom: workBottom(o), vw, vh, anchorTop: lit[0]?.top ?? area.top });
     const fits = (c) => c.left >= 8 && c.top >= 8 && c.left + bw <= vw - 8 && c.top + bh <= vh - 8
       && !keep.some((k) => c.left < k.right + 4 && c.left + bw > k.left - 4 && c.top < k.bottom + 4 && c.top + bh > k.top - 4);

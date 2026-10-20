@@ -296,7 +296,7 @@ export function bindForwardKey(root) {
     e.preventDefault();
     e.stopImmediatePropagation();
     if (!f.disabled) f.click();
-    else root.querySelector('[data-x][data-action="placeValue"]')?.click();     // the keyboard's way to put the value into x
+    else root.querySelector('[data-x][data-action="placeValue"]')?.dispatchEvent(new MouseEvent('click', { bubbles: true }));   // (an x on the seesaw is SVG: no .click())     // the keyboard's way to put the value into x
   };
   window.addEventListener('keydown', onKey, true);
   return () => window.removeEventListener('keydown', onKey, true);
