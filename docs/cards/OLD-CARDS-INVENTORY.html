@@ -1,0 +1,279 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Old Solve it Cards</title><style>
+:root { --bg:#fdfcf8; --ink:#1d1d1b; --muted:#5d5a52; --line:#d9d4c7; --accent:#0b5d8f; --soft:#f3efe4; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg:#171714; --ink:#ece9e1; --muted:#aaa59a; --line:#3a3832; --accent:#6db8e8; --soft:#22211d; } }
+:root[data-theme="dark"] { --bg:#171714; --ink:#ece9e1; --muted:#aaa59a; --line:#3a3832; --accent:#6db8e8; --soft:#22211d; }
+html { -webkit-text-size-adjust:100%; }
+body { background:var(--bg); color:var(--ink); font:17px/1.55 "Segoe UI", system-ui, -apple-system, sans-serif; margin:0; }
+main { max-width:1180px; margin:0 auto; padding:24px 16px 80px; }
+h1 { font-size:2rem; line-height:1.2; margin:.2em 0 .6em; border-bottom:3px solid var(--ink); padding-bottom:.3em; }
+h2 { font-size:1.5rem; margin-top:2.2em; border-bottom:1px solid var(--line); padding-bottom:.2em; }
+h3 { font-size:1.2rem; margin-top:1.6em; }
+p, li { max-width:75ch; }
+code { font-family:ui-monospace, Consolas, monospace; font-size:.88em; background:var(--soft); padding:0 .25em; border-radius:3px; }
+pre { background:var(--soft); border:1px solid var(--line); padding:12px 14px; overflow-x:auto; font-size:.85rem; line-height:1.4; border-radius:6px; }
+pre code { background:none; padding:0; }
+table { border-collapse:collapse; width:100%; font-size:.86rem; margin:1em 0; display:block; overflow-x:auto; }
+th, td { border:1px solid var(--line); padding:6px 8px; vertical-align:top; text-align:left; }
+th { background:var(--soft); font-weight:700; }
+a { color:var(--accent); }
+a.shot { white-space:nowrap; text-decoration:none; border-bottom:1px dotted var(--accent); }
+strong { font-weight:700; }
+.gallery { display:grid; grid-template-columns:repeat(auto-fill, minmax(320px, 1fr)); gap:16px; }
+figure { margin:0; border:1px solid var(--line); border-radius:6px; padding:8px; background:var(--bg); scroll-margin-top:12px; }
+figure:target { outline:3px solid var(--accent); }
+figure img { width:100%; height:auto; display:block; border-radius:3px; }
+figcaption { font-size:.8rem; color:var(--muted); margin-top:6px; }
+@media print { body { font-size:12pt; } .gallery { grid-template-columns:1fr 1fr; } figure { break-inside:avoid; } a { color:inherit; } }
+.diagram{margin:1.2em 0;border:1px solid var(--line);border-radius:6px;padding:12px;max-width:820px}.diagram svg{width:100%;height:auto;display:block}pre{white-space:pre}</style></head><body><main><h1>Solve it: the old cards, the shared loop, and what the new cards need (read-only inventory, 2026-10-20)</h1>
+<h2>Plain summary</h2>
+<ul>
+<li>Solve it today shows four cards and one "coming soon" card: <strong>Add to both sides</strong> and <strong>Divide it</strong> (both on the new shared loop), then the older <strong>One-step equations</strong> and <strong>Two-step equations</strong>, then <strong>Multi-step equations (soon)</strong>. A fifth old card, <strong>Switch sides</strong>, is already off the home screen, but its links still work.</li>
+<li>The old One-step and Two-step cards only ask students to type x, with help pictures. They have no moves. Nothing in them can be reused as a loop card except their problem lists and their finished-level records.</li>
+<li><strong>Flip it is not built.</strong> Its spec is there, but there's no card, no level and no help for it. Small parts exist: a Flip button and its light are drawn but greyed, the hidden Distribute drill can multiply by −1, and Divide it explains −1 without doing it.</li>
+<li>Reusable now: the loop itself, the Add move, Divide's fraction move with its dealing help, dragging terms (crossing x across is coded but no card uses it), and combining terms by hand. Distributing and multiplying by a whole number or −1 work only in the hidden drill, not on the loop.</li>
+<li>Sizes: <strong>Flip it</strong>, <strong>Two-step</strong> and <strong>Multiply</strong> are medium, mostly configuration plus new equation shapes. <strong>Distribute + combine + solve</strong> and <strong>Variables on both sides</strong> need new engine work.</li>
+<li>Students keep their progress. Old levels stay saved, and a new card can credit them the same way Add and Divide already do. An old card should be hidden ("retired") when its replacement goes live, never deleted from the card list, or its saved levels are dropped.</li>
+<li>Karl decides: the Flip it name (Count it already has a "Flip It"), how old levels count toward the new cards, the build order, and when the old cards go.</li>
+</ul>
+<hr>
+<p>Evidence key: <strong>obs</strong> = I saw it in the file at that line; <strong>inf</strong> = I inferred it (reason given). Paths are relative to the repository root. Read against <code>main</code> after Build F, Part 1 (no Add answer of 0 or ±1; the generators' row and slip-collision reports); line numbers are from that commit and may drift as Build F goes on.</p>
+<h2>1. What exists today</h2>
+<h3>1A. The Solve it section (home screen)</h3>
+<p>Section <code>solve</code>, "Solving equations", cards in this order: <code>add-both</code>, <code>divide-it</code>, <code>one-step</code>, <code>two-step</code>, <code>multi-step</code> (obs: <code>src/packs/index.js:180</code>). Students reach a card from the home screen's Solve it panel or tab (obs: <code>src/view/packmap.js:91-127</code>). A retired card is not listed in any section, but a <code>?pack=</code> link still opens it (obs: <code>src/main.js:629-631</code> starts any pack that has an adapter; <code>retired</code> is checked only when resuming, <code>src/main.js:615</code>).</p>
+<div class="tw"><table><thead><tr><th>#</th><th>Card (title / id)</th><th>Menu flags</th><th>Engine and adapter</th><th>Saved levels</th><th>Shown on screen</th></tr></thead><tbody>
+<tr><td>1</td><td><strong>Add to both sides</strong> / <code>add-both</code></td><td><code>firstLevel: 2</code>, <code>whyLevel: 1</code> (obs <code>packs/index.js:108-118</code>)</td><td>Loop card <code>src/engine/cards/add.js</code>, adapter <code>addBothPlay</code> in <code>src/play/solveCards.js:29</code> (obs <code>main.js:77</code>)</td><td>6</td><td>Levels 1-5 = saved 2-6. Saved 1 is the "See why it works" button</td></tr>
+<tr><td>2</td><td><strong>Divide it</strong> / <code>divide-it</code></td><td><code>firstLevel: 2</code>, <code>whyLevel: 1</code> (obs <code>packs/index.js:145-155</code>)</td><td>Loop card <code>src/engine/divideMoves.js</code>, adapter <code>divideMovesPlay</code> (obs <code>main.js:76</code>)</td><td>6</td><td>Levels 1-5 = saved 2-6</td></tr>
+<tr><td>3</td><td><strong>One-step equations</strong> / <code>one-step</code></td><td><code>firstLevel: 3</code> (obs <code>packs/index.js:91-102</code>)</td><td>Old type-x engine <code>src/engine/solveLight.js</code>, adapter <code>solveLightPlay</code> (obs <code>main.js:73</code>)</td><td>5 (8 bits reserved in codes)</td><td>Levels 1-3 = saved 3-5. Saved 1-2 are hidden</td></tr>
+<tr><td>4</td><td><strong>Two-step equations</strong> / <code>two-step</code></td><td>none (obs <code>packs/index.js:133-141</code>)</td><td>Same old engine and adapter (obs <code>main.js:74</code>)</td><td>7 (8 bits reserved)</td><td>Levels 1-7</td></tr>
+<tr><td>5</td><td><strong>Multi-step equations</strong> / <code>multi-step</code> ("Variables on both sides")</td><td><code>comingSoon</code>, 0 levels (obs <code>packs/index.js:158,173</code>)</td><td>none</td><td>0 (nothing saved)</td><td>a "soon" card</td></tr>
+<tr><td>—</td><td><strong>Switch sides</strong> / <code>switch</code></td><td><code>retired: true</code>, not in any section (obs <code>packs/index.js:121-130,177-181</code>)</td><td>Old drag-across engine <code>src/engine/switchSides.js</code>, adapter <code>switchPlay</code> (obs <code>main.js:75</code>)</td><td>6</td><td>link only</td></tr>
+</tbody></table></div>
+<h3>1B. Level contents (from the generators)</h3>
+<p><strong>Add to both sides</strong> (obs <code>src/engine/generateAddBoth.js:40-75</code>; Build F working tree also bans answers 0 and ±1, <code>:78-79</code>):</p>
+<div class="tw"><table><thead><tr><th>Saved level</th><th>Name (obs <code>packs/index.js:116</code>)</th><th>Forms and numbers</th></tr></thead><tbody>
+<tr><td>1</td><td>numbers only</td><td>the numeric walkthrough ("See why it works")</td></tr>
+<tr><td>2</td><td>x + a = b</td><td>a 1-9, b −9..12; 3 party, 2 battle</td></tr>
+<tr><td>3</td><td>x − a = b</td><td>a 2-9, b −9..12</td></tr>
+<tr><td>4</td><td>both forms</td><td>a 2-9, b −10..12; both signs of answer</td></tr>
+<tr><td>5</td><td>x on the right</td><td>both forms, 3 of 5 with x on the right; Trade places from here (obs <code>cards/add.js:31</code>)</td></tr>
+<tr><td>6</td><td>all four forms, bigger</td><td>a 1-14, b −15..15, answers ≤ 15 in size (obs <code>:79-80</code> limit)</td></tr>
+</tbody></table></div>
+<p><strong>Divide it</strong> (obs <code>src/engine/generateDivide.js:29-56</code>; the card's level n = generator level n−1, <code>packs/index.js:154</code>):</p>
+<div class="tw"><table><thead><tr><th>Saved level</th><th>Name</th><th>Forms and numbers</th></tr></thead><tbody>
+<tr><td>1</td><td>numbers only</td><td>numeric walkthrough</td></tr>
+<tr><td>2</td><td>ax = b, a = 2 or 3</td><td>answers ±2..5, ≤ 15 counters</td></tr>
+<tr><td>3</td><td>a = 2 to 5</td><td>answers ±2..6, ≤ 30 counters</td></tr>
+<tr><td>4</td><td>bigger numbers</td><td>a 2-5, up to 36 counters</td></tr>
+<tr><td>5</td><td>a = 4 or 6</td><td>composite coefficients (several fractions are legal)</td></tr>
+<tr><td>6</td><td>all mixed</td><td>a 2-6, at least 3 different a</td></tr>
+</tbody></table></div>
+<p>Divide it only has <code>ax = b</code> with <strong>a positive</strong> (2-6) and x on the left. There's no negative coefficient and no x on the right (obs <code>generateDivide.js:13-21</code>, <code>divideBoard.js:12</code>).</p>
+<p><strong>One-step equations</strong> (obs <code>src/engine/generateSolve.js:14-62</code>). All answers are positive (obs <code>:2-3</code>).</p>
+<div class="tw"><table><thead><tr><th>Saved level</th><th>Name</th><th>Forms and numbers</th><th>Shown?</th></tr></thead><tbody>
+<tr><td>1</td><td>x + a = b</td><td>a 2-12, x 2-12</td><td>hidden (Add took it)</td></tr>
+<tr><td>2</td><td>x − a = b</td><td>a 2-12, b positive</td><td>hidden (Add took it)</td></tr>
+<tr><td>3</td><td>ax = b</td><td>a 2-6, x 2-12, ≤ 36</td><td>shown as Level 1</td></tr>
+<tr><td>4</td><td>x / a = b</td><td>a 2-6, b 2-12, x = a·b ≤ 36</td><td>shown as Level 2</td></tr>
+<tr><td>5</td><td>all four mixed</td><td>one of each form + 1</td><td>shown as Level 3</td></tr>
+</tbody></table></div>
+<p>There is <strong>no <code>−x = b</code> level</strong>, even though <code>SPEC-FLIP-IT.md</code> §8 says "old One-step <code>−x = b</code> maps here" (obs <code>generateSolve.js:46-62</code>; <code>docs/design/SPEC-FLIP-IT.md:5,181</code>).</p>
+<p><strong>Two-step equations</strong> (obs <code>src/engine/generateSolve2.js:40-75</code>). a 2-5, b 1-12, |c| ≤ 30.</p>
+<div class="tw"><table><thead><tr><th>Saved level</th><th>Name</th><th>Forms</th></tr></thead><tbody>
+<tr><td>1</td><td>ax + b = c</td><td>answers 1-9</td></tr>
+<tr><td>2</td><td>ax − b = c</td><td>answers 1-9</td></tr>
+<tr><td>3</td><td>b + ax = c</td><td>answers 1-9</td></tr>
+<tr><td>4</td><td>x on the right</td><td>the three forms mirrored (c = ax + b)</td></tr>
+<tr><td>5</td><td>b − ax = c</td><td><strong>negative coefficient</strong> (coef = −a, obs <code>solve2.js:12</code>), c negative in 2 of 5</td></tr>
+<tr><td>6</td><td>negative answers</td><td>−9..−1, some mirrored</td></tr>
+<tr><td>7</td><td>all mixed</td><td>all four forms, both signs, mirrored</td></tr>
+</tbody></table></div>
+<p>Two-step allows an answer of <strong>1</strong> (obs <code>generateSolve2.js:13</code>, <code>POSITIVE = 1..9</code>). The loop spec bans ±1 (obs <code>SPEC-SOLVE-IT-LOOP.md:123</code>), so the new Two-step generator differs here (inf).</p>
+<p><strong>Switch sides</strong> (retired; obs <code>src/engine/generateSwitch.js:36-59</code>): 1 x + a = b; 2 x − a = b; 3 negative answers; 4 x on the right; 5 two-step (Two-step's L1-3 forms); 6 two-step, negative answers.</p>
+<h3>1C. Equations solved elsewhere (not Solve it)</h3>
+<ul>
+<li><strong>Count it › Flip It</strong> / <code>flipit</code>: integer subtraction ("subtract by adding the opposite"), 5 levels (obs <code>src/packs/flipit.js:5-22</code>). <strong>This is not the Flip it card.</strong> Same name, different thing. The id <code>flipit</code> is taken in saves, save codes (first in every layout, obs <code>progress.js:176-266</code>) and as the default <code>?pack</code> (obs <code>main.js:626</code>). The new card needs a different id (inf).</li>
+<li><strong>Build it › Distribute, then combine</strong> / <code>distribute-combine</code>: expressions, not equations (A + B(Cx + D)), 5 levels (obs <code>packs/index.js:66-75</code>). It's read-only for Solve it.</li>
+<li><strong>Distribute drill</strong> / <code>distribute-drill</code>: hidden, behind <code>?drill=distribute</code> only (obs <code>main.js:80-82</code>). Two fixed problems, <code>5 − 2(x + 2) = 3</code> and <code>3(x + 1) = 9</code>, with its own board and reducer, <strong>not on the loop</strong> (obs <code>src/engine/distributeDrill.js:1-6,19-22</code>).</li>
+</ul>
+<h3>1D. Flip it: is any of SPEC-FLIP-IT built?</h3>
+<p><strong>No card is built</strong> (obs: no pack in <code>packs/index.js:160-174</code>; no Flip shape in <code>shape.js:23-37</code>; no rungs in <code>registry.js:141</code>). The spec on disk says <strong>revision 1.0, "status: designed", follows loop rev 1.2</strong> (obs <code>docs/design/SPEC-FLIP-IT.md:1,3</code>). <code>SPEC-FLIP-IT.md</code> at the repo root is identical (obs <code>diff -q</code>). The loop spec lists "SPEC-FLIP-IT.md rev 1.1 → 1.2" as a required edit (obs <code>SPEC-SOLVE-IT-LOOP.md:149</code>), so the rev 1.1 the brief names isn't in the repo (inf). Spec: 6 levels (numeric L1, <code>−x = b</code>, <code>b = −x</code>, <code>−ax = b</code>, mixed, bigger), the move Flip everything plus Take a fraction from L4 (obs <code>SPEC-FLIP-IT.md:31-38,61-64</code>).</p>
+<p>Pieces that exist:</p>
+<ul>
+<li>The panel button "Flip everything (× −1)" and its light "No opposite box" are defined, but no card makes them live (obs <code>src/view/narrowPanel.js:14</code>; Add's panel <code>addBothScreen.js:478-490</code>; Divide's <code>divideScreen.js:193</code>).</li>
+<li>The drill flips every term (×−1) on its own board (obs <code>distributeDrill.js:49-60,168-172</code>).</li>
+<li>On Divide it, Multiply › −1 is explained but not applied (obs <code>divideBlank.js:12-14,50-54</code>; message <code>view/divideFeedback.js:26</code>).</li>
+</ul>
+<h2>2. Old level ids, save bits, and keeping progress</h2>
+<h3>2A. How progress is stored</h3>
+<ul>
+<li><strong>On the device:</strong> localStorage key <code>mat.v1</code> holds <code>{ v, packs: { &lt;id&gt;: { levels: [bool…], first?, open? } }, current, layout }</code>, with a backup in <code>mat.v1.backup</code> if a save would ever lower the count (obs <code>main.js:100-123</code>, <code>progress.js:8-19</code>). Class-sheet state is in <code>mat.sync.v1</code> (obs <code>src/syncStore.js:6</code>).</li>
+<li><strong>Google sign-in / class sheet:</strong> the app sends <code>levels</code> per pack (obs <code>src/engine/sync.js:46-52</code>). The sheet (<code>teacher/Code.gs</code>) keeps one column per pack-level, like <code>one-step-3</code> (obs <code>Code.gs:20,365-373</code>), merges "finished anywhere stays finished" and sends the merged progress back (obs <code>Code.gs:13-15</code>). The app merges it with <code>normalizeProgress</code> + <code>mergeProgress</code> (obs <code>sync.js:71-74</code>). Sheet limits: 30 packs, 20 levels a pack (obs <code>Code.gs:24</code>).</li>
+<li><strong>Save codes</strong> (hidden, behind <code>?codes=1</code>): <code>MAT-</code> + base-31 bitmask. <strong>v14</strong> = 16 data symbols, 75 bits used, in this pack order (obs <code>progress.js:259-269</code>):</li>
+</ul>
+<div class="tw"><table><thead><tr><th>Order</th><th>Pack</th><th>Bits</th><th>Bit range</th></tr></thead><tbody>
+<tr><td>1</td><td>flipit (Count it)</td><td>5</td><td>0-4</td></tr>
+<tr><td>2</td><td>lasso</td><td>7</td><td>5-11</td></tr>
+<tr><td>3</td><td>boxes</td><td>6</td><td>12-17</td></tr>
+<tr><td>4</td><td>groups-of-terms</td><td>8</td><td>18-25</td></tr>
+<tr><td>5</td><td>combineit</td><td>5</td><td>26-30</td></tr>
+<tr><td>6</td><td>distribute-combine</td><td>5</td><td>31-35</td></tr>
+<tr><td>7</td><td>value</td><td>5</td><td>36-40</td></tr>
+<tr><td>8</td><td><strong>one-step</strong></td><td>8 (5 used)</td><td>41-48</td></tr>
+<tr><td>9</td><td><strong>two-step</strong></td><td>8 (7 used)</td><td>49-56</td></tr>
+<tr><td>10</td><td><strong>switch</strong></td><td>6</td><td>57-62</td></tr>
+<tr><td>11</td><td><strong>add-both</strong></td><td>6</td><td>63-68</td></tr>
+<tr><td>12</td><td><strong>divide-it</strong></td><td>6</td><td>69-74</td></tr>
+</tbody></table></div>
+<p>16 base-31 symbols hold about 79.3 bits (obs <code>progress.js:162</code>). With 75 used, a new 6-level card doesn't fit, so each new card needs a <strong>v15 layout</strong> (17 symbols) appended at the end. Old codes keep their meaning (inf, from the layout table and decoder <code>progress.js:305-327</code>).</p>
+<h3>2B. Legacy credit, as it works today (the model for new cards)</h3>
+<p><code>withLegacyCredit</code> runs every time progress is loaded, decoded or merged from the sheet (obs <code>progress.js:92</code>, <code>sync.js:73</code>). It only ever adds:</p>
+<div class="tw"><table><thead><tr><th>New level (saved)</th><th>Credited when the student finished</th><th>Evidence</th></tr></thead><tbody>
+<tr><td>add-both 2 (x + a)</td><td>one-step 1</td><td>obs <code>progress.js:101-108</code></td></tr>
+<tr><td>add-both 3 (x − a)</td><td>one-step 2</td><td>same</td></tr>
+<tr><td>add-both 4 (both)</td><td>switch 1 and switch 2</td><td>same</td></tr>
+<tr><td>add-both 5 (x right)</td><td>switch 4</td><td>same</td></tr>
+<tr><td>add-both 6 (all, bigger)</td><td>switch 3 and switch 4</td><td>same</td></tr>
+<tr><td>divide-it 2</td><td>one-step 3 (ax = b)</td><td>obs <code>progress.js:112</code></td></tr>
+<tr><td>divide-it 3</td><td>one-step 5 (mixed)</td><td>same</td></tr>
+<tr><td>add-both 1, divide-it 1, divide-it 4-6</td><td>never credited (new)</td><td>obs comments <code>:97,110-111</code></td></tr>
+</tbody></table></div>
+<p>It also opens the levels up to the highest credited one (obs <code>progress.js:114-123</code>). The old levels keep their own bits, so they still sit in codes and on the sheet.</p>
+<h3>2C. What happens when an old card is replaced</h3>
+<ul>
+<li><strong>Retire it, don't remove it.</strong> <code>normalizeProgress</code> keeps only packs that are in <code>PACKS</code> (obs <code>progress.js:75-77</code>). If a pack were deleted from <code>PACKS</code>, a student's finished levels for it would be dropped from the device on the next load and save. Legacy credit that reads them would stop working, and new codes would write zeros there (inf from <code>:75-92</code> and <code>encodeProgress :289-301</code>). Switch sides shows the safe pattern: <code>retired: true</code>, kept in <code>PACKS</code> "so its saved levels are kept for the two-step card" (obs <code>packs/index.js:123</code>). The sheet keeps old columns either way (inf: <code>Code.gs</code> reads every header, <code>:376-389</code>).</li>
+<li><strong>Credit already given stays.</strong> Once add-both bits are written true they are saved in their own right (obs <code>completeLevel</code>/save path, <code>main.js:122</code>). Credit from a new card's rule is worked out again on every load (inf).</li>
+<li><strong>Watch out:</strong> finishing a level of a retired card from a link still saves it (obs <code>main.js:381</code> checks only <code>comingSoon</code>/<code>hidden</code>).</li>
+<li><strong>The Solve it diagnostic</strong> still probes <code>one-step</code> levels 2 and 4 and <code>two-step</code> levels 2 and 5 (obs <code>src/engine/diagnostic.js:22-23</code>), through the old <code>solve</code> typed card (obs <code>lightCards.js:190-196,227</code>). Saved diagnostic places depend on the probe order (obs comment <code>diagnostic.js:26,32</code>). Retiring the old cards means changing the probes carefully (inf).</li>
+</ul>
+<h3>2D. Old levels that map forward (proposal, for each new card)</h3>
+<div class="tw"><table><thead><tr><th>Old level</th><th>Natural new home</th><th>Note</th></tr></thead><tbody>
+<tr><td>one-step 4 (x / a = b)</td><td>Multiply card, its first equation level</td><td>positive only (inf)</td></tr>
+<tr><td>one-step 5 (mixed)</td><td>already credits divide-it 3; could also credit a Multiply mixed level</td><td>inf</td></tr>
+<tr><td>two-step 1-3</td><td>Two-step card's first levels (ax ± b = c, b + ax = c)</td><td>same forms (inf)</td></tr>
+<tr><td>two-step 4</td><td>Two-step "x on the right"</td><td>inf</td></tr>
+<tr><td>two-step 5 (b − ax)</td><td>Two-step with a negative coefficient (needs Flip)</td><td>inf</td></tr>
+<tr><td>two-step 6-7</td><td>Two-step negatives / mixed</td><td>inf</td></tr>
+<tr><td>switch 5-6</td><td>Two-step L1-3 / negatives (kept for this, obs <code>packs/index.js:123</code>)</td><td></td></tr>
+<tr><td>(none)</td><td>Flip it</td><td>no old <code>−x = b</code> level exists (obs §1B)</td></tr>
+<tr><td>(none)</td><td>Distribute + combine + solve, Variables on both sides</td><td>Build it's distribute-combine is expressions, not equations; no credit suggested (inf)</td></tr>
+</tbody></table></div>
+<h2>3. What the shared loop can do for new cards</h2>
+<h3>3A. The loop (<code>src/engine/solveLoop.js</code>)</h3>
+<p>It owns the x = row, guesses and the check, the forced move, commit/fold, Undo, Start over, and help through the registry (obs <code>solveLoop.js:1-13,46-291</code>). A card supplies <code>startBoard</code>, <code>alone</code>, <code>reduce</code>, <code>tag</code>, <code>slip</code>, <code>collapse</code>, <code>answerBlocked</code>, <code>waitingForUndo</code> and the rest (obs <code>:19-36</code>). Limits:</p>
+<ul>
+<li>Answers are whole numbers only (obs <code>:172,191</code>).</li>
+<li><code>collapse(level)</code> exists for multi-step cards (obs <code>:204</code>).</li>
+<li>The check renderer knows <code>x</code> (with coef), <code>num</code> and <code>frac</code> (1/n of terms). It has <strong>no parentheses group and no times-term</strong> (obs <code>src/engine/solveTerms.js:2,15,27-28</code>).</li>
+</ul>
+<h3>3B. Moves</h3>
+<div class="tw"><table><thead><tr><th>Move</th><th>Where it works</th><th>On the loop?</th></tr></thead><tbody>
+<tr><td>Add ___ to both sides</td><td>Add card (obs <code>cards/add.js:5-7,299-305</code>)</td><td>yes. The amount is a whole number only (obs <code>cards/add.js:37</code>), so it can't add <code>3x</code> (inf → needed for Variables on both sides)</td></tr>
+<tr><td>Trade places</td><td>Add, Level 5 up (obs <code>cards/add.js:29-35</code>)</td><td>yes (Add only)</td></tr>
+<tr><td>Cross the border (drag a number across)</td><td>Add's term layer (obs <code>addBothLights.js:1-12</code>; <code>lightsGrab.js:45-51,65-68</code>)</td><td>yes, numbers. <strong>x across (<code>crossX</code>) is coded but "no card uses it yet"</strong> (obs <code>lightsGrab.js:46,51</code>)</td></tr>
+<tr><td>Combine like terms (drag onto a like term, type the sum)</td><td>Add's term layer and the drill (obs <code>addBothLights.js:10-11</code>; <code>lightsGrab.js:102</code> builds x or number sums)</td><td>numbers on Add, yes. <strong>x terms combine only in the drill</strong> (inf: Add boards have one x, <code>addBothMoves.js:10</code>)</td></tr>
+<tr><td>Multiply › fraction (1/n of both sides)</td><td>Divide it, with dealing help (obs <code>divideMoves.js:87-157</code>; <code>divideBlank.js:41-42</code>)</td><td>yes</td></tr>
+<tr><td>Multiply › whole number</td><td>Divide: <strong>explained, not applied</strong> (obs <code>divideBlank.js:12-14,50-54</code>). Drill: <strong>applied</strong> (obs <code>distributeDrill.js:53,227</code>)</td><td><strong>no</strong> (drill only)</td></tr>
+<tr><td>Multiply › −1 / Flip everything</td><td>Divide: explained, not applied (same lines). Drill: applied (obs <code>distributeDrill.js:51,168-172,223-225</code>)</td><td><strong>no</strong> (drill only)</td></tr>
+<tr><td>Distribute (drag the factor onto the parentheses, type each product)</td><td>drill only (obs <code>distributeDrill.js:3-5,204-221</code>)</td><td><strong>no</strong></td></tr>
+<tr><td>Tap a minus (− 2 → + −2)</td><td>drill (obs <code>distributeDrill.js:190</code>)</td><td>no</td></tr>
+</tbody></table></div>
+<p>The panel only knows four move buttons: Add, Multiply, Flip, Trade (obs <code>narrowPanel.js:11-16</code>). Distribute and Combine are "by hand" goals there (obs <code>:17-18</code>). The older 8-move list is still in <code>lightScreen.js:13-22</code> (used by the numeric screens).</p>
+<h3>3C. Shapes the classifier knows (<code>src/engine/solveit/shape.js</code>)</h3>
+<p>S1-S7, T0-T2 (Add) and D1, D2, DF (Divide) (obs <code>shape.js:23-37</code>). Everything else is <code>unknown</code>:</p>
+<ul>
+<li>x on both sides (obs <code>:52</code>)</li>
+<li>anything but a number beside x (a group, a fraction) (obs <code>:57</code>)</li>
+<li>a coefficient with more terms (<code>ax + c</code>) (obs <code>:75-76</code>)</li>
+</ul>
+<p>A board where x has any <code>coef</code> is treated as the Divide family (obs <code>:59</code>). So <code>−x = 5</code> would be read as <strong>D1 with a = −1</strong>, and <code>(1/3)x = 4</code> as D1 with a = 1/3 (inf from <code>:58-77</code>). The Divide lights compare <code>now.coef &lt; prev.coef</code> (obs <code>:111-113</code>). That gives the wrong answer with negative coefficients (e.g. −3x → −x would not light "Smaller numbers") (inf).</p>
+<p>An unregistered shape logs an error and tests fail on it (obs <code>registry.js:150-156</code>), so every new shape must be added to the classifier and the registry together.</p>
+<h3>3D. Scaffolds per shape (registry)</h3>
+<div class="tw"><table><thead><tr><th>Shape</th><th>Entry</th><th>Ladder</th></tr></thead><tbody>
+<tr><td>S1, T1, T2</td><td><code>rungs/add.js</code> S1</td><td>hint pop-up → Model it → Choose the move → Guided (obs <code>rungs/add.js:20,142</code>)</td></tr>
+<tr><td>S2, S5</td><td>S2</td><td>Party/Battle → counters walk (obs <code>:107,142</code>)</td></tr>
+<tr><td>S7</td><td>none on purpose ("solved") (obs <code>:136</code>)</td><td>—</td></tr>
+<tr><td>T0</td><td>none (building) (obs <code>:138</code>)</td><td>—</td></tr>
+<tr><td>S3, S4, S6</td><td>waiting for Undo (obs <code>:140-142</code>)</td><td>—</td></tr>
+<tr><td>D1, D2</td><td><code>rungs/divide.js</code></td><td>Model it → Guided, plus Teach me (obs <code>rungs/divide.js:11,46,59</code>)</td></tr>
+<tr><td>DF</td><td>waiting for Undo (obs <code>:93-95</code>)</td><td>—</td></tr>
+</tbody></table></div>
+<h3>3E. New shapes each card would bring (inf, from the spec forms and §3C)</h3>
+<div class="tw"><table><thead><tr><th>Card</th><th>New shapes</th><th>Missing scaffolds</th></tr></thead><tbody>
+<tr><td>Flip it</td><td><code>−x = b</code>, <code>−ax = b</code> (and x-right twins), <code>x = −(b)</code> (needs a "negated" term kind), the failed-flip waiting state</td><td>flip-both-sides seesaw (two-action), opposite-box picture (Build it's box drawing is not exported, obs <code>SOLVE-IT-ONE-SYSTEM.md:251</code>), dealing that flips first (spec §4)</td></tr>
+<tr><td>Two-step</td><td><code>ax + c = b</code>, <code>ax = b + k</code>, <code>c + ax = b</code>, mirrored; then D1/D2</td><td>a "which first?" rung; Add's S1/S2 rungs and Divide's D1 rungs would need to read a coefficient (inf)</td></tr>
+<tr><td>Multiply (x/3 = 4)</td><td><code>(1/a)x = b</code>, <code>x = a(b)</code> (a times-term)</td><td>a "groups of x/3" picture (architecture suggests C10's boxes, obs <code>SOLVE-IT-ONE-SYSTEM.md:227</code>)</td></tr>
+<tr><td>Distribute + combine + solve</td><td><code>a(x + c) = b</code>, <code>n + a(x + c) = b</code>, unsimplified sides with like terms</td><td>everything: Groups of Terms / Boxes &amp; Circles adapters (obs <code>SOLVE-IT-ONE-SYSTEM.md:61,64,229</code>)</td></tr>
+<tr><td>Variables on both sides</td><td><code>ax + c = dx + e</code> and its steps</td><td>like-terms rung (C5), cross-x rung</td></tr>
+</tbody></table></div>
+<h2>4. Rough size of each new card (as configuration of the loop)</h2>
+<div class="tw"><table><thead><tr><th>Card</th><th>Size</th><th>Why (one line)</th></tr></thead><tbody>
+<tr><td><strong>Flip it</strong></td><td><strong>Medium</strong></td><td>A new no-amount move, a few new shapes, negative-coefficient lights and an opposite-box picture; Take a fraction must be lifted out of <code>divideMoves.js</code> so two cards share it.</td></tr>
+<tr><td><strong>Two-step</strong></td><td><strong>Medium</strong></td><td>Add's and Divide's moves on one board with a coefficient and a number (today Add's x has no coefficient, <code>addBothMoves.js:10</code>), new mixed shapes, collapse from L3; <code>b − ax</code> needs Flip first.</td></tr>
+<tr><td><strong>Distribute + combine + solve</strong></td><td><strong>Needs new engine work</strong></td><td>Parentheses, distribute and x-term combining exist only in the off-loop drill; the board, check renderer and classifier have no group term.</td></tr>
+<tr><td><strong>Multiply (fractional coefficients)</strong></td><td><strong>Medium (smallest of the new engine pieces)</strong></td><td>The whole-number option is already in Divide's Multiply menu (explained, not applied) and works in the drill; it needs an <code>x/a</code> term, the <code>x = a(b)</code> shape and a picture.</td></tr>
+<tr><td><strong>Variables on both sides</strong></td><td><strong>Needs new engine work</strong></td><td>x on both sides is "unknown" to the classifier, Add's amount can't be <code>3x</code>, and crossing x is coded but unused; it also needs everything Two-step and Distribute bring.</td></tr>
+</tbody></table></div>
+<p>The architecture doc estimates each at "M" and plans Flip it first (obs <code>SOLVE-IT-ONE-SYSTEM.md:226-230,297</code>). The decision log's order puts fractions before two-step "so all the moves exist before they are combined" (obs <code>docs/design/DECISION-LOG.md:7</code>).</p>
+<h2>5. What to retire when each replacement goes live (listed, not deleted)</h2>
+<p>Retire means: set <code>retired: true</code>, take the card out of its section, keep it in <code>PACKS</code> and keep its save-code bits (see §2C). Delete code only after the diagnostic and any other users are moved.</p>
+<div class="tw"><table><thead><tr><th>When this goes live</th><th>Retire</th><th>Files used only by it (obs import map)</th></tr></thead><tbody>
+<tr><td>Multiply card</td><td>One-step L4 (x / a); with Divide already live, the whole <strong>One-step equations</strong> card (<code>one-step</code>)</td><td><code>src/engine/solveLight.js</code> (also used by switch), <code>src/engine/generateSolve.js</code> (also used by generateSwitch), <code>src/play/solveLightPlay.js</code>, <code>src/view/solveMat.js</code>, <code>src/view/solveFeedback.js</code>, <code>src/view/undoConstant.js</code>; <code>lightCards.js</code> <code>solve</code> entry (used by the diagnostic, <code>:190-196</code>); tests <code>tests/solve.test.js</code></td></tr>
+<tr><td>Two-step card</td><td><strong>Two-step equations</strong> (<code>two-step</code>) and Switch sides' last uses (<code>switch</code> L5-6)</td><td><code>src/engine/solve2.js</code>, <code>src/engine/generateSolve2.js</code>, <code>src/view/solve2Rows.js</code>, <code>src/engine/equation.js</code> (once nothing uses it), <code>src/engine/switchSides.js</code>, <code>src/engine/generateSwitch.js</code>, <code>src/play/switchPlay.js</code>, <code>src/view/switchMat.js</code>, <code>src/view/switchFeedback.js</code>, <code>src/view/switchPointer.js</code>; tests <code>solve2.test.js</code>, <code>switch.test.js</code></td></tr>
+<tr><td>Flip it</td><td>Divide's "−1 explained, not applied" message (<code>dFlipNo</code>, <code>divideBlank.js:50-54</code>, <code>divideFeedback.js:26</code>) once Flip is real</td><td>—</td></tr>
+<tr><td>Multiply card</td><td>Divide's "whole number explained" (<code>dWholeNo</code>, <code>dZeroNo</code>) if the whole option becomes real there</td><td>—</td></tr>
+<tr><td>Distribute + combine + solve</td><td>the hidden <strong>Distribute drill</strong> (<code>?drill=distribute</code>)</td><td><code>src/engine/distributeDrill.js</code>, <code>src/play/distributeDrillPlay.js</code>, the drill branches in <code>src/view/addBothScreen.js:334-350,486-490</code> and <code>addBothLights.js</code> (<code>s.drill</code>)</td></tr>
+<tr><td>Variables on both sides</td><td>the <strong>Multi-step equations (soon)</strong> placeholder (<code>packs/index.js:173</code>)</td><td>—</td></tr>
+<tr><td>any of them</td><td>Solve it diagnostic probes for <code>one-step</code>/<code>two-step</code> (<code>diagnostic.js:22-23</code>)</td><td>—</td></tr>
+<tr><td>docs</td><td><code>SPEC-SOLVE.md</code> (old one/two-step/switch spec), the root copy of <code>SPEC-FLIP-IT.md</code> (identical to <code>docs/design/</code>)</td><td>—</td></tr>
+</tbody></table></div>
+<p>Keep: the save-code layouts v1-v14 and their pack ids (CLAUDE.md: don't change what a code means), and <code>src/view/solveScreen.js</code> and <code>lightScreen.js</code>, which the new cards use (obs import map).</p>
+<h2>6. Questions for Karl (recommended option first)</h2>
+<ol>
+<li><strong>What do we call the new card for <code>−x = 12</code>?</strong> Count it already has a card called "Flip It" (subtracting negatives).</li>
+</ol>
+<p>   (A) "Flip everything", a new name that matches the move button · (B) keep "Flip it" for both · (C) rename Count it's card.</p>
+<ol>
+<li><strong>Should finished old levels count on the new cards?</strong></li>
+</ol>
+<p>   (A) Yes, level for level where the problems match (old Two-step 1-7 and Switch sides 5-6 → new Two-step; old One-step x / a → Multiply), so nobody repeats work · (B) No, everyone starts the new cards fresh · (C) Only a finished old card counts, as all of the new card.</p>
+<ol>
+<li><strong>Build order?</strong></li>
+</ol>
+<p>   (A) Flip it → Multiply → Two-step → Distribute → Variables on both sides (one-move cards first, so every move exists before they're combined) · (B) Multiply → Flip it → … (your list order) · (C) Two-step first, since it's the most used in class.</p>
+<ol>
+<li><strong>When a new card goes live, what happens to the old one?</strong></li>
+</ol>
+<p>   (A) It leaves the home screen the same day, and its finished levels are kept (like Switch sides) · (B) Both stay on the home screen for a week or two · (C) The old one is deleted.</p>
+<ol>
+<li><strong>Flip it's numbers-only Level 1</strong> (flip one side vs. both, with a short quiz):</li>
+</ol>
+<p>   (A) Make it the "See why it works" button, like Add and Divide · (B) Make it a normal first level · (C) Leave it out.</p>
+<h2>Links to look at</h2>
+<p>The test-links page: <a href="https://karlmaukskoepke.github.io/AlgebraMat/test-links.html.">https://karlmaukskoepke.github.io/AlgebraMat/test-links.html.</a> It has entries for Add, Divide and the drill, but <strong>none for One-step, Two-step or Switch sides</strong>. The links below for those three are new, built the same way.</p>
+<p>All of these work on the live site now. Finishing a level from a link saves it in that browser (even for retired Switch sides).</p>
+<p><strong>Old cards (to be replaced)</strong></p>
+<ul>
+<li>One-step, ax = b (shown as Level 1): <a href="https://karlmaukskoepke.github.io/AlgebraMat/?pack=one-step&amp;level=3&amp;seed=7&amp;nosignin=1">https://karlmaukskoepke.github.io/AlgebraMat/?pack=one-step&amp;level=3&amp;seed=7&amp;nosignin=1</a></li>
+<li>One-step, x / a = b (shown as Level 2): <a href="https://karlmaukskoepke.github.io/AlgebraMat/?pack=one-step&amp;level=4&amp;seed=7&amp;nosignin=1">https://karlmaukskoepke.github.io/AlgebraMat/?pack=one-step&amp;level=4&amp;seed=7&amp;nosignin=1</a></li>
+<li>One-step, all four mixed (shown as Level 3): <a href="https://karlmaukskoepke.github.io/AlgebraMat/?pack=one-step&amp;level=5&amp;seed=7&amp;nosignin=1">https://karlmaukskoepke.github.io/AlgebraMat/?pack=one-step&amp;level=5&amp;seed=7&amp;nosignin=1</a></li>
+<li>Two-step, ax + b = c: <a href="https://karlmaukskoepke.github.io/AlgebraMat/?pack=two-step&amp;level=1&amp;seed=7&amp;nosignin=1">https://karlmaukskoepke.github.io/AlgebraMat/?pack=two-step&amp;level=1&amp;seed=7&amp;nosignin=1</a></li>
+<li>Two-step, x on the right: <a href="https://karlmaukskoepke.github.io/AlgebraMat/?pack=two-step&amp;level=4&amp;seed=7&amp;nosignin=1">https://karlmaukskoepke.github.io/AlgebraMat/?pack=two-step&amp;level=4&amp;seed=7&amp;nosignin=1</a></li>
+<li>Two-step, b − ax = c (negative coefficient): <a href="https://karlmaukskoepke.github.io/AlgebraMat/?pack=two-step&amp;level=5&amp;seed=7&amp;nosignin=1">https://karlmaukskoepke.github.io/AlgebraMat/?pack=two-step&amp;level=5&amp;seed=7&amp;nosignin=1</a></li>
+<li>Two-step, all mixed: <a href="https://karlmaukskoepke.github.io/AlgebraMat/?pack=two-step&amp;level=7&amp;seed=7&amp;nosignin=1">https://karlmaukskoepke.github.io/AlgebraMat/?pack=two-step&amp;level=7&amp;seed=7&amp;nosignin=1</a></li>
+<li>Switch sides (retired), x + a = b: <a href="https://karlmaukskoepke.github.io/AlgebraMat/?pack=switch&amp;level=1&amp;seed=7&amp;nosignin=1">https://karlmaukskoepke.github.io/AlgebraMat/?pack=switch&amp;level=1&amp;seed=7&amp;nosignin=1</a></li>
+<li>Switch sides (retired), two-step: <a href="https://karlmaukskoepke.github.io/AlgebraMat/?pack=switch&amp;level=5&amp;seed=7&amp;nosignin=1">https://karlmaukskoepke.github.io/AlgebraMat/?pack=switch&amp;level=5&amp;seed=7&amp;nosignin=1</a></li>
+</ul>
+<p><strong>Cards already on the loop (reused from test-links.json)</strong></p>
+<ul>
+<li>Add to both sides, Level 1: <a href="https://karlmaukskoepke.github.io/AlgebraMat/?pack=add-both&amp;level=2&amp;seed=7&amp;nosignin=1">https://karlmaukskoepke.github.io/AlgebraMat/?pack=add-both&amp;level=2&amp;seed=7&amp;nosignin=1</a></li>
+<li>Add to both sides, x on the right (Trade places): <a href="https://karlmaukskoepke.github.io/AlgebraMat/?pack=add-both&amp;level=5&amp;seed=1&amp;nosignin=1">https://karlmaukskoepke.github.io/AlgebraMat/?pack=add-both&amp;level=5&amp;seed=1&amp;nosignin=1</a></li>
+<li>Divide it, Level 2 (the Multiply menu with whole number, fraction and −1): <a href="https://karlmaukskoepke.github.io/AlgebraMat/?pack=divide-it&amp;level=3&amp;seed=7&amp;nosignin=1">https://karlmaukskoepke.github.io/AlgebraMat/?pack=divide-it&amp;level=3&amp;seed=7&amp;nosignin=1</a></li>
+<li>Distribute drill (Flip and Multiply work here): <a href="https://karlmaukskoepke.github.io/AlgebraMat/?drill=distribute&amp;nosignin=1">https://karlmaukskoepke.github.io/AlgebraMat/?drill=distribute&amp;nosignin=1</a></li>
+</ul>
+<p><strong>The other "Flip It" and Build it's distributing (for comparison only)</strong></p>
+<ul>
+<li>Count it › Flip It (subtracting negatives): <a href="https://karlmaukskoepke.github.io/AlgebraMat/?pack=flipit&amp;level=1&amp;seed=7&amp;nosignin=1">https://karlmaukskoepke.github.io/AlgebraMat/?pack=flipit&amp;level=1&amp;seed=7&amp;nosignin=1</a></li>
+<li>Build it › Distribute, then combine: <a href="https://karlmaukskoepke.github.io/AlgebraMat/?pack=distribute-combine&amp;level=1&amp;seed=7&amp;nosignin=1">https://karlmaukskoepke.github.io/AlgebraMat/?pack=distribute-combine&amp;level=1&amp;seed=7&amp;nosignin=1</a></li>
+<li>Home screen (Solve it, with "Multi-step equations: soon"): <a href="https://karlmaukskoepke.github.io/AlgebraMat/?nosignin=1">https://karlmaukskoepke.github.io/AlgebraMat/?nosignin=1</a></li>
+</ul>
+<p>One-step's hidden levels 1 and 2 also open from a link (<code>level=1</code>, <code>level=2</code>), but the title would read "Level −1" / "Level 0" (inf: <code>main.js:263</code> with <code>packs/index.js:190</code>), so I left them out.</p></main></body></html>
