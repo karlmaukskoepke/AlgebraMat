@@ -57,6 +57,7 @@ export const addBothPlay = makeSolvePlay({
       // Count it's counters at x alone (Build C, Part 3): its Mat's taps and the tray's buttons go to the walk
       case 'zone': return /^\d+$/.test(d.zone ?? '') ? { type: 'cnt', act: { type: 'tapZone', zone: Number(d.zone) } } : { type: 'zone', side: d.side };   // (the seesaw's sides are named, the counters' zones numbered)
       case 'counter': return { type: 'cnt', act: { type: 'tapCounter', zone: Number(d.zone), index: Number(d.index) } };
+      case 'cntBox': return { type: 'cnt', act: { type: 'tapBox', zone: Number(d.box) } };
       case 'cntPick': return { type: 'cnt', act: { type: 'pickSign', sign: d.sign } };
       case 'cntCheck': return { type: 'cnt', act: { type: 'check' } };
       case 'cntChoose': return { type: 'cnt', act: { type: 'choose', choice: d.value } };

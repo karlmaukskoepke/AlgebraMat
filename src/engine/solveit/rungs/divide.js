@@ -9,16 +9,23 @@ import { coefOf, pileSize, diagOf } from '../../divideBoard.js';
 // D1 `ax = b`
 const D1 = {
   ladder: ['modelIt', 'guided'],                    // (rev 1.2: every rung gives something to do, so the picture-only rung is merged into the next)
-  // after Undo: the number in front of x outlined with the move's prompt; after a fraction that did not split (Build D, Part 4), the boxes
-  // and the counters, "We want only one of the five x boxes.", and the fractions to choose from, the ones tried crossed off
+  // after Undo, the reminder (Build F, Part 3): the number in front of x outlined, Multiply's options open with the fraction option lit
+  // and its preview on the equation, and one line with the real numbers; recorded as a reminder (`hint`). After a fraction that did not
+  // split (Build D, Part 4): the boxes and the counters, "We want only one of the five x boxes.", and the fractions to choose from, the
+  // ones tried crossed off.
   hintPopup: {
+    word: 'hint',
     after(s, before) {
       s.hint = { kind: 'coef' };
       if (before?.fail && s.tried.length) {
         s.menu = 'fraction';
         return { target: 'coef', key: 'dWhichFraction', params: { boxes: coefOf(s.board) }, choose: true };
       }
-      return { target: 'coef', key: 'dPickFraction', move: 'fraction' };
+      const a = coefOf(s.board);
+      s.mopts = { kind: null, entry: '' };
+      s.ui = { ...(s.ui ?? {}), preview: 'frac' };
+      if (!s.supportsShown.includes('hint')) s.supportsShown.push('hint');
+      return { target: 'coef', key: 'dReminder', params: { boxes: a, frac: fractionText(a) }, move: 'fracOption' };
     },
   },
   // 1. Model it and deal it: the fractions are live; choose one, deal the counters, keep a group

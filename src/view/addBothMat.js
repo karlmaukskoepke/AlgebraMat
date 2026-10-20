@@ -50,8 +50,19 @@ export function boardItems(s) {
     const g = groupShape(Math.abs(t.v));
     return { type: 'group', id: t.id, slot: t.slot, v: t.v, n: Math.abs(t.v), shape: g, width: g.width, height: g.height };
   };
-  const board = s.stage === 'build' ? buildBoard(s) : s.board;
+  const board = s.stage === 'build' ? buildBoard(s) : slipBoard(s) ?? s.board;
   return { left: board.left.map(item), right: board.right.map(item) };
+}
+
+// A wrong move's picture (Build F, Part 3): while it waits for Undo, the group it left beside x is drawn as the two groups it came from.
+export const slipShown = (s) => Boolean(s.scaffold && s.slipPair && s.needUndo && !s.combining && !s.sub && s.stage === 'moves');
+function slipBoard(s) {
+  if (!slipShown(s)) return null;
+  const { a, b, id } = s.slipPair;
+  const side = xSideOf(s.board);
+  const pair = [{ id: 'slipA', kind: 'num', v: a }, { id: 'slipB', kind: 'num', v: b }];
+  const terms = s.board[side].flatMap((t) => (t.id === id ? pair : [t]));
+  return { ...s.board, [side]: id ? terms : [...terms, ...pair] };
 }
 
 // While building: the x box (once it is up) and the groups of counters on each side.
@@ -120,7 +131,7 @@ const hitArea = (x, y, w, h) => {
 // The balance (Karl: the models stand on the seesaw). The beam tips; the board's items (the x box, groups of counters or
 // numbers) stand on it, so what is added to a side shows up on that side of the balance. A pivot sits under the middle, and
 // the dashed border runs up and down through it. `ctx`: { top (room for the readout), readout: {text, cls, size}, building,
-// zonesOn, early, tapAction(id), cls(id), struck, angle, anim, hint, dropText }.
+// zonesOn, early, tapAction(id), cls(id), struck, leftOver(id), angle, anim, hint, dropText }.
 export function drawBalance(svg, items, ctx) {
   const lw = Math.max(sideWidth(items.left), sideWidth(items.right));   // both sides alike, so the border (and the pivot) is the middle
   const rw = lw;
@@ -188,7 +199,7 @@ export function drawBalance(svg, items, ctx) {
         for (let n = 0; n < it.n; n++) {
           const mx = cx + 11 + (n % it.shape.cols) * CELL + CELL / 2;
           const my = cy + 11 + Math.floor(n / it.shape.cols) * CELL + CELL / 2;
-          counterMark(g, mx, my, Math.sign(it.v), n < k ? 'sv-struck' : '');
+          counterMark(g, mx, my, Math.sign(it.v), n < k ? 'sv-struck' : ctx.leftOver?.(it.id) ? 'is-left' : '');
           if (n < k) g.append(el('line', { x1: mx - 9, y1: my + 9, x2: mx + 9, y2: my - 9, class: 'sv-slash' }));
         }
         out.append(g);
@@ -243,13 +254,16 @@ export function boardSvg(s) {
   const items = boardItems(s);
   const building = s.stage === 'build';
   const svg = el('svg', { class: 'mat value-mat addboth-mat', role: 'group', 'aria-label': 'The Add to both sides Mat' });
-  const cls = (id) => `${s.selected === id ? ' is-selected' : ''}${s.combining && (s.combining.a === id || s.combining.b === id) ? ' is-combining' : ''}${(s.hint?.kind === 'cancel' && s.hint.id === id) || (s.hint?.kind === 'sum' && s.hint.ids.includes(id)) ? ' is-hint' : ''}${s.pending?.kind === 'cross' && s.pending.id === id ? ' is-crossing' : ''}`;
+  const slip = slipShown(s);
+  const slipSide = slip ? new Set(s.board[xSideOf(s.board) === 'left' ? 'right' : 'left'].map((t) => t.id)) : null;
+  const cls = (id) => `${slip && (id === 'slipA' || id === 'slipB') ? ' is-slip' : ''}${slip && slipSide.has(id) ? ' is-slipother' : ''}${s.selected === id ? ' is-selected' : ''}${s.combining && (s.combining.a === id || s.combining.b === id) ? ' is-combining' : ''}${(s.hint?.kind === 'cancel' && s.hint.id === id) || (s.hint?.kind === 'sum' && s.hint.ids.includes(id)) ? ' is-hint' : ''}${s.pending?.kind === 'cross' && s.pending.id === id ? ' is-crossing' : ''}`;
   const tapAction = (id) => (building ? null : s.menu === 'cross' ? (s.pending?.kind === 'cross' && s.pending.id === id ? 'flipSign' : 'cross') : 'select');
   const geo = drawBalance(svg, items, {
     top: 64,
     readout: { text: building ? 'Build the equation' : tiltText(s), cls: building ? '' : balanced(s) ? 'is-good' : 'is-bad' },
     building, zonesOn: building || (s.stage === 'moves' && s.menu === 'add' && hasAmount(s) && !s.combining && !seesawAddOpen(s)),
     early: s.early?.step === 'drag', tapAction, cls, struck: struckCounts(s), angle: tipAngle(s), anim: s.anim,
+    leftOver: (id) => slip && (id === 'slipA' || id === 'slipB'),
   });
   const sideBtnsOn = !building && s.stage === 'moves' && s.menu === 'add' && hasAmount(s) && !s.combining && !s.resolving && s.pending?.kind !== 'cross';
   const base = building ? s.base : s.board;
@@ -342,8 +356,14 @@ export function trayFor(s) {
   return t;
 }
 
-// While two groups are being combined and the student has asked to cross them off: the pairs struck, as counts per group id.
+// While two groups are being combined and the student has asked to cross them off: the pairs struck, as counts per group id. In a wrong
+// move's picture, the pairs that cancelled.
 function struckCounts(s) {
+  if (slipShown(s)) {
+    const { a, b } = s.slipPair;
+    const pairs = Math.sign(a) === Math.sign(b) ? 0 : Math.min(Math.abs(a), Math.abs(b));
+    return { slipA: pairs, slipB: pairs };
+  }
   const c = s.combining;
   if (!c || !c.crossed || c.kind !== 'battle') return {};   // (the scaffold's battle beside x: crossed off and kept, Build D)
   const find = (id) => [...s.board.left, ...s.board.right].find((t) => t.id === id);

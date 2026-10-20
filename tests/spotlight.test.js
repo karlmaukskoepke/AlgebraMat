@@ -5,6 +5,7 @@ import { newLightsSession, withLights, ADD_SPOT } from '../src/engine/addBothLig
 import { makeDivide } from '../src/engine/divide.js';
 import { newDivide, reduceDivide, DIVIDE_SPOT } from '../src/engine/divideMoves.js';
 import { withSpotlight, spotOf } from '../src/engine/spotlight.js';
+import { withFractionBlank } from '../src/engine/divideBlank.js';
 
 // The spotlight message (Build C, Part 2): an error waits for Undo, then a hint pops up.
 const add = withSpotlight(withLights(reduceAddBoth), ADD_SPOT);
@@ -118,5 +119,39 @@ describe('Build D-2, Parts 2 and 5: the x = cursor; the seesaw’s Add typed onc
     expect([s.pending, s.leftDelta, s.rightDelta, s.amountEntry]).toEqual([null, 0, 0, '-']);
     s = run(add, s, ...typed('8'), { type: 'go' });
     expect([s.pending, s.menu, s.history.length > 0]).toEqual([null, null, true]);
+  });
+});
+
+// Build F, Part 3: the help gaps
+describe('Build F: Divide it\'s reminder after Undo, and a wrong seesaw move\'s picture', () => {
+  const div = withSpotlight(withFractionBlank(reduceDivide), DIVIDE_SPOT);              // (as the app composes it)
+  it('Divide: after Undo the fraction option under Multiply is lit with its preview, said in real numbers, and recorded as a reminder', () => {
+    let s = run(div, newDivide(makeDivide(5, -3), { level: 3 }), ...typed('4'), { type: 'check' }, { type: 'placeValue' }, { type: 'nextLine' }, { type: 'nextLine' });
+    expect(spotOf(s, DIVIDE_SPOT)).toMatchObject({ kind: 'error' });
+    s = run(div, s, { type: 'undo' });
+    expect(spotOf(s, DIVIDE_SPOT)).toMatchObject({ kind: 'hint', target: 'coef', move: 'fracOption' });
+    expect([s.feedback.key, s.feedback.params.boxes, s.feedback.params.frac, s.mopts, s.ui.preview]).toEqual(['dReminder', 5, '⅕', { kind: null, entry: '' }, 'frac']);
+    expect(s.supportsShown).toContain('hint');
+    // the lit option is the move: picking it starts the fraction (and the hint goes)
+    const f = run(div, s, { type: 'multPick', kind: 'frac' });
+    expect([spotOf(f, DIVIDE_SPOT), f.menu]).toEqual([null, 'fraction']);
+  });
+  it('the seesaw: a move that only partly cancels is an error over its picture, the pair beside x kept for it; Undo, then the reminder', () => {
+    let s = run(add, start(), { type: 'stuck' }, { type: 'stuck' });                       // Level 3 (saved 4): the seesaw, Add open
+    expect([s.scaffold, s.menu]).toEqual([true, 'add']);
+    s = run(add, s, ...typed('-3'), { type: 'go' }, { type: 'kind', value: 'battle' }, { type: 'crossNext' }, { type: 'kind', value: 'party' });
+    expect(spotOf(s, ADD_SPOT)).toMatchObject({ kind: 'error', target: 'slip', label: 'still here', lit: ['slipOther'] });
+    expect(s.slipPair).toMatchObject({ a: 8, b: -3, kind: 'battle' });
+    expect(run(add, s, { type: 'stuck' })).toBe(s);                                       // only Undo
+    s = run(add, s, { type: 'undo' });
+    expect(spotOf(s, ADD_SPOT)).toMatchObject({ kind: 'hint', target: 'xnum', move: 'add' });
+    expect([s.feedback.key, s.slipPair, s.scaffold]).toEqual(['aStuckHint', undefined, true]);
+  });
+  it('the seesaw: a move that makes the number beside x bigger is "got bigger"; a right move keeps no picture', () => {
+    const red = run(add, start(), { type: 'stuck' }, { type: 'stuck' }, ...typed('3'), { type: 'go' }, { type: 'kind', value: 'party' }, { type: 'kind', value: 'battle' });
+    expect(spotOf(red, ADD_SPOT)).toMatchObject({ kind: 'error', target: 'slip', label: 'got bigger' });
+    expect(red.slipPair).toMatchObject({ a: 8, b: 3, kind: 'party' });
+    const right = run(add, start(), { type: 'stuck' }, { type: 'stuck' }, ...typed('-8'), { type: 'go' }, { type: 'kind', value: 'battle' }, { type: 'crossNext' }, { type: 'kind', value: 'party' });
+    expect([spotOf(right, ADD_SPOT)?.kind ?? null, right.slipPair]).toEqual([null, undefined]);
   });
 });

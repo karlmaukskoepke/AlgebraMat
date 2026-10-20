@@ -58,7 +58,7 @@ describe('Add: x alone with two numbers on the other side (Build C, Part 3 repla
     let s = add(alone(), stuck);
     expect(s.feedback.key).toBe('aAlonePB');
     s = add(s, { type: 'kind', value: 'party' }, stuck);
-    expect([s.feedback.key, s.alone.walk.step, boardText(s.board)]).toEqual(['aAloneCounters', 'draw', 'x = −4 + −8']);
+    expect([s.feedback.key, s.alone.walk.step, boardText(s.board)]).toEqual(['aAloneCounters', 'answer', 'x = −4 + −8']);   // drawn; a Party: count (Build F)
     for (const k of ['aAlonePB', 'aAloneRight', 'aAloneCounters', 'aAloneCount']) expect(addBothFeedbackText({ key: k, params: { sum: '−4 + −8', kind: 'party' } })).not.toContain('12');
   });
   it('Teach me starts at party or battle at the numbers (Build D), never says to add again, and counts as a Teach me', () => {

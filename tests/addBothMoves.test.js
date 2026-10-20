@@ -299,7 +299,7 @@ describe('I\'m stuck and Teach me bring in the scaffold, one rung at a time', ()
     s = run(s, { type: 'kind', value: 'party' });
     expect([s.feedback.key, s.alone.step, s.typing, boardText(s.board), s.entry]).toEqual(['aAloneRight', 'type', 'answer', 'x = −6 + −3', '']);
     s = run(s, { type: 'stuck' });
-    expect([s.feedback.key, s.alone.step, s.alone.walk.step, s.scaffold]).toEqual(['aAloneCounters', 'counters', 'draw', false]);
+    expect([s.feedback.key, s.alone.step, s.alone.walk.step, s.scaffold]).toEqual(['aAloneCounters', 'counters', 'answer', false]);   // drawn; a Party: count them all (Build F)
     expect(s.supportsShown).toEqual(['hint', 'model']);
   });
   it('the question is about the numbers on the current row', () => {

@@ -481,3 +481,16 @@ Every screen of both Solve it cards changed, and nothing else did: problems, sav
 | `screen:div-teach@1366x768` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
 | `screen:div-wrong-guess@1366x650` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
 | `screen:div-wrong-guess@1366x768` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
+
+## Build F, Part 3: the help gaps (2026-10-20)
+
+Compared run by run with the code before this part: one scripted run changed, and the screens.
+- **Divide it, after Undo (the reminder):** the fraction option under Multiply opens lit, with its preview, and the line says "To get one x, take a fraction of both sides: one of the 5 x boxes is ⅕." It is recorded as a reminder (`hint`). When the fraction is then chosen, the line keeps "Pick a fraction of both sides…" (it went back to "Find the value of x." before).
+- **Add, the screens:** the work and the right-hand space are split evenly in every state, so the work never shifts sideways when the seesaw or a walk comes in. All Add screens move a little; they are already listed under Part 2.
+- **Not reached by the scripted runs** (covered by unit tests in `tests/spotlight.test.js` and `tests/aloneHelp.test.js`):
+  - a wrong seesaw move's picture spotlight;
+  - the counters walk drawn for the student, with tap-to-cross-off.
+
+| Key | Why |
+|---|---|
+| `event:divide-it/wrong-guess-then-undo` | the reminder after Undo is recorded: `supports` [] → [`hint`] (its trace, from step 8, is already allowed by an earlier entry) |

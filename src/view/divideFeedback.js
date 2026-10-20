@@ -26,6 +26,7 @@ const M = {
   dFlipNo: (p) => `−1 × (${p.a}x) makes −${p.a}x: the sign changes, but there are still ${p.a} x’s. Try a fraction.`,
   dBlankBad: () => 'Type a fraction of both sides: 1 over 2, 3, 4, 5 or 6 (like 1/5).',
   dPickFraction: () => 'Pick a fraction of both sides. Which one leaves one box?',
+  dReminder: (p) => `To get one x, take a fraction of both sides: one of the ${p.boxes} x boxes is ${p.frac}.`,
   dUndone: () => 'Undone. Pick a different fraction.',
   dForced: (p) => `For this one, take ${p.frac} of both sides.`,
   dFail: (p) => {

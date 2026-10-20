@@ -22,6 +22,30 @@
           ]
         },
         {
+          "name": "Help gaps closed (Build F, Part 3)",
+          "about": "Divide it’s hint after Undo lights the fraction option under Multiply. A wrong move on the seesaw gets a picture spotlight, then Undo, then the hint. At x = 11 + −8 the counters come drawn, and the student crosses off the pairs and counts.",
+          "links": [
+            {
+              "label": "Divide it · the hint after Undo",
+              "query": "?pack=divide-it&level=3&seed=7&nosignin=1",
+              "reset": true,
+              "look": "Type 4 in x =, press Check, drag the 4 in, press Next twice: not balanced. Press Undo: the Multiply options open with the fraction lit and its preview, and “one of the 5 x boxes is ⅕”."
+            },
+            {
+              "label": "A wrong move on the seesaw",
+              "query": "?pack=add-both&level=4&seed=7&nosignin=1",
+              "reset": true,
+              "look": "Press I’m stuck twice, type −3, press Go, then Battle, Next, Party. The screen greys; the 8 and −3 on the seesaw show 3 pairs crossed off and 5 left (“still here”), the other side lit, Undo pulsing. Press Undo: the hint at the +8."
+            },
+            {
+              "label": "Cross off the pairs at x alone",
+              "query": "?pack=add-both&level=2&seed=7&nosignin=1",
+              "reset": true,
+              "look": "Add −8 to both sides. Press I’m stuck, Battle, I’m stuck. The counters for 11 and −8 are drawn on the right: tap a counter (it and a − go), then tap a whole box (every pair goes). Crossed-off counters stay. Count the 3 left and type 3."
+            }
+          ]
+        },
+        {
           "name": "The seesaw beside the work (Build F, Part 2)",
           "about": "The seesaw, its tray and the counters at x alone now draw in the space on the right, beside the equation, and never cover the work. The page is wider on both Solve it cards, and x =, the green button and the corners stay in one place.",
           "links": [

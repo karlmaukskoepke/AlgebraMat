@@ -21,7 +21,7 @@ import {
   startBoard, xAlone, xSideOf, otherSideOf, find, sideOf, combinable, unresolved, kindOf, combineTerms, sumNums, xConstantTerm,
   alonePair, lightBoard, workLine, tilt, balanced, num,
 } from '../addBothMoves.js';
-import { aloneAsk, plus, say, problemParams } from './addHelp.js';
+import { aloneAsk, plus, say, problemParams, crossOff } from './addHelp.js';
 import { reduce as reduceWalk } from '../session.js';
 import { reduceBig } from '../bigSession.js';
 import { hintAfterUndo } from '../solveit/registry.js';
@@ -49,6 +49,7 @@ function judgeMove(s, api, amount) {
   const redsBefore = s.reds;
   const next = s.board;
   api.commit(s, { rows: [{ type: 'work', work: workLine(before, amount) }, { type: 'eq', board: next }], next, label: null, helpful, lights, keepScaffold: s.scaffold });
+  if (helpful) delete s.slipPair;                                // (a wrong move keeps its pair for the picture until Undo, Build F)
   // what the addition did, in the student's numbers (Build D-2): the number next to x before the move, and the amount added
   const params = { amount: signed(amount), before: plus(sumNums(before[xSideOf(before)])), added: plus(amount) };
   s.prevBoard = next;
@@ -147,7 +148,12 @@ function startPair(s, api) {
 // of it, so one Undo takes the whole move back (the loop's rule); pairs combined outside a move are each their own step.
 function combineNow(s, api, a, b, kind, params) {
   if (!s.resolving) api.pushHistory(s);
+  const side = sideOf(s.board, a.id);
+  const had = new Set(s.board[side].map((t) => t.id));
   s.board = combineTerms(s.board, a.id, b.id);
+  // the pair beside x, while a move is resolved: if the move turns out wrong, the seesaw shows it again, its cancelled pairs crossed off
+  // (the picture spotlight, Build F, Part 3)
+  if (s.resolving && side === xSideOf(s.board)) s.slipPair = { a: a.v, b: b.v, kind, id: s.board[side].find((t) => !had.has(t.id))?.id ?? null };
   s.combining = null;
   s.combinedNote = { kind, g1: params.g1, g2: params.g2, total: params.total };
   return startPair(s, api);
@@ -156,7 +162,7 @@ function combineNow(s, api, a, b, kind, params) {
 // ---------- x alone: Count it's walks, driven by their own actions ----------
 
 // The walk stops at its answer step: the student types the value in x =, not in the walk.
-const WALK_ACTIONS = new Set(['pickSign', 'tapZone', 'tapCounter', 'check', 'choose']);
+const WALK_ACTIONS = new Set(['pickSign', 'tapZone', 'tapCounter', 'tapBox', 'check', 'choose']);
 const BIG_ACTIONS = new Set(['choose', 'chooseOp', 'chooseSign']);
 function walkStep(s, act) {
   const al = s.alone;
@@ -169,10 +175,12 @@ function walkStep(s, act) {
   }
   if (!al?.walk || !WALK_ACTIONS.has(act?.type) || al.walk.step === 'answer' || al.walk.step === 'done') return 'ignore';
   if (act.type === 'check' && al.walk.step !== 'draw') return 'ignore';
-  let w = reduceWalk(al.walk, act);
+  // crossing off (Build F, Part 3): a tapped counter takes an opposite one with it; a tapped box, every pair it can
+  let w = al.walk.step === 'cancel' && (act.type === 'tapCounter' || act.type === 'tapBox') ? crossOff(al.walk, act.zone, act.type === 'tapCounter' ? act.index : null)
+    : act.type === 'tapBox' ? al.walk : reduceWalk(al.walk, act);
   if (w === al.walk) return 'ignore';
   if (w.step === 'partyBattle' && al.kind) w = reduceWalk(w, { type: 'choose', choice: al.kind });   // already answered at the numbers
-  if (act.type === 'tapCounter' && w.zones.some((z) => z.some((c) => c.canceled)) && !s.supportsShown.includes('crossoff')) s.supportsShown.push('crossoff');
+  if ((act.type === 'tapCounter' || act.type === 'tapBox') && w.zones.some((z) => z.some((c) => c.canceled)) && !s.supportsShown.includes('crossoff')) s.supportsShown.push('crossoff');
   s.alone = { ...al, walk: w };
   return say(s, w.step === 'answer' ? 'aAloneCount' : 'aAloneCounters');
 }
@@ -206,6 +214,7 @@ const loop = createSolveLoop({
       combining: null, selected: null, alone: null, startOver: false, counterMode: false, teachFlow: false, forcedAmount: null,
       combinedNote: null,
     });
+    delete s.slipPair;
     if (s.stage === 'build') { s.stage = 'moves'; s.step = 'moves'; s.built = { constant: 0, other: 0, x: false }; s.pick = null; }
   },
   collapse: () => false,                                                       // a single-step card: the check never collapses
@@ -219,6 +228,7 @@ const loop = createSolveLoop({
   afterUndo(s) {
     const wasZero = s.zeroOther;
     Object.assign(s, { zeroOther: false, alone: null, helpCombine: false, selected: null, undoneZero: false });
+    delete s.slipPair;
     if (s.scaffold) return;
     s.menu = 'add';
     s.amountEntry = '';

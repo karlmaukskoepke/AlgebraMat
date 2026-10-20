@@ -3615,7 +3615,8 @@ body[data-input='touch'] #play.is-light #controls .btn-pad { min-width: 48px; mi
    stack's height, so nothing reflows as the seesaw, the tray or the check come and go. */
 /* The Solve it loop cards use the room a 1366 screen has (the page was 960 wide): one width on both cards and in every state. */
 .screen:has(.lb-eqcard.ui-light) { max-width: min(1280px, calc(100vw - 32px)); }
-.ui-light .sv-work.has-seesaw { grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr); }
+/* (Add keeps one split in every state, so the work never shifts sideways as the seesaw or a walk comes and goes) */
+.ui-light .sv-work.has-seesaw, .ui-light.ui-grab .sv-work { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
 .ui-light .sv-work.has-seesaw .sv-check { padding-left: 12px; display: flex; flex-direction: column; align-items: stretch; gap: 6px; }
 .ui-light .sv-work.has-seesaw .ab-boardwrap { flex: none; min-height: 0; width: 100%; max-width: calc(46vh * var(--ar, 1.1)); }
 .ui-light .sv-work.has-seesaw .ab-boardwrap > svg { flex: none; width: 100%; height: auto; }
@@ -3629,3 +3630,9 @@ body[data-input='touch'] #play.is-light #controls .btn-pad { min-width: 48px; mi
 .ui-light .sv-check > .alone-tray { position: static; width: 100%; max-width: 380px; margin: 4px auto 0; box-shadow: none; }
 @media (max-width: 760px) { .ui-light .sv-work.has-seesaw { grid-template-columns: minmax(0, 1fr); } .ui-light .sv-work.has-seesaw .sv-check { padding-left: 0; } }
 .ab-hit { fill: transparent; stroke: none; }
+
+/* ---------- Build F, Part 3: a wrong seesaw move's picture: the pair beside x, the cancelled pairs crossed off, what is left lit ---------- */
+.addboth-mat .is-slip .ab-group-box { stroke: #b5368c; stroke-width: 4; }
+.addboth-mat .bm-mark.is-left .mark { stroke: #b5368c; stroke-width: 4.5; }
+.alone-tray .alone-box { fill: transparent; stroke: #c9c3ae; stroke-width: 2; stroke-dasharray: 6 5; cursor: pointer; }
+.ui-light .sv-check > .alone-tray:not(.is-big) { max-width: 560px; }

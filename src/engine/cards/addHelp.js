@@ -6,6 +6,7 @@
 import { signed, constantOf, oppositeOf, isBattle } from '../addBoth.js';
 import { alonePair, find, otherNums } from '../addBothMoves.js';
 import { newCombineSession } from '../combineSession.js';
+import { reduce as reduceWalk } from '../session.js';
 import { makeProblem } from '../expr.js';
 import { MAX_PER_ZONE } from '../moves.js';
 import { newBigSession, reduceBig } from '../bigSession.js';
@@ -75,6 +76,35 @@ export function aloneCounters(s, say) {
     s.alone = { a: a.id, b: b.id, kind: s.alone?.kind ?? null, step: 'big', walk: null, big };
     return say(s, 'aAloneBig');
   }
-  s.alone = { a: a.id, b: b.id, kind: s.alone?.kind ?? null, step: 'counters', walk: newCombineSession(makeProblem(a.v, '+', b.v)) };
+  s.alone = { a: a.id, b: b.id, kind: s.alone?.kind ?? null, step: 'counters', walk: drawnWalk(a.v, b.v, s.alone?.kind ?? null) };
   return say(s, 'aAloneCounters');
+}
+
+// Count it's walk with the two numbers already drawn as counters (Build F, Part 3): the student answers Party or Battle (unless that was
+// answered at the numbers), crosses off the pairs, counts what is left and types x. Drawn through Count it's own reducer, unchanged.
+export function drawnWalk(a, b, kind = null) {
+  let w = newCombineSession(makeProblem(a, '+', b));
+  [a, b].forEach((v, zone) => {
+    w = reduceWalk(w, { type: 'pickSign', sign: v < 0 ? '-' : '+' });
+    for (let i = 0; i < Math.abs(v); i++) w = reduceWalk(w, { type: 'tapZone', zone });
+  });
+  w = reduceWalk(w, { type: 'check' });
+  return kind ? reduceWalk(w, { type: 'choose', choice: kind }) : w;
+}
+
+// A cross-off in the walk (Build F, Part 3): a tapped counter goes with the first opposite counter in the other box; a tapped box crosses
+// off every pair it can. Through Count it's own pair rule (select, then partner).
+export function crossOff(w, zone, index = null) {
+  if (w.step !== 'cancel') return w;
+  const partner = (c) => w.zones[1 - zone].findIndex((d) => !d.canceled && d.sign !== c.sign);
+  const one = (i) => {
+    const c = w.zones[zone][i];
+    const j = c && !c.canceled ? partner(c) : -1;
+    if (j < 0) return false;
+    w = reduceWalk(reduceWalk(w, { type: 'tapCounter', zone, index: i }), { type: 'tapCounter', zone: 1 - zone, index: j });
+    return true;
+  };
+  if (index !== null) { one(index); return w; }
+  for (let i = 0; i < w.zones[zone].length && w.step === 'cancel'; i++) one(i);
+  return w;
 }

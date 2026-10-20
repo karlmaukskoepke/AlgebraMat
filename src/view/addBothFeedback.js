@@ -95,6 +95,10 @@ const M = {
     : 'That didn’t give you fewer terms. Try adding the opposite of the number next to x. Undo it and try a different number to add to both sides.'),
   aZeroOther: () => 'The right side is 0, but x isn’t any more alone. Look at the left side. Press Undo.',
   aZeroUndone: () => 'What do we add to both sides to eliminate this?',
+  // a wrong move on the seesaw, said over its picture (Build F, Part 3): the pair beside x, what cancelled and what is left
+  aSlipPic: (p) => (p.kind === 'party'
+    ? `Party! ${p.a} and ${p.b} join: now ${p.sum} is beside x, more than before. Press Undo.`
+    : `Battle! ${p.a} and ${p.b}: ${p.pairs} ${p.pairs === 1 ? 'pair cancels' : 'pairs cancel'} (crossed off), but ${p.sum} is still beside x. Press Undo.`),
   aRed3: (p) => (p.before ? `Adding to both sides is used to eliminate terms by adding the opposite. ${p.before} + ${p.added} did not eliminate the term. Let’s try again, or try I’m stuck.`
     : 'That didn’t give you fewer terms. Undo it and try a different number, or try I’m stuck.'),
   aPartial: (p) => (p.before ? `${p.before} was only partially canceled by the ${p.added} you added. What value instead of ${p.added} would have completely canceled the ${p.before}?`
@@ -118,7 +122,7 @@ const M = {
   // the help at x alone (Build C, Part 3): Party/Battle at the two numbers, then x =, then Count it's counters
   aAlonePB: (p) => `${p.sum}: party or battle?`,
   aAloneRight: (p) => `${p.kind === 'party' ? 'Yes, a party: the teams join.' : 'Yes, a battle: the bigger team wins.'} Now type x.`,
-  aAloneCounters: () => 'Make the two numbers with counters, cancel the pairs, and count what is left. Then type x.',
+  aAloneCounters: () => 'Here are the two numbers as counters. Cross off any + and − pairs, count what is left, then type x.',
   aAloneCount: () => 'Count what is left, then type x.',
   aStruck: (p) => `Battle! ${p.g1} and ${p.g2}: the pairs cancel. See the crossed-off pairs, then press Next.`,
   aTeachDo: (p) => `To cancel the ${p.constant} we add its opposite, ${p.opposite}, to both sides.`,

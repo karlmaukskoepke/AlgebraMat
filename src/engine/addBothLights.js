@@ -379,7 +379,7 @@ export function lightsSummary(s) {
 // ---------- the spotlight (Build C, Part 2: engine/spotlight.js) ----------
 // Which messages are errors on Add to both sides, what each lights up and its small label, and the hint after Undo: the card's
 // reminder rung for the state Undo returned to (the number next to x outlined, "What would we add to both sides to eliminate it?").
-// The scaffold (the seesaw) keeps its own messages on the line.
+// On the seesaw, a wrong move is a picture spotlight (below).
 const ADD_ERRORS = {
   // the two numbers added are lit too, and the sum (or what is left) carries the label (Build D-2)
   aRed: { target: 'xnum', label: 'got bigger', lit: ['workpair'] },
@@ -392,9 +392,24 @@ const ADD_ERRORS = {
   aWrong: { target: 'subst', clear: true },
   lxCombineWrong: { target: 'sumbox', label: 'check this' },
 };
+// A wrong move on the seesaw (Build F, Part 3): a picture spotlight. The pair that combined beside x is drawn again, its cancelled pairs
+// crossed off and what is left (or what joined) lit; the side without x is lit too. Undo, then the hint, as on the bare screen. The
+// move's verdict can come wrapped in the answer to the last Party or Battle (aKindRight).
+export const slipKey = (s) => (s.feedback?.key === 'aKindRight' ? s.feedback.params?.after?.key ?? null : s.feedback?.key ?? null);
+const SEESAW_ERRORS = {
+  aRed: { target: 'slip', label: 'got bigger', lit: ['slipOther'] },
+  aRed3: { target: 'slip', label: 'got bigger', lit: ['slipOther'] },
+  aPartial: { target: 'slip', label: 'still here', lit: ['slipOther'] },
+  aZeroOther: { target: 'slipOther', label: 'now 0', lit: ['slip'] },
+  aUndoFirstHelp: { target: 'slip', label: 'waiting for Undo', lit: ['slipOther'] },
+};
+function seesawError(s) {
+  if (!s.needUndo || s.combining || s.sub || s.stage !== 'moves') return null;
+  return SEESAW_ERRORS[slipKey(s)] ?? null;
+}
 export const ADD_SPOT = {
-  error: (s) => (s.scaffold ? null : ADD_ERRORS[s.feedback?.key] ?? null),
-  keepsReds: (s) => ['aRed', 'aRed3', 'aZeroOther', 'lxZero', 'aPartial'].includes(s.feedback?.key),
+  error: (s) => (s.scaffold ? seesawError(s) : ADD_ERRORS[s.feedback?.key] ?? null),
+  keepsReds: (s) => ['aRed', 'aRed3', 'aZeroOther', 'lxZero', 'aPartial'].includes(slipKey(s)),
   startOverAt: 3,
   clear: (s) => { s.entry = ''; s.sub = null; },
   // the hint after Undo is the registry's, for the shape Undo returned to (engine/solveit/rungs/add.js): the reminder at S1 (the opposite

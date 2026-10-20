@@ -9,17 +9,19 @@ const run = (s, ...a) => a.reduce(reduceAddBoth, s);
 const typed = (text) => [...text].map((ch) => (/\d/.test(ch) ? { type: 'digit', digit: Number(ch) } : { type: 'toggleSign' }));
 const cnt = (act) => ({ type: 'cnt', act });
 const alone = () => run(newAddBoth(makeAddBoth('x+a', 8, 3), { level: 2 }), { type: 'choose', move: 'add' }, ...typed('-8'), { type: 'go' });   // x = 11 + −8
-const draw = (s, sign, zone, n) => run(s, cnt({ type: 'pickSign', sign }), ...Array(n).fill(cnt({ type: 'tapZone', zone })));
 
 describe('the counters walk at x = 11 + −8', () => {
-  it('runs Count it\'s walk on the two numbers: draw, Party/Battle (skipped once answered), cancel, then x = is typed', () => {
+  it('runs Count it\'s walk on the two numbers, drawn (Build F, Part 3): Party/Battle (skipped once answered), the student crosses off, then x = is typed', () => {
     let s = run(alone(), { type: 'stuck' }, { type: 'kind', value: 'battle' }, { type: 'stuck' });
-    expect(s.alone.walk.step).toBe('draw');
-    s = draw(draw(s, '+', 0, 11), '-', 1, 8);
-    s = run(s, cnt({ type: 'check' }));
-    expect(s.alone.walk.step).toBe('cancel');                                           // Battle was answered at the numbers
-    for (let k = 0; k < 8; k++) s = run(s, cnt({ type: 'tapCounter', zone: 0, index: k }), cnt({ type: 'tapCounter', zone: 1, index: k }));
+    expect([s.alone.walk.step, s.alone.walk.zones.map((z) => z.length)]).toEqual(['cancel', [11, 8]]);   // Battle was answered at the numbers
+    const crossed = (q) => q.alone.walk.zones.map((z) => z.filter((c) => c.canceled).length);
+    s = run(s, cnt({ type: 'tapCounter', zone: 1, index: 0 }));                         // a counter: it and an opposite one
+    expect([crossed(s), s.alone.walk.step]).toEqual([[1, 1], 'cancel']);
+    expect(run(s, cnt({ type: 'tapCounter', zone: 1, index: 0 }))).toBe(s);             // a crossed-off counter: nothing
+    s = run(s, cnt({ type: 'tapBox', zone: 0 }));                                       // a whole box: every pair it can
+    expect(crossed(s)).toEqual([8, 8]);                                                 // crossed off, and still there
     expect([s.alone.walk.step, s.feedback.key, s.entry]).toEqual(['answer', 'aAloneCount', '']);   // never the value
+    expect(run(s, cnt({ type: 'tapBox', zone: 0 }))).toBe(s);                           // nothing left to cross off
     expect(run(s, cnt({ type: 'digit', digit: 3 }))).toBe(s);                         // the value goes in x =, not the walk
     s = run(s, ...typed('3'), { type: 'check' }, { type: 'placeValue' }, { type: 'nextLine' }, { type: 'nextLine' });
     expect(s.stage).toBe('done');
@@ -31,8 +33,7 @@ describe('the counters walk at x = 11 + −8', () => {
     let s = run(alone(), { type: 'teach' });
     expect(s.alone.step).toBe('pb');                                                    // Build D: the bubble at the numbers first
     s = run(s, { type: 'teach' });
-    s = run(draw(draw(s, '+', 0, 11), '-', 1, 8), cnt({ type: 'check' }));
-    expect(s.alone.walk.step).toBe('partyBattle');
+    expect(s.alone.walk.step).toBe('partyBattle');                                      // drawn, then the walk's own question
     expect(run(s, cnt({ type: 'choose', choice: 'battle' })).alone.walk.step).toBe('cancel');
   });
   it('numbers past Count it\'s 12 a side get Count it\'s big-number walk (Build D): the add or subtract and the sign, never the value', () => {

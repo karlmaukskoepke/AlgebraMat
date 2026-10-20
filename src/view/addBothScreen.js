@@ -19,7 +19,7 @@ import { productLabels, needsFlip } from '../engine/distributeDrill.js';
 import { spotOf } from '../engine/spotlight.js';
 import { lightsFeedbackText } from './addBothLightsFeedback.js';
 import { spotlightLayer, findSolveTarget } from './spotlight.js';
-import { boardBlock, trayFor, html } from './addBothMat.js';
+import { boardBlock, trayFor, html, slipShown } from './addBothMat.js';
 import { narrowPanel } from './narrowPanel.js';
 import { multiplyOptions } from './multiplyOptions.js';
 import { forwardButton, srLine, notePopup, substBlock as sharedSubstBlock, FORCED_TEXT, FIRST_TEXT, placeText } from './solveScreen.js';
@@ -55,10 +55,17 @@ const NUDGE = {
   lxXCross: 'newest', dxTapMinusFirst: 'newest', dxGroupCross: 'newest',
 };
 
+// A wrong seesaw move's words, from its picture's numbers (Build F, Part 3).
+function slipFeedback(s) {
+  const { a, b, kind } = s.slipPair;
+  const pairs = kind === 'party' ? 0 : Math.min(Math.abs(a), Math.abs(b));
+  return { key: 'aSlipPic', params: { a: signed(a), b: signed(b), sum: signed(a + b), pairs, kind } };
+}
+
 function popups(s, wrap) {
   const sp = s.drill ? null : spotOf(s, ADD_SPOT);
   const o = { root: wrap, find: findSolveTarget, undo: '.lx-undo', help: true, moveSel: (m) => `[data-move="${m}"]`, work: '.lb-main' };
-  if (sp) { wrap.append(spotlightLayer(sp, { ...o, text: lightsFeedbackText(s.feedback) })); return; }
+  if (sp) { wrap.append(spotlightLayer(sp, { ...o, text: lightsFeedbackText(sp.kind === 'error' && sp.target === 'slip' && slipShown(s) ? slipFeedback(s) : s.feedback) })); return; }
   if (introOpen(s)) {
     const lit = ['newest', 'panel', 'forward', ...(s.ui?.preview ? ['preview'] : [])];
     wrap.append(spotlightLayer({ kind: 'intro', lit }, { ...o, text: FORCED_TEXT }));
@@ -496,8 +503,9 @@ function panel(s) {
 }
 
 // Count it's counters walk on the two numbers at x alone, in a tray in the right-hand space beside the work (Build F, Part 2; it was
-// an overlay above the numbers): its counter zones stand over the two numbers, as on Count it's Mat. The walk's own palette is left behind; the tray has only what the walk needs here: + and −
-// to draw, Check for the drawing, Party / Battle if it was not answered at the numbers. Counters are tapped on the Mat to cancel.
+// an overlay above the numbers): its counter zones stand over the two numbers, as on Count it's Mat. The counters come drawn (Build F,
+// Part 3); the tray has only what the walk needs here: Party / Battle if it was not answered at the numbers, then the pairs crossed off
+// on the Mat, then the count. (+, − and Check stay for a walk that starts at the drawing.)
 // Numbers past the counters' limit (Build D, Part 5): Count it's big-number walk in the same tray, without counters: Party or Battle,
 // Add or Subtract, the sign; then the value is typed in x = (the walk never writes it).
 function bigTray(s) {
@@ -526,10 +534,20 @@ function aloneTray(s) {
     tools.append(html('button', 'btn btn-party', ['Party!'], { type: 'button', 'data-action': 'cntChoose', 'data-value': 'party' }),
       html('button', 'btn btn-battle', ['Battle!'], { type: 'button', 'data-action': 'cntChoose', 'data-value': 'battle' }));
   }
-  // only the counter zones of Count it's Mat: the two numbers themselves are right under the tray, in the equation
   const mat = renderCountersMat(w, {});
   mat.setAttribute('viewBox', '100 44 500 226');           // the counter zones over the two numbers, as on Count it's Mat
-  return html('div', 'alone-tray', [mat, html('p', 'alone-caption', [w.step === 'answer' ? 'Count who is left. Type it in x =.' : countersText(w.feedback)]), tools], { role: 'group', 'aria-label': 'Counters for the two numbers' });
+  // crossing off (Build F, Part 3): a tap on a counter crosses off a pair, a tap on a box every pair it can; crossed-off counters stay
+  if (w.step === 'cancel') {
+    for (const [zone, cx] of [[0, 210], [1, 490]]) {
+      const box = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+      Object.entries({ x: cx - 104, y: 50, width: 208, height: 160, rx: 12, class: 'alone-box', 'data-action': 'cntBox', 'data-box': zone, role: 'button', 'aria-label': 'Cross off every pair this box can' })
+        .forEach(([k, v]) => box.setAttribute(k, v));
+      mat.prepend(box);
+    }
+  }
+  const caption = w.step === 'cancel' ? 'Cross off the pairs: tap a counter, or a whole box.'
+    : w.step === 'answer' ? (w.choice === 'party' ? 'Count them all. Type it in x =.' : 'Count who is left. Type it in x =.') : countersText(w.feedback);
+  return html('div', 'alone-tray', [mat, html('p', 'alone-caption', [caption]), tools], { role: 'group', 'aria-label': 'Counters for the two numbers' });
 }
 
 export function renderAddBothScreen(s) {
