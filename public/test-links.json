@@ -1,6 +1,138 @@
 {
-  "_about": "The test-links page (test-links.html) reads this list: Karl's change list. Live = on the site for everyone. Testing = behind a flag, waiting for Karl to keep or retire it. Retired = deleted. Every build adds or updates its entries (CLAUDE.md, Working with Karl). Each entry is a name, one plain sentence (`about`) and, for Live and Testing, its buttons. A button's `query` is the part after the address: card, level, seed, flags, sign-in skipped. `level` in a link is the saved level number (Add to both sides and Divide it: link level 2 is shown as Level 1). `reset: true` clears this browser's progress first; `look` is one sentence on what to look for; `notLive` says plainly why a link won't work on the live site.",
+  "_about": "The test-links page (test-links.html) reads this list: Karl's change list. `checks` is the Features to check section at the top: one item per new feature (id, name, build, one link, numbered steps, what you should see), written from the real code and walked through with tests/features/walk.mjs before a build is called finished; the ticks live only in Karl's browser, and an item stays here until Karl has ticked it. The rest of the page: Live = on the site for everyone. Testing = behind a flag, waiting for Karl to keep or retire it. Retired = deleted. Every build adds or updates its entries (CLAUDE.md, Working with Karl). Each entry is a name, one plain sentence (`about`) and, for Live and Testing, its buttons. A button's `query` is the part after the address: card, level, seed, flags, sign-in skipped. `level` in a link is the saved level number (Add to both sides and Divide it: link level 2 is shown as Level 1). `reset: true` clears this browser's progress first; `look` is one sentence on what to look for; `notLive` says plainly why a link won't work on the live site.",
   "updated": "2026-10-20",
+  "checks": [
+    {
+      "id": "f-no-0-1-minus1",
+      "name": "Add never gives an answer of 0, 1 or −1",
+      "build": "Build F",
+      "link": {
+        "label": "Open Add to both sides · Level 2",
+        "query": "?pack=add-both&level=3&seed=7&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Add to both sides, Level 2, on x − 3 = −1.",
+        "Click the top box in the panel on the right (the one that looks like + ▢ = + ▢: that is Add). Type 3 and press Enter.",
+        "Type 2 and press Enter five times. The next problem comes up.",
+        "Do the other four problems the same way: work out the answer in your head, click Add, type the number that cancels the one beside x, press Enter, type the answer, press Enter five times."
+      ],
+      "see": "The five problems are x − 3 = −1, x − 4 = 6, x − 6 = −9, x − 2 = 5 and x − 5 = −7, and their answers (2, 10, −3, 7, −2) are never 0, 1 or −1. The first one used to be x − 4 = −3, whose answer is 1; the −1 in the first problem is on the right side of the equation, and that is fine."
+    },
+    {
+      "id": "f-seesaw-beside-work",
+      "name": "The seesaw opens beside the work, never over it",
+      "build": "Build F",
+      "link": {
+        "label": "Open Add to both sides · Level 1",
+        "query": "?pack=add-both&level=2&seed=7&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Add to both sides, Level 1, on x + 8 = 11.",
+        "Click I’m stuck once (a hint asks what to add), then click I’m stuck a second time. The seesaw appears, with “Build the equation” above it.",
+        "Look at the screen: the equation is at the top left, the seesaw is on the right, and x = with the green button sits below both.",
+        "Now make your window act like a shorter laptop: hold Ctrl and press + twice (Command and + on a Mac). That zooms to 125%. Look again at the same things. Press Ctrl and 0 (Command and 0) to go back."
+      ],
+      "see": "At both heights the seesaw sits in the space to the right of the equation. Nothing is covered, and x = and the green button are still on the screen without scrolling."
+    },
+    {
+      "id": "f-divide-hint-after-undo",
+      "name": "Divide it: the hint after Undo names the idea with the real numbers",
+      "build": "Build F",
+      "link": {
+        "label": "Open Divide it · Level 2",
+        "query": "?pack=divide-it&level=3&seed=7&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Divide it, Level 2, on 5x = −15.",
+        "Click the box after x =, type 4 and press Enter.",
+        "Drag the 4 from the x = box onto the x in the equation.",
+        "Press Next twice. Wait two seconds: the screen greys and says the equation is not balanced.",
+        "Press Undo (bottom left)."
+      ],
+      "see": "The three Multiply options open with the fraction one (▢ over ▢) lit, and the message reads “To get one x, take a fraction of both sides: one of the 5 x boxes is ⅕.” The green button says Got it."
+    },
+    {
+      "id": "f-seesaw-wrong-move",
+      "name": "After a wrong move on the seesaw, the picture shows what cancelled and what did not",
+      "build": "Build F",
+      "link": {
+        "label": "Open Add to both sides · Level 3",
+        "query": "?pack=add-both&level=4&seed=7&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Add to both sides, Level 3, on x + 8 = −4.",
+        "Click I’m stuck twice. The seesaw appears.",
+        "Type −3 (the minus key, then 3) and click the green Go.",
+        "It asks Party or Battle for 8 and −3. Click Battle!, then click the green Next.",
+        "It asks again, for −4 and −3. Click Party!",
+        "Wait two seconds.",
+        "Press Undo."
+      ],
+      "see": "After the wait the screen greys. On the seesaw the +8 and the −3 each show three pairs crossed off, with the 5 left over marked “still here”, the other side is lit, and the message reads “Battle! 8 and −3: 3 pairs cancel (crossed off), but 5 is still beside x. Press Undo.” Undo pulses with an arrow. After Undo, a hint points at the +8 and asks what to add."
+    },
+    {
+      "id": "f-cross-off-at-x-alone",
+      "name": "At x = −3 + 5: choose Party or Battle, cross off pairs, count, type x",
+      "build": "Build F",
+      "link": {
+        "label": "Open Add to both sides · Level 2",
+        "query": "?pack=add-both&level=3&seed=285&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Add to both sides, Level 2, on x − 5 = −3.",
+        "Click the top box in the panel on the right (Add). Type 5 and press Enter. The work now reads x = −3 + 5.",
+        "Click I’m stuck. It asks “−3 + 5: party or battle?” Click I’m stuck again. Counters appear on the right: three − under the −3 and five + under the 5, with Party! and Battle! under them. Click Battle!",
+        "Tap one − counter. It and one + counter get an orange line through them.",
+        "Tap an empty part inside the dotted box around the + counters (not on a counter). Every pair that can go is crossed off.",
+        "Count what is left, type it in x = (2) and press Enter."
+      ],
+      "see": "The crossed-off counters stay on the screen, with the lines through them, and two + counters are left. After you type 2 the check begins: “Let’s check that x = 2 is the solution.”"
+    },
+    {
+      "id": "student-add",
+      "name": "Play it like a student: Add to both sides",
+      "build": "Build G",
+      "link": {
+        "label": "Open Add to both sides · Level 3",
+        "query": "?pack=add-both&level=4&seed=7&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Add to both sides, Level 3, on x + 8 = −4. You are going to play a student who gets things wrong.",
+        "Mistake 1, ignoring the screen: touch nothing for 10 seconds. A good response is a gentle flashing of I’m stuck, with nothing else changing and nothing taken away.",
+        "Mistake 2, a wrong answer from the start: click the box after x =, type −4 (copying the number on the right) and press Enter. Drag the −4 onto the x in the equation. Press Next twice and wait two seconds. A good response shows (−4) + 8 = −4 turn into 4 = −4, says the equation is not balanced, and leaves only Undo to press. Press Undo, then Got it.",
+        "Mistake 3, a move that makes it worse: type 8 (the box under the equation is open) and click the green Go. Wait two seconds. A good response marks the 16 “got bigger”, explains with your own numbers (+8 + +8 did not eliminate the term), and pulses Undo. Press Undo, then Got it.",
+        "Mistake 4, a move that only half cancels: type −5 and click Go. Wait two seconds. A good response marks the leftover 3 “still here” and says +8 was only partially canceled by the −5 you added. Press Undo, then Got it.",
+        "Mistake 5, pressing I’m stuck again and again: press it four times. A good response gives a bigger clue each time (look at the +8, then which number cancels it, then choose Add, then “−8 cancels the +8. Add it to both sides yourself.”) and still leaves the move to you."
+      ],
+      "see": "Every mistake gets a short message built from the student’s own numbers, and there is always one clear thing to press next. Nobody is left stuck, and nothing gives the answer away."
+    },
+    {
+      "id": "student-divide",
+      "name": "Play it like a student: Divide it",
+      "build": "Build G",
+      "link": {
+        "label": "Open Divide it · Level 2",
+        "query": "?pack=divide-it&level=3&seed=7&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Divide it, Level 2, on 5x = −15. You are going to play a student who gets things wrong.",
+        "Mistake 1, ignoring the screen: touch nothing for 10 seconds. A good response is a gentle flashing of I’m stuck, with nothing else changing and nothing taken away.",
+        "Mistake 2, a wrong answer from the start: click the box after x =, type −15 (copying the number on the right) and press Enter. Drag the −15 onto the x. Press Next twice and wait two seconds. A good response shows 5 × (−15) = −15 turn into −75 = −15, says the equation is not balanced, and leaves only Undo to press. Press Undo, then Got it.",
+        "Mistake 3, a whole number that does not help: the three Multiply options are already open, so click the first one (▢ × ( )), type 5 and click the green Go. A good response says “5 × (5x) makes 25x: still not one x. Try a fraction.” in a small note, and nothing is locked.",
+        "Mistake 4, flipping the sign: click Multiply, click the −1 × ( ) option and click Go. A good response says the sign changes but there are still 5 x’s, and points to a fraction.",
+        "Mistake 5, a fraction that does not split: click Multiply, click the ▢ over ▢ option, type 1 and then 2, and click Go. Wait two seconds. A good response says it doesn’t split (5 boxes can’t make 2 equal groups, and −15 can’t be shared into 2 equal groups), and pulses Undo. Press Undo: it shows the five x boxes and the fractions to choose from. Press Got it.",
+        "Mistake 6, pressing I’m stuck: press it twice. A good response gives a bigger clue the second time (first the 5 boxes and 15 counters, then “take ⅕ of both sides”) and still leaves the move to you."
+      ],
+      "see": "Every mistake gets a short message built from the student’s own numbers, and there is always one clear thing to press next. Nobody is left stuck, and nothing gives the answer away."
+    }
+  ],
   "sections": [
     {
       "title": "Live",

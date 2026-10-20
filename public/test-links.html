@@ -9,8 +9,9 @@
       href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;600;700;800&display=swap"
       rel="stylesheet"
     />
-    <!-- Karl's change list: Live, Testing, Retired. One click opens the app on the right card, level and seed (CLAUDE.md,
-         Working with Karl). Not linked from the app. The entries live in test-links.json; every build adds or updates its own. -->
+    <!-- Karl's change list: Features to check (what is new and not yet looked at), then Live, Testing, Retired. One click opens the app
+         on the right card, level and seed (CLAUDE.md, Working with Karl). Not linked from the app. The entries live in
+         test-links.json; every build adds or updates its own. -->
     <style>
       :root { --ink: #1d1d1d; --muted: #5d6470; --paper: #fff; --line: #d5dee9; --warn: #9a4a00; }
       * { box-sizing: border-box; }
@@ -37,13 +38,32 @@
       .url { margin: 0; color: var(--muted); font-size: 13px; overflow-wrap: anywhere; }
       .note { color: var(--muted); font-size: 16px; }
       #done { font-weight: 600; }
+      /* Features to check */
+      .features h2 { margin-top: 28px; }
+      .tally { margin: 0 0 12px; font-size: 20px; font-weight: 600; }
+      .small-btn { padding: 10px 16px; font-size: 17px; }
+      .check { display: flex; flex-direction: column; gap: 12px; margin: 20px 0; padding: 18px 20px; border: 3px solid var(--ink); border-radius: 14px; }
+      .check-head { display: flex; align-items: flex-start; gap: 14px; }
+      .check-head h3 { margin: 0; flex: 1; }
+      .tick { flex: none; width: 32px; height: 32px; margin: 2px 0 0; accent-color: var(--ink); cursor: pointer; }
+      .chip { display: inline-block; margin-left: 10px; padding: 1px 12px; border: 2px solid var(--ink); border-radius: 999px; font-size: 15px; font-weight: 700; white-space: nowrap; vertical-align: middle; }
+      .check .go { align-self: flex-start; }
+      .steps { margin: 0; padding-left: 30px; }
+      .steps li { margin: 8px 0; padding-left: 4px; }
+      .see { margin: 0; padding: 10px 16px; border-left: 6px solid var(--ink); background: #f5f7fa; font-size: 18px; }
+      .see strong { font-weight: 700; }
+      .check.is-done { border-color: var(--line); }
+      .check.is-done h3 { color: var(--muted); }
+      .checked-group { margin-top: 22px; }
+      .checked-group summary { cursor: pointer; font-weight: 700; font-size: 22px; padding: 6px 0; }
     </style>
   </head>
   <body>
     <main>
       <h1>Changes</h1>
-      <p class="intro"><strong>Live</strong> is on the site for everyone. <strong>Testing</strong> is waiting for you: tell the design chat which to keep (it becomes the normal way, no flag) or retire (it is deleted). <strong>Retired</strong> is gone. Every button opens the app already on that screen, sign-in skipped.</p>
-      <div class="bar">
+      <p class="intro"><strong>Features to check</strong> comes first: what is new and not yet looked at, with exact steps. Below it, <strong>Live</strong> is on the site for everyone. <strong>Testing</strong> is waiting for you: tell the design chat which to keep (it becomes the normal way, no flag) or retire (it is deleted). <strong>Retired</strong> is gone. Every button opens the app already on that screen, sign-in skipped.</p>
+      <section class="features" id="features" aria-labelledby="features-title"></section>
+      <div class="bar" style="margin-top: 36px">
         <button class="go reset" type="button" id="reset">Reset my progress</button>
         <span class="note" id="done" role="status"></span>
       </div>
@@ -69,9 +89,68 @@
       };
       const app = new URL('./', location.href);       // the app sits next to this page
 
+      // Features to check: ticks are kept in this browser only (a key of their own, so Reset my progress leaves them alone).
+      const TICKS_KEY = 'mat.checks.v1';
+      let ticks = {};
+      let canSave = true;
+      try { ticks = JSON.parse(localStorage.getItem(TICKS_KEY) || '{}') || {}; } catch { canSave = false; }
+      const saveTicks = () => {
+        try { localStorage.setItem(TICKS_KEY, JSON.stringify(ticks)); canSave = true; } catch { canSave = false; }
+      };
+      let checkedOpen = false;
+
+      function checkCard(c, done, redraw) {
+        const href = new URL(c.link.query, app).href;
+        const tick = el('input', { type: 'checkbox', className: 'tick', checked: done, id: `tick-${c.id}` });
+        tick.setAttribute('aria-label', `${c.name}: checked`);
+        tick.addEventListener('change', () => {
+          if (tick.checked) ticks[c.id] = true; else delete ticks[c.id];
+          saveTicks();
+          redraw();
+        });
+        const title = el('h3');
+        title.append(el('label', { htmlFor: tick.id }, c.name), el('span', { className: 'chip' }, c.build));
+        const go = el('a', { className: 'go', href }, c.link.label);
+        if (c.link.reset) go.addEventListener('click', () => resetProgress());           // a fresh student, then the page
+        const steps = el('ol', { className: 'steps' });
+        for (const t of c.steps) steps.append(el('li', {}, t));
+        const see = el('p', { className: 'see' });
+        see.append(el('strong', {}, 'What you should see: '), document.createTextNode(c.see));
+        const card = el('article', { className: `check${done ? ' is-done' : ''}` });
+        card.append(el('div', { className: 'check-head' }, undefined), go, el('p', { className: 'url' }, href), steps, see);
+        card.firstChild.append(tick, title);
+        return card;
+      }
+
+      function renderChecks(checks) {
+        const box = document.getElementById('features');
+        const open = checks.filter((c) => !ticks[c.id]);
+        const done = checks.filter((c) => ticks[c.id]);
+        const redraw = () => renderChecks(checks);
+        const clear = el('button', { className: 'go reset small-btn', type: 'button', id: 'clear-ticks' }, 'Clear all ticks');
+        clear.addEventListener('click', () => { ticks = {}; saveTicks(); redraw(); });
+        const tally = !checks.length ? 'Nothing to check yet.'
+          : open.length ? `${open.length} still to check${done.length ? `, ${done.length} checked` : ''}.` : `Nothing left to check: all ${done.length} are ticked.`;
+        const bar = el('div', { className: 'bar' });
+        bar.append(clear);
+        if (!canSave) bar.append(el('span', { className: 'not-live' }, 'This browser can’t save ticks, so they will be gone when you reload.'));
+        box.replaceChildren(el('h2', { id: 'features-title' }, 'Features to check'),
+          el('p', { className: 'section-about' }, 'Every new feature, with the exact steps to try it and what you should see. Tick it when you have looked. Ticks stay in this browser. Each button starts a fresh student, so the same problem comes up every time.'),
+          el('p', { className: 'tally', role: 'status' }, tally), bar);
+        for (const c of open) box.append(checkCard(c, false, redraw));
+        if (done.length) {
+          const group = el('details', { className: 'checked-group', open: checkedOpen });
+          group.addEventListener('toggle', () => { checkedOpen = group.open; });
+          group.append(el('summary', {}, `Checked (${done.length})`));
+          for (const c of done) group.append(checkCard(c, true, redraw));
+          box.append(group);
+        }
+      }
+
       fetch('test-links.json', { cache: 'no-store' })
         .then((r) => r.json())
         .then((data) => {
+          renderChecks(data.checks ?? []);
           const root = document.getElementById('groups');
           root.replaceChildren();
           const ABOUT = { Live: 'On the site for every student.', Testing: 'Behind a test switch: students don’t see these.', Retired: 'Deleted from the app.' };
