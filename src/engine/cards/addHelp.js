@@ -55,7 +55,7 @@ export function sizesOf(a, b) {
   const hi = Math.max(Math.abs(a), Math.abs(b));
   const lo = Math.min(Math.abs(a), Math.abs(b));
   const winner = Math.abs(a) >= Math.abs(b) ? a : b;
-  return { a: signed(a), b: signed(b), hi, lo, sign: winner < 0 ? '-' : '+', win: signed(winner) };
+  return { a: signed(a), b: signed(b), hi, lo, first: Math.abs(a), second: Math.abs(b), sign: winner < 0 ? '-' : '+', win: signed(winner) };   // (a party adds the sizes in the order the row reads them)
 }
 
 // 1. The question floats at the two numbers: "11 − 8: party or battle?" (recorded as the reminder, `hint`).

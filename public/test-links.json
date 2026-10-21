@@ -1,7 +1,243 @@
 {
   "_about": "The test-links page (test-links.html) reads this list: Karl's change list. `checks` is the Features to check section at the top: one item per new feature (id, name, build, one link, numbered steps, what you should see), written from the real code and walked through with tests/features/walk.mjs before a build is called finished; the ticks live only in Karl's browser, and an item stays here until Karl has ticked it. The rest of the page: Live = on the site for everyone. Testing = behind a flag, waiting for Karl to keep or retire it. Retired = deleted. Every build adds or updates its entries (CLAUDE.md, Working with Karl). Each entry is a name, one plain sentence (`about`) and, for Live and Testing, its buttons. A button's `query` is the part after the address: card, level, seed, flags, sign-in skipped. `level` in a link is the saved level number (Add to both sides and Divide it: link level 2 is shown as Level 1). `reset: true` clears this browser's progress first; `look` is one sentence on what to look for; `notLive` says plainly why a link won't work on the live site.",
-  "updated": "2026-10-20",
+  "updated": "2026-10-21",
   "checks": [
+    {
+      "id": "h-combine-wrong",
+      "name": "A wrong sum keeps the two numbers lit",
+      "build": "Build H",
+      "link": {
+        "label": "Open Add to both sides · Level 3",
+        "query": "?pack=add-both&level=4&seed=7&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Add to both sides, Level 3, on x + 8 = −4.",
+        "Click Add (the top box in the panel on the right), type −8 and click Go. The equation is now x = −4 − 8.",
+        "Press and hold on the −4, drag it onto the −8 and let go. A box asks for their sum: type 5 and press Enter (a wrong sum on purpose).",
+        "Wait two seconds."
+      ],
+      "see": "The screen goes grey and a box says −4 − 8 is not 5, with Undo pulsing. The −4 and the −8 stay bright next to the box marked “check this”: they are what the question is about."
+    },
+    {
+      "id": "h-not-balanced-add",
+      "name": "A wrong answer keeps its reason lit, and your number is blue (Add to both sides)",
+      "build": "Build H",
+      "link": {
+        "label": "Open Add to both sides · Level 3",
+        "query": "?pack=add-both&level=4&seed=7&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Add to both sides, Level 3, on x + 8 = −4.",
+        "Click the box after x =, type −4 and press Enter. Drag the −4 onto the x in the equation. A first line appears on the right: (−4) + 8 = −4.",
+        "Press Next twice, then wait two seconds. The screen goes grey and a box says the equation is not balanced.",
+        "Look at the last line on the right, 4 = −4, and the words ✗ Not balanced under it."
+      ],
+      "see": "In the first line, the −4 you dropped in is the same blue as the x it replaced. When the screen goes grey, the last line (4 = −4) and the words Not balanced stay bright and easy to read; Undo is the only button that works."
+    },
+    {
+      "id": "h-not-balanced-divide",
+      "name": "A wrong answer keeps its reason lit, and your number is blue (Divide it)",
+      "build": "Build H",
+      "link": {
+        "label": "Open Divide it · Level 2",
+        "query": "?pack=divide-it&level=3&seed=7&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Divide it, Level 2, on 5x = −15.",
+        "Click the box after x =, type 4 and press Enter. Drag the 4 onto the x in the equation. A first line appears on the right: 5 × 4 = −15.",
+        "Press Next twice, then wait two seconds. The screen goes grey and a box says the equation is not balanced.",
+        "Look at the last line on the right, 20 = −15, and the words ✗ Not balanced under it."
+      ],
+      "see": "In the first line, the 4 you dropped in is the same blue as the x it replaced. When the screen goes grey, the last line (20 = −15) and the words Not balanced stay bright and easy to read; Undo is the only button that works."
+    },
+    {
+      "id": "h-ghost-hint",
+      "name": "The faint number starts to move after 2½ seconds",
+      "build": "Build H",
+      "link": {
+        "label": "Open Add to both sides · Level 3",
+        "query": "?pack=add-both&level=4&seed=7&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Add to both sides, Level 3, on x + 8 = −4.",
+        "Click the box after x =, type −4 and press Enter. The −4 in the box now blinks: it is ready to be dragged.",
+        "Count slowly to three without touching anything.",
+        "Now drag the −4 onto the x in the equation."
+      ],
+      "see": "After about two and a half seconds a faint −4 slides from the x = box toward the x in the equation, and it keeps coming back until you drag the number yourself. Clicking the x does not put it in: only dragging does."
+    },
+    {
+      "id": "h-type-x-numbers",
+      "name": "At x = −3 + 5 the two numbers stay bright",
+      "build": "Build H",
+      "link": {
+        "label": "Open Add to both sides · Level 2",
+        "query": "?pack=add-both&level=3&seed=285&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Add to both sides, Level 2, on x + 5 = −3.",
+        "Click the top box in the panel on the right (+ ▢ = + ▢: that is Add). Type 5 and press Enter. The equation now has x alone: x = −3 + 5.",
+        "Click I’m stuck. A question floats above −3 and +5: Party or Battle?",
+        "Click Battle!"
+      ],
+      "see": "The question goes away and says “Yes, a battle: the bigger team wins. Now type x.” The −3 and the +5 stay bright and easy to read, outlined, next to the x = box that is ready for you. Only the rest of the screen is grey."
+    },
+    {
+      "id": "h-drag-preview",
+      "name": "Dragging a term shows the same grey preview on both sides",
+      "build": "Build H",
+      "link": {
+        "label": "Open Add to both sides · Level 1",
+        "query": "?pack=add-both&level=2&seed=7&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Add to both sides, Level 1, on x + 8 = 11.",
+        "Press and hold on the +8 in the equation and drag it just to the left of the x. Do not let go.",
+        "Keep holding and drag it across the = onto the right side.",
+        "Drag it back to where it started and let go."
+      ],
+      "see": "Left of the x, a grey 8 sits in the place it would land, drawn in the equation itself (before, it was a dashed empty box). On the right side a grey −8 sits where it would land. Back where it started, the 8 shows grey in its own place, and nothing changes when you let go."
+    },
+    {
+      "id": "h-slash-fraction",
+      "name": "Typing a slash turns Multiply into the fraction box",
+      "build": "Build H",
+      "link": {
+        "label": "Open Divide it · Level 2",
+        "query": "?pack=divide-it&level=3&seed=7&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Divide it, Level 2, on 5x = −15.",
+        "Click the Multiply box in the panel on the right (the second one down). Three choices open beside it. Click the first one, a single box × ( ).",
+        "Type 1, then press the / key (next to the right Shift on most keyboards), then type 5."
+      ],
+      "see": "When you press /, the single box turns into a fraction box: the 1 you typed becomes the top, the cursor jumps to the bottom, and the 5 makes ⅕ on both sides. The green button says Go."
+    },
+    {
+      "id": "h-retype-fraction",
+      "name": "A fraction box can be retyped by tapping it",
+      "build": "Build H",
+      "link": {
+        "label": "Open Divide it · Level 2",
+        "query": "?pack=divide-it&level=3&seed=7&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Divide it, Level 2, on 5x = −15.",
+        "Click the Multiply box in the panel on the right. Click the second choice, the one with a bar between two boxes. Type 1, then 5. A small note under the fraction says “Tap a box to retype it.”",
+        "Click the top box of the fraction.",
+        "Click the bottom box of the fraction."
+      ],
+      "see": "Clicking the top box empties it and puts the blinking cursor in it. Clicking the bottom box empties that one too, and the cursor moves there. The other box keeps its number until you click it."
+    },
+    {
+      "id": "h-enter-go",
+      "name": "Enter does the move, and never gives another clue",
+      "build": "Build H",
+      "link": {
+        "label": "Open Add to both sides · Level 1",
+        "query": "?pack=add-both&level=2&seed=7&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Add to both sides, Level 1, on x + 8 = 11.",
+        "Click I’m stuck once. A hint asks what to add to both sides, and a box is open for the number.",
+        "Type −8 and press Enter.",
+        "Press Enter again."
+      ],
+      "see": "The first Enter does the move: x + 8 − 8 = 11 − 8 appears, and x is alone. The second Enter does nothing. Before this change, Enter after I’m stuck gave the next clue and the second Enter wrote −8 over your own number."
+    },
+    {
+      "id": "h-counters-words",
+      "name": "The counters at x = −3 + 5 no longer say “Nice drawing!”",
+      "build": "Build H",
+      "link": {
+        "label": "Open Add to both sides · Level 2",
+        "query": "?pack=add-both&level=3&seed=285&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Add to both sides, Level 2, on x + 5 = −3.",
+        "Click Add (the top box in the panel on the right), type 5 and press Enter. Click I’m stuck, then click I’m stuck again. The two numbers arrive as counters on the right.",
+        "Read the words under the counters."
+      ],
+      "see": "The words under the counters say “Party or Battle?”, with no “Nice drawing!”: you did not draw them, so the sentence no longer praises a drawing."
+    },
+    {
+      "id": "h-seesaw-mirrors-check",
+      "name": "The seesaw shows the check, line by line",
+      "build": "Build H",
+      "link": {
+        "label": "Open Add to both sides · Level 3",
+        "query": "?pack=add-both&level=4&seed=7&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Add to both sides, Level 3, on x + 8 = −4.",
+        "Click I’m stuck twice. The seesaw opens on the right. Type −8 and click Go. Click Battle!, then Next, then Party!.",
+        "Type −12 and press Enter. The seesaw now shows the original equation, x + 8 = −4, with an empty x box. Drag the −12 onto that x box.",
+        "Press Next, then Next again."
+      ],
+      "see": "When the −12 lands, the x box becomes 12 minus counters in a blue box with a small x above it, beside 8 plus counters, and the other side has 4 minus counters, each line written below it. After the next press, the left side is 4 minus counters and the beam is level. The last words are ✓ Balanced, and the seesaw says Balanced too. A check done beside the equation (without I’m stuck) is drawn as before."
+    },
+    {
+      "id": "h-seesaw-mirrors-big",
+      "name": "On the seesaw, a number over 12 is one labelled box",
+      "build": "Build H",
+      "link": {
+        "label": "Open Add to both sides · Level 5",
+        "query": "?pack=add-both&level=6&seed=6&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Add to both sides, Level 5, on x − 2 = −15.",
+        "Click I’m stuck twice. Type 2 and click Go. Click Battle!, then Next. Click Battle! again for −15 and 2.",
+        "Type −13 and press Enter. Drag the −13 onto the x box on the seesaw.",
+        "Press Next, then Next again."
+      ],
+      "see": "The x box turns into one box that says −13, with a small x above it (not thirteen counters), beside 2 plus counters; the other side is one box that says −15. The last line is balanced, and the beam is level."
+    },
+    {
+      "id": "h-big-battle",
+      "name": "At big numbers, a battle asks who won, then tells you what to subtract",
+      "build": "Build H",
+      "link": {
+        "label": "Open Add to both sides · Level 5",
+        "query": "?pack=add-both&level=6&seed=6&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Add to both sides, Level 5, on x − 2 = −15.",
+        "Click Add (the top box in the panel on the right), type 2 and press Enter. The equation is now x = −15 + 2.",
+        "Click I’m stuck, then click Battle!. Two small boxes float side by side above −15 and +2.",
+        "In the left box (Who won? −15 or 2?) click the big + first, then the big −.",
+        "Type −13 and press Enter."
+      ],
+      "see": "The right box (Subtract 15 − 2 to find how many are left) is greyed until the left one is answered. The big + gets “Not that one”; the big − is right and wakes the right box up. −15 and 2 stay bright the whole time. Nothing is ever written in x = for you: you type the −13."
+    },
+    {
+      "id": "h-big-party",
+      "name": "At big numbers, a party only asks you to add",
+      "build": "Build H",
+      "link": {
+        "label": "Open Add to both sides · Level 5",
+        "query": "?pack=add-both&level=6&seed=198&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Add to both sides, Level 5, on x + 13 = −2.",
+        "Click Add (the top box in the panel on the right), type −13 and press Enter. The equation is now x = −2 − 13.",
+        "Click I’m stuck, then click Party!."
+      ],
+      "see": "One small box floats above −2 and −13, which stay bright: “Add 2 + 13 to find how many in all.” There is no question about who won. Nothing is written in x = for you: you type the −15."
+    },
     {
       "id": "f-no-0-1-minus1",
       "name": "Add never gives an answer of 0, 1 or −1",
@@ -150,6 +386,162 @@
               "label": "Save codes (teacher only)",
               "query": "?codes=1&nosignin=1",
               "look": "With ?codes=1 the Save code and Enter code buttons come back, for moving a student by hand."
+            }
+          ]
+        },
+        {
+          "name": "Build H, Part 1: the quick fixes (2026-10-21)",
+          "about": "Not balanced keeps its reason lit; the value you drop in is blue; each x already filled gets a small green check (for later cards with two x’s); the faint number starts after 2½ seconds; “Now type x” keeps the two numbers bright; a dragged term shows the same grey preview on both sides; a typed / turns Multiply into the fraction box; fraction boxes are retyped by tapping; Enter never gives another clue; and “Nice drawing!” is gone from the counters you did not draw. Each one is a Features to check item at the top of this page.",
+          "links": [
+            {
+              "label": "Add · a wrong answer",
+              "query": "?pack=add-both&level=4&seed=7&nosignin=1",
+              "reset": true,
+              "look": "Type −4, Enter, drag it onto x, press Next twice: the last line 4 = −4 and “Not balanced” stay bright, the −4 in the first line is blue."
+            },
+            {
+              "label": "Divide it · a wrong answer",
+              "query": "?pack=divide-it&level=3&seed=7&nosignin=1",
+              "reset": true,
+              "look": "Type 4, Enter, drag it onto x, press Next twice: 20 = −15 and “Not balanced” stay bright."
+            },
+            {
+              "label": "Divide it · a slash",
+              "query": "?pack=divide-it&level=3&seed=7&nosignin=1",
+              "reset": true,
+              "look": "Multiply, the first choice, type 1, press /, type 5: the fraction ⅕. Click a box in the fraction: it empties and has the cursor."
+            }
+          ]
+        },
+        {
+          "name": "Build H, Part 2: the seesaw mirrors the check (2026-10-21)",
+          "about": "When the seesaw was opened by I’m stuck or Teach me, checking an answer redraws the seesaw as the original equation and draws each line of the check on it: the x box becomes counters in a box with a small x above it (one labelled box past 12), and the last line is balanced. A check beside the equation, without I’m stuck, is unchanged.",
+          "links": [
+            {
+              "label": "Level 3 · the check on the seesaw",
+              "query": "?pack=add-both&level=4&seed=7&nosignin=1",
+              "reset": true,
+              "look": "I’m stuck twice, type −8, Go, Battle!, Next, Party!, type −12, Enter, drag the −12 onto the x box on the seesaw, then Next twice."
+            },
+            {
+              "label": "Level 5 · a number over 12",
+              "query": "?pack=add-both&level=6&seed=6&nosignin=1",
+              "reset": true,
+              "look": "x − 2 = −15: I’m stuck twice, 2, Go, Battle!, Next, Battle!, type −13, Enter, drag it onto the seesaw’s x: one box that says −13, with a small x above it."
+            }
+          ]
+        },
+        {
+          "name": "Build H, Part 3: big numbers at x alone (2026-10-21)",
+          "about": "Past 12 there are no counters. After the right Party or Battle at the two numbers, a battle shows two small boxes side by side above them (Who won? with a big + and −, then the subtraction to do, greyed until the first is answered); a party shows only the addition. The numbers stay bright; you type x.",
+          "links": [
+            {
+              "label": "A battle at big numbers",
+              "query": "?pack=add-both&level=6&seed=6&nosignin=1",
+              "reset": true,
+              "look": "Click Add, type 2, Enter, I’m stuck, Battle!: “Who won? −15 or 2?” and “Subtract 15 − 2 to find how many are left.”"
+            },
+            {
+              "label": "A party at big numbers",
+              "query": "?pack=add-both&level=6&seed=198&nosignin=1",
+              "reset": true,
+              "look": "Click Add, type −13, Go, I’m stuck, Party!: “Add 2 + 13 to find how many in all.” only."
+            }
+          ]
+        },
+        {
+          "name": "Build H screenshots (2026-10-21)",
+          "about": "The acceptance pictures at 1366×768 and 1366×650 (they open on GitHub, once this build is on main). The report is docs/build-h/BUILD-H-REPORT.md.",
+          "links": [
+            {
+              "label": "Not balanced, lit (Add) · 1366×768",
+              "query": "https://github.com/karlmaukskoepke/AlgebraMat/blob/main/docs/build-h/h-not-balanced-add-768.png",
+              "look": "A picture only: nothing to click."
+            },
+            {
+              "label": "Not balanced, lit (Divide) · 1366×650",
+              "query": "https://github.com/karlmaukskoepke/AlgebraMat/blob/main/docs/build-h/h-not-balanced-divide-650.png",
+              "look": "A picture only: nothing to click."
+            },
+            {
+              "label": "Green checks above two x’s (a test state)",
+              "query": "https://github.com/karlmaukskoepke/AlgebraMat/blob/main/docs/build-h/two-x-checks.png",
+              "look": "A picture only: nothing to click."
+            },
+            {
+              "label": "The faint number on its way (after 2½ seconds)",
+              "query": "https://github.com/karlmaukskoepke/AlgebraMat/blob/main/docs/build-h/h-ghost-hint.png",
+              "look": "A picture only: nothing to click."
+            },
+            {
+              "label": "−3 + 5 stays bright after Battle · 1366×768",
+              "query": "https://github.com/karlmaukskoepke/AlgebraMat/blob/main/docs/build-h/h-type-x-numbers-768.png",
+              "look": "A picture only: nothing to click."
+            },
+            {
+              "label": "The grey preview, left side",
+              "query": "https://github.com/karlmaukskoepke/AlgebraMat/blob/main/docs/build-h/h-drag-preview-left.png",
+              "look": "A picture only: nothing to click."
+            },
+            {
+              "label": "The grey preview, right side",
+              "query": "https://github.com/karlmaukskoepke/AlgebraMat/blob/main/docs/build-h/h-drag-preview-right.png",
+              "look": "A picture only: nothing to click."
+            },
+            {
+              "label": "1, /, 5 makes ⅕ · 1366×768",
+              "query": "https://github.com/karlmaukskoepke/AlgebraMat/blob/main/docs/build-h/h-slash-fraction-768.png",
+              "look": "A picture only: nothing to click."
+            },
+            {
+              "label": "A fraction box cleared by a click",
+              "query": "https://github.com/karlmaukskoepke/AlgebraMat/blob/main/docs/build-h/h-retype-fraction-top.png",
+              "look": "A picture only: nothing to click."
+            },
+            {
+              "label": "A wrong sum keeps its two numbers lit · 1366×768",
+              "query": "https://github.com/karlmaukskoepke/AlgebraMat/blob/main/docs/build-h/h-combine-wrong-768.png",
+              "look": "A picture only: nothing to click."
+            },
+            {
+              "label": "The seesaw, first line of the check",
+              "query": "https://github.com/karlmaukskoepke/AlgebraMat/blob/main/docs/build-h/h-seesaw-mirrors-check-1.png",
+              "look": "A picture only: nothing to click."
+            },
+            {
+              "label": "The seesaw, balanced at the last line · 1366×768",
+              "query": "https://github.com/karlmaukskoepke/AlgebraMat/blob/main/docs/build-h/h-seesaw-mirrors-check-768.png",
+              "look": "A picture only: nothing to click."
+            },
+            {
+              "label": "The seesaw, balanced at the last line · 1366×650",
+              "query": "https://github.com/karlmaukskoepke/AlgebraMat/blob/main/docs/build-h/h-seesaw-mirrors-check-650.png",
+              "look": "A picture only: nothing to click."
+            },
+            {
+              "label": "The seesaw with a number over 12 · 1366×768",
+              "query": "https://github.com/karlmaukskoepke/AlgebraMat/blob/main/docs/build-h/h-seesaw-mirrors-big-768.png",
+              "look": "A picture only: nothing to click."
+            },
+            {
+              "label": "Two questions side by side (a battle) · 1366×768",
+              "query": "https://github.com/karlmaukskoepke/AlgebraMat/blob/main/docs/build-h/h-big-battle-768.png",
+              "look": "A picture only: nothing to click."
+            },
+            {
+              "label": "Two questions side by side (a battle) · 1366×650",
+              "query": "https://github.com/karlmaukskoepke/AlgebraMat/blob/main/docs/build-h/h-big-battle-650.png",
+              "look": "A picture only: nothing to click."
+            },
+            {
+              "label": "One question (a party) · 1366×768",
+              "query": "https://github.com/karlmaukskoepke/AlgebraMat/blob/main/docs/build-h/h-big-party-768.png",
+              "look": "A picture only: nothing to click."
+            },
+            {
+              "label": "One question (a party) · 1366×650",
+              "query": "https://github.com/karlmaukskoepke/AlgebraMat/blob/main/docs/build-h/h-big-party-650.png",
+              "look": "A picture only: nothing to click."
             }
           ]
         },
