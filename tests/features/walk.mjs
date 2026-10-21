@@ -16,7 +16,7 @@ import path from 'node:path';
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const [, , addressArg, outArg, ...only] = process.argv;
 const BASE = (addressArg || 'http://localhost:5173/').replace(/\/?$/, '/');
-const OUT = outArg || path.join(ROOT, 'docs/build-i');
+const OUT = outArg || path.join(ROOT, 'docs/build-j');
 mkdirSync(OUT, { recursive: true });
 
 function loadPlaywright() {
@@ -91,6 +91,10 @@ class Walk {
     const b = await this.box('.spot-box.is-bubble');
     if (!nums || !b || b[1] < nums[3]) throw new Error(`the box should sit under the numbers: numbers ${nums}, box ${b}`);
   }
+  // Flip everything's moves, as a person does them (Build J)
+  async flip() { await this.click(act('flipPick')); await this.click(act('go')); await wait(this.page, 300); }
+  async fraction(text) { await this.click(act('multOpen')); await this.click(`${act('multPick')}[data-kind="frac"]`); await this.type(text); await this.click(act('go')); await wait(this.page, 300); }
+  async solve(v) { await this.click(act('focus')); await this.type(v); await this.enter(); await this.drag(); await this.click(act('nextLine')); await this.click(act('nextLine')); }
   async type(text) { await this.page.keyboard.type(String(text)); await wait(this.page, 200); }
   async enter(times = 1) { for (let i = 0; i < times; i++) { await this.page.keyboard.press('Enter'); await wait(this.page, 250); } }
   async drag() {                                    // the typed value, dragged from the x = box onto the x
@@ -139,7 +143,9 @@ class Walk {
   async text() { return (await this.page.evaluate(() => document.body.innerText)).replace(/\s+/g, ' '); }
   async see(...words) {                             // every piece of text must be on the screen
     const t = await this.text();
-    for (const w of words) if (!t.includes(w)) throw new Error(`expected to see "${w}" after step "${this.step}". On screen: ${t.slice(0, 400)}`);
+    // (pieces of an equation drawn side by side can read as "−3 x" for "−3x": spaces are ignored when the plain match fails)
+    const tight = t.replace(/\s+/g, '');
+    for (const w of words) if (!t.includes(w) && !tight.includes(w.replace(/\s+/g, ''))) throw new Error(`expected to see "${w}" after step "${this.step}". On screen: ${t.slice(0, 400)}`);
   }
   async notSee(...words) {
     const t = await this.text();
@@ -602,6 +608,130 @@ const WALKS = {
     w.at('type −15, Enter, drag, Next twice'); await w.type('-15'); await w.enter(); await w.drag();
     await w.click(act('nextLine')); await w.click(act('nextLine'));
     await w.see('✓ Balanced');
+  },
+
+  // ---- Build J: Flip everything ----
+  async 'j-level-1'(w) {
+    await w.start(); await w.see('FLIP EVERYTHING · Level 1', '−x', '12');
+    await w.both('j-level-1');
+    w.at('click Add'); await w.click(`${act('greyMove')}[data-move="add"]`); await w.see('That move unlocks on a later card.');
+    w.at('click Multiply, the whole number'); await w.click(act('multOpen')); await w.click(`${act('multPick')}[data-kind="whole"]`); await w.see('That move unlocks on a later card.');
+    w.at('the fraction'); await w.click(`${act('multPick')}[data-kind="frac"]`); await w.see('That move unlocks on a later level.');
+    if (!(await w.page.locator('[data-mopt="flip"]').count())) throw new Error('−1 × ( ) should be live');
+  },
+  async 'j-level-2'(w) {
+    await w.start(); await w.see('FLIP EVERYTHING · Level 2', '12', '−x');
+    await w.both('j-level-2');
+    w.at('flip, Go'); await w.flip(); await w.see('−(12) = x');
+    w.at('type −12, check'); await w.solve(-12);
+    await w.see('✓ Balanced');
+  },
+  async 'j-level-3'(w) {
+    await w.start(); await w.see('FLIP EVERYTHING · Level 3', '−3x', '12');
+    await w.both('j-level-3');
+    w.at('flip, Go, Next'); await w.flip(); await w.see('3x = −12'); await w.click(act('foldNext'));
+    w.at('⅓'); await w.fraction('1/3'); await w.see('x = ⅓(−12)');
+    w.at('type −4, check'); await w.solve(-4); await w.see('✓ Balanced');
+  },
+  async 'j-level-4'(w) {
+    await w.start(); await w.see('FLIP EVERYTHING · Level 4', '12', '−3x');
+    await w.both('j-level-4');
+    w.at('⅓ first'); await w.fraction('1/3'); await w.see('4 = −x');
+    if (await w.page.locator('.lx-dot.is-red').count()) throw new Error('a fraction first should not light anything red');
+    w.at('Next, flip'); await w.click(act('foldNext')); await w.flip(); await w.see('−(4) = x');
+    w.at('type −4, check'); await w.solve(-4); await w.see('✓ Balanced');
+  },
+  async 'j-level-5'(w) {
+    await w.start(); await w.see('FLIP EVERYTHING · Level 5', '−3x', '36');
+    await w.both('j-level-5');
+    w.at('flip, Next, ⅓'); await w.flip(); await w.click(act('foldNext')); await w.fraction('1/3'); await w.see('x = ⅓(−36)');
+    w.at('type −12, check'); await w.solve(-12); await w.see('✓ Balanced');
+  },
+  async 'j-helpful-flip'(w) {
+    await w.start();
+    w.at('point at the Flip button'); await w.page.locator('[data-action="flipPick"]').hover(); await wait(w.page, 400);
+    await w.see('−1 × (−x) = −1 × (12)');
+    w.at('click it, Go'); await w.flip();
+    await w.see('x = −(12)'); await w.notSee('x = −12 ');
+    const lights = await w.page.evaluate(() => ['noopp', 'solved'].map((k) => document.querySelector(`[data-light="${k}"]`)?.className));
+    if (!lights.every((c) => /is-green/.test(c ?? ''))) throw new Error(`No opposite box and Solved for x should be green: ${lights}`);
+    await w.both('j-helpful-flip');
+  },
+  async 'j-worse-flip'(w) {
+    await w.start();
+    w.at('flip, Go, Next'); await w.flip(); await w.click(act('foldNext')); await w.see('3x = −12');
+    w.at('flip again, Go, wait'); await w.flip(); await w.lateLayer();
+    await w.see('x has a minus', 'Flipping 3x = −12 made −3x = 12: now x has a minus. Press Undo.');
+    await w.lit('.lb-rowwrap .lb-front', 1);                                     // the new −3x, lit (the first is the original)
+    await w.both('j-worse-flip');
+    w.at('Undo'); await w.click(act('undo')); await wait(w.page, 800);
+    await w.see('To get one x, take a fraction of both sides: one of the 3 x boxes is ⅓.');
+    if (!(await w.page.locator('.spot-move[data-mopt="frac"]').count())) throw new Error('the fraction option should be lit');
+  },
+  async 'j-one-move'(w) {
+    await w.start();
+    w.at('Multiply, fraction, −1/3, Go'); await w.fraction('-1/3');
+    await w.see('−⅓(−3x) = −⅓(12)', 'x = −⅓(12)');
+    if (await w.page.locator('.lx-dot.is-red').count()) throw new Error('−⅓ in one move should not light anything red');
+    await w.both('j-one-move');
+    w.at('type −4, check'); await w.solve(-4); await w.see('✓ Balanced');
+  },
+  async 'j-typed-12'(w) {
+    await w.start();
+    w.at('type 12, Enter, drag, Next twice, wait'); await w.click(act('focus')); await w.type(12); await w.enter(); await w.drag();
+    await w.see('−(12) = 12'); await w.click(act('nextLine')); await w.click(act('nextLine')); await w.lateLayer();
+    await w.see('−12 = 12', 'When x = 12, the equation is not balanced.');
+    w.at('Undo'); await w.click(act('undo')); await wait(w.page, 800);
+    await w.see('−x = 12 means the opposite of x is 12, so x is not 12. Flip everything: multiply both sides by −1.', '−1 × (−x) = −1 × (12)');
+    if (!(await w.page.locator('.spot-move[data-move="flip"]').count())) throw new Error('the Flip button should be lit');
+    await w.both('j-typed-12');
+  },
+  async 'j-trade'(w) {
+    await w.start();
+    await w.see('This is the symmetric property: if a = b, then b = a.');
+    await w.both('j-trade');
+    w.at('Trade places, flip'); await w.click(`${act('choose')}[data-move="trade"]`); await w.see('−x = 12'); await w.flip(); await w.see('x = −(12)');
+    w.at('type −12, check'); await w.solve(-12); await w.see('✓ Balanced');
+  },
+  async 'j-check-negx'(w) {
+    await w.start();
+    w.at('flip, type −12, drag'); await w.flip(); await w.click(act('focus')); await w.type(-12); await w.enter(); await w.drag(); await wait(w.page, 300);
+    await w.pairs('−x=12', '−(−12)=12');
+    await w.both('j-check-negx');
+    w.at('Next twice'); await w.click(act('nextLine')); await w.click(act('nextLine')); await w.see('12 = 12', '✓ Balanced');
+  },
+  async 'j-forced'(w) {
+    await w.start();
+    w.at('type −12 at once, check'); await w.click(act('focus')); await w.type(-12); await w.enter(); await w.drag();
+    await w.click(act('nextLine')); await w.click(act('nextLine')); await w.see('✓ Balanced');
+    w.at('Next problem'); await w.click(act('next')); await wait(w.page, 800);
+    await w.see('Your mental math is very strong.', '−x', '3');
+    if (!(await w.page.locator('[data-action="flipPick"].is-ring').count())) throw new Error('the Flip button should be ringed');
+    await w.both('j-forced');
+  },
+  async 'student-flip'(w) {
+    await w.start();
+    w.at('mistake 1: touch nothing for 11 seconds'); await wait(w.page, 11000);
+    if (!(await w.page.locator('.lx-help.is-idle').count())) throw new Error('I’m stuck should be flashing after 10 seconds');
+    w.at('mistake 2: type 12, check'); await w.click(act('focus')); await w.type(12); await w.enter(); await w.drag();
+    await w.click(act('nextLine')); await w.click(act('nextLine')); await w.lateLayer();
+    await w.see('−3 × 12 = 12', '−36 = 12', 'When x = 12, the equation is not balanced.');
+    w.at('mistake 2: Undo'); await w.click(act('undo')); await wait(w.page, 800);
+    await w.see('In −3x = 12 the minus belongs to x. Flip everything first: multiply both sides by −1.');
+    await w.click(act('spotDismiss'));
+    w.at('mistake 3: ½'); await w.fraction('1/2'); await w.lateLayer();
+    await w.see('3 boxes can\'t make 2 equal groups');
+    w.at('mistake 3: Undo, ⅓'); await w.click(act('undo')); await wait(w.page, 800);
+    await w.see('We want only one of the three x boxes.');
+    await w.click(`${act('take')}[data-n="3"]`); await wait(w.page, 400); await w.see('−x = 4');
+    w.at('mistake 4: type 4, check, Undo'); await w.click(act('focus')); await w.type(4); await w.enter(); await w.drag();
+    await w.click(act('nextLine')); await w.click(act('nextLine')); await w.lateLayer();
+    await w.click(act('undo')); await wait(w.page, 800);
+    await w.see('−x = 4 means the opposite of x is 4, so x is not 4.');
+    await w.click(act('spotDismiss'));
+    w.at('mistake 5: I’m stuck twice'); await w.stuck(); const one = await w.text(); await w.stuck(); const two = await w.text();
+    for (const t of [one, two]) if (!t.includes('−x means x has a minus. To get rid of it, multiply both sides by −1: Flip everything.')) throw new Error(`I’m stuck should give the reminder: ${t.slice(0, 300)}`);
+    await w.shot('student-flip-stuck');
   },
 };
 

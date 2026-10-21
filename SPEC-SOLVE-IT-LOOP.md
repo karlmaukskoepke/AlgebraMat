@@ -153,7 +153,7 @@ x ALONE ─► `x =` is the last step, and the only place that blinks
 1. **Colour pass** (magenta/green meanings, per-move colours): after Build D.
 2. **Add onto the shared loop** (phases P2–P4 of the one-system architecture): next build after D; includes the scaffold classifier and registry.
 3. **Divide it `1/▢` blank:** decided; to be built after D (spec the blank and its preview in `SPEC-DIVIDE-IT.md`).
-4. **Required edits:** `SPEC-DIVIDE-IT.md` (rev 2.2 → 3.0: blank move, fraction-cycle feedback, no choice, hover preview); `SPEC-FLIP-IT.md` (rev 1.1 → 1.2: pop-up and side-by-side check); `SPEC-ADD-TO-BOTH-SIDES.md` rev 2.4 pointer; `SPEC-LIGHTS-EXPERIMENT-*` are now history.
+4. **Required edits:** `SPEC-DIVIDE-IT.md` (rev 2.2 → 3.0: blank move, fraction-cycle feedback, no choice, hover preview); `SPEC-FLIP-IT.md` (done: rev 1.2, Build J, the card as built in basic form); `SPEC-ADD-TO-BOTH-SIDES.md` rev 2.4 pointer; `SPEC-LIGHTS-EXPERIMENT-*` are now history.
 5. **Opening the site to students** means removing the Netlify team login first, and an audit of progress loss after updates.
 6. **Teacher data scope:** only stuck and Teach me counts, plus lights on the class sheet. Add count of first-state correct guesses?
 7. **Move order** in the panel is parked.

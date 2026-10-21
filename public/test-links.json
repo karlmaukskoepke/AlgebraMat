@@ -3,6 +3,222 @@
   "updated": "2026-10-21",
   "checks": [
     {
+      "id": "j-level-1",
+      "name": "Level 1 (−x = b): only Flip everything is needed; the other moves say why not",
+      "build": "Build J",
+      "link": {
+        "label": "Open Flip everything · Level 1",
+        "query": "?pack=flip-everything&level=2&seed=18&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Flip everything, Level 1, on −x = 12.",
+        "Click Add (the top box in the panel on the right).",
+        "Click Multiply (the second box). Three options open beside it: click the first one (▢ × ( )), then the second (▢ over ▢)."
+      ],
+      "see": "Add says “That move unlocks on a later card.” In the Multiply options the whole number says the same, the fraction says “That move unlocks on a later level.”, and only −1 × ( ) is live."
+    },
+    {
+      "id": "j-level-2",
+      "name": "Level 2 (b = −x): flip first, and x stays on the right",
+      "build": "Build J",
+      "link": {
+        "label": "Open Flip everything · Level 2",
+        "query": "?pack=flip-everything&level=3&seed=6&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Flip everything, Level 2, on 12 = −x.",
+        "Click Got it if a pop-up is open, then click the Flip button (the third box in the panel on the right, −x → x) and the green Go.",
+        "Type −12 and press Enter. Drag the −12 onto the x and press Next twice."
+      ],
+      "see": "The flip writes −1 × (12) = −1 × (−x), then −(12) = x, with x still on the right (that is fine). The check ends ✓ Balanced."
+    },
+    {
+      "id": "j-level-3",
+      "name": "Level 3 (−ax = b): flip, then take a fraction",
+      "build": "Build J",
+      "link": {
+        "label": "Open Flip everything · Level 3",
+        "query": "?pack=flip-everything&level=4&seed=213&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Flip everything, Level 3, on −3x = 12.",
+        "Click the Flip button (the third box in the panel on the right, −x → x) and Go. Then click the green Next.",
+        "Click Multiply, then the fraction option (▢ over ▢). Type 1, /, 3 and click Go.",
+        "Type −4, press Enter, drag it onto the x and press Next twice."
+      ],
+      "see": "After the flip the equation is 3x = −12 (No opposite box turns green). Taking ⅓ writes x = ⅓(−12), which is not worked out for you. The check ends ✓ Balanced."
+    },
+    {
+      "id": "j-level-4",
+      "name": "Level 4 (all four forms): a fraction first, then the flip",
+      "build": "Build J",
+      "link": {
+        "label": "Open Flip everything · Level 4",
+        "query": "?pack=flip-everything&level=5&seed=483&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Flip everything, Level 4, on 12 = −3x.",
+        "Click Multiply, then the fraction option. Type 1, /, 3 and click Go.",
+        "Click the green Next. Then click the Flip button (the third box in the panel on the right, −x → x) and Go.",
+        "Type −4, press Enter, drag it onto the x and press Next twice."
+      ],
+      "see": "Taking ⅓ first gives 4 = −x, with no red light (either order is fine). The flip then gives −(4) = x. The check ends ✓ Balanced."
+    },
+    {
+      "id": "j-level-5",
+      "name": "Level 5 (bigger numbers)",
+      "build": "Build J",
+      "link": {
+        "label": "Open Flip everything · Level 5",
+        "query": "?pack=flip-everything&level=6&seed=430&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Flip everything, Level 5, on −3x = 36.",
+        "Click the Flip button (the third box in the panel on the right, −x → x) and Go, then Next. Click Multiply, the fraction option, type 1, /, 3 and click Go.",
+        "Type −12, press Enter, drag it onto the x and press Next twice."
+      ],
+      "see": "3x = −36, then x = ⅓(−36). The check ends ✓ Balanced."
+    },
+    {
+      "id": "j-helpful-flip",
+      "name": "A helpful flip: −x = 12 becomes x = −(12)",
+      "build": "Build J",
+      "link": {
+        "label": "Open Flip everything · Level 1",
+        "query": "?pack=flip-everything&level=2&seed=18&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Flip everything, Level 1, on −x = 12.",
+        "Point at the Flip button (the third box in the panel on the right, −x → x) without clicking: a grey preview appears under the equation.",
+        "Click it, then click the green Go."
+      ],
+      "see": "The preview is −1 × (−x) = −1 × (12). After Go it is written in, then x = −(12): the 12 is not turned into −12 for you. No opposite box and Solved for x turn green."
+    },
+    {
+      "id": "j-worse-flip",
+      "name": "A flip that makes it worse: the spotlight, Undo, then the hint",
+      "build": "Build J",
+      "link": {
+        "label": "Open Flip everything · Level 3",
+        "query": "?pack=flip-everything&level=4&seed=213&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Flip everything, Level 3, on −3x = 12.",
+        "Click the Flip button (the third box in the panel on the right, −x → x) and Go, then the green Next. The equation is 3x = −12.",
+        "Click the Flip button and Go again, then wait two seconds.",
+        "Press Undo."
+      ],
+      "see": "−3x = 12 comes back with −3x framed in red (“x has a minus”) and “Flipping 3x = −12 made −3x = 12: now x has a minus. Press Undo.” Only Undo works. After Undo: “To get one x, take a fraction of both sides: one of the 3 x boxes is ⅓.” with the fraction option lit."
+    },
+    {
+      "id": "j-one-move",
+      "name": "−3x = 12 times −⅓ in one move is accepted",
+      "build": "Build J",
+      "link": {
+        "label": "Open Flip everything · Level 3",
+        "query": "?pack=flip-everything&level=4&seed=213&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Flip everything, Level 3, on −3x = 12.",
+        "Click Multiply, then the fraction option. Type −1 (the minus key, then 1), /, 3 and click Go.",
+        "Type −4, press Enter, drag it onto the x and press Next twice."
+      ],
+      "see": "It writes −⅓(−3x) = −⅓(12), then x = −⅓(12), with No opposite box and Solved for x green and no red. The check ends ✓ Balanced."
+    },
+    {
+      "id": "j-typed-12",
+      "name": "Typed 12 for −x = 12: the hint points at Flip everything",
+      "build": "Build J",
+      "link": {
+        "label": "Open Flip everything · Level 1",
+        "query": "?pack=flip-everything&level=2&seed=18&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Flip everything, Level 1, on −x = 12.",
+        "Click the box after x =, type 12 and press Enter. Drag the 12 onto the x.",
+        "Press Next twice and wait two seconds. Press Undo."
+      ],
+      "see": "The check shows −(12) = 12, then −12 = 12, and says it is not balanced. After Undo: “−x = 12 means the opposite of x is 12, so x is not 12. Flip everything: multiply both sides by −1.” with the Flip button ringed and its preview under the equation."
+    },
+    {
+      "id": "j-trade",
+      "name": "Trade places on 12 = −x, with the symmetric property",
+      "build": "Build J",
+      "link": {
+        "label": "Open Flip everything · Level 2",
+        "query": "?pack=flip-everything&level=3&seed=6&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Flip everything, Level 2, on 12 = −x.",
+        "Read the pop-up beside the panel.",
+        "Click Trade places (the bottom box in the panel). Then click the Flip button (the third box in the panel on the right, −x → x) and Go.",
+        "Type −12, press Enter, drag it onto the x and press Next twice."
+      ],
+      "see": "The pop-up says x is on the right, to click Trade places, and “This is the symmetric property: if a = b, then b = a.” Trading writes −x = 12; the flip gives x = −(12); the check ends ✓ Balanced. (Flipping first also works.)"
+    },
+    {
+      "id": "j-check-negx",
+      "name": "The check shows −(−12)",
+      "build": "Build J",
+      "link": {
+        "label": "Open Flip everything · Level 1",
+        "query": "?pack=flip-everything&level=2&seed=18&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Flip everything, Level 1, on −x = 12.",
+        "Click the Flip button (the third box in the panel on the right, −x → x) and Go.",
+        "Type −12, press Enter and drag it onto the x.",
+        "Press Next twice."
+      ],
+      "see": "The check starts with −x = 12 and, under it, −(−12) = 12, the blue (−12) right under the blue x. Then 12 = 12 and ✓ Balanced."
+    },
+    {
+      "id": "j-forced",
+      "name": "After a correct first guess, the next problem needs a move",
+      "build": "Build J",
+      "link": {
+        "label": "Open Flip everything · Level 1",
+        "query": "?pack=flip-everything&level=2&seed=18&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Flip everything, Level 1, on −x = 12.",
+        "Without making a move, type −12, press Enter, drag it onto the x and press Next twice.",
+        "Click Next problem."
+      ],
+      "see": "The next problem (−x = 3) opens with “Your mental math is very strong. Let’s try solving this next problem using a move first.”, the Flip button ringed, and x = greyed until a move is made."
+    },
+    {
+      "id": "student-flip",
+      "name": "Play it like a student: Flip everything",
+      "build": "Build J",
+      "link": {
+        "label": "Open Flip everything · Level 3",
+        "query": "?pack=flip-everything&level=4&seed=213&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Flip everything, Level 3, on −3x = 12. You are going to play a student who gets things wrong.",
+        "Mistake 1, ignoring the screen: touch nothing for 10 seconds. A good response is a gentle flashing of I’m stuck, and nothing else changing.",
+        "Mistake 2, dropping the signs: click the box after x =, type 12 and press Enter. Drag it onto the x, press Next twice and wait two seconds. A good response shows −3 × 12 = 12 turn into −36 = 12, says it is not balanced, and leaves only Undo. Press Undo: the hint says the minus belongs to x and lights the Flip button. Press Got it.",
+        "Mistake 3, a fraction that does not split: click Multiply, the fraction option, type 1, /, 2 and click Go. Wait two seconds. A good response says 3 boxes can’t make 2 equal groups and pulses Undo. Press Undo: the boxes, the counters and the fractions to choose from appear, ½ crossed off. Click ⅓.",
+        "Mistake 4, forgetting the sign at the end: the equation is now −x = 4. Type 4, press Enter, drag it onto the x, press Next twice and wait. Press Undo. A good response says −x = 4 means the opposite of x is 4, so x is not 4, and lights Flip everything.",
+        "Mistake 5, pressing I’m stuck again and again: press it twice. A good response repeats the reminder with the real numbers (this card has no pictures yet) and still leaves the move to you."
+      ],
+      "see": "Every mistake gets a short message built from the student’s own numbers, and there is always one clear thing to press next. Nothing gives the answer away."
+    },
+    {
       "id": "i-check-shadow",
       "name": "Picking up your number slides a faint copy of the equation into the check",
       "build": "Build I",
@@ -458,6 +674,120 @@
               "label": "Save codes (teacher only)",
               "query": "?codes=1&nosignin=1",
               "look": "With ?codes=1 the Save code and Enter code buttons come back, for moving a student by hand."
+            }
+          ]
+        },
+        {
+          "name": "Build J: Flip everything, a new Solve it card (2026-10-21)",
+          "about": "Equations where x has a minus: −x = 12, 12 = −x, −3x = 12. Flip everything (multiply both sides by −1) takes the minus off x; from Level 3 a fraction of both sides finishes, in either order or as −⅓ in one move. Trade places is live where x is on the right. Help is a reminder with the real numbers (no pictures yet). It sits after Divide it on the Solve it screen. \"See why it works\" is not built yet, so the card has no button for it.",
+          "links": [
+            {
+              "label": "Level 1 · −x = b",
+              "query": "?pack=flip-everything&level=2&seed=18&nosignin=1",
+              "reset": true,
+              "look": "−x = 12. Flip everything, then type −12."
+            },
+            {
+              "label": "Level 2 · b = −x",
+              "query": "?pack=flip-everything&level=3&seed=6&nosignin=1",
+              "reset": true,
+              "look": "12 = −x. Trade places is live; flip first or trade first."
+            },
+            {
+              "label": "Level 3 · −ax = b",
+              "query": "?pack=flip-everything&level=4&seed=213&nosignin=1",
+              "reset": true,
+              "look": "−3x = 12. Flip, then take ⅓; or take −⅓ in one move."
+            },
+            {
+              "label": "Level 4 · all four forms",
+              "query": "?pack=flip-everything&level=5&seed=483&nosignin=1",
+              "reset": true,
+              "look": "12 = −3x, then the other forms."
+            },
+            {
+              "label": "Level 5 · bigger numbers",
+              "query": "?pack=flip-everything&level=6&seed=430&nosignin=1",
+              "reset": true,
+              "look": "−3x = 36, answers up to 20 in size."
+            }
+          ]
+        },
+        {
+          "name": "Build J screenshots (2026-10-21)",
+          "about": "The acceptance pictures at 1366×768 and 1366×650 (they open on GitHub). The report is docs/build-j/BUILD-J-REPORT.md.",
+          "links": [
+            {
+              "label": "Level 1 opening · 1366×768",
+              "query": "https://github.com/karlmaukskoepke/AlgebraMat/blob/main/docs/build-j/j-level-1-768.png",
+              "look": "A picture only: nothing to click.",
+              "notLive": "Opens the picture on GitHub, not the app; GitHub may ask you to sign in."
+            },
+            {
+              "label": "Level 2 opening · 1366×768",
+              "query": "https://github.com/karlmaukskoepke/AlgebraMat/blob/main/docs/build-j/j-level-2-768.png",
+              "look": "A picture only: nothing to click.",
+              "notLive": "Opens the picture on GitHub, not the app; GitHub may ask you to sign in."
+            },
+            {
+              "label": "Level 3 opening · 1366×768",
+              "query": "https://github.com/karlmaukskoepke/AlgebraMat/blob/main/docs/build-j/j-level-3-768.png",
+              "look": "A picture only: nothing to click.",
+              "notLive": "Opens the picture on GitHub, not the app; GitHub may ask you to sign in."
+            },
+            {
+              "label": "Level 4 opening · 1366×768",
+              "query": "https://github.com/karlmaukskoepke/AlgebraMat/blob/main/docs/build-j/j-level-4-768.png",
+              "look": "A picture only: nothing to click.",
+              "notLive": "Opens the picture on GitHub, not the app; GitHub may ask you to sign in."
+            },
+            {
+              "label": "Level 5 opening · 1366×650",
+              "query": "https://github.com/karlmaukskoepke/AlgebraMat/blob/main/docs/build-j/j-level-5-650.png",
+              "look": "A picture only: nothing to click.",
+              "notLive": "Opens the picture on GitHub, not the app; GitHub may ask you to sign in."
+            },
+            {
+              "label": "A helpful flip · 1366×768",
+              "query": "https://github.com/karlmaukskoepke/AlgebraMat/blob/main/docs/build-j/j-helpful-flip-768.png",
+              "look": "A picture only: nothing to click.",
+              "notLive": "Opens the picture on GitHub, not the app; GitHub may ask you to sign in."
+            },
+            {
+              "label": "A flip that makes it worse · 1366×650",
+              "query": "https://github.com/karlmaukskoepke/AlgebraMat/blob/main/docs/build-j/j-worse-flip-650.png",
+              "look": "A picture only: nothing to click.",
+              "notLive": "Opens the picture on GitHub, not the app; GitHub may ask you to sign in."
+            },
+            {
+              "label": "−⅓ in one move · 1366×768",
+              "query": "https://github.com/karlmaukskoepke/AlgebraMat/blob/main/docs/build-j/j-one-move-768.png",
+              "look": "A picture only: nothing to click.",
+              "notLive": "Opens the picture on GitHub, not the app; GitHub may ask you to sign in."
+            },
+            {
+              "label": "The check for −x = 12 · 1366×768",
+              "query": "https://github.com/karlmaukskoepke/AlgebraMat/blob/main/docs/build-j/j-check-negx-768.png",
+              "look": "A picture only: nothing to click.",
+              "notLive": "Opens the picture on GitHub, not the app; GitHub may ask you to sign in."
+            },
+            {
+              "label": "I’m stuck (the reminder) · 1366×768",
+              "query": "https://github.com/karlmaukskoepke/AlgebraMat/blob/main/docs/build-j/student-flip-stuck.png",
+              "look": "A picture only: nothing to click.",
+              "notLive": "Opens the picture on GitHub, not the app; GitHub may ask you to sign in."
+            },
+            {
+              "label": "The forced move · 1366×768",
+              "query": "https://github.com/karlmaukskoepke/AlgebraMat/blob/main/docs/build-j/j-forced-768.png",
+              "look": "A picture only: nothing to click.",
+              "notLive": "Opens the picture on GitHub, not the app; GitHub may ask you to sign in."
+            },
+            {
+              "label": "The report",
+              "query": "https://github.com/karlmaukskoepke/AlgebraMat/blob/main/docs/build-j/BUILD-J-REPORT.md",
+              "look": "The Build J report.",
+              "notLive": "Opens the report on GitHub, not the app; GitHub may ask you to sign in."
             }
           ]
         },
