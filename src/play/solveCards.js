@@ -29,7 +29,7 @@ import { renderFlipScreen, introOpen as flipIntroOpen } from '../view/flipScreen
 import { flipFeedbackText } from '../view/flipFeedback.js';
 import { buildSolvePad } from '../view/divideControls.js';
 // Two-step equations: the loop card (engine/cards/twoStep.js) under the shared Multiply menu and Add's term layer, on Add's screen
-import { newTwoStep, reduceTwoStep, solve as twoLoop, xAlone as twoAlone, optionOf, TWO_STEP_MENU, TWO_STEP_SPOT } from '../engine/cards/twoStep.js';
+import { newTwoStep, solve as twoLoop, xAlone as twoAlone, TWO_STEP_MENU, TWO_STEP_SPOT, TWO_STEP_LAYER } from '../engine/cards/twoStep.js';
 import { formatTwoStep } from '../engine/twoStep.js';
 import { startLights } from '../engine/addBothLights.js';
 import { renderTwoStepScreen, introOpen as twoIntroOpen } from '../view/twoStepScreen.js';
@@ -167,7 +167,7 @@ const ADD_MAT = new Set(['lxApply']);
 export const twoStepPlay = makeSolvePlay({
   pack: 'two-step-equations',
   loop: twoLoop,
-  layer: withLights(TWO_STEP_MENU.withMenu(reduceTwoStep), { alone: twoAlone, menuPreview: (s, kind) => optionOf(kind, s) === 'live' }),
+  layer: TWO_STEP_LAYER,
   spot: TWO_STEP_SPOT,
   introOpen: twoIntroOpen,
   format: formatTwoStep,

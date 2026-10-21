@@ -3,6 +3,267 @@
   "updated": "2026-10-21",
   "checks": [
     {
+      "id": "k-worked",
+      "name": "Add, combine, fraction on 3x + 4 = 19",
+      "build": "Build K",
+      "link": {
+        "label": "Open Two-step equations · Level 1",
+        "query": "?pack=two-step-equations&level=1&seed=406&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens the new Two-step equations card, Level 1, on 3x + 4 = 19.",
+        "Click Add (the top box in the panel on the right), type −4 and press Enter. The 4s cross out and a new row reads 3x = 19 − 4.",
+        "Drag the 19 onto the 4 beside it. A box opens under them: type 15 and press Enter. The row reads 3x = 15.",
+        "Click Multiply (the second box in the panel). Three options open beside it: click the second one (▢ over ▢), type 1/3 and press Enter. The new row reads x = ⅓(15).",
+        "Click the box after x =, type 5 and press Enter. Drag the 5 onto the x in 3x + 4 = 19, then press Enter three times."
+      ],
+      "see": "After Add the right side stays 19 − 4 until you put it together: nothing is worked out for you. The check reads 3x + 4 = 19, then 3 × 5 + 4 = 19 under it, down to 19 = 19 and Balanced."
+    },
+    {
+      "id": "k-boxes",
+      "name": "Add at 3x = 15: the three x boxes message",
+      "build": "Build K",
+      "link": {
+        "label": "Open Two-step equations · Level 1",
+        "query": "?pack=two-step-equations&level=1&seed=406&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Two-step equations, Level 1, on 3x + 4 = 19.",
+        "Click Add (the top box in the panel on the right), type −4 and press Enter.",
+        "Drag the 19 onto the 4 beside it. A box opens under them: type 15 and press Enter.",
+        "Click Add (the top box in the panel on the right), type −3 and press Enter (trying to cancel the 3 in 3x).",
+        "Read the message, then click Undo."
+      ],
+      "see": "The 3x is outlined and the message says “3x is three x boxes, not a 3 to cancel. Adding −3 does not take them away. To get one x, take a fraction of the three x boxes: ⅓.” After Undo, Multiply’s options are open with the fraction lit and previewed, and the hint says “one of the 3 x boxes is ⅓”."
+    },
+    {
+      "id": "k-frac-grey",
+      "name": "The fraction is greyed until each side is one term",
+      "build": "Build K",
+      "link": {
+        "label": "Open Two-step equations · Level 1",
+        "query": "?pack=two-step-equations&level=1&seed=406&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Two-step equations, Level 1, on 3x + 4 = 19.",
+        "Click Multiply (the second box in the panel), then click the second option (▢ over ▢).",
+        "Click Add (the top box in the panel on the right), type −4 and press Enter. Click Multiply and the second option again.",
+        "Drag the 19 onto the 4 beside it. A box opens under them: type 15 and press Enter. Click Multiply and the second option once more."
+      ],
+      "see": "The first two times it says “That move works once each side is one term.” and nothing opens. Once the row is 3x = 15, the fraction blank opens under the equation."
+    },
+    {
+      "id": "k-trade",
+      "name": "Level 3: Trade places first, with the symmetric-property line",
+      "build": "Build K",
+      "link": {
+        "label": "Open Two-step equations · Level 3",
+        "query": "?pack=two-step-equations&level=3&seed=813&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Two-step equations, Level 3, on 19 = 4 + 3x.",
+        "Read the pop-up beside the panel and look at the Trade places box (the fourth one).",
+        "Click Trade places."
+      ],
+      "see": "The pop-up ends “This is the symmetric property: if a = b, then b = a.” and Trade places has a blue ring. After the click the new row reads 4 + 3x = 19."
+    },
+    {
+      "id": "k-bax-flip",
+      "name": "b − ax = c with Flip everything: 4 − 3x = −11",
+      "build": "Build K",
+      "link": {
+        "label": "Open Two-step equations · Level 5",
+        "query": "?pack=two-step-equations&level=5&seed=1565&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Two-step equations, Level 5, on 4 − 3x = −11.",
+        "Click Add (the top box in the panel on the right), type −4 and press Enter.",
+        "Drag the −11 onto the 4 beside it. A box opens under them: type −15 and press Enter. The row reads −3x = −15.",
+        "Click Flip everything (the third box in the panel), then the green Go.",
+        "Click Multiply (the second box in the panel). Three options open beside it: click the second one (▢ over ▢), type 1/3 and press Enter.",
+        "Click the box after x =, type 5 and press Enter. Press Enter again (from Level 3 a right answer is checked in one short line)."
+      ],
+      "see": "After the flip a pop-up says “Multiplying both sides by −1 flips every sign. −x becomes x.” and the row reads 3x = 15. The check starts 4 − 3x = −11 with 4 − 3 × 5 = −11 under it, then Balanced."
+    },
+    {
+      "id": "k-flip-intro",
+      "name": "Flip everything: the first flip says what −1 does (once)",
+      "build": "Build K",
+      "link": {
+        "label": "Open Flip everything · Level 1",
+        "query": "?pack=flip-everything&level=2&seed=18&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Flip everything, Level 1, on −x = 12.",
+        "Click Flip everything (the third box in the panel), then the green Go.",
+        "Click the box after x =, type −12 and press Enter. Drag the −12 onto the x, press Enter twice, then click Next problem.",
+        "On the next equation, click Flip everything, then Go."
+      ],
+      "see": "The first flip shows a small pop-up: “Multiplying both sides by −1 flips every sign. −x becomes x.” The flip on the second problem works the same way but shows no pop-up."
+    },
+    {
+      "id": "k-credit",
+      "name": "Finished old Two-step levels already count on the new card",
+      "build": "Build K",
+      "link": {
+        "label": "Open the old Two-step card · Level 1",
+        "query": "?pack=two-step&level=1&seed=7&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens the old Two-step equations card (now off the home screen), Level 1. Click Skip tour if a tour starts.",
+        "Type 6 and press Enter, then press Enter again for the next problem. Do the same with 8, 1, 3 and 2.",
+        "Click ← Packs at the top left, then Solve it."
+      ],
+      "see": "The old card says Level 1 is complete. On the home screen the new Two-step equations card shows Level 1 done and Level 2 open. (On a student’s own device, any old Two-step level they finished shows the same way, on the level of the same kind.)"
+    },
+    {
+      "id": "k-level-1",
+      "name": "Level 1 (ax + b = c): a right guess makes the next problem a move",
+      "build": "Build K",
+      "link": {
+        "label": "Open Two-step equations · Level 1",
+        "query": "?pack=two-step-equations&level=1&seed=406&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Two-step equations, Level 1, on 3x + 4 = 19.",
+        "Click the box after x =, type 5 and press Enter. Drag the 5 onto the x, then press Enter three times.",
+        "Click Next problem."
+      ],
+      "see": "The first problem ends “Yes! x = 5, and it balances.” The second problem, 5x + 8 = 18, opens with “Your mental math is very strong. Let’s try solving this next problem using a move first.” and Add has a steady ring."
+    },
+    {
+      "id": "k-level-2",
+      "name": "Level 2 (ax − b = c): 3x − 4 = 11",
+      "build": "Build K",
+      "link": {
+        "label": "Open Two-step equations · Level 2",
+        "query": "?pack=two-step-equations&level=2&seed=1133&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Two-step equations, Level 2, on 3x − 4 = 11.",
+        "Click Add (the top box in the panel on the right), type 4 and press Enter.",
+        "Drag the −11 onto the 4 beside it. A box opens under them: type 15 and press Enter.",
+        "Click Multiply (the second box in the panel). Three options open beside it: click the second one (▢ over ▢), type 1/3 and press Enter.",
+        "Click the box after x =, type 5 and press Enter. Drag the 5 onto the x, then press Enter three times."
+      ],
+      "see": "Adding 4 gives 3x = 11 + 4, then 3x = 15 and x = ⅓(15). The check reads 3 × 5 − 4 = 11 down to 11 = 11 and Balanced."
+    },
+    {
+      "id": "k-level-3",
+      "name": "Level 3 (x on the right): Add first is fine too",
+      "build": "Build K",
+      "link": {
+        "label": "Open Two-step equations · Level 3",
+        "query": "?pack=two-step-equations&level=3&seed=813&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Two-step equations, Level 3, on 19 = 4 + 3x.",
+        "Click Add (the top box in the panel on the right), type −4 and press Enter (instead of Trade places).",
+        "Hover over the top dot beside Add in the panel."
+      ],
+      "see": "The new row reads 19 − 4 = 3x with no red message, and the dot opens to “Fewer terms” with a green tick."
+    },
+    {
+      "id": "k-level-4",
+      "name": "Level 4 (b + ax = c): 4 + 3x = 19, with the short check",
+      "build": "Build K",
+      "link": {
+        "label": "Open Two-step equations · Level 4",
+        "query": "?pack=two-step-equations&level=4&seed=101&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Two-step equations, Level 4, on 4 + 3x = 19.",
+        "Click Add (the top box in the panel on the right), type −4 and press Enter.",
+        "Drag the 19 onto the 4 beside it. A box opens under them: type 15 and press Enter.",
+        "Click Multiply (the second box in the panel). Three options open beside it: click the second one (▢ over ▢), type 1/3 and press Enter.",
+        "Click the box after x =, type 5 and press Enter. Press Enter again (from Level 3 a right answer is checked in one short line)."
+      ],
+      "see": "Adding −4 gives 3x = 19 − 4 (the x term stays second until the 4s cancel). From this level the check is short: 4 + 3 × 5 = 19, then Balanced."
+    },
+    {
+      "id": "k-level-5",
+      "name": "Level 5 (b − ax = c): I’m stuck gives a reminder only",
+      "build": "Build K",
+      "link": {
+        "label": "Open Two-step equations · Level 5",
+        "query": "?pack=two-step-equations&level=5&seed=1565&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Two-step equations, Level 5, on 4 − 3x = −11.",
+        "Click I’m stuck (bottom right).",
+        "Click I’m stuck again."
+      ],
+      "see": "Each time the 4 is outlined, the Add box is open under the equation, and the pop-up says “Look at the +4 next to x. What would we add to both sides to eliminate it? Type it in the box.” No balance, counters or Teach me."
+    },
+    {
+      "id": "k-level-6",
+      "name": "Level 6 (negative answers): 3x + 4 = −11",
+      "build": "Build K",
+      "link": {
+        "label": "Open Two-step equations · Level 6",
+        "query": "?pack=two-step-equations&level=6&seed=1447&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Two-step equations, Level 6, on 3x + 4 = −11.",
+        "Click Add (the top box in the panel on the right), type −4 and press Enter.",
+        "Drag the −11 onto the 4 beside it. A box opens under them: type −15 and press Enter.",
+        "Click Multiply (the second box in the panel). Three options open beside it: click the second one (▢ over ▢), type 1/3 and press Enter.",
+        "Click the box after x =, type −5 and press Enter. Press Enter again (from Level 3 a right answer is checked in one short line)."
+      ],
+      "see": "The rows read 3x = −11 − 4, then 3x = −15 and x = ⅓(−15). The check reads 3 × (−5) + 4 = −11, then Balanced."
+    },
+    {
+      "id": "k-level-7",
+      "name": "Level 7 (all mixed): 19 = 4 − 3x, finished with −⅓",
+      "build": "Build K",
+      "link": {
+        "label": "Open Two-step equations · Level 7",
+        "query": "?pack=two-step-equations&level=7&seed=812&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Two-step equations, Level 7, on 19 = 4 − 3x.",
+        "Click Trade places (the fourth box in the panel).",
+        "Click Add (the top box in the panel on the right), type −4 and press Enter.",
+        "Drag the 19 onto the 4 beside it. A box opens under them: type 15 and press Enter. The row reads −3x = 15.",
+        "Click Multiply (the second box in the panel). Three options open beside it: click the second one (▢ over ▢), type −1/3 and press Enter.",
+        "Click the box after x =, type −5 and press Enter. Press Enter again (from Level 3 a right answer is checked in one short line)."
+      ],
+      "see": "Taking −⅓ of both sides finishes in one move: x = −⅓(15). The check reads 19 = 4 − 3 × (−5), then Balanced."
+    },
+    {
+      "id": "student-two-step",
+      "name": "Play it like a student: Two-step",
+      "build": "Build K",
+      "link": {
+        "label": "Open Two-step equations · Level 1",
+        "query": "?pack=two-step-equations&level=1&seed=406&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Two-step equations, Level 1, on 3x + 4 = 19. You are going to play a student who gets things wrong.",
+        "Mistake 1, ignoring the screen: touch nothing for 10 seconds. A good response is a gentle flashing of I’m stuck, with nothing else changing.",
+        "Mistake 2, skipping the fraction: click the box after x =, type 15 and press Enter. Drag the 15 onto the x, press Enter three times and wait two seconds. A good response works out 3 × 15 + 4 = 19 to 49 = 19, says the equation is not balanced, and leaves only Undo. Press Undo: the hint outlines the 4 and asks what to add to both sides. Click Got it.",
+        "Mistake 3, a move that makes it worse: the Add box is still open under the equation, so type 4 and press Enter. A good response lights the 4 and the 4 that was added, says they did not eliminate the term, and leaves only Undo. Press Undo, then Got it.",
+        "Mistake 4, a move at the wrong moment: click Multiply and the second option (▢ over ▢). A good response is a small note, “That move works once each side is one term.”, and nothing locked.",
+        "Mistake 5, a wrong sum: the Add box is open again, so type −4 and press Enter. Drag the 19 onto the 4, type 23 and press Enter. A good response says “19 − 4 is not 23. Press Undo and try again.” with the two numbers still readable. Press Undo: the hint lights 19 and −4 and says to drag one onto the other."
+      ],
+      "see": "Every mistake gets a calm answer in the real numbers, Undo is the way out of each error, and the hint after Undo points at the next move. Nothing is ever worked out for you."
+    },
+    {
       "id": "j-level-1",
       "name": "Level 1 (−x = b): only Flip everything is needed; the other moves say why not",
       "build": "Build J",
@@ -674,6 +935,108 @@
               "label": "Save codes (teacher only)",
               "query": "?codes=1&nosignin=1",
               "look": "With ?codes=1 the Save code and Enter code buttons come back, for moving a student by hand."
+            }
+          ]
+        },
+        {
+          "name": "Build K: Two-step equations, the new Solve it card (2026-10-21)",
+          "about": "3x + 4 = 19 in moves: Add to both sides (the student puts the other side together by dragging), then take a fraction of both sides. The fraction, and from Level 5 Flip everything, work once each side is one term. Trade places is live from Level 3 (x on the right). Help is a reminder with the real numbers (no pictures yet). It replaces the old Two-step card in the same place on the Solve it screen, and finished old levels count.",
+          "links": [
+            {
+              "label": "Level 1 · ax + b = c",
+              "look": "3x + 4 = 19. Add −4, combine 19 − 4, take ⅓, type 5.",
+              "query": "?pack=two-step-equations&level=1&seed=406&nosignin=1",
+              "reset": true
+            },
+            {
+              "label": "Level 2 · ax − b = c",
+              "look": "3x − 4 = 11. Add 4 first.",
+              "query": "?pack=two-step-equations&level=2&seed=1133&nosignin=1",
+              "reset": true
+            },
+            {
+              "label": "Level 3 · x on the right",
+              "look": "19 = 4 + 3x. Trade places is pointed out (the symmetric property); Add first works too.",
+              "query": "?pack=two-step-equations&level=3&seed=813&nosignin=1",
+              "reset": true
+            },
+            {
+              "label": "Level 4 · b + ax = c",
+              "look": "4 + 3x = 19. The check is short from here.",
+              "query": "?pack=two-step-equations&level=4&seed=101&nosignin=1",
+              "reset": true
+            },
+            {
+              "label": "Level 5 · b − ax = c",
+              "look": "4 − 3x = −11. After Add and combining, Flip everything or a fraction.",
+              "query": "?pack=two-step-equations&level=5&seed=1565&nosignin=1",
+              "reset": true
+            },
+            {
+              "label": "Level 6 · negative answers",
+              "look": "3x + 4 = −11, answers −2 to −9.",
+              "query": "?pack=two-step-equations&level=6&seed=1447&nosignin=1",
+              "reset": true
+            },
+            {
+              "label": "Level 7 · all mixed",
+              "look": "19 = 4 − 3x, then every form, both signs.",
+              "query": "?pack=two-step-equations&level=7&seed=812&nosignin=1",
+              "reset": true
+            }
+          ]
+        },
+        {
+          "name": "Build K screenshots (2026-10-21)",
+          "about": "The acceptance pictures at 1366×768 and 1366×650 (they open on GitHub). The report is in the build-k folder of the docs.",
+          "links": [
+            {
+              "label": "Level 1 opening · 1366×768",
+              "look": "A picture only: nothing to click.",
+              "notLive": "Opens the picture on GitHub, not the app; GitHub may ask you to sign in.",
+              "query": "https://github.com/karlmaukskoepke/AlgebraMat/blob/main/docs/build-k/k-level-1-768.png"
+            },
+            {
+              "label": "Add, combine, fraction · 1366×768",
+              "look": "A picture only: nothing to click.",
+              "notLive": "Opens the picture on GitHub, not the app; GitHub may ask you to sign in.",
+              "query": "https://github.com/karlmaukskoepke/AlgebraMat/blob/main/docs/build-k/k-worked-768.png"
+            },
+            {
+              "label": "The three x boxes · 1366×768",
+              "look": "A picture only: nothing to click.",
+              "notLive": "Opens the picture on GitHub, not the app; GitHub may ask you to sign in.",
+              "query": "https://github.com/karlmaukskoepke/AlgebraMat/blob/main/docs/build-k/k-boxes-768.png"
+            },
+            {
+              "label": "The fraction greyed · 1366×768",
+              "look": "A picture only: nothing to click.",
+              "notLive": "Opens the picture on GitHub, not the app; GitHub may ask you to sign in.",
+              "query": "https://github.com/karlmaukskoepke/AlgebraMat/blob/main/docs/build-k/k-frac-grey-768.png"
+            },
+            {
+              "label": "Level 3 with the Trade places ring · 1366×768",
+              "look": "A picture only: nothing to click.",
+              "notLive": "Opens the picture on GitHub, not the app; GitHub may ask you to sign in.",
+              "query": "https://github.com/karlmaukskoepke/AlgebraMat/blob/main/docs/build-k/k-trade-768.png"
+            },
+            {
+              "label": "A negative coefficient, flipped · 1366×768",
+              "look": "A picture only: nothing to click.",
+              "notLive": "Opens the picture on GitHub, not the app; GitHub may ask you to sign in.",
+              "query": "https://github.com/karlmaukskoepke/AlgebraMat/blob/main/docs/build-k/k-bax-flip-768.png"
+            },
+            {
+              "label": "I’m stuck, reminder only · 1366×768",
+              "look": "A picture only: nothing to click.",
+              "notLive": "Opens the picture on GitHub, not the app; GitHub may ask you to sign in.",
+              "query": "https://github.com/karlmaukskoepke/AlgebraMat/blob/main/docs/build-k/k-stuck-768.png"
+            },
+            {
+              "label": "The home screen: the new card in its place · 1366×768",
+              "look": "A picture only: nothing to click.",
+              "notLive": "Opens the picture on GitHub, not the app; GitHub may ask you to sign in.",
+              "query": "https://github.com/karlmaukskoepke/AlgebraMat/blob/main/docs/build-k/k-home-768.png"
             }
           ]
         },
@@ -2120,6 +2483,54 @@
     {
       "title": "Retired",
       "items": [
+        {
+          "name": "The old Two-step equations card (Build K)",
+          "about": "Replaced by the new Two-step equations card and taken off the home screen. Its saved levels are kept and count on the new card. Its links still open it.",
+          "links": [
+            {
+              "label": "Old Two-step · Level 1",
+              "look": "The old card: type x, with its help pictures.",
+              "query": "?pack=two-step&level=1&seed=7&nosignin=1",
+              "reset": true
+            },
+            {
+              "label": "Old Two-step · Level 2",
+              "look": "The old card: type x, with its help pictures.",
+              "query": "?pack=two-step&level=2&seed=7&nosignin=1",
+              "reset": true
+            },
+            {
+              "label": "Old Two-step · Level 3",
+              "look": "The old card: type x, with its help pictures.",
+              "query": "?pack=two-step&level=3&seed=7&nosignin=1",
+              "reset": true
+            },
+            {
+              "label": "Old Two-step · Level 4",
+              "look": "The old card: type x, with its help pictures.",
+              "query": "?pack=two-step&level=4&seed=7&nosignin=1",
+              "reset": true
+            },
+            {
+              "label": "Old Two-step · Level 5",
+              "look": "The old card: type x, with its help pictures.",
+              "query": "?pack=two-step&level=5&seed=7&nosignin=1",
+              "reset": true
+            },
+            {
+              "label": "Old Two-step · Level 6",
+              "look": "The old card: type x, with its help pictures.",
+              "query": "?pack=two-step&level=6&seed=7&nosignin=1",
+              "reset": true
+            },
+            {
+              "label": "Old Two-step · Level 7",
+              "look": "The old card: type x, with its help pictures.",
+              "query": "?pack=two-step&level=7&seed=7&nosignin=1",
+              "reset": true
+            }
+          ]
+        },
         {
           "name": "The banner",
           "about": "The yellow message box at the top of Add to both sides and Divide it is deleted: every message is a pop-up (Build D)."

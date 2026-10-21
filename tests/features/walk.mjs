@@ -157,11 +157,179 @@ class Walk {
   // quick helpers for the steps Karl repeats
   async add(n) { await this.click(`${act('choose')}[data-move="add"]`); await this.type(n); await this.click(act('go')); }
   async stuck(times = 1) { for (let i = 0; i < times; i++) await this.click(act('stuck')); }
+  // the Two-step card (Build K): drag the first number on the side without x onto the second, type their sum, Enter
+  async combine(sum) {
+    const side = await this.page.evaluate(() => {
+      const sides = [...document.querySelectorAll('.lx-live .lb-side')];
+      return sides.findIndex((s) => !s.querySelector('[data-like="x"]'));
+    });
+    const toks = this.page.locator('.lx-live .lb-side').nth(side).locator('.lx-tok');
+    const f = await toks.nth(0).boundingBox();
+    const t = await toks.nth(1).boundingBox();
+    const m = this.page.mouse;
+    await m.move(f.x + f.width / 2, f.y + f.height / 2); await m.down();
+    await m.move(f.x + f.width / 2 + 8, f.y + f.height / 2, { steps: 3 });
+    await m.move(t.x + t.width / 2, t.y + t.height / 2, { steps: 12 }); await wait(this.page, 150); await m.up(); await wait(this.page, 400);
+    await this.type(sum); await this.enter();
+  }
+  async addEnter(n) { await this.click(`${act('choose')}[data-move="add"]`); await this.type(n); await this.enter(); await wait(this.page, 300); }
+  async fracEnter(text) { await this.click(act('multOpen')); await this.click(`${act('multPick')}[data-kind="frac"]`); await this.type(text); await this.enter(); await wait(this.page, 300); }
+  // (a right value from Level 3 is checked short: no dragging, one Enter)
+  async answer(v, nexts) { await this.click(act('focus')); await this.type(v); await this.enter(); if (await this.page.locator('[data-chip]').count()) await this.drag(); await this.enter(nexts); await wait(this.page, 300); }
   async box(selector) { return this.page.evaluate((s) => { const r = document.querySelector(s)?.getBoundingClientRect(); return r ? [r.left, r.top, r.right, r.bottom].map(Math.round) : null; }, selector); }
 }
 
 // ---- one walk per item (same id as in the data file) ---------------------------------------------------------------------------------
 const WALKS = {
+  // ---- Build K: the new Two-step equations card ----
+  async 'k-worked'(w) {
+    await w.start(); await w.see('TWO-STEP EQUATIONS · Level 1', '3x + 4 = 19');
+    w.at('Add −4, Enter'); await w.addEnter(-4); await w.see('3x = 19 − 4');
+    w.at('combine 19 and 4, type 15'); await w.combine(15); await w.see('3x = 15');
+    w.at('Multiply, the fraction, 1/3'); await w.fracEnter('1/3'); await w.see('x = ⅓(15)');
+    await w.both('k-worked');
+    w.at('type 5, drag, Enter three times'); await w.answer(5, 3);
+    await w.see('3 × 5 + 4 = 19', '19 = 19', '✓ Balanced');
+  },
+  async 'k-boxes'(w) {
+    await w.start();
+    w.at('Add −4, combine'); await w.addEnter(-4); await w.combine(15); await w.see('3x = 15');
+    w.at('Add −3'); await w.addEnter(-3); await w.lateLayer();
+    await w.see('3x is three x boxes, not a 3 to cancel. Adding −3 does not take them away. To get one x, take a fraction of the three x boxes: ⅓.');
+    await w.lit('.lx-live .lb-x');
+    await w.both('k-boxes');
+    w.at('Undo'); await w.click(act('undo')); await wait(w.page, 900);
+    await w.see('one of the 3 x boxes is ⅓');
+    if (!(await w.page.locator('.mo-flyout [data-mopt="frac"]').count())) throw new Error('Multiply’s options should be open with the fraction live');
+  },
+  async 'k-frac-grey'(w) {
+    await w.start();
+    w.at('Multiply, the fraction'); await w.click(act('multOpen')); await w.click(`${act('multPick')}[data-kind="frac"]`);
+    await w.see('That move works once each side is one term.');
+    await w.both('k-frac-grey');
+    w.at('Add −4, then the fraction'); await w.addEnter(-4); await w.click(act('multOpen')); await w.click(`${act('multPick')}[data-kind="frac"]`);
+    await w.see('That move works once each side is one term.');
+    if (await w.page.locator('.dv-fracblank').count()) throw new Error('the fraction blank should not open while a side has two terms');
+    w.at('combine, then the fraction'); await w.combine(15); await w.click(act('multOpen')); await w.click(`${act('multPick')}[data-kind="frac"]`);
+    if (!(await w.page.locator('.lx-ghost.is-chosen .dv-fracblank').count())) throw new Error('the fraction blank should open at 3x = 15');
+  },
+  async 'k-trade'(w) {
+    await w.start(); await w.see('TWO-STEP EQUATIONS · Level 3', '19 = 4 + 3x');
+    await w.see('This is the symmetric property: if a = b, then b = a.');
+    if (!(await w.page.locator('[data-move="trade"].is-target').count())) throw new Error('Trade places should have a ring');
+    await w.both('k-trade');
+    w.at('Trade places'); await w.click(`${act('choose')}[data-move="trade"]`); await w.see('4 + 3x = 19');
+  },
+  async 'k-bax-flip'(w) {
+    await w.start(); await w.see('TWO-STEP EQUATIONS · Level 5', '4 − 3x = −11');
+    w.at('Add −4, combine'); await w.addEnter(-4); await w.combine(-15); await w.see('−3x = −15');
+    w.at('Flip everything, Go'); await w.click(act('flipPick')); await w.click(act('go')); await wait(w.page, 400);
+    await w.see('Multiplying both sides by −1 flips every sign. −x becomes x.', '3x = 15');
+    await w.both('k-bax-flip');
+    w.at('⅓'); await w.fracEnter('1/3'); await w.see('x = ⅓(15)');
+    w.at('type 5, drag, Enter'); await w.answer(5, 1);
+    await w.see('4 − 3x = −11', '4 − 3 × 5 = −11', '✓ Balanced');
+  },
+  async 'k-flip-intro'(w) {
+    await w.start(); await w.see('FLIP EVERYTHING · Level 1', '−x');
+    w.at('flip, Go'); await w.flip();
+    await w.see('Multiplying both sides by −1 flips every sign. −x becomes x.');
+    await w.both('k-flip-intro');
+    w.at('type −12, Enter, drag, Enter twice, Next problem'); await w.solve(-12); await w.see('✓ Balanced'); await w.click(act('next')); await wait(w.page, 500);
+    w.at('flip on the second problem'); await w.flip();
+    await w.notSee('Multiplying both sides by −1 flips every sign.');
+    await w.see('x = −(');
+  },
+  async 'k-credit'(w) {
+    await w.start(); await w.see('TWO-STEP EQUATIONS · Level 1', '2x + 5 = 17');
+    if (await w.page.locator('text=Skip tour').count()) await w.click('text=Skip tour');
+    for (const v of [6, 8, 1, 3, 2]) { w.at(`type ${v}, Enter, Enter`); await w.type(v); await w.enter(); await wait(w.page, 500); await w.enter(); await wait(w.page, 500); }
+    await w.see('Level 1 complete');
+    w.at('← Packs, Solve it'); await w.click('text=← Packs'); await wait(w.page, 500); await w.click('.section-panel.sec-solve'); await wait(w.page, 600);
+    await w.see('Two-step equations', 'Add, combine, then take a fraction');
+    const card = await w.page.evaluate(() => [...document.querySelectorAll('.pack-card, [class*="card"]')].map((c) => c.innerText).find((x) => x.includes('Add, combine, then take a fraction')) ?? '');
+    if (!/Level 2(?!\s*Locked)/.test(card.replace(/\s+/g, ' ').replace('Level 2 Locked', 'Level 2Locked'))) throw new Error(`Level 2 of the new card should be open: ${card.replace(/\s+/g, ' ').slice(0, 200)}`);
+    await w.both('k-home');
+  },
+  async 'k-level-1'(w) {
+    await w.start(); await w.see('TWO-STEP EQUATIONS · Level 1', '3x + 4 = 19');
+    await w.both('k-level-1');
+    w.at('type 5, Enter, drag, Enter three times'); await w.answer(5, 3); await w.see('Yes! x = 5, and it balances.');
+    w.at('Next problem'); await w.click(act('next')); await wait(w.page, 600);
+    await w.see('5x + 8 = 18', 'Your mental math is very strong.');
+    if (!(await w.page.locator('[data-move="add"].is-ring').count())) throw new Error('Add should have a steady ring');
+  },
+  async 'k-level-2'(w) {
+    await w.start(); await w.see('TWO-STEP EQUATIONS · Level 2', '3x − 4 = 11');
+    await w.both('k-level-2');
+    w.at('Add 4'); await w.addEnter(4); await w.see('3x = 11 + 4');
+    w.at('combine'); await w.combine(15); await w.see('3x = 15');
+    w.at('⅓'); await w.fracEnter('1/3'); await w.see('x = ⅓(15)');
+    w.at('type 5'); await w.answer(5, 3); await w.see('3 × 5 − 4 = 11', '11 = 11', '✓ Balanced');
+  },
+  async 'k-level-3'(w) {
+    await w.start(); await w.see('TWO-STEP EQUATIONS · Level 3', '19 = 4 + 3x');
+    await w.both('k-level-3');
+    w.at('Add −4'); await w.addEnter(-4); await w.see('19 − 4 = 3x');
+    if (await w.page.locator('.spot-layer.is-error').count()) throw new Error('Add first should not be red');
+    w.at('hover the Fewer terms dot'); await w.page.hover('[data-light="fewer"]'); await wait(w.page, 300);
+    if (!(await w.page.locator('[data-light="fewer"].is-green').count())) throw new Error('Fewer terms should be green');
+    await w.see('Fewer terms');
+  },
+  async 'k-level-4'(w) {
+    await w.start(); await w.see('TWO-STEP EQUATIONS · Level 4', '4 + 3x = 19');
+    await w.both('k-level-4');
+    w.at('Add −4'); await w.addEnter(-4); await w.see('3x = 19 − 4');
+    w.at('combine'); await w.combine(15);
+    w.at('⅓'); await w.fracEnter('1/3');
+    w.at('type 5'); await w.answer(5, 1); await w.see('4 + 3 × 5 = 19', '✓ Balanced');
+  },
+  async 'k-level-5'(w) {
+    await w.start(); await w.see('TWO-STEP EQUATIONS · Level 5', '4 − 3x = −11');
+    await w.both('k-level-5');
+    w.at("I'm stuck"); await w.stuck(); await wait(w.page, 700);
+    await w.see('Look at the +4 next to x. What would we add to both sides to eliminate it? Type it in the box.');
+    await w.both('k-stuck');
+    w.at("I'm stuck again"); await w.stuck(); await wait(w.page, 700);
+    await w.see('Look at the +4 next to x.');
+    if (await w.page.locator('.ab-boardwrap, .alone-tray, [data-action="teach"]').count()) throw new Error('no balance, counters or Teach me in basic form');
+  },
+  async 'k-level-6'(w) {
+    await w.start(); await w.see('TWO-STEP EQUATIONS · Level 6', '3x + 4 = −11');
+    await w.both('k-level-6');
+    w.at('Add −4'); await w.addEnter(-4); await w.see('3x = −11 − 4');
+    w.at('combine'); await w.combine(-15); await w.see('3x = −15');
+    w.at('⅓'); await w.fracEnter('1/3'); await w.see('x = ⅓(−15)');
+    w.at('type −5'); await w.answer(-5, 1); await w.see('3 × (−5) + 4 = −11', '✓ Balanced');
+  },
+  async 'k-level-7'(w) {
+    await w.start(); await w.see('TWO-STEP EQUATIONS · Level 7', '19 = 4 − 3x');
+    await w.both('k-level-7');
+    w.at('Trade places'); await w.click(`${act('choose')}[data-move="trade"]`); await w.see('4 − 3x = 19');
+    w.at('Add −4, combine'); await w.addEnter(-4); await w.combine(15); await w.see('−3x = 15');
+    w.at('−⅓'); await w.fracEnter('-1/3'); await w.see('x = −⅓(15)');
+    w.at('type −5'); await w.answer(-5, 1); await w.see('19 = 4 − 3 × (−5)', '✓ Balanced');
+  },
+  async 'student-two-step'(w) {
+    await w.start();
+    w.at('mistake 1: touch nothing for 11 seconds'); await wait(w.page, 11000);
+    if (!(await w.page.locator('.lx-help.is-idle').count())) throw new Error('I’m stuck should be flashing after 10 seconds');
+    w.at('mistake 2: type 15, drag, Enter three times'); await w.answer(15, 3); await w.lateLayer();
+    await w.see('3 × 15 + 4 = 19', '49 = 19', 'not balanced');
+    w.at('mistake 2: Undo'); await w.click(act('undo')); await wait(w.page, 800);
+    await w.see('Look at the +4 next to x.'); await w.click(act('spotDismiss'));
+    w.at('mistake 3: type 4 in the open Add box, Enter'); await w.type(4); await w.enter(); await w.lateLayer();
+    await w.see('did not eliminate the term');
+    w.at('mistake 3: Undo'); await w.click(act('undo')); await wait(w.page, 800); await w.click(act('spotDismiss'));
+    w.at('mistake 4: the fraction too early'); await w.click(act('multOpen')); await w.click(`${act('multPick')}[data-kind="frac"]`);
+    await w.see('That move works once each side is one term.');
+    w.at('mistake 5: type −4 in the open Add box, a wrong sum'); await w.type(-4); await w.enter(); await w.combine(23); await w.lateLayer();
+    await w.see('19 − 4 is not 23. Press Undo and try again.');
+    await w.lit('.lx-live .lx-tok.is-pair');
+    await w.both('student-two-step');
+    w.at('mistake 5: Undo'); await w.click(act('undo')); await wait(w.page, 800);
+    await w.see('19 and −4 are on the same side. Put them together: drag one onto the other and type what they make.');
+  },
   async 'f-no-0-1-minus1'(w) {
     await w.start();
     await w.see('ADD TO BOTH SIDES · Level 2', 'x', '3', '−1');

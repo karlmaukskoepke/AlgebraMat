@@ -2,9 +2,9 @@ import { describe, it, expect } from 'vitest';
 import { PACKS, SECTIONS, twoStepEquations, twoStep as oldTwoStep } from '../src/packs/index.js';
 import { makeTwoStep, tagTwoStep, formatTwoStep, constOf, coefOf } from '../src/engine/twoStep.js';
 import { generateTwoStepLevel, TWO_STEP_LEVELS, worstCaseRows, slipCollisions, slipSafe } from '../src/engine/generateTwoStep.js';
-import { newTwoStep, reduceTwoStep, TWO_STEP_MENU, TWO_STEP_SPOT, xAlone, optionOf } from '../src/engine/cards/twoStep.js';
+import { newTwoStep, TWO_STEP_SPOT, TWO_STEP_LAYER, optionOf } from '../src/engine/cards/twoStep.js';
 import { newFlip, reduceFlip, FLIP_MENU } from '../src/engine/cards/flip.js';
-import { startLights, withLights } from '../src/engine/addBothLights.js';
+import { startLights } from '../src/engine/addBothLights.js';
 import { withSpotlight } from '../src/engine/spotlight.js';
 import { shapeOf, UNKNOWN, SHAPES } from '../src/engine/solveit/shape.js';
 import { REGISTRY } from '../src/engine/solveit/registry.js';
@@ -84,7 +84,7 @@ describe('the generator: every level, 200 seeds', () => {
 
 // ---------- playing it, through the card's layers as a student does (the spotlight round the term layer round the Multiply menu) ----------
 
-const layer = withSpotlight(withLights(TWO_STEP_MENU.withMenu(reduceTwoStep), { alone: xAlone, menuPreview: (s, kind) => optionOf(kind, s) === 'live' }), TWO_STEP_SPOT);
+const layer = withSpotlight(TWO_STEP_LAYER, TWO_STEP_SPOT);
 const start = (p, level, opts = {}) => startLights(newTwoStep({ ...p, logLevel: level }, { level, ...opts }));
 const digits = (n) => [...String(Math.abs(n))].map((d) => ({ type: 'digit', digit: Number(d) })).concat(n < 0 ? [{ type: 'toggleSign' }] : []);
 const A = {
@@ -223,6 +223,7 @@ describe('x on the right, the minus on x, the forced move', () => {
     expect(shapeOf(at).id).toBe('F2');
     const f = run(at, A.flip());
     expect(f.feedback.key).toBe('fFlipIntro');                                // the first flip of the level says what −1 does
+    expect(f.rows.map((r) => r.type)).toEqual(['eq', 'fold', 'work', 'eq']);  // the Add and the combining folded first, then the flip
     expect(shapeOf(f).id).toBe('D1');
     expect(run(f, [...A.frac(3), ...A.check(5)]).stage).toBe('done');
     const g = run(at, A.frac(3));

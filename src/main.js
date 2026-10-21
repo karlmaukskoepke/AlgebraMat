@@ -1,7 +1,7 @@
 import './style.css';
 import { PROBLEMS_PER_LEVEL } from './engine/generate.js';
 import {
-  completeLevel, isPackComplete, isLevelUnlocked, normalizeProgress, mergeProgress,
+  completeLevel, isPackComplete, isLevelUnlocked, normalizeProgress, mergeProgress, withLegacyCredit,
   encodeProgress, decodeProgress, doneCount,
 } from './engine/progress.js';
 import { createStore } from './storage.js';
@@ -380,7 +380,8 @@ function nextProblem() {
 
 function finishLevel() {
   const { pack, level } = play;
-  if (!pack.comingSoon && !pack.hidden) progress = completeLevel(progress, pack.id, level); // a round opened from a link isn't saved yet
+  // (a level finished on an old card counts on its new card straight away, not only at the next load: Build K)
+  if (!pack.comingSoon && !pack.hidden) progress = withLegacyCredit(completeLevel(progress, pack.id, level)); // a round opened from a link isn't saved yet
   play.finished = true;
   persist();
   render();

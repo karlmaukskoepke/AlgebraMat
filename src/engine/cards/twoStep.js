@@ -23,7 +23,7 @@ import { chooseFraction, takeStep, coefOn } from '../fractionMove.js';
 import { commitFlip, commitFraction } from '../flipMove.js';
 import { makeMultiplyMenu } from '../multiplyMenu.js';
 import { hintAfterUndo } from '../solveit/registry.js';
-import { ADD_ERRORS, moveOwed } from '../addBothLights.js';
+import { ADD_ERRORS, moveOwed, withLights } from '../addBothLights.js';
 
 // The levels a move goes live at (displayed = saved on this card).
 export const TRADE_LEVEL = 3;                 // x on the right
@@ -160,6 +160,7 @@ const loop = createSolveLoop({
         if (g) return g;
         if (s.level < FLIP_LEVEL || !singleTerm(s.board)) return say(s, greyKey('flip', s));
         if (xAlone(s.board)) return say(s, 'aSolvedBoard');
+        api.fold(s);                                       // the move before it (Add, and the combining) folds to its own row first
         const out = commitFlip(s, api, MOVE);
         s.lastFlip = out.needUndo;
         // the first flip of the level that helps: one sentence about what −1 does (once, like the first Trade places)
@@ -228,3 +229,8 @@ export const TWO_STEP_SPOT = {
   hint: (s, before = null) => hintAfterUndo(s, before),
   prompt: (s) => (moveOwed(s) ? 'lxMustMove' : 'aFindX'),
 };
+
+// The card's layers, as a student plays it: Add's term layer (dragging, combining, the Add blank) round the Multiply menu round the card.
+// A term picked up closes Multiply's options (they would otherwise stay open under the drag).
+const layered = withLights(TWO_STEP_MENU.withMenu(reduceTwoStep), { alone: xAlone, menuPreview: (s, kind) => optionOf(kind, s) === 'live' });
+export const TWO_STEP_LAYER = (s, action) => layered(action.type === 'lxDrop' && s.mopts ? { ...s, mopts: null } : s, action);

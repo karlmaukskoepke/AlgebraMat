@@ -35,7 +35,8 @@ const CARD = {
   silent: new Set([...SILENT, 'dPickFraction', 'lxCombined', 'lxCombinedAlone']),
   nudge: { ...NUDGE, wOneTerm: 'panel', aLaterLevel: 'panel', fFlipIntro: 'panel', dBlankBad: 'answer', dUnitFraction: 'blank', dForced: 'fractions' },
   // the Multiply row: its preview while an option is hovered, then the chosen option (the fraction blank, or −1)
-  ghost: (s) => (s.mopts || fracOpen(s) || (KINDS.includes(s.ui?.preview) && TWO_STEP_MENU.canPreview(s)) ? moveRow(s, TWO_STEP_MENU, { blueFlip: true }) : null),
+  // (with only the options open, the Add move's row stays: an Add box left open is still seen)
+  ghost: (s) => (s.mopts?.kind || fracOpen(s) || (KINDS.includes(s.ui?.preview) && TWO_STEP_MENU.canPreview(s)) ? moveRow(s, TWO_STEP_MENU, { blueFlip: true }) : null),
   forward(s) {
     if (s.mopts?.kind) return { label: 'Go', action: 'go', enabled: s.mopts.kind === 'flip' };
     if (fracOpen(s)) return { label: 'Go', action: 'go', enabled: Boolean(fracOf(s.fb)) };
