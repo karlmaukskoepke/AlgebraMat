@@ -19,7 +19,7 @@ describe('substituting a value, one operation at a time', () => {
     const r = run([x(3)], [num(-12)], -4);
     expect(r.texts).toEqual(['3 × (−4) = −12', '−12 = −12']);
     expect(r.ok).toBe(true);
-    expect(r.lines[0].segs.filter((s) => s.cls === 'is-op').map((s) => s.text).join('')).toBe('3 × (−4)');
+    expect(r.lines[0].segs.filter((s) => s.cls.split(' ').includes('is-op')).map((s) => s.text).join('')).toBe('3 × (−4)');
     expect(r.lines[1].segs.find((s) => s.cls === 'is-res').text).toBe('−12');
     expect(r.lines[1].op).toBe(false);
   });
@@ -27,7 +27,7 @@ describe('substituting a value, one operation at a time', () => {
     const r = run([x(), num(3)], [num(-6)], -9);
     expect(r.texts).toEqual(['(−9) + 3 = −6', '−6 = −6']);
     expect(r.ok).toBe(true);
-    expect(r.lines[0].segs.filter((s) => s.cls === 'is-op').map((s) => s.text).join('')).toBe('(−9) + 3');
+    expect(r.lines[0].segs.filter((s) => s.cls.split(' ').includes('is-op')).map((s) => s.text).join('')).toBe('(−9) + 3');
     expect(run([x(), num(3)], [num(-6)], -3).ok).toBe(false);
   });
   it('a simplified state with an unsimplified side: the left is worked first, then the right, a step a line', () => {

@@ -34,7 +34,8 @@ function fracBox(s, mirror) {
     return html(mirror ? 'span' : 'button', `lx-box dv-fracpart${focus ? ' is-focus' : ''}${text ? '' : ' is-empty'}${focus && !text ? ' is-blink' : ''}${mirror ? ' is-mirror' : ''}`, [text || ' '],
       mirror ? { 'aria-hidden': 'true' } : { type: 'button', 'data-action': 'focus', 'data-target': p, 'data-lx-field': '1', 'aria-label': p === 'num' ? 'The top of the fraction' : 'The bottom of the fraction', ...(open ? {} : { tabindex: '-1' }) });
   };
-  return html('span', `dv-fracblank${mirror ? ' is-mirror' : ''}`, [part('num'), html('span', 'dv-fracbar'), part('den')]);
+  // the cue under the open blank: a click or tap on a box clears it (Build H, Part 1)
+  return html('span', `dv-fracblank${mirror ? ' is-mirror' : ''}`, [part('num'), html('span', 'dv-fracbar'), part('den'), ...(open && !mirror ? [html('span', 'dv-retype', ['Tap a box to retype it'])] : [])]);
 }
 // The whole-number option's blank (Build D-2, Part 4): typed on the left, mirrored on the right.
 function wholeBox(s, mirror) {

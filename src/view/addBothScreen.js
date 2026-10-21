@@ -73,7 +73,8 @@ function popups(s, wrap) {
   }
   // the seesaw just built and balanced: "Choose a move" with only the moves lit, the rest greyed (Build D-2, Part 5)
   if (s.scaffold && s.stage === 'moves' && s.feedback?.key === 'aBuilt' && !s.menu) {
-    wrap.append(spotlightLayer({ kind: 'intro', lit: ['panel'] }, { ...o, text: lightsFeedbackText(s.feedback) }));
+    // (the equation and the seesaw it is about stay lit with the moves: never grey out what the question is about, Build H)
+    wrap.append(spotlightLayer({ kind: 'intro', lit: ['panel', 'newest', 'board'] }, { ...o, text: lightsFeedbackText(s.feedback) }));
     return;
   }
   // combining two terms dropped together: they are lit with "Combine" over them, the box for their sum under them, the rest greyed
@@ -519,6 +520,9 @@ function bigTray(s) {
   const caption = b.step === 'answer' ? 'Now type x.' : b.feedback?.key === 'bigPartyIntro' ? 'Look at the signs: the same (a Party) or different (a Battle)?' : bigFeedbackText(b.feedback);
   return html('div', 'alone-tray is-big', [...notes, html('p', 'alone-caption', [caption]), tools], { role: 'group', 'aria-label': 'Working out the two numbers' });
 }
+// Count it's words for the counters walk, with the one line that is not true here swapped, in this adapter (Count it itself is not
+// touched): the counters arrive already drawn, so "Nice drawing!" would praise a drawing the student did not make (Build H, Part 1).
+const aloneWords = (fb) => (fb?.key === 'drawDone' ? 'Party or Battle?' : countersText(fb));
 function aloneTray(s) {
   if (s.sub) return null;                                       // the value is being checked: the walk's box is gone (Build D-2, Part 5)
   if (s.alone?.big && s.stage !== 'done') return bigTray(s);
@@ -546,7 +550,7 @@ function aloneTray(s) {
     }
   }
   const caption = w.step === 'cancel' ? 'Cross off the pairs: tap a counter, or a whole box.'
-    : w.step === 'answer' ? (w.choice === 'party' ? 'Count them all. Type it in x =.' : 'Count who is left. Type it in x =.') : countersText(w.feedback);
+    : w.step === 'answer' ? (w.choice === 'party' ? 'Count them all. Type it in x =.' : 'Count who is left. Type it in x =.') : aloneWords(w.feedback);
   return html('div', 'alone-tray', [mat, html('p', 'alone-caption', [caption]), tools], { role: 'group', 'aria-label': 'Counters for the two numbers' });
 }
 

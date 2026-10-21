@@ -1,8 +1,8 @@
-# The Solve it loop: the shared structure every Solve it card follows  (Karl, 2026-10-18; revision 2.0; status: matches the live site plus Build D)
+# The Solve it loop: the shared structure every Solve it card follows  (Karl, 2026-10-18; revision 2.1, 2026-10-20; status: matches the live site plus Build D)
 
-**Revision 2.0 is a rewrite.** It replaces rev 1.2 (2026-10-12) to match what is built and what Karl decided in live testing (Builds A to D): no Guess x / Use a move choice, no banner, hover previews, spotlight feedback, the check beside the equation, one green button, grabbable terms, and tucked help. Sections 3, 7, 8 and 9 carry over almost unchanged. **Design direction ("the light design"):** fewer elements on screen; more space for the problem; no banner (only just-in-time pop-ups); during any feedback the screen greys out and only what matters is lit (for students, not teachers); previews of moves on mouseover; equations the student can manipulate, with previews built in.
+**Revision 2.1 (2026-10-20)** adds one rule to section 2B, "Never grey out what the question is about", and a line to the conformance checklist. **Revision 2.0 is a rewrite.** It replaces rev 1.2 (2026-10-12) to match what is built and what Karl decided in live testing (Builds A to D): no Guess x / Use a move choice, no banner, hover previews, spotlight feedback, the check beside the equation, one green button, grabbable terms, and tucked help. Sections 3, 7, 8 and 9 carry over almost unchanged. **Design direction ("the light design"):** fewer elements on screen; more space for the problem; no banner (only just-in-time pop-ups); during any feedback the screen greys out and only what matters is lit (for students, not teachers); previews of moves on mouseover; equations the student can manipulate, with previews built in.
 
-**What this is.** One document for everything every Solve it card shares. **Each card is only problem-type configuration** (its moves, levels, forms, slips, scaffold pictures). **Precedence:** if a card spec and this document disagree on a shared rule, this document wins. Card specs open with "Follows `SPEC-SOLVE-IT-LOOP.md` rev 2.0." **Code mirrors this:** one shared loop; a card never re-implements it. Count it and Build it are separate and read-only; Solve it borrows their scaffolds through a thin adapter in its own code.
+**What this is.** One document for everything every Solve it card shares. **Each card is only problem-type configuration** (its moves, levels, forms, slips, scaffold pictures). **Precedence:** if a card spec and this document disagree on a shared rule, this document wins. Card specs open with "Follows `SPEC-SOLVE-IT-LOOP.md` rev 2.1." **Code mirrors this:** one shared loop; a card never re-implements it. Count it and Build it are separate and read-only; Solve it borrows their scaffolds through a thin adapter in its own code.
 
 ---
 
@@ -68,6 +68,7 @@ x ALONE ─► `x =` is the last step, and the only place that blinks
 - **Only one thing is lit at a time.** **No cursor or `x =` blinks** except the final `x =` step.
 - **Nothing advances on a timer** except the problem-start header fade and the help-flash timers above.
 - **Layout is stable;** no reflow when a row is added. **Phones are secondary:** Chromebooks and laptops first; every drag has a tap alternative.
+- **Never grey out what the question is about.** Whatever the student is being asked about (the numbers in `−8 + 11`, the equation being solved, the two sides that failed to balance) stays at full strength and readable during any pop-up, spotlight or scaffold. Other things grey around it.
 - **Answers:** one whole number typed into `x =` (or the blanks). The solved value is never displayed before the student types it.
 
 ---
@@ -139,6 +140,7 @@ x ALONE ─► `x =` is the last step, and the only place that blinks
 9. **Generator verified;** banned answers; collisions reported.
 10. **Shared code:** pop-up component, row builder, check renderer, operation colour, scaffold adapter are shared, not re-implemented per card.
 11. **Class-sheet words and save codes unchanged.**
+12. **Nothing the question is about is greyed.** The numbers, equation or sides being asked about stay fully readable during every pop-up, spotlight and scaffold (§2B).
 
 ---
 

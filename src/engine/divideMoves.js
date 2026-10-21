@@ -195,8 +195,8 @@ const DIVIDE_ERRORS = {
   dFail: { target: 'failSide', label: 'doesn’t split' },
   dFail3: { target: 'failSide', label: 'doesn’t split' },
   aUndoFirstHelp: { target: 'lastMove', label: 'waiting for Undo' },
-  aUndoGuess: { target: 'subst' },
-  dWrong: { target: 'subst', clear: true },
+  aUndoGuess: { target: 'subst', lit: ['substLast'] },
+  dWrong: { target: 'subst', clear: true, lit: ['substLast'] },
 };
 export const DIVIDE_SPOT = {
   error: (s) => DIVIDE_ERRORS[s.feedback?.key] ?? null,

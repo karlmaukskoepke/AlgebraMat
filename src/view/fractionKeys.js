@@ -1,4 +1,4 @@
-// Divide it's keys on the Mat (moved from its play adapter in Build E): "/" goes to the bottom of the fraction blank; the Multiply options'
+// Divide it's keys on the Mat (moved from its play adapter in Build E): "/" goes to the bottom of the fraction blank (and from the whole-number blank it opens the fraction blank); the Multiply options'
 // hover previews; and the unit-fraction pop-up when the blank has sat open a while.
 
 import { fracOpen, fracOf } from '../engine/divideBlank.js';
@@ -10,7 +10,8 @@ const STUCK_AFTER = 7000;
 export function bindFractionKeys(root, dispatch, getSession) {
   const onKey = (e) => {
     idle = Date.now();
-    if ((e.key === '/' || e.key === 'Divide') && getSession() && fracOpen(getSession())) { e.preventDefault(); e.stopImmediatePropagation(); dispatch({ type: 'fracSlash' }); }
+    const open = getSession() && (fracOpen(getSession()) || getSession().mopts?.kind === 'whole');     // (a "/" in the whole-number blank opens the fraction)
+    if ((e.key === '/' || e.key === 'Divide') && open) { e.preventDefault(); e.stopImmediatePropagation(); dispatch({ type: 'fracSlash' }); }
   };
   let idle = Date.now();
   let wasOpen = false;

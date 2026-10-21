@@ -494,3 +494,21 @@ Compared run by run with the code before this part: one scripted run changed, an
 | Key | Why |
 |---|---|
 | `event:divide-it/wrong-guess-then-undo` | the reminder after Undo is recorded: `supports` [] → [`hint`] (its trace, from step 8, is already allowed by an earlier entry) |
+
+## Build H, Part 1: the quick fixes (2026-10-21)
+
+Compared screen by screen with the code before this part (`main` at `5a528b1`): no scripted run changed (no trace, event, problem or save code), only these screens. Every one of them is already allowed by an earlier part; they are listed again here with what this part did to them.
+- **A check that ends Not balanced** (`add-wrong-guess`, `div-wrong-guess`, `div-end`): the last row of the check (the two values that are not equal) is lit with the "Not balanced" label instead of greyed; the value dropped into each x is blue in the first row.
+- **The check's first row, wherever a check is on screen** (`add-end`): the value dropped into x is blue.
+- **Walk and help screens** (`add-alone-stuck-2`, `add-alone-stuck-3`, `div-alone-stuck-1`, `div-failed-stuck`, `div-stuck-1`, `div-stuck-2`): a few pixels only (under 0.2%).
+
+| Key | Why |
+|---|---|
+| `screen:add-wrong-guess@1366x768` | the last check row is lit with "Not balanced"; the substituted value is blue |
+| `screen:add-wrong-guess@1366x650` | as above |
+| `screen:div-wrong-guess@1366x768` | as above |
+| `screen:div-wrong-guess@1366x650` | as above |
+| `screen:div-end@1366x768` | the substituted value is blue in the first check row |
+| `screen:div-end@1366x650` | as above |
+| `screen:add-end@1366x768` | as above |
+| `screen:add-end@1366x650` | as above |

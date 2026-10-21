@@ -42,6 +42,14 @@ export function withFractionBlank(reduce) {
       if (action.kind === 'frac') return inner({ ...state, mopts: null }, { type: 'choose', move: 'fraction' });
       return { ...state, mopts: { kind: action.kind, entry: '' }, feedback: null, ui: { ...(state.ui ?? {}), preview: false } };
     }
+    // a "/" typed in the whole-number blank is the fraction's bar (Build H, Part 1): the fraction blank opens, what was typed is its
+    // top, and the cursor moves to the bottom: 1, /, 5 makes 1/5
+    if (m?.kind === 'whole' && (action.type === 'fracSlash' || (action.type === 'typeChar' && action.ch === '/'))) {
+      const opened = inner({ ...state, mopts: null }, { type: 'choose', move: 'fraction' });
+      if (opened.menu !== 'fraction') return state;
+      const num = m.entry === '-' ? '' : m.entry;
+      return { ...opened, fb: { num, den: '', part: 'den' }, feedback: num.replace('-', '').length > 1 ? { key: 'dUnitFraction', params: {}, bad: false } : null };
+    }
     if (m?.kind && action.type !== 'ui') {
       if (m.kind === 'whole' && isTyping(action)) {
         const entry = typeInto(m.entry, action, 'integer');
@@ -90,7 +98,8 @@ function fractionBlank(reduce) {
         return done && fb.num !== '' && fb.num !== '1' ? { ...next, feedback: { key: 'dUnitFraction', params: {}, bad: false } } : { ...next, feedback: null };
       }
       if (action.type === 'fracStuck') return { ...state, feedback: { key: 'dUnitFraction', params: {}, bad: false } };
-      if (action.type === 'focus' && (action.target === 'num' || action.target === 'den')) return { ...state, fb: { ...fb, part: action.target } };
+      // a click or tap on either box clears it and puts the cursor in it (Build H, Part 1)
+      if (action.type === 'focus' && (action.target === 'num' || action.target === 'den')) return { ...state, fb: { ...fb, [action.target]: '', part: action.target }, feedback: null };
       if (action.type === 'go') {
         const f = fracOf(fb);
         if (!f) return { ...state, fb: { ...fb, part: fb.den ? fb.part : 'den' }, feedback: { key: 'dBlankBad', params: {}, bad: true } };

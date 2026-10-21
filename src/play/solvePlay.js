@@ -43,6 +43,7 @@ export function makeSolvePlay(card) {
       if (own) return own;
       if (d.action === 'focus') return { type: 'focus', target: d.target };
       if (d.action === 'choose') return { type: 'choose', move: d.move };
+      if (d.action === 'placeValue') return { type: 'placeValue', ...(d.xi !== undefined && d.xi !== '' ? { index: Number(d.xi) } : {}) };   // (the x it was dropped on, when there is more than one)
       if (d.action === 'greyMove') return { type: 'greyMove', move: d.move };
       return COMMON.has(d.action) ? { type: d.action } : null;
     },

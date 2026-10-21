@@ -11,6 +11,11 @@ const FRACTIONS = { 2: '½', 3: '⅓', 4: '¼', 5: '⅕', 6: '⅙' };
 export const fractionText = (n) => FRACTIONS[n] ?? `1/${n}`;
 export const plugValue = (v) => (v < 0 ? `(${signed(v)})` : `${v}`);
 
+// How many x's an equation has to drop the value into (each x term is one, with or without a number in front; the x inside a fraction
+// of a worked row is not a drop target).
+const xIn = (terms) => terms.reduce((n, t) => n + (t.kind === 'x' ? 1 : 0), 0);
+export const xCount = (board) => xIn(board.left) + xIn(board.right);
+
 export const termText = (t) => {
   if (t.kind === 'x') return (t.coef ?? 1) > 1 ? `${t.coef}x` : (t.coef ?? 1) < -1 ? `${MINUS}${-t.coef}x` : (t.coef ?? 1) === -1 ? `${MINUS}x` : 'x';
   if (t.kind === 'frac') return `${fractionText(t.n)}(${t.inner.map(termText).join(' + ')})`;
@@ -33,10 +38,12 @@ const isNumber = (it) => it.k === 'sub' || it.k === 'num';
 // Text of an item as a list of segments ({ text, cls }); `mark` says which item (by reference) is the op, and which the result.
 function itemSegs(it, ctx, alone) {
   const cls = ctx.op === it || ctx.pair?.includes(it) ? 'is-op' : ctx.res === it ? 'is-res' : '';
-  if (it.k === 'sub') return [{ text: !alone && it.v < 0 ? `(${signed(it.v)})` : signed(it.v), cls: cls || 'is-blue' }];
+  // the value dropped into x is always the blue of the x it replaced (Build H, Part 1), even when it is the operation about to happen
+  const blue = cls ? `${cls} is-blue` : 'is-blue';
+  if (it.k === 'sub') return [{ text: !alone && it.v < 0 ? `(${signed(it.v)})` : signed(it.v), cls: blue }];
   if (it.k === 'num') return [{ text: signed(it.v), cls }];
-  if (it.k === 'prod') return [{ text: `${signed(it.a)} × `, cls }, { text: plugValue(it.v), cls: cls || 'is-blue' }];
-  if (it.k === 'neg') return [{ text: `${MINUS}(`, cls }, { text: signed(it.v), cls: cls || 'is-blue' }, { text: ')', cls }];
+  if (it.k === 'prod') return [{ text: `${signed(it.a)} × `, cls }, { text: plugValue(it.v), cls: blue }];
+  if (it.k === 'neg') return [{ text: `${MINUS}(`, cls }, { text: signed(it.v), cls: blue }, { text: ')', cls }];
   // a fraction: the fraction and its inner part; the whole is the op when it is the one being worked out
   const inner = sumSegs(it.inner, ctx);
   return [{ text: `${fractionText(it.n)}(`, cls }, ...inner, { text: ')', cls }];

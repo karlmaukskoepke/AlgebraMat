@@ -3636,3 +3636,16 @@ body[data-input='touch'] #play.is-light #controls .btn-pad { min-width: 48px; mi
 .addboth-mat .bm-mark.is-left .mark { stroke: #b5368c; stroke-width: 4.5; }
 .alone-tray .alone-box { fill: transparent; stroke: #c9c3ae; stroke-width: 2; stroke-dasharray: 6 5; cursor: pointer; }
 .ui-light .sv-check > .alone-tray:not(.is-big) { max-width: 560px; }
+
+/* Build H, Part 1: the value dropped into x is blue in the check's first line (solveTerms.js); with more than one x, each x that has the
+   value shows a small green check above it (a shape as well as a colour) */
+.ui-light .lb-x.has-xmark { position: relative; }
+.ui-light .lb-xcheck { position: absolute; left: 50%; top: -16px; transform: translateX(-50%); width: 24px; height: 24px; border-radius: 50%; background: #1b6e3a; color: #fff; font: 800 17px/24px 'Lexend', system-ui, sans-serif; text-align: center; pointer-events: none; }
+
+/* Build H, Part 1: dragging a term shows the same in-place grey preview on both sides: the term is drawn, grey, where it would land (it
+   was a dashed empty box on the side it stayed on, and when it was dropped back where it started) */
+.ui-light .lx-live .lx-tok.is-lifted { color: #6f6b60; opacity: 0.55; outline: 3px dashed #9a968a; outline-offset: 2px; border-radius: 10px; background: none; }
+.ui-light .lx-live .lx-tok.is-lifted * { color: inherit; border-color: transparent; }
+/* Build H, Part 1: the small cue under Divide it's open fraction blank (it takes no room of its own: the row keeps its height) */
+.dv-fracblank { position: relative; }
+.dv-light .dv-retype { position: absolute; top: calc(100% + 2px); left: 50%; transform: translateX(-50%); white-space: nowrap; font: 700 15px 'Lexend', system-ui, sans-serif; color: #5d5a52; pointer-events: none; }

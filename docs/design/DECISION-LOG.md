@@ -77,3 +77,17 @@ feedback loop; previews of moves on mouseover; manipulable equations with previe
 
 **Kept after all (Karl, rev 2 of the brief):** the lights stay, as the small collapsed column of dots beside the narrow panel (hover
 opens a dot into its goal; no new labels). Now that they take little room, Karl likes them as a curiosity.
+
+## 2026-10-20: Build F review (Karl, after testing Build F live)
+
+**Successes (keep, and only tweak from now on):**
+- Divide's hint after Undo: it lights the fraction option and names the idea with real numbers.
+- Crossing off pairs at `x = −3 + 5`.
+
+**Karl's answers to Build F's decisions:**
+- Keep the wider page.
+- Keep counters that arrive already drawn.
+- Add's hint after Undo counts as `hint` on the class sheet.
+
+**New rule (loop spec rev 2.1):** never grey out what the question is about. The numbers in `−8 + 11`, the equation being solved, or the
+two sides that failed to balance stay at full strength and readable during any pop-up, spotlight or scaffold. Other things grey around them.

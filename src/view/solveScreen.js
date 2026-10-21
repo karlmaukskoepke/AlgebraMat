@@ -29,10 +29,15 @@ function termsOf(side, s, o) {
     if (t.kind === 'frac') {
       out.push(html('span', 'lb-frac', [html('span', 'is-blue', [fractionText(t.n)]), '(', ...termsOf(t.inner, s, { ...o, live: false, plug: false }), ')']));
     } else if (t.kind === 'x') {
-      const dropOn = o.plug && s.sub?.placing;
+      const xi = o.xi ? o.xi.n++ : 0;                           // which x of the equation this is, left to right
+      const filled = Boolean(o.plug && s.sub && (!s.sub.placing || s.sub.filled?.includes(xi)));
+      const dropOn = o.plug && s.sub?.placing && !filled;
       const c = t.coef ?? 1;
-      // the value is dragged into each x of the equation being checked; an x it went into changes colour (Build D, Part 2)
-      const xel = html('span', `lb-x${o.plug ? ' is-plugx' : ''}${dropOn ? ' is-droptarget' : ''}${o.plug && s.sub && !s.sub.placing ? ' is-placed' : ''}`, ['x'], { 'data-x': '1', ...(dropOn ? { 'data-action': 'placeValue', role: 'button', tabindex: '0', 'aria-label': 'Put your value into x' } : {}) });
+      // the value is dragged into each x of the equation being checked; an x it went into changes colour (Build D, Part 2). With more
+      // than one x, each x that has the value gets a small green check above it: a shape, not colour alone (Build H, Part 1)
+      const manyX = o.plug && (s.sub?.xs ?? 1) > 1;
+      const xel = html('span', `lb-x${o.plug ? ' is-plugx' : ''}${dropOn ? ' is-droptarget' : ''}${filled ? ' is-placed' : ''}${manyX ? ' has-xmark' : ''}`, ['x'], { 'data-x': '1', 'data-xi': String(xi), ...(dropOn ? { 'data-action': 'placeValue', role: 'button', tabindex: '0', 'aria-label': 'Put your value into x' } : {}) });
+      if (manyX && filled) xel.append(html('span', 'lb-xcheck', ['✓'], { 'aria-label': 'This x has the value' }));
       if (c > 1) out.push(html('span', 'lb-coef', [o.live && s.hint?.kind === 'coef' ? html('span', 'lb-hintbox', [String(c)]) : String(c), xel]));
       else out.push(xel);
     } else {
@@ -45,7 +50,7 @@ function termsOf(side, s, o) {
 const charsOf = (list) => list.map((x) => (x.kind === 'frac' ? 5 + charsOf(x.inner) : x.kind === 'x' ? ((x.coef ?? 1) > 1 ? 2 : 1) : String(signed(x.v)).length + 3)).reduce((a, b) => a + b, 0);
 const eqClass = (chars) => (chars > 30 ? ' is-xlong' : chars > 20 ? ' is-long' : '');
 
-const sideEls = (board, s, o) => [termsOf(board.left, s, o), termsOf(board.right, s, o)];
+const sideEls = (board, s, o) => { const oo = { ...o, xi: { n: 0 } }; return [termsOf(board.left, s, oo), termsOf(board.right, s, oo)]; };
 // A side as written, inert (the move's preview row).
 export const sideTerms = (terms, s) => termsOf(terms, s, { live: false, plug: false });
 
@@ -131,9 +136,9 @@ export function answerBlock(s, loop) {
 }
 
 // The value is dragged onto x (Build D-2, Part 2: dragging only; a click on x no longer places it, though Enter still does, for the
-// keyboard). While the value is a chip, a pointer drag carries a copy of it; letting go over x places it. After about 4 seconds with
+// keyboard). While the value is a chip, a pointer drag carries a copy of it; letting go over x places it. After about 2.5 seconds with
 // nothing done, a faint copy of the value travels from x = to the first x, again and again until the student acts.
-const HINT_WAIT = 4000;
+const HINT_WAIT = 2500;
 const HINT_EVERY = 2600;
 const reduceMotion = () => typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -152,7 +157,7 @@ export function bindValueDrag(root, dispatch) {
     ghost = null;
     // letting go over x, or anywhere on the outlined equation, places the value (a kind drop zone; small fingers, small x)
     const over = document.elementFromPoint(e.clientX, e.clientY)?.closest('[data-x][data-action="placeValue"], .is-plugrow');
-    if (over && root.contains(over)) dispatch({ type: 'placeValue' });
+    if (over && root.contains(over)) dispatch({ type: 'placeValue', ...(over.dataset?.xi !== undefined && over.matches('[data-x]') ? { index: Number(over.dataset.xi) } : {}) });
   };
   const down = (e) => {
     const chip = e.target.closest('[data-chip]');
@@ -285,6 +290,10 @@ export function notePopup(s, o) {
 
 // Enter presses the green button, wherever the focus is on the Mat (a field, the problem), unless it is on another action button
 // (Undo, a move, I'm stuck), which keeps its own Enter.
+// The help corner's buttons never keep an Enter of their own: a student who clicks I'm stuck, types a number and presses Enter gets the
+// green button (Go with the number in the blank, else Next, else Check), never another clue (Build H, Part 1; rev 0.1's order).
+export const HELP_BUTTONS = '[data-action="stuck"], [data-action="teach"], [data-action="startOver"]';
+
 export function bindForwardKey(root) {
   const onKey = (e) => {
     if (e.key !== 'Enter' || e.repeat || e.ctrlKey || e.metaKey || e.altKey) return;
@@ -292,7 +301,7 @@ export function bindForwardKey(root) {
     const f = root.querySelector('.btn-forward');
     if (!f) return;
     const a = document.activeElement;
-    if (a instanceof HTMLElement && a !== f && a.matches('button, a, [role="button"]') && !a.dataset.lxField && !a.closest('#controls') && !a.matches('[data-action="focus"], [data-x]')) return;
+    if (a instanceof HTMLElement && a !== f && a.matches('button, a, [role="button"]') && !a.matches(HELP_BUTTONS) && !a.dataset.lxField && !a.closest('#controls') && !a.matches('[data-action="focus"], [data-x]')) return;
     e.preventDefault();
     e.stopImmediatePropagation();
     if (!f.disabled) f.click();

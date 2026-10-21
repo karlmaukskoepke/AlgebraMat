@@ -388,9 +388,9 @@ const ADD_ERRORS = {
   lxZero: { target: 'xnum', label: 'no change' },
   aZeroOther: { target: 'otherSide', label: 'now 0' },
   aUndoFirstHelp: { target: 'lastMove', label: 'waiting for Undo' },
-  aUndoGuess: { target: 'subst' },
-  aWrong: { target: 'subst', clear: true },
-  lxCombineWrong: { target: 'sumbox', label: 'check this' },
+  aUndoGuess: { target: 'subst', lit: ['substLast'] },
+  aWrong: { target: 'subst', clear: true, lit: ['substLast'] },
+  lxCombineWrong: { target: 'sumbox', label: 'check this', lit: ['pair'] },       // (the two numbers being combined stay lit too)
 };
 // A wrong move on the seesaw (Build F, Part 3): a picture spotlight. The pair that combined beside x is drawn again, its cancelled pairs
 // crossed off and what is left (or what joined) lit; the side without x is lit too. Undo, then the hint, as on the bare screen. The
@@ -421,7 +421,8 @@ export const ADD_SPOT = {
     // the scaffold's pair: party or battle, floating right above the two groups on the balance (Build D, Part 5)
     if (s.scaffold && s.combining?.step === 'kind') return { kind: 'ask', target: 'combining', choices: [['Party!', 'party'], ['Battle!', 'battle']] };
     if (s.alone?.step === 'pb') return { kind: 'ask', target: 'otherSide', choices: [['Party!', 'party'], ['Battle!', 'battle']] };
-    if (s.alone?.step === 'type') return { kind: 'ask', target: 'answer' };
+    // (the two numbers being worked out stay lit, fully readable: never grey out what the question is about, Build H)
+    if (s.alone?.step === 'type') return { kind: 'ask', target: 'answer', lit: ['otherSide'] };
     return null;
   },
 };

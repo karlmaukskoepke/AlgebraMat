@@ -13,7 +13,7 @@
 // its scaffold pictures. Pure logic, no DOM.
 
 import { typeInto, isTyping } from './entry.js';
-import { signed, substitutionLines, boardText } from './solveTerms.js';
+import { signed, substitutionLines, boardText, xCount } from './solveTerms.js';
 import { climb, teach as teachShape } from './solveit/registry.js';
 
 // What a card supplies:
@@ -202,13 +202,21 @@ export function createSolveLoop(card) {
         const target = current ? s.board : s.rows[0].board;
         const work = substitutionLines(target, typed);
         const collapsed = correct && card.collapse(s.level);
-        s.sub = { kind, typed, ok: correct, tag, target: current ? 'current' : 'original', lines: work.lines, collapsed, placing: !collapsed, step: collapsed ? 1 : 0 };
+        // (an equation with more than one x takes a drop in each: `xs` of them, `filled` the ones that have it; Build H, Part 1)
+        s.sub = { kind, typed, ok: correct, tag, target: current ? 'current' : 'original', lines: work.lines, collapsed, placing: !collapsed, step: collapsed ? 1 : 0, xs: xCount(target), filled: [] };
         if (s.sub.placing) return say(s, 'aPlace', { typed: signed(typed), where: s.sub.target });
         return say(s, correct || kind === 'value' ? 'aPlugIn' : 'aPlugCurrent', { typed: signed(typed), where: s.sub.target });
       }
       // the value goes onto x (dragged, or tapped there)
       case 'placeValue': {
         if (!s.sub?.placing) return state;
+        const xs = s.sub.xs ?? 1;
+        if (xs > 1) {                                                              // a drop in each x: the one dropped on, or the next that is empty
+          const at = Number.isInteger(action.index) && action.index >= 0 && action.index < xs ? action.index : [...Array(xs).keys()].find((i) => !s.sub.filled.includes(i));
+          if (at === undefined) return state;
+          if (!s.sub.filled.includes(at)) s.sub = { ...s.sub, filled: [...s.sub.filled, at] };
+          if (s.sub.filled.length < xs) return say(s, 'aPlace', { typed: signed(s.sub.typed), where: s.sub.target });
+        }
         s.sub = { ...s.sub, placing: false, step: 1 };                             // the copy of the equation is written beside it, its first line (Build D)
         return say(s, s.sub.ok || s.sub.kind === 'value' ? 'aPlugIn' : 'aPlugCurrent', { typed: signed(s.sub.typed), where: s.sub.target });
       }

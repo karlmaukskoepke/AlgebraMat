@@ -8,7 +8,7 @@
 import { bindAddBothMat } from './addBothPointer.js';
 import { bindGrab } from './lightsGrabPointer.js';
 import { bindHelpTimer } from './helpTimer.js';
-import { bindValueDrag } from './solveScreen.js';
+import { bindValueDrag, HELP_BUTTONS } from './solveScreen.js';
 
 const ADD = '.lb-move[data-move="add"]';
 
@@ -114,7 +114,8 @@ export function bindLightsMat(root, dispatch, getSession) {
     keyboard = true;
     const a = document.activeElement;
     // a focused button on the Mat (the Add icon, Undo, I'm stuck…) keeps its own Enter; the two fields do not
-    if (a instanceof HTMLElement && root.contains(a) && a.matches('button, a') && !a.dataset.lxField) return;
+    // (I'm stuck, Teach me and Start over never do: Enter is the green button's, Build H, Part 1)
+    if (a instanceof HTMLElement && root.contains(a) && a.matches('button, a') && !a.dataset.lxField && !a.matches(HELP_BUTTONS)) return;
     if (a instanceof HTMLElement && a.matches('button, a') && !root.contains(a) && !a.closest('#controls')) return;
     e.preventDefault();
     e.stopImmediatePropagation();

@@ -280,6 +280,10 @@ export function findSolveTarget(root, target, s = null) {
     case 'original': return eqRows[0]?.querySelector('.lb-eq') ?? eqRows[0] ?? null;
     case 'preview': return root.querySelector('.lx-ghost.is-preview .lb-eq, .lx-ghost.is-near .lb-eq, .lx-ghost.is-chosen .lb-eq');
     case 'subst': return root.querySelector('.sv-check .sv-mark, .lx-subst li:last-child, .lb-subst li:last-child') ?? root.querySelector('.lx-subst, .lb-subst');
+    case 'substLast': {                                 // the final row of the check: the two values that are not equal (Build H, Part 1)
+      const rows = [...root.querySelectorAll('.sv-check .sv-checkrow:not(.sv-mark), .lb-subst li:not(.sv-mark)')];
+      return rows.at(-1) ?? null;
+    }
     case 'check': return root.querySelector('.sv-check');
     case 'answer': return root.querySelector('[data-fk="answer"], .lb-typed');
     case 'forward': return root.querySelector('.btn-forward');
