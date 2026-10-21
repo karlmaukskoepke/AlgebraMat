@@ -12,6 +12,7 @@ import { generateSolveLevel } from '../engine/generateSolve.js';
 import { generateSolve2Level } from '../engine/generateSolve2.js';
 import { generateSwitchLevel } from '../engine/generateSwitch.js';
 import { generateAddBothLevel } from '../engine/generateAddBoth.js';
+import { generateTwoStepLevel } from '../engine/generateTwoStep.js';
 import { generateFlipLevel } from '../engine/generateFlip.js';
 import { generateDivideLevel } from '../engine/generateDivide.js';
 
@@ -130,9 +131,11 @@ export const switchSides = {
   generate: (level, seed) => generateSwitchLevel(level, seed),
 };
 
-// Two-step equations (SPEC-SOLVE.md §7): undo the number first, then the multiplying. Same supports as One-step.
+// Two-step equations (SPEC-SOLVE.md §7): undo the number first, then the multiplying. Same supports as One-step. Retired in Build K: the
+// new Two-step equations card (below) replaced it. It is kept here, with its saved levels, so they still count (engine/progress.js).
 export const twoStep = {
   id: 'two-step',
+  retired: true,
   title: 'Two-step equations',
   subtitle: 'Undoing two operations',
   blurb: 'Undo the number first, then the multiplying.',
@@ -169,6 +172,19 @@ export const flipEverything = {
   generate: (level, seed) => generateFlipLevel(level, seed),
 };
 
+// Two-step equations, the new card (Build K, basic form): `3x + 4 = 19` in two moves, Add to both sides (the student combines the other
+// side) and take a fraction (or, from Level 5, flip). Seven levels, shown as saved (no walkthrough). Not `two-step`: that id is the old
+// card's, whose seven saved levels keep their meaning.
+export const twoStepEquations = {
+  id: 'two-step-equations',
+  title: 'Two-step equations',
+  subtitle: 'Add, combine, then take a fraction',
+  blurb: 'Cancel the number beside x, combine, then take a fraction of both sides.',
+  levels: 7,
+  levelNames: ['ax + b = c', 'ax − b = c', 'x on the right', 'b + ax = c', 'b − ax = c', 'negative answers', 'all mixed'],
+  generate: (level, seed) => generateTwoStepLevel(level, seed),
+};
+
 // The rest of the equations are still to come: they show as cards under Solve it, with no levels (so they take no room in saves).
 const soon = (id, title, subtitle) => ({ id, title, subtitle, comingSoon: true, levels: 0, levelNames: [] });
 
@@ -186,6 +202,7 @@ export const PACKS = [
   oneStep,
   switchSides,
   twoStep,
+  twoStepEquations,
   soon('multi-step', 'Multi-step equations', 'Variables on both sides'),
 ];
 
@@ -193,7 +210,7 @@ export const PACKS = [
 export const SECTIONS = [
   { id: 'count', title: 'Count it', blurb: 'Adding, subtracting and multiplying numbers', packs: ['combineit', 'flipit', 'lasso'] },
   { id: 'build', title: 'Build it', blurb: 'Expressions, with boxes, circles and groups', packs: ['boxes', 'groups-of-terms', 'distribute-combine', 'value'] },
-  { id: 'solve', title: 'Solve it', blurb: 'Solving equations', packs: ['add-both', 'divide-it', 'flip-everything', 'one-step', 'two-step', 'multi-step'] },
+  { id: 'solve', title: 'Solve it', blurb: 'Solving equations', packs: ['add-both', 'divide-it', 'flip-everything', 'one-step', 'two-step-equations', 'multi-step'] },
 ];
 export const sectionById = (id) => SECTIONS.find((s) => s.id === id);
 export const sectionOf = (packId) => SECTIONS.find((s) => s.packs.includes(packId));

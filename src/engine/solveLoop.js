@@ -14,7 +14,7 @@
 
 import { typeInto, isTyping } from './entry.js';
 import { signed, substitutionLines, boardText, xCount } from './solveTerms.js';
-import { climb, teach as teachShape } from './solveit/registry.js';
+import { climb, remind, teach as teachShape } from './solveit/registry.js';
 
 // What a card supplies:
 //   id                 'add-both'
@@ -34,6 +34,7 @@ import { climb, teach as teachShape } from './solveit/registry.js';
 //   waitingForUndo(s)  a try of the card's own waits for Undo outside `needUndo` (Divide's failed fraction); undoReason(s) says why
 //   helpBlocked(s)     the card holds help back for now (Add to both sides while its seesaw is being built)
 //   afterUndo(s), undoKey(s)  the card's own clean-up after Undo, and what it says
+//   reminderOnly       a card in basic form: I'm stuck gives the shape's reminder only, never its pictures (Two-step equations, Build K)
 // I'm stuck or Teach me while a move waits for Undo (Build A): the first rung is one sentence saying what happened, with Undo the
 // one highlighted target, and no other help opens. It counts as the click it was, and the class sheet records it as a reminder
 // ('hint'). Used by every card on the loop, and by Add to both sides, which is not on the loop yet.
@@ -277,7 +278,7 @@ export function createSolveLoop(card) {
         moveMode(s);
         s.stuck += 1;
         s.helped = true;
-        return climb(s, api);                                                          // the shape's next rung (solveit/registry.js)
+        return card.reminderOnly ? remind(s, api) : climb(s, api);                     // the shape's next rung (solveit/registry.js)
       }
       case 'teach': {
         if (!helpOk(s)) return state;

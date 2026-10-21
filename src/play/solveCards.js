@@ -28,6 +28,12 @@ import { formatFlip } from '../engine/flip.js';
 import { renderFlipScreen, introOpen as flipIntroOpen } from '../view/flipScreen.js';
 import { flipFeedbackText } from '../view/flipFeedback.js';
 import { buildSolvePad } from '../view/divideControls.js';
+// Two-step equations: the loop card (engine/cards/twoStep.js) under the shared Multiply menu and Add's term layer, on Add's screen
+import { newTwoStep, reduceTwoStep, solve as twoLoop, xAlone as twoAlone, optionOf, TWO_STEP_MENU, TWO_STEP_SPOT } from '../engine/cards/twoStep.js';
+import { formatTwoStep } from '../engine/twoStep.js';
+import { startLights } from '../engine/addBothLights.js';
+import { renderTwoStepScreen, introOpen as twoIntroOpen } from '../view/twoStepScreen.js';
+import { twoStepFeedbackText } from '../view/twoStepFeedback.js';
 
 // ---------- Add to both sides ----------
 
@@ -126,7 +132,7 @@ export const flipPlay = makeSolvePlay({
   format: formatFlip,
   newSession: (problem, { forceMove = false, flags = null } = {}) => {
     flipTaught = flags ?? flipTaught ?? {};
-    return newFlip(problem, { level: problem.logLevel ?? 2, forceMove, introTrade: !flipTaught.trade });
+    return newFlip(problem, { level: problem.logLevel ?? 2, forceMove, introTrade: !flipTaught.trade, introFlip: !flipTaught.flip });
   },
   feedbackText: flipFeedbackText,
   buildControls: (root, dispatch) => buildSolvePad(root, dispatch, flipLoop.answerLive),
@@ -138,8 +144,52 @@ export const flipPlay = makeSolvePlay({
   padOpen: (s) => s.stage !== 'done' && !s.sub && (FLIP_MENU.fracOpen(s) || (flipLoop.answerLive(s) && (s.typing === 'answer' || flipLoop.alone(s)))),
   effects(before, s) {
     if (s.tradeCount > 0 && flipTaught) flipTaught.trade = true;
+    if (s.flipCount > 0 && flipTaught) flipTaught.flip = true;
   },
   matAction(d) {
+    switch (d.action) {
+      case 'multOpen': return { type: 'multOpen' };
+      case 'multPick': return { type: 'multPick', kind: d.kind };
+      case 'flipPick': return { type: 'flipPick' };
+      case 'take': return { type: 'take', n: Number(d.n), ...(d.from === 'list' ? { fromList: true } : {}) };
+      default: return null;
+    }
+  },
+});
+
+// ---------- Two-step equations ----------
+
+let twoTaught = null;   // the first Trade places and the first flip of a level are pointed out once
+
+// Add to both sides' Mat buttons that a move-only card uses too (no seesaw, no counters): Apply, dragging a number into the blank
+const ADD_MAT = new Set(['lxApply']);
+
+export const twoStepPlay = makeSolvePlay({
+  pack: 'two-step-equations',
+  loop: twoLoop,
+  layer: withLights(TWO_STEP_MENU.withMenu(reduceTwoStep), { alone: twoAlone, menuPreview: (s, kind) => optionOf(kind, s) === 'live' }),
+  spot: TWO_STEP_SPOT,
+  introOpen: twoIntroOpen,
+  format: formatTwoStep,
+  newSession: (problem, { forceMove = false, flags = null } = {}) => {
+    twoTaught = flags ?? twoTaught ?? {};
+    return startLights(newTwoStep(problem, { level: problem.logLevel ?? 1, forceMove, introTrade: !twoTaught.trade, introFlip: !twoTaught.flip }));
+  },
+  feedbackText: twoStepFeedbackText,
+  buildControls: makeAddBothControls((s) => lightsAnswerLive(s, twoLoop) || combineOpen(s) || TWO_STEP_MENU.fracOpen(s)),
+  bindMat: (root, dispatch, getSession) => {
+    const off = [bindLightsMat(root, dispatch, getSession), bindFractionKeys(root, dispatch, getSession, TWO_STEP_MENU)];
+    return () => off.forEach((f) => f?.());
+  },
+  renderMat: (s) => renderTwoStepScreen(s),
+  padOpen: (s) => s.stage !== 'done' && !s.sub && ((blankOpen(s) && amountMode(s)) || combineOpen(s) || TWO_STEP_MENU.fracOpen(s)
+    || (lightsAnswerLive(s, twoLoop) && (s.typing === 'answer' || s.ui?.focus === 'answer' || twoAlone(s.board)))),
+  effects(before, s) {
+    if (s.tradeCount > 0 && twoTaught) twoTaught.trade = true;
+    if (s.flipCount > 0 && twoTaught) twoTaught.flip = true;
+  },
+  matAction(d) {
+    if (ADD_MAT.has(d.action)) return { type: d.action };
     switch (d.action) {
       case 'multOpen': return { type: 'multOpen' };
       case 'multPick': return { type: 'multPick', kind: d.kind };

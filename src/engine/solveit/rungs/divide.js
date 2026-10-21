@@ -29,7 +29,7 @@ const D1 = {
       s.hint = { kind: 'coef' };
       const cycle = fractionCycleHint(s, before);
       if (cycle) return cycle;
-      const a = coefOf(s.board);
+      const a = coefOn(s.board);                     // (x on either side: the Two-step card reuses this entry, Build K)
       s.mopts = { kind: null, entry: '' };
       s.ui = { ...(s.ui ?? {}), preview: 'frac' };
       if (!s.supportsShown.includes('hint')) s.supportsShown.push('hint');

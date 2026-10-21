@@ -3677,3 +3677,15 @@ body[data-input='touch'] #play.is-light #controls .btn-pad { min-width: 48px; mi
 
 /* ---------- Build J: Flip everything ---------- */
 .mo-opt.is-grey { opacity: 0.42; border-style: dashed; }
+
+/* ---------- Build K: the Two-step card draws on Add's screen (.ts-light) with the shared Multiply row (Divide it's blank, as on .dv-light) ---------- */
+.ts-light .dv-fracpart { min-width: 34px; min-height: 36px; padding: 0 6px; font: 800 24px 'Lexend', system-ui, sans-serif; color: #0072b2; border: 3px dashed #0072b2; border-radius: 8px; background: transparent; }
+.ts-light .lx-ghost.is-chosen .dv-fracpart:not(.is-mirror) { border-style: solid; background: #fff; }
+.ts-light .dv-retype { position: absolute; top: calc(100% + 2px); left: 50%; transform: translateX(-50%); white-space: nowrap; font: 700 15px 'Lexend', system-ui, sans-serif; color: #5d5a52; pointer-events: none; }
+.ts-light .mo-blank { display: inline-flex; align-items: center; justify-content: center; min-width: 48px; min-height: 50px; padding: 0 8px; font: 800 30px 'Lexend', system-ui, sans-serif; color: #0072b2; border: 3px dashed #0072b2; border-radius: 10px; background: transparent; vertical-align: middle; }
+.ts-light .dv-ghost .lx-box.is-empty.is-blink::after { content: ''; position: absolute; left: 8px; right: 8px; bottom: 5px; border-bottom: 3px solid #0072b2; animation: ab-blink 1s steps(2, start) infinite; }
+.ts-light .dv-ghost .lx-box { position: relative; }
+.ts-light .dv-ghost.is-preview .lb-eq { color: #9a968a; }
+.ts-light .lb-frac .is-blue, .ts-light .lb-neg .is-blue { color: #0072b2; }
+.ts-light .lb-rowwrap.is-fold { position: relative; }
+@media (prefers-reduced-motion: reduce) { .ts-light .dv-ghost .lx-box.is-empty.is-blink::after { animation: none; } }

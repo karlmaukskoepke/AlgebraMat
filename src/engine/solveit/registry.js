@@ -19,8 +19,9 @@ import { shapeOf, UNKNOWN } from './shape.js';
 import { DIVIDE_RUNGS } from './rungs/divide.js';
 import { ADD_RUNGS } from './rungs/add.js';
 import { FLIP_RUNGS } from './rungs/flip.js';
+import { TWO_STEP_RUNGS } from './rungs/twoStep.js';
 
-export const REGISTRY = { ...ADD_RUNGS, ...DIVIDE_RUNGS, ...FLIP_RUNGS };
+export const REGISTRY = { ...ADD_RUNGS, ...DIVIDE_RUNGS, ...FLIP_RUNGS, ...TWO_STEP_RUNGS };
 // (a new card adds its own shapes' entries)
 export function registerRungs(entries) {
   for (const [id, entry] of Object.entries(entries)) {
@@ -49,6 +50,16 @@ export function climb(s, api) {
   const rung = entry[entry.ladder[i]];
   record(s, rung.word);
   return rung.open(s, api, shape);
+}
+
+// I'm stuck on a card in basic form (Build K): the shape's reminder only, whatever its ladder (a shape another card brings, like Divide
+// it's D1, keeps its pictures for that card). It is the hint the shape gives after Undo, asked for, and is recorded as a reminder.
+export function remind(s, api) {
+  const { shape, entry } = entryOf(s);
+  const r = entry?.hintPopup?.after?.(s, null, shape) ?? null;
+  if (!r) return api.say(s, entry?.none ?? 'aFindX');
+  record(s, 'hint');
+  return api.say(s, r.key, r.params ?? {});
 }
 
 // Teach me: the shape's forced path.

@@ -11,6 +11,7 @@
 //   makeMultiplyMenu({ xAlone, coefOf, option(kind, s), probe, negTop })
 //     probe    the move the Multiply button checks with the card before it opens (the card's `choose` puts it in s.menu, or says why not)
 //     negTop   the fraction's top may be −1 (Flip everything accepts −⅓ of both sides in one move)
+//     greyKey  what a greyed option says when tapped (default: the fraction "unlocks on a later level", the rest "on a later card")
 
 import { isTyping, typeInto } from './entry.js';
 import { FRACTIONS } from './divide.js';
@@ -20,7 +21,7 @@ export const MULT_KINDS = ['whole', 'frac', 'flip'];
 export const multOpen = (s) => Boolean(s.mopts);
 const okWhole = (t) => /^-?\d+$/.test(t ?? '');
 
-export function makeMultiplyMenu({ xAlone, coefOf, option = (kind) => (kind === 'frac' ? 'live' : 'explain'), probe = 'fraction', negTop = false }) {
+export function makeMultiplyMenu({ xAlone, coefOf, option = (kind) => (kind === 'frac' ? 'live' : 'explain'), greyKey = (kind) => (kind === 'frac' ? 'aLaterLevel' : 'aLater'), probe = 'fraction', negTop = false }) {
   // Can the move be previewed (hovered) right now? Is its blank open?
   const canPreview = (s) => s.stage === 'moves' && !s.sub && !s.deal && !s.diag && !s.fail && !s.needUndo && s.menu !== 'fraction' && !xAlone(s.board) && !s.mopts?.kind;
   const fracOpen = (s) => s.stage === 'moves' && s.menu === 'fraction' && !s.sub && !s.deal && !s.fail && !s.spot?.choose && s.typing !== 'answer';
@@ -56,7 +57,7 @@ export function makeMultiplyMenu({ xAlone, coefOf, option = (kind) => (kind === 
       }
       if (action.type === 'multPick' && m && MULT_KINDS.includes(action.kind)) {
         const what = option(action.kind, state);
-        if (what === 'grey') return { ...state, feedback: { key: action.kind === 'frac' ? 'aLaterLevel' : 'aLater', params: {}, bad: false } };
+        if (what === 'grey') return { ...state, feedback: { key: greyKey(action.kind, state), params: {}, bad: false } };
         if (action.kind === 'frac') return inner({ ...state, mopts: null }, { type: 'choose', move: 'fraction' });
         return { ...state, mopts: { kind: action.kind, entry: '' }, feedback: null, ui: { ...(state.ui ?? {}), preview: false } };
       }

@@ -25,6 +25,16 @@
 //   F4  x = −(b)              the finishing flip (the other side is the opposite of a number, never evaluated)
 //   F5  x = ⅟a(b), x = −⅟a(b) the finishing fraction (one move of −⅟a, or ⅟a after the flip)
 //   FF  a fraction that does not split (the board is F2 or F3 until Undo)
+// Two-step equations (Build K; read with the card's family: shapeOfBoard(board, 'two')). x has a number in front of it and a number beside it;
+// where a state is one another card already has, it is that card's shape, with its entries (`3x = 15` is Divide it's D1, `−3x = 15` is
+// F2, `x = ⅓(15)` is F5)
+//   W1  ax + c = b            the original, or any state with a number still beside x and one number on the other side (a ≠ ±1, either
+//                             sign: `4 − 3x = 19` is −3x + 4)
+//   W2  ax = b + k …          the number beside x cancelled, the other side not combined yet (after Add)
+//   W3  ax + c′ = b + k …     an Add that did not cancel (partly, or bigger): waits for Undo
+//   W4  ax + c′ = 0           the side without x zeroed: waits for Undo
+//   D1  ax = b, F1 −x = b, F2 −ax = b, F4 x = −(b), F5 x = ⅟a(b) or −⅟a(b): as on Divide it and Flip everything
+//   DF  a fraction that does not split (the board is D1, F1 or F2 until Undo)
 // The same Add shape with x on the right is the R twin: the same id, with `r: true` (and so on every Flip shape: `12 = −x` is F1, r).
 
 export const SHAPES = {
@@ -47,6 +57,10 @@ export const SHAPES = {
   F4: 'x = −(b)',
   F5: 'x = ⅟a(b) or −⅟a(b)',
   FF: 'a fraction that does not split (Flip everything)',
+  W1: 'ax + c = b',
+  W2: 'ax = b + k (the other side not combined yet)',
+  W3: 'ax + c′ = b + k (partly done or bigger)',
+  W4: 'ax + c′ = 0 (the other side zeroed)',
 };
 
 export const UNKNOWN = 'unknown';
@@ -61,6 +75,7 @@ const sum = (terms) => terms.reduce((a, t) => a + t.v, 0);
 export function shapeOfBoard(board, family = null) {
   if (!board?.left || !board?.right) return { id: UNKNOWN, why: 'no board' };
   if (family === 'flip') return flipShape(board);
+  if (family === 'two') return twoShape(board);
   const xl = board.left.filter((t) => t.kind === 'x').length;
   const xr = board.right.filter((t) => t.kind === 'x').length;
   if (xl + xr !== 1) return { id: UNKNOWN, why: xl + xr === 0 ? 'no x' : 'x on both sides' };
@@ -133,10 +148,50 @@ function flipShape(board) {
   return { id: UNKNOWN, why: `a ${t.kind} on the other side` };
 }
 
+// Two-step equations' shapes: one x term with its number in front (either side, either place on its side) and numbers beside it; the
+// other side numbers, or, once x is alone, the opposite of a number or a fraction of a number. Order-free and sign-normalised.
+function twoShape(board) {
+  const xl = board.left.filter((t) => t.kind === 'x').length;
+  const xr = board.right.filter((t) => t.kind === 'x').length;
+  if (xl + xr !== 1) return { id: UNKNOWN, why: xl + xr === 0 ? 'no x' : 'x on both sides' };
+  const r = xr === 1;
+  const mine = board[r ? 'right' : 'left'];
+  const theirs = board[r ? 'left' : 'right'];
+  if (mine.some((t) => t.kind !== 'x' && t.kind !== 'num')) return { id: UNKNOWN, why: `a ${mine.find((t) => t.kind !== 'x' && t.kind !== 'num').kind} beside x` };
+  if (!theirs.length) return { id: UNKNOWN, why: 'an empty side' };
+  const coef = mine.find((t) => t.kind === 'x').coef ?? 1;
+  const xNums = nums(mine).map((t) => t.v);
+  const base = { family: 'two', r, coef, xNums, xSum: sum(nums(mine)) };
+  // x alone after the finishing move: the other side is never evaluated
+  if (theirs.length === 1 && (theirs[0].kind === 'neg' || theirs[0].kind === 'frac')) {
+    if (coef !== 1 || xNums.length) return { id: UNKNOWN, why: `a ${theirs[0].kind} with x not alone` };
+    const t = theirs[0];
+    const b = t.inner?.[0]?.v;
+    if (t.kind === 'neg') return { ...base, id: 'F4', other: { neg: b }, params: { b } };
+    return { ...base, id: 'F5', other: { n: t.n, inner: b }, params: { n: t.n, sign: t.sign ?? 1, b } };
+  }
+  if (theirs.some((t) => t.kind !== 'num')) return { id: UNKNOWN, why: `a ${theirs.find((t) => t.kind !== 'num').kind} on the other side` };
+  const other = nums(theirs).map((t) => t.v);
+  const shaped = (id, params) => ({ ...base, id, other, params });
+  if (xNums.length) {
+    if (coef === 1 || coef === -1) return { id: UNKNOWN, why: 'a number beside a single x (never made on Two-step)' };
+    if (other.length === 1) return other[0] === 0 ? shaped('W4', { a: coef, c: base.xSum }) : shaped('W1', { a: coef, c: base.xSum, b: other[0] });
+    return shaped('W3', { a: coef, c: base.xSum, b: other[0], k: other.slice(1) });
+  }
+  if (other.length >= 2) return shaped('W2', { a: coef, b: other[0], k: other.slice(1) });
+  if (coef === 1) return { id: UNKNOWN, why: 'x = a number (the app never writes the value)' };
+  if (coef === -1) return shaped('F1', { b: other[0] });
+  if (coef < -1) return shaped('F2', { a: -coef, b: other[0] });
+  return shaped('D1', { a: coef, b: other[0] });
+}
+
+// (the cards whose boards are read with their own family)
+const FAMILY_OF = { flip: 'flip', 'two-step': 'two' };
+
 // The shape of a state: the board's, refined by the flags the board does not hold. `waiting` says a move (or a try) waits for Undo.
 export function shapeOf(s) {
   if (s?.stage === 'build') return { id: 'T0', family: 'add', r: Boolean(s.problem?.mirror), params: { built: s.built } };
-  const shape = shapeOfBoard(s?.board, s?.problem?.kind === 'flip' ? 'flip' : null);
+  const shape = shapeOfBoard(s?.board, FAMILY_OF[s?.problem?.kind] ?? null);
   if (shape.id === UNKNOWN) return shape;
   const waiting = Boolean(s.needUndo || s.fail || s.zeroOther);
   if (s.fail) return { ...shape, id: shape.family === 'flip' ? 'FF' : 'DF', over: shape.id, waiting: true, params: { ...shape.params, n: s.fail.n } };
@@ -149,11 +204,19 @@ export function shapeOf(s) {
 //   combined, so zeroing the other side never lights up green and the unsimplified side is never read. Fewer terms is green when x's
 //   side has fewer terms, red when it has more or the number next to x got bigger, and grey otherwise.
 //   Divide it judges Smaller numbers (the number in front of x got smaller) and One box (x alone).
+//   Two-step equations judges Fewer terms (as Add to both sides: x's side only) and Solved for x (x alone with a plain 1 in front).
 //   Flip everything judges No opposite box (green when the move took the minus off x, red when it put one on, grey otherwise) and Solved
 //   for x (x alone with a plain 1 in front).
 export function lightsOf(prev, now) {
   if (now.family === 'flip') {
     return { noopp: prev.coef < 0 && now.coef > 0 ? 'green' : prev.coef > 0 && now.coef < 0 ? 'red' : 'neutral', solved: now.coef === 1 ? 'green' : 'off' };
+  }
+  if (now.family === 'two') {
+    const count = (sh) => 1 + (sh.xSum !== 0 ? 1 : 0);
+    // (a fraction or a flip of `3x = 15` is not about the number beside x: Fewer terms is not judged there, so it goes back to off)
+    const none = prev.xSum === 0 && now.xSum === 0 && (prev.other?.length ?? 1) === 1;
+    const fewer = none ? 'off' : count(now) < count(prev) ? 'green' : count(now) > count(prev) || Math.abs(now.xSum) > Math.abs(prev.xSum) ? 'red' : 'neutral';
+    return { fewer, solved: now.coef === 1 && now.xNums.length === 0 ? 'green' : 'off' };
   }
   if (now.family === 'divide') {
     // (by size, so −3x to −x is smaller too; Build J. The same as before for positive coefficients)

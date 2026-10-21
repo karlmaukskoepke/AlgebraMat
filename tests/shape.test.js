@@ -188,6 +188,7 @@ describe('Build E, P2: unknown shapes fail loudly, never quietly', () => {
     // S5 and S6 (moves stacked without Undo) can no longer happen on the shared loop; they stay classified and registered
     const unreachable = ['S5', 'S6'];
     for (const id of Object.keys(SHAPES)) {
+      if (id.startsWith('W')) continue;                         // (the Two-step card's shapes: tests/twoStep.test.js walks them)
       if (unreachable.includes(id)) expect(counts[id] ?? 0, `shape ${id}`).toBe(0);
       else expect(counts[id] ?? 0, `shape ${id}`).toBeGreaterThan(0);
     }

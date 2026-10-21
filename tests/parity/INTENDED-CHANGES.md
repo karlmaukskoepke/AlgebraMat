@@ -628,3 +628,30 @@ Compared with the code after Part 1: no scripted run and no screen changed. No s
 | `savecode:flip-everything-L4` | none (the card is new) | a v15 code with Flip everything's saved Level 4 done | the new card's levels are saved in the code |
 | `savecode:flip-everything-L5` | none (the card is new) | a v15 code with Flip everything's saved Level 5 done | the new card's levels are saved in the code |
 | `savecode:flip-everything-L6` | none (the card is new) | a v15 code with Flip everything's saved Level 6 done | the new card's levels are saved in the code |
+
+## Build K (2026-10-21): the new Two-step equations card; the first-flip pop-up on Flip everything
+
+**Compared directly with `main` before this build (Build J, `671f6d2`):** a baseline recorded from that commit, with nothing listed as
+intended. Problems, class-sheet records and all 25 scripted runs are identical, and all 62 screens of Add to both sides and Divide it match
+pixel for pixel. The only differences are save codes:
+
+- The 72 recorded states are now written as **v16** (one symbol longer: the new card's seven levels are appended at the end). Each decodes
+  to the same progress as before. Their keys are already listed above (from Build J), so they pass here.
+- Nine of them (`savecode:two-step-L1` … `-L7`, `savecode:switch-L5`, `savecode:switch-L6`) no longer read back as the identical code,
+  because decoding now credits the matching levels of the new card (the same pattern as Add to both sides' and Divide it's credit). The
+  old card's own levels keep their bits and their meaning.
+- Seven new states, the new card's levels:
+
+| Key | Before | After | Why |
+|---|---|---|---|
+| `savecode:two-step-equations-L1` | none (the card is new) | a v16 code with the new Two-step card's Level 1 done | the new card's levels are saved in the code |
+| `savecode:two-step-equations-L2` | none (the card is new) | a v16 code with its Level 2 done | the same |
+| `savecode:two-step-equations-L3` | none (the card is new) | a v16 code with its Level 3 done | the same |
+| `savecode:two-step-equations-L4` | none (the card is new) | a v16 code with its Level 4 done | the same |
+| `savecode:two-step-equations-L5` | none (the card is new) | a v16 code with its Level 5 done | the same |
+| `savecode:two-step-equations-L6` | none (the card is new) | a v16 code with its Level 6 done | the same |
+| `savecode:two-step-equations-L7` | none (the card is new) | a v16 code with its Level 7 done | the same |
+
+**Not in the harness (Flip everything has no scripted runs):** the first flip of a level that helps now says "Multiplying both sides by −1
+flips every sign. −x becomes x." (a small pop-up beside the panel, once a level, like the first Trade places). Everything else on Flip
+everything is unchanged; its unit tests (`tests/flip.test.js`) pass as before, and a flip without the level's flag says what it said.

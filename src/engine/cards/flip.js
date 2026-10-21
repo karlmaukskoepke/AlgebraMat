@@ -10,10 +10,11 @@
 // No DOM here.
 
 import { createSolveLoop } from '../solveLoop.js';
-import { shapeOfBoard, lightsOf } from '../solveit/shape.js';
+import { shapeOfBoard } from '../solveit/shape.js';
 import { signed, boardText } from '../solveTerms.js';
 import { xTerm, numTerm } from '../divideBoard.js';
-import { applyFraction, chooseFraction, takeStep, xSideOf, coefOn, otherTerm, mapSides } from '../fractionMove.js';
+import { chooseFraction, takeStep, xSideOf, coefOn } from '../fractionMove.js';
+import { applyFlip, commitFlip as commitFlipMove, commitFraction as commitFractionMove } from '../flipMove.js';
 import { makeMultiplyMenu } from '../multiplyMenu.js';
 import { hintAfterUndo } from '../solveit/registry.js';
 import { tagFlip, formatFlip } from '../flip.js';
@@ -34,22 +35,9 @@ export const startBoard = (p) => {
 export const xAlone = (board) => coefOn(board) === 1;
 const shape = (board) => shapeOfBoard(board, 'flip');
 
-let counter = 0;
-const id = () => `f${++counter}`;
-const timesTerm = (f, inner) => ({ id: id(), kind: 'times', f, inner });
-const negTerm = (inner) => ({ id: id(), kind: 'neg', inner });
-
-// Flip everything: the work row `−1 × (−x) = −1 × (12)` and the board after it. The flip that finishes (x alone) leaves the other side
-// as `−(12)`; a flip that does not finish (`−3x = 12` → `3x = −12`, or the unhelpful `3x = −12` → `−3x = 12`) shows the new numbers.
-export function applyFlip(board) {
-  const a = coefOn(board);
-  const b = otherTerm(board).v;
-  const work = mapSides(board, (terms) => [timesTerm(-1, [terms[0]])]);
-  const next = -a === 1
-    ? mapSides(board, (terms, mine) => (mine ? [xTerm(1)] : [negTerm([numTerm(b)])]))
-    : mapSides(board, (terms, mine) => (mine ? [xTerm(-a)] : [numTerm(-b)]));
-  return { work, next };
-}
+// Flip everything and the fraction after it are the shared moves (engine/flipMove.js), read with this card's family.
+const FLIP_MOVE = { shape, alone: xAlone, say: (...a) => say(...a) };
+export { applyFlip };
 
 export const tradeAvailable = (s) => s.level >= TRADE_LEVEL && s.stage === 'moves' && !s.sub && !s.needUndo && !s.fail && xSideOf(s.board) === 'right';
 // The first equation with x on the right in a level is pointed out (Add to both sides' message); either order is fine here, so it is
@@ -57,7 +45,6 @@ export const tradeAvailable = (s) => s.level >= TRADE_LEVEL && s.stage === 'move
 export const tradePending = (s) => Boolean(s.tradeIntro) && s.tradeCount === 0 && tradeAvailable(s);
 
 const say = (s, key, params = {}, bad = false) => { s.feedback = { key, params: { a: s.problem.a, b: signed(s.problem.b), ...params }, bad }; return s; };
-const coefText = (c) => (c === 1 ? 'x' : c === -1 ? '−x' : `${signed(c)}x`);
 
 // ---------- the card ----------
 
@@ -67,9 +54,9 @@ const loop = createSolveLoop({
   alone: xAlone,
   noLights: () => ({ noopp: 'off', solved: 'off' }),
   params: (s) => ({ a: s.problem.a, b: signed(s.problem.b) }),
-  extra: (p, { level, introTrade = false }) => ({
+  extra: (p, { level, introTrade = false, introFlip = false }) => ({
     fail: null, deal: null, diag: null, pic: null, tried: [],
-    tradeIntro: introTrade && level >= TRADE_LEVEL && Boolean(p.mirror), tradeCount: 0,
+    tradeIntro: introTrade && level >= TRADE_LEVEL && Boolean(p.mirror), tradeCount: 0, flipIntro: introFlip, flipCount: 0,
   }),
   snapshotExtra: () => ({ fail: null, deal: null, diag: null, pic: null }),
   resetState: (s) => { s.fail = null; s.deal = null; s.diag = null; s.pic = null; },
@@ -129,35 +116,19 @@ const loop = createSolveLoop({
   },
 });
 
-// A flip is helpful when x had a minus (No opposite box goes green); a flip of x with no minus is legal but unhelpful: it waits for Undo,
-// and the new minus on x is lit with what happened, in the real numbers.
+// The first flip of a level that helps says, once, what −1 does (Build K: there is no "See why it works" yet), like the first Trade places.
 function commitFlip(s, api) {
-  const before = s.board;
-  const a = coefOn(before);
-  const b = otherTerm(before).v;
-  api.pushHistory(s);
-  s.hint = null;
-  const { work, next } = applyFlip(before);
-  const helpful = a < 0;
-  api.commit(s, { rows: [{ type: 'work', board: work }, { type: 'eq', board: next }], next, label: { flip: true }, helpful, lights: lightsOf(shape(before), shape(next)) });
-  s.fail = null;
-  if (!helpful) return say(s, 'fWorse', { was: coefText(a), now: coefText(-a), b: signed(b), nb: signed(-b) }, true);
-  return say(s, xAlone(next) ? 'aSolvedBoard' : 'aFindX');
+  const out = commitFlipMove(s, api, FLIP_MOVE);
+  if (!out.needUndo && s.flipIntro && s.flipCount === 0) say(s, 'fFlipIntro');
+  if (!out.needUndo) s.flipCount += 1;
+  return out;
 }
-
-// A fraction that splits is always helpful (the number in front of x gets smaller). Taking −⅓ of `−3x = 12` finishes in one move.
-function commitFraction(s, n, sign, api) {
-  const before = s.board;
-  const { work, next } = applyFraction(before, n, sign);
-  api.commit(s, { rows: [{ type: 'work', board: work }, { type: 'eq', board: next }], next, label: { n, ...(sign < 0 ? { sign } : {}) }, helpful: true, lights: lightsOf(shape(before), shape(next)) });
-  s.fail = null;
-  return say(s, xAlone(next) ? 'aSolvedBoard' : 'aFindX');
-}
+const commitFraction = (s, n, sign, api) => commitFractionMove(s, n, sign, api, FLIP_MOVE);
 
 // ---------- the card's entry points ----------
 
-export function newFlip(problem, { level = 2, forceMove = false, introTrade = false } = {}) {
-  const s = loop.newSession(problem, { level, forceMove, introTrade });
+export function newFlip(problem, { level = 2, forceMove = false, introTrade = false, introFlip = false } = {}) {
+  const s = loop.newSession(problem, { level, forceMove, introTrade, introFlip });
   return tradePending(s) && !forceMove ? say(s, 'aTradeIntro') : s;
 }
 export const reduceFlip = loop.reduce;

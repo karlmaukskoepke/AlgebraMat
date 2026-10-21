@@ -22,13 +22,19 @@ import { spotlightLayer, findSolveTarget } from './spotlight.js';
 import { boardBlock, trayFor, html, slipShown } from './addBothMat.js';
 import { narrowPanel } from './narrowPanel.js';
 import { multiplyOptions } from './multiplyOptions.js';
-import { forwardButton, srLine, notePopup, substBlock as sharedSubstBlock, FORCED_TEXT, FIRST_TEXT, placeText } from './solveScreen.js';
+import { forwardButton, srLine, notePopup, substBlock as sharedSubstBlock, sideTerms, foldTag, FORCED_TEXT, FIRST_TEXT, placeText } from './solveScreen.js';
 import { firstOpen } from './visit.js';
 // Count it's counters Mat and its words, read-only, for the help at x alone (Build C, Part 3)
 import { renderMat as renderCountersMat } from './mat.js';
 import { feedbackText as countersText } from './feedback.js';
 import { bigFeedbackText } from './bigFeedback.js';
 import { bigNotes } from '../play/bigPlay.js';
+
+// The card this screen draws (Build K): Add to both sides, or a card configured on the same term layer (the Two-step card,
+// view/twoStepScreen.js), which names its loop, spotlight, words and Trade places rules, and may add its own rows, panel moves, pop-ups
+// and green-button words (`ghost`, `panel`, `popups`, `forward`, `silent`, `nudge`). Set by renderAddBothScreen for the render.
+const ADD_CARD = { loop: solve, spot: ADD_SPOT, text: lightsFeedbackText, tradeAvailable, tradePending, alone: xAlone, answerLive: (s) => lightsAnswerLive(s), teach: true };
+let C = ADD_CARD;
 
 const btn = (label, action, cls, attrs = {}) => html('button', cls, [label], { type: 'button', 'data-action': action, ...attrs });
 const shown = (v) => (v ? v.replace('-', MINUS) : ' ');
@@ -43,11 +49,11 @@ export const introOpen = (s) => moveOwed(s) && !s.introSeen && !s.drill;
 const firstUp = (s) => firstOpen() && !s.drill && !s.mustMove && s.rows.length === 1 && s.history.length === 0 && !s.sub && !s.entry && s.stage === 'moves' && !s.scaffold;
 
 // What the card says that needs no pop-up: the screen itself shows it (the blank, the rule line, the green button's word, x = live).
-const SILENT = new Set(['dxMultPick', 'dxWholeAsk', 'dxMultAsk', 'dxFlipAsk', 'aTeachDo', 'aAloneBig', 'aPlace', 'aFindX', 'lxMustMove', 'aMustMove', 'aPickAmount', 'aAmountSet', 'aGreen', 'aSolvedBoard', 'aUndone', 'lxUndone',
+export const SILENT = new Set(['dxMultPick', 'dxWholeAsk', 'dxMultAsk', 'dxFlipAsk', 'aTeachDo', 'aAloneBig', 'aPlace', 'aFindX', 'lxMustMove', 'aMustMove', 'aPickAmount', 'aAmountSet', 'aGreen', 'aSolvedBoard', 'aUndone', 'lxUndone',
   'aStartedOver', 'aPlugIn', 'aPlugCurrent', 'aGuessed', 'lxCombineAsk', 'lxCombined', 'lxCombinedAlone', 'aCorrect', 'aSimplerFirst',
   'aZeroUndone', 'aAloneCounters', 'aAloneCount', 'aAlonePB', 'aAloneRight', 'aUndoGuess', 'dxProducts', 'dxRight', 'dxCrossed', 'aTraded']);
 // Input nudges with nothing to undo: a small pop-up next to where the student is, no dimming.
-const NUDGE = {
+export const NUDGE = {
   dxMultNo: 'newest',
   typeAnswer: 'answer', answerUnreadable: 'answer', aFinishMoveFirst: 'answer', aUndoFirst: 'answer', aPickKind: 'answer', typeCount: 'answer',
   aAmountBig: 'blank', aAmountZero: 'blank', aGoNotYet: 'forward', aOtherSide: 'forward',
@@ -63,11 +69,12 @@ function slipFeedback(s) {
 }
 
 function popups(s, wrap) {
-  const sp = s.drill ? null : spotOf(s, ADD_SPOT);
-  const o = { root: wrap, find: findSolveTarget, undo: '.lx-undo', help: true, moveSel: (m) => `[data-move="${m}"]`, work: '.lb-main' };
+  const sp = s.drill ? null : spotOf(s, C.spot);
+  const o = { root: wrap, find: (root, target) => findSolveTarget(root, target, s), undo: '.lx-undo', help: true, moveSel: (m) => (m === 'fracOption' ? '[data-mopt="frac"]' : `[data-move="${m}"]`), work: '.lb-main' };
+  if (C.popups?.(s, wrap, o, sp)) return;                                // the card's own pop-ups first (the Two-step card: its reminders)
   // two small questions at big numbers: their words come from their keys (Build H, Part 3)
-  if (sp?.bubbles) { wrap.append(spotlightLayer({ ...sp, bubbles: sp.bubbles.map((b) => ({ ...b, text: lightsFeedbackText({ key: b.key, params: b.params }) })) }, { ...o, text: null })); return; }
-  if (sp) { wrap.append(spotlightLayer(sp, { ...o, text: lightsFeedbackText(sp.kind === 'error' && sp.target === 'slip' && slipShown(s) ? slipFeedback(s) : s.feedback) })); return; }
+  if (sp?.bubbles) { wrap.append(spotlightLayer({ ...sp, bubbles: sp.bubbles.map((b) => ({ ...b, text: C.text({ key: b.key, params: b.params }) })) }, { ...o, text: null })); return; }
+  if (sp) { wrap.append(spotlightLayer(sp, { ...o, text: C.text(sp.kind === 'error' && sp.target === 'slip' && slipShown(s) ? slipFeedback(s) : s.feedback) })); return; }
   if (introOpen(s)) {
     const lit = ['newest', 'panel', 'forward', ...(s.ui?.preview ? ['preview'] : [])];
     wrap.append(spotlightLayer({ kind: 'intro', lit }, { ...o, text: FORCED_TEXT }));
@@ -76,7 +83,7 @@ function popups(s, wrap) {
   // the seesaw just built and balanced: "Choose a move" with only the moves lit, the rest greyed (Build D-2, Part 5)
   if (s.scaffold && s.stage === 'moves' && s.feedback?.key === 'aBuilt' && !s.menu) {
     // (the equation and the seesaw it is about stay lit with the moves: never grey out what the question is about, Build H)
-    wrap.append(spotlightLayer({ kind: 'intro', lit: ['panel', 'newest', 'board'] }, { ...o, text: lightsFeedbackText(s.feedback) }));
+    wrap.append(spotlightLayer({ kind: 'intro', lit: ['panel', 'newest', 'board'] }, { ...o, text: C.text(s.feedback) }));
     return;
   }
   // combining two terms dropped together: they are lit with "Combine" over them, the box for their sum under them, the rest greyed
@@ -86,22 +93,22 @@ function popups(s, wrap) {
   }
   // checking a value: everything greys out but the equation being checked and the checking space (and, while the value waits to be
   // dragged in, the value; once it is in, the green Next)
-  if (s.sub && s.sub.step < solve.subTotal(s.sub)) {
+  if (s.sub && s.sub.step < C.loop.subTotal(s.sub)) {
     // (on the seesaw, the balance that mirrors the check is lit with it: it is what the check is drawn on)
     wrap.append(spotlightLayer({ kind: 'intro', lit: ['plugrow', 'check', ...(s.scaffold ? ['board'] : []), s.sub.placing ? 'answer' : 'forward'] }, { ...o, text: s.sub.placing ? placeText(s.sub.typed) : null }));
     return;
   }
   // Teach me: the move to make, in the Add move's blank, with Add lit; the green button says Do it
   if (s.teachFlow && blankOpen(s)) {
-    wrap.append(spotlightLayer({ kind: 'hint', target: 'xnum', move: 'add', place: 'below' }, { ...o, text: lightsFeedbackText(s.feedback) }));
+    wrap.append(spotlightLayer({ kind: 'hint', target: 'xnum', move: 'add', place: 'below' }, { ...o, text: C.text(s.feedback) }));
     return;
   }
   // the drill's end: a negative in front of x: a hint lights Flip everything
   if (s.drill && s.stage !== 'done' && !s.lx.mult && !s.lx.mopts && needsFlip(s.board)) {
-    wrap.append(spotlightLayer({ kind: 'hint', target: 'newest', move: 'multiply', place: 'below' }, { ...o, text: lightsFeedbackText({ key: 'dxFlipHint' }) }));
+    wrap.append(spotlightLayer({ kind: 'hint', target: 'newest', move: 'multiply', place: 'below' }, { ...o, text: C.text({ key: 'dxFlipHint' }) }));
     return;
   }
-  const note = notePopup(s, { silent: SILENT, nudge: NUDGE, text: lightsFeedbackText, scaffold: s.scaffold ? 'board' : null });
+  const note = notePopup(s, { silent: C.silent ?? SILENT, nudge: C.nudge ?? NUDGE, text: C.text, scaffold: s.scaffold ? 'board' : null });
   if (note) { wrap.append(spotlightLayer(note.spot, { ...o, text: note.text })); return; }
   if (firstUp(s)) wrap.append(spotlightLayer({ kind: 'note', place: 'below' }, { ...o, text: FIRST_TEXT }));
 }
@@ -122,6 +129,7 @@ const sideEls = (terms, negIds = []) => {
 };
 
 // The line a move leaves above the new equation: the amount (blue) on both sides, x's numbers struck as they combine.
+const xText = (c) => (c === 1 ? 'x' : c === -1 ? `${MINUS}x` : `${String(c).replace('-', MINUS)}x`);
 const workEls = (items, negIds = []) => {
   const out = [];
   // a cross-off only where the numbers really cancel (+8 and −8), never +8 and +8 (Build D-2)
@@ -136,9 +144,9 @@ const workEls = (items, negIds = []) => {
       out.push(html('span', `${t.term.kind === 'num' ? 'lb-num' : 'lb-x'}${cls}`, [body]));
       return;
     }
-    const sub = i > 0 && !t.x && t.v < 0;
+    const sub = i > 0 && (t.x ? (t.coef ?? 1) < 0 : t.v < 0);
     if (i > 0) out.push(html('span', `lb-plus${t.added ? ' is-added' : ''}`, [sub ? MINUS : '+']));
-    out.push(t.x ? html('span', 'lb-x', ['x']) : html('span', `lb-num${t.added ? ' is-added' : ''}${t.struck ? ' is-struck' : ''}`, [sub ? String(-t.v) : signed(t.v)]));
+    out.push(t.x ? html('span', 'lb-x', [xText(sub ? -(t.coef ?? 1) : t.coef ?? 1)]) : html('span', `lb-num${t.added ? ' is-added' : ''}${t.struck ? ' is-struck' : ''}`, [sub ? String(-t.v) : signed(t.v)]));
   });
   return out;
 };
@@ -258,25 +266,38 @@ function rowsOf(s) {
       const times = (terms) => [...(terms.length > 1 ? [html('span', 'lb-plus', ['(']), ...sideEls(terms, s.lx.negIds), html('span', 'lb-plus', [')'])] : sideEls(terms, s.lx.negIds)), html('span', 'lb-plus lx-times', ['×']), html('span', 'lb-num is-added', [`(${signed(row.factor ?? -1)})`])];
       return html('div', `${cls} has-work`, [eqRow(times(row.board.left), times(row.board.right), `lb-work${eqClass(charsOf([...row.board.left, ...row.board.right]) + 12)}`, { 'aria-label': `Both sides times ${signed(row.factor ?? -1).replace(MINUS, 'negative ')}` })]);
     }
+    // a move written as an equation of whole sides: a fraction of both sides, or both sides times −1 (the Two-step card's Multiply)
+    if (row.type === 'work' && row.board) {
+      const w = eqRow(sideTerms(row.board.left, s), sideTerms(row.board.right, s), `lb-work${row.failed ? ' is-failed' : ''}${eqClass(charsOf([...row.board.left, ...row.board.right]) + 6)}`, { 'aria-hidden': 'true' });
+      if (row.failed) w.append(html('span', 'lb-failmark', ['✗']));
+      return html('div', `${cls} has-work`, [w]);
+    }
     if (row.type === 'work') {
       return html('div', cls, [eqRow(workEls(row.work.left, s.lx.negIds), workEls(row.work.right, s.lx.negIds), `lb-work${eqClass(charsOf([...row.work.left, ...row.work.right]))}`, { 'aria-hidden': 'true' })]);
     }
     // the equation the value goes back into: the original, or, for a wrong guess after a move, the current one (the loop's rule)
     const plug = Boolean(s.sub) && i === (s.sub.target === 'current' ? last : 0);
-    const live = i === last && !plug && s.stage !== 'done';
+    // x alone with a side that is not worked out (`x = ⅓(15)`, `x = −(5)`): written as it is, nothing to pick up
+    const inert = [...row.board.left, ...row.board.right].some((u) => u.kind !== 'x' && u.kind !== 'num');
+    const live = i === last && !plug && s.stage !== 'done' && !inert;
     const chars = eqClass(charsOf([...row.board.left, ...row.board.right]));
+    const tag = row.type === 'fold' && row.label ? [foldTag(row.label)] : [];   // (what a folded fraction or flip did, above it)
     let eq;
-    if (live) eq = eqRow(liveSide(s, 'left'), liveSide(s, 'right'), `lx-live${chars}${s.ui?.carry ? ' is-carrying' : ''}`, { role: 'group', 'aria-label': 'The equation: its terms can be picked up' });
+    if (inert && !plug) eq = eqRow(sideTerms(row.board.left, s), sideTerms(row.board.right, s), chars, { role: 'img', 'aria-label': 'The equation' });
+    else if (live) eq = eqRow(liveSide(s, 'left'), liveSide(s, 'right'), `lx-live${chars}${s.ui?.carry ? ' is-carrying' : ''}`, { role: 'group', 'aria-label': 'The equation: its terms can be picked up' });
     else {
       // the equation being checked: the value is dragged into its x (or x is tapped), which then changes colour (Build D, Part 2)
       const side = (terms) => sideEls(terms, s.lx.negIds).map((el) => {
         if (!plug || !el.classList.contains('lb-x')) return el;
-        if (s.sub.placing) return html('span', 'lb-x is-plugx is-droptarget', ['x'], { 'data-x': '1', 'data-action': 'placeValue', role: 'button', tabindex: '0', 'aria-label': 'Put your value into x' });
-        return html('span', 'lb-x is-plugx is-placed', ['x'], { 'data-x': '1' });
+        const front = el.textContent.slice(0, -1);                    // the number in front of x stays (`3x`: the Two-step card)
+        const x = s.sub.placing
+          ? html('span', 'lb-x is-plugx is-droptarget', ['x'], { 'data-x': '1', 'data-action': 'placeValue', role: 'button', tabindex: '0', 'aria-label': 'Put your value into x' })
+          : html('span', 'lb-x is-plugx is-placed', ['x'], { 'data-x': '1' });
+        return front ? html('span', 'lb-coef', [front, x]) : x;
       });
       eq = eqRow(side(row.board.left), side(row.board.right), chars, { role: 'img', 'aria-label': 'The equation' });
     }
-    return html('div', `${cls}${plug ? ' is-plugrow' : ''}`, [eq]);
+    return html('div', `${cls}${plug ? ' is-plugrow' : ''}${tag.length ? ' is-fold' : ''}`, [...tag, eq]);
   });
 }
 
@@ -364,6 +385,8 @@ function multRow(s, hovered = null) {
 }
 
 function ghostRow(s) {
+  const own = C.ghost?.(s);                                    // (the card's own move row: the Two-step card's Multiply)
+  if (own) return own;
   if (s.lx.mult) return multRow(s);
   if (s.lx.mopts && ['whole', 'frac', 'flip'].includes(s.ui?.preview)) return multRow(s, s.ui.preview);
   if (s.lx.distribute) return productRow(s);
@@ -408,7 +431,7 @@ function workStack(s) {
 
 // What moving forward means now: { label, action, enabled }. The first that applies wins.
 export function forwardOf(s) {
-  const sp = s.drill ? null : spotOf(s, ADD_SPOT);
+  const sp = s.drill ? null : spotOf(s, C.spot);
   if (s.stage === 'done') return { label: 'Next problem', action: 'next', enabled: true };
   if (sp?.kind === 'error') return { label: 'Check', action: 'check', enabled: false };
   if (introOpen(s)) return { label: 'Next', action: 'introNext', enabled: true };
@@ -419,8 +442,10 @@ export function forwardOf(s) {
   return forwardCore(s);
 }
 function forwardCore(s) {
+  const own = C.forward?.(s);                                  // (the card's own move's Go: the Two-step card's Multiply)
+  if (own) return own;
   if (s.sub?.placing) return { label: 'Next', action: 'nextLine', enabled: false };
-  if (s.sub && s.sub.step < solve.subTotal(s.sub)) return { label: 'Next', action: 'nextLine', enabled: true };
+  if (s.sub && s.sub.step < C.loop.subTotal(s.sub)) return { label: 'Next', action: 'nextLine', enabled: true };
   if (s.lx.mult) return { label: 'Go', action: 'go', enabled: s.lx.mult.kind === 'flip' || (valid(s.lx.mult.entry) && Number(s.lx.mult.entry) !== 0) };
   if (s.lx.distribute) return { label: 'Multiply', action: 'lxApply', enabled: s.lx.distribute.entries.every((e) => /\d|x/.test(e)) };
   if (s.lx.combine) return { label: 'Combine', action: 'lxApply', enabled: valid(s.lx.combine.entry) && !s.lx.combine.wrong };
@@ -430,16 +455,16 @@ function forwardCore(s) {
   if (s.scaffold && s.stage === 'moves' && s.menu === 'add') return { label: 'Go', action: 'go', enabled: (Boolean(s.pending?.both) && s.leftDelta === s.rightDelta) || (!s.pending && valid(s.amountEntry) && Number(s.amountEntry) !== 0) };
   if (blankOpen(s) && amountMode(s)) return { label: 'Go', action: 'go', enabled: valid(s.amountEntry) };
   if (!s.sub && (s.unfolded || s.pic)) return { label: 'Next', action: 'foldNext', enabled: true };   // (the loop: a move that folds, a picture)
-  return { label: 'Check', action: 'check', enabled: lightsAnswerLive(s) && valid(s.entry) };
+  return { label: 'Check', action: 'check', enabled: C.answerLive(s) && valid(s.entry) };
 }
 
 // ---------- the answer row: x = [ ] [the green button] ----------
 
 function answerRow(s) {
-  const live = lightsAnswerLive(s);
+  const live = C.answerLive(s);
   const text = s.sub && !live ? String(s.sub.typed) : s.entry;
   // x = shows no cursor at first: it blinks once clicked (until anything else happens), and at the last step, x alone on its side
-  const last = live && !amountMode(s) && (xAlone(s.board) || Boolean(s.ui?.fieldCursor));
+  const last = live && !amountMode(s) && (C.alone(s.board) || Boolean(s.ui?.fieldCursor));
   const placing = Boolean(s.sub?.placing);                 // the typed value is what is dragged into x
   const typed = html('button', `ab-typed lb-typed lx-field${text ? '' : ' is-empty'}${last ? ' is-focus' : ''}${last && !text ? ' is-blink' : ''}${live || placing ? '' : ' is-off'}${placing ? ' is-chip' : ''}`, [shown(text)], placing
     ? { type: 'button', 'data-chip': '1', 'data-fk': 'answer', 'data-lx-field': '1', 'aria-label': `Your value ${shown(text)}: drag it into x` }
@@ -453,26 +478,26 @@ function answerRow(s) {
 
 // The checking space: once the value is in x, the copy of the equation with the value in parentheses, then a line a press of the green
 // Next, then Balanced or Not balanced. The loop's check, drawn by the shared renderer (view/solveScreen.js), as on every card.
-const substBlock = (s) => sharedSubstBlock(s, solve);
+const substBlock = (s) => sharedSubstBlock(s, C.loop);
 
 // The corners: Undo bottom-left; Start over and the help, small and quiet, bottom-right. Teach me appears only after a second error on
 // the problem (and flashes as it comes); I'm stuck starts to flash after 10 seconds with nothing done (view/helpTimer.js).
 function corners(s) {
   const done = s.stage === 'done';
-  const wrongGuess = s.sub?.kind === 'guess' && !s.sub.ok && s.sub.step >= solve.subTotal(s.sub);
+  const wrongGuess = s.sub?.kind === 'guess' && !s.sub.ok && s.sub.step >= C.loop.subTotal(s.sub);
   const undo = btn('↶ Undo', 'undo', 'btn lx-corner lx-undo', { 'data-key': 'u', 'data-fk': 'undo' });
   undo.disabled = done || !((s.history.length > 0 && !s.sub) || wrongGuess || s.lx.combine || s.lx.distribute);
   if (!undo.disabled && (s.needUndo || wrongGuess || s.lx.combine?.wrong)) undo.classList.add('is-target');
   const over = btn('Start over', 'startOver', 'btn lx-corner lx-startover', { 'data-fk': 'startOver' });
-  over.disabled = done || !solve.startOverOk(s);                  // (the loop's rule: live once anything has been done)
+  over.disabled = done || !C.loop.startOverOk(s);                  // (the loop's rule: live once anything has been done)
   return html('div', 'lx-corners', [undo, html('div', 'lx-cornerright', [over, ...helpButtons(s)])]);
 }
 function helpButtons(s) {
-  const off = Boolean(s.drill) || !solve.helpOk(s);              // (the drill has no help ladder)
+  const off = Boolean(s.drill) || !C.loop.helpOk(s);              // (the drill has no help ladder)
   const stuck = btn('I’m stuck', 'stuck', 'btn lx-corner lx-help', { 'data-key': 's', 'data-fk': 'stuck' });
   stuck.disabled = off;
   const out = [stuck];
-  if ((s.errors ?? 0) >= 2 || s.taught > 0) {
+  if (C.teach && ((s.errors ?? 0) >= 2 || s.taught > 0)) {          // (no Teach me on a card in basic form)
     const teach = btn('Teach me', 'teach', `btn lx-corner lx-help${s.taught > 0 ? '' : ' is-new'}`, { 'data-key': 't', 'data-fk': 'teach' });
     teach.disabled = off;
     out.push(teach);
@@ -489,11 +514,11 @@ function panel(s) {
   const moves = {
     add: {
       live: true, off: Boolean(s.drill), pressed: menu === 'add', preview: canChoose(s) && s.ui?.preview === true, near: canChoose(s) && s.ui?.preview === 'near',
-      ring: moveOwed(s) && !blankOpen(s) && !tradePending(s), focus: s.ui?.focus === 'add',
+      ring: moveOwed(s) && !blankOpen(s) && !C.tradePending(s), focus: s.ui?.focus === 'add',
     },
   };
   // Trade places is live from Level 4 when x is on the right; the first time, it is the move to click
-  if (tradeAvailable(s)) moves.trade = { live: true, pulse: tradePending(s) };
+  if (C.tradeAvailable(s)) moves.trade = { live: true, pulse: C.tradePending(s) };
   // the drill finishes with Flip everything and Multiply (Build D, Part 3)
   if (s.drill) {
     // one Multiply button: its three options beside it (Build D-2, Part 4); Flip everything is its −1
@@ -501,6 +526,7 @@ function panel(s) {
   }
   const lights = building ? {} : { fewer: s.lights.fewer, fewerHand: s.lx.hand.fewer, solved: s.lights.solved };
   const flash = ['red', 'neutral'].includes(s.lights.fewer) && s.history.length > 0 ? ['fewer'] : [];
+  C.panel?.(s, moves);                                          // (the card's own moves: the Two-step card's Multiply and Flip)
   const el = narrowPanel(moves, { disabled, lights, open: s.ui?.light ?? null, flash });
   if (moveOwed(s)) el.classList.add('is-owed');                   // the forced move: the needed move has a steady ring and the pulse
   return el;
@@ -557,11 +583,12 @@ function aloneTray(s) {
   return html('div', 'alone-tray', [mat, html('p', 'alone-caption', [caption]), tools], { role: 'group', 'aria-label': 'Counters for the two numbers' });
 }
 
-export function renderAddBothScreen(s) {
-  const wrap = html('div', 'lb-game lb-eqcard ui-lights ui-grab ui-light');
+export function renderAddBothScreen(s, card = ADD_CARD) {
+  C = card;
+  const wrap = html('div', `lb-game lb-eqcard ui-lights ui-grab ui-light${C.cls ? ` ${C.cls}` : ''}`);
   // no banner: the line is kept for screen readers only (while a pop-up is up, it holds the prompt)
-  const sp = s.drill ? null : spotOf(s, ADD_SPOT);
-  wrap.append(srLine(lightsFeedbackText(sp ? { key: ADD_SPOT.prompt(s), params: {} } : s.feedback)));
+  const sp = s.drill ? null : spotOf(s, C.spot);
+  wrap.append(srLine(C.text(sp ? { key: C.spot.prompt(s), params: {} } : s.feedback)));
   const body = html('div', 'lb-body');
   const main = html('div', 'lb-main');
   const work = html('div', 'sv-solve', [html('div', 'lb-eqblock', [workStack(s)])]);

@@ -21,6 +21,8 @@ const M = {
   fWrong: (p) => `When x = ${p.typed}, the equation is not balanced.`,
   fTraded: () => 'The same equation with the sides traded: x is on the left now.',
   aLaterLevel: () => 'That move unlocks on a later level.',
+  // the first flip of a level that helps (Build K)
+  fFlipIntro: () => 'Multiplying both sides by −1 flips every sign. −x becomes x.',
 };
 
 export function flipFeedbackText(fb) {

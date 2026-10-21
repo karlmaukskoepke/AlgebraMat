@@ -65,7 +65,7 @@ const sideEls = (board, s, o) => { const oo = { ...o, xi: { n: 0 } }; return [te
 export const sideTerms = (terms, s) => termsOf(terms, s, { live: false, plug: false });
 
 // What a folded move says it did, above its equation: `⅓ of both sides`, `−⅓ of both sides`, `−1 × both sides` (Build J).
-function foldTag(label) {
+export function foldTag(label) {
   if (label.flip) return html('span', 'lb-foldtag', [html('span', 'is-blue', [`${MINUS}1 ×`]), ' both sides']);
   return html('span', 'lb-foldtag', [html('span', 'is-blue', [`${label.sign < 0 ? MINUS : ''}${fractionText(label.n)}`]), ' of both sides']);
 }

@@ -59,6 +59,11 @@ function sumSegs(items, ctx) {
       out.push({ text: `${-it.v}`, cls: ctx.op === it || ctx.pair?.includes(it) ? 'is-op' : ctx.res === it ? 'is-res' : '' });
       return;
     }
+    if (i && it.k === 'prod' && it.a < 0) {                         // so is x with a minus after another term: 4 − 3 × 5 (Build K)
+      const cls = ctx.op === it ? 'is-op' : '';
+      out.push({ text: ' − ', cls }, { text: `${-it.a} × `, cls }, { text: plugValue(it.v), cls: cls ? `${cls} is-blue` : 'is-blue' });
+      return;
+    }
     if (i) out.push({ text: ' + ', cls: opCls });
     out.push(...itemSegs(it, ctx, items.length === 1));
   });
@@ -140,6 +145,7 @@ export function equationSegs(board) {
   };
   const sideSegs = (terms) => terms.flatMap((t, i) => {
     if (i && t.kind === 'num' && t.v < 0) return [{ text: ' − ', cls: '' }, { text: `${-t.v}`, cls: '' }];
+    if (i && t.kind === 'x' && (t.coef ?? 1) < 0) return [{ text: ' − ', cls: '' }, ...termSegs({ ...t, coef: -t.coef })];   // `4 − 3x` (Build K)
     return [...(i ? [{ text: ' + ', cls: '' }] : []), ...termSegs(t)];
   });
   return [...sideSegs(board.left), { text: ' = ', cls: '' }, ...sideSegs(board.right)];

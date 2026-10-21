@@ -91,3 +91,20 @@ opens a dot into its goal; no new labels). Now that they take little room, Karl 
 
 **New rule (loop spec rev 2.1):** never grey out what the question is about. The numbers in `−8 + 11`, the equation being solved, or the
 two sides that failed to balance stay at full strength and readable during any pop-up, spotlight or scaffold. Other things grey around them.
+
+## 2026-10-21: card plan (Karl, recorded at the start of Build K)
+
+1. **Card order:** Flip everything (Build J), Two-step (Build K), Distribute + combine + solve, Variables on both sides, Multiply last. One
+   card per build.
+2. **Basic form** means: the moves, levels, generator, lights, the check, the forced move, the spotlight errors and the hint after Undo all
+   work; I'm stuck shows the reminder only (it lights the needed move). No Teach me, seesaw, counters or opposite-box scaffolds until a
+   later build.
+3. **Two-step rule (Karl chose "B"):** the multiply-type moves (take a fraction, flip everything) are live only when each side is a single
+   term. Dividing first or flipping first on a side of two terms (`6x + 12 = 18`, times 1/6) needs the real Distribute mechanic and arrives
+   with the Distribute card.
+4. **Distribute card requirement (Karl):** the shared loop gets the improved distribute move, with the multiplying factors labelled above
+   each blank (as in the hidden drill), as a shared move, not a drill. When it exists, Two-step gets divide-first and flip-first by
+   configuration.
+5. **Parked for the end of the cards build (Karl):** add the drag features to Build it's Combine like terms and Distribute modules. This
+   lifts the "Count it and Build it are read-only" rule for those two modules only. It needs its own spec, parity for Build it, and Karl's
+   explicit go-ahead at that time. Build it is not touched in Build K.

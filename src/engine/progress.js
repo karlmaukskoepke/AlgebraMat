@@ -111,6 +111,20 @@ const LEGACY_ADD_BOTH = [
 // mixed level (5) its Level 3. Level 1 is never credited, and Levels 4–6 (composite coefficients, mixed) are new.
 const LEGACY_DIVIDE = [null, (p) => done(p, 'one-step', 3), (p) => done(p, 'one-step', 5)];
 
+// Two-step equations, the new card (Build K): an old level counts where its problems are the same form. Old Two-step L1 (ax + b) → 1;
+// L2 (ax − b) → 2; L4 (the three forms with x on the right) → 3; L3 (b + ax) → 4; L5 (b − ax) → 5; L6 (negative answers) → 6; L7 (all mixed)
+// → 7. Switch sides' two-step levels: L5 (ax + b, ax − b and b + ax, positive answers) → 1, 2 and 4; L6 (negative answers, some turned
+// round) → 6. Nothing else is credited.
+const LEGACY_TWO_STEP = [
+  (p) => done(p, 'two-step', 1) || done(p, 'switch', 5),
+  (p) => done(p, 'two-step', 2) || done(p, 'switch', 5),
+  (p) => done(p, 'two-step', 4),
+  (p) => done(p, 'two-step', 3) || done(p, 'switch', 5),
+  (p) => done(p, 'two-step', 5),
+  (p) => done(p, 'two-step', 6) || done(p, 'switch', 6),
+  (p) => done(p, 'two-step', 7),
+];
+
 function creditPack(progress, id, rules) {
   const entry = progress.packs[id];
   if (!entry) return;
@@ -125,6 +139,7 @@ function creditPack(progress, id, rules) {
 export function withLegacyCredit(progress) {
   creditPack(progress, 'add-both', LEGACY_ADD_BOTH);
   creditPack(progress, 'divide-it', LEGACY_DIVIDE);
+  creditPack(progress, 'two-step-equations', LEGACY_TWO_STEP);
   return progress;
 }
 
@@ -161,12 +176,13 @@ export function mergeProgress(a, b) {
 //   v13: 14 data symbols (about 69.4 bits): + Add to both sides (6), 69 bits in use
 //   v14: 16 data symbols (about 79.3 bits): + Divide it (6), 75 bits in use
 //   v15: 17 data symbols (about 84.2 bits): + Flip everything (6), 81 bits in use (Build J)
+//   v16: 18 data symbols (about 89.2 bits): + Two-step equations, the new card (7), 88 bits in use (Build K)
 //
 // The data is a whole number of up to 75 bits, so it is worked out with BigInt: a plain JavaScript number holds only 53 bits
 // exactly, and v11 and v12 codes (57 and 63 bits) were written with plain numbers, which rounded the low bits (Count it and
 // Build it's levels). Those codes can still be read, but what they carry for those cards may be wrong; v13 is exact.
 //
-// New codes are always v15; older codes (written down earlier) still work, and a code from before Combine it's
+// New codes are always v16; older codes (written down earlier) still work, and a code from before Combine it's
 // mixed round (or Boxes & Circles' read-the-model round) brings its levels back in the right places (see
 // normalizeProgress). (Group It's pack id is still `lasso`.) v8 uses 36 of about 39.6 bits.
 
@@ -276,8 +292,18 @@ const LAYOUTS = {
       { id: 'add-both', levels: 6 }, { id: 'divide-it', levels: 6 }, { id: 'flip-everything', levels: 6 },
     ],
   },
+  // Two-step equations, the new card, 7 levels (Build K), appended at the end: 88 bits, in 18 symbols. v1-v15 codes read as before.
+  16: {
+    data: 18,
+    packs: [
+      { id: 'flipit', levels: 5 }, { id: 'lasso', levels: 7 }, { id: 'boxes', levels: 6 },
+      { id: 'groups-of-terms', levels: 8 }, { id: 'combineit', levels: 5 }, { id: 'distribute-combine', levels: 5 },
+      { id: 'value', levels: 5 }, { id: 'one-step', levels: 8 }, { id: 'two-step', levels: 8 }, { id: 'switch', levels: 6 },
+      { id: 'add-both', levels: 6 }, { id: 'divide-it', levels: 6 }, { id: 'flip-everything', levels: 6 }, { id: 'two-step-equations', levels: 7 },
+    ],
+  },
 };
-export const CODE_VERSION = 15;
+export const CODE_VERSION = 16;
 
 // Weighted sum mod 31. Weights 2, 3, 4, … are all nonzero mod 31 and differ
 // by 1 between neighbors, so any single typo or neighbor swap is caught.

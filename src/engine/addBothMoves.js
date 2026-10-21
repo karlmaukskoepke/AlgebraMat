@@ -80,7 +80,10 @@ export function lightBoard(board, amount) {
   const sum = sumNums(board[xSide]) + amount;
   const xt = board[xSide].find((t) => t.kind === 'x');
   const otherSum = sumNums(board[other]) + amount;
-  return { ...board, [xSide]: [xt, ...(sum !== 0 ? [num(sum)] : [])], [other]: otherSum === 0 ? [num(0)] : [...board[other], num(amount)] };
+  // (what is left beside x keeps its place: before x when the number was written first, `4 + 3x`; Build K)
+  const first = board[xSide][0].kind === 'num';
+  const left = sum !== 0 ? [num(sum)] : [];
+  return { ...board, [xSide]: first ? [...left, xt] : [xt, ...left], [other]: otherSum === 0 ? [num(0)] : [...board[other], num(amount)] };
 }
 
 // What a move looked like before x's side was simplified: both sides with the added amount (coloured), and the numbers on x's side that
@@ -88,7 +91,7 @@ export function lightBoard(board, amount) {
 export function workLine(board, amount) {
   const xSide = xSideOf(board);
   const otherZero = sumNums(board[xSide === 'left' ? 'right' : 'left']) + amount === 0;       // the other side cancels to 0 too
-  const side = (terms, isX) => [...terms.map((t) => (t.kind === 'x' ? { x: true } : { v: t.v, struck: isX || otherZero })), { v: amount, added: true, struck: isX || otherZero }];
+  const side = (terms, isX) => [...terms.map((t) => (t.kind === 'x' ? { x: true, ...(t.coef !== undefined ? { coef: t.coef } : {}) } : { v: t.v, struck: isX || otherZero })), { v: amount, added: true, struck: isX || otherZero }];
   return { left: side(board.left, xSide === 'left'), right: side(board.right, xSide === 'right'), amount };
 }
 

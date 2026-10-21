@@ -30,7 +30,10 @@ const say = (s, key, params = {}, bad = false) => { s.feedback = { key, params: 
 
 export function newLightsSession(problem, opts = {}) {
   // (the problem after a correct guess, shown with a move first, is the loop's: s.mustMove until s.movedOnce)
-  const s = newAddBoth(problem, { level: opts.level, introTrade: opts.introTrade, forceMove: Boolean(opts.forceMove) });
+  return startLights(newAddBoth(problem, { level: opts.level, introTrade: opts.introTrade, forceMove: Boolean(opts.forceMove) }));
+}
+// The term layer's own fields on a card's new session (Add to both sides; the Two-step card, Build K).
+export function startLights(s) {
   s.allowZero = true;                     // a 0 in the blank is allowed (it simply does not help)
   s.lx = {
     moves: 0,                             // moves applied (Undo does not take them back off this count)
@@ -65,21 +68,24 @@ export const seesawAdd = (s) => Boolean(s.scaffold) && s.stage === 'moves' && s.
 
 // Is x = [ ] live? The loop's rule (always, except while a move waits for Undo, a value is being checked, the move is owed, or the
 // seesaw is busy), and not while a sum, products or a multiply of the term layer are open. The drill's x = is live until it is done.
-export function lightsAnswerLive(s) {
+export function lightsAnswerLive(s, loop = solve) {
   if (s.lx?.combine || s.lx?.distribute || s.lx?.mult) return false;
   if (s.drill) return s.stage !== 'done';
-  return solve.answerLive(s);
+  return loop.answerLive(s);
 }
 
 const amountOf = (entry) => (/^-?\d+$/.test(entry ?? '') ? Number(entry) : null);
 const xConstant = (board) => board[xSideOf(board)].filter((t) => t.kind === 'num').reduce((a, t) => a + t.v, 0);
 
 
-export function withLights(reduce = reduceAddBoth) {
+// opts (a card other than Add to both sides under this layer; Build K): `alone(board)`, what x alone is on its boards, and
+// `menuPreview(state, kind)`, whether a Multiply option's preview (a hover on it: 'frac', 'flip', 'whole') goes to the card's own menu.
+export function withLights(reduce = reduceAddBoth, { alone = xAlone, menuPreview = null } = {}) {
   const wrapped = (state, action) => {
     // ----- view state only -----
     if (action.type === 'ui') {
       const patch = { ...action.patch };
+      if (menuPreview && ['frac', 'flip', 'whole'].includes(patch.preview)) return menuPreview(state, patch.preview) ? reduce(state, action) : state;
       if (patch.preview && !canChoose(state)) return state;
       if ((patch.carry || patch.drag) && !canGrab(state)) return state;
       const next = withUi(state, patch);
@@ -89,7 +95,7 @@ export function withLights(reduce = reduceAddBoth) {
       return patch.preview === true ? countPreview(next) : next;
     }
     if (state.stage === 'done') return state;
-    const grab = grabAction(state, action, wrapped);
+    const grab = grabAction(state, action, wrapped, alone);
     if (grab) return grab;
 
     // Esc (or a second tap on the icon): S2 goes back to S0; a preview just goes away.
@@ -168,6 +174,7 @@ export function withLights(reduce = reduceAddBoth) {
         s.ui.focus = 'blank';
         break;
       case 'go': {
+        if (menuPreview && state.menu !== 'add' && !state.scaffold) break;        // (another move's Go: a card's own Multiply menu)
         if (s.history.length <= state.history.length && !s.scaffold) break;    // the engine said no (too big, say)
         if (s.scaffold) break;
         lx.moves += 1;
@@ -175,7 +182,7 @@ export function withLights(reduce = reduceAddBoth) {
         const amount = s.lastAmount;
         if (s.lights.fewer === 'red' && state.history.length === 0 && Math.sign(amount) === Math.sign(xConstant(before))) lx.log.sameSignRed += 1;
         if (amount === 0) say(s, 'lxZero', {}, false);
-        if (xAlone(s.board)) s.ui.focus = 'answer';                                 // the next thing to do is type x
+        if (alone(s.board)) s.ui.focus = 'answer';                                  // the next thing to do is type x
         break;
       }
       case 'undo':
@@ -221,7 +228,7 @@ const sumParams = (s) => ({ sum: pairText(s.board, s.lx.combine.a, s.lx.combine.
 
 // The actions that are the wrapper's own: a drop (pointer or keyboard), a minus tap, the sum of a combine typed and applied, and the
 // Undo of a reorder, a minus tap or a combine. Returns null for anything else.
-function grabAction(state, action, wrapped) {
+function grabAction(state, action, wrapped, alone) {
   const lx = state.lx;
   // ----- the sum of a combine: typed into its blank, applied with Enter or ✓ -----
   if (lx.combine && isTyping(action)) {
@@ -249,12 +256,12 @@ function grabAction(state, action, wrapped) {
     s.board = next;
     s.prevBoard = next;
     s.rows.push({ type: 'eq', board: next });
-    s.lights = { ...s.lights, solved: xAlone(next) ? 'green' : 'off' };
+    s.lights = { ...s.lights, solved: alone(next) ? 'green' : 'off' };
     s.lx.hand = { fewer: 'green' };                         // the by-hand part of Fewer terms (A3): one term fewer
     s.lx.combine = null;
     s.movedOnce = true;                                     // the student's own combining counts as the move
     s.ui = { ...UI0, focus: 'answer' };
-    return say(s, xAlone(next) ? 'lxCombinedAlone' : 'lxCombined');
+    return say(s, alone(next) ? 'lxCombinedAlone' : 'lxCombined');
   }
 
   // ----- Undo: a combine being typed closes; a reorder, a minus tap or a combine is taken back here -----
@@ -382,7 +389,7 @@ export function lightsSummary(s) {
 // Which messages are errors on Add to both sides, what each lights up and its small label, and the hint after Undo: the card's
 // reminder rung for the state Undo returned to (the number next to x outlined, "What would we add to both sides to eliminate it?").
 // On the seesaw, a wrong move is a picture spotlight (below).
-const ADD_ERRORS = {
+export const ADD_ERRORS = {
   // the two numbers added are lit too, and the sum (or what is left) carries the label (Build D-2)
   aRed: { target: 'xnum', label: 'got bigger', lit: ['workpair'] },
   aRed3: { target: 'xnum', label: 'got bigger', lit: ['workpair'] },

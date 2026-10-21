@@ -13,18 +13,19 @@
 // No DOM here.
 
 import { createSolveLoop } from '../solveLoop.js';
-import { shapeOfBoard, lightsOf } from '../solveit/shape.js';
+import { shapeOfBoard } from '../solveit/shape.js';
 import { constantOf, signed, tagAddBoth } from '../addBoth.js';
 import { typeInto, isTyping } from '../entry.js';
 import { emptySkills } from '../skills.js';
 import {
-  startBoard, xAlone, xSideOf, otherSideOf, find, sideOf, combinable, unresolved, kindOf, combineTerms, sumNums, xConstantTerm,
-  alonePair, lightBoard, workLine, tilt, balanced, num, negativeParty,
+  startBoard, xAlone, xSideOf, find, sideOf, combinable, unresolved, kindOf, combineTerms, xConstantTerm,
+  alonePair, tilt, balanced, num, negativeParty,
 } from '../addBothMoves.js';
-import { aloneAsk, plus, say, problemParams, crossOff, pastCounters, sizesOf } from './addHelp.js';
+import { aloneAsk, say, problemParams, crossOff, pastCounters, sizesOf } from './addHelp.js';
 import { reduce as reduceWalk } from '../session.js';
 import { reduceBig } from '../bigSession.js';
 import { hintAfterUndo } from '../solveit/registry.js';
+import { judgeAdd, addBare, amountOf } from '../addMove.js';
 
 // ---------- Trade places ----------
 
@@ -34,39 +35,15 @@ export const tradeAvailable = (s) => s.level >= TRADE_LEVEL && !s.scaffold && s.
   && !s.resolving && xSideOf(s.board) === 'right';
 export const tradePending = (s) => Boolean(s.tradeIntro) && s.tradeCount === 0 && tradeAvailable(s);
 
-const amountOf = (entry) => (/^-?\d+$/.test(entry ?? '') ? Number(entry) : null);
 // Keys go to the amount's blank (rather than x =) while the move is open.
 export const amountKeys = (s) => s.menu === 'add' && s.typing !== 'answer' && (!s.pending || s.pending.second);
 
 // ---------- a move, judged ----------
 
-// A move has been made (and, in the seesaw, everything that can combine has): it is judged by the lights (from the shapes before and
-// after), committed through the loop (a helpful move is the new equation; any other waits for Undo), and said in the student's numbers.
-function judgeMove(s, api, amount) {
-  const before = s.prevBoard;
-  const lights = lightsOf(shapeOfBoard(before), shapeOfBoard(s.board));
-  const helpful = lights.fewer === 'green';
-  const redsBefore = s.reds;
-  const next = s.board;
-  api.commit(s, { rows: [{ type: 'work', work: workLine(before, amount) }, { type: 'eq', board: next }], next, label: null, helpful, lights, keepScaffold: s.scaffold });
-  if (helpful) delete s.slipPair;                                // (a wrong move keeps its pair for the picture until Undo, Build F)
-  // what the addition did, in the student's numbers (Build D-2): the number next to x before the move, and the amount added
-  const params = { amount: signed(amount), before: plus(sumNums(before[xSideOf(before)])), added: plus(amount) };
-  s.prevBoard = next;
-  s.resolving = false;
-  s.reds = lights.fewer === 'red' || s.zeroOther ? redsBefore + 1 : 0;                      // a red or a zeroed side counts toward three
-  if (s.zeroOther) {                                                                           // the side without x went to 0 (§3B step 8)
-    if (s.reds >= 3) s.startOver = true;
-    return say(s, 'aZeroOther', {}, true);
-  }
-  if (lights.fewer === 'red') {
-    if (s.reds >= 3) s.startOver = true;
-    return say(s, s.reds >= 3 ? 'aRed3' : 'aRed', params, true);
-  }
-  if (lights.solved === 'green') return say(s, 'aSolvedBoard');
-  if (lights.fewer === 'neutral') return say(s, 'aPartial', { ...params, con: plus(xConstantTerm(s.board)?.v ?? 0) });
-  return say(s, 'aGreen');
-}
+// A move (and, in the seesaw, everything that can combine) is judged by the shared Add move (engine/addMove.js): the lights from the shapes
+// before and after, committed through the loop, and said in the student's numbers.
+const ADD_MOVE = { shape: (board) => shapeOfBoard(board), alone: xAlone, say };
+const judgeMove = (s, api, amount) => judgeAdd(s, api, amount, ADD_MOVE);
 
 // ---------- the seesaw: building, the two-action move, the pairs ----------
 
@@ -342,21 +319,9 @@ const loop = createSolveLoop({
           return judgeMove(s, api, s.lastAmount);
         }
         if (s.stage !== 'moves' || s.menu !== 'add' || s.sub) return 'ignore';
-        const amount = amountOf(s.amountEntry);                        // (the light design allows a 0: it just doesn't help)
-        if (amount === null || (amount === 0 && !s.allowZero)) return say(s, 'aAmountZero', {}, true);
-        if (Math.abs(amount) > 15) return say(s, 'aAmountBig', {}, true);
-        if (s.forced && amount !== s.forcedAmount) return say(s, 'aForced', { amount: signed(s.forcedAmount) }, true);
-        const gate = api.blockMove(s);
-        if (gate) return gate;
-        api.pushHistory(s);
-        const before = s.board;
-        s.alone = null;
-        s.work = workLine(before, amount);
-        s.board = lightBoard(before, amount);                            // (the commit writes the rows for it)
-        s.zeroOther = !xAlone(s.board) && sumNums(before[otherSideOf(before)]) + amount === 0;
-        s.lastAmount = amount;
-        Object.assign(s, { menu: null, typing: null, amountEntry: '', hint: null });
-        judgeMove(s, api, amount);
+        const made = s.history.length;
+        const out = addBare(s, api, ADD_MOVE);                           // (the shared move: engine/addMove.js)
+        if (s.history.length === made) return out;                       // not made: the amount, or something waits for Undo
         // Teach me's move, done for the student's Go: at x alone, party or battle at the numbers (Build D, Part 5)
         if (s.teachFlow) {
           s.teachFlow = false;
