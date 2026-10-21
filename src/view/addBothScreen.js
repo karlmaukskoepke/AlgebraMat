@@ -85,7 +85,8 @@ function popups(s, wrap) {
   // checking a value: everything greys out but the equation being checked and the checking space (and, while the value waits to be
   // dragged in, the value; once it is in, the green Next)
   if (s.sub && s.sub.step < solve.subTotal(s.sub)) {
-    wrap.append(spotlightLayer({ kind: 'intro', lit: ['plugrow', 'check', s.sub.placing ? 'answer' : 'forward'] }, { ...o, text: s.sub.placing ? placeText(s.sub.typed) : null }));
+    // (on the seesaw, the balance that mirrors the check is lit with it: it is what the check is drawn on)
+    wrap.append(spotlightLayer({ kind: 'intro', lit: ['plugrow', 'check', ...(s.scaffold ? ['board'] : []), s.sub.placing ? 'answer' : 'forward'] }, { ...o, text: s.sub.placing ? placeText(s.sub.typed) : null }));
     return;
   }
   // Teach me: the move to make, in the Add move's blank, with Add lit; the green button says Do it

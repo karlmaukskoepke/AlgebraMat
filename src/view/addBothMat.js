@@ -7,6 +7,7 @@
 import { MINUS } from '../engine/expr.js';
 import { formatAddBoth, signed } from '../engine/addBoth.js';
 import { xSideOf, tilt, balanced, kindOf, sideValueText } from '../engine/addBothMoves.js';
+import { checkMirror, mirrorReadout, COUNTER_LIMIT } from '../engine/seesawCheck.js';
 
 const SVG_NS = 'http://www.w3.org/2000/svg';
 function el(name, attrs = {}, children = []) {
@@ -43,6 +44,20 @@ export function groupShape(n) {
 
 // What is on the board, as data: each side's items with their widths. While building, only what the student has put up.
 export function boardItems(s) {
+  // the check on the seesaw: the original equation, each line of the check drawn on it (Build H, Part 2)
+  const mirror = checkMirror(s);
+  if (mirror) {
+    const make = (it) => {
+      if (it.type === 'x') return { type: 'x', id: it.id, width: BOX_W, height: BOX_H };
+      const labelled = it.type === 'xgroup';
+      if (Math.abs(it.v) > COUNTER_LIMIT || it.v === 0) {            // past the limit: one box labelled with the number
+        return { type: 'token', id: it.id, v: it.v, xlabel: labelled, width: Math.max(76, 30 + String(signed(it.v)).length * 24), height: TOKEN_H };
+      }
+      const g = groupShape(Math.abs(it.v));
+      return { type: 'group', id: it.id, v: it.v, n: Math.abs(it.v), xlabel: labelled, shape: g, width: g.width, height: g.height };
+    };
+    return { left: mirror.left.map(make), right: mirror.right.map(make) };
+  }
   const counters = s.counterMode || s.stage === 'build';
   const item = (t) => {
     if (t.kind === 'x') return { type: 'x', id: t.id, width: BOX_W, height: BOX_H };
@@ -187,6 +202,7 @@ export function drawBalance(svg, items, ctx) {
         g.append(hitArea(cx, cy, it.width, it.height));
         g.append(el('rect', { x: cx, y: cy, width: it.width, height: it.height, rx: 12, class: 'ab-token-box' }));
         g.append(el('text', { x: cx + it.width / 2, y: cy + it.height / 2 + 12, 'text-anchor': 'middle', class: 'ab-token-text' }, [signed(it.v)]));
+        if (it.xlabel) { g.classList.add('is-xgroup'); g.append(el('text', { x: cx + it.width / 2, y: cy - 8, 'text-anchor': 'middle', class: 'ab-xlabel' }, ['x'])); }
         out.append(g);
       } else {
         const attrs = building
@@ -195,6 +211,7 @@ export function drawBalance(svg, items, ctx) {
         const g = el('g', { class: `ab-group${ctx.cls?.(it.id) ?? ''}${it.v < 0 ? ' is-negative' : ''}`, ...attrs });
         g.append(hitArea(cx, cy, it.width, it.height));
         g.append(el('rect', { x: cx, y: cy, width: it.width, height: it.height, rx: 12, class: 'ab-group-box' }));
+        if (it.xlabel) { g.classList.add('is-xgroup'); g.append(el('text', { x: cx + it.width / 2, y: cy - 8, 'text-anchor': 'middle', class: 'ab-xlabel' }, ['x'])); }
         const k = ctx.struck?.[it.id] ?? 0;
         for (let n = 0; n < it.n; n++) {
           const mx = cx + 11 + (n % it.shape.cols) * CELL + CELL / 2;
@@ -252,13 +269,18 @@ export function equationSvg(text, geo, lines = []) {
 
 export function boardSvg(s) {
   const items = boardItems(s);
+  const mirror = checkMirror(s);                                  // the seesaw's check: no taps, the beam tips with what is drawn
   const building = s.stage === 'build';
   const svg = el('svg', { class: 'mat value-mat addboth-mat', role: 'group', 'aria-label': 'The Add to both sides Mat' });
   const slip = slipShown(s);
   const slipSide = slip ? new Set(s.board[xSideOf(s.board) === 'left' ? 'right' : 'left'].map((t) => t.id)) : null;
   const cls = (id) => `${slip && (id === 'slipA' || id === 'slipB') ? ' is-slip' : ''}${slip && slipSide.has(id) ? ' is-slipother' : ''}${s.selected === id ? ' is-selected' : ''}${s.combining && (s.combining.a === id || s.combining.b === id) ? ' is-combining' : ''}${(s.hint?.kind === 'cancel' && s.hint.id === id) || (s.hint?.kind === 'sum' && s.hint.ids.includes(id)) ? ' is-hint' : ''}${s.pending?.kind === 'cross' && s.pending.id === id ? ' is-crossing' : ''}`;
   const tapAction = (id) => (building ? null : s.menu === 'cross' ? (s.pending?.kind === 'cross' && s.pending.id === id ? 'flipSign' : 'cross') : 'select');
-  const geo = drawBalance(svg, items, {
+  const geo = drawBalance(svg, items, mirror ? {
+    top: 64,
+    readout: { text: mirrorReadout(mirror) || ' ', cls: !mirror.final ? '' : mirror.tilt === 0 ? 'is-good' : 'is-bad' },
+    building: false, zonesOn: false, early: false, tapAction: () => null, cls: () => '', struck: {}, angle: angleFor(mirror.tilt), anim: null, leftOver: () => false,
+  } : {
     top: 64,
     readout: { text: building ? 'Build the equation' : tiltText(s), cls: building ? '' : balanced(s) ? 'is-good' : 'is-bad' },
     building, zonesOn: building || (s.stage === 'moves' && s.menu === 'add' && hasAmount(s) && !s.combining && !seesawAddOpen(s)),
@@ -266,7 +288,7 @@ export function boardSvg(s) {
     leftOver: (id) => slip && (id === 'slipA' || id === 'slipB'),
   });
   const sideBtnsOn = !building && s.stage === 'moves' && s.menu === 'add' && hasAmount(s) && !s.combining && !s.resolving && s.pending?.kind !== 'cross';
-  const base = building ? s.base : s.board;
+  const base = building ? s.base : mirror ? mirror.board : s.board;      // (the check's equation under the seesaw is the one being checked)
   let lines = [];
   if (s.early?.step === 'check' || s.early?.step === 'move') {
     const shown = s.early.step === 'check' ? s.early.lines.slice(0, s.early.shown + 1) : s.early.lines;

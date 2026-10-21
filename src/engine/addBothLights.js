@@ -388,8 +388,8 @@ const ADD_ERRORS = {
   lxZero: { target: 'xnum', label: 'no change' },
   aZeroOther: { target: 'otherSide', label: 'now 0' },
   aUndoFirstHelp: { target: 'lastMove', label: 'waiting for Undo' },
-  aUndoGuess: { target: 'subst', lit: ['substLast'] },
-  aWrong: { target: 'subst', clear: true, lit: ['substLast'] },
+  aUndoGuess: { target: 'subst', lit: ['substLast', 'board'] },                // (and the seesaw that shows the two sides, when it is up)
+  aWrong: { target: 'subst', clear: true, lit: ['substLast', 'board'] },
   lxCombineWrong: { target: 'sumbox', label: 'check this', lit: ['pair'] },       // (the two numbers being combined stay lit too)
 };
 // A wrong move on the seesaw (Build F, Part 3): a picture spotlight. The pair that combined beside x is drawn again, its cancelled pairs

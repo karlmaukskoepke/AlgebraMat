@@ -104,19 +104,21 @@ export function substitutionLines(board, value) {
   let left = board.left.map((t) => toItem(t, value));
   let right = board.right.map((t) => toItem(t, value));
   const lines = [];
+  const states = [];                                                // the items of each line, for a picture of it (the seesaw's check, Build H)
   let prevRes = null;
   for (let guard = 0; guard < 40; guard++) {
     const onLeft = nextOp(left);
     const found = onLeft ?? nextOp(right);
     const ctx = { op: found?.op ?? null, pair: found?.pair ?? null, res: prevRes };
     lines.push({ segs: lineOf(left, right, ctx), op: Boolean(found), res: Boolean(prevRes) });
+    states.push({ left: left.map((it) => ({ ...it })), right: right.map((it) => ({ ...it })) });
     if (!found) break;
     if (onLeft) left = applyOp(left, found); else right = applyOp(right, found);
     prevRes = found.res;
   }
   const l = valueOf(left);
   const r = valueOf(right);
-  return { lines, left: l, right: r, ok: l !== null && l === r };
+  return { lines, states, left: l, right: r, ok: l !== null && l === r };
 }
 
 export const lineText = (line) => line.segs.map((s) => s.text).join('');

@@ -3649,3 +3649,7 @@ body[data-input='touch'] #play.is-light #controls .btn-pad { min-width: 48px; mi
 /* Build H, Part 1: the small cue under Divide it's open fraction blank (it takes no room of its own: the row keeps its height) */
 .dv-fracblank { position: relative; }
 .dv-light .dv-retype { position: absolute; top: calc(100% + 2px); left: 50%; transform: translateX(-50%); white-space: nowrap; font: 700 15px 'Lexend', system-ui, sans-serif; color: #5d5a52; pointer-events: none; }
+
+/* Build H, Part 2: the seesaw's check. The x box is drawn as counters in a blue box with a small x above it. */
+.ab-xlabel { font: 800 30px 'Lexend', system-ui, sans-serif; fill: #0072b2; }
+.ab-group.is-xgroup .ab-group-box, .ab-token.is-xgroup .ab-token-box { stroke: #0072b2; stroke-width: 3.5; }

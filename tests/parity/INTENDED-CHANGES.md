@@ -512,3 +512,7 @@ Compared screen by screen with the code before this part (`main` at `5a528b1`): 
 | `screen:div-end@1366x650` | as above |
 | `screen:add-end@1366x768` | as above |
 | `screen:add-end@1366x650` | as above |
+
+## Build H, Part 2: the seesaw mirrors the check (2026-10-21)
+
+Compared with the code before this part: no scripted run (trace, event, problem, save code) and no screen changed. None of the 31 screens draws a check on the seesaw, so the new picture is covered by `tests/seesawCheck.test.js` (the mirror's states line by line, the 12-counter limit, a wrong value, x on the right) and by the walk of its Features to check item. No new key is needed.
