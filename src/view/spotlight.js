@@ -165,6 +165,7 @@ export function spotlightLayer(spot, o) {
     : { role: 'status', 'aria-live': 'polite' });
   // Small questions side by side, floating above the numbers they are about, which stay lit (Build H, Part 3): spot.bubbles is a list of
   // { id, text, choices: [[label, value]], action, picked, dim }. One not yet to be answered is dimmed; a picked one shows its answer.
+  // spot.slots keeps room for questions still to come (Build I, Part 2: the second appears to the right of the first, which stays put).
   const bubbleEls = (spot.bubbles ?? []).map((b, i, all) => {
     const kids = [el('p', 'spot-text', [b.text])];
     if (b.choices) {
@@ -174,10 +175,11 @@ export function spotlightLayer(spot, o) {
         return btn;
       })));
     }
-    return el('div', `spot-box is-bubble${all.length === 1 ? ' is-lone' : ''}${b.dim ? ' is-dim' : ''}${b.picked ? ' is-done' : ''}`, kids, { role: 'group', 'aria-label': b.text, 'data-bubble': b.id, 'data-i': String(i), ...(b.dim ? { 'aria-disabled': 'true' } : {}) });
+    return el('div', `spot-box is-bubble${(spot.slots ?? all.length) === 1 ? ' is-lone' : ''}${b.dim ? ' is-dim' : ''}${b.picked ? ' is-done' : ''}`, kids, { role: 'group', 'aria-label': b.text, 'data-bubble': b.id, 'data-i': String(i), ...(b.dim ? { 'aria-disabled': 'true' } : {}) });
   });
   if (kind === 'ask' && spot.choices) {
-    box.append(el('div', 'spot-choices', spot.choices.map(([label, value]) => el('button', `btn ${value === 'party' ? 'btn-party' : value === 'battle' ? 'btn-battle' : ''}`, [label], { type: 'button', 'data-action': spot.choiceAction ?? 'kind', 'data-value': value }))));
+    // (spot.big: a big + and − to pick a sign, as in the small questions at big numbers; Build I, Part 3)
+    box.append(el('div', `spot-choices${spot.big ? ' is-big' : ''}`, spot.choices.map(([label, value]) => el('button', `btn ${value === 'party' ? 'btn-party' : value === 'battle' ? 'btn-battle' : ''}`, [label], { type: 'button', 'data-action': spot.choiceAction ?? 'kind', 'data-value': value, ...(value === '+' ? { 'aria-label': 'Positive' } : value === '-' ? { 'aria-label': 'Negative' } : {}) }))));
   }
   if (o.extra) box.append(o.extra);                       // a card's own content in the bubble (Divide's boxes and its fractions)
   let arrow = null;
@@ -240,15 +242,21 @@ export function spotlightLayer(spot, o) {
     if (bubbleEls.length) {
       // side by side, centred over the numbers, above them (below when there is no room above); equal heights
       const gap = 14;
-      const total = bubbleEls.length * BUBBLE_W + (bubbleEls.length - 1) * gap;
+      // (spot.slots: the places kept for questions still to come, so the first stays put when the second appears beside it, Build I)
+      const slots = Math.max(spot.slots ?? 0, bubbleEls.length);
+      const total = slots * BUBBLE_W + (slots - 1) * gap;
       for (const b of bubbleEls) { b.style.width = `${BUBBLE_W}px`; b.style.minHeight = ''; }
       const bh = Math.max(...bubbleEls.map((b) => b.offsetHeight));
       for (const b of bubbleEls) b.style.minHeight = `${bh}px`;
       const cx = r ? (r.left + r.right) / 2 : vw / 2;
       const left0 = Math.min(Math.max(8, cx - total / 2), Math.max(8, vw - total - 8));
+      // just below the numbers, where they cover nothing (Build I: above, they covered the rows of work over the numbers); above only
+      // when there is no room below
+      const below = r ? r.bottom + pad + GAP : 8;
       const above = r ? r.top - pad - GAP - bh : 8;
-      const top = above >= 8 ? above : (r ? r.bottom + pad + GAP : 8);
-      bubbleEls.forEach((b, i) => Object.assign(b.style, { left: `${left0 + i * (BUBBLE_W + gap)}px`, top: `${Math.min(top, vh - bh - 8)}px` }));
+      const under = below + bh <= vh - 8 || above < 8;
+      const top = under ? below : above;
+      bubbleEls.forEach((b, i) => { b.classList.toggle('is-below', under); Object.assign(b.style, { left: `${left0 + i * (BUBBLE_W + gap)}px`, top: `${Math.min(top, vh - bh - 8)}px` }); });
       return;
     }
 

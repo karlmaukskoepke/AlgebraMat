@@ -69,6 +69,8 @@ export const cancelAmount = (board) => { const c = xConstantTerm(board); return 
 export const otherNums = (board) => board[otherSideOf(board)].filter((t) => t.kind === 'num');
 // x alone with two numbers on the other side (x = −3 + 5): the two numbers, as the row reads them.
 export const alonePair = (board) => { const nums = otherNums(board); return nums.length >= 2 ? [nums[0], nums[1]] : null; };
+// x alone with a party of two negatives still to put together (x = −2 + −13, Build I, Part 3): the pair, or null.
+export const negativeParty = (board) => { const nums = otherNums(board); return xAlone(board) && nums.length === 2 && nums.every((t) => t.v < 0) ? nums : null; };
 
 // The move: the numbers on x's side cancel on their own; the other side just gets the amount added (left as separate terms), unless the
 // amount cancels it to 0 (the zero-the-wrong-side slip shows the 0 they were after).

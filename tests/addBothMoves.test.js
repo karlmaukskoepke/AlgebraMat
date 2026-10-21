@@ -192,7 +192,9 @@ describe('plugging a typed value back in: a line a click', () => {
     expect([s.feedback.key, s.feedback.params.tag, s.entry, s.stage, s.wrongs]).toEqual(['aWrong', 'wrong-op', '', 'moves', 1]);
     expect(run(s, { type: 'undo' })).toBe(s);
     expect(clickThrough(answer(move(start(), -3), '−6')).feedback.params.tag).toBe('untouched');
-    expect(clickThrough(answer(move(start(P('x+a', 4, -2)), -4), '6')).feedback.params.tag).toBe('sign-flipped');
+    // (x = −2 − 4 is a party of negatives: typed 6 there is its own slip since Build I, Part 3; a battle's flipped sign is still sign-flipped)
+    expect(clickThrough(answer(move(start(P('x+a', 4, -2)), -4), '6')).feedback.params.tag).toBe('party-neg-sign');
+    expect(clickThrough(answer(move(start(P('x+a', 4, 1)), -4), '3')).feedback.params.tag).toBe('sign-flipped');
     s = answer(s, '−9');                                                                   // typing again clears the old substitution
     expect([s.sub.ok, s.sub.step]).toEqual([true, 0]);
     expect(clickThrough(s).stage).toBe('done');

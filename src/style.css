@@ -3672,3 +3672,5 @@ body[data-input='touch'] #play.is-light #controls .btn-pad { min-width: 48px; mi
 .ui-light .sv-checklist .sv-line2 { margin-top: -2px; }
 .sv-shadowline { position: fixed; left: 0; top: 0; z-index: 940; pointer-events: none; white-space: nowrap; color: #2b2a26; opacity: 0.45; line-height: 1.3; }
 .sv-shadowline .is-blue { color: #0072b2; }
+/* the small questions at big numbers sit just below the numbers (Build I, Part 2): the pointer is on top */
+.spot-box.is-bubble.is-below::after { bottom: auto; top: -13px; border: 12px solid transparent; border-top: 0; border-bottom-color: #0b5f8f; }

@@ -17,6 +17,7 @@ const SLIP = {
   'sign-flipped': (p) => (p.battle
     ? `Battle! ${p.opp} and ${p.other} fight, and the bigger team wins. Which team has more?`
     : 'Right size, wrong team. Check the sign.'),
+  'party-neg-sign': () => 'Right size, wrong team. Check the sign.',
   'sizes-added': (p) => `${p.opp} and ${p.other} are opposites, so it's a Battle, not a Party. Take the bigger side's sign.`,
   unmatched: (p) => `${NOT(p)} Cancel the ${p.con} with its opposite, ${p.opp}, on both sides.`,
 };
@@ -25,6 +26,9 @@ export const slip = (p) => (SLIP[p.tag] ?? SLIP.unmatched)(p);
 const notBalanced = (p) => (p.tag === 'gave-opposite'
   ? `${p.typed} is an important number, but it’s not the value of x. It’s what we add to both sides to find x.`
   : `When x = ${p.typed}, the equation is not balanced.`);
+
+// A party of two numbers is a party of positives or of negatives (Build I, Part 2): the sign the student picked.
+const teamOf = (p) => (p.sign === '-' ? 'negatives' : 'positives');
 
 // Why a move waits for Undo, in one sentence (aUndoFirstHelp).
 const UNDO_REASON = {
@@ -122,15 +126,23 @@ const M = {
   // the help at x alone (Build C, Part 3): Party/Battle at the two numbers, then x =, then Count it's counters
   aAlonePB: (p) => `${p.sum}: party or battle?`,
   aAloneRight: (p) => `${p.kind === 'party' ? 'Yes, a party: the teams join.' : 'Yes, a battle: the bigger team wins.'} Now type x.`,
-  // past the counters' limit: the two small questions at the numbers (Build H, Part 3)
+  // past the counters' limit: the two small questions at the numbers, one at a time (Build I, Part 2)
   aAloneWho: (p) => `Yes, a battle: the bigger team wins. Who won, ${p.a} or ${p.b}?`,
-  aAloneAdd: (p) => `Yes, a party: the teams join. Add ${p.first} + ${p.second} to find how many in all, then type x.`,
+  aAloneParty: () => 'Yes, a party: the teams join. A party of what? Pick the sign.',
   aWhoWrong: (p) => `Not that one: the bigger team wins. Which is bigger, ${p.hi} or ${p.lo}? Pick the sign of the winner.`,
-  aWhoRight: (p) => `Yes: ${p.win} wins. Subtract ${p.hi} − ${p.lo} to find how many are left, then type x.`,
+  aWhoRight: (p) => `Yes: ${p.win} wins. Subtract ${p.hi} − ${p.lo} to find how many of the ${p.win} are left, then type x.`,
+  aPartyWrong: (p) => `Not that one. Look at the signs of ${p.a} and ${p.b}, then pick the sign.`,
+  aPartyRight: (p) => `Yes: a party of ${teamOf(p)}. Add ${p.first} + ${p.second} to find how many ${teamOf(p)}, then type x.`,
+  // a party of negatives typed without its sign (Build I, Part 3)
+  aNegSign: (p) => `${p.a} and ${p.b} are both negatives. A party of negatives makes ___`,
+  aNegSignWrong: (p) => `Look again: ${p.a} and ${p.b} are both negatives. A party of negatives makes ___`,
+  aNegSignRight: () => 'Now type x, and keep the sign.',
   aBubbleWho: (p) => `Who won? ${p.a} or ${p.b}?`,
   aBubbleWhoWrong: (p) => `Not that one. The bigger team wins: ${p.hi} or ${p.lo}?`,
-  aBubbleSub: (p) => `Subtract ${p.hi} − ${p.lo} to find how many are left.`,
-  aBubbleAdd: (p) => `Add ${p.first} + ${p.second} to find how many in all.`,
+  aBubbleSub: (p) => `Subtract ${p.hi} − ${p.lo} to find how many of the ${p.win} are left.`,
+  aBubbleParty: () => 'A party of what? Pick the sign.',
+  aBubblePartyWrong: (p) => `Not that one. Look at the signs of ${p.a} and ${p.b}.`,
+  aBubbleAdd: (p) => `Add ${p.first} + ${p.second} to find how many ${teamOf(p)}.`,
   aAloneCounters: () => 'Here are the two numbers as counters. Cross off any + and − pairs, count what is left, then type x.',
   aAloneCount: () => 'Count what is left, then type x.',
   aStruck: (p) => `Battle! ${p.g1} and ${p.g2}: the pairs cancel. See the crossed-off pairs, then press Next.`,

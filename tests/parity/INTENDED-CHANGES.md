@@ -536,3 +536,7 @@ Compared screen by screen with the code before this part (`main` at `25f65f0`): 
 | `screen:div-wrong-guess@1366x650` | as above |
 | `screen:div-end@1366x768` | as above |
 | `screen:div-end@1366x650` | as above |
+
+## Build I, Parts 2 and 3: big numbers one question at a time; a party of negatives keeps its sign (2026-10-21)
+
+Compared with the code after Part 1: no scripted run and no screen changed. No scripted run reaches x alone with a number past 12, and none types a party of negatives without its sign (the scripted runs at `x = −4 + −8` type −12). The new behaviour is covered by `tests/bigPairs.test.js` (one question at a time, for a battle and now a party) and `tests/buildI.test.js` (every party-of-negatives shape from the generators, typed +sum, gets the sign question after Undo; typed −sum is correct; a battle never gets it; the class sheet keeps the word `hint`). The new slip tag `party-neg-sign` appears only in those runs. No new key is needed.

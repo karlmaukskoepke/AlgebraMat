@@ -409,16 +409,18 @@ function seesawError(s) {
   if (!s.needUndo || s.combining || s.sub || s.stage !== 'moves') return null;
   return SEESAW_ERRORS[slipKey(s)] ?? null;
 }
-// Past the counters' limit, at x alone (Build H, Part 3): two small questions side by side at the two numbers, which stay lit. A battle asks
-// who won (a big + and a big −), and the sum to work out waits, dimmed, until that is answered; a party skips the first and shows only the
-// add. Their numbers are read from the row on screen. The student then types x: the app never writes the value.
+// Past the counters' limit, at x alone (Build I, Part 2; it was Build H, Part 3): two small questions at the two numbers, which stay lit,
+// asked one at a time so the sign is not lost. The first asks for the sign with a big + and a big − (a battle: who won; a party: a party of
+// what?). The second does not exist until the first is answered right; then it appears beside it ("Subtract 15 − 2 to find how many of
+// the −15 are left.", "Add 2 + 13 to find how many negatives."), and the first stays, showing the sign picked. Their numbers are read from
+// the row on screen. The student then types x: the app never writes the value.
 function aloneBubbles(s) {
   const al = s.alone;
   const sz = sizesOf(findOnBoard(s.board, al.a).v, findOnBoard(s.board, al.b).v);
   const battle = al.kind === 'battle';
-  const out = [];
-  if (battle) out.push({ id: 'who', key: s.feedback?.key === 'aWhoWrong' ? 'aBubbleWhoWrong' : 'aBubbleWho', params: sz, action: 'whoWon', choices: [['+', '+'], ['−', '-']], picked: al.who ?? null });
-  out.push({ id: 'op', key: battle ? 'aBubbleSub' : 'aBubbleAdd', params: sz, dim: al.step === 'who' });
+  const wrong = s.feedback?.key === 'aWhoWrong' || s.feedback?.key === 'aPartyWrong';
+  const out = [{ id: 'who', key: battle ? (wrong ? 'aBubbleWhoWrong' : 'aBubbleWho') : (wrong ? 'aBubblePartyWrong' : 'aBubbleParty'), params: sz, action: 'whoWon', choices: [['+', '+'], ['−', '-']], picked: al.who ?? null }];
+  if (al.step !== 'who') out.push({ id: 'op', key: battle ? 'aBubbleSub' : 'aBubbleAdd', params: sz });
   return out;
 }
 export const ADD_SPOT = {
@@ -435,7 +437,9 @@ export const ADD_SPOT = {
     // the scaffold's pair: party or battle, floating right above the two groups on the balance (Build D, Part 5)
     if (s.scaffold && s.combining?.step === 'kind') return { kind: 'ask', target: 'combining', choices: [['Party!', 'party'], ['Battle!', 'battle']] };
     if (s.alone?.step === 'pb') return { kind: 'ask', target: 'otherSide', choices: [['Party!', 'party'], ['Battle!', 'battle']] };
-    if (s.alone?.sizes && (s.alone.step === 'who' || s.alone.step === 'type')) return { kind: 'ask', target: 'otherSide', lit: s.alone.step === 'type' ? ['answer'] : [], bubbles: aloneBubbles(s) };
+    // a party of negatives typed without its sign (Build I, Part 3): the sign question at the two numbers, which stay lit
+    if (s.alone?.step === 'sign') return { kind: 'ask', target: 'otherSide', choices: [['+', '+'], ['−', '-']], choiceAction: 'whoWon', big: true };
+    if (s.alone?.sizes && (s.alone.step === 'who' || s.alone.step === 'type')) return { kind: 'ask', target: 'otherSide', lit: s.alone.step === 'type' ? ['answer'] : [], bubbles: aloneBubbles(s), slots: 2 };
     // (the two numbers being worked out stay lit, fully readable: never grey out what the question is about, Build H)
     if (s.alone?.step === 'type') return { kind: 'ask', target: 'answer', lit: ['otherSide'] };
     return null;

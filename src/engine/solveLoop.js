@@ -23,7 +23,7 @@ import { climb, teach as teachShape } from './solveit/registry.js';
 //   extra(p, opts)     the card's own state fields
 //   snapshotExtra(s)   the card's fields a move changes (restored by Undo)
 //   resetState(s)      the card's fields back to a bare state (a new equation state, or Start over)
-//   tag(p, typed)      the slip tag of a wrong typed value (null when right)
+//   tag(p, typed, s)   the slip tag of a wrong typed value (null when right); `s` is the state it was typed in
 //   slip(s, typed, tag) the line for a wrong value: { key, params }
 //   collapse(level)    does the substitution check collapse at this level? (never, on a single-step card)
 //   reduce(s, action, api)  the card's own actions: undefined (not mine), 'ignore' (no change), or the changed state
@@ -193,7 +193,7 @@ export function createSolveLoop(card) {
         const typed = Number(typedText);
         const correct = typed === s.problem.x;
         const kind = alone(s) ? 'value' : 'guess';
-        const tag = correct ? null : card.tag(s.problem, typed);
+        const tag = correct ? null : card.tag(s.problem, typed, s);
         if (!correct) { s.wrongs += 1; s.tag = tag; s.tags.push(tag); s.answers.push({ typed: s.entry, tag }); }
         // a correct guess at the first state, before any move, forces the next problem to be a move
         s.guessedFirst = correct && kind === 'guess' && s.rows.length === 1 && s.history.length === 0;

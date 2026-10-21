@@ -3,6 +3,112 @@
   "updated": "2026-10-21",
   "checks": [
     {
+      "id": "i-check-shadow",
+      "name": "Picking up your number slides a faint copy of the equation into the check",
+      "build": "Build I",
+      "link": {
+        "label": "Open Add to both sides · Level 3",
+        "query": "?pack=add-both&level=4&seed=7&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Add to both sides, Level 3, on x + 8 = −4.",
+        "Click the box after x =, type −12 and press Enter.",
+        "Press and hold on the −12 and move it slowly toward the x, but do not let go yet.",
+        "Let go on an empty part of the page (not on the x).",
+        "Now drag the −12 onto the x in the equation and let go."
+      ],
+      "see": "While you hold the −12, a faint copy of x + 8 = −4 slides into the empty space on the right. Let go anywhere else and it slides back and nothing changes. Let go on the x and it stays there, solid, with (−12) + 8 = −4 written under it."
+    },
+    {
+      "id": "i-check-pairs-add",
+      "name": "The check writes the equation, then your number right under its x (Add to both sides)",
+      "build": "Build I",
+      "link": {
+        "label": "Open Add to both sides · Level 3",
+        "query": "?pack=add-both&level=4&seed=7&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Add to both sides, Level 3, on x + 8 = −4.",
+        "Click the box after x =, type −12 and press Enter. Drag the −12 onto the x.",
+        "Look at the first two lines on the right.",
+        "Press Next twice."
+      ],
+      "see": "The first line is x + 8 = −4 with a blue x; right under it is (−12) + 8 = −4, and the blue (−12) sits directly under the blue x. Next adds −4 = −4, then ✓ Balanced."
+    },
+    {
+      "id": "i-check-pairs-divide",
+      "name": "The check writes the equation, then your number right under its x (Divide it)",
+      "build": "Build I",
+      "link": {
+        "label": "Open Divide it · Level 2",
+        "query": "?pack=divide-it&level=3&seed=7&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Divide it, Level 2, on 5x = −15.",
+        "Click the box after x =, type −3 and press Enter. Drag the −3 onto the x.",
+        "Look at the first two lines on the right.",
+        "Press Next twice."
+      ],
+      "see": "The first line is 5x = −15 with a blue x; right under it is 5 × (−3) = −15, and the blue (−3) sits directly under the blue x (the first line moves a little to the right to make room). Next adds −15 = −15, then ✓ Balanced."
+    },
+    {
+      "id": "i-big-battle",
+      "name": "At big numbers, a battle asks who won first; the subtraction appears only after",
+      "build": "Build I",
+      "link": {
+        "label": "Open Add to both sides · Level 5",
+        "query": "?pack=add-both&level=6&seed=6&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Add to both sides, Level 5, on x − 2 = −15.",
+        "Click Add (the top box in the panel on the right), type 2 and press Enter. The equation is now x = −15 + 2.",
+        "Click I’m stuck, then click Battle!. One small box appears just under −15 and +2: Who won? −15 or 2?",
+        "Click the big + first, then the big −.",
+        "Type −13 and press Enter."
+      ],
+      "see": "At first there is only the one box (no greyed second box). The + gets “Not that one”. After the −, a second box appears to the right: “Subtract 15 − 2 to find how many of the −15 are left.”, and the first box still shows the − you picked. −15 and 2 stay bright; nothing is written in x = for you."
+    },
+    {
+      "id": "i-big-party",
+      "name": "At big numbers, a party asks for its sign first, then what to add",
+      "build": "Build I",
+      "link": {
+        "label": "Open Add to both sides · Level 5",
+        "query": "?pack=add-both&level=6&seed=198&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Add to both sides, Level 5, on x + 13 = −2.",
+        "Click Add (the top box in the panel on the right), type −13 and press Enter. The equation is now x = −2 − 13.",
+        "Click I’m stuck, then click Party!. One small box appears: A party of what? Pick the sign.",
+        "Click the big + first, then the big −.",
+        "Type −15 and press Enter."
+      ],
+      "see": "The + gets “Not that one. Look at the signs of −2 and −13.” After the −, a second box appears to the right: “Add 2 + 13 to find how many negatives.”, and the first box still shows the −. −2 and −13 stay bright; nothing is written in x = for you."
+    },
+    {
+      "id": "i-party-neg-sign",
+      "name": "A party of negatives typed without its sign gets a sign question",
+      "build": "Build I",
+      "link": {
+        "label": "Open Add to both sides · Level 5",
+        "query": "?pack=add-both&level=6&seed=198&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Add to both sides, Level 5, on x + 13 = −2.",
+        "Click Add, type −13 and press Enter. The equation is now x = −2 − 13.",
+        "Click the box after x =, type 15 (forgetting the sign) and press Enter. Drag the 15 onto the x, press Next twice and wait two seconds. Press Undo.",
+        "In the box at −2 and −13, click the big + first, then the big −.",
+        "Type −15, press Enter, drag it onto the x and press Next twice."
+      ],
+      "see": "After Undo, a box at the two numbers (both bright, the rest grey) says “−2 and −13 are both negatives. A party of negatives makes ___”. The + gets “Look again…” and the same question; the − says “Now type x, and keep the sign.” with x = bright. The −15 ends ✓ Balanced. (A wrong size, like −17, gets the usual hint instead.)"
+    },
+    {
       "id": "h-combine-wrong",
       "name": "A wrong sum keeps the two numbers lit",
       "build": "Build H",
@@ -205,40 +311,6 @@
       "see": "The x box turns into one box that says −13, with a small x above it (not thirteen counters), beside 2 plus counters; the other side is one box that says −15. The last line is balanced, and the beam is level."
     },
     {
-      "id": "h-big-battle",
-      "name": "At big numbers, a battle asks who won, then tells you what to subtract",
-      "build": "Build H",
-      "link": {
-        "label": "Open Add to both sides · Level 5",
-        "query": "?pack=add-both&level=6&seed=6&nosignin=1",
-        "reset": true
-      },
-      "steps": [
-        "Click the button. It opens Add to both sides, Level 5, on x − 2 = −15.",
-        "Click Add (the top box in the panel on the right), type 2 and press Enter. The equation is now x = −15 + 2.",
-        "Click I’m stuck, then click Battle!. Two small boxes float side by side above −15 and +2.",
-        "In the left box (Who won? −15 or 2?) click the big + first, then the big −.",
-        "Type −13 and press Enter."
-      ],
-      "see": "The right box (Subtract 15 − 2 to find how many are left) is greyed until the left one is answered. The big + gets “Not that one”; the big − is right and wakes the right box up. −15 and 2 stay bright the whole time. Nothing is ever written in x = for you: you type the −13."
-    },
-    {
-      "id": "h-big-party",
-      "name": "At big numbers, a party only asks you to add",
-      "build": "Build H",
-      "link": {
-        "label": "Open Add to both sides · Level 5",
-        "query": "?pack=add-both&level=6&seed=198&nosignin=1",
-        "reset": true
-      },
-      "steps": [
-        "Click the button. It opens Add to both sides, Level 5, on x + 13 = −2.",
-        "Click Add (the top box in the panel on the right), type −13 and press Enter. The equation is now x = −2 − 13.",
-        "Click I’m stuck, then click Party!."
-      ],
-      "see": "One small box floats above −2 and −13, which stay bright: “Add 2 + 13 to find how many in all.” There is no question about who won. Nothing is written in x = for you: you type the −15."
-    },
-    {
       "id": "f-no-0-1-minus1",
       "name": "Add never gives an answer of 0, 1 or −1",
       "build": "Build F",
@@ -390,6 +462,138 @@
           ]
         },
         {
+          "name": "Build I, Part 1: the check writes the equation, then your number under its x (2026-10-21)",
+          "about": "When you check a value, the space on the right starts with the equation itself (every x blue) and, directly under it, the same equation with your number in place of x, the number right under the x it replaced. Picking the number up slides a faint copy of the equation in; a drop on x makes it solid, a drop anywhere else slides it back. Then Next works it out as before. On every Solve it card.",
+          "links": [
+            {
+              "label": "Add · check x = −12",
+              "query": "?pack=add-both&level=4&seed=7&nosignin=1",
+              "reset": true,
+              "look": "Type −12, Enter, drag it onto x: x + 8 = −4, and under it (−12) + 8 = −4 with the (−12) under the x."
+            },
+            {
+              "label": "Divide it · check x = −3",
+              "query": "?pack=divide-it&level=3&seed=7&nosignin=1",
+              "reset": true,
+              "look": "Type −3, Enter, drag it onto x: 5x = −15, and under it 5 × (−3) = −15 with the (−3) under the x."
+            }
+          ]
+        },
+        {
+          "name": "Build I, Part 2: big numbers, one question at a time (2026-10-21)",
+          "about": "Past 12, after the right Party or Battle at x alone, one small box asks for the sign first (a battle: Who won?; a party: A party of what?) with a big + and −. Only once that is right does the second box appear beside it (what to subtract or add, worded with the sign), and the first box keeps showing the sign you picked. The boxes sit just under the numbers. You type x.",
+          "links": [
+            {
+              "label": "A battle at big numbers",
+              "query": "?pack=add-both&level=6&seed=6&nosignin=1",
+              "reset": true,
+              "look": "Click Add, type 2, Enter, I’m stuck, Battle!, then −: “Subtract 15 − 2 to find how many of the −15 are left.” appears beside the first box."
+            },
+            {
+              "label": "A party at big numbers",
+              "query": "?pack=add-both&level=6&seed=198&nosignin=1",
+              "reset": true,
+              "look": "Click Add, type −13, Enter, I’m stuck, Party!, then −: “Add 2 + 13 to find how many negatives.” appears beside the first box."
+            }
+          ]
+        },
+        {
+          "name": "Build I, Part 3: a party of negatives keeps its sign (2026-10-21)",
+          "about": "At x = −2 − 13, typing 15 (the right size, the wrong sign) is checked as usual and is not balanced; after Undo a box at the two numbers says “−2 and −13 are both negatives. A party of negatives makes ___” with a big + and −. The right pick says “Now type x, and keep the sign.” The class sheet records the slip as party-neg-sign, with the usual word hint.",
+          "links": [
+            {
+              "label": "x + 13 = −2, typed 15",
+              "query": "?pack=add-both&level=6&seed=198&nosignin=1",
+              "reset": true,
+              "look": "Click Add, type −13, Enter; type 15, Enter, drag it onto x, Next twice, Undo: the sign question at −2 and −13."
+            }
+          ]
+        },
+        {
+          "name": "Build I screenshots (2026-10-21)",
+          "about": "The acceptance pictures at 1366×768 and 1366×650 (they open on GitHub, once this build is on main). The report is docs/build-i/BUILD-I-REPORT.md.",
+          "links": [
+            {
+              "label": "The faint copy slides in on pick-up · 1366×768",
+              "query": "https://github.com/karlmaukskoepke/AlgebraMat/blob/main/docs/build-i/i-check-shadow-768.png",
+              "look": "A picture only: nothing to click.",
+              "notLive": "Opens the picture on GitHub, not the app; GitHub may ask you to sign in."
+            },
+            {
+              "label": "The equation, and the value under its x (Add) · 1366×768",
+              "query": "https://github.com/karlmaukskoepke/AlgebraMat/blob/main/docs/build-i/i-check-pairs-add-768.png",
+              "look": "A picture only: nothing to click.",
+              "notLive": "Opens the picture on GitHub, not the app; GitHub may ask you to sign in."
+            },
+            {
+              "label": "The equation, and the value under its x (Divide) · 1366×650",
+              "query": "https://github.com/karlmaukskoepke/AlgebraMat/blob/main/docs/build-i/i-check-pairs-divide-650.png",
+              "look": "A picture only: nothing to click.",
+              "notLive": "Opens the picture on GitHub, not the app; GitHub may ask you to sign in."
+            },
+            {
+              "label": "Two x’s, a test state: the equation and the values under them",
+              "query": "https://github.com/karlmaukskoepke/AlgebraMat/blob/main/docs/build-i/two-x-check-lines.png",
+              "look": "A picture only: nothing to click.",
+              "notLive": "Opens the picture on GitHub, not the app; GitHub may ask you to sign in."
+            },
+            {
+              "label": "Not balanced, lit (Add) · 1366×768",
+              "query": "https://github.com/karlmaukskoepke/AlgebraMat/blob/main/docs/build-i/h-not-balanced-add-768.png",
+              "look": "A picture only: nothing to click.",
+              "notLive": "Opens the picture on GitHub, not the app; GitHub may ask you to sign in."
+            },
+            {
+              "label": "Not balanced, lit (Divide) · 1366×650",
+              "query": "https://github.com/karlmaukskoepke/AlgebraMat/blob/main/docs/build-i/h-not-balanced-divide-650.png",
+              "look": "A picture only: nothing to click.",
+              "notLive": "Opens the picture on GitHub, not the app; GitHub may ask you to sign in."
+            },
+            {
+              "label": "A battle at big numbers: the first box alone",
+              "query": "https://github.com/karlmaukskoepke/AlgebraMat/blob/main/docs/build-i/i-big-battle-0.png",
+              "look": "A picture only: nothing to click.",
+              "notLive": "Opens the picture on GitHub, not the app; GitHub may ask you to sign in."
+            },
+            {
+              "label": "A battle at big numbers: the second box beside it · 1366×650",
+              "query": "https://github.com/karlmaukskoepke/AlgebraMat/blob/main/docs/build-i/i-big-battle-650.png",
+              "look": "A picture only: nothing to click.",
+              "notLive": "Opens the picture on GitHub, not the app; GitHub may ask you to sign in."
+            },
+            {
+              "label": "A party at big numbers: the first box alone",
+              "query": "https://github.com/karlmaukskoepke/AlgebraMat/blob/main/docs/build-i/i-big-party-0.png",
+              "look": "A picture only: nothing to click.",
+              "notLive": "Opens the picture on GitHub, not the app; GitHub may ask you to sign in."
+            },
+            {
+              "label": "A party at big numbers: the second box beside it · 1366×768",
+              "query": "https://github.com/karlmaukskoepke/AlgebraMat/blob/main/docs/build-i/i-big-party-768.png",
+              "look": "A picture only: nothing to click.",
+              "notLive": "Opens the picture on GitHub, not the app; GitHub may ask you to sign in."
+            },
+            {
+              "label": "−2 − 13 typed 15: the sign question after Undo · 1366×768",
+              "query": "https://github.com/karlmaukskoepke/AlgebraMat/blob/main/docs/build-i/i-party-neg-sign-768.png",
+              "look": "A picture only: nothing to click.",
+              "notLive": "Opens the picture on GitHub, not the app; GitHub may ask you to sign in."
+            },
+            {
+              "label": "The tallest check (on the seesaw) · 1366×650",
+              "query": "https://github.com/karlmaukskoepke/AlgebraMat/blob/main/docs/build-i/h-seesaw-mirrors-check-650.png",
+              "look": "A picture only: nothing to click.",
+              "notLive": "Opens the picture on GitHub, not the app; GitHub may ask you to sign in."
+            },
+            {
+              "label": "The report",
+              "query": "https://github.com/karlmaukskoepke/AlgebraMat/blob/main/docs/build-i/BUILD-I-REPORT.md",
+              "look": "The Build I report.",
+              "notLive": "Opens the report on GitHub, not the app; GitHub may ask you to sign in."
+            }
+          ]
+        },
+        {
           "name": "Build H, Part 1: the quick fixes (2026-10-21)",
           "about": "Not balanced keeps its reason lit; the value you drop in is blue; each x already filled gets a small green check (for later cards with two x’s); the faint number starts after 2½ seconds; “Now type x” keeps the two numbers bright; a dragged term shows the same grey preview on both sides; a typed / turns Multiply into the fraction box; fraction boxes are retyped by tapping; Enter never gives another clue; and “Nice drawing!” is gone from the counters you did not draw. Each one is a Features to check item at the top of this page.",
           "links": [
@@ -433,7 +637,7 @@
         },
         {
           "name": "Build H, Part 3: big numbers at x alone (2026-10-21)",
-          "about": "Past 12 there are no counters. After the right Party or Battle at the two numbers, a battle shows two small boxes side by side above them (Who won? with a big + and −, then the subtraction to do, greyed until the first is answered); a party shows only the addition. The numbers stay bright; you type x.",
+          "about": "Past 12 there are no counters. After the right Party or Battle at the two numbers, a battle shows two small boxes side by side above them (Who won? with a big + and −, then the subtraction to do, greyed until the first is answered); a party shows only the addition. The numbers stay bright; you type x. Replaced by Build I, Part 2 (one question at a time; a party asks for its sign too).",
           "links": [
             {
               "label": "A battle at big numbers",

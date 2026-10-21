@@ -16,7 +16,7 @@ import path from 'node:path';
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const [, , addressArg, outArg, ...only] = process.argv;
 const BASE = (addressArg || 'http://localhost:5173/').replace(/\/?$/, '/');
-const OUT = outArg || path.join(ROOT, 'docs/build-h');
+const OUT = outArg || path.join(ROOT, 'docs/build-i');
 mkdirSync(OUT, { recursive: true });
 
 function loadPlaywright() {
@@ -58,6 +58,38 @@ class Walk {
       return;
     }
     throw new Error(`nothing to click for ${sel}`);
+  }
+  // the typed value picked up and carried toward x, not let go (Build I); then let go at a place on the page
+  async hold() {
+    const from = await this.page.locator('[data-chip]').first().boundingBox();
+    const to = await this.page.locator('[data-x][data-action="placeValue"]').first().boundingBox();
+    const m = this.page.mouse;
+    await m.move(from.x + from.width / 2, from.y + from.height / 2);
+    await m.down();
+    await m.move(from.x + from.width / 2 + 10, from.y + from.height / 2 - 10, { steps: 3 });
+    await m.move((from.x + to.x) / 2, (from.y + to.y) / 2 + 60, { steps: 10 });
+    await wait(this.page, 700);
+  }
+  async letGo(x, y) { const m = this.page.mouse; await m.move(x, y, { steps: 6 }); await m.up(); await wait(this.page, 200); }
+  // the check's first two lines read as given, and each blue value sits right under its blue x (centres within 3 px)
+  async pairs(line1, line2) {
+    const got = await this.page.evaluate(() => {
+      const mid = (e) => { const r = e.getBoundingClientRect(); return (r.left + r.right) / 2; };
+      const rows = [...document.querySelectorAll('.sv-checklist .sv-checkrow')];
+      const xs = [...(rows[0]?.querySelectorAll('[data-pair]') ?? [])];
+      const vs = [...(rows[1]?.querySelectorAll('[data-pair]') ?? [])];
+      const blue = [...xs, ...vs].map((e) => getComputedStyle(e).color);
+      return { l1: rows[0]?.innerText.replace(/\s+/g, ''), l2: rows[1]?.innerText.replace(/\s+/g, ''), off: xs.map((x, i) => Math.abs(mid(x) - mid(vs[i]))), blue, under: rows[1]?.getBoundingClientRect().top > rows[0]?.getBoundingClientRect().top };
+    });
+    if (got.l1 !== line1 || got.l2 !== line2) throw new Error(`the check should start ${line1}, then ${line2}: ${got.l1} / ${got.l2} after step "${this.step}"`);
+    if (!got.off.length || got.off.some((d) => d > 3) || !got.under) throw new Error(`each value should sit right under its x: off by ${got.off} px after step "${this.step}"`);
+    if (new Set(got.blue).size !== 1) throw new Error(`every x and its value should be the same blue: ${got.blue}`);
+  }
+  // the small questions at big numbers sit just under the two numbers (not over the work above them)
+  async belowNumbers() {
+    const nums = await this.box('.lx-live .lx-tok.is-hint');
+    const b = await this.box('.spot-box.is-bubble');
+    if (!nums || !b || b[1] < nums[3]) throw new Error(`the box should sit under the numbers: numbers ${nums}, box ${b}`);
   }
   async type(text) { await this.page.keyboard.type(String(text)); await wait(this.page, 200); }
   async enter(times = 1) { for (let i = 0; i < times; i++) { await this.page.keyboard.press('Enter'); await wait(this.page, 250); } }
@@ -405,43 +437,6 @@ const WALKS = {
     await w.both('h-seesaw-mirrors-big');
   },
 
-  async 'h-big-battle'(w) {
-    await w.start(); await w.see('x', '2', '−15');
-    w.at('Add, type 2, Enter'); await w.add(2); await w.see('x = −15 + 2');
-    w.at("I'm stuck"); await w.stuck(); await w.see('−15 + 2: party or battle?');
-    w.at('Battle!'); await w.click(`${act('kind')}[data-value="battle"]`); await wait(w.page, 500);
-    await w.see('Who won? −15 or 2?', 'Subtract 15 − 2 to find how many are left.');
-    await w.lit('.lx-live .lx-tok.is-hint', 0); await w.lit('.lx-live .lx-tok.is-hint', 1);
-    const dim = await w.page.locator('.spot-box.is-bubble[data-bubble="op"]').evaluate((e) => ({ cls: e.className, opacity: getComputedStyle(e).opacity }));
-    if (!/is-dim/.test(dim.cls) || Number(dim.opacity) > 0.6) throw new Error(`the subtract box should be dimmed until who won is answered: ${JSON.stringify(dim)}`);
-    await w.shot('h-big-battle-0');
-    w.at('click +'); await w.click(`${act('whoWon')}[data-value="+"]`); await w.see('Not that one');
-    w.at('click −'); await w.click(`${act('whoWon')}[data-value="-"]`);
-    const after = await w.page.locator('.spot-box.is-bubble[data-bubble="op"]').evaluate((e) => ({ cls: e.className, opacity: getComputedStyle(e).opacity }));
-    if (/is-dim/.test(after.cls) || Number(after.opacity) < 0.9) throw new Error(`the subtract box should wake up: ${JSON.stringify(after)}`);
-    const typed = await w.page.locator('[data-fk="answer"]').innerText();
-    if (typed.trim() !== '') throw new Error(`nothing should be written in x = for the student: "${typed}"`);
-    await w.lit('.lx-live .lx-tok.is-hint', 0);
-    await w.both('h-big-battle');
-    w.at('type −13, Enter'); await w.type('-13'); await w.enter();
-    await w.see('Let’s check that x = −13 is the solution.');
-  },
-
-  async 'h-big-party'(w) {
-    await w.start(); await w.see('x', '13', '−2');
-    w.at('Add, type −13, Enter'); await w.click(`${act('choose')}[data-move="add"]`); await w.type('-13'); await w.click(act('go')); await w.see('x = −2 − 13');
-    w.at("I'm stuck"); await w.stuck(); await w.see('−2 − 13: party or battle?');
-    w.at('Party!'); await w.click(`${act('kind')}[data-value="party"]`); await wait(w.page, 500);
-    await w.see('Add 2 + 13 to find how many in all.');
-    await w.notSee('Who won');
-    await w.lit('.lx-live .lx-tok.is-hint', 0); await w.lit('.lx-live .lx-tok.is-hint', 1);
-    const typed = await w.page.locator('[data-fk="answer"]').innerText();
-    if (typed.trim() !== '') throw new Error(`nothing should be written in x = for the student: "${typed}"`);
-    await w.both('h-big-party');
-    w.at('type −15, Enter'); await w.type('-15'); await w.enter();
-    await w.see('Let’s check that x = −15 is the solution.');
-  },
-
   async 'student-add'(w) {
     await w.start();
     await w.see('x', '8', '−4');
@@ -508,6 +503,105 @@ const WALKS = {
     if (!one.includes('5 boxes and 15 counters.')) throw new Error(`press 1 of I’m stuck should talk about the 5 boxes and 15 counters. On screen: ${one.slice(0, 300)}`);
     if (!two.includes('take ⅕ of both sides')) throw new Error(`press 2 of I’m stuck should say to take ⅕ of both sides. On screen: ${two.slice(0, 300)}`);
     await w.shot('student-divide-stuck');
+  },
+
+  // ---- Build I ----
+  async 'i-check-shadow'(w) {
+    await w.start(); await w.see('x', '8', '−4');
+    w.at('type −12, Enter'); await w.click(act('focus')); await w.type('-12'); await w.enter();
+    w.at('press and hold the −12, move toward x'); await w.hold();
+    const shown = await w.page.evaluate(() => { const e = document.querySelector('.sv-shadowline'); const r = e?.getBoundingClientRect(); const c = document.querySelector('.sv-check')?.getBoundingClientRect(); return e ? { text: e.innerText.replace(/\s+/g, ' '), opacity: Number(getComputedStyle(e).opacity), inside: r.left >= c.left - 2 && r.top >= c.top - 2 } : null; });
+    if (!shown || shown.text.replace(/ /g, '') !== 'x+8=−4' || shown.opacity > 0.6 || !shown.inside) throw new Error(`a faint copy of x + 8 = −4 should be in the space on the right: ${JSON.stringify(shown)}`);
+    await w.both('i-check-shadow');
+    w.at('let go on an empty part of the page'); await w.letGo(300, 330); await wait(w.page, 700);
+    if (await w.page.locator('.sv-shadowline').count()) throw new Error('the faint copy should slide back and go');
+    if (!(await w.page.locator('[data-chip]').count())) throw new Error('a drop off the x should change nothing: the −12 should still be waiting');
+    w.at('drag the −12 onto x'); await w.drag();
+    await w.see('(−12) + 8 = −4');
+    const lines = await w.page.evaluate(() => [...document.querySelectorAll('.sv-checklist .sv-checkrow')].map((e) => e.innerText.replace(/\s+/g, '')));
+    if (lines[0] !== 'x+8=−4' || lines[1] !== '(−12)+8=−4') throw new Error(`the check should start x + 8 = −4, then (−12) + 8 = −4: ${lines}`);
+  },
+
+  async 'i-check-pairs-add'(w) {
+    await w.start();
+    w.at('type −12, Enter, drag it onto x'); await w.click(act('focus')); await w.type('-12'); await w.enter(); await w.drag(); await wait(w.page, 300);
+    await w.pairs('x+8=−4', '(−12)+8=−4');
+    await w.both('i-check-pairs-add');
+    w.at('Next twice'); await w.click(act('nextLine')); await w.click(act('nextLine'));
+    await w.see('−4 = −4', '✓ Balanced');
+  },
+
+  async 'i-check-pairs-divide'(w) {
+    await w.start(); await w.see('DIVIDE IT · Level 2', '5', '−15');
+    w.at('type −3, Enter, drag it onto x'); await w.click(act('focus')); await w.type('-3'); await w.enter(); await w.drag(); await wait(w.page, 300);
+    await w.pairs('5x=−15', '5×(−3)=−15');
+    await w.both('i-check-pairs-divide');
+    w.at('Next twice'); await w.click(act('nextLine')); await w.click(act('nextLine'));
+    await w.see('−15 = −15', '✓ Balanced');
+  },
+
+  async 'i-big-battle'(w) {
+    await w.start(); await w.see('x', '2', '−15');
+    w.at('Add, type 2, Enter'); await w.add(2); await w.see('x = −15 + 2');
+    w.at("I'm stuck, Battle!"); await w.stuck(); await w.click(`${act('kind')}[data-value="battle"]`); await wait(w.page, 500);
+    await w.see('Who won? −15 or 2?'); await w.notSee('Subtract');
+    if (await w.page.locator('.spot-box.is-bubble').count() !== 1) throw new Error('only one box should be there before who won is answered');
+    await w.lit('.lx-live .lx-tok.is-hint', 0); await w.lit('.lx-live .lx-tok.is-hint', 1);
+    await w.belowNumbers();
+    await w.shot('i-big-battle-0');
+    const first = await w.box('.spot-box.is-bubble[data-bubble="who"]');
+    w.at('click +'); await w.click(`${act('whoWon')}[data-value="+"]`); await w.see('Not that one'); await w.notSee('Subtract');
+    w.at('click −'); await w.click(`${act('whoWon')}[data-value="-"]`); await wait(w.page, 400);
+    await w.see('Subtract 15 − 2 to find how many of the −15 are left.');
+    const [one, two] = [await w.box('.spot-box.is-bubble[data-bubble="who"]'), await w.box('.spot-box.is-bubble[data-bubble="op"]')];
+    if (JSON.stringify(one) !== JSON.stringify(first)) throw new Error(`the first box should stay where it was: ${first} then ${one}`);
+    if (two[0] < one[2]) throw new Error('the second box should appear to the right of the first');
+    if (!(await w.page.locator('.spot-box.is-bubble[data-bubble="who"] .is-picked[data-value="-"]').count())) throw new Error('the first box should still show the − picked');
+    const typed = await w.page.locator('[data-fk="answer"]').innerText();
+    if (typed.trim() !== '') throw new Error(`nothing should be written in x = for the student: "${typed}"`);
+    await w.lit('.lx-live .lx-tok.is-hint', 0);
+    await w.both('i-big-battle');
+    w.at('type −13, Enter'); await w.type('-13'); await w.enter();
+    await w.see('Let’s check that x = −13 is the solution.');
+  },
+
+  async 'i-big-party'(w) {
+    await w.start(); await w.see('x', '13', '−2');
+    w.at('Add, type −13, Enter'); await w.add(-13); await w.see('x = −2 − 13');
+    w.at("I'm stuck, Party!"); await w.stuck(); await w.click(`${act('kind')}[data-value="party"]`); await wait(w.page, 500);
+    await w.see('A party of what? Pick the sign.'); await w.notSee('Add 2 + 13', 'Who won');
+    await w.lit('.lx-live .lx-tok.is-hint', 0); await w.lit('.lx-live .lx-tok.is-hint', 1);
+    await w.belowNumbers();
+    await w.shot('i-big-party-0');
+    w.at('click +'); await w.click(`${act('whoWon')}[data-value="+"]`); await w.see('Not that one. Look at the signs of −2 and −13.'); await w.notSee('Add 2 + 13');
+    w.at('click −'); await w.click(`${act('whoWon')}[data-value="-"]`); await wait(w.page, 400);
+    await w.see('Add 2 + 13 to find how many negatives.');
+    if (!(await w.page.locator('.spot-box.is-bubble[data-bubble="who"] .is-picked[data-value="-"]').count())) throw new Error('the first box should still show the − picked');
+    const typed = await w.page.locator('[data-fk="answer"]').innerText();
+    if (typed.trim() !== '') throw new Error(`nothing should be written in x = for the student: "${typed}"`);
+    await w.both('i-big-party');
+    w.at('type −15, Enter'); await w.type('-15'); await w.enter();
+    await w.see('Let’s check that x = −15 is the solution.');
+  },
+
+  async 'i-party-neg-sign'(w) {
+    await w.start(); await w.see('x', '13', '−2');
+    w.at('Add, type −13, Enter'); await w.add(-13); await w.see('x = −2 − 13');
+    w.at('type 15, Enter, drag, Next twice, wait'); await w.click(act('focus')); await w.type(15); await w.enter(); await w.drag();
+    await w.click(act('nextLine')); await w.click(act('nextLine')); await w.lateLayer();
+    await w.see('When x = 15, the equation is not balanced.');
+    w.at('Undo'); await w.click(act('undo')); await wait(w.page, 800);
+    await w.see('−2 and −13 are both negatives. A party of negatives makes ___');
+    await w.lit('.lx-live .lx-tok.is-hint', 0); await w.lit('.lx-live .lx-tok.is-hint', 1);
+    await w.both('i-party-neg-sign');
+    w.at('click +'); await w.click(`.spot-layer ${act('whoWon')}[data-value="+"]`); await wait(w.page, 300);
+    await w.see('Look again: −2 and −13 are both negatives. A party of negatives makes ___');
+    w.at('click −'); await w.click(`.spot-layer ${act('whoWon')}[data-value="-"]`); await wait(w.page, 300);
+    await w.see('Now type x, and keep the sign.');
+    await w.lit('[data-fk="answer"]');
+    w.at('type −15, Enter, drag, Next twice'); await w.type('-15'); await w.enter(); await w.drag();
+    await w.click(act('nextLine')); await w.click(act('nextLine'));
+    await w.see('✓ Balanced');
   },
 };
 

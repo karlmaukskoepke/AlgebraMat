@@ -3,10 +3,11 @@
 // rung a click gets and records its class-sheet word; a rung only sets up what the student does next. (Moved here from the card's own
 // `climb` and `teach` in Build E, P4: the rungs, their messages and their words are the same.)
 
-import { xConstantTerm, cancelAmount, alonePair, xAlone } from '../../addBothMoves.js';
+import { xConstantTerm, cancelAmount, alonePair, xAlone, negativeParty } from '../../addBothMoves.js';
 import { enterScaffold, aloneAsk, aloneCounters, plus, say } from '../../cards/addHelp.js';
 
 const plusText = (v) => (v < 0 ? `−${-v}` : `+${v}`);
+const plusless = (v) => (v < 0 ? `−${-v}` : `${v}`);
 // What the seesaw's rungs say: the number next to x and the move that cancels it.
 function scaffoldParams(s) {
   const constant = xConstantTerm(s.board);
@@ -113,6 +114,17 @@ const S2 = {
   hintPopup: {
     after(s, before) {
       const tag = before?.sub?.tag ?? (before?.feedback?.key === 'aWrong' ? before.feedback.params?.tag : null);
+      // a party of negatives typed without its sign (x = −2 + −13, typed 15; Build I, Part 3): the sign question at the two numbers,
+      // "−2 and −13 are both negatives. A party of negatives makes ___" with a big + and −; recorded as the reminder (`hint`)
+      const negs = negativeParty(s.board);
+      if (tag === 'party-neg-sign' && negs) {
+        s.alone = { a: negs[0].id, b: negs[1].id, kind: 'party', step: 'sign', walk: null, who: null };
+        s.hint = { kind: 'sum', ids: negs.map((t) => t.id) };
+        s.menu = null;
+        s.typing = null;
+        if (!s.supportsShown.includes('hint')) s.supportsShown.push('hint');
+        return { ask: true, key: 'aNegSign', params: { a: plusless(negs[0].v), b: plusless(negs[1].v) } };
+      }
       const pair = xAlone(s.board) ? alonePair(s.board) : null;
       const typed = before?.sub?.typed;
       const sizes = pair && Math.sign(pair[0].v) !== Math.sign(pair[1].v) && Math.abs(typed) === Math.abs(pair[0].v) + Math.abs(pair[1].v);

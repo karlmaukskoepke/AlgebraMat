@@ -19,7 +19,7 @@ import { typeInto, isTyping } from '../entry.js';
 import { emptySkills } from '../skills.js';
 import {
   startBoard, xAlone, xSideOf, otherSideOf, find, sideOf, combinable, unresolved, kindOf, combineTerms, sumNums, xConstantTerm,
-  alonePair, lightBoard, workLine, tilt, balanced, num,
+  alonePair, lightBoard, workLine, tilt, balanced, num, negativeParty,
 } from '../addBothMoves.js';
 import { aloneAsk, plus, say, problemParams, crossOff, pastCounters, sizesOf } from './addHelp.js';
 import { reduce as reduceWalk } from '../session.js';
@@ -239,7 +239,9 @@ const loop = createSolveLoop({
     }
   },
   undoKey: (s) => (s.undoneZero ? 'aZeroUndone' : 'aUndone'),
-  tag: (p, typed) => tagAddBoth(p, typed),
+  // the right size with the wrong sign, typed at x alone with a party of two negatives on screen (x = −2 + −13, typed 15): a slip of its own
+  // for the class sheet (Build I, Part 3), and the sign question after Undo; anywhere else, the card's slips
+  tag: (p, typed, s) => (s && negativeParty(s.board) && typed === -p.x ? 'party-neg-sign' : tagAddBoth(p, typed)),
   slip: (s, typed, tag) => ({ key: 'aWrong', params: { typed: signed(typed), tag, value: signed(typed + constantOf(s.problem)) } }),
 
   // ----- Add to both sides' own actions -----
@@ -385,13 +387,12 @@ const loop = createSolveLoop({
           const right = kindOf(a.v, b.v);
           const params = { g1: signed(a.v), g2: signed(b.v), kind: right, picked: action.value };
           if (action.value !== right) { s.kindMisses += 1; return say(s, 'aKindWrong', params, true); }
-          // past 12 there are no counters: a battle asks who won, a party asks to add (two small questions at the numbers, Build H, Part 3)
+          // past 12 there are no counters: two small questions at the numbers, one at a time (Build I, Part 2). First the sign (a battle:
+          // who won; a party: a party of what?), then, once that is right, what to work out; then the student types x
           if (pastCounters(a.v, b.v)) {
             const sizes = sizesOf(a.v, b.v);
-            s.alone = { ...s.alone, kind: right, sizes: true, who: null, step: right === 'battle' ? 'who' : 'type' };
-            if (right === 'battle') return say(s, 'aAloneWho', { ...params, ...sizes });
-            s.typing = 'answer';
-            return say(s, 'aAloneAdd', { ...params, ...sizes });
+            s.alone = { ...s.alone, kind: right, sizes: true, who: null, step: 'who' };
+            return say(s, right === 'battle' ? 'aAloneWho' : 'aAloneParty', { ...params, ...sizes });
           }
           s.alone = { ...s.alone, kind: right, step: 'type' };
           s.typing = 'answer';
@@ -424,15 +425,25 @@ const loop = createSolveLoop({
         }
         return combineNow(s, api, a, b, right, params);
       }
-      // who won, at big numbers (a battle): the sign of the bigger team. The app never writes the value; the sizes are told, the sum is not.
+      // the sign, at big numbers: who won (a battle: the sign of the bigger team), or a party of what (both numbers' sign). The app never
+      // writes the value; the sizes are told, the sum is not.
       case 'whoWon': {
         const al = s.alone;
+        // after a party of negatives typed without its sign (Build I, Part 3): "a party of negatives makes ___", then retype x
+        if (al?.step === 'sign' && !s.sub && ['+', '-'].includes(action.value)) {
+          const params = { a: signed(find(s.board, al.a).v), b: signed(find(s.board, al.b).v) };
+          if (action.value !== '-') { s.alone = { ...al, whoMisses: (al.whoMisses ?? 0) + 1 }; return say(s, 'aNegSignWrong', params, true); }
+          s.alone = { ...al, step: 'type', who: '-' };
+          s.typing = 'answer';
+          return say(s, 'aNegSignRight', params);
+        }
         if (al?.step !== 'who' || s.sub || !['+', '-'].includes(action.value)) return 'ignore';
         const sizes = sizesOf(find(s.board, al.a).v, find(s.board, al.b).v);
-        if (action.value !== sizes.sign) { s.alone = { ...al, whoMisses: (al.whoMisses ?? 0) + 1 }; return say(s, 'aWhoWrong', sizes, true); }
+        const party = al.kind === 'party';
+        if (action.value !== sizes.sign) { s.alone = { ...al, whoMisses: (al.whoMisses ?? 0) + 1 }; return say(s, party ? 'aPartyWrong' : 'aWhoWrong', sizes, true); }
         s.alone = { ...al, step: 'type', who: action.value };
         s.typing = 'answer';
-        return say(s, 'aWhoRight', sizes);
+        return say(s, party ? 'aPartyRight' : 'aWhoRight', sizes);
       }
       case 'crossNext': {
         if (s.combining?.step !== 'struck') return 'ignore';
