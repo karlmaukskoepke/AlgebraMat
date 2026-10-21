@@ -1,5 +1,7 @@
 import { describe, it, expect } from 'vitest';
-import { addBoth, divideIt } from '../src/packs/index.js';
+import { addBoth, divideIt, flipEverything } from '../src/packs/index.js';
+import { newFlip, reduceFlip, FLIP_MENU, FLIP_SPOT } from '../src/engine/cards/flip.js';
+import { withSpotlight } from '../src/engine/spotlight.js';
 import { reduceAddBoth } from '../src/engine/cards/add.js';
 import { newLightsSession, withLights } from '../src/engine/addBothLights.js';
 import { newDivide, reduceDivide } from '../src/engine/divideMoves.js';
@@ -143,12 +145,43 @@ describe('Build E, P2: lights from shapes', () => {
   });
 });
 
+describe('Build J: the shape of every state on Flip everything', () => {
+  const r = withSpotlight(FLIP_MENU.withMenu(reduceFlip), FLIP_SPOT);
+  const frac = (top, n) => [{ type: 'multOpen' }, { type: 'multPick', kind: 'frac' }, ...(top < 0 ? [{ type: 'typeChar', ch: '-' }] : []), { type: 'digit', digit: 1 }, { type: 'digit', digit: n }, { type: 'go' }];
+  const flip = [{ type: 'flipPick' }, { type: 'go' }];
+  for (let level = 2; level <= 6; level++) {
+    it(`Level ${level}: ${SEEDS * 5} problems, both orders, −⅟a in one move, a flip that makes it worse, a fraction that does not split, the slips`, () => {
+      const list = problemsOf(flipEverything, level);
+      expect(list.length).toBeGreaterThanOrEqual(200);
+      for (const p of list) {
+        const where = `L${level} ${JSON.stringify(p)}`;
+        const start = newFlip({ ...p, logLevel: level }, { level });
+        const trade = p.mirror ? [{ type: 'choose', move: 'trade' }] : [];
+        walk(start, r, [...trade, ...flip, ...check(p.x)], `${where} flip`);
+        walk(start, r, [...check(-p.x), { type: 'undo' }, { type: 'spotDismiss' }, ...flip, ...check(p.x)], `${where} sign slip, then flip`);
+        if (p.a > 1) {
+          walk(start, r, [...flip, { type: 'foldNext' }, ...frac(1, p.a), ...check(p.x)], `${where} flip, then fraction`);
+          walk(start, r, [...flip, { type: 'foldNext' }, ...flip, { type: 'undo' }, { type: 'spotDismiss' }], `${where} flip twice (worse), Undo`);
+          walk(start, r, [...frac(1, p.a), { type: 'foldNext' }, ...flip, ...check(p.x)], `${where} fraction, then flip`);
+          walk(start, r, [...frac(-1, p.a), ...check(p.x)], `${where} −⅟a in one move`);
+          const bad = [2, 3, 4, 5, 6].find((n) => p.a % n !== 0);
+          if (bad) walk(start, r, [...frac(1, bad), { type: 'stuck' }, { type: 'undo' }], `${where} a fraction that does not split`);
+        }
+      }
+    });
+  }
+});
+
 describe('Build E, P2: unknown shapes fail loudly, never quietly', () => {
   it('x on both sides, no x, a term the classifier does not know', () => {
     expect(shapeOfBoard({ left: [{ kind: 'x' }], right: [{ kind: 'x' }] }).id).toBe(UNKNOWN);
     expect(shapeOfBoard({ left: [{ kind: 'num', v: 1 }], right: [{ kind: 'num', v: 1 }] }).id).toBe(UNKNOWN);
     expect(shapeOfBoard({ left: [{ kind: 'x' }, { kind: 'group', factor: 2, inner: [] }], right: [{ kind: 'num', v: 1 }] })).toMatchObject({ id: UNKNOWN, why: 'a group beside x' });
     expect(() => known({ board: { left: [{ kind: 'x' }], right: [{ kind: 'x' }] } }, 'test')).toThrow(/unknown shape/);
+    // Flip everything's family (Build J): x alone with a plain number is never made there; two terms on the other side are not its
+    expect(shapeOfBoard({ left: [{ kind: 'x', coef: 1 }], right: [{ kind: 'num', v: 4 }] }, 'flip').id).toBe(UNKNOWN);
+    expect(shapeOfBoard({ left: [{ kind: 'x', coef: -1 }], right: [{ kind: 'num', v: 4 }, { kind: 'num', v: 1 }] }, 'flip').id).toBe(UNKNOWN);
+    expect(shapeOfBoard({ left: [{ kind: 'x', coef: -2 }], right: [{ kind: 'neg', inner: [{ kind: 'num', v: 4 }] }] }, 'flip').id).toBe(UNKNOWN);
   });
   it('every shape in the list was reached by the walks above (counts for the report)', () => {
     const counts = Object.fromEntries([...seen.entries()].sort());

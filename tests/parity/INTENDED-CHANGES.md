@@ -540,3 +540,91 @@ Compared screen by screen with the code before this part (`main` at `25f65f0`): 
 ## Build I, Parts 2 and 3: big numbers one question at a time; a party of negatives keeps its sign (2026-10-21)
 
 Compared with the code after Part 1: no scripted run and no screen changed. No scripted run reaches x alone with a number past 12, and none types a party of negatives without its sign (the scripted runs at `x = −4 + −8` type −12). The new behaviour is covered by `tests/bigPairs.test.js` (one question at a time, for a battle and now a party) and `tests/buildI.test.js` (every party-of-negatives shape from the generators, typed +sum, gets the sign question after Undo; typed −sum is correct; a battle never gets it; the class sheet keeps the word `hint`). The new slip tag `party-neg-sign` appears only in those runs. No new key is needed.
+
+
+## Build J: the Flip everything card, and Take a fraction shared (2026-10-21)
+
+**Save codes.** New codes are written in a v15 layout: the twelve earlier cards in the same places, then Flip everything's six levels at the end (17 symbols instead of 16). So every code the harness writes changes (the version letter `G` becomes `H`, and one more symbol). Nothing about what an older code means changes: every v1-v14 code still decodes to the same progress, and each of these 72 recorded v14 codes is checked in `tests/flip.test.js` to decode, re-encode as the same v14 code, and carry its levels into v15 unchanged.
+
+**Divide it, Add to both sides and the rest.** Take a fraction (the move, its blank, its preview, a fraction that does not split and the fractions to choose from after it) moved out of Divide it's own files into shared ones (`engine/fractionMove.js`, `engine/multiplyMenu.js`, `view/multiplyRow.js`); Divide it is configured on them. Problems, class-sheet records and every trace are unchanged, and the screens were compared pixel by pixel with Build I's: no screen of Divide it changed. Divide's Smaller numbers light now compares by size (identical for its positive coefficients). The only words that changed on Add to both sides are the first Trade places pop-up, which gains one sentence: "This is the symmetric property: if a = b, then b = a." (none of the 31 screens shows it).
+
+| Key | Before | After | Why |
+|---|---|---|---|
+| `savecode:empty` | `MAT-G2222222222222222X` | the same state, written as v15 (one symbol longer) | it still reads back the same |
+| `savecode:combineit-L1` | `MAT-G22222222224CPPC4X` | the same state, written as v15 (one symbol longer) | it still reads back the same |
+| `savecode:combineit-L2` | `MAT-G22222222226QCBP6V` | the same state, written as v15 (one symbol longer) | it still reads back the same |
+| `savecode:combineit-L3` | `MAT-G2222222222BDPNBAR` | the same state, written as v15 (one symbol longer) | it still reads back the same |
+| `savecode:combineit-L4` | `MAT-G2222222222MSC9MJG` | the same state, written as v15 (one symbol longer) | it still reads back the same |
+| `savecode:combineit-L5` | `MAT-G22222222238HPH83W` | the same state, written as v15 (one symbol longer) | it still reads back the same |
+| `savecode:flipit-L1` | `MAT-G2222222222222223H` | the same state, written as v15 (one symbol longer) | it still reads back the same |
+| `savecode:flipit-L2` | `MAT-G22222222222222244` | the same state, written as v15 (one symbol longer) | it still reads back the same |
+| `savecode:flipit-L3` | `MAT-G22222222222222269` | the same state, written as v15 (one symbol longer) | it still reads back the same |
+| `savecode:flipit-L4` | `MAT-G222222222222222AK` | the same state, written as v15 (one symbol longer) | it still reads back the same |
+| `savecode:flipit-L5` | `MAT-G222222222222222J8` | the same state, written as v15 (one symbol longer) | it still reads back the same |
+| `savecode:lasso-L1` | `MAT-G22222222222222333` | the same state, written as v15 (one symbol longer) | it still reads back the same |
+| `savecode:lasso-L2` | `MAT-G22222222222222447` | the same state, written as v15 (one symbol longer) | it still reads back the same |
+| `savecode:lasso-L3` | `MAT-G2222222222222266F` | the same state, written as v15 (one symbol longer) | it still reads back the same |
+| `savecode:lasso-L4` | `MAT-G22222222222222AAY` | the same state, written as v15 (one symbol longer) | it still reads back the same |
+| `savecode:lasso-L5` | `MAT-G22222222222222JJZ` | the same state, written as v15 (one symbol longer) | it still reads back the same |
+| `savecode:lasso-L6` | `MAT-G22222222222223435` | the same state, written as v15 (one symbol longer) | it still reads back the same |
+| `savecode:lasso-L7` | `MAT-G2222222222222464B` | the same state, written as v15 (one symbol longer) | it still reads back the same |
+| `savecode:boxes-L1` | `MAT-G22222222222226A6Q` | the same state, written as v15 (one symbol longer) | it still reads back the same |
+| `savecode:boxes-L2` | `MAT-G2222222222222AJAG` | the same state, written as v15 (one symbol longer) | it still reads back the same |
+| `savecode:boxes-L3` | `MAT-G2222222222222K3JJ` | the same state, written as v15 (one symbol longer) | it still reads back the same |
+| `savecode:boxes-L4` | `MAT-G22222222222235537` | the same state, written as v15 (one symbol longer) | it still reads back the same |
+| `savecode:boxes-L5` | `MAT-G2222222222224884F` | the same state, written as v15 (one symbol longer) | it still reads back the same |
+| `savecode:boxes-L6` | `MAT-G2222222222226EE6Y` | the same state, written as v15 (one symbol longer) | it still reads back the same |
+| `savecode:groups-of-terms-L1` | `MAT-G222222222222ATTAZ` | the same state, written as v15 (one symbol longer) | it still reads back the same |
+| `savecode:groups-of-terms-L2` | `MAT-G222222222222KMKJ3` | the same state, written as v15 (one symbol longer) | it still reads back the same |
+| `savecode:groups-of-terms-L3` | `MAT-G22222222222368637` | the same state, written as v15 (one symbol longer) | it still reads back the same |
+| `savecode:groups-of-terms-L4` | `MAT-G222222222224AEA4F` | the same state, written as v15 (one symbol longer) | it still reads back the same |
+| `savecode:groups-of-terms-L5` | `MAT-G222222222226JTJ6Y` | the same state, written as v15 (one symbol longer) | it still reads back the same |
+| `savecode:groups-of-terms-L6` | `MAT-G22222222222B4M3AF` | the same state, written as v15 (one symbol longer) | it still reads back the same |
+| `savecode:groups-of-terms-L7` | `MAT-G22222222222M774JF` | the same state, written as v15 (one symbol longer) | it still reads back the same |
+| `savecode:groups-of-terms-L8` | `MAT-G222222222237CC73X` | the same state, written as v15 (one symbol longer) | it still reads back the same |
+| `savecode:distribute-combine-L1` | `MAT-G2222222224F2BZE4R` | the same state, written as v15 (one symbol longer) | it still reads back the same |
+| `savecode:distribute-combine-L2` | `MAT-G2222222226V2NYT62` | the same state, written as v15 (one symbol longer) | it still reads back the same |
+| `savecode:distribute-combine-L3` | `MAT-G222222222BQ3AXKAY` | the same state, written as v15 (one symbol longer) | it still reads back the same |
+| `savecode:distribute-combine-L4` | `MAT-G222222222ND4KV5JD` | the same state, written as v15 (one symbol longer) | it still reads back the same |
+| `savecode:distribute-combine-L5` | `MAT-G2222222239R76Q93P` | the same state, written as v15 (one symbol longer) | it still reads back the same |
+| `savecode:value-L1` | `MAT-G222222224HFCBDG4A` | the same state, written as v15 (one symbol longer) | it still reads back the same |
+| `savecode:value-L2` | `MAT-G222222226ZVPMRX6N` | the same state, written as v15 (one symbol longer) | it still reads back the same |
+| `savecode:value-L3` | `MAT-G22222222BZRC8GUAY` | the same state, written as v15 (one symbol longer) | it still reads back the same |
+| `savecode:value-L4` | `MAT-G22222222NZFPEYNJ9` | the same state, written as v15 (one symbol longer) | it still reads back the same |
+| `savecode:add-both-L1` | `MAT-G222DR25MB7KMC65AA` | the same state, written as v15 (one symbol longer) | it still reads back the same |
+| `savecode:add-both-L2` | `MAT-G222SF297MD67PA8JX` | the same state, written as v15 (one symbol longer) | it still reads back the same |
+| `savecode:add-both-L3` | `MAT-G223HV2GD7RADBJF3E` | the same state, written as v15 (one symbol longer) | it still reads back the same |
+| `savecode:add-both-L4` | `MAT-G2252Q2XRDFJRN3V44` | the same state, written as v15 (one symbol longer) | it still reads back the same |
+| `savecode:add-both-L5` | `MAT-G2283D3VFRW4G95Q6S` | the same state, written as v15 (one symbol longer) | it still reads back the same |
+| `savecode:add-both-L6` | `MAT-G22E4R5QWGS6XG9DA3` | the same state, written as v15 (one symbol longer) | it still reads back the same |
+| `savecode:divide-it-L1` | `MAT-G22T7F9ESYHBUXGRJQ` | the same state, written as v15 (one symbol longer) | it still reads back the same |
+| `savecode:divide-it-L2` | `MAT-G23KCVGUJWZNPUYG36` | the same state, written as v15 (one symbol longer) | it still reads back the same |
+| `savecode:divide-it-L3` | `MAT-G255QQYP4TZACPWX4P` | the same state, written as v15 (one symbol longer) | it still reads back the same |
+| `savecode:divide-it-L4` | `MAT-G289EEXB7MYJQCTU6D` | the same state, written as v15 (one symbol longer) | it still reads back the same |
+| `savecode:divide-it-L5` | `MAT-G2EGTUUMD8X4DQMNAJ` | the same state, written as v15 (one symbol longer) | it still reads back the same |
+| `savecode:divide-it-L6` | `MAT-G2TYMPP7RFU6SE89JT` | the same state, written as v15 (one symbol longer) | it still reads back the same |
+| `savecode:one-step-L1` | `MAT-G22222224KXSNPUJ47` | the same state, written as v15 (one symbol longer) | it still reads back the same |
+| `savecode:one-step-L2` | `MAT-G222222276VJACP36D` | the same state, written as v15 (one symbol longer) | it still reads back the same |
+| `savecode:one-step-L3` | `MAT-G2222222CBR3JQB4A3` | the same state, written as v15 (one symbol longer) | it still reads back the same |
+| `savecode:one-step-L4` | `MAT-G2222222PNF54DM6JE` | the same state, written as v15 (one symbol longer) | it still reads back the same |
+| `savecode:one-step-L5` | `MAT-G2222223C9V86S7B3J` | the same state, written as v15 (one symbol longer) | it still reads back the same |
+| `savecode:switch-L1` | `MAT-G22227PURKM2AJ6F6F` | the same state, written as v15 (one symbol longer) | it still reads back the same |
+| `savecode:switch-L2` | `MAT-G2222DCPG672K3AVAV` | the same state, written as v15 (one symbol longer) | it still reads back the same |
+| `savecode:switch-L3` | `MAT-G2222RQBXAC354KQJZ` | the same state, written as v15 (one symbol longer) | it still reads back the same |
+| `savecode:switch-L4` | `MAT-G2223GDNUJP4876E3B` | the same state, written as v15 (one symbol longer) | it still reads back the same |
+| `savecode:switch-L5` | `MAT-G2224XSAP4B6ECAT4X` | the same state, written as v15 (one symbol longer) | it still reads back the same |
+| `savecode:switch-L6` | `MAT-G2227VHKB6MATPKK66` | the same state, written as v15 (one symbol longer) | it still reads back the same |
+| `savecode:two-step-L1` | `MAT-G222222QB3J7FYRPJ4` | the same state, written as v15 (one symbol longer) | it still reads back the same |
+| `savecode:two-step-L2` | `MAT-G222223DM53CWXGC3V` | the same state, written as v15 (one symbol longer) | it still reads back the same |
+| `savecode:two-step-L3` | `MAT-G222224S784QTUXP4Y` | the same state, written as v15 (one symbol longer) | it still reads back the same |
+| `savecode:two-step-L4` | `MAT-G222227HCE7EMPVB6H` | the same state, written as v15 (one symbol longer) | it still reads back the same |
+| `savecode:two-step-L5` | `MAT-G22222CZPTCU8CQMAF` | the same state, written as v15 (one symbol longer) | it still reads back the same |
+| `savecode:two-step-L6` | `MAT-G22222QZCKQNEQE7J8` | the same state, written as v15 (one symbol longer) | it still reads back the same |
+| `savecode:two-step-L7` | `MAT-G22223EYQ6E9UDTD33` | the same state, written as v15 (one symbol longer) | it still reads back the same |
+| `savecode:everything` | `MAT-G3MX89FVET36ERJFGJ` | the same state, written as v15 (one symbol longer) | it still reads back the same |
+| `savecode:flip-everything-L1` | none (the card is new) | a v15 code with Flip everything's saved Level 1 done | the new card's levels are saved in the code |
+| `savecode:flip-everything-L2` | none (the card is new) | a v15 code with Flip everything's saved Level 2 done | the new card's levels are saved in the code |
+| `savecode:flip-everything-L3` | none (the card is new) | a v15 code with Flip everything's saved Level 3 done | the new card's levels are saved in the code |
+| `savecode:flip-everything-L4` | none (the card is new) | a v15 code with Flip everything's saved Level 4 done | the new card's levels are saved in the code |
+| `savecode:flip-everything-L5` | none (the card is new) | a v15 code with Flip everything's saved Level 5 done | the new card's levels are saved in the code |
+| `savecode:flip-everything-L6` | none (the card is new) | a v15 code with Flip everything's saved Level 6 done | the new card's levels are saved in the code |

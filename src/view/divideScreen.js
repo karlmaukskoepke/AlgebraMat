@@ -5,79 +5,26 @@
 // collapsed lights. No banner: what the card says is a pop-up (view/spotlight.js); the line is kept for screen readers only.
 
 import { html } from './addBothMat.js';
-import { stackRows, substBlock, forwardButton, srLine, notePopup, sideTerms, FORCED_TEXT, FIRST_TEXT, placeText } from './solveScreen.js';
-import { equationRow } from './lightScreen.js';
+import { stackRows, substBlock, forwardButton, srLine, notePopup, FORCED_TEXT, FIRST_TEXT, placeText } from './solveScreen.js';
 import { fracOpen, canPreview, fracOf } from '../engine/divideBlank.js';
 import { multiplyOptions } from './multiplyOptions.js';
+import { moveRow as sharedMoveRow, fractionChoices as sharedFractionChoices } from './multiplyRow.js';
 import { groupDiagram } from './groupDiagram.js';
 import { divideFeedbackText } from './divideFeedback.js';
 import { narrowPanel } from './narrowPanel.js';
 import { solve, xAlone, coefOf, pileSize, DEAL_ROUND_LEVEL, DIVIDE_SPOT } from '../engine/divideMoves.js';
 import { spotOf } from '../engine/spotlight.js';
 import { spotlightLayer, findSolveTarget } from './spotlight.js';
-import { FRACTIONS } from '../engine/divide.js';
-import { fractionText } from '../engine/solveTerms.js';
 import { MINUS } from '../engine/expr.js';
 import { firstOpen } from './visit.js';
 
 const btn = (label, action, cls, attrs = {}) => html('button', cls, [label], { type: 'button', 'data-action': action, ...attrs });
 const valid = (t) => /^-?\d+$/.test(t ?? '');
 
-// The move's row under the newest equation (Build D, Part 4): its preview while the move is hovered (dashed, grey), then the blank, a
-// fraction of both sides (top and bottom; "1/5" typed), the right side's fraction mirroring the left's.
-function fracBox(s, mirror) {
-  const fb = s.fb ?? { num: '', den: '', part: 'num' };
-  const open = fracOpen(s);
-  const part = (p) => {
-    const text = fb[p];
-    const focus = open && !mirror && fb.part === p;
-    return html(mirror ? 'span' : 'button', `lx-box dv-fracpart${focus ? ' is-focus' : ''}${text ? '' : ' is-empty'}${focus && !text ? ' is-blink' : ''}${mirror ? ' is-mirror' : ''}`, [text || ' '],
-      mirror ? { 'aria-hidden': 'true' } : { type: 'button', 'data-action': 'focus', 'data-target': p, 'data-lx-field': '1', 'aria-label': p === 'num' ? 'The top of the fraction' : 'The bottom of the fraction', ...(open ? {} : { tabindex: '-1' }) });
-  };
-  // the cue under the open blank: a click or tap on a box clears it (Build H, Part 1)
-  return html('span', `dv-fracblank${mirror ? ' is-mirror' : ''}`, [part('num'), html('span', 'dv-fracbar'), part('den'), ...(open && !mirror ? [html('span', 'dv-retype', ['Tap a box to retype it'])] : [])]);
-}
-// The whole-number option's blank (Build D-2, Part 4): typed on the left, mirrored on the right.
-function wholeBox(s, mirror) {
-  const chosen = s.mopts?.kind === 'whole';
-  const text = chosen ? s.mopts.entry : '';
-  return html(mirror ? 'span' : 'button', `lx-box mo-blank${chosen && !mirror ? ' is-focus' : ''}${text ? '' : ' is-empty'}${chosen && !mirror && !text ? ' is-blink' : ''}${mirror ? ' is-mirror' : ''}`,
-    [text ? text.replace('-', MINUS) : ' '], mirror ? { 'aria-hidden': 'true' } : { type: 'button', 'data-lx-field': '1', 'aria-label': 'The whole number to multiply both sides by' });
-}
-function moveRow(s) {
-  const open = fracOpen(s);
-  const chosen = s.mopts?.kind ?? (open ? 'frac' : null);
-  // the hovered option (Build D-2: one Multiply button, three options); the fraction was the move's preview before
-  const hovered = !chosen && canPreview(s) ? (s.ui?.preview === true ? 'frac' : s.ui?.preview || null) : null;
-  const kind = chosen ?? hovered;
-  const slot = html('div', `lx-ghost dv-ghost${chosen ? ' is-chosen' : hovered ? ' is-preview' : ''}`);
-  if (!kind) return slot;
-  const front = (mirror) => (kind === 'frac' ? fracBox(s, mirror) : kind === 'whole' ? wholeBox(s, mirror) : html('span', 'lb-num', [`${MINUS}1`]));
-  const side = (terms, mirror) => [front(mirror), html('span', 'lb-plus dv-times', ['×']), html('span', 'lb-plus', ['(']), ...sideTerms(terms, s), html('span', 'lb-plus', [')'])];
-  slot.append(equationRow(side(s.board.left, false), side(s.board.right, true), 'lx-ghosteq'));
-  if (!chosen) slot.setAttribute('aria-hidden', 'true');
-  return slot;
-}
-
-// After a fraction that did not split, the hint shows the boxes and the counters, the boxes bracketed, and the fractions to choose from:
-// the ones already tried are crossed off and greyed (Build D, Part 4).
-function fractionChoices(s) {
-  const b = s.board;
-  const size = pileSize(b);
-  const wrap = html('div', 'dv-choose');
-  const [want, ask] = divideFeedbackText({ key: 'dWhichFraction', params: { boxes: coefOf(b) } }).split('\n');
-  wrap.append(groupDiagram({ n: 1, boxes: coefOf(b), size, neg: b.right[0].kind === 'num' && b.right[0].v < 0, groups: null, pile: size, kept: null, tap: null, bracketBoxes: true }),
-    html('p', 'spot-text', [want]), html('p', 'spot-text', [ask]));
-  const row = html('div', 'dv-choices');
-  for (const n of FRACTIONS) {
-    const tried = s.tried.includes(n);
-    const btn = html('button', `btn dv-choice${tried ? ' is-tried' : ''}`, [fractionText(n)], { type: 'button', 'data-action': 'take', 'data-n': n, 'data-from': 'list', 'aria-label': `${fractionText(n)}${tried ? ', tried already' : ''}` });
-    btn.disabled = tried;
-    row.append(btn);
-  }
-  wrap.append(row);
-  return wrap;
-}
+// The move's row under the newest equation and the fractions to choose from after a failed try are the shared Multiply move's
+// (view/multiplyRow.js, lifted out of this file in Build J).
+const moveRow = (s) => sharedMoveRow(s, { fracOpen, canPreview });
+const fractionChoices = (s) => sharedFractionChoices(s, divideFeedbackText);
 
 // ---------- the group diagram, in the checking space while the counters are up ----------
 

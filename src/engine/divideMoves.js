@@ -7,26 +7,18 @@
 import { createSolveLoop } from './solveLoop.js';
 import { shapeOfBoard, lightsOf } from './solveit/shape.js';
 import { signed, fractionText, boardText } from './solveTerms.js';
-import { startBoard, coefOf, xAlone, pileSize, DEAL_ROUND_LEVEL, xTerm, numTerm, fracOf } from './divideBoard.js';
+import { startBoard, coefOf, xAlone, pileSize, DEAL_ROUND_LEVEL } from './divideBoard.js';
 import { hintAfterUndo } from './solveit/registry.js';
-import { takeFraction, tagDivide, groupsOf, FRACTIONS, legalFractions, formatDivide } from './divide.js';
+import { tagDivide, groupsOf, FRACTIONS, legalFractions, formatDivide } from './divide.js';
+import { applyFraction, chooseFraction, takeStep } from './fractionMove.js';
 
 // ---------- the board (engine/divideBoard.js, shared with the help in engine/solveit/rungs/divide.js) ----------
 
 export { startBoard, coefOf, xAlone, pileSize, DEAL_ROUND_LEVEL } from './divideBoard.js';
 export { boardText, signed };
 
-// The board after taking 1/n of both sides, and the work row that shows it. The right side stays unsimplified on the move that
-// finishes (x alone), so the value is never shown before it is typed; a partial move shows the smaller numbers.
-function applyFraction(board, n) {
-  const a = coefOf(board);
-  const b = board.right[0].v;
-  const work = { left: [fracOf(n, [board.left[0]])], right: [fracOf(n, [board.right[0]])] };
-  const next = a / n === 1
-    ? { left: [xTerm(1)], right: [fracOf(n, [numTerm(b)])] }
-    : { left: [xTerm(a / n)], right: [numTerm(b / n)] };
-  return { work, next };
-}
+// Taking a fraction of both sides is the shared move (engine/fractionMove.js, lifted out of this file in Build J): its work row, the
+// board it makes, a try that does not split. This card adds only the dealing by hand, below.
 
 // ---------- the counters: a pile the size of the number on the right, dealt into n groups, one kept ----------
 
@@ -45,12 +37,6 @@ function dealtMessage(s, d, total) {
   const holds = d.groups.join(', ');
   if (left > 0) return { key: 'dDealt', params: { got, total, holds: s.diag ? '' : holds } };
   return evenGroups(d.groups) ? { key: 'dKeepReady', params: { frac: fractionText(d.n) } } : { key: 'dUneven', params: { holds } };
-}
-
-// What a failed attempt says: which side broke.
-function failParams(board, n, res) {
-  const a = coefOf(board);
-  return { n, frac: fractionText(n), boxes: a, b: signed(board.right[0].v), left: res.leftOver, boxesSplit: res.boxesSplit, countersSplit: res.countersSplit };
 }
 
 // ---------- the card ----------
@@ -79,48 +65,24 @@ const loop = createSolveLoop({
 
   // ----- Divide it's own actions: choosing the move, taking a fraction, dealing and keeping -----
   reduce(s, action, api) {
-    const gate = () => { const g = api.blockMove(s); return g; };
     switch (action.type) {
       // a move from an earlier card is not needed here; a move from a later card unlocks later (spec §4)
       case 'greyMove':
         return say(s, EARLIER.includes(action.move) ? 'aNotNeeded' : 'aLater');
-      case 'choose': {
-        if (action.move !== 'fraction') return undefined;
-        const g = gate();
-        if (g) return g;
-        if (xAlone(s.board)) return say(s, 'aSolvedBoard');
-        s.menu = 'fraction';
-        s.fail = null;
-        return say(s, 'dPickFraction');
-      }
-      case 'take': {
-        if (s.menu !== 'fraction' || !FRACTIONS.includes(action.n)) return 'ignore';
-        const g = gate();
-        if (g) return g === 'ignore' ? g : 'ignore';
-        const n = action.n;
-        if ((s.fail || s.deal) && s.history.length) { const reds = s.reds; api.restore(s, s.history.pop()); s.reds = reds; }   // a new try replaces the last one
-        const a = coefOf(s.board);
-        if (s.forced && n !== a) return say(s, 'dForced', { frac: fractionText(a) }, true);
-        const check = takeFraction({ a, b: s.board.right[0].v }, n);
-        api.pushHistory(s);
-        s.hint = null;
-        if (!check.ok) {
-          if (!s.tried.includes(n)) s.tried = [...s.tried, n];
-          s.fail = { n, boxesSplit: check.boxesSplit, countersSplit: check.countersSplit };
-          s.reds += 1;
-          const work = { left: [fracOf(n, [s.board.left[0]])], right: [fracOf(n, [s.board.right[0]])] };
-          s.rows.push({ type: 'work', board: work, failed: true });
-          return say(s, s.reds >= 3 ? 'dFail3' : 'dFail', failParams(s.board, n, check), true);
-        }
-        // with the counters up, the move is done by hand: n empty groups appear, the boxes split into the same n, the pile is dealt
-        if (s.scaffold) { s.deal = { n, groups: Array(n).fill(0) }; return say(s, 'dDealPrompt', { n, frac: fractionText(n), boxes: a, size: pileSize(s.board), per: a / n }); }
-        // chosen from the list after a fraction that did not split (Build D): the picture shows 1 of the n boxes and 1/n of the counters
-        if (action.fromList) {
-          const size = pileSize(s.board);
-          return commitFraction(s, n, api, { n, boxes: a, size, neg: s.board.right[0].v < 0, groups: Array(n).fill(size / n), kept: 0 });
-        }
-        return commitFraction(s, n, api);
-      }
+      case 'choose':
+        return action.move === 'fraction' ? chooseFraction(s, api, say, xAlone) : undefined;
+      case 'take':
+        return takeStep(s, action, api, say, (st, n) => {
+          const a = coefOf(st.board);
+          // with the counters up, the move is done by hand: n empty groups appear, the boxes split into the same n, the pile is dealt
+          if (st.scaffold) { st.deal = { n, groups: Array(n).fill(0) }; return say(st, 'dDealPrompt', { n, frac: fractionText(n), boxes: a, size: pileSize(st.board), per: a / n }); }
+          // chosen from the list after a fraction that did not split (Build D): the picture shows 1 of the n boxes and 1/n of the counters
+          if (action.fromList) {
+            const size = pileSize(st.board);
+            return commitFraction(st, n, api, { n, boxes: a, size, neg: st.board.right[0].v < 0, groups: Array(n).fill(size / n), kept: 0 });
+          }
+          return commitFraction(st, n, api);
+        });
       // ----- dealing: one counter at a time (or a round), then keep one group; also the diagram at x alone -----
       case 'deal': {
         const d = s.deal ?? s.diag;

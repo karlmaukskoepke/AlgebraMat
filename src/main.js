@@ -19,7 +19,7 @@ import { distributeLightPlay } from './play/distributeLightPlay.js';
 import { valueLightPlay } from './play/valueLightPlay.js';
 import { solveLightPlay } from './play/solveLightPlay.js';
 import { switchPlay } from './play/switchPlay.js';
-import { addBothPlay, divideMovesPlay } from './play/solveCards.js';
+import { addBothPlay, divideMovesPlay, flipPlay } from './play/solveCards.js';
 import { distributeDrillPack, distributeDrillPlay } from './play/distributeDrillPlay.js';
 import { divideNumericPlay } from './play/divideNumericPlay.js';
 import { addBothNumericPlay } from './play/addBothNumericPlay.js';
@@ -75,6 +75,7 @@ const PLAY = {
   switch: switchPlay,
   'divide-it': (level) => (level === 1 ? divideNumericPlay : divideMovesPlay),   // Level 1 is numeric (no x)
   'add-both': (level) => (level === 1 ? addBothNumericPlay : addBothPlay),   // Level 1 is numeric (no x): "See why it works"
+  'flip-everything': flipPlay,                                                   // (its Level 1, numbers only, is not built yet: Build J)
   'distribute-combine': (level) => (level >= 4 ? distributeTypedPlay : LIGHT ? distributeLightPlay : distributePlay),
 };
 // ?drill=distribute: the Distribute drill of lights round 2 (B6), a hidden pack that exists only with the link.

@@ -1,13 +1,14 @@
 // Divide it's keys on the Mat (moved from its play adapter in Build E): "/" goes to the bottom of the fraction blank (and from the whole-number blank it opens the fraction blank); the Multiply options'
 // hover previews; and the unit-fraction pop-up when the blank has sat open a while.
 
-import { fracOpen, fracOf } from '../engine/divideBlank.js';
+import { fracOpen as divideFracOpen, fracOf as divideFracOf } from '../engine/divideBlank.js';
 import { bindMultiplyHover } from './multiplyOptions.js';
 
 // The fraction blank's keys; the Multiply options' hover previews (Build D-2, Part 4); and, when the blank has sat open a while with no
 // unit fraction in it, the pop-up "Enter a unit fraction, like ⅕ or ½." (once each time the blank opens).
 const STUCK_AFTER = 7000;
-export function bindFractionKeys(root, dispatch, getSession) {
+// `menu`: the card's Multiply menu ({ fracOpen, fracOf }; Divide it's unless a card passes its own, Build J).
+export function bindFractionKeys(root, dispatch, getSession, { fracOpen, fracOf } = { fracOpen: divideFracOpen, fracOf: divideFracOf }) {
   const onKey = (e) => {
     idle = Date.now();
     const open = getSession() && (fracOpen(getSession()) || getSession().mopts?.kind === 'whole');     // (a "/" in the whole-number blank opens the fraction)

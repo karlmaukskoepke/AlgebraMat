@@ -11,10 +11,11 @@ const LOOK = {
 };
 const SAID = { whole: 'Multiply both sides by a whole number', frac: 'Multiply both sides by a fraction', flip: 'Multiply both sides by −1' };
 
-// kinds: which options, in order; preview: the kind hovered now.
-export function multiplyOptions(kinds, preview) {
-  return html('div', 'mo-flyout', kinds.map((k) => html('button', `btn mo-opt${preview === k ? ' is-preview' : ''}`, LOOK[k](), {
-    type: 'button', 'data-action': 'multPick', 'data-kind': k, 'data-mopt': k, 'aria-label': SAID[k],
+// kinds: which options, in order; preview: the kind hovered now; grey: options greyed on this card (a tap says why; Build J). A greyed
+// option is not previewed.
+export function multiplyOptions(kinds, preview, grey = []) {
+  return html('div', 'mo-flyout', kinds.map((k) => html('button', `btn mo-opt${preview === k ? ' is-preview' : ''}${grey.includes(k) ? ' is-grey' : ''}`, LOOK[k](), {
+    type: 'button', 'data-action': 'multPick', 'data-kind': k, ...(grey.includes(k) ? { 'aria-disabled': 'true' } : { 'data-mopt': k }), 'aria-label': SAID[k],
   })), { role: 'group', 'aria-label': 'Multiply by' });
 }
 

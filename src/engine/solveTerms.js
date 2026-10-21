@@ -18,7 +18,9 @@ export const xCount = (board) => xIn(board.left) + xIn(board.right);
 
 export const termText = (t) => {
   if (t.kind === 'x') return (t.coef ?? 1) > 1 ? `${t.coef}x` : (t.coef ?? 1) < -1 ? `${MINUS}${-t.coef}x` : (t.coef ?? 1) === -1 ? `${MINUS}x` : 'x';
-  if (t.kind === 'frac') return `${fractionText(t.n)}(${t.inner.map(termText).join(' + ')})`;
+  if (t.kind === 'frac') return `${t.sign < 0 ? MINUS : ''}${fractionText(t.n)}(${t.inner.map(termText).join(' + ')})`;
+  if (t.kind === 'neg') return `${MINUS}(${t.inner.map(termText).join(' + ')})`;                       // `−(12)` (Build J)
+  if (t.kind === 'times') return `${signed(t.f)} × (${t.inner.map(termText).join(' + ')})`;          // `−1 × (−x)` (Build J)
   return signed(t.v);
 };
 export const sideText = (terms) => terms.map((t, i) => (i && t.kind === 'num' && t.v < 0 ? ` − ${-t.v}` : `${i ? ' + ' : ''}${termText(t)}`)).join('');

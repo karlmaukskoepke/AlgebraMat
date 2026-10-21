@@ -22,6 +22,12 @@ import { divideFeedbackText } from '../view/divideFeedback.js';
 import { bindValueDrag, bindForwardKey } from '../view/solveScreen.js';
 import { bindHelpTimer } from '../view/helpTimer.js';
 import { bindFractionKeys } from '../view/fractionKeys.js';
+// Flip everything: the loop card (engine/cards/flip.js) under the shared Multiply menu (engine/multiplyMenu.js), on its screen
+import { newFlip, reduceFlip, solve as flipLoop, FLIP_SPOT, FLIP_MENU } from '../engine/cards/flip.js';
+import { formatFlip } from '../engine/flip.js';
+import { renderFlipScreen, introOpen as flipIntroOpen } from '../view/flipScreen.js';
+import { flipFeedbackText } from '../view/flipFeedback.js';
+import { buildSolvePad } from '../view/divideControls.js';
 
 // ---------- Add to both sides ----------
 
@@ -102,6 +108,43 @@ export const divideMovesPlay = makeSolvePlay({
       case 'deal': return { type: 'deal', group: Number(d.group) };
       case 'dealRound': return { type: 'dealRound' };
       case 'keep': return { type: 'keep', group: Number(d.group) };
+      default: return null;
+    }
+  },
+});
+
+// ---------- Flip everything ----------
+
+let flipTaught = null;  // the first Trade places of a level is pointed out once
+
+export const flipPlay = makeSolvePlay({
+  pack: 'flip-everything',
+  loop: flipLoop,
+  layer: FLIP_MENU.withMenu(reduceFlip),
+  spot: FLIP_SPOT,
+  introOpen: flipIntroOpen,
+  format: formatFlip,
+  newSession: (problem, { forceMove = false, flags = null } = {}) => {
+    flipTaught = flags ?? flipTaught ?? {};
+    return newFlip(problem, { level: problem.logLevel ?? 2, forceMove, introTrade: !flipTaught.trade });
+  },
+  feedbackText: flipFeedbackText,
+  buildControls: (root, dispatch) => buildSolvePad(root, dispatch, flipLoop.answerLive),
+  renderMat: (s) => renderFlipScreen(s),
+  bindMat: (root, dispatch, getSession) => {
+    const off = [bindValueDrag(root, dispatch), bindForwardKey(root), bindHelpTimer(root), bindFractionKeys(root, dispatch, getSession, FLIP_MENU)];
+    return () => off.forEach((f) => f());
+  },
+  padOpen: (s) => s.stage !== 'done' && !s.sub && (FLIP_MENU.fracOpen(s) || (flipLoop.answerLive(s) && (s.typing === 'answer' || flipLoop.alone(s)))),
+  effects(before, s) {
+    if (s.tradeCount > 0 && flipTaught) flipTaught.trade = true;
+  },
+  matAction(d) {
+    switch (d.action) {
+      case 'multOpen': return { type: 'multOpen' };
+      case 'multPick': return { type: 'multPick', kind: d.kind };
+      case 'flipPick': return { type: 'flipPick' };
+      case 'take': return { type: 'take', n: Number(d.n), ...(d.from === 'list' ? { fromList: true } : {}) };
       default: return null;
     }
   },

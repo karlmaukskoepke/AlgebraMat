@@ -3674,3 +3674,6 @@ body[data-input='touch'] #play.is-light #controls .btn-pad { min-width: 48px; mi
 .sv-shadowline .is-blue { color: #0072b2; }
 /* the small questions at big numbers sit just below the numbers (Build I, Part 2): the pointer is on top */
 .spot-box.is-bubble.is-below::after { bottom: auto; top: -13px; border: 12px solid transparent; border-top: 0; border-bottom-color: #0b5f8f; }
+
+/* ---------- Build J: Flip everything ---------- */
+.mo-opt.is-grey { opacity: 0.42; border-style: dashed; }

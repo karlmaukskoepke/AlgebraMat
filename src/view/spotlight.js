@@ -342,8 +342,11 @@ export function findSolveTarget(root, target, s = null) {
     case 'failSide': {
       const row = root.querySelector('.lb-work.is-failed');
       if (!row || !s?.fail) return row;
-      if (!s.fail.boxesSplit && s.fail.countersSplit) return row.querySelector('.lb-left') ?? row;
-      if (s.fail.boxesSplit && !s.fail.countersSplit) return row.querySelector('.lb-right') ?? row;
+      // the boxes are on x's side, the counters on the other (x may be on the right: Flip everything, Build J)
+      const boxSide = row.querySelector('.lb-right .lb-x') ? '.lb-right' : '.lb-left';
+      const pileSide = boxSide === '.lb-left' ? '.lb-right' : '.lb-left';
+      if (!s.fail.boxesSplit && s.fail.countersSplit) return row.querySelector(boxSide) ?? row;
+      if (s.fail.boxesSplit && !s.fail.countersSplit) return row.querySelector(pileSide) ?? row;
       return row;
     }
     case 'coef': return newest?.querySelector('.lb-hintbox, .lb-coef, .lb-x') ?? newest;

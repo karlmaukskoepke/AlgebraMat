@@ -1,8 +1,11 @@
-// The number pad for Divide it (the answer row is in the work stack on the Mat). Live only when the x = [ ] row is.
+// The number pad for Divide it (the answer row is in the work stack on the Mat). Live only when the x = [ ] row is. Flip everything uses
+// the same pad with its own loop (Build J).
 
-import { answerLive } from '../engine/divideMoves.js';
+import { answerLive as divideAnswerLive } from '../engine/divideMoves.js';
 
-export function buildDivideControls(root, dispatch) {
+export const buildDivideControls = (root, dispatch) => buildSolvePad(root, dispatch, divideAnswerLive);
+
+export function buildSolvePad(root, dispatch, answerLive) {
   root.innerHTML = '';
   const keys = document.createElement('div');
   keys.className = 'pad';

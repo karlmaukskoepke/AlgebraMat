@@ -5,6 +5,16 @@
 
 import { fractionText, signed } from '../../solveTerms.js';
 import { coefOf, pileSize, diagOf } from '../../divideBoard.js';
+import { coefOn } from '../../fractionMove.js';
+
+// After a fraction that did not split, Undo brings back the boxes and the counters, "We want only one of the five x boxes.", and the
+// fractions to choose from, the ones tried crossed off (Build D, Part 4). Shared by every card that takes a fraction (Build J): x may be
+// on either side, and the boxes are counted by the size of the number in front of x.
+export function fractionCycleHint(s, before) {
+  if (!before?.fail || !s.tried.length) return null;
+  s.menu = 'fraction';
+  return { target: 'coef', key: 'dWhichFraction', params: { boxes: Math.abs(coefOn(s.board)) }, choose: true };
+}
 
 // D1 `ax = b`
 const D1 = {
@@ -17,10 +27,8 @@ const D1 = {
     word: 'hint',
     after(s, before) {
       s.hint = { kind: 'coef' };
-      if (before?.fail && s.tried.length) {
-        s.menu = 'fraction';
-        return { target: 'coef', key: 'dWhichFraction', params: { boxes: coefOf(s.board) }, choose: true };
-      }
+      const cycle = fractionCycleHint(s, before);
+      if (cycle) return cycle;
       const a = coefOf(s.board);
       s.mopts = { kind: null, entry: '' };
       s.ui = { ...(s.ui ?? {}), preview: 'frac' };

@@ -27,7 +27,13 @@ function termsOf(side, s, o) {
   side.forEach((t, i) => {
     if (i > 0) out.push(html('span', 'lb-plus', [t.kind === 'num' && t.v < 0 ? MINUS : '+']));
     if (t.kind === 'frac') {
-      out.push(html('span', 'lb-frac', [html('span', 'is-blue', [fractionText(t.n)]), '(', ...termsOf(t.inner, s, { ...o, live: false, plug: false }), ')']));
+      out.push(html('span', 'lb-frac', [html('span', 'is-blue', [`${t.sign < 0 ? MINUS : ''}${fractionText(t.n)}`]), '(', ...termsOf(t.inner, s, { ...o, live: false, plug: false }), ')']));
+    } else if (t.kind === 'times') {
+      // both sides times a number, written out: `−1 × (−x)` (Flip everything's work row, Build J); the number in blue (loop §3D)
+      out.push(html('span', 'lb-frac', [html('span', 'is-blue', [`${signed(t.f)} ×`]), ' (', ...termsOf(t.inner, s, { ...o, live: false, plug: false }), ')']));
+    } else if (t.kind === 'neg') {
+      // the opposite of a number, left unsimplified at x alone: `x = −(12)` (Build J)
+      out.push(html('span', 'lb-frac lb-neg', [html('span', 'is-blue', [MINUS]), '(', ...termsOf(t.inner, s, { ...o, live: false, plug: false }), ')']));
     } else if (t.kind === 'x') {
       const xi = o.xi ? o.xi.n++ : 0;                           // which x of the equation this is, left to right
       const filled = Boolean(o.plug && s.sub && (!s.sub.placing || s.sub.filled?.includes(xi)));
@@ -38,7 +44,11 @@ function termsOf(side, s, o) {
       const manyX = o.plug && (s.sub?.xs ?? 1) > 1;
       const xel = html('span', `lb-x${o.plug ? ' is-plugx' : ''}${dropOn ? ' is-droptarget' : ''}${filled ? ' is-placed' : ''}${manyX ? ' has-xmark' : ''}`, ['x'], { 'data-x': '1', 'data-xi': String(xi), ...(dropOn ? { 'data-action': 'placeValue', role: 'button', tabindex: '0', 'aria-label': 'Put your value into x' } : {}) });
       if (manyX && filled) xel.append(html('span', 'lb-xcheck', ['✓'], { 'aria-label': 'This x has the value' }));
-      if (c > 1) out.push(html('span', 'lb-coef', [o.live && s.hint?.kind === 'coef' ? html('span', 'lb-hintbox', [String(c)]) : String(c), xel]));
+      // the number in front of x, with its sign (`−x`, `−3x`: Flip everything, Build J)
+      const front = c > 1 || c < -1 ? String(c).replace('-', MINUS) : c === -1 ? MINUS : null;
+      // (a negative one is its own piece, so a spotlight on it covers the minus too; Divide's positive ones are as before)
+      const piece = c < 0 ? html('span', 'lb-num lb-front', [front]) : front;
+      if (front) out.push(html('span', 'lb-coef', [o.live && s.hint?.kind === 'coef' ? html('span', 'lb-hintbox', [front]) : piece, xel]));
       else out.push(xel);
     } else {
       out.push(html('span', 'lb-num', [i > 0 && t.v < 0 ? String(-t.v) : signed(t.v)]));
@@ -47,12 +57,18 @@ function termsOf(side, s, o) {
   return out;
 }
 
-const charsOf = (list) => list.map((x) => (x.kind === 'frac' ? 5 + charsOf(x.inner) : x.kind === 'x' ? ((x.coef ?? 1) > 1 ? 2 : 1) : String(signed(x.v)).length + 3)).reduce((a, b) => a + b, 0);
+const charsOf = (list) => list.map((x) => (x.kind === 'frac' || x.kind === 'neg' ? 5 + charsOf(x.inner) : x.kind === 'times' ? 7 + charsOf(x.inner) : x.kind === 'x' ? ((x.coef ?? 1) > 1 ? 2 : (x.coef ?? 1) < 0 ? String(x.coef).length : 1) : String(signed(x.v)).length + 3)).reduce((a, b) => a + b, 0);
 const eqClass = (chars) => (chars > 30 ? ' is-xlong' : chars > 20 ? ' is-long' : '');
 
 const sideEls = (board, s, o) => { const oo = { ...o, xi: { n: 0 } }; return [termsOf(board.left, s, oo), termsOf(board.right, s, oo)]; };
 // A side as written, inert (the move's preview row).
 export const sideTerms = (terms, s) => termsOf(terms, s, { live: false, plug: false });
+
+// What a folded move says it did, above its equation: `⅓ of both sides`, `−⅓ of both sides`, `−1 × both sides` (Build J).
+function foldTag(label) {
+  if (label.flip) return html('span', 'lb-foldtag', [html('span', 'is-blue', [`${MINUS}1 ×`]), ' both sides']);
+  return html('span', 'lb-foldtag', [html('span', 'is-blue', [`${label.sign < 0 ? MINUS : ''}${fractionText(label.n)}`]), ' of both sides']);
+}
 
 // The work stack. Every row stays settled (no entrance animation: a re-render never replays one).
 export function stackRows(s) {
@@ -74,7 +90,7 @@ export function stackRows(s) {
     eq.setAttribute('role', 'img');
     eq.setAttribute('aria-label', 'The equation');
     const kids = [];                                                // which equation is being checked is said on its own line above the check rows
-    if (row.type === 'fold') kids.push(html('span', 'lb-foldtag', [html('span', 'is-blue', [fractionText(row.label.n)]), ' of both sides']));
+    if (row.type === 'fold') kids.push(foldTag(row.label));
     kids.push(eq);
     return html('div', `lb-rowwrap is-settled${row.type === 'fold' ? ' is-fold' : ''}${plug ? ' is-plugrow' : ''}`, kids);
   });

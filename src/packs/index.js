@@ -12,6 +12,7 @@ import { generateSolveLevel } from '../engine/generateSolve.js';
 import { generateSolve2Level } from '../engine/generateSolve2.js';
 import { generateSwitchLevel } from '../engine/generateSwitch.js';
 import { generateAddBothLevel } from '../engine/generateAddBoth.js';
+import { generateFlipLevel } from '../engine/generateFlip.js';
 import { generateDivideLevel } from '../engine/generateDivide.js';
 
 // Group It (built as "Lasso"; its id stays 'lasso' so saved progress and
@@ -154,6 +155,20 @@ export const divideIt = {
   generate: (level, seed) => generateDivideLevel(level - 1, seed),                    // level 1 → numeric (0), 2–6 → the five equation sets
 };
 
+// Flip everything (SPEC-FLIP-IT.md rev 1.2, Build J, basic form): x with a minus (`−x = 12`, `12 = −x`, `−3x = 12`). Six saved levels like
+// Add to both sides and Divide it: saved Level 1 (numbers only) is reserved for its "See why it works", not built yet, so the card has no
+// button for it; it opens at saved Level 2 (shown as Level 1). Not `flipit`: that id is Count it's subtraction card.
+export const flipEverything = {
+  id: 'flip-everything',
+  firstLevel: 2,
+  title: 'Flip everything',
+  subtitle: 'When x has a minus',
+  blurb: 'Multiply both sides by −1 to take the minus off x.',
+  levels: 6,
+  levelNames: ['numbers only', '−x = b', 'b = −x', '−ax = b', 'all four forms', 'bigger numbers'],
+  generate: (level, seed) => generateFlipLevel(level, seed),
+};
+
 // The rest of the equations are still to come: they show as cards under Solve it, with no levels (so they take no room in saves).
 const soon = (id, title, subtitle) => ({ id, title, subtitle, comingSoon: true, levels: 0, levelNames: [] });
 
@@ -167,6 +182,7 @@ export const PACKS = [
   valueIt,
   addBoth,
   divideIt,
+  flipEverything,
   oneStep,
   switchSides,
   twoStep,
@@ -177,7 +193,7 @@ export const PACKS = [
 export const SECTIONS = [
   { id: 'count', title: 'Count it', blurb: 'Adding, subtracting and multiplying numbers', packs: ['combineit', 'flipit', 'lasso'] },
   { id: 'build', title: 'Build it', blurb: 'Expressions, with boxes, circles and groups', packs: ['boxes', 'groups-of-terms', 'distribute-combine', 'value'] },
-  { id: 'solve', title: 'Solve it', blurb: 'Solving equations', packs: ['add-both', 'divide-it', 'one-step', 'two-step', 'multi-step'] },
+  { id: 'solve', title: 'Solve it', blurb: 'Solving equations', packs: ['add-both', 'divide-it', 'flip-everything', 'one-step', 'two-step', 'multi-step'] },
 ];
 export const sectionById = (id) => SECTIONS.find((s) => s.id === id);
 export const sectionOf = (packId) => SECTIONS.find((s) => s.packs.includes(packId));

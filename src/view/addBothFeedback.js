@@ -36,6 +36,7 @@ const UNDO_REASON = {
   partial: 'That move only partly cancelled the number next to x.',
   zero: 'That move made the other side 0, but x isn’t alone.',
   fail: 'That fraction doesn’t split evenly.',
+  flip: 'That flip put a minus on x.',
 };
 
 const M = {
@@ -53,7 +54,8 @@ const M = {
   aBuilt: () => 'That is the equation. Now choose a move.',
   // the first moves
   aFindX: () => 'Find x.',                                             // the prompt, on every card and at every state (Build C)
-  aTradeIntro: () => 'x is on the right. Click “Trade places” to rewrite the equation with x on the left.',
+  // (Build J: one sentence names the property, on Add to both sides and Flip everything)
+  aTradeIntro: () => 'x is on the right. Click “Trade places” to rewrite the equation with x on the left. This is the symmetric property: if a = b, then b = a.',
   aTraded: () => 'The same equation with the sides traded: x is on the left now. Choose “Add ___ to both sides”.',
   aTradeFirst: () => 'First click “Trade places” to put x on the left.',
   aTradeNot: () => 'Trade places is for an equation with x on the right.',
