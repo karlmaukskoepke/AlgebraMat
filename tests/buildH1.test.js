@@ -63,7 +63,7 @@ describe('Not balanced keeps its reason lit (item 1) and the numbers stay lit at
   it('a wrong guess or a wrong value lights the last row of the check with the label, on both cards', () => {
     const a = newLightsSession({ ...makeAddBoth('x+a', 8, -12), logLevel: 4 }, { level: 4 });          // x + 8 = −4
     const g = run(add, a, ...typed('4'), { type: 'check' }, { type: 'placeValue' }, { type: 'nextLine' }, { type: 'nextLine' });
-    expect(spotOf(g, ADD_SPOT)).toMatchObject({ kind: 'error', target: 'subst', lit: ['substLast'] });
+    expect(spotOf(g, ADD_SPOT)).toMatchObject({ kind: 'error', target: 'subst', lit: ['substLast', 'board'] });
     const d = run(div, newDivide({ ...makeDivide(5, -3), logLevel: 3 }, { level: 3 }), ...typed('4'), { type: 'check' }, { type: 'placeValue' }, { type: 'nextLine' }, { type: 'nextLine' });
     expect(spotOf(d, DIVIDE_SPOT)).toMatchObject({ kind: 'error', lit: ['substLast'] });
   });
