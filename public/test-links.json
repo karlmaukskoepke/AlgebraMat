@@ -784,6 +784,12 @@
               "notLive": "Opens the picture on GitHub, not the app; GitHub may ask you to sign in."
             },
             {
+              "label": "The tallest case (x on the right with a number in front) · 1366×650",
+              "query": "https://github.com/karlmaukskoepke/AlgebraMat/blob/main/docs/build-j/j-worst-650.png",
+              "look": "A picture only: nothing to click.",
+              "notLive": "Opens the picture on GitHub, not the app; GitHub may ask you to sign in."
+            },
+            {
               "label": "The report",
               "query": "https://github.com/karlmaukskoepke/AlgebraMat/blob/main/docs/build-j/BUILD-J-REPORT.md",
               "look": "The Build J report.",
