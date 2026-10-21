@@ -65,6 +65,8 @@ function slipFeedback(s) {
 function popups(s, wrap) {
   const sp = s.drill ? null : spotOf(s, ADD_SPOT);
   const o = { root: wrap, find: findSolveTarget, undo: '.lx-undo', help: true, moveSel: (m) => `[data-move="${m}"]`, work: '.lb-main' };
+  // two small questions at big numbers: their words come from their keys (Build H, Part 3)
+  if (sp?.bubbles) { wrap.append(spotlightLayer({ ...sp, bubbles: sp.bubbles.map((b) => ({ ...b, text: lightsFeedbackText({ key: b.key, params: b.params }) })) }, { ...o, text: null })); return; }
   if (sp) { wrap.append(spotlightLayer(sp, { ...o, text: lightsFeedbackText(sp.kind === 'error' && sp.target === 'slip' && slipShown(s) ? slipFeedback(s) : s.feedback) })); return; }
   if (introOpen(s)) {
     const lit = ['newest', 'panel', 'forward', ...(s.ui?.preview ? ['preview'] : [])];

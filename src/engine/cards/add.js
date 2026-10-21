@@ -21,7 +21,7 @@ import {
   startBoard, xAlone, xSideOf, otherSideOf, find, sideOf, combinable, unresolved, kindOf, combineTerms, sumNums, xConstantTerm,
   alonePair, lightBoard, workLine, tilt, balanced, num,
 } from '../addBothMoves.js';
-import { aloneAsk, plus, say, problemParams, crossOff } from './addHelp.js';
+import { aloneAsk, plus, say, problemParams, crossOff, pastCounters, sizesOf } from './addHelp.js';
 import { reduce as reduceWalk } from '../session.js';
 import { reduceBig } from '../bigSession.js';
 import { hintAfterUndo } from '../solveit/registry.js';
@@ -257,7 +257,7 @@ const loop = createSolveLoop({
         if (!s.scaffold) s.hint = null;
         return s;
       }
-      if (s.alone?.step === 'type') s.alone = { ...s.alone, step: 'typing' };   // "Now type x." has done its job
+      if (s.alone?.step === 'type' || s.alone?.step === 'who') s.alone = { ...s.alone, step: 'typing' };   // "Now type x." (or the two small questions) has done its job
       return undefined;
     }
     if (s.combining && !WHILE_COMBINING.has(action.type)) return 'ignore';
@@ -385,6 +385,14 @@ const loop = createSolveLoop({
           const right = kindOf(a.v, b.v);
           const params = { g1: signed(a.v), g2: signed(b.v), kind: right, picked: action.value };
           if (action.value !== right) { s.kindMisses += 1; return say(s, 'aKindWrong', params, true); }
+          // past 12 there are no counters: a battle asks who won, a party asks to add (two small questions at the numbers, Build H, Part 3)
+          if (pastCounters(a.v, b.v)) {
+            const sizes = sizesOf(a.v, b.v);
+            s.alone = { ...s.alone, kind: right, sizes: true, who: null, step: right === 'battle' ? 'who' : 'type' };
+            if (right === 'battle') return say(s, 'aAloneWho', { ...params, ...sizes });
+            s.typing = 'answer';
+            return say(s, 'aAloneAdd', { ...params, ...sizes });
+          }
           s.alone = { ...s.alone, kind: right, step: 'type' };
           s.typing = 'answer';
           return say(s, 'aAloneRight', params);
@@ -415,6 +423,16 @@ const loop = createSolveLoop({
           return say(s, 'aStruck', params);
         }
         return combineNow(s, api, a, b, right, params);
+      }
+      // who won, at big numbers (a battle): the sign of the bigger team. The app never writes the value; the sizes are told, the sum is not.
+      case 'whoWon': {
+        const al = s.alone;
+        if (al?.step !== 'who' || s.sub || !['+', '-'].includes(action.value)) return 'ignore';
+        const sizes = sizesOf(find(s.board, al.a).v, find(s.board, al.b).v);
+        if (action.value !== sizes.sign) { s.alone = { ...al, whoMisses: (al.whoMisses ?? 0) + 1 }; return say(s, 'aWhoWrong', sizes, true); }
+        s.alone = { ...al, step: 'type', who: action.value };
+        s.typing = 'answer';
+        return say(s, 'aWhoRight', sizes);
       }
       case 'crossNext': {
         if (s.combining?.step !== 'struck') return 'ignore';

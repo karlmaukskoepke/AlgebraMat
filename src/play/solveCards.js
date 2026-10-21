@@ -68,6 +68,7 @@ export const addBothPlay = makeSolvePlay({
       case 'buildTap': return { type: 'buildTap', group: d.group, sign: d.sign, remove: Boolean(d.remove) };
       case 'select': return { type: 'select', id: d.id };
       case 'kind': return { type: 'kind', value: d.value };
+      case 'whoWon': return { type: 'whoWon', value: d.value };
       case 'crossNext': return { type: 'crossNext' };
       case 'abandon': return { type: 'abandon' };
       default: return null;

@@ -14,6 +14,7 @@
 //   too big...), with nothing to undo.
 
 const BOX_W = 340;
+const BUBBLE_W = 300;                 // the small questions side by side at the numbers (Build H, Part 3)
 const NUDGE_W = 270;
 const GAP = 14;
 const SVG_NS = 'http://www.w3.org/2000/svg';
@@ -162,6 +163,19 @@ export function spotlightLayer(spot, o) {
   const box = el('div', `spot-box${kind === 'nudge' ? ' is-small' : ''}`, o.text ? [el('p', 'spot-text', [o.text], { id: textId })] : [], error
     ? { role: 'alertdialog', 'aria-modal': 'true', 'aria-labelledby': textId }
     : { role: 'status', 'aria-live': 'polite' });
+  // Small questions side by side, floating above the numbers they are about, which stay lit (Build H, Part 3): spot.bubbles is a list of
+  // { id, text, choices: [[label, value]], action, picked, dim }. One not yet to be answered is dimmed; a picked one shows its answer.
+  const bubbleEls = (spot.bubbles ?? []).map((b, i, all) => {
+    const kids = [el('p', 'spot-text', [b.text])];
+    if (b.choices) {
+      kids.push(el('div', 'spot-choices is-big', b.choices.map(([label, value]) => {
+        const btn = el('button', `btn${b.picked === value ? ' is-picked' : ''}`, [label], { type: 'button', 'data-action': b.action, 'data-value': value, 'aria-label': value === '+' ? 'Positive' : value === '-' ? 'Negative' : label });
+        if (b.picked) btn.disabled = true;
+        return btn;
+      })));
+    }
+    return el('div', `spot-box is-bubble${all.length === 1 ? ' is-lone' : ''}${b.dim ? ' is-dim' : ''}${b.picked ? ' is-done' : ''}`, kids, { role: 'group', 'aria-label': b.text, 'data-bubble': b.id, 'data-i': String(i), ...(b.dim ? { 'aria-disabled': 'true' } : {}) });
+  });
   if (kind === 'ask' && spot.choices) {
     box.append(el('div', 'spot-choices', spot.choices.map(([label, value]) => el('button', `btn ${value === 'party' ? 'btn-party' : value === 'battle' ? 'btn-battle' : ''}`, [label], { type: 'button', 'data-action': spot.choiceAction ?? 'kind', 'data-value': value }))));
   }
@@ -178,6 +192,7 @@ export function spotlightLayer(spot, o) {
   }
   if (frame) layer.append(frame);
   if (o.text || o.extra) layer.append(box);
+  layer.append(...bubbleEls);
   if (arrow) layer.append(arrow);
 
   const find = (t) => (typeof t === 'string' ? o.find(o.root, t) : t);
@@ -221,6 +236,21 @@ export function spotlightLayer(spot, o) {
       }
     }
     if (dim) drawDim(dim, lit);
+
+    if (bubbleEls.length) {
+      // side by side, centred over the numbers, above them (below when there is no room above); equal heights
+      const gap = 14;
+      const total = bubbleEls.length * BUBBLE_W + (bubbleEls.length - 1) * gap;
+      for (const b of bubbleEls) { b.style.width = `${BUBBLE_W}px`; b.style.minHeight = ''; }
+      const bh = Math.max(...bubbleEls.map((b) => b.offsetHeight));
+      for (const b of bubbleEls) b.style.minHeight = `${bh}px`;
+      const cx = r ? (r.left + r.right) / 2 : vw / 2;
+      const left0 = Math.min(Math.max(8, cx - total / 2), Math.max(8, vw - total - 8));
+      const above = r ? r.top - pad - GAP - bh : 8;
+      const top = above >= 8 ? above : (r ? r.bottom + pad + GAP : 8);
+      bubbleEls.forEach((b, i) => Object.assign(b.style, { left: `${left0 + i * (BUBBLE_W + gap)}px`, top: `${Math.min(top, vh - bh - 8)}px` }));
+      return;
+    }
 
     const bw = kind === 'nudge' ? NUDGE_W : BOX_W;
     box.style.width = `${bw}px`;

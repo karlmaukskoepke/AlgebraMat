@@ -516,3 +516,7 @@ Compared screen by screen with the code before this part (`main` at `5a528b1`): 
 ## Build H, Part 2: the seesaw mirrors the check (2026-10-21)
 
 Compared with the code before this part: no scripted run (trace, event, problem, save code) and no screen changed. None of the 31 screens draws a check on the seesaw, so the new picture is covered by `tests/seesawCheck.test.js` (the mirror's states line by line, the 12-counter limit, a wrong value, x on the right) and by the walk of its Features to check item. No new key is needed.
+
+## Build H, Part 3: big numbers at x alone (2026-10-21)
+
+Compared with the code before this part: no scripted run and no screen changed (no scripted run reaches x alone with a number past 12; the scripted ones use −4 + −8 and 11 − 8, which are as before). The two small questions are covered by `tests/bigPairs.test.js`, which also checks that up to 12 is unchanged and that the class-sheet words are the same (`hint` only, from the Party or Battle at the numbers). No new key is needed.

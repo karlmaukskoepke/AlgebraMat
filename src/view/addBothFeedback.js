@@ -122,6 +122,15 @@ const M = {
   // the help at x alone (Build C, Part 3): Party/Battle at the two numbers, then x =, then Count it's counters
   aAlonePB: (p) => `${p.sum}: party or battle?`,
   aAloneRight: (p) => `${p.kind === 'party' ? 'Yes, a party: the teams join.' : 'Yes, a battle: the bigger team wins.'} Now type x.`,
+  // past the counters' limit: the two small questions at the numbers (Build H, Part 3)
+  aAloneWho: (p) => `Yes, a battle: the bigger team wins. Who won, ${p.a} or ${p.b}?`,
+  aAloneAdd: (p) => `Yes, a party: the teams join. Add ${p.hi} + ${p.lo} to find how many in all, then type x.`,
+  aWhoWrong: (p) => `Not that one: the bigger team wins. Which is bigger, ${p.hi} or ${p.lo}? Pick the sign of the winner.`,
+  aWhoRight: (p) => `Yes: ${p.win} wins. Subtract ${p.hi} − ${p.lo} to find how many are left, then type x.`,
+  aBubbleWho: (p) => `Who won? ${p.a} or ${p.b}?`,
+  aBubbleWhoWrong: (p) => `Not that one. The bigger team wins: ${p.hi} or ${p.lo}?`,
+  aBubbleSub: (p) => `Subtract ${p.hi} − ${p.lo} to find how many are left.`,
+  aBubbleAdd: (p) => `Add ${p.hi} + ${p.lo} to find how many in all.`,
   aAloneCounters: () => 'Here are the two numbers as counters. Cross off any + and − pairs, count what is left, then type x.',
   aAloneCount: () => 'Count what is left, then type x.',
   aStruck: (p) => `Battle! ${p.g1} and ${p.g2}: the pairs cancel. See the crossed-off pairs, then press Next.`,

@@ -14,6 +14,8 @@
 
 import { reduceAddBoth, newAddBoth, xAlone, xSideOf, solve, hint as hintAfterUndo } from './cards/add.js';
 import { isTyping, typeInto } from './entry.js';
+import { find as findOnBoard } from './addBothMoves.js';
+import { sizesOf } from './cards/addHelp.js';
 import { findTerm, outcomeOf, reorderBoard, combineBoard, pairText, valueOf, crossBoard, otherSide } from './lightsGrab.js';
 
 const slotSide = (board, id) => otherSide(findTerm(board, id).side);
@@ -407,6 +409,18 @@ function seesawError(s) {
   if (!s.needUndo || s.combining || s.sub || s.stage !== 'moves') return null;
   return SEESAW_ERRORS[slipKey(s)] ?? null;
 }
+// Past the counters' limit, at x alone (Build H, Part 3): two small questions side by side at the two numbers, which stay lit. A battle asks
+// who won (a big + and a big −), and the sum to work out waits, dimmed, until that is answered; a party skips the first and shows only the
+// add. Their numbers are read from the row on screen. The student then types x: the app never writes the value.
+function aloneBubbles(s) {
+  const al = s.alone;
+  const sz = sizesOf(findOnBoard(s.board, al.a).v, findOnBoard(s.board, al.b).v);
+  const battle = al.kind === 'battle';
+  const out = [];
+  if (battle) out.push({ id: 'who', key: s.feedback?.key === 'aWhoWrong' ? 'aBubbleWhoWrong' : 'aBubbleWho', params: sz, action: 'whoWon', choices: [['+', '+'], ['−', '-']], picked: al.who ?? null });
+  out.push({ id: 'op', key: battle ? 'aBubbleSub' : 'aBubbleAdd', params: sz, dim: al.step === 'who' });
+  return out;
+}
 export const ADD_SPOT = {
   error: (s) => (s.scaffold ? seesawError(s) : ADD_ERRORS[s.feedback?.key] ?? null),
   keepsReds: (s) => ['aRed', 'aRed3', 'aZeroOther', 'lxZero', 'aPartial'].includes(slipKey(s)),
@@ -421,6 +435,7 @@ export const ADD_SPOT = {
     // the scaffold's pair: party or battle, floating right above the two groups on the balance (Build D, Part 5)
     if (s.scaffold && s.combining?.step === 'kind') return { kind: 'ask', target: 'combining', choices: [['Party!', 'party'], ['Battle!', 'battle']] };
     if (s.alone?.step === 'pb') return { kind: 'ask', target: 'otherSide', choices: [['Party!', 'party'], ['Battle!', 'battle']] };
+    if (s.alone?.sizes && (s.alone.step === 'who' || s.alone.step === 'type')) return { kind: 'ask', target: 'otherSide', lit: s.alone.step === 'type' ? ['answer'] : [], bubbles: aloneBubbles(s) };
     // (the two numbers being worked out stay lit, fully readable: never grey out what the question is about, Build H)
     if (s.alone?.step === 'type') return { kind: 'ask', target: 'answer', lit: ['otherSide'] };
     return null;

@@ -47,6 +47,17 @@ export function sumHelp(s, say, level) {
   return say(s, 'aStuckSum', { sum: nums.map((t) => signed(t.v)).join(' + '), many: nums.length > 2, party: same, level: Math.min(level, 3) });
 }
 
+// Numbers past the counters' limit (Count it's counters stop at 12 a zone): the help at x alone asks two small questions at the numbers
+// instead of drawing counters (Build H, Part 3).
+export const pastCounters = (a, b) => Math.abs(a) > MAX_PER_ZONE || Math.abs(b) > MAX_PER_ZONE;
+// What the two small questions say about the numbers on screen: the bigger and the smaller size, the winner's sign, the winner as the row reads it.
+export function sizesOf(a, b) {
+  const hi = Math.max(Math.abs(a), Math.abs(b));
+  const lo = Math.min(Math.abs(a), Math.abs(b));
+  const winner = Math.abs(a) >= Math.abs(b) ? a : b;
+  return { a: signed(a), b: signed(b), hi, lo, sign: winner < 0 ? '-' : '+', win: signed(winner) };
+}
+
 // 1. The question floats at the two numbers: "11 − 8: party or battle?" (recorded as the reminder, `hint`).
 export function aloneAsk(s, say) {
   const [a, b] = alonePair(s.board);

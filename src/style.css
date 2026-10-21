@@ -3653,3 +3653,16 @@ body[data-input='touch'] #play.is-light #controls .btn-pad { min-width: 48px; mi
 /* Build H, Part 2: the seesaw's check. The x box is drawn as counters in a blue box with a small x above it. */
 .ab-xlabel { font: 800 30px 'Lexend', system-ui, sans-serif; fill: #0072b2; }
 .ab-group.is-xgroup .ab-group-box, .ab-token.is-xgroup .ab-token-box { stroke: #0072b2; stroke-width: 3.5; }
+
+/* Build H, Part 3: two small questions side by side at big numbers. The left asks who won (a big + and a big −); the right (the sum to work
+   out) is dimmed until the left is answered. Each has a little point toward the numbers they are about. */
+.spot-box.is-bubble { padding: 12px 14px; border-color: #0b5f8f; }
+.spot-box.is-bubble .spot-text { font-size: 20px; }
+.spot-box.is-bubble.is-dim { opacity: 0.4; pointer-events: none; }
+.spot-box.is-bubble::after { content: ''; position: absolute; bottom: -13px; width: 0; height: 0; border: 12px solid transparent; border-bottom: 0; border-top-color: #0b5f8f; }
+.spot-box.is-bubble[data-i="0"]::after { right: 28px; }
+.spot-box.is-bubble[data-i="1"]::after { left: 28px; }
+.spot-box.is-bubble.is-lone::after { left: calc(50% - 12px); right: auto; }
+.spot-choices.is-big .btn { min-height: 64px; font-size: 44px; font-weight: 900; line-height: 1; }
+.spot-choices.is-big .btn.is-picked { background: #0b5f8f; color: #fff; border-color: #0b5f8f; opacity: 1; }
+.spot-choices.is-big .btn:disabled:not(.is-picked) { opacity: 0.35; }
