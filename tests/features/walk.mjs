@@ -226,11 +226,11 @@ const WALKS = {
     w.at('type −4, Enter'); await w.click(act('focus')); await w.type('-4'); await w.enter();
     w.at('drag the −4 onto x'); await w.drag();
     await w.see('(−4) + 8 = −4');
-    const blue = await w.page.evaluate(() => ({ value: [...document.querySelectorAll('.sv-checklist .sv-checkrow:first-child .is-blue')].map((e) => getComputedStyle(e).color), x: getComputedStyle(document.querySelector('.is-plugrow .lb-x')).color }));
+    const blue = await w.page.evaluate(() => ({ value: [...document.querySelectorAll('.sv-checklist .sv-line2 .is-blue')].map((e) => getComputedStyle(e).color), x: getComputedStyle(document.querySelector('.is-plugrow .lb-x')).color }));
     if (!blue.value.length || blue.value.some((c) => c !== blue.x)) throw new Error(`the dropped-in value should be the blue of the x (${blue.x}) but is ${blue.value}`);
     w.at('Next twice'); await w.click(act('nextLine')); await w.click(act('nextLine')); await w.lateLayer();
     await w.see('4 = −4', '✗ Not balanced', 'When x = −4, the equation is not balanced.');
-    await w.lit('.sv-checklist .sv-checkrow:not(.sv-mark)', 1);          // the last line, 4 = −4
+    await w.lit('.sv-checklist .sv-checkrow:not(.sv-mark)', 2);          // the last line, 4 = −4 (under the equation and the line with the value)
     await w.lit('.sv-checklist .sv-mark');
     await w.both('h-not-balanced-add');
   },
@@ -241,11 +241,11 @@ const WALKS = {
     w.at('type 4, Enter'); await w.click(act('focus')); await w.type(4); await w.enter();
     w.at('drag the 4 onto x'); await w.drag();
     await w.see('5 × 4 = −15');
-    const blue = await w.page.evaluate(() => ({ value: [...document.querySelectorAll('.sv-checklist .sv-checkrow:first-child .is-blue')].map((e) => getComputedStyle(e).color), x: getComputedStyle(document.querySelector('.is-plugrow .lb-x')).color }));
+    const blue = await w.page.evaluate(() => ({ value: [...document.querySelectorAll('.sv-checklist .sv-line2 .is-blue')].map((e) => getComputedStyle(e).color), x: getComputedStyle(document.querySelector('.is-plugrow .lb-x')).color }));
     if (!blue.value.length || blue.value.some((c) => c !== blue.x)) throw new Error(`the dropped-in value should be the blue of the x (${blue.x}) but is ${blue.value}`);
     w.at('Next twice'); await w.click(act('nextLine')); await w.click(act('nextLine')); await w.lateLayer();
     await w.see('20 = −15', '✗ Not balanced', 'When x = 4, the equation is not balanced.');
-    await w.lit('.sv-checklist .sv-checkrow:not(.sv-mark)', 1);
+    await w.lit('.sv-checklist .sv-checkrow:not(.sv-mark)', 2);
     await w.lit('.sv-checklist .sv-mark');
     await w.both('h-not-balanced-divide');
   },
@@ -595,7 +595,32 @@ async function checkTwoXs(page) {
   const n = await page.locator('#two-x .lb-xcheck').count();
   if (n !== 3) throw new Error(`expected 3 green checks (one above the first x, then one above each x), found ${n}`);
   await page.screenshot({ path: path.join(OUT, 'two-x-checks.png') });
-  return true;
+  // the check of the same equation (Build I, Part 1): the equation itself, every x blue, and under it the value under each x
+  await page.evaluate(async () => {
+    const m = await import('/src/view/solveScreen.js');
+    const t = await import('/src/engine/solveTerms.js');
+    const board = { left: [{ kind: 'x' }, { kind: 'num', v: 3 }], right: [{ kind: 'x', coef: 2 }, { kind: 'num', v: -1 }] };
+    const host = document.querySelector('#two-x');
+    host.replaceChildren();
+    for (const v of [4, -4]) {
+      const work = t.substitutionLines(board, v);
+      const sub = { placing: false, xs: 2, filled: [0, 1], typed: v, target: 'original', step: 2, lines: work.lines, ok: false, kind: 'value' };
+      const state = { rows: [{ type: 'eq', board }], board, sub, feedback: null, stage: 'moves' };
+      const stack = document.createElement('div'); stack.className = 'lb-stack'; stack.style.cssText = 'min-height:0;display:flex;gap:60px;align-items:flex-start;margin-bottom:40px';
+      stack.append(...m.stackRows(state), m.substBlock(state, { subView: () => ({ lines: work.lines.slice(0, 2), mark: null, last: 1 }) }));
+      host.append(Object.assign(document.createElement('p'), { textContent: `x = ${v}`, style: 'font:700 20px Lexend,system-ui,sans-serif;margin:20px 0 0' }), stack);
+    }
+  });
+  await wait(page, 500);
+  const pairs = await page.evaluate(() => [...document.querySelectorAll('#two-x .sv-checklist')].map((list) => {
+    const mid = (e) => { const r = e.getBoundingClientRect(); return (r.left + r.right) / 2; };
+    const xs = [...list.querySelectorAll('.sv-line1 [data-pair]')];
+    const vs = [...list.querySelectorAll('.sv-line2 [data-pair]')];
+    return xs.map((x, i) => Math.round(Math.abs(mid(x) - mid(vs[i]))));
+  }));
+  if (pairs.length !== 2 || pairs.some((p) => p.length !== 2)) throw new Error(`expected two checks with two blue pairs each, found ${JSON.stringify(pairs)}`);
+  await page.screenshot({ path: path.join(OUT, 'two-x-check-lines.png') });
+  return pairs;
 }
 
 // ---- run ----------------------------------------------------------------------------------------------------------------------------
@@ -612,7 +637,7 @@ if (!only.length || only.includes('two-x')) {
   const page = await (await browser.newContext({ viewport: { width: 1366, height: 768 } })).newPage();
   try {
     const done = await checkTwoXs(page);
-    console.log(done ? 'PASS     the green checks above two x’s (drawn from a test state)' : 'SKIP     the green checks above two x’s (needs the dev server’s source files)');
+    console.log(done ? `PASS     the green checks above two x’s, and the check's two lines (drawn from a test state; each x to its value, px: ${JSON.stringify(done)})` : 'SKIP     the green checks above two x’s (needs the dev server’s source files)');
   } catch (e) { failed++; console.log(`FAIL     the green checks above two x’s\n         ${String(e.message).split('\n')[0]}`); }
   await page.context().close();
 }

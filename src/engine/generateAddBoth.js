@@ -171,7 +171,7 @@ export function stackRowsFor(p, level) {
   const moves = 1 + trade + 2;
   const xs = [{ kind: 'x' }, { kind: 'num', v: p.form === 'x-a' ? -p.a : p.a }];
   const board = p.mirror ? { left: [{ kind: 'num', v: p.b }], right: xs } : { left: xs, right: [{ kind: 'num', v: p.b }] };
-  const check = substitutionLines(board, p.x).lines.length + 1;
+  const check = substitutionLines(board, p.x).lines.length + 2;      // the equation itself (Build I), each line of the work, the mark
   return { moves, answer: 2, check, total: moves + 2 + check };
 }
 // The worst case of a card level over many seeds (the screen reserves it).

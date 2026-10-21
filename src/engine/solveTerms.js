@@ -122,3 +122,23 @@ export function substitutionLines(board, value) {
 }
 
 export const lineText = (line) => line.segs.map((s) => s.text).join('');
+
+// The equation as the check's first line writes it (Build I, Part 1): the same spacing and signs as the line under it, every x blue and
+// numbered left to right (`xi`), so each value of the line under it can be set directly below the x it replaced.
+export function equationSegs(board) {
+  let xi = 0;
+  const termSegs = (t) => {
+    if (t.kind === 'x') {
+      const c = t.coef ?? 1;
+      const front = c === 1 ? [] : [{ text: c === -1 ? MINUS : signed(c), cls: '' }];
+      return [...front, { text: 'x', cls: 'is-blue', xi: xi++ }];
+    }
+    if (t.kind === 'frac') return [{ text: `${fractionText(t.n)}(`, cls: '' }, ...sideSegs(t.inner), { text: ')', cls: '' }];
+    return [{ text: signed(t.v), cls: '' }];
+  };
+  const sideSegs = (terms) => terms.flatMap((t, i) => {
+    if (i && t.kind === 'num' && t.v < 0) return [{ text: ' − ', cls: '' }, { text: `${-t.v}`, cls: '' }];
+    return [...(i ? [{ text: ' + ', cls: '' }] : []), ...termSegs(t)];
+  });
+  return [...sideSegs(board.left), { text: ' = ', cls: '' }, ...sideSegs(board.right)];
+}

@@ -22,9 +22,13 @@ describe('Build F: banned answers', () => {
 });
 
 describe('Build F: the generators report their worst-case rows and their slip collisions', () => {
-  it('worst-case rows fit the reserved stack (at most 9 rows) on both cards', () => {
-    for (let level = 2; level <= 6; level++) expect(addRows(level).total).toBeLessThanOrEqual(9);
-    for (let level = 1; level <= 5; level++) expect(divRows(level).total).toBeLessThanOrEqual(9);
+  // Build I: the check gained a row (the equation itself, above the line with the value). The check sits beside the work, so the work
+  // column is at most 6 rows and the check column 4; counted as one column, at most 10 (rendered at 1366x650 by the Features walks).
+  it('worst-case rows fit (at most 10 rows counted as one column; the check column at most 4) on both cards', () => {
+    for (let level = 2; level <= 6; level++) expect(addRows(level).total).toBeLessThanOrEqual(10);
+    for (let level = 1; level <= 5; level++) expect(divRows(level).total).toBeLessThanOrEqual(10);
+    for (let level = 2; level <= 6; level++) expect(addRows(level).check).toBe(4);
+    for (let level = 1; level <= 5; level++) expect(divRows(level).check).toBe(4);
   });
   it('slip collisions are counted (the tag order decides them; the report says how often)', () => {
     const add = addCollisions(4);

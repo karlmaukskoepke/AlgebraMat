@@ -118,7 +118,7 @@ export function stackRowsFor(p) {
   const partial = FRACTIONS.some((n) => n < p.a && p.a % n === 0);
   const moves = (partial ? 1 : 0) + 2;
   const board = { left: [{ kind: 'x', coef: p.a }], right: [{ kind: 'num', v: p.b }] };
-  const check = substitutionLines(board, p.x).lines.length + 1;
+  const check = substitutionLines(board, p.x).lines.length + 2;      // the equation itself (Build I), each line of the work, the mark
   return { moves: 1 + moves, answer: 2, check, total: 1 + moves + 2 + check };
 }
 // The worst case of a level over many seeds (the generator reports it; the screen reserves the move rows).

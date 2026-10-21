@@ -30,11 +30,11 @@
       },
       "steps": [
         "Click the button. It opens Add to both sides, Level 3, on x + 8 = −4.",
-        "Click the box after x =, type −4 and press Enter. Drag the −4 onto the x in the equation. A first line appears on the right: (−4) + 8 = −4.",
+        "Click the box after x =, type −4 and press Enter. Drag the −4 onto the x in the equation. Two lines appear on the right: the equation itself, x + 8 = −4, and under it (−4) + 8 = −4, with the (−4) right under the x.",
         "Press Next twice, then wait two seconds. The screen goes grey and a box says the equation is not balanced.",
         "Look at the last line on the right, 4 = −4, and the words ✗ Not balanced under it."
       ],
-      "see": "In the first line, the −4 you dropped in is the same blue as the x it replaced. When the screen goes grey, the last line (4 = −4) and the words Not balanced stay bright and easy to read; Undo is the only button that works."
+      "see": "In the second line, the −4 you dropped in is the same blue as the x above it that it replaced. When the screen goes grey, the last line (4 = −4) and the words Not balanced stay bright and easy to read; Undo is the only button that works."
     },
     {
       "id": "h-not-balanced-divide",
@@ -47,11 +47,11 @@
       },
       "steps": [
         "Click the button. It opens Divide it, Level 2, on 5x = −15.",
-        "Click the box after x =, type 4 and press Enter. Drag the 4 onto the x in the equation. A first line appears on the right: 5 × 4 = −15.",
+        "Click the box after x =, type 4 and press Enter. Drag the 4 onto the x in the equation. Two lines appear on the right: the equation itself, 5x = −15, and under it 5 × 4 = −15, with the 4 right under the x.",
         "Press Next twice, then wait two seconds. The screen goes grey and a box says the equation is not balanced.",
         "Look at the last line on the right, 20 = −15, and the words ✗ Not balanced under it."
       ],
-      "see": "In the first line, the 4 you dropped in is the same blue as the x it replaced. When the screen goes grey, the last line (20 = −15) and the words Not balanced stay bright and easy to read; Undo is the only button that works."
+      "see": "In the second line, the 4 you dropped in is the same blue as the x above it that it replaced. When the screen goes grey, the last line (20 = −15) and the words Not balanced stay bright and easy to read; Undo is the only button that works."
     },
     {
       "id": "h-ghost-hint",
@@ -341,7 +341,7 @@
       "steps": [
         "Click the button. It opens Add to both sides, Level 3, on x + 8 = −4. You are going to play a student who gets things wrong.",
         "Mistake 1, ignoring the screen: touch nothing for 10 seconds. A good response is a gentle flashing of I’m stuck, with nothing else changing and nothing taken away.",
-        "Mistake 2, a wrong answer from the start: click the box after x =, type −4 (copying the number on the right) and press Enter. Drag the −4 onto the x in the equation. Press Next twice and wait two seconds. A good response shows (−4) + 8 = −4 turn into 4 = −4, says the equation is not balanced, and leaves only Undo to press. Press Undo, then Got it.",
+        "Mistake 2, a wrong answer from the start: click the box after x =, type −4 (copying the number on the right) and press Enter. Drag the −4 onto the x in the equation. Press Next twice and wait two seconds. A good response writes x + 8 = −4 with (−4) + 8 = −4 under it, turns that into 4 = −4, says the equation is not balanced, and leaves only Undo to press. Press Undo, then Got it.",
         "Mistake 3, a move that makes it worse: type 8 (the box under the equation is open) and click the green Go. Wait two seconds. A good response marks the 16 “got bigger”, explains with your own numbers (+8 + +8 did not eliminate the term), and pulses Undo. Press Undo, then Got it.",
         "Mistake 4, a move that only half cancels: type −5 and click Go. Wait two seconds. A good response marks the leftover 3 “still here” and says +8 was only partially canceled by the −5 you added. Press Undo, then Got it.",
         "Mistake 5, pressing I’m stuck again and again: press it four times. A good response gives a bigger clue each time (look at the +8, then which number cancels it, then choose Add, then “−8 cancels the +8. Add it to both sides yourself.”) and still leaves the move to you."
@@ -360,7 +360,7 @@
       "steps": [
         "Click the button. It opens Divide it, Level 2, on 5x = −15. You are going to play a student who gets things wrong.",
         "Mistake 1, ignoring the screen: touch nothing for 10 seconds. A good response is a gentle flashing of I’m stuck, with nothing else changing and nothing taken away.",
-        "Mistake 2, a wrong answer from the start: click the box after x =, type −15 (copying the number on the right) and press Enter. Drag the −15 onto the x. Press Next twice and wait two seconds. A good response shows 5 × (−15) = −15 turn into −75 = −15, says the equation is not balanced, and leaves only Undo to press. Press Undo, then Got it.",
+        "Mistake 2, a wrong answer from the start: click the box after x =, type −15 (copying the number on the right) and press Enter. Drag the −15 onto the x. Press Next twice and wait two seconds. A good response writes 5x = −15 with 5 × (−15) = −15 under it, turns that into −75 = −15, says the equation is not balanced, and leaves only Undo to press. Press Undo, then Got it.",
         "Mistake 3, a whole number that does not help: the three Multiply options are already open, so click the first one (▢ × ( )), type 5 and click the green Go. A good response says “5 × (5x) makes 25x: still not one x. Try a fraction.” in a small note, and nothing is locked.",
         "Mistake 4, flipping the sign: click Multiply, click the −1 × ( ) option and click Go. A good response says the sign changes but there are still 5 x’s, and points to a fraction.",
         "Mistake 5, a fraction that does not split: click Multiply, click the ▢ over ▢ option, type 1 and then 2, and click Go. Wait two seconds. A good response says it doesn’t split (5 boxes can’t make 2 equal groups, and −15 can’t be shared into 2 equal groups), and pulses Undo. Press Undo: it shows the five x boxes and the fractions to choose from. Press Got it.",

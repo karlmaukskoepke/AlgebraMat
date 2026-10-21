@@ -6,7 +6,7 @@
 import { html, actionRow } from './addBothMat.js';
 import { equationRow } from './lightScreen.js';
 import { MINUS } from '../engine/expr.js';
-import { signed, fractionText, boardText } from '../engine/solveTerms.js';
+import { signed, fractionText, boardText, equationSegs } from '../engine/solveTerms.js';
 
 // ---------- the line: actions only, one sentence ----------
 
@@ -82,11 +82,65 @@ export function stackRows(s) {
 
 // ---------- the answer row, Check, Next, the substitution ----------
 
-// The substitution lines, in the checking space beside the equation being checked (Build D, Part 2): the first is the copy of the
-// equation with the value in parentheses in place of each x; then one operation a press of the green Next, the operation about to
-// happen bold in the accent colour; then Balanced or Not balanced. No labels.
+// The check, in the checking space beside the equation being checked (Build I, Part 1): the first line is that equation exactly as it
+// is, every x in the blue of the x it is; directly under it, the same equation with the value in each x's place, each value set under
+// the x it replaced so the blue pairs read "this x became this number"; then one operation a press of the green Next, the operation
+// about to happen bold in the accent colour; then Balanced or Not balanced. No labels. While the value waits to be dropped in, the space
+// keeps the first line ready (hidden): picking the value up slides a faint copy of it in (bindValueDrag).
 function substList(s, sub, view) {
-  return checkSpace(view.lines.map((line) => line.segs.map((seg) => (seg.cls ? html('span', seg.cls, [seg.text]) : seg.text))), view.mark ? sub.ok : null, view.last);
+  const target = sub.target === 'current' ? s.board : s.rows[0].board;
+  const head = equationSegs(target).map((seg) => (seg.xi !== undefined ? html('span', seg.cls, [seg.text], { 'data-pair': String(seg.xi) }) : seg.cls ? html('span', seg.cls, [seg.text]) : seg.text));
+  if (!view.lines.length) {
+    const list = checkSpace([], view.mark ? sub.ok : null);
+    if (sub.placing) list.append(html('div', 'sv-line1src', head, { hidden: '', 'aria-hidden': 'true' }));
+    return list;
+  }
+  const lines = view.lines.map((line, i) => (i === 0 ? pairedSegs(line.segs) : line.segs.map((seg) => (seg.cls ? html('span', seg.cls, [seg.text]) : seg.text))));
+  const list = checkSpace([head, ...lines], view.mark ? sub.ok : null, view.last + 1);
+  list.children[0].classList.add('sv-line1');
+  list.children[1].classList.add('sv-line2');
+  list.children[0].setAttribute('aria-label', `The equation: ${equationSegs(target).map((seg) => seg.text).join('')}`);
+  alignPairs(list);
+  return list;
+}
+
+// The line with the value in place of x: each value (the blue segment) is numbered as the x it replaced, and a spacer sits before it (or
+// before its "2 × " or "−(") so the value can be moved right under its x.
+function pairedSegs(segs) {
+  const out = [html('span', 'sv-pad')];
+  let k = 0;
+  segs.forEach((seg, j) => {
+    const value = seg.cls.split(' ').includes('is-blue');
+    const prefix = !value && segs[j + 1]?.cls.split(' ').includes('is-blue') && /×\s$|\($/.test(seg.text);
+    if (k > 0 && (prefix || (value && !/×\s$|\($/.test(segs[j - 1]?.text ?? '')))) out.push(html('span', 'sv-pad'));
+    out.push(value ? html('span', seg.cls, [seg.text], { 'data-pair': String(k++) }) : seg.cls ? html('span', seg.cls, [seg.text]) : seg.text);
+  });
+  return out;
+}
+
+// Each value straight under its x (measured once the check is on screen, and again when the fonts arrive). A value wider than x moves
+// the rest of its line, never the pair; if the first value reaches left of where the line starts, the first line moves right as a whole
+// (never stretched or squeezed).
+function alignPairs(list) {
+  const run = () => {
+    if (!list.isConnected) return;
+    const top = list.querySelector('.sv-line1');
+    const sub = list.querySelector('.sv-line2');
+    if (!top || !sub) return;
+    top.style.marginLeft = '';
+    const pads = [...sub.querySelectorAll('.sv-pad')];
+    pads.forEach((p) => { p.style.width = '0px'; });
+    const xs = [...top.querySelectorAll('[data-pair]')];
+    const vs = [...sub.querySelectorAll('[data-pair]')];
+    const mid = (e) => { const r = e.getBoundingClientRect(); return (r.left + r.right) / 2; };
+    for (let i = 0; i < Math.min(xs.length, vs.length, pads.length); i++) {
+      const d = mid(xs[i]) - mid(vs[i]);
+      if (i === 0 && d < 0) top.style.marginLeft = `${-d}px`;
+      else if (d > 0) pads[i].style.width = `${d}px`;
+    }
+  };
+  if (typeof requestAnimationFrame === 'function') requestAnimationFrame(run);
+  if (typeof document !== 'undefined') document.fonts?.ready.then(run);
 }
 
 // The checking space's rows (shared by every Solve it card): `lines` is a list of rows (each a list of nodes or text), `mark` is true
@@ -138,12 +192,43 @@ export function answerBlock(s, loop) {
 // The value is dragged onto x (Build D-2, Part 2: dragging only; a click on x no longer places it, though Enter still does, for the
 // keyboard). While the value is a chip, a pointer drag carries a copy of it; letting go over x places it. After about 2.5 seconds with
 // nothing done, a faint copy of the value travels from x = to the first x, again and again until the student acts.
+// Picking the value up (Build I, Part 1): a faint copy of the equation being checked slides from it into the checking space, to the place
+// the check's first line will take. Dropping the value on x makes it solid (the check is drawn there); dropping it anywhere else slides it
+// back. Returns { solid, back }, or null when there is nowhere for it to go.
+function slideShadow(root) {
+  const src = root.querySelector('.sv-line1src');
+  const list = src?.parentElement;
+  const from = root.querySelector('.lb-rowwrap.is-plugrow .lb-eq') ?? root.querySelector('.is-plugrow');
+  if (!src || !list || !from) return null;
+  const to = list.getBoundingClientRect();
+  const pad = parseFloat(getComputedStyle(list).paddingTop) || 0;
+  const line = html('div', 'sv-shadowline', [...src.cloneNode(true).childNodes], { 'aria-hidden': 'true' });
+  line.style.font = getComputedStyle(list).font;
+  list.parentElement.append(line);
+  const a = from.getBoundingClientRect();
+  const end = `translate(${to.left}px, ${to.top + pad}px)`;
+  const start = `translate(${a.left}px, ${a.top}px)`;
+  const still = reduceMotion();
+  line.style.transform = end;
+  const anim = line.animate(still ? [{ opacity: 0 }, { opacity: 0.45 }] : [{ transform: start, opacity: 0 }, { transform: end, opacity: 0.45 }], { duration: still ? 200 : 450, easing: 'ease-out', fill: 'forwards' });
+  return {
+    solid: () => { anim.cancel(); line.style.opacity = '1'; },
+    back: () => {
+      anim.cancel();
+      const out = line.animate(still ? [{ opacity: 0.45 }, { opacity: 0 }] : [{ transform: end, opacity: 0.45 }, { transform: start, opacity: 0 }], { duration: still ? 200 : 400, easing: 'ease-in', fill: 'forwards' });
+      out.onfinish = () => line.remove();
+      out.oncancel = () => line.remove();
+    },
+  };
+}
+
 const HINT_WAIT = 2500;
 const HINT_EVERY = 2600;
 const reduceMotion = () => typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 export function bindValueDrag(root, dispatch) {
   let ghost = null;
+  let shadow = null;
   let idleSince = Date.now();
   let lastHint = 0;
   let chipSeen = false;
@@ -157,7 +242,12 @@ export function bindValueDrag(root, dispatch) {
     ghost = null;
     // letting go over x, or anywhere on the outlined equation, places the value (a kind drop zone; small fingers, small x)
     const over = document.elementFromPoint(e.clientX, e.clientY)?.closest('[data-x][data-action="placeValue"], .is-plugrow');
-    if (over && root.contains(over)) dispatch({ type: 'placeValue', ...(over.dataset?.xi !== undefined && over.matches('[data-x]') ? { index: Number(over.dataset.xi) } : {}) });
+    const sh = shadow;
+    shadow = null;
+    if (over && root.contains(over)) {
+      sh?.solid();                                                         // the copy stays where it is and turns solid: the check draws it there
+      dispatch({ type: 'placeValue', ...(over.dataset?.xi !== undefined && over.matches('[data-x]') ? { index: Number(over.dataset.xi) } : {}) });
+    } else sh?.back();                                                     // anywhere else: the copy slides back, and nothing changes
   };
   const down = (e) => {
     const chip = e.target.closest('[data-chip]');
@@ -165,6 +255,7 @@ export function bindValueDrag(root, dispatch) {
     e.preventDefault();
     ghost = html('div', 'sv-ghost', [chip.textContent]);
     document.body.append(ghost);
+    shadow = slideShadow(root);
     move(e);
     document.addEventListener('pointermove', move);
     document.addEventListener('pointerup', end);
@@ -227,6 +318,7 @@ export function bindValueDrag(root, dispatch) {
     document.removeEventListener('focusin', awayFocus);
     window.removeEventListener('keydown', acted, true);
     ghost?.remove();
+    shadow?.back();
     document.querySelectorAll('.sv-hintghost').forEach((g) => g.remove());
   };
 }

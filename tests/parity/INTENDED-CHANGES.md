@@ -520,3 +520,19 @@ Compared with the code before this part: no scripted run (trace, event, problem,
 ## Build H, Part 3: big numbers at x alone (2026-10-21)
 
 Compared with the code before this part: no scripted run and no screen changed (no scripted run reaches x alone with a number past 12; the scripted ones use −4 + −8 and 11 − 8, which are as before). The two small questions are covered by `tests/bigPairs.test.js`, which also checks that up to 12 is unchanged and that the class-sheet words are the same (`hint` only, from the Party or Battle at the numbers). No new key is needed.
+
+## Build I, Part 1: the check writes the equation, then the value under each x (2026-10-21)
+
+Compared screen by screen with the code before this part (`main` at `25f65f0`): no scripted run changed (no trace, event, problem or save code: the new first line is drawn by the screen, not kept in the state, and the number of Next presses is the same), only the four screens that show a check. Each is already allowed by an earlier part; listed again with what this part did.
+- **Every check** (`add-wrong-guess`, `add-end`, `div-wrong-guess`, `div-end`): the check space starts with the equation itself, every x blue (`x + 8 = −4`, `5x = −15`); the line with the value is directly under it, each value under the x it replaced (the first line moves right a little when the value is wider than x). Everything below moves down one row.
+
+| Key | Why |
+|---|---|
+| `screen:add-wrong-guess@1366x768` | the check's new first line, the equation; the value under its x |
+| `screen:add-wrong-guess@1366x650` | as above |
+| `screen:add-end@1366x768` | as above |
+| `screen:add-end@1366x650` | as above |
+| `screen:div-wrong-guess@1366x768` | as above |
+| `screen:div-wrong-guess@1366x650` | as above |
+| `screen:div-end@1366x768` | as above |
+| `screen:div-end@1366x650` | as above |

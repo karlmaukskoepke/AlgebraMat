@@ -96,11 +96,12 @@ describe('the generator: never ±a, and the worst-case work-stack height it repo
       expect(p.a * p.x).toBe(p.b);                                                              // verified by substitution
     }
   });
-  it('a prime coefficient is 8 rows at most; a composite one (a partial move is legal) is 9, as the spec estimated', () => {
-    expect(stackRowsFor({ a: 3, b: -12, x: -4 })).toEqual({ moves: 3, answer: 2, check: 3, total: 8 });
-    expect(stackRowsFor({ a: 6, b: 12, x: 2 })).toEqual({ moves: 4, answer: 2, check: 3, total: 9 });
-    for (let level = 1; level <= 5; level++) expect(worstCaseRows(level).total).toBeLessThanOrEqual(9);
-    expect(worstCaseRows(1).total).toBe(8);                                                      // generator level 1 = the card's Level 2: a is 2 or 3, no partial move
-    expect([2, 3, 4, 5].map((l) => worstCaseRows(l).total)).toEqual([9, 9, 9, 9]);               // the card's Levels 3-6 have a composite a, so a partial move is legal
+  // (Build I: the check has one more row, the equation itself above the line with the value in it)
+  it('a prime coefficient is 9 rows at most; a composite one (a partial move is legal) is 10', () => {
+    expect(stackRowsFor({ a: 3, b: -12, x: -4 })).toEqual({ moves: 3, answer: 2, check: 4, total: 9 });
+    expect(stackRowsFor({ a: 6, b: 12, x: 2 })).toEqual({ moves: 4, answer: 2, check: 4, total: 10 });
+    for (let level = 1; level <= 5; level++) expect(worstCaseRows(level).total).toBeLessThanOrEqual(10);
+    expect(worstCaseRows(1).total).toBe(9);                                                      // generator level 1 = the card's Level 2: a is 2 or 3, no partial move
+    expect([2, 3, 4, 5].map((l) => worstCaseRows(l).total)).toEqual([10, 10, 10, 10]);           // the card's Levels 3-6 have a composite a, so a partial move is legal
   });
 });
