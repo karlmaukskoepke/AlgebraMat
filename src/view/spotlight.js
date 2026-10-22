@@ -325,7 +325,7 @@ export function findSolveTarget(root, target, s = null) {
     case 'check': return root.querySelector('.sv-check');
     case 'answer': return root.querySelector('[data-fk="answer"], .lb-typed');
     case 'forward': return root.querySelector('.btn-forward');
-    case 'panel': return root.querySelector('.lx-panel');
+    case 'panel': return root.querySelector('.mo-flyout') ?? root.querySelector('.lx-panel');      // (with Multiply's options open, beside them, never over them: Build L)
     case 'combining': return [...root.querySelectorAll('.ab-boardwrap .is-combining')];
     case 'slip': return [...root.querySelectorAll('.ab-boardwrap .is-slip')];                 // a wrong move's picture on the seesaw
     case 'slipOther': return [...root.querySelectorAll('.ab-boardwrap .is-slipother')];

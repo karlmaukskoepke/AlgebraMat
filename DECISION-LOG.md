@@ -51,3 +51,103 @@ Format: decision, why, date. All dated 2026-10-11 unless noted.
 - **Tutorials play once per student, then by choice** (replay button). Applies to every card's tutorial. (Karl)
 - **Add to both sides screen redesigned** after Karl's first look: balance and seesaw on the dashed border, board above the equation, drag-up tray, Balancing moves panel, checkboxes. (Karl)
 - **Divide it** spec saved (`SPEC-DIVIDE-IT.md`); review and defaults in `SPEC-DIVIDE-IT-BUILD-NOTES.md`.
+
+## 2026-10-18: the light design (Karl, after testing Builds C and the round-2 experiment live)
+
+The direction every later build serves. **Principles:** fewer elements on screen; a much smaller moves panel; fewer buttons; more
+space for the problem; no banner at the top, only just-in-time pop-ups; the screen greys out and the relevant thing is lit during any
+feedback loop; previews of moves on mouseover; manipulable equations with previews built in.
+
+**Successes (keep, and only tweak from now on):**
+- Hover-preview of a move on the equation, and filling the blank in that row.
+- Error pop-ups that dim the page, light the error and are cleared only by a pulsing Undo, followed by a hint pop-up.
+- The narrow moves panel.
+- Dragging terms: reorder, cross the midline, combine.
+- Distributing by dragging the factor onto the parentheses, after tapping the minus to make it a negative.
+- Party/Battle shown right at the numbers.
+- Level 1 going straight to problems, with "See why it works" as a button.
+- The test-links page and its Live / Testing / Retired list.
+- Divide's first feedback box (the "can't split 5x in half evenly" box).
+- Dragging the tested value into every x (from Divide).
+
+**Retired:**
+- Guess x / Use a move.
+- The tucked layout.
+- The banner for feedback.
+
+**Kept after all (Karl, rev 2 of the brief):** the lights stay, as the small collapsed column of dots beside the narrow panel (hover
+opens a dot into its goal; no new labels). Now that they take little room, Karl likes them as a curiosity.
+
+## 2026-10-20: Build F review (Karl, after testing Build F live)
+
+**Successes (keep, and only tweak from now on):**
+- Divide's hint after Undo: it lights the fraction option and names the idea with real numbers.
+- Crossing off pairs at `x = −3 + 5`.
+
+**Karl's answers to Build F's decisions:**
+- Keep the wider page.
+- Keep counters that arrive already drawn.
+- Add's hint after Undo counts as `hint` on the class sheet.
+
+**New rule (loop spec rev 2.1):** never grey out what the question is about. The numbers in `−8 + 11`, the equation being solved, or the
+two sides that failed to balance stay at full strength and readable during any pop-up, spotlight or scaffold. Other things grey around them.
+
+## 2026-10-21: card plan (Karl, recorded at the start of Build K)
+
+1. **Card order:** Flip everything (Build J), Two-step (Build K), Distribute + combine + solve, Variables on both sides, Multiply last. One
+   card per build.
+2. **Basic form** means: the moves, levels, generator, lights, the check, the forced move, the spotlight errors and the hint after Undo all
+   work; I'm stuck shows the reminder only (it lights the needed move). No Teach me, seesaw, counters or opposite-box scaffolds until a
+   later build.
+3. **Two-step rule (Karl chose "B"):** the multiply-type moves (take a fraction, flip everything) are live only when each side is a single
+   term. Dividing first or flipping first on a side of two terms (`6x + 12 = 18`, times 1/6) needs the real Distribute mechanic and arrives
+   with the Distribute card.
+4. **Distribute card requirement (Karl):** the shared loop gets the improved distribute move, with the multiplying factors labelled above
+   each blank (as in the hidden drill), as a shared move, not a drill. When it exists, Two-step gets divide-first and flip-first by
+   configuration.
+5. **Parked for the end of the cards build (Karl):** add the drag features to Build it's Combine like terms and Distribute modules. This
+   lifts the "Count it and Build it are read-only" rule for those two modules only. It needs its own spec, parity for Build it, and Karl's
+   explicit go-ahead at that time. Build it is not touched in Build K.
+
+## 2026-10-21: multiply / divide menu (Karl's review, recorded at the start of Build L)
+
+**Why:** Flip everything had two doors (its own panel button and Multiply's third option, `−1 × ( )`), and students think "divide both
+sides", not "multiply by a fraction", so the menu made them translate first.
+
+1. **Flip everything keeps its own panel button and leaves the Multiply menu.** The `−1 × ( )` option is gone.
+2. **The Multiply menu offers three options:** Multiply (a whole number, `n ( ) = n ( )`, negatives allowed), **Divide** (`1/n ( ) = 1/n ( )`:
+   the `1/` is printed, the student types only n, one digit, a minus allowed) and Fraction (the general `▢/▢` blank, Build D-2's rules).
+   The menu never changes shape; greyed options say why when tapped.
+3. **Typing −1 as a multiplier is Flip everything** (the same move, preview, row, class-sheet record and tags as the Flip button), and so
+   is dividing by −1. Where Flip is greyed, the typed −1 gets that card's existing greyed message.
+4. **The Divide blank accepts negatives.** Dividing by −3 is multiplying by −⅓ (the sign goes on the numerator). It is the same move as
+   the Fraction option with a top of −1: one code path, three ways in.
+5. **The equation always stays in multiplication form.** Dividing by n is shown as multiplying by 1/n (`⅕ × (5x) = ⅕ × (−15)`), with a
+   short label beside the row: "Dividing by 5 is multiplying by ⅕." Dividing by n writes the same rows, checks, lights, class-sheet events
+   and save bits as taking 1/n did.
+6. **Which options each card turns on:** Divide it: Divide (Multiply explained, not applied; Fraction greyed). Flip everything: Divide from
+   saved Level 4 (dividing by −a, or by a, or −1/a in one move: either order). Two-step: Divide once each side is one term (Flip from
+   Level 5, as before). Fraction is greyed on every card today; it is for the later Multiply card (fractional coefficients).
+7. **Hints name the divide.** Wherever a hint names a fraction, it says "Divide both sides by 5 (that is, multiply by ⅕)", and lights
+   the Divide option with its preview.
+
+**Karl's answers to Build K's decisions (all approved):**
+- The first-flip pop-up shows once per level, like Trade places.
+- The "three x boxes" message appears only when the amount added is the number in front of x.
+- Fewer terms goes back to off after a fraction or a flip.
+- The placement quiz (the diagnostic) is pointed at the new Two-step card (Build L, Part 5).
+
+## Eventually (Karl, 2026-10-21; not for now)
+
+Ideas recorded, nothing built.
+
+1. **Don't let I'm stuck be spammed past problems.** Karl's idea: after the first I'm stuck on a problem, further clicks mean the problem
+   doesn't count toward finishing the level, so students can't look like they're learning by clicking through. Not a penalty. Design
+   notes: decide by support type (a reminder is mild; Teach me and the guided step that fills in the amount are the ones that carry the
+   answer), not by raw click count; a problem that doesn't count should be replaced by a fresh one, with a cap so no student is stuck
+   forever; first read the class sheet's real `hint`/`model`/`guided` counts before choosing thresholds.
+2. **Teacher dashboard:** a progress summary, assign specific levels to specific students, see when they are completed. Design note:
+   students are anonymous scrambled ids (a hard district rule), so the id-to-name key must stay with the teacher, never in the app.
+3. **Other teachers sign up their classes securely.** Design note: keep students anonymous (class codes, no names or emails). This implies
+   a real backend in place of the Google Sheet, and a student-data-privacy review (FERPA, COPPA, New York's student data privacy law)
+   before anyone outside Karl's district uses it.

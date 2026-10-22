@@ -24,11 +24,11 @@ const REMINDERS = {
     const key = tag === 'sign-flipped' || tag === 'ignored-front' ? 'fSignHint' : 'fFlipHint';
     return { target: 'coef', key, params: { neg: xText(a), b: signed(shape.params.b), a, frac: fractionText(a) }, move: 'flip' };
   },
-  // ax = b after a flip: Multiply's options open with the fraction lit and previewed (Divide it's reminder, with these numbers)
+  // ax = b after a flip: Multiply's options open with Divide lit and previewed (Build L) (Divide it's reminder, with these numbers)
   F3(s, shape) {
     s.mopts = { kind: null, entry: '' };
-    s.ui = { ...(s.ui ?? {}), preview: 'frac' };
-    return { target: 'coef', key: 'dReminder', params: { boxes: shape.params.a, frac: fractionText(shape.params.a) }, move: 'fracOption' };
+    s.ui = { ...(s.ui ?? {}), preview: 'div' };
+    return { target: 'coef', key: 'dReminder', params: { boxes: shape.params.a, frac: fractionText(shape.params.a) }, move: 'divOption' };
   },
   // x = −(b): x is alone; the other side is the opposite of a number
   F4(s, shape) {

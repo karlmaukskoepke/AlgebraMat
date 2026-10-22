@@ -79,13 +79,13 @@ const xConstant = (board) => board[xSideOf(board)].filter((t) => t.kind === 'num
 
 
 // opts (a card other than Add to both sides under this layer; Build K): `alone(board)`, what x alone is on its boards, and
-// `menuPreview(state, kind)`, whether a Multiply option's preview (a hover on it: 'frac', 'flip', 'whole') goes to the card's own menu.
+// `menuPreview(state, kind)`, whether a Multiply option's preview (a hover on it: 'whole', 'div', 'frac', 'flip') goes to the card's own menu.
 export function withLights(reduce = reduceAddBoth, { alone = xAlone, menuPreview = null } = {}) {
   const wrapped = (state, action) => {
     // ----- view state only -----
     if (action.type === 'ui') {
       const patch = { ...action.patch };
-      if (menuPreview && ['frac', 'flip', 'whole'].includes(patch.preview)) return menuPreview(state, patch.preview) ? reduce(state, action) : state;
+      if (menuPreview && ['frac', 'div', 'flip', 'whole'].includes(patch.preview)) return menuPreview(state, patch.preview) ? reduce(state, action) : state;
       if (patch.preview && !canChoose(state)) return state;
       if ((patch.carry || patch.drag) && !canGrab(state)) return state;
       const next = withUi(state, patch);
@@ -148,7 +148,7 @@ export function withLights(reduce = reduceAddBoth, { alone = xAlone, menuPreview
       return both.pending?.both ? wrapped(both, action) : both;
     }
 
-    const typingAnswer = isTyping(action) && !amountMode(state);
+    const typingAnswer = isTyping(action) && !amountMode(state) && !state.mopts?.kind && state.menu !== 'fraction';   // (not the Multiply menu's blanks)
     // greyed while the move is owed
     if ((typingAnswer || (action.type === 'focus' && action.target === 'answer')) && moveOwed(state)) return state;
 

@@ -21,7 +21,7 @@ import { lightsFeedbackText } from './addBothLightsFeedback.js';
 import { spotlightLayer, findSolveTarget } from './spotlight.js';
 import { boardBlock, trayFor, html, slipShown } from './addBothMat.js';
 import { narrowPanel } from './narrowPanel.js';
-import { multiplyOptions } from './multiplyOptions.js';
+import { multiplyOptions, optionSel } from './multiplyOptions.js';
 import { forwardButton, srLine, notePopup, substBlock as sharedSubstBlock, sideTerms, foldTag, FORCED_TEXT, FIRST_TEXT, placeText } from './solveScreen.js';
 import { firstOpen } from './visit.js';
 // Count it's counters Mat and its words, read-only, for the help at x alone (Build C, Part 3)
@@ -70,7 +70,7 @@ function slipFeedback(s) {
 
 function popups(s, wrap) {
   const sp = s.drill ? null : spotOf(s, C.spot);
-  const o = { root: wrap, find: (root, target) => findSolveTarget(root, target, s), undo: '.lx-undo', help: true, moveSel: (m) => (m === 'fracOption' ? '[data-mopt="frac"]' : `[data-move="${m}"]`), work: '.lb-main' };
+  const o = { root: wrap, find: (root, target) => findSolveTarget(root, target, s), undo: '.lx-undo', help: true, moveSel: optionSel, work: '.lb-main' };
   if (C.popups?.(s, wrap, o, sp)) return;                                // the card's own pop-ups first (the Two-step card: its reminders)
   // two small questions at big numbers: their words come from their keys (Build H, Part 3)
   if (sp?.bubbles) { wrap.append(spotlightLayer({ ...sp, bubbles: sp.bubbles.map((b) => ({ ...b, text: C.text({ key: b.key, params: b.params }) })) }, { ...o, text: null })); return; }

@@ -16,7 +16,8 @@ const r = withSpotlight(FLIP_MENU.withMenu(reduceFlip), FLIP_SPOT);
 const go = (s, ...a) => a.reduce(r, s);
 const keys = (t) => [...String(t)].map((ch) => (/\d/.test(ch) ? { type: 'digit', digit: Number(ch) } : { type: 'typeChar', ch }));
 const flip = [{ type: 'flipPick' }, { type: 'go' }];
-const frac = (text) => [{ type: 'multOpen' }, { type: 'multPick', kind: 'frac' }, ...keys(text), { type: 'go' }];
+// (Build L: taking 1/3 is dividing by 3 on Multiply's Divide option, and −1/3 is dividing by −3)
+const frac = (text) => { const [top, n] = text.split('/'); return [{ type: 'multOpen' }, { type: 'multPick', kind: 'div' }, ...(top.startsWith('-') ? [{ type: 'typeChar', ch: '-' }] : []), ...keys(n), { type: 'go' }]; };
 const check = (v) => [...keys(v), { type: 'check' }, { type: 'placeValue' }, { type: 'nextLine' }, { type: 'nextLine' }];
 const said = (s) => flipFeedbackText(s.feedback);
 const seeds = 200;
@@ -102,8 +103,9 @@ describe('the moves', () => {
     expect(go(s, { type: 'check' })).toBe(s);                                                // only Undo
     s = go(s, { type: 'undo' });
     expect(boardText(s.board)).toBe('3x = −12');
-    expect(spotOf(s, FLIP_SPOT)).toMatchObject({ kind: 'hint', move: 'fracOption' });
-    expect(said(s)).toBe('To get one x, take a fraction of both sides: one of the 3 x boxes is ⅓.');
+    expect(spotOf(s, FLIP_SPOT)).toMatchObject({ kind: 'hint', move: 'divOption' });
+    expect(said(s)).toBe('To get one x, divide both sides by 3 (that is, multiply by ⅓): one of the 3 x boxes is ⅓.');
+    expect([s.mopts, s.ui.preview]).toEqual([{ kind: null, entry: '' }, 'div']);
   });
   it('a fraction that does not split gets the shared Divide feedback, and the fraction cycle after Undo', () => {
     let s = go(newFlip(makeFlip(3, -4), { level: 4 }), ...frac('1/2'));
@@ -112,12 +114,14 @@ describe('the moves', () => {
     s = go(s, { type: 'undo' });
     expect(spotOf(s, FLIP_SPOT)).toMatchObject({ kind: 'hint', choose: true });
   });
-  it('Multiply here: the whole number is greyed; the fraction is greyed until saved Level 4; −1 is Flip everything', () => {
+  it('Multiply here (Build L): the whole number and the fraction are greyed; Divide is greyed until saved Level 4; no −1 option', () => {
     const l2 = go(newFlip(makeFlip(1, -5), { level: 2 }), { type: 'multOpen' });
     expect(l2.mopts).toEqual({ kind: null, entry: '' });
     expect(go(l2, { type: 'multPick', kind: 'whole' }).feedback.key).toBe('aLater');
-    expect(go(l2, { type: 'multPick', kind: 'frac' }).feedback.key).toBe('aLaterLevel');
-    expect(boardText(go(l2, { type: 'multPick', kind: 'flip' }, { type: 'go' }).board)).toBe('x = −(5)');
+    expect(go(l2, { type: 'multPick', kind: 'div' }).feedback.key).toBe('aLaterLevel');
+    expect(go(l2, { type: 'multPick', kind: 'frac' }).feedback.key).toBe('aLater');
+    expect(go(l2, { type: 'multPick', kind: 'flip' }).mopts).toBe(null);                       // (not an option: it closes the menu, nothing else)
+    expect(boardText(go(newFlip(makeFlip(1, -5), { level: 2 }), ...flip).board)).toBe('x = −(5)');
     expect(go(newFlip(makeFlip(1, -5), { level: 2 }), { type: 'greyMove', move: 'add' }).feedback.key).toBe('aLater');
     expect(addBothFeedbackText({ key: 'aLater' })).toBe('That move unlocks on a later card.');
   });
@@ -153,7 +157,7 @@ describe('the help (basic form: the reminder only)', () => {
     expect(s.stuck).toBe(2);
     expect(said(s)).toMatch(/^−x means x has a minus/);
     const t = go(newFlip(makeFlip(3, -4), { level: 4 }), { type: 'stuck' });
-    expect(said(t)).toBe('−3x has a minus. To get rid of it, multiply both sides by −1: Flip everything. Then take ⅓ of both sides.');
+    expect(said(t)).toBe('−3x has a minus. To get rid of it, multiply both sides by −1: Flip everything. Then divide both sides by 3 (that is, multiply by ⅓).');
     const u = go(newFlip(makeFlip(1, -12), { level: 2 }), ...flip, { type: 'stuck' });
     expect(said(u)).toBe('x is alone. −(12) means the opposite of 12. Work it out and type x.');
     expect(s.supportsShown).toEqual(['hint']);

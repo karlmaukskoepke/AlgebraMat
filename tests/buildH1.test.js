@@ -3,7 +3,8 @@ import { makeAddBoth } from '../src/engine/addBoth.js';
 import { reduceAddBoth } from '../src/engine/cards/add.js';
 import { newLightsSession, withLights, ADD_SPOT } from '../src/engine/addBothLights.js';
 import { makeDivide } from '../src/engine/divide.js';
-import { newDivide, reduceDivide, DIVIDE_SPOT } from '../src/engine/divideMoves.js';
+import { newDivide, reduceDivide, DIVIDE_SPOT, boardText, xAlone, coefOf } from '../src/engine/divideMoves.js';
+import { makeMultiplyMenu } from '../src/engine/multiplyMenu.js';
 import { withSpotlight, spotOf } from '../src/engine/spotlight.js';
 import { withFractionBlank, fracOpen } from '../src/engine/divideBlank.js';
 import { substitutionLines, xCount } from '../src/engine/solveTerms.js';
@@ -76,25 +77,35 @@ describe('Not balanced keeps its reason lit (item 1) and the numbers stay lit at
   });
 });
 
-describe('Divide it: a slash in the whole-number blank opens the fraction blank (item 7); a box is retyped by tapping it (item 8)', () => {
+describe('Divide it: a slash in the whole-number blank (item 7; Build L: it opens Divide here); a box is retyped by tapping it (item 8)', () => {
   const R = withSpotlight(withFractionBlank(reduceDivide), DIVIDE_SPOT);
   const run = (s, ...actions) => actions.reduce(R, s);
   const start = () => newDivide({ ...makeDivide(5, -3), logLevel: 3 }, { level: 3 });
-  it('1, /, 5 makes 1/5: what was typed is the top, the cursor goes to the bottom', () => {
+  // Build L: the Fraction option is greyed on Divide it, and Divide is live: 1 then / is dividing, so the Divide blank opens (its 1/ printed)
+  it('1, /, 5 makes 1/5: on Divide it (the Fraction option greyed) the Divide blank opens, and 5 is what it divides by', () => {
     let s = run(start(), { type: 'multOpen' }, { type: 'multPick', kind: 'whole' }, digit(1));
     expect(s.mopts).toMatchObject({ kind: 'whole', entry: '1' });
     s = run(s, { type: 'fracSlash' });
-    expect([s.mopts, fracOpen(s), s.fb]).toEqual([null, true, { num: '1', den: '', part: 'den' }]);
-    s = run(s, digit(5));
-    expect(s.fb).toMatchObject({ num: '1', den: '5' });
+    expect([s.mopts, fracOpen(s)]).toEqual([{ kind: 'div', entry: '' }, false]);
+    s = run(s, digit(5), { type: 'go' });
+    expect(boardText(s.board)).toBe('x = ⅕(−15)');
   });
-  it('the slash typed as a character does the same; an empty whole-number blank gives an empty top', () => {
+  it('the slash typed as a character does the same; an empty whole-number blank opens Divide too', () => {
     const s = run(start(), { type: 'multOpen' }, { type: 'multPick', kind: 'whole' }, { type: 'typeChar', ch: '/' });
-    expect([fracOpen(s), s.fb]).toEqual([true, { num: '', den: '', part: 'den' }]);
+    expect([fracOpen(s), s.mopts]).toEqual([false, { kind: 'div', entry: '' }]);
   });
-  it('a top that is more than one digit gets the unit-fraction pop-up', () => {
+  it('a top that is not 1 says the general fraction unlocks on a later card, and the blank stays', () => {
     const s = run(start(), { type: 'multOpen' }, { type: 'multPick', kind: 'whole' }, digit(1), digit(2), { type: 'fracSlash' });
-    expect(s.feedback).toMatchObject({ key: 'dUnitFraction' });
+    expect([s.feedback.key, s.mopts]).toEqual(['aLater', { kind: 'whole', entry: '12' }]);
+  });
+  it('where the Fraction option is live (the later Multiply card), the slash still opens the fraction blank with the typed top', () => {
+    const menu = makeMultiplyMenu({ xAlone, coefOf, option: (k) => (k === 'frac' ? 'live' : 'explain') });
+    const F = withSpotlight(menu.withMenu(reduceDivide), DIVIDE_SPOT);
+    let s = [{ type: 'multOpen' }, { type: 'multPick', kind: 'whole' }, digit(1), { type: 'fracSlash' }].reduce(F, start());
+    expect([s.mopts, menu.fracOpen(s), s.fb]).toEqual([null, true, { num: '1', den: '', part: 'den' }]);
+    s = [digit(5)].reduce(F, s);
+    expect(s.fb).toMatchObject({ num: '1', den: '5' });
+    expect([{ type: 'multOpen' }, { type: 'multPick', kind: 'whole' }, digit(1), digit(2), { type: 'fracSlash' }].reduce(F, start()).feedback).toMatchObject({ key: 'dUnitFraction' });
   });
   it('tapping a box clears it and puts the cursor in it', () => {
     let s = run(start(), { type: 'choose', move: 'fraction' }, digit(1), digit(5));

@@ -21,12 +21,16 @@ const M = {
   dWhichFraction: (p) => `We want only one of the ${WORDS[p.boxes] ?? p.boxes} x boxes.\nWhat fraction of these boxes should we find?`,
   // the Multiply options (Build D-2, Part 4)
   dUnitFraction: () => 'Enter a unit fraction, like ⅕ or ½.',
-  dWholeNo: (p) => `${sg(p.n)} × (${p.a}x) makes ${sg(p.made)}x: still not one x. Try a fraction.`,
-  dZeroNo: () => 'Times 0 makes both sides 0, and x is gone. Try a fraction.',
-  dFlipNo: (p) => `−1 × (${p.a}x) makes −${p.a}x: the sign changes, but there are still ${p.a} x’s. Try a fraction.`,
+  dWholeNo: (p) => `${sg(p.n)} × (${p.a}x) makes ${sg(p.made)}x: still not one x. Try dividing both sides.`,
+  dZeroNo: () => 'Times 0 makes both sides 0, and x is gone. Try dividing both sides.',
+  dFlipNo: (p) => `−1 × (${p.a}x) makes −${p.a}x: the sign changes, but there are still ${p.a} x’s. Try dividing both sides.`,
+  // the Divide option (Build L): one digit, a minus allowed
+  dDivOneDigit: () => 'Enter a one-digit number to divide by.',
+  dDivZero: () => 'You can’t divide by 0. Pick a number to divide both sides by.',
+  dDivBad: (p) => (p.typed < 0 && !p.neg ? 'Divide by a positive number here: 2, 3, 4, 5 or 6.' : p.neg ? 'Divide both sides by 2, 3, 4, 5 or 6, or by −2 to −6.' : 'Divide both sides by 2, 3, 4, 5 or 6.'),
   dBlankBad: () => 'Type a fraction of both sides: 1 over 2, 3, 4, 5 or 6 (like 1/5).',
   dPickFraction: () => 'Pick a fraction of both sides. Which one leaves one box?',
-  dReminder: (p) => `To get one x, take a fraction of both sides: one of the ${p.boxes} x boxes is ${p.frac}.`,
+  dReminder: (p) => `To get one x, divide both sides by ${p.boxes} (that is, multiply by ${p.frac}): one of the ${p.boxes} x boxes is ${p.frac}.`,
   dUndone: () => 'Undone. Pick a different fraction.',
   dForced: (p) => `For this one, take ${p.frac} of both sides.`,
   dFail: (p) => {

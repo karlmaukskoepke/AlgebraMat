@@ -6,7 +6,7 @@ import { divideFeedbackText } from './divideFeedback.js';
 const M = {
   // the reminder: I'm stuck, and the hint after Undo (solveit/rungs/flip.js)
   fFlipHint: (p) => (p.a > 1
-    ? `${p.neg} has a minus. To get rid of it, multiply both sides by −1: Flip everything. Then take ${p.frac} of both sides.`
+    ? `${p.neg} has a minus. To get rid of it, multiply both sides by −1: Flip everything. Then divide both sides by ${p.a} (that is, multiply by ${p.frac}).`
     : `${p.neg} means x has a minus. To get rid of it, multiply both sides by −1: Flip everything.`),
   // after typing the number without its sign (12 for −x = 12), or the number in front of x ignored
   fSignHint: (p) => (p.a > 1

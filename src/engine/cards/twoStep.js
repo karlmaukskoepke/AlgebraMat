@@ -52,15 +52,15 @@ export const tradePending = (s) => Boolean(s.tradeIntro) && s.tradeCount === 0 &
 const amountKeys = (s) => s.menu === 'add' && s.typing !== 'answer';
 const coefText = (c) => (c === 1 ? 'x' : c === -1 ? '−x' : `${signed(c)}x`);
 
-// What Multiply's options are on this card: the whole number belongs to a later card; the fraction is live once each side is one term;
-// −1 (Flip everything) too, from Level 5. A greyed option says why when tapped.
+// What Multiply's options are on this card (Build L): the whole number and the general fraction belong to later cards; Divide is live once
+// each side is one term; Flip everything (its own button, or dividing by −1) too, from Level 5. A greyed option says why when tapped.
 export function optionOf(kind, s) {
-  if (kind === 'whole') return 'grey';
+  if (kind === 'whole' || kind === 'frac') return 'grey';
   if (kind === 'flip' && s.level < FLIP_LEVEL) return 'grey';
   return singleTerm(s.board) ? 'live' : 'grey';
 }
 export function greyKey(kind, s) {
-  if (kind === 'whole') return 'aLater';
+  if (kind === 'whole' || kind === 'frac') return 'aLater';
   if (kind === 'flip' && s.level < FLIP_LEVEL) return 'aLaterLevel';
   return 'wOneTerm';
 }
@@ -199,8 +199,8 @@ export const reduceTwoStep = loop.reduce;
 export const solve = loop;
 export { coefOn };
 
-// Multiply on this card (the shared menu, engine/multiplyMenu.js): its options as `optionOf` says; the fraction's top may be −1 from
-// Level 5 (−⅓ of both sides in one move), and −1 is Flip everything.
+// Multiply on this card (the shared menu, engine/multiplyMenu.js): its options as `optionOf` says; Divide may take a negative from Level 5
+// (−⅓ of both sides in one move), and dividing by −1 is Flip everything.
 export const TWO_STEP_MENU = makeMultiplyMenu({
   xAlone,
   coefOf: coefOn,

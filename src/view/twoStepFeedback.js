@@ -11,7 +11,7 @@ const M = {
   // a fraction or a flip tapped while a side has two terms (Karl's rule "B")
   wOneTerm: () => 'That move works once each side is one term.',
   // Add at `3x = 15` with the number in front of x: the x boxes are not a number to cancel
-  wBoxes: (p) => `${p.ax} is ${WORD[p.boxes] ?? p.boxes} x boxes, not a ${p.boxes} to cancel. Adding ${p.amount} does not take them away. To get one x, take a fraction of the ${WORD[p.boxes] ?? p.boxes} x boxes: ${p.frac}.`,
+  wBoxes: (p) => `${p.ax} is ${WORD[p.boxes] ?? p.boxes} x boxes, not a ${p.boxes} to cancel. Adding ${p.amount} does not take them away. To get one x, divide both sides by ${p.boxes} (that is, multiply by ${p.frac}): one of the ${WORD[p.boxes] ?? p.boxes} x boxes is ${p.frac}.`,
   // the reminder at `3x = 19 + −4`: the other side is still two numbers
   wCombineHint: (p) => `${p.g1} and ${p.g2} are on the same side. Put them together: drag one onto the other and type what they make.`,
   wWrong: (p) => `When x = ${p.typed}, the equation is not balanced.`,

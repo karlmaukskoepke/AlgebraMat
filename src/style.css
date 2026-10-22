@@ -3586,6 +3586,12 @@ body[data-input='touch'] #play.is-light #controls .btn-pad { min-width: 48px; mi
 .mo-frac { display: inline-flex; flex-direction: column; align-items: center; gap: 2px; }
 .mo-frac .mo-box { width: 18px; height: 14px; }
 .mo-bar { display: block; width: 22px; border-top: 2px solid currentColor; }
+.mo-sign { font-size: 15px; font-weight: 800; color: #0072b2; margin-right: 2px; }
+.mo-one { font-size: 13px; line-height: 14px; }
+/* Build L: Divide's row, its 1/ printed and the bottom typed; the label under it says what dividing is */
+.mo-divtop { font: 800 24px 'Lexend', system-ui, sans-serif; color: #0072b2; line-height: 36px; min-height: 36px; }
+.lx-ghost.is-preview .mo-divtop { color: inherit; }
+.mo-divlabel { margin: 4px 0 0; font: 700 17px 'Lexend', system-ui, sans-serif; color: #5d5a52; text-align: center; }
 .ui-light .dv-fracpart.is-focus, .ui-light .lx-box.is-focus.mo-blank { outline: none; box-shadow: none; }
 .ui-light .dv-times { padding: 0 6px; }
 .dv-light .mo-blank { display: inline-flex; align-items: center; justify-content: center; min-width: 48px; min-height: 50px; padding: 0 8px; font: 800 30px 'Lexend', system-ui, sans-serif; color: #0072b2; border: 3px dashed #0072b2; border-radius: 10px; background: transparent; vertical-align: middle; }

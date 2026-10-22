@@ -5,11 +5,12 @@
 
 import { html } from './addBothMat.js';
 import { stackRows, substBlock, forwardButton, srLine, notePopup, FORCED_TEXT, FIRST_TEXT, placeText } from './solveScreen.js';
-import { multiplyOptions } from './multiplyOptions.js';
+import { multiplyOptions, optionSel } from './multiplyOptions.js';
+import { goReady, MULT_KINDS } from '../engine/multiplyMenu.js';
 import { moveRow as sharedMoveRow, fractionChoices as sharedFractionChoices } from './multiplyRow.js';
 import { flipFeedbackText } from './flipFeedback.js';
 import { narrowPanel } from './narrowPanel.js';
-import { solve, xAlone, FLIP_SPOT, FLIP_MENU, FRACTION_LEVEL, tradeAvailable, tradePending } from '../engine/cards/flip.js';
+import { solve, xAlone, FLIP_SPOT, FLIP_MENU, flipOption, tradeAvailable, tradePending } from '../engine/cards/flip.js';
 import { coefOn } from '../engine/fractionMove.js';
 import { spotOf } from '../engine/spotlight.js';
 import { spotlightLayer, findSolveTarget } from './spotlight.js';
@@ -37,7 +38,7 @@ export function forwardOf(s) {
   return forwardCore(s);
 }
 function forwardCore(s) {
-  if (s.mopts?.kind) return { label: 'Go', action: 'go', enabled: s.mopts.kind === 'flip' };
+  if (s.mopts?.kind) return { label: 'Go', action: 'go', enabled: goReady(s.mopts) };
   if (fracOpen(s)) return { label: 'Go', action: 'go', enabled: Boolean(fracOf(s.fb)) };
   if (s.sub?.placing) return { label: 'Next', action: 'nextLine', enabled: false };
   if (s.sub && s.sub.step < solve.subTotal(s.sub)) return { label: 'Next', action: 'nextLine', enabled: true };
@@ -75,14 +76,14 @@ function corners(s) {
   return html('div', 'lx-corners', [undo, html('div', 'lx-cornerright', [over, stuck])]);
 }
 
-// The narrow panel: Multiply (its whole number greyed; the fraction live from saved Level 4), Flip everything (Multiply's −1, also a button
-// of its own), Trade places when x is on the right (from saved Level 3). The lights: No opposite box and Solved for x.
+// The narrow panel: Multiply (Divide live from saved Level 4; its whole number and fraction greyed), Flip everything (its own button; Build
+// L: no longer a Multiply option), Trade places when x is on the right (from saved Level 3). The lights: No opposite box and Solved for x.
 function panel(s) {
   const mapLight = (v) => (v === 'neutral' ? 'off' : v);
   const owed = solve.moveOwed(s) && !s.menu && !s.mopts && !s.sub && !xAlone(s.board);
   const negated = coefOn(s.board) < 0;
-  const grey = ['whole', ...(s.level >= FRACTION_LEVEL ? [] : ['frac'])];
-  const flyout = s.mopts && !s.mopts.kind ? multiplyOptions(['whole', 'frac', 'flip'], s.ui?.preview, grey) : null;
+  const grey = MULT_KINDS.filter((k) => flipOption(k, s) !== 'live');
+  const flyout = s.mopts && !s.mopts.kind ? multiplyOptions(MULT_KINDS, s.ui?.preview, grey) : null;
   const moves = {
     multiply: { live: true, move: 'fraction', action: 'multOpen', label: 'Multiply', pressed: s.menu === 'fraction' || (Boolean(s.mopts) && s.mopts.kind !== 'flip'), ring: owed && !negated, flyout },
     flip: { live: true, move: 'flip', action: 'flipPick', label: 'Flip everything (× −1)', pressed: s.mopts?.kind === 'flip', ring: owed && negated, attrs: { 'data-mopt': 'flip' } },
@@ -101,18 +102,18 @@ function panel(s) {
 const SILENT = new Set(['aPlace', 'aFindX', 'aMustMove', 'dPickFraction', 'aPlugIn', 'aPlugCurrent', 'aSolvedBoard', 'aUndone', 'aCorrect', 'aStartedOver',
   'aSimplerFirst', 'aUndoGuess', 'fTraded']);
 const NUDGE = {
-  dBlankBad: 'answer', dUnitFraction: 'blank', typeAnswer: 'answer', answerUnreadable: 'answer', aUndoFirst: 'answer', aFinishMoveFirst: 'answer',
+  dBlankBad: 'answer', dUnitFraction: 'blank', dDivOneDigit: 'blank', dDivBad: 'preview', dDivZero: 'preview', typeAnswer: 'answer', answerUnreadable: 'answer', aUndoFirst: 'answer', aFinishMoveFirst: 'answer',
   aLater: 'panel', aLaterLevel: 'panel', aNotNeeded: 'panel', aTradeNot: 'panel', aTradeIntro: 'panel', fFlipIntro: 'panel', dForced: 'fractions',
 };
 
 const REMINDER = {
-  fFlipHint: { target: 'coef', move: 'flip' }, fSignHint: { target: 'coef', move: 'flip' }, dReminder: { target: 'coef', move: 'fracOption' },
+  fFlipHint: { target: 'coef', move: 'flip' }, fSignHint: { target: 'coef', move: 'flip' }, dReminder: { target: 'coef', move: 'divOption' },
   fNegHint: { target: 'answer' }, fFracHint: { target: 'answer' },
 };
 
 function popups(s, wrap) {
   const sp = spotOf(s, FLIP_SPOT);
-  const o = { root: wrap, find: (root, target) => findSolveTarget(root, target, s), undo: '.lx-undo', help: true, moveSel: (m) => (m === 'fracOption' ? '[data-mopt="frac"]' : `[data-move="${m}"]`), work: '.lb-main' };
+  const o = { root: wrap, find: (root, target) => findSolveTarget(root, target, s), undo: '.lx-undo', help: true, moveSel: optionSel, work: '.lb-main' };
   if (sp) { wrap.append(spotlightLayer(sp.choose ? { ...sp, place: 'beside' } : sp, { ...o, text: sp.choose ? '' : flipFeedbackText(s.feedback), extra: sp.choose ? sharedFractionChoices(s, flipFeedbackText) : null })); return; }
   if (introOpen(s)) { wrap.append(spotlightLayer({ kind: 'intro', lit: ['newest', 'panel', 'forward'] }, { ...o, text: FORCED_TEXT })); return; }
   // checking a value: everything greys out but the equation being checked and the checking space

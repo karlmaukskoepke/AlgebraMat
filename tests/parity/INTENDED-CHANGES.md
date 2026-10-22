@@ -655,3 +655,27 @@ pixel for pixel. The only differences are save codes:
 **Not in the harness (Flip everything has no scripted runs):** the first flip of a level that helps now says "Multiplying both sides by −1
 flips every sign. −x becomes x." (a small pop-up beside the panel, once a level, like the first Trade places). Everything else on Flip
 everything is unchanged; its unit tests (`tests/flip.test.js`) pass as before, and a flip without the level's flag says what it said.
+
+## Build L (2026-10-22): the Multiply menu is multiply / divide / fraction, and Flip leaves it; the placement quiz opens the new Two-step card
+
+**Compared directly with `main` before this build (Build K, `267811f`):** a baseline recorded from that commit, with nothing listed as
+intended. Problems, save codes, class-sheet records, all 25 scripted runs and all 62 screens of Add to both sides and Divide it are
+identical, so nothing is added to the table above.
+
+**Why the screens did not change:** none of the 62 recorded states opens the Multiply menu (its options and the Divide row show only after a
+click on Multiply, and the harness's Divide steps still click the old "Take a fraction" button, which has not existed since Build D-2, so
+those states never reach the move). The screens that do change were compared by hand and photographed in `docs/build-l/` instead:
+
+| Where | Before | After | Why |
+|---|---|---|---|
+| Divide it, Flip everything, Two-step: Multiply's options | `▢ × ( )`, `▢/▢ × ( )`, `−1 × ( )` | `× ▢ ( ) = ▢ ( )`, `÷ 1/▢ ( ) = 1/▢ ( )`, `▢/▢ ( ) = ▢/▢ ( )` (greyed on every card today) | Build L, Parts 1 and 3 |
+| The row under the equation while Divide is hovered or chosen | (the fraction's two boxes) | `1/▢ × (5x) = 1/▢ × (−15)`, the 1/ printed, and the line "Dividing by 5 is multiplying by ⅕." under it | Part 1 |
+| The rows written after the move | `⅕(5x) = ⅕(−15)`, `x = ⅕(−15)` | the same: dividing by 5 writes what taking ⅕ wrote | must not change |
+| The hint after Undo (Divide it D1, Flip everything F2 and F3, Two-step's three x boxes) | "take a fraction of both sides", the fraction option lit | "divide both sides by 5 (that is, multiply by ⅕)", the Divide option lit and previewed | Part 4 |
+| Add to both sides | the Multiply button greyed, no options | unchanged | Part 3 |
+
+**Not in the harness:** Flip everything and Two-step have no scripted runs; their unit tests (`tests/flip.test.js`, `tests/twoStep.test.js`,
+`tests/shape.test.js`) now play the fraction through Divide and pass with the same rows, shapes and lights, and `tests/buildL.test.js`
+checks that dividing by −1 gives the same rows, words and class-sheet record as the Flip button. The placement quiz is not in the harness
+either: `tests/diagnostic.test.js` checks that its problems and their order are unchanged and that a result saved before Build L opens what
+it opened then.

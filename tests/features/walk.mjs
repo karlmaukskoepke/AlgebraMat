@@ -93,7 +93,8 @@ class Walk {
   }
   // Flip everything's moves, as a person does them (Build J)
   async flip() { await this.click(act('flipPick')); await this.click(act('go')); await wait(this.page, 300); }
-  async fraction(text) { await this.click(act('multOpen')); await this.click(`${act('multPick')}[data-kind="frac"]`); await this.type(text); await this.click(act('go')); await wait(this.page, 300); }
+  // Multiply's Divide option (Build L): the number to divide by, one digit, a minus allowed (−3 is multiplying by −⅓)
+  async divide(n) { await this.click(act('multOpen')); await this.click(`${act('multPick')}[data-kind="div"]`); await this.type(n); await this.click(act('go')); await wait(this.page, 300); }
   async solve(v) { await this.click(act('focus')); await this.type(v); await this.enter(); await this.drag(); await this.click(act('nextLine')); await this.click(act('nextLine')); }
   async type(text) { await this.page.keyboard.type(String(text)); await wait(this.page, 200); }
   async enter(times = 1) { for (let i = 0; i < times; i++) { await this.page.keyboard.press('Enter'); await wait(this.page, 250); } }
@@ -173,7 +174,7 @@ class Walk {
     await this.type(sum); await this.enter();
   }
   async addEnter(n) { await this.click(`${act('choose')}[data-move="add"]`); await this.type(n); await this.enter(); await wait(this.page, 300); }
-  async fracEnter(text) { await this.click(act('multOpen')); await this.click(`${act('multPick')}[data-kind="frac"]`); await this.type(text); await this.enter(); await wait(this.page, 300); }
+  async divEnter(n) { await this.click(act('multOpen')); await this.click(`${act('multPick')}[data-kind="div"]`); await this.type(n); await this.enter(); await wait(this.page, 300); }
   // (a right value from Level 3 is checked short: no dragging, one Enter)
   async answer(v, nexts) { await this.click(act('focus')); await this.type(v); await this.enter(); if (await this.page.locator('[data-chip]').count()) await this.drag(); await this.enter(nexts); await wait(this.page, 300); }
   async box(selector) { return this.page.evaluate((s) => { const r = document.querySelector(s)?.getBoundingClientRect(); return r ? [r.left, r.top, r.right, r.bottom].map(Math.round) : null; }, selector); }
@@ -181,12 +182,92 @@ class Walk {
 
 // ---- one walk per item (same id as in the data file) ---------------------------------------------------------------------------------
 const WALKS = {
+  // ---- Build L: the Multiply menu is multiply / divide / fraction, and Flip leaves it ----
+  async 'l-menu'(w) {
+    await w.start(); await w.see('DIVIDE IT · Level 2', '5x', '−15');
+    w.at('click Multiply'); await w.click(act('multOpen'));
+    const kinds = await w.page.locator('.mo-flyout [data-kind]').evaluateAll((els) => els.map((e) => e.dataset.kind));
+    if (kinds.join(',') !== 'whole,div,frac') throw new Error(`the options should be multiply, divide, fraction: ${kinds}`);
+    if (!(await w.page.locator('.mo-flyout [data-kind="frac"].is-grey').count())) throw new Error('the fraction option should be greyed');
+    w.at('point at the first'); await w.page.hover('[data-mopt="whole"]'); await wait(w.page, 300);
+    if (!(await w.page.locator('.lx-ghost.is-preview .mo-blank').count())) throw new Error('pointing at Multiply should show its preview');
+    w.at('point at the second'); await w.page.hover('[data-mopt="div"]'); await wait(w.page, 300);
+    if (!(await w.page.locator('.lx-ghost.is-preview .mo-divblank').count())) throw new Error('pointing at Divide should show its preview');
+    await w.both('l-menu-divide');
+    w.at('click the third'); await w.click(`${act('multPick')}[data-kind="frac"]`); await w.see('That move unlocks on a later card.');
+  },
+  async 'l-divide-preview'(w) {
+    await w.start(); await w.see('DIVIDE IT · Level 2', '5x', '−15');
+    w.at('Multiply, point at Divide'); await w.click(act('multOpen')); await w.page.hover('[data-mopt="div"]'); await wait(w.page, 300);
+    await w.see('1 × (5x) = 1 × (−15)', 'Dividing by a number is multiplying by 1 over it.');
+    w.at('click Divide, type 5'); await w.click(`${act('multPick')}[data-kind="div"]`); await w.type(5);
+    await w.see('Dividing by 5 is multiplying by ⅕.');
+    const boxes = await w.page.locator('.mo-divblank .mo-divpart').allInnerTexts();
+    if (boxes.map((b) => b.trim()).join(',') !== '5,5') throw new Error(`both sides should show 5: ${boxes}`);
+    await w.both('l-divide-preview');
+    w.at('Go'); await w.click(act('go')); await wait(w.page, 300);
+    await w.see('⅕(5x) = ⅕(−15)', 'x = ⅕(−15)');
+  },
+  async 'l-divide-negative'(w) {
+    await w.start(); await w.see('FLIP EVERYTHING · Level 3', '−3x', '12');
+    w.at('Multiply, Divide'); await w.click(act('multOpen')); await w.click(`${act('multPick')}[data-kind="div"]`);
+    w.at('minus, 3'); await w.page.keyboard.press('-'); await w.type(3);
+    await w.see('Dividing by −3 is multiplying by −⅓.');
+    const tops = await w.page.locator('.mo-divblank .mo-divtop').allInnerTexts();
+    if (tops.join(',') !== '−1,−1') throw new Error(`the minus should go on the top of both: ${tops}`);
+    await w.both('l-divide-negative');
+    w.at('Go'); await w.click(act('go')); await wait(w.page, 300);
+    await w.see('−⅓(−3x) = −⅓(12)', 'x = −⅓(12)');
+    if (await w.page.locator('.lx-dot.is-red').count()) throw new Error('dividing by −3 should not light anything red');
+  },
+  async 'l-minus-one'(w) {
+    await w.start(); await w.see('FLIP EVERYTHING · Level 3', '−3x', '12');
+    const rows = () => w.page.locator('.lb-stack .lb-rowwrap').allInnerTexts().then((r) => r.map((x) => x.replace(/\s+/g, '')));
+    w.at('Multiply, Divide, −1, Go'); await w.click(act('multOpen')); await w.click(`${act('multPick')}[data-kind="div"]`); await w.page.keyboard.press('-'); await w.type(1);
+    await w.see('Dividing by −1 is multiplying by −1.');
+    await w.click(act('go')); await wait(w.page, 400);
+    await w.see('−1 × (−3x) = −1 × (12)', '3x = −12');
+    const byDivide = await rows();
+    await w.both('l-minus-one');
+    w.at('Undo'); await w.click(act('undo')); await wait(w.page, 500);
+    w.at('Flip button, Go'); await w.flip(); await wait(w.page, 300);
+    const byButton = await rows();
+    if (byDivide.join('|') !== byButton.join('|')) throw new Error(`the Flip button should write the same rows: ${byDivide} / ${byButton}`);
+  },
+  async 'l-hint-divide'(w) {
+    await w.start(); await w.see('TWO-STEP EQUATIONS · Level 1', '3x + 4 = 19');
+    w.at('Add −4'); await w.addEnter(-4);
+    w.at('combine, 15'); await w.combine(15); await w.see('3x = 15');
+    w.at('type 15, drag, Enter twice'); await w.answer(15, 2); await w.lateLayer();
+    await w.see('3 × 15 = 15', '45 = 15', 'not balanced');
+    w.at('Undo'); await w.click(act('undo')); await wait(w.page, 900);
+    await w.see('To get one x, divide both sides by 3 (that is, multiply by ⅓): one of the 3 x boxes is ⅓.');
+    if (!(await w.page.locator('.spot-move[data-mopt="div"]').count())) throw new Error('the Divide option should be lit');
+    if (!(await w.page.locator('.lx-ghost.is-preview .mo-divblank').count())) throw new Error('Divide’s preview should be under 3x = 15');
+    await w.both('l-hint-divide');
+  },
+  async 'l-placement'(w) {
+    await w.start(); await w.see('DIAGNOSTIC', '1 of 10');
+    const skip = () => w.click('[data-go="skip"]');
+    w.at('I don’t know, twice'); await skip(); await skip();
+    await w.see('3 of 10', '5x − 2 = 18');
+    w.at('type 4, Next'); await w.type(4); await w.click('[data-go="next"]');
+    await w.see('4 of 10', '2 − 3x = −16');
+    w.at('I don’t know, seven times'); for (let i = 0; i < 7; i++) await skip();
+    await w.see('RESULTS', 'Two-step equations', 'Getting there', 'Start at Level 4');
+    await w.both('l-placement');
+    w.at('Start at Level 4'); await w.click('.diag-go[data-pack="two-step-equations"]'); await wait(w.page, 700);
+    await w.see('TWO-STEP EQUATIONS · Level 4');
+    const open = await w.page.evaluate(() => JSON.parse(localStorage.getItem('mat.v1'))?.progress?.packs?.['two-step-equations']?.open ?? JSON.parse(localStorage.getItem('mat.v1'))?.packs?.['two-step-equations']?.open);
+    if (open !== 4) throw new Error(`Levels 1 to 4 of the new card should be open: ${open}`);
+  },
+
   // ---- Build K: the new Two-step equations card ----
   async 'k-worked'(w) {
     await w.start(); await w.see('TWO-STEP EQUATIONS · Level 1', '3x + 4 = 19');
     w.at('Add −4, Enter'); await w.addEnter(-4); await w.see('3x = 19 − 4');
     w.at('combine 19 and 4, type 15'); await w.combine(15); await w.see('3x = 15');
-    w.at('Multiply, the fraction, 1/3'); await w.fracEnter('1/3'); await w.see('x = ⅓(15)');
+    w.at('Multiply, Divide, 3'); await w.divEnter(3); await w.see('x = ⅓(15)');
     await w.both('k-worked');
     w.at('type 5, drag, Enter three times'); await w.answer(5, 3);
     await w.see('3 × 5 + 4 = 19', '19 = 19', '✓ Balanced');
@@ -195,23 +276,24 @@ const WALKS = {
     await w.start();
     w.at('Add −4, combine'); await w.addEnter(-4); await w.combine(15); await w.see('3x = 15');
     w.at('Add −3'); await w.addEnter(-3); await w.lateLayer();
-    await w.see('3x is three x boxes, not a 3 to cancel. Adding −3 does not take them away. To get one x, take a fraction of the three x boxes: ⅓.');
+    await w.see('3x is three x boxes, not a 3 to cancel. Adding −3 does not take them away. To get one x, divide both sides by 3 (that is, multiply by ⅓): one of the three x boxes is ⅓.');
     await w.lit('.lx-live .lb-x');
     await w.both('k-boxes');
     w.at('Undo'); await w.click(act('undo')); await wait(w.page, 900);
-    await w.see('one of the 3 x boxes is ⅓');
-    if (!(await w.page.locator('.mo-flyout [data-mopt="frac"]').count())) throw new Error('Multiply’s options should be open with the fraction live');
+    await w.see('divide both sides by 3 (that is, multiply by ⅓): one of the 3 x boxes is ⅓');
+    if (!(await w.page.locator('.mo-flyout [data-mopt="div"]').count())) throw new Error('Multiply’s options should be open with Divide live');
+    if (!(await w.page.locator('.lx-ghost.is-preview .mo-divblank').count())) throw new Error('Divide’s preview should be under the equation');
   },
   async 'k-frac-grey'(w) {
     await w.start();
-    w.at('Multiply, the fraction'); await w.click(act('multOpen')); await w.click(`${act('multPick')}[data-kind="frac"]`);
+    w.at('Multiply, Divide'); await w.click(act('multOpen')); await w.click(`${act('multPick')}[data-kind="div"]`);
     await w.see('That move works once each side is one term.');
     await w.both('k-frac-grey');
-    w.at('Add −4, then the fraction'); await w.addEnter(-4); await w.click(act('multOpen')); await w.click(`${act('multPick')}[data-kind="frac"]`);
+    w.at('Add −4, then Divide'); await w.addEnter(-4); await w.click(act('multOpen')); await w.click(`${act('multPick')}[data-kind="div"]`);
     await w.see('That move works once each side is one term.');
-    if (await w.page.locator('.dv-fracblank').count()) throw new Error('the fraction blank should not open while a side has two terms');
-    w.at('combine, then the fraction'); await w.combine(15); await w.click(act('multOpen')); await w.click(`${act('multPick')}[data-kind="frac"]`);
-    if (!(await w.page.locator('.lx-ghost.is-chosen .dv-fracblank').count())) throw new Error('the fraction blank should open at 3x = 15');
+    if (await w.page.locator('.dv-fracblank').count()) throw new Error('Divide’s blank should not open while a side has two terms');
+    w.at('combine, then Divide'); await w.combine(15); await w.click(act('multOpen')); await w.click(`${act('multPick')}[data-kind="div"]`);
+    if (!(await w.page.locator('.lx-ghost.is-chosen .mo-divblank').count())) throw new Error('Divide’s blank should open at 3x = 15');
   },
   async 'k-trade'(w) {
     await w.start(); await w.see('TWO-STEP EQUATIONS · Level 3', '19 = 4 + 3x');
@@ -226,7 +308,7 @@ const WALKS = {
     w.at('Flip everything, Go'); await w.click(act('flipPick')); await w.click(act('go')); await wait(w.page, 400);
     await w.see('Multiplying both sides by −1 flips every sign. −x becomes x.', '3x = 15');
     await w.both('k-bax-flip');
-    w.at('⅓'); await w.fracEnter('1/3'); await w.see('x = ⅓(15)');
+    w.at('⅓'); await w.divEnter(3); await w.see('x = ⅓(15)');
     w.at('type 5, drag, Enter'); await w.answer(5, 1);
     await w.see('4 − 3x = −11', '4 − 3 × 5 = −11', '✓ Balanced');
   },
@@ -264,7 +346,7 @@ const WALKS = {
     await w.both('k-level-2');
     w.at('Add 4'); await w.addEnter(4); await w.see('3x = 11 + 4');
     w.at('combine'); await w.combine(15); await w.see('3x = 15');
-    w.at('⅓'); await w.fracEnter('1/3'); await w.see('x = ⅓(15)');
+    w.at('⅓'); await w.divEnter(3); await w.see('x = ⅓(15)');
     w.at('type 5'); await w.answer(5, 3); await w.see('3 × 5 − 4 = 11', '11 = 11', '✓ Balanced');
   },
   async 'k-level-3'(w) {
@@ -281,7 +363,7 @@ const WALKS = {
     await w.both('k-level-4');
     w.at('Add −4'); await w.addEnter(-4); await w.see('3x = 19 − 4');
     w.at('combine'); await w.combine(15);
-    w.at('⅓'); await w.fracEnter('1/3');
+    w.at('⅓'); await w.divEnter(3);
     w.at('type 5'); await w.answer(5, 1); await w.see('4 + 3 × 5 = 19', '✓ Balanced');
   },
   async 'k-level-5'(w) {
@@ -299,7 +381,7 @@ const WALKS = {
     await w.both('k-level-6');
     w.at('Add −4'); await w.addEnter(-4); await w.see('3x = −11 − 4');
     w.at('combine'); await w.combine(-15); await w.see('3x = −15');
-    w.at('⅓'); await w.fracEnter('1/3'); await w.see('x = ⅓(−15)');
+    w.at('⅓'); await w.divEnter(3); await w.see('x = ⅓(−15)');
     w.at('type −5'); await w.answer(-5, 1); await w.see('3 × (−5) + 4 = −11', '✓ Balanced');
   },
   async 'k-level-7'(w) {
@@ -307,7 +389,7 @@ const WALKS = {
     await w.both('k-level-7');
     w.at('Trade places'); await w.click(`${act('choose')}[data-move="trade"]`); await w.see('4 − 3x = 19');
     w.at('Add −4, combine'); await w.addEnter(-4); await w.combine(15); await w.see('−3x = 15');
-    w.at('−⅓'); await w.fracEnter('-1/3'); await w.see('x = −⅓(15)');
+    w.at('−⅓'); await w.divEnter(-3); await w.see('x = −⅓(15)');
     w.at('type −5'); await w.answer(-5, 1); await w.see('19 = 4 − 3 × (−5)', '✓ Balanced');
   },
   async 'student-two-step'(w) {
@@ -321,7 +403,7 @@ const WALKS = {
     w.at('mistake 3: type 4 in the open Add box, Enter'); await w.type(4); await w.enter(); await w.lateLayer();
     await w.see('did not eliminate the term');
     w.at('mistake 3: Undo'); await w.click(act('undo')); await wait(w.page, 800); await w.click(act('spotDismiss'));
-    w.at('mistake 4: the fraction too early'); await w.click(act('multOpen')); await w.click(`${act('multPick')}[data-kind="frac"]`);
+    w.at('mistake 4: Divide too early'); await w.click(act('multOpen')); await w.click(`${act('multPick')}[data-kind="div"]`);
     await w.see('That move works once each side is one term.');
     w.at('mistake 5: type −4 in the open Add box, a wrong sum'); await w.type(-4); await w.enter(); await w.combine(23); await w.lateLayer();
     await w.see('19 − 4 is not 23. Press Undo and try again.');
@@ -380,7 +462,9 @@ const WALKS = {
     await w.lateLayer();
     await w.see('When x = 4, the equation is not balanced.');
     w.at('Undo'); await w.click(act('undo')); await wait(w.page, 800);
-    await w.see('To get one x, take a fraction of both sides: one of the 5 x boxes is ⅕.', 'Got it');
+    await w.see('To get one x, divide both sides by 5 (that is, multiply by ⅕): one of the 5 x boxes is ⅕.', 'Got it');
+    if (!(await w.page.locator('.spot-move[data-mopt="div"]').count())) throw new Error('the Divide option should be lit');
+    if (!(await w.page.locator('.lx-ghost.is-preview .mo-divblank').count())) throw new Error('Divide’s preview should be under the equation');
     await w.shot('f-divide-hint-after-undo');
   },
 
@@ -509,26 +593,11 @@ const WALKS = {
     await w.start(); await w.see('DIVIDE IT · Level 2', '5', '−15');
     w.at('Multiply, the first choice'); await w.click(act('multOpen')); await w.click(`${act('multPick')}[data-kind="whole"]`);
     w.at('type 1, /, 5'); await w.type(1); await w.page.keyboard.press('/'); await wait(w.page, 300); await w.type(5);
-    const boxes = await w.page.locator('.dv-fracpart:not(.is-mirror)').allInnerTexts();
-    if (boxes.join(',').replace(/\s/g, '') !== '1,5') throw new Error(`1, / and 5 should make the fraction 1/5 but the boxes say ${JSON.stringify(boxes)}`);
-    await w.see('Go');
+    // (Build L: the Fraction option is greyed here, so 1 then / is dividing: Divide's 1/ is printed, and the 5 is what it divides by)
+    const box = await w.page.locator('.mo-divblank:not(.is-mirror) .mo-divpart').allInnerTexts();
+    if (box.join(',').replace(/\s/g, '') !== '5') throw new Error(`1, / and 5 should open Divide with 5 in its box, but it says ${JSON.stringify(box)}`);
+    await w.see('Dividing by 5 is multiplying by ⅕.', 'Go');
     await w.both('h-slash-fraction');
-  },
-
-  async 'h-retype-fraction'(w) {
-    await w.start(); await w.see('DIVIDE IT · Level 2');
-    w.at('Multiply, the second choice, 1, 5'); await w.click(act('multOpen')); await w.click(`${act('multPick')}[data-kind="frac"]`); await w.type(1); await w.type(5);
-    await w.see('Tap a box to retype it');
-    const read = () => w.page.locator('.dv-fracpart:not(.is-mirror)').allInnerTexts().then((t) => t.map((x) => x.trim()));
-    if ((await read()).join(',') !== '1,5') throw new Error(`the boxes should say 1 and 5: ${await read()}`);
-    w.at('click the top box'); await w.click('.dv-fracpart[data-target="num"]');
-    if ((await read()).join(',') !== ',5') throw new Error(`the top box should be empty and the bottom keep its 5: ${await read()}`);
-    if (!(await w.page.locator('.dv-fracpart[data-target="num"].is-blink').count())) throw new Error('the cursor should be in the top box');
-    await w.shot('h-retype-fraction-top');
-    w.at('click the bottom box'); await w.click('.dv-fracpart[data-target="den"]');
-    if ((await read()).join(',') !== ',') throw new Error(`the bottom box should be empty too: ${await read()}`);
-    if (!(await w.page.locator('.dv-fracpart[data-target="den"].is-blink').count())) throw new Error('the cursor should be in the bottom box');
-    await w.both('h-retype-fraction');
   },
 
   async 'h-enter-go'(w) {
@@ -658,13 +727,13 @@ const WALKS = {
     w.at('mistake 2: Undo, Got it'); await w.click(act('undo')); await wait(w.page, 800); await w.click(act('spotDismiss'));
     w.at('mistake 3: the first option, 5, Go');
     await w.click(`${act('multPick')}[data-kind="whole"]`); await w.type(5); await w.click(act('go'));
-    await w.see('5 × (5x) makes 25x: still not one x. Try a fraction.');
+    await w.see('5 × (5x) makes 25x: still not one x. Try dividing both sides.');
     await w.shot('student-divide-whole');
-    w.at('mistake 4: Multiply, −1 × ( ), Go');
-    await w.click(act('multOpen')); await w.click(`${act('multPick')}[data-kind="flip"]`); await w.click(act('go'));
-    await w.see('−1 × (5x) makes −5x: the sign changes, but there are still 5 x’s. Try a fraction.');
-    w.at('mistake 5: Multiply, ▢ over ▢, 1, 2, Go');
-    await w.click(act('multOpen')); await w.click(`${act('multPick')}[data-kind="frac"]`); await w.type(1); await w.type(2); await w.click(act('go'));
+    w.at('mistake 4: Multiply, the first option, −1, Go');
+    await w.click(act('multOpen')); await w.click(`${act('multPick')}[data-kind="whole"]`); await w.type('-1'); await w.click(act('go'));
+    await w.see('−1 × (5x) makes −5x: the sign changes, but there are still 5 x’s. Try dividing both sides.');
+    w.at('mistake 5: Multiply, Divide, 2, Go');
+    await w.click(act('multOpen')); await w.click(`${act('multPick')}[data-kind="div"]`); await w.type(2); await w.click(act('go'));
     await w.lateLayer();
     await w.see('doesn’t split', '5 boxes can\'t make 2 equal groups');
     await w.shot('student-divide-half');
@@ -784,8 +853,10 @@ const WALKS = {
     await w.both('j-level-1');
     w.at('click Add'); await w.click(`${act('greyMove')}[data-move="add"]`); await w.see('That move unlocks on a later card.');
     w.at('click Multiply, the whole number'); await w.click(act('multOpen')); await w.click(`${act('multPick')}[data-kind="whole"]`); await w.see('That move unlocks on a later card.');
-    w.at('the fraction'); await w.click(`${act('multPick')}[data-kind="frac"]`); await w.see('That move unlocks on a later level.');
-    if (!(await w.page.locator('[data-mopt="flip"]').count())) throw new Error('−1 × ( ) should be live');
+    w.at('Divide'); await w.click(`${act('multPick')}[data-kind="div"]`); await w.see('That move unlocks on a later level.');
+    w.at('the fraction'); await w.click(`${act('multPick')}[data-kind="frac"]`); await w.see('That move unlocks on a later card.');
+    if (await w.page.locator('.mo-flyout [data-kind="flip"]').count()) throw new Error('there should be no −1 option (Build L)');
+    if (!(await w.page.locator('[data-action="flipPick"]').count())) throw new Error('Flip everything should be its own button');
   },
   async 'j-level-2'(w) {
     await w.start(); await w.see('FLIP EVERYTHING · Level 2', '12', '−x');
@@ -798,21 +869,21 @@ const WALKS = {
     await w.start(); await w.see('FLIP EVERYTHING · Level 3', '−3x', '12');
     await w.both('j-level-3');
     w.at('flip, Go, Next'); await w.flip(); await w.see('3x = −12'); await w.click(act('foldNext'));
-    w.at('⅓'); await w.fraction('1/3'); await w.see('x = ⅓(−12)');
+    w.at('⅓'); await w.divide(3); await w.see('x = ⅓(−12)');
     w.at('type −4, check'); await w.solve(-4); await w.see('✓ Balanced');
   },
   async 'j-level-4'(w) {
     await w.start(); await w.see('FLIP EVERYTHING · Level 4', '12', '−3x');
     await w.both('j-level-4');
-    w.at('⅓ first'); await w.fraction('1/3'); await w.see('4 = −x');
-    if (await w.page.locator('.lx-dot.is-red').count()) throw new Error('a fraction first should not light anything red');
+    w.at('⅓ first'); await w.divide(3); await w.see('4 = −x');
+    if (await w.page.locator('.lx-dot.is-red').count()) throw new Error('dividing first should not light anything red');
     w.at('Next, flip'); await w.click(act('foldNext')); await w.flip(); await w.see('−(4) = x');
     w.at('type −4, check'); await w.solve(-4); await w.see('✓ Balanced');
   },
   async 'j-level-5'(w) {
     await w.start(); await w.see('FLIP EVERYTHING · Level 5', '−3x', '36');
     await w.both('j-level-5');
-    w.at('flip, Next, ⅓'); await w.flip(); await w.click(act('foldNext')); await w.fraction('1/3'); await w.see('x = ⅓(−36)');
+    w.at('flip, Next, ⅓'); await w.flip(); await w.click(act('foldNext')); await w.divide(3); await w.see('x = ⅓(−36)');
     w.at('type −12, check'); await w.solve(-12); await w.see('✓ Balanced');
   },
   async 'j-helpful-flip'(w) {
@@ -833,12 +904,12 @@ const WALKS = {
     await w.lit('.lb-rowwrap .lb-front', 1);                                     // the new −3x, lit (the first is the original)
     await w.both('j-worse-flip');
     w.at('Undo'); await w.click(act('undo')); await wait(w.page, 800);
-    await w.see('To get one x, take a fraction of both sides: one of the 3 x boxes is ⅓.');
-    if (!(await w.page.locator('.spot-move[data-mopt="frac"]').count())) throw new Error('the fraction option should be lit');
+    await w.see('To get one x, divide both sides by 3 (that is, multiply by ⅓): one of the 3 x boxes is ⅓.');
+    if (!(await w.page.locator('.spot-move[data-mopt="div"]').count())) throw new Error('the Divide option should be lit');
   },
   async 'j-one-move'(w) {
     await w.start();
-    w.at('Multiply, fraction, −1/3, Go'); await w.fraction('-1/3');
+    w.at('Multiply, Divide, −3, Go'); await w.divide(-3);
     await w.see('−⅓(−3x) = −⅓(12)', 'x = −⅓(12)');
     if (await w.page.locator('.lx-dot.is-red').count()) throw new Error('−⅓ in one move should not light anything red');
     await w.both('j-one-move');
@@ -887,7 +958,7 @@ const WALKS = {
     w.at('mistake 2: Undo'); await w.click(act('undo')); await wait(w.page, 800);
     await w.see('In −3x = 12 the minus belongs to x. Flip everything first: multiply both sides by −1.');
     await w.click(act('spotDismiss'));
-    w.at('mistake 3: ½'); await w.fraction('1/2'); await w.lateLayer();
+    w.at('mistake 3: ½'); await w.divide(2); await w.lateLayer();
     await w.see('3 boxes can\'t make 2 equal groups');
     w.at('mistake 3: Undo, ⅓'); await w.click(act('undo')); await wait(w.page, 800);
     await w.see('We want only one of the three x boxes.');

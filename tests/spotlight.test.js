@@ -6,6 +6,7 @@ import { makeDivide } from '../src/engine/divide.js';
 import { newDivide, reduceDivide, DIVIDE_SPOT } from '../src/engine/divideMoves.js';
 import { withSpotlight, spotOf } from '../src/engine/spotlight.js';
 import { withFractionBlank } from '../src/engine/divideBlank.js';
+import { divideFeedbackText } from '../src/view/divideFeedback.js';
 
 // The spotlight message (Build C, Part 2): an error waits for Undo, then a hint pops up.
 const add = withSpotlight(withLights(reduceAddBoth), ADD_SPOT);
@@ -125,16 +126,17 @@ describe('Build D-2, Parts 2 and 5: the x = cursor; the seesaw’s Add typed onc
 // Build F, Part 3: the help gaps
 describe('Build F: Divide it\'s reminder after Undo, and a wrong seesaw move\'s picture', () => {
   const div = withSpotlight(withFractionBlank(reduceDivide), DIVIDE_SPOT);              // (as the app composes it)
-  it('Divide: after Undo the fraction option under Multiply is lit with its preview, said in real numbers, and recorded as a reminder', () => {
+  it('Divide: after Undo the Divide option under Multiply is lit with its preview, said in real numbers, and recorded as a reminder', () => {
     let s = run(div, newDivide(makeDivide(5, -3), { level: 3 }), ...typed('4'), { type: 'check' }, { type: 'placeValue' }, { type: 'nextLine' }, { type: 'nextLine' });
     expect(spotOf(s, DIVIDE_SPOT)).toMatchObject({ kind: 'error' });
     s = run(div, s, { type: 'undo' });
-    expect(spotOf(s, DIVIDE_SPOT)).toMatchObject({ kind: 'hint', target: 'coef', move: 'fracOption' });
-    expect([s.feedback.key, s.feedback.params.boxes, s.feedback.params.frac, s.mopts, s.ui.preview]).toEqual(['dReminder', 5, '⅕', { kind: null, entry: '' }, 'frac']);
+    expect(spotOf(s, DIVIDE_SPOT)).toMatchObject({ kind: 'hint', target: 'coef', move: 'divOption' });
+    expect([s.feedback.key, s.feedback.params.boxes, s.feedback.params.frac, s.mopts, s.ui.preview]).toEqual(['dReminder', 5, '⅕', { kind: null, entry: '' }, 'div']);
+    expect(divideFeedbackText(s.feedback)).toBe('To get one x, divide both sides by 5 (that is, multiply by ⅕): one of the 5 x boxes is ⅕.');
     expect(s.supportsShown).toContain('hint');
-    // the lit option is the move: picking it starts the fraction (and the hint goes)
-    const f = run(div, s, { type: 'multPick', kind: 'frac' });
-    expect([spotOf(f, DIVIDE_SPOT), f.menu]).toEqual([null, 'fraction']);
+    // the lit option is the move: picking it opens Divide's blank (and the hint goes)
+    const f = run(div, s, { type: 'multPick', kind: 'div' });
+    expect([spotOf(f, DIVIDE_SPOT), f.mopts]).toEqual([null, { kind: 'div', entry: '' }]);
   });
   it('the seesaw: a move that only partly cancels is an error over its picture, the pair beside x kept for it; Undo, then the reminder', () => {
     let s = run(add, start(), { type: 'stuck' }, { type: 'stuck' });                       // Level 3 (saved 4): the seesaw, Add open

@@ -89,7 +89,8 @@ const start = (p, level, opts = {}) => startLights(newTwoStep({ ...p, logLevel: 
 const digits = (n) => [...String(Math.abs(n))].map((d) => ({ type: 'digit', digit: Number(d) })).concat(n < 0 ? [{ type: 'toggleSign' }] : []);
 const A = {
   add: (k) => [{ type: 'choose', move: 'add' }, ...digits(k), { type: 'go' }],
-  frac: (n, sign = 1) => [{ type: 'multOpen' }, { type: 'multPick', kind: 'frac' }, ...(sign < 0 ? [{ type: 'toggleSign' }] : []), { type: 'digit', digit: 1 }, { type: 'fracSlash' }, { type: 'digit', digit: n }, { type: 'go' }],
+  // (Build L: taking ⅓ is dividing by 3 on Multiply's Divide option; −⅓ is dividing by −3)
+  frac: (n, sign = 1) => [{ type: 'multOpen' }, { type: 'multPick', kind: 'div' }, ...(sign < 0 ? [{ type: 'toggleSign' }] : []), { type: 'digit', digit: n }, { type: 'go' }],
   flip: () => [{ type: 'flipPick' }, { type: 'go' }],
   trade: () => [{ type: 'choose', move: 'trade' }],
   check: (v) => [{ type: 'focus', target: 'answer' }, ...digits(v), { type: 'check' }, { type: 'placeValue' }, ...Array(6).fill({ type: 'nextLine' })],
@@ -132,16 +133,17 @@ describe('the worked example, 3x + 4 = 19', () => {
     expect(s.stage).toBe('done');
     expect(s.clean).toBe(true);
   });
-  it('the fraction and the flip are greyed until each side is one term', () => {
-    const s = run(start(p, 5), [{ type: 'multOpen' }, { type: 'multPick', kind: 'frac' }]);
+  it('Divide and the flip are greyed until each side is one term; Multiply and the general fraction belong to later cards', () => {
+    const s = run(start(p, 5), [{ type: 'multOpen' }, { type: 'multPick', kind: 'div' }]);
     expect(s.feedback.key).toBe('wOneTerm');
+    expect(run(start(p, 5), [{ type: 'multOpen' }, { type: 'multPick', kind: 'frac' }]).feedback.key).toBe('aLater');
     expect(s.menu).not.toBe('fraction');
     expect(run(start(p, 5), [{ type: 'greyMove', move: 'flip' }]).feedback.key).toBe('wOneTerm');
     expect(run(start(p, 1), [{ type: 'greyMove', move: 'flip' }]).feedback.key).toBe('aLaterLevel');
     expect(run(start(p, 1), [{ type: 'multOpen' }, { type: 'multPick', kind: 'whole' }]).feedback.key).toBe('aLater');
     expect(optionOf('frac', start(p, 1))).toBe('grey');
   });
-  it('Add at 3x = 15 (adding −3): the three x boxes, then Undo, then the fraction lit with ⅓', () => {
+  it('Add at 3x = 15 (adding −3): the three x boxes, then Undo, then Divide lit with ⅓', () => {
     let s = flow(start(p, 1), [A.add(-4), (st) => combine(st), A.add(-3)]);
     expect(s.feedback.key).toBe('wBoxes');
     expect(s.feedback.params).toMatchObject({ ax: '3x', boxes: 3, amount: '−3', frac: '⅓' });
@@ -152,9 +154,9 @@ describe('the worked example, 3x + 4 = 19', () => {
     expect(shapeOf(s).id).toBe('D1');
     expect(s.feedback.key).toBe('dReminder');
     expect(s.feedback.params).toMatchObject({ boxes: 3, frac: '⅓' });
-    expect(s.spot).toMatchObject({ kind: 'hint', move: 'fracOption' });
+    expect(s.spot).toMatchObject({ kind: 'hint', move: 'divOption' });
     expect(s.mopts).toBeTruthy();
-    expect(s.ui.preview).toBe('frac');
+    expect(s.ui.preview).toBe('div');
   });
   it('an Add that does not cancel says Add to both sides\' words; a wrong combine lights its numbers, then the hint', () => {
     expect(run(start(p, 1), A.add(-2)).feedback.key).toBe('aPartial');

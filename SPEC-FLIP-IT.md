@@ -2,7 +2,7 @@
 
 **Follows `SPEC-SOLVE-IT-LOOP.md` rev 2.2** (including "Never grey out what the question is about" and its conformance checklist). Everything shared (the screen, x = at every state, the forced-move rule, the check, Undo and Start over, folding, the help ladder, generator rules) is the loop's and wins any conflict. This spec states only what is specific to this card.
 
-**Revision 1.2 (Build J)** rewrites rev 1.0 (written before the light design) to match what is built. It drops the Guess x / Use a move choice, the Why? boxes beside each move, the two-action flip, the seesaw and dealing scaffolds and Teach me (none are in basic form), and names the card "Flip everything". Rev 1.1 was never in the repository. Where this file and the Build J brief differ, the brief won.
+**Build L note (2026-10-21, loop rev 2.3):** the Multiply menu is now multiply / divide / fraction, and its `−1 × ( )` option is gone: Flip everything is the panel's Flip button, or −1 typed in Multiply or Divide. On this card Divide is live from saved Level 4 (dividing by 3 or by −3, or by −1, in either order); Multiply and Fraction are greyed. The table in §3 and F2/F3 in §4 are updated. **Revision 1.2 (Build J)** rewrites rev 1.0 (written before the light design) to match what is built. It drops the Guess x / Use a move choice, the Why? boxes beside each move, the two-action flip, the seesaw and dealing scaffolds and Teach me (none are in basic form), and names the card "Flip everything". Rev 1.1 was never in the repository. Where this file and the Build J brief differ, the brief won.
 
 Section: Solve it, after Divide it and before One-step equations. Card id **`flip-everything`** (`flipit` is Count it's subtraction card). Prerequisite: Divide it (Take a fraction). Old levels: none map here (there was never an old `−x = b` level). No diagnostic.
 
@@ -44,10 +44,10 @@ Levels unlock in order. Tested on 200 seeds per level (`tests/flip.test.js`).
 
 | Move | Where | Live |
 |---|---|---|
-| **Flip everything** | the panel's Flip button, and Multiply's **−1 × ( )** option (the same move) | every level |
-| **Take a fraction** | Multiply's **▢ over ▢** option: the shared move, blank, preview and fraction-cycle feedback of Divide it (`engine/fractionMove.js`, `engine/multiplyMenu.js`, `view/multiplyRow.js`). The top may be −1 (−⅓ in one move) | from saved Level 4; before that it says "That move unlocks on a later level." |
+| **Flip everything** | the panel's Flip button (Build L: no longer a Multiply option; −1 typed in Multiply's Divide blank is the same move) | every level |
+| **Take a fraction** | Multiply's **Divide** option (Build L; it was the **▢ over ▢** option, now greyed here): dividing by 3 is taking ⅓, dividing by −3 is taking −⅓. The shared move, blank, preview and fraction-cycle feedback of Divide it (`engine/fractionMove.js`, `engine/multiplyMenu.js`, `view/multiplyRow.js`). The top may be −1 (−⅓ in one move) | from saved Level 4; before that it says "That move unlocks on a later level." |
 | **Trade places** | the panel's Trade button, when x is on the right | from saved Level 3; not required (flip first is fine). The first time in a level, Add to both sides' pop-up points it out, now with "This is the symmetric property: if a = b, then b = a." (on both cards) |
-| Add; Multiply by a whole number | greyed | "That move unlocks on a later card." |
+| Add; Multiply by a whole number; Multiply's Fraction option | greyed | "That move unlocks on a later card." |
 
 **Hover** a move to see its preview under the equation (`−1 × (−x) = −1 × (12)`, dashed and grey); **click** to make it solid; the green **Go** applies it.
 
@@ -68,7 +68,7 @@ The classifier reads this card's boards with its own family (`shapeOfBoard(board
 |---|---|---|
 | **F1** | `−x = b` | "−x means x has a minus. To get rid of it, multiply both sides by −1: Flip everything." The Flip button lit, its preview on the equation |
 | **F2** | `−ax = b` | "−3x has a minus. To get rid of it, multiply both sides by −1: Flip everything. Then take ⅓ of both sides." Flip lit and previewed |
-| **F3** | `ax = b` (after a flip) | Divide it's reminder: "To get one x, take a fraction of both sides: one of the 3 x boxes is ⅓." Multiply's fraction option lit and previewed |
+| **F3** | `ax = b` (after a flip) | Divide it's reminder: "To get one x, divide both sides by 3 (that is, multiply by ⅓): one of the 3 x boxes is ⅓." Multiply's Divide option lit and previewed (Build L) |
 | **F4** | `x = −(b)` | "x is alone. −(12) means the opposite of 12. Work it out and type x." x = lit |
 | **F5** | `x = ⅓(b)` or `x = −⅓(b)` | "x is alone. ⅓(−12) is 1 of 3 equal groups of −12. Work it out and type x." x = lit |
 | **FF** | a fraction that does not split | waits for Undo (the loop's "Undo first"), then the fraction cycle |

@@ -134,12 +134,19 @@ export function newFlip(problem, { level = 2, forceMove = false, introTrade = fa
 export const reduceFlip = loop.reduce;
 export const solve = loop;
 
-// Multiply on this card (the shared menu, engine/multiplyMenu.js): the whole number is greyed, the fraction live from saved Level 4 (its
-// top may be −1: −⅓ of both sides in one move), and −1 is Flip everything.
+// Multiply on this card (the shared menu, engine/multiplyMenu.js; Build L): Divide is live from saved Level 4 (by 3, or by −3: −⅓ of both
+// sides in one move; by −1 is Flip everything), the whole number and the general fraction are greyed, and Flip everything is the Flip
+// button's.
+export function flipOption(kind, s) {
+  if (kind === 'flip') return 'live';
+  if (kind === 'div') return s.level >= FRACTION_LEVEL ? 'live' : 'grey';
+  return 'grey';
+}
 export const FLIP_MENU = makeMultiplyMenu({
   xAlone,
   coefOf: coefOn,
-  option: (kind, s) => (kind === 'whole' ? 'grey' : kind === 'frac' ? (s.level >= FRACTION_LEVEL ? 'live' : 'grey') : 'live'),
+  option: flipOption,
+  greyKey: (kind, s) => (kind === 'div' && s.level < FRACTION_LEVEL ? 'aLaterLevel' : 'aLater'),
   probe: 'flip',
   negTop: true,
 });

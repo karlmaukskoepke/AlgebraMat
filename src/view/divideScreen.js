@@ -7,7 +7,8 @@
 import { html } from './addBothMat.js';
 import { stackRows, substBlock, forwardButton, srLine, notePopup, FORCED_TEXT, FIRST_TEXT, placeText } from './solveScreen.js';
 import { fracOpen, canPreview, fracOf } from '../engine/divideBlank.js';
-import { multiplyOptions } from './multiplyOptions.js';
+import { multiplyOptions, optionSel } from './multiplyOptions.js';
+import { goReady, MULT_KINDS } from '../engine/multiplyMenu.js';
 import { moveRow as sharedMoveRow, fractionChoices as sharedFractionChoices } from './multiplyRow.js';
 import { groupDiagram } from './groupDiagram.js';
 import { divideFeedbackText } from './divideFeedback.js';
@@ -87,7 +88,7 @@ export function forwardOf(s) {
   return forwardCore(s);
 }
 function forwardCore(s) {
-  if (s.mopts?.kind) return { label: 'Go', action: 'go', enabled: s.mopts.kind === 'flip' || valid(s.mopts.entry) };
+  if (s.mopts?.kind) return { label: 'Go', action: 'go', enabled: goReady(s.mopts) };
   if (fracOpen(s)) return { label: 'Go', action: 'go', enabled: Boolean(fracOf(s.fb)) };
   if (s.sub?.placing) return { label: 'Next', action: 'nextLine', enabled: false };
   if (s.sub && s.sub.step < solve.subTotal(s.sub)) return { label: 'Next', action: 'nextLine', enabled: true };
@@ -136,8 +137,9 @@ function corners(s) {
 function panel(s) {
   const mapLight = (v) => (v === 'neutral' ? 'off' : v);
   const owed = solve.moveOwed(s) && !s.menu && !s.sub && !xAlone(s.board) && !s.scaffold;
-  // one Multiply button: a click opens its three options beside it (Build D-2, Part 4)
-  const flyout = s.mopts && !s.mopts.kind ? multiplyOptions(['whole', 'frac', 'flip'], s.ui?.preview) : null;
+  // one Multiply button: a click opens its three options beside it (Build D-2, Part 4): Multiply (explained), Divide (the move), Fraction
+  // (greyed: a later card; Build L)
+  const flyout = s.mopts && !s.mopts.kind ? multiplyOptions(MULT_KINDS, s.ui?.preview, ['frac']) : null;
   const el = narrowPanel({ multiply: { live: true, move: 'fraction', action: 'multOpen', label: 'Multiply', pressed: s.menu === 'fraction' || Boolean(s.mopts), ring: owed && !s.mopts, flyout } }, {
     disabled: s.stage === 'done' || Boolean(s.sub),
     lights: { smaller: mapLight(s.lights.smaller), onebox: mapLight(s.lights.onebox), solved: xAlone(s.board) ? 'green' : 'off' },
@@ -151,14 +153,14 @@ function panel(s) {
 const SILENT = new Set(['aPlace', 'aFindX', 'aMustMove', 'dPickFraction', 'aPlugIn', 'aPlugCurrent', 'aSolvedBoard', 'dUndone', 'aCorrect', 'aStartedOver',
   'aUndone', 'aSimplerFirst', 'aUndoGuess']);
 const NUDGE = {
-  dBlankBad: 'answer', dUnitFraction: 'blank', dWholeNo: 'preview', dZeroNo: 'preview', dFlipNo: 'preview',
+  dBlankBad: 'answer', dUnitFraction: 'blank', dWholeNo: 'preview', dZeroNo: 'preview', dFlipNo: 'preview', dDivOneDigit: 'blank', dDivBad: 'preview', dDivZero: 'preview',
   typeAnswer: 'answer', answerUnreadable: 'answer', aUndoFirst: 'answer', aFinishMoveFirst: 'answer',
   aLater: 'panel', aNotNeeded: 'panel', dForced: 'fractions',
 };
 
 function popups(s, wrap) {
   const sp = spotOf(s, DIVIDE_SPOT);
-  const o = { root: wrap, find: (root, target) => findSolveTarget(root, target, s), undo: '.lx-undo', help: true, moveSel: (m) => (m === 'fracOption' ? '[data-mopt="frac"]' : `[data-move="${m}"]`), work: '.lb-main' };
+  const o = { root: wrap, find: (root, target) => findSolveTarget(root, target, s), undo: '.lx-undo', help: true, moveSel: optionSel, work: '.lb-main' };
   if (sp) { wrap.append(spotlightLayer(sp.choose ? { ...sp, place: 'beside' } : sp, { ...o, text: sp.choose ? '' : divideFeedbackText(s.feedback), extra: sp.choose ? fractionChoices(s) : null })); return; }
   if (introOpen(s)) { wrap.append(spotlightLayer({ kind: 'intro', lit: ['newest', 'panel', 'forward'] }, { ...o, text: FORCED_TEXT })); return; }
   // checking a value: everything greys out but the equation being checked and the checking space

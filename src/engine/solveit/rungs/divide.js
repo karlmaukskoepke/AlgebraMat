@@ -19,8 +19,8 @@ export function fractionCycleHint(s, before) {
 // D1 `ax = b`
 const D1 = {
   ladder: ['modelIt', 'guided'],                    // (rev 1.2: every rung gives something to do, so the picture-only rung is merged into the next)
-  // after Undo, the reminder (Build F, Part 3): the number in front of x outlined, Multiply's options open with the fraction option lit
-  // and its preview on the equation, and one line with the real numbers; recorded as a reminder (`hint`). After a fraction that did not
+  // after Undo, the reminder (Build F, Part 3): the number in front of x outlined, Multiply's options open with the Divide option lit (Build L)
+  // and its preview on the equation, and one line with the real numbers ("divide both sides by 5"); recorded as a reminder (`hint`). After a fraction that did not
   // split (Build D, Part 4): the boxes and the counters, "We want only one of the five x boxes.", and the fractions to choose from, the
   // ones tried crossed off.
   hintPopup: {
@@ -31,9 +31,9 @@ const D1 = {
       if (cycle) return cycle;
       const a = coefOn(s.board);                     // (x on either side: the Two-step card reuses this entry, Build K)
       s.mopts = { kind: null, entry: '' };
-      s.ui = { ...(s.ui ?? {}), preview: 'frac' };
+      s.ui = { ...(s.ui ?? {}), preview: 'div' };
       if (!s.supportsShown.includes('hint')) s.supportsShown.push('hint');
-      return { target: 'coef', key: 'dReminder', params: { boxes: a, frac: fractionText(a) }, move: 'fracOption' };
+      return { target: 'coef', key: 'dReminder', params: { boxes: a, frac: fractionText(a) }, move: 'divOption' };
     },
   },
   // 1. Model it and deal it: the fractions are live; choose one, deal the counters, keep a group
