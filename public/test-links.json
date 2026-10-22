@@ -89,6 +89,24 @@
       "see": "After Undo, Multiply’s options are open with Divide lit, its grey preview is under 3x = 15, and the message reads “To get one x, divide both sides by 3 (that is, multiply by ⅓): one of the 3 x boxes is ⅓.”"
     },
     {
+      "id": "l-placement",
+      "name": "The placement quiz opens the new Two-step card at the right level",
+      "build": "Build L",
+      "link": {
+        "label": "Open the Solve it placement quiz",
+        "query": "?diag=solve&seed=7&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens the Solve it placement quiz (the diagnostic), problem 1 of 10.",
+        "Click “I don’t know” twice.",
+        "Problem 3 is 5x − 2 = 18: type 4 and click Next.",
+        "Problem 4 is 2 − 3x = −16: click “I don’t know”. Then click “I don’t know” six more times, until the results show.",
+        "Under Two-step equations, click the green button."
+      ],
+      "see": "The results list Two-step equations as “Getting there”, with 5x − 2 = 18 right, and the button says “Start at Level 4”. It opens the new Two-step equations card at Level 4 (4 + 3x = 19 style), and Levels 1 to 4 are open on the card."
+    },
+    {
       "id": "k-worked",
       "name": "Add, combine, divide on 3x + 4 = 19",
       "build": "Build K",
@@ -1032,6 +1050,18 @@
           ]
         },
         {
+          "name": "Build L: the placement quiz opens the new Two-step card (2026-10-22)",
+          "about": "The Solve it placement quiz asks the same two Two-step problems as before (5x − 2 = 18 style, then 2 − 3x = −16 style). What a result opens is now the new Two-step card: both right opens Levels 1–6, only the first right 1–4, only the second right 1–2. A result finished before this build opens what it opened then.",
+          "links": [
+            {
+              "label": "Solve it placement quiz",
+              "look": "Ten problems, the same ones every time from this button. The results say where to start on each card.",
+              "query": "?diag=solve&seed=7&nosignin=1",
+              "reset": true
+            }
+          ]
+        },
+        {
           "name": "Build L screenshots (2026-10-22)",
           "about": "The acceptance pictures at 1366×768 and 1366×650 (they open on GitHub). The report is in the build-l folder of the docs.",
           "links": [
@@ -1076,6 +1106,12 @@
               "look": "A picture only: nothing to click.",
               "notLive": "Opens the picture on GitHub, not the app; GitHub may ask you to sign in.",
               "query": "https://github.com/karlmaukskoepke/AlgebraMat/blob/main/docs/build-l/l-hint-divide-768.png"
+            },
+            {
+              "label": "The placement quiz’s results · 1366×768",
+              "look": "A picture only: nothing to click.",
+              "notLive": "Opens the picture on GitHub, not the app; GitHub may ask you to sign in.",
+              "query": "https://github.com/karlmaukskoepke/AlgebraMat/blob/main/docs/build-l/l-placement-768.png"
             }
           ]
         },

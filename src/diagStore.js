@@ -7,13 +7,19 @@ import { totalOf, probesOf } from './engine/diagnostic.js';
 export const DIAG_KEY = 'mat.diag.v2';
 export const OLD_DIAG_KEY = 'mat.diag.v1';
 
+// What a saved result opens: 2 since Build L (the Two-step probes open the new card). A result finished before that has no `v` and is
+// `legacy`: it opens what it opened then, so a student placed before Build L neither loses nor gains a level. One saved part way gets
+// today's readout when it is finished.
+export const DIAG_V = 2;
+
 // Whatever was saved for a section, as a clean state or null.
 export function readDiag(raw, section = 'all') {
   if (!raw || typeof raw !== 'object' || !Number.isInteger(raw.seed) || raw.seed < 0) return null;
   const total = totalOf(section);
   const answers = Array.isArray(raw.answers) ? raw.answers.slice(0, total)
     .map((a) => ({ typed: typeof a?.typed === 'string' ? a.typed.slice(0, 24) : '', skipped: Boolean(a?.skipped) })) : [];
-  return { seed: raw.seed, section, index: answers.length, entry: '', answers, done: answers.length >= total };
+  const done = answers.length >= total;
+  return { seed: raw.seed, section, index: answers.length, entry: '', answers, done, ...(done && raw.v !== DIAG_V ? { legacy: true } : {}) };
 }
 
 // The old single diagnostic's answers, cut into the sections' parts (same seed, so every problem is the same one).
@@ -44,7 +50,7 @@ export function loadDiag(section) {
 
 export function saveDiag(state) {
   const all = readAll();
-  all[state.section] = { seed: state.seed, answers: state.answers };
+  all[state.section] = { seed: state.seed, answers: state.answers, ...(state.legacy ? {} : { v: DIAG_V }) };
   try { localStorage.setItem(DIAG_KEY, JSON.stringify(all)); } catch { /* storage blocked or full */ }
 }
 

@@ -312,11 +312,11 @@ function startDiagnostic(section, retake = false) {
   clearTimeout(nextTimer);
   play = null;
   if (retake) clearDiag(section);
-  let state = loadDiag(section) ?? newDiagnostic(newSeed(), section);
+  let state = loadDiag(section) ?? newDiagnostic(fixedSeed ?? newSeed(), section);   // (?seed= gives the same problems: a test link)
   const items = diagnosticItems(state.seed, section);
   const back = () => goHome();
   const finish = () => {
-    const rows = readout(state.seed, state.answers, items, section);
+    const rows = readout(state.seed, state.answers, items, section, { legacy: Boolean(state.legacy) });
     progress = applyReadout(progress, rows);
     persist();
     view.render(state, items, rows, 'I opened the levels you’re ready for. Start where it says, or pick any open level on the pack map.');
@@ -630,6 +630,8 @@ const urlPack = packById(params.get('pack') === 'groupit' ? 'lasso' : params.get
 const resume = savedCurrent();
 if (DRILL) {
   startLevel(distributeDrillPack.id, 1);
+} else if (DIAGNOSTIC_SECTIONS.includes(params.get('diag'))) {
+  startDiagnostic(params.get('diag'));                // ?diag=solve opens a section's diagnostic (a test link, Build L)
 } else if (urlPack && PLAY[urlPack.id] && Number.isInteger(urlLevel) && urlLevel >= 1 && urlLevel <= urlPack.levels) {
   startLevel(urlPack.id, urlLevel);
 } else if (resume) {

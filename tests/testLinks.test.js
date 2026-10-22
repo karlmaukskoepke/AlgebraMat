@@ -26,8 +26,11 @@ describe('Features to check (test-links.json)', () => {
 
   it.each(checks.map((c) => [c.id, c]))('%s opens a fixed problem with sign-in skipped', (_id, c) => {
     const q = new URLSearchParams(c.link.query.replace(/^\?/, ''));
-    expect(packs).toContain(q.get('pack'));
-    expect(Number(q.get('level'))).toBeGreaterThan(0);
+    if (q.get('diag')) expect(['count', 'build', 'solve']).toContain(q.get('diag'));     // a section's placement quiz (Build L)
+    else {
+      expect(packs).toContain(q.get('pack'));
+      expect(Number(q.get('level'))).toBeGreaterThan(0);
+    }
     expect(Number(q.get('seed'))).toBeGreaterThan(0);
     expect(q.get('nosignin')).toBe('1');
     expect(c.link.reset).toBe(true);        // a fresh student, so the same problem comes up every time

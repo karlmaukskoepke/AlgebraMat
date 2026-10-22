@@ -125,6 +125,13 @@ const LEGACY_TWO_STEP = [
   (p) => done(p, 'two-step', 7),
 ];
 
+// The new Two-step card's level for an old Two-step level, read off the table above (the level an old level credits on its own).
+export function newTwoStepLevel(oldLevel) {
+  const only = { packs: { 'two-step': { levels: Array.from({ length: 7 }, (_, i) => i === oldLevel - 1) } } };
+  const i = LEGACY_TWO_STEP.findIndex((rule) => rule(only));
+  return i + 1;
+}
+
 function creditPack(progress, id, rules) {
   const entry = progress.packs[id];
   if (!entry) return;

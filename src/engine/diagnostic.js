@@ -5,7 +5,7 @@
 import { PACKS, packById } from '../packs/index.js';
 import { CARDS, cardIdFor } from './lightCards.js';
 import { typeInto, isTyping } from './entry.js';
-import { openLevels } from './progress.js';
+import { openLevels, newTwoStepLevel } from './progress.js';
 import { isBattle } from './addBoth.js';
 
 // Adding and subtracting first, then groups, then the algebra cards (the pack map's order). Two levels each: one
@@ -20,7 +20,11 @@ export const PROBES = [
   { pack: 'distribute-combine', levels: [1, 3], section: 'build' },
   { pack: 'value', levels: [1, 3], section: 'build' },
   { pack: 'one-step', levels: [2, 4], section: 'solve' },   // x − a = b, and x / a = b
-  { pack: 'two-step', levels: [2, 5], section: 'solve' },   // ax − b = c, and b − ax = c (a negative coefficient)
+  // Two-step: ax − b = c, and b − ax = c (a negative coefficient), the old card's Levels 2 and 5 (the same problems, in the same order:
+  // saved places depend on it). Build L: what they open is the new Two-step card (the old one is retired), each old level read through
+  // Build K's legacy-credit table (old 2 → new 2, old 3 → new 4, old 5 → new 5, old 6 → new 6): a result opens the new card up to the
+  // level that matches the one the old card would have started at.
+  { pack: 'two-step', levels: [2, 5], section: 'solve', opens: { pack: 'two-step-equations', level: newTwoStepLevel } },
   // Add to both sides (SPEC-ADD-TO-BOTH-SIDES.md §8): an x − a = b Battle (level 3), then two of the bigger level 6, one with x on
   // the left and one with x on the right. L3 wrong opens L1–L3; L3 right and a level-6 wrong, L1–L5; both level-6 right, all six.
   // (Last in the list, so a Solve it diagnostic saved before it was added carries on with these three.)
@@ -83,9 +87,10 @@ export function reduceDiagnostic(state, action, items = diagnosticItems(state.se
 // ---------- The readout ----------
 
 // How each card went, and the level to start at: both right → the level after the harder one; the easier one right →
-// the level after it; otherwise from the start.
-export function readout(seed, answers, items = diagnosticItems(seed), section = 'all') {
-  return probesOf(section).map(({ pack, levels, rec: recOf }) => {
+// the level after it; otherwise from the start. A probe of a retired card says which card it opens now (`opens`, Build L); `legacy`
+// (a result finished before Build L) keeps what it opened then, so a student placed before it neither loses nor gains a level.
+export function readout(seed, answers, items = diagnosticItems(seed), section = 'all', { legacy = false } = {}) {
+  return probesOf(section).map(({ pack, levels, rec: recOf, opens }) => {
     const mine = items.map((it, i) => ({ it, a: answers[i], i })).filter((x) => x.it.pack === pack);
     const right = mine.map((x) => isRight(x.it, x.a?.typed));
     const total = packById(pack).levels;
@@ -93,8 +98,9 @@ export function readout(seed, answers, items = diagnosticItems(seed), section = 
       : right[0] ? Math.min(total, levels[0] + 1)
         : right[1] ? levels[0] : 1;
     const standing = right.every(Boolean) ? 'strong' : right.some(Boolean) ? 'growing' : 'start';
+    const now = opens && !legacy ? { pack: opens.pack, rec: opens.level(rec), probed: pack } : { pack, rec };
     return {
-      pack, rec, standing,
+      ...now, standing,
       problems: mine.map((x, k) => ({ lead: itemLead(x.it), level: x.it.level, text: itemText(x.it), answer: itemAnswer(x.it), typed: x.a?.typed ?? '', skipped: Boolean(x.a?.skipped), right: right[k] })),
     };
   });
