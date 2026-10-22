@@ -990,7 +990,7 @@ async function checkThePage(page) {
   if ((await count('#features details.checked-group')) !== 0) fail('the Checked group should not show while nothing is ticked');
   for (const c of checks) {
     const href = await page.locator(`#features .check:has(#tick-${c.id}) a.go`).getAttribute('href');
-    if (!/nosignin=1/.test(href) || !/pack=/.test(href) || !/seed=/.test(href)) fail(`the button for ${c.id} should carry the pack, seed and sign-in skip: ${href}`);
+    if (!/nosignin=1/.test(href) || !/(pack|diag)=/.test(href) || !/seed=/.test(href)) fail(`the button for ${c.id} should carry the card (or the quiz), seed and sign-in skip: ${href}`);
     if (await count(`#features .check:has(#tick-${c.id}) ol.steps li`) !== c.steps.length) fail(`${c.id}: steps missing`);
   }
   // tick one: it drops into the collapsed Checked group
