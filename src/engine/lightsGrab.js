@@ -5,6 +5,7 @@
 
 import { signed } from './addBoth.js';
 import { MINUS } from './expr.js';
+import { fractionText } from './solveTerms.js';
 
 // Combining like terms automatically (no blank to type) starts at this level. Never, in this round (B3).
 export const AUTO_COMBINE_FROM_LEVEL = Infinity;
@@ -107,11 +108,13 @@ export function combineBoard(board, a, b, total) {
 
 // How a term is written in a row (B4): a negative term after the first is written as subtraction, "− 2", "− 2x", "− 2(x + 2)", unless
 // its minus was tapped to show it as a negative, "+ −2". `op` is the sign before the term (null for the first), `body` the term.
-export const valueOf = (t) => (t.kind === 'num' ? t.v : t.kind === 'x' ? (t.coef ?? 1) : t.factor);
+export const valueOf = (t) => (t.kind === 'num' ? t.v : t.kind === 'x' ? (t.coef ?? 1) : t.kind === 'group' ? t.factor : 1);
 const coefText = (c) => (c === 1 ? '' : c === -1 ? MINUS : signed(c));
 function bodyOf(t, v) {
   if (t.kind === 'num') return signed(v);
   if (t.kind === 'x') return `${coefText(v)}x`;
+  if (t.kind === 'frac') return `${t.sign < 0 ? MINUS : ''}${fractionText(t.n)}(${sideText(t.inner)})`;     // `⅓(15)` (Build M: divided first)
+  if (t.kind === 'neg') return `${MINUS}(${sideText(t.inner)})`;
   return `${coefText(v)}(${sideText(t.inner)})`;
 }
 export function termText(t, i, negShown = false) {

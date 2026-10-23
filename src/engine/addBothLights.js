@@ -16,7 +16,9 @@ import { reduceAddBoth, newAddBoth, xAlone, xSideOf, solve, hint as hintAfterUnd
 import { isTyping, typeInto } from './entry.js';
 import { find as findOnBoard } from './addBothMoves.js';
 import { sizesOf } from './cards/addHelp.js';
-import { findTerm, outcomeOf, reorderBoard, combineBoard, pairText, valueOf, crossBoard, otherSide } from './lightsGrab.js';
+import { findTerm, outcomeOf, reorderBoard, combineBoard, pairText, valueOf, crossBoard, otherSide, termText } from './lightsGrab.js';
+import { productLabels, rightProducts, pieceOf, pieceTyped, productSlip, distributeBoard } from './distributeMove.js';
+import { MINUS } from './expr.js';
 
 const slotSide = (board, id) => otherSide(findTerm(board, id).side);
 
@@ -80,7 +82,10 @@ const xConstant = (board) => board[xSideOf(board)].filter((t) => t.kind === 'num
 
 // opts (a card other than Add to both sides under this layer; Build K): `alone(board)`, what x alone is on its boards, and
 // `menuPreview(state, kind)`, whether a Multiply option's preview (a hover on it: 'whole', 'div', 'frac', 'flip') goes to the card's own menu.
-export function withLights(reduce = reduceAddBoth, { alone = xAlone, menuPreview = null } = {}) {
+// `distribute: true` turns on the distribute move (Build M: a factor dragged onto its parenthesis, one typed product a piece), with
+// `lights(state, board)` the card's lights after it and `fold(state)` the loop's fold (the move before it is committed first).
+export function withLights(reduce = reduceAddBoth, { alone = xAlone, menuPreview = null, distribute = false, lights = null, fold = null } = {}) {
+  const opts = { distribute, lights, fold };
   const wrapped = (state, action) => {
     // ----- view state only -----
     if (action.type === 'ui') {
@@ -95,7 +100,7 @@ export function withLights(reduce = reduceAddBoth, { alone = xAlone, menuPreview
       return patch.preview === true ? countPreview(next) : next;
     }
     if (state.stage === 'done') return state;
-    const grab = grabAction(state, action, wrapped, alone);
+    const grab = grabAction(state, action, wrapped, alone, opts);
     if (grab) return grab;
 
     // Esc (or a second tap on the icon): S2 goes back to S0; a preview just goes away.
@@ -107,7 +112,7 @@ export function withLights(reduce = reduceAddBoth, { alone = xAlone, menuPreview
     };
     if (action.type === 'lxCancel') {
       if (ui(state).carry) return withUi(state, { carry: null });
-      if (state.lx.combine) return closeCombine(state);
+      if (state.lx.combine || state.lx.distribute) return closeCombine(state);
       if (blankOpen(state)) return cancel(state);
       return ui(state).preview ? withUi(state, { preview: false }) : state;
     }
@@ -154,7 +159,7 @@ export function withLights(reduce = reduceAddBoth, { alone = xAlone, menuPreview
 
     // help, a move or a check closes a sum being typed
     let input = state;
-    if (state.lx.combine && ['stuck', 'teach', 'choose', 'check'].includes(action.type)) { input = structuredClone(state); input.lx.combine = null; }
+    if ((state.lx.combine || state.lx.distribute) && ['stuck', 'teach', 'choose', 'check'].includes(action.type)) { input = structuredClone(state); input.lx.combine = null; input.lx.distribute = null; }
 
     const s = reduce(input, action);
     if (s === input) return input;                                  // the engine did nothing (a closed sum still counts)
@@ -221,6 +226,7 @@ export function withLights(reduce = reduceAddBoth, { alone = xAlone, menuPreview
 const closeCombine = (state) => {
   const s = structuredClone(state);
   s.lx.combine = null;
+  s.lx.distribute = null;
   s.ui = { ...UI0 };
   return say(s, moveOwed(s) ? 'lxMustMove' : 'aFindX');
 };
@@ -228,11 +234,15 @@ const sumParams = (s) => ({ sum: pairText(s.board, s.lx.combine.a, s.lx.combine.
 
 // The actions that are the wrapper's own: a drop (pointer or keyboard), a minus tap, the sum of a combine typed and applied, and the
 // Undo of a reorder, a minus tap or a combine. Returns null for anything else.
-function grabAction(state, action, wrapped, alone) {
+function grabAction(state, action, wrapped, alone, opts = {}) {
   const lx = state.lx;
-  // ----- the sum of a combine: typed into its blank, applied with Enter or ✓ -----
+  if (opts.distribute) {
+    const d = distributeAction(state, action, alone, opts);
+    if (d) return d;
+  }
+  // ----- the sum of a combine: typed into its blank, applied with Enter or ✓ (two x-terms: every piece is typed, the x too: Build M) -----
   if (lx.combine && isTyping(action)) {
-    const entry = typeInto(lx.combine.wrong ? '' : lx.combine.entry, action, 'integer');
+    const entry = combineIsX(state) ? typeX(lx.combine.wrong ? '' : lx.combine.entry, action) : typeInto(lx.combine.wrong ? '' : lx.combine.entry, action, 'integer');
     if (entry === lx.combine.entry && !lx.combine.wrong) return state;
     const s = structuredClone(state);
     s.lx.combine = { ...s.lx.combine, entry, wrong: false };
@@ -242,16 +252,19 @@ function grabAction(state, action, wrapped, alone) {
   if (action.type === 'lxApply' || (action.type === 'go' && lx.combine)) {
     if (!lx.combine) return state;
     const c = lx.combine;
-    if (!/^-?\d+$/.test(c.entry)) return withUi(state, { shake: true });
+    const isX = combineIsX(state);
+    // two x-terms: a bare number is sent back, the x is part of the answer (Build M)
+    if (isX && /^-?\d+$/.test(c.entry)) return say(withUi(state, { shake: true }), 'dxTypeX', {}, false);
+    if (isX ? xCoefOf(c.entry) === null : !/^-?\d+$/.test(c.entry)) return withUi(state, { shake: true });
     const s = structuredClone(state);
     const total = valueOf(findTerm(s.board, c.a).term) + valueOf(findTerm(s.board, c.b).term);
-    if (Number(c.entry) !== total) {
+    if ((isX ? xCoefOf(c.entry) : Number(c.entry)) !== total) {
       s.lx.combine = { ...c, wrong: true };
       s.lx.log.sumsWrong += 1;
       s.ui = { ...UI0 };
       return say(s, 'lxCombineWrong', { ...sumParams(s), typed: c.entry }, true);
     }
-    s.history.push({ lxKind: 'combine', board: s.board, rows: [...s.rows], prevBoard: s.prevBoard, lights: s.lights, hand: s.lx.hand });
+    s.history.push({ lxKind: 'combine', board: s.board, rows: [...s.rows], prevBoard: s.prevBoard, lights: s.lights, hand: s.lx.hand, negIds: s.lx.negIds });
     const next = combineBoard(s.board, c.a, c.b, total);
     s.board = next;
     s.prevBoard = next;
@@ -266,7 +279,7 @@ function grabAction(state, action, wrapped, alone) {
 
   // ----- Undo: a combine being typed closes; a reorder, a minus tap or a combine is taken back here -----
   if (action.type === 'undo') {
-    if (lx.combine) return closeCombine(state);
+    if (lx.combine || lx.distribute) return closeCombine(state);
     const top = state.history[state.history.length - 1];
     if (state.sub || !top?.lxKind) return null;
     const s = structuredClone(state);
@@ -274,7 +287,8 @@ function grabAction(state, action, wrapped, alone) {
     if (top.lxKind === 'minus') s.lx.negIds = s.lx.negIds.includes(top.id) ? s.lx.negIds.filter((x) => x !== top.id) : [...s.lx.negIds, top.id];
     else {
       Object.assign(s, { board: top.board, rows: top.rows, prevBoard: top.prevBoard });
-      if (top.lxKind === 'combine') { s.lights = top.lights; s.lx.hand = top.hand; }
+      if (top.lxKind === 'combine') { s.lights = top.lights; s.lx.hand = top.hand; if (top.negIds) s.lx.negIds = top.negIds; }
+      if (top.lxKind === 'distribute') { Object.assign(s, { lights: top.lights, unfolded: false, movedOnce: top.movedOnce }); s.lx.negIds = top.negIds; }
     }
     s.ui = { ...UI0 };
     return say(s, 'lxUndone');
@@ -358,6 +372,117 @@ function grabAction(state, action, wrapped, alone) {
   s.lx.combine = { a: out.a, b: out.b, side: out.side, entry: '', wrong: false };
   s.ui.focus = 'sum';
   return say(s, 'lxCombineAsk', sumParams(s));
+}
+
+// ---------- combining two x-terms (Build M): the sum typed whole, `5x` ----------
+const combineIsX = (s) => findTerm(s.board, s.lx.combine.a)?.term.kind === 'x';
+// `5x` → 5, `x` → 1, `−x` → −1; null when it is not a number in front of x
+export const xCoefOf = (entry) => { const m = /^(-?)(\d*)x$/.exec(entry ?? ''); return m ? (m[1] ? -1 : 1) * (m[2] === '' ? 1 : Number(m[2])) : null; };
+// digits and a leading minus, then the x at the end
+function typeX(entry, action) {
+  if (entry.endsWith('x') && !['backspace', 'toggleSign'].includes(action.type)) return entry;
+  if (action.type === 'typeChar' && action.ch === 'x') return entry + 'x';
+  if (action.type === 'toggleSign' && entry.endsWith('x')) return entry.startsWith('-') ? entry.slice(1) : `-${entry}`;
+  return typeInto(entry, action, 'integer');
+}
+
+// ---------- the distribute move (Build M; the hidden drill's move, made shared) ----------
+// Its actions: a subtracted factor's minus tapped (shown as a negative number, needed before distributing), the factor dropped on its
+// parenthesis (the blanks open: one per piece, each labelled with its multiplication), a piece typed or a blank chosen, and Go (or
+// Enter): with every blank filled, the products are checked; right, the app writes the new row from them, bringing the other terms down.
+// A wrong product is the spotlight's (the blank and its label lit, Undo, then the hint). Undo closes the blanks, or takes the move back.
+function distributeAction(state, action, alone, opts) {
+  const lx = state.lx;
+  const d = lx.distribute;
+  if (d && isTyping(action)) {
+    if (action.type === 'typeChar') return state;                                   // (the x is printed after the x blank)
+    const k = d.focus;
+    const entry = typeInto(d.wrong === k ? '' : d.entries[k], action, 'integer');
+    if (entry === d.entries[k] && d.wrong !== k) return state;
+    const s = structuredClone(state);
+    s.lx.distribute.entries[k] = entry;
+    s.lx.distribute.wrong = null;
+    s.ui = { ...UI0, focus: `prod:${k}` };
+    return say(s, 'dxProducts');
+  }
+  if (d && action.type === 'focus' && action.target === 'dist') {
+    const s = structuredClone(state);
+    s.lx.distribute.focus = Math.max(0, Math.min(d.entries.length - 1, Number(action.index) || 0));
+    s.ui = { ...UI0, focus: `prod:${s.lx.distribute.focus}` };
+    return s;
+  }
+  // a subtracted factor shown as a negative number (and back): `5 − 2(x + 2)` ⇄ `5 + −2(x + 2)`, display only
+  if (action.type === 'lxMinus') {
+    const f = findTerm(state.board, action.id);
+    if (f?.term.kind !== 'group') return null;
+    if (!canGrab(state) || f.at === 0 || f.term.factor >= 0) return state;
+    const s = structuredClone(state);
+    const shown = s.lx.negIds.includes(action.id);
+    s.lx.negIds = shown ? s.lx.negIds.filter((x) => x !== action.id) : [...s.lx.negIds, action.id];
+    s.history.push({ lxKind: 'minus', id: action.id });
+    s.lx.log.minusTaps += 1;
+    s.ui = { ...UI0, focus: `tok:${action.id}:f` };
+    return shown ? s : say(s, 'dxNegFactor', { neg: `${MINUS}${-f.term.factor}` });
+  }
+  if (action.type === 'lxDistribute') {
+    const f = findTerm(state.board, action.id);
+    if (!canGrab(state) || f?.term.kind !== 'group') return withUi(state, { carry: null });
+    const s = structuredClone(state);
+    s.lx.log.drags += 1;
+    if (action.how === 'key') s.lx.log.outcomes.keyboard += 1;
+    // a subtracted factor is seen as a negative number first
+    if (f.term.factor < 0 && f.at > 0 && !s.lx.negIds.includes(f.term.id)) {
+      s.lx.log.outcomes.snapBack += 1;
+      s.ui = { ...UI0, focus: `tok:${f.term.id}:f` };
+      return say(s, 'dxTapMinusFirst', { factor: `${MINUS}${-f.term.factor}` });
+    }
+    s.lx.log.outcomes.distribute += 1;
+    Object.assign(s, { menu: null, amountEntry: '', typing: null, hint: null, mopts: null });
+    s.lx.distribute = { group: f.term.id, entries: f.term.inner.map(() => ''), focus: 0, wrong: null };
+    s.ui = { ...UI0, focus: 'prod:0' };
+    return say(s, 'dxProducts');
+  }
+  if (!d || !(action.type === 'lxApply' || action.type === 'go')) return null;
+  const g = findTerm(state.board, d.group).term;
+  // Enter goes from a filled blank to the next empty one; Go with a blank still empty shakes it
+  const empty = d.entries.findIndex((e) => !pieceTyped(e));
+  if (empty >= 0) {
+    const s = structuredClone(state);
+    if (action.type === 'go' && pieceTyped(d.entries[d.focus])) { s.lx.distribute.focus = empty; s.ui = { ...UI0, focus: `prod:${empty}` }; return s; }
+    s.ui = { ...UI0, shake: true, focus: `prod:${empty}` };
+    return s;
+  }
+  const right = rightProducts(g);
+  const wrong = d.entries.findIndex((e, k) => pieceOf(e) !== right[k]);
+  const s = structuredClone(state);
+  if (wrong >= 0) {
+    const typed = pieceOf(d.entries[wrong]);
+    const tag = productSlip(g, wrong, typed);
+    Object.assign(s.lx.distribute, { wrong, focus: wrong });
+    s.lx.log.productsWrong = (s.lx.log.productsWrong ?? 0) + 1;
+    s.answers.push({ typed: `${productLabels(g)[wrong]} = ${d.entries[wrong]}`, tag });
+    s.tags.push(tag);
+    s.ui = { ...UI0, focus: `prod:${wrong}` };
+    const shown = `${String(d.entries[wrong]).replace('-', MINUS)}${g.inner[wrong].kind === 'x' ? 'x' : ''}`;
+    return say(s, 'dxProductWrong', { product: productLabels(g)[wrong].replace(/-/g, MINUS), typed: shown, tag }, true);
+  }
+  // right: the move before it is committed (folded) first; this one is the current move, until the student goes on
+  opts.fold?.(s);
+  s.history.push({ lxKind: 'distribute', board: s.board, rows: [...s.rows], prevBoard: s.prevBoard, lights: s.lights, hand: s.lx.hand, negIds: s.lx.negIds, movedOnce: s.movedOnce });
+  const { board, made } = distributeBoard(s.board, g.id);
+  s.board = board;
+  s.prevBoard = board;
+  s.rows.push({ type: 'eq', board });
+  // written "+ −2x + −4", as in the notes: a negative piece after the first shows as a negative number
+  s.lx.negIds = [...s.lx.negIds.filter((x) => x !== g.id), ...made.filter((t, i) => valueOf(t) < 0 && (i > 0 || findTerm(board, t.id).at > 0)).map((t) => t.id)];
+  s.lights = opts.lights ? opts.lights(s, board) : s.lights;
+  s.lx.distribute = null;
+  s.lx.moves += 1;
+  s.movedOnce = true;                                     // a move: it unlocks x = on a forced problem
+  s.unfolded = !alone(board);
+  s.foldLabel = { dist: g.factor };
+  s.ui = { ...UI0 };
+  return say(s, 'dxDistributed', { product: termText(made[0], 0).body });
 }
 
 // A hover on a light or a move is counted once per look (A3, logging).

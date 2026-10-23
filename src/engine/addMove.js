@@ -19,7 +19,7 @@ export function judgeAdd(s, api, amount, o) {
   const helpful = lights.fewer === 'green';
   const redsBefore = s.reds;
   const next = s.board;
-  api.commit(s, { rows: [{ type: 'work', work: workLine(before, amount) }, { type: 'eq', board: next }], next, label: null, helpful, lights, keepScaffold: s.scaffold });
+  api.commit(s, { rows: [{ type: 'work', work: (o.work ?? workLine)(before, amount) }, { type: 'eq', board: next }], next, label: null, helpful, lights, keepScaffold: s.scaffold });
   if (helpful) delete s.slipPair;                                // (a wrong move keeps its pair for the picture until Undo, Build F)
   // what the addition did, in the student's numbers (Build D-2): the number next to x before the move, and the amount added
   const params = { amount: signed(amount), before: plus(sumNums(before[xSideOf(before)])), added: plus(amount) };
@@ -40,7 +40,8 @@ export function judgeAdd(s, api, amount, o) {
 }
 
 // The bare move (no seesaw): the amount in the blank, added to both sides in one action. Returns the state, or null when the amount is
-// not one the move takes (the card's message is already said). o: { alone(board), shape(board), say }.
+// not one the move takes (the card's message is already said). o: { alone(board), shape(board), say, board?(board, amount), work?(…) }
+// (`board` and `work`: the board after the move and its work line, where the card's x side may hold several numbers: Build M).
 export function addBare(s, api, o) {
   const amount = amountOf(s.amountEntry);                        // (the light design allows a 0: it just doesn't help)
   if (amount === null || (amount === 0 && !s.allowZero)) return o.say(s, 'aAmountZero', {}, true);
@@ -52,9 +53,9 @@ export function addBare(s, api, o) {
   const before = s.board;
   if (o.rebase) s.prevBoard = before;
   s.alone = null;
-  s.work = workLine(before, amount);
-  s.board = lightBoard(before, amount);                            // (the commit writes the rows for it)
-  s.zeroOther = !o.alone(s.board) && sumNums(before[otherSideOf(before)]) + amount === 0;
+  s.work = (o.work ?? workLine)(before, amount);
+  s.board = (o.board ?? lightBoard)(before, amount);               // (the commit writes the rows for it; a card may keep several numbers apart)
+  s.zeroOther = !o.alone(s.board) && before[otherSideOf(before)].every((t) => t.kind === 'num') && sumNums(before[otherSideOf(before)]) + amount === 0;
   s.lastAmount = amount;
   Object.assign(s, { menu: null, typing: null, amountEntry: '', hint: null });
   return judgeAdd(s, api, amount, o);                              // (judged against s.prevBoard, the board the move was made on)

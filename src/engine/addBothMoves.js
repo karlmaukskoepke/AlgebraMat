@@ -18,7 +18,9 @@ export function startBoard(p) {
 
 export const sideOf = (board, id) => (board.left.some((t) => t.id === id) ? 'left' : board.right.some((t) => t.id === id) ? 'right' : null);
 export const find = (board, id) => [...board.left, ...board.right].find((t) => t.id === id);
-export const xSideOf = (board) => (board.left.some((t) => t.kind === 'x') ? 'left' : 'right');
+// (a factor times a parenthesis holds an x too: `3(x + 2)`, Build M)
+export const hasX = (t) => t.kind === 'x' || t.kind === 'group';
+export const xSideOf = (board) => (board.left.some(hasX) ? 'left' : 'right');
 export const otherSideOf = (board) => (xSideOf(board) === 'left' ? 'right' : 'left');
 export const countTerms = (board) => board.left.length + board.right.length;
 export const sumNums = (terms) => terms.filter((t) => t.kind === 'num').reduce((s, t) => s + t.v, 0);

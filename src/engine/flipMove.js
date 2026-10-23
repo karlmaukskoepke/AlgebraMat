@@ -6,8 +6,8 @@
 
 import { lightsOf } from './solveit/shape.js';
 import { signed } from './solveTerms.js';
-import { xTerm, numTerm } from './divideBoard.js';
-import { applyFraction, coefOn, otherTerm, mapSides } from './fractionMove.js';
+import { numTerm } from './divideBoard.js';
+import { applyFraction, coefOn, otherTerm, mapSides, xWith } from './fractionMove.js';
 
 let counter = 0;
 const id = () => `f${++counter}`;
@@ -22,8 +22,8 @@ export function applyFlip(board) {
   const b = otherTerm(board).v;
   const work = mapSides(board, (terms) => [timesTerm(-1, [terms[0]])]);
   const next = -a === 1
-    ? mapSides(board, (terms, mine) => (mine ? [xTerm(1)] : [negTerm([numTerm(b)])]))
-    : mapSides(board, (terms, mine) => (mine ? [xTerm(-a)] : [numTerm(-b)]));
+    ? mapSides(board, (terms, mine) => (mine ? xWith(terms[0], 1) : [negTerm([numTerm(b)])]))
+    : mapSides(board, (terms, mine) => (mine ? xWith(terms[0], -a) : [numTerm(-b)]));
   return { work, next };
 }
 

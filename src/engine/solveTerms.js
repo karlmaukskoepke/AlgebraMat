@@ -1,6 +1,6 @@
 // The shared term algebra of the Solve it loop (SPEC-SOLVE-IT-LOOP.md §3C, §4): an equation state is two sides, each a list of
-// terms. A term is { kind: 'x', coef? } (coef defaults to 1), { kind: 'num', v }, or { kind: 'frac', n, inner: [terms] } (1/n of
-// the inner terms, as in ⅓(−12)). This module writes a state as text, and works out a value substituted for x one operation at a
+// terms. A term is { kind: 'x', coef? } (coef defaults to 1), { kind: 'num', v }, { kind: 'frac', n, inner: [terms] } (1/n of
+// the inner terms, as in ⅓(−12)), or { kind: 'group', factor, inner: [terms] } (a factor times a parenthesis, `3(x + 2)`: Build M). This module writes a state as text, and works out a value substituted for x one operation at a
 // time: each line has the operation about to happen marked (`op`: underlined, in the accent colour) and the result of the one
 // before marked (`res`: the same colour), so the eye follows one change down the stack. Pure logic, no DOM.
 
@@ -13,7 +13,7 @@ export const plugValue = (v) => (v < 0 ? `(${signed(v)})` : `${v}`);
 
 // How many x's an equation has to drop the value into (each x term is one, with or without a number in front; the x inside a fraction
 // of a worked row is not a drop target).
-const xIn = (terms) => terms.reduce((n, t) => n + (t.kind === 'x' ? 1 : 0), 0);
+const xIn = (terms) => terms.reduce((n, t) => n + (t.kind === 'x' ? 1 : t.kind === 'group' ? xIn(t.inner) : 0), 0);
 export const xCount = (board) => xIn(board.left) + xIn(board.right);
 
 export const termText = (t) => {
@@ -21,9 +21,11 @@ export const termText = (t) => {
   if (t.kind === 'frac') return `${t.sign < 0 ? MINUS : ''}${fractionText(t.n)}(${t.inner.map(termText).join(' + ')})`;
   if (t.kind === 'neg') return `${MINUS}(${t.inner.map(termText).join(' + ')})`;                       // `−(12)` (Build J)
   if (t.kind === 'times') return `${signed(t.f)} × (${t.inner.map(termText).join(' + ')})`;          // `−1 × (−x)` (Build J)
+  if (t.kind === 'group') return `${t.factor === 1 ? '' : t.factor === -1 ? MINUS : signed(t.factor)}(${sideText(t.inner)})`;   // `3(x + 2)` (Build M)
   return signed(t.v);
 };
-export const sideText = (terms) => terms.map((t, i) => (i && t.kind === 'num' && t.v < 0 ? ` − ${-t.v}` : `${i ? ' + ' : ''}${termText(t)}`)).join('');
+export const sideText = (terms) => terms.map((t, i) => (i && t.kind === 'num' && t.v < 0 ? ` − ${-t.v}`
+  : i && t.kind === 'group' && t.factor < 0 ? ` − ${termText({ ...t, factor: -t.factor })}` : `${i ? ' + ' : ''}${termText(t)}`)).join('');
 export const boardText = (board) => `${sideText(board.left)} = ${sideText(board.right)}`;
 
 // ---------- the value in place of x, worked out one operation at a time ----------
@@ -33,6 +35,7 @@ export const boardText = (board) => `${sideText(board.left)} = ${sideText(board.
 const toItem = (t, value) => {
   if (t.kind === 'x') return (t.coef ?? 1) === 1 ? { k: 'sub', v: value } : (t.coef === -1 ? { k: 'neg', v: value } : { k: 'prod', a: t.coef, v: value });
   if (t.kind === 'frac') return { k: 'frac', n: t.n, inner: t.inner.map((u) => toItem(u, value)) };
+  if (t.kind === 'group') return { k: 'grp', f: t.factor, inner: t.inner.map((u) => toItem(u, value)) };   // `3(x + 2)`: the parenthesis first
   return { k: 'num', v: t.v };
 };
 const isNumber = (it) => it.k === 'sub' || it.k === 'num';
@@ -46,13 +49,22 @@ function itemSegs(it, ctx, alone) {
   if (it.k === 'num') return [{ text: signed(it.v), cls }];
   if (it.k === 'prod') return [{ text: `${signed(it.a)} × `, cls }, { text: plugValue(it.v), cls: blue }];
   if (it.k === 'neg') return [{ text: `${MINUS}(`, cls }, { text: signed(it.v), cls: blue }, { text: ')', cls }];
+  // a factor times a parenthesis (Build M): `3(3 + 2)`, `−2(−7 + 4)`; a negative value first inside the parenthesis needs no second pair
+  // of parentheses, and the whole is the op once the parenthesis is one number (`3(5)`)
+  if (it.k === 'grp') return [{ text: `${it.f === 1 ? '' : it.f === -1 ? MINUS : signed(it.f)}(`, cls }, ...sumSegs(it.inner, ctx, true), { text: ')', cls }];
   // a fraction: the fraction and its inner part; the whole is the op when it is the one being worked out
   const inner = sumSegs(it.inner, ctx);
   return [{ text: `${fractionText(it.n)}(`, cls }, ...inner, { text: ')', cls }];
 }
-function sumSegs(items, ctx) {
+function sumSegs(items, ctx, inGroup = false) {
   const out = [];
   items.forEach((it, i) => {
+    if (i === 0 && inGroup && it.k === 'sub') { out.push(...itemSegs(it, ctx, true)); return; }   // `(−7 + 4)`, not `((−7) + 4)`
+    if (i && it.k === 'grp' && it.f < 0) {                          // a group subtracted after another term: 5 − 2(−3 + 2) (Build M)
+      const cls = ctx.op === it ? 'is-op' : '';
+      out.push({ text: ' − ', cls }, { text: `${it.f === -1 ? '' : -it.f}(`, cls }, ...sumSegs(it.inner, ctx, true), { text: ')', cls });
+      return;
+    }
     const opCls = i && ctx.pair?.includes(it) && ctx.pair.includes(items[i - 1]) ? 'is-op' : '';
     if (i && it.k === 'num' && it.v < 0) {                          // a negative number after another term is written as a subtraction: 15 − 6
       out.push({ text: ' − ', cls: opCls });
@@ -72,6 +84,16 @@ function sumSegs(items, ctx) {
 
 // The next operation on a list of items (left to right, products and fractions first, then sums): { apply, op, pair }, or null.
 function nextOp(items) {
+  for (const it of items) {
+    if (it.k === 'grp') {                                           // a parenthesis is worked out first, then multiplied (Build M)
+      const inner = nextOp(it.inner);
+      if (inner) return { ...inner, apply: (list) => list.map((x) => (x === it ? { ...it, inner: inner.apply(it.inner) } : x)) };
+      if (it.inner.length === 1 && isNumber(it.inner[0])) {
+        const r = { k: 'num', v: it.f * it.inner[0].v };
+        return { op: it, res: r, apply: (list) => list.map((x) => (x === it ? r : x)) };
+      }
+    }
+  }
   for (const it of items) {
     if (it.k === 'frac') {
       const inner = nextOp(it.inner);
@@ -141,11 +163,13 @@ export function equationSegs(board) {
       return [...front, { text: 'x', cls: 'is-blue', xi: xi++ }];
     }
     if (t.kind === 'frac') return [{ text: `${fractionText(t.n)}(`, cls: '' }, ...sideSegs(t.inner), { text: ')', cls: '' }];
+    if (t.kind === 'group') return [{ text: `${t.factor === 1 ? '' : t.factor === -1 ? MINUS : signed(t.factor)}(`, cls: '' }, ...sideSegs(t.inner), { text: ')', cls: '' }];
     return [{ text: signed(t.v), cls: '' }];
   };
   const sideSegs = (terms) => terms.flatMap((t, i) => {
     if (i && t.kind === 'num' && t.v < 0) return [{ text: ' − ', cls: '' }, { text: `${-t.v}`, cls: '' }];
     if (i && t.kind === 'x' && (t.coef ?? 1) < 0) return [{ text: ' − ', cls: '' }, ...termSegs({ ...t, coef: -t.coef })];   // `4 − 3x` (Build K)
+    if (i && t.kind === 'group' && t.factor < 0) return [{ text: ' − ', cls: '' }, ...termSegs({ ...t, factor: -t.factor })];   // `5 − 2(x + 2)` (Build M)
     return [...(i ? [{ text: ' + ', cls: '' }] : []), ...termSegs(t)];
   });
   return [...sideSegs(board.left), { text: ' = ', cls: '' }, ...sideSegs(board.right)];

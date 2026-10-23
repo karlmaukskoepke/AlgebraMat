@@ -25,8 +25,13 @@ export function lineBlock(s, textOf) {
 function termsOf(side, s, o) {
   const out = [];
   side.forEach((t, i) => {
-    if (i > 0) out.push(html('span', 'lb-plus', [t.kind === 'num' && t.v < 0 ? MINUS : '+']));
-    if (t.kind === 'frac') {
+    const subGroup = i > 0 && t.kind === 'group' && t.factor < 0;                  // `5 − 2(x + 2)` (Build M)
+    if (i > 0) out.push(html('span', 'lb-plus', [(t.kind === 'num' && t.v < 0) || subGroup ? MINUS : '+']));
+    if (t.kind === 'group') {
+      // a factor times a parenthesis, written as it is: `3(x + 2)`, `−2(x − 4)` (Build M)
+      const f = subGroup ? -t.factor : t.factor;
+      out.push(html('span', 'lb-frac lb-group', [f === 1 ? '' : f === -1 ? MINUS : String(f).replace('-', MINUS), '(', ...termsOf(t.inner, s, { ...o, live: false }), ')']));
+    } else if (t.kind === 'frac') {
       out.push(html('span', 'lb-frac', [html('span', 'is-blue', [`${t.sign < 0 ? MINUS : ''}${fractionText(t.n)}`]), '(', ...termsOf(t.inner, s, { ...o, live: false, plug: false }), ')']));
     } else if (t.kind === 'times') {
       // both sides times a number, written out: `−1 × (−x)` (Flip everything's work row, Build J); the number in blue (loop §3D)
@@ -57,7 +62,7 @@ function termsOf(side, s, o) {
   return out;
 }
 
-const charsOf = (list) => list.map((x) => (x.kind === 'frac' || x.kind === 'neg' ? 5 + charsOf(x.inner) : x.kind === 'times' ? 7 + charsOf(x.inner) : x.kind === 'x' ? ((x.coef ?? 1) > 1 ? 2 : (x.coef ?? 1) < 0 ? String(x.coef).length : 1) : String(signed(x.v)).length + 3)).reduce((a, b) => a + b, 0);
+const charsOf = (list) => list.map((x) => (x.kind === 'frac' || x.kind === 'neg' || x.kind === 'group' ? 5 + charsOf(x.inner) : x.kind === 'times' ? 7 + charsOf(x.inner) : x.kind === 'x' ? ((x.coef ?? 1) > 1 ? 2 : (x.coef ?? 1) < 0 ? String(x.coef).length : 1) : String(signed(x.v)).length + 3)).reduce((a, b) => a + b, 0);
 const eqClass = (chars) => (chars > 30 ? ' is-xlong' : chars > 20 ? ' is-long' : '');
 
 const sideEls = (board, s, o) => { const oo = { ...o, xi: { n: 0 } }; return [termsOf(board.left, s, oo), termsOf(board.right, s, oo)]; };
@@ -66,6 +71,7 @@ export const sideTerms = (terms, s) => termsOf(terms, s, { live: false, plug: fa
 
 // What a folded move says it did, above its equation: `⅓ of both sides`, `−⅓ of both sides`, `−1 × both sides` (Build J).
 export function foldTag(label) {
+  if (label.dist !== undefined) return html('span', 'lb-foldtag', [html('span', 'is-blue', [`${signed(label.dist)} ·`]), ' each piece']);   // a distribute (Build M)
   if (label.flip) return html('span', 'lb-foldtag', [html('span', 'is-blue', [`${MINUS}1 ×`]), ' both sides']);
   return html('span', 'lb-foldtag', [html('span', 'is-blue', [`${label.sign < 0 ? MINUS : ''}${fractionText(label.n)}`]), ' of both sides']);
 }

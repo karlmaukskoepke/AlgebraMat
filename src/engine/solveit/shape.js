@@ -35,6 +35,23 @@
 //   W4  ax + c′ = 0           the side without x zeroed: waits for Undo
 //   D1  ax = b, F1 −x = b, F2 −ax = b, F4 x = −(b), F5 x = ⅟a(b) or −⅟a(b): as on Divide it and Flip everything
 //   DF  a fraction that does not split (the board is D1, F1 or F2 until Undo)
+// Distribute, combine, solve (Build M; read with the card's family: shapeOfBoard(board, 'dist')). x may sit in a factor times a
+// parenthesis (a group, `3(x + 2)`); the distributed rows have several terms, x-terms and numbers not yet put together. Order-free and
+// sign-normalised. Where a state is one Two-step already has, it is Two-step's shape, with its entries (`3x + 6 = 15` is W1, `3x = 15 − 6`
+// W2, `3x = 9` D1, `−2x = 14` F2, `x = ⅓(9)` F5)
+//   P1  a(x + c) = b          a group alone on its side, a positive factor
+//   P2  −a(x + c) = b         a group alone, a negative factor
+//   P3  n + a(x + c) = b      numbers beside the group, a positive factor
+//   P4  n − a(x + c) = b      numbers beside the group, a negative factor (shown subtracted until its minus is tapped)
+//   P5  a(x + c) + bx = d     an x-term beside the group (Level 5)
+//   P6  a(x + c) = b + k      the other side not combined yet (after an Add that cancelled n)
+//   E1  n + ax + k = b        the distributed row: one x-term, two or more numbers beside it, not yet put together
+//   E2  ax + bx + k = d       two or more x-terms not yet put together
+//   E4  ax + k = b + m        one x-term and one number, the other side not combined yet (an Add that cancelled one number of E1)
+//   Q1  x + c = ⅟a(b)         after dividing first: the parenthesis's terms, the other side a fraction (or −(b), after a flip)
+//   Q2  x = ⅟a(b) + k         Q1 after the Add that cancels c: x is alone, the other side is left as it is
+//   Q3  x + c′ = ⅟a(b) + k    an Add at Q1 that did not cancel: waits for Undo
+
 // The same Add shape with x on the right is the R twin: the same id, with `r: true` (and so on every Flip shape: `12 = −x` is F1, r).
 
 export const SHAPES = {
@@ -61,6 +78,18 @@ export const SHAPES = {
   W2: 'ax = b + k (the other side not combined yet)',
   W3: 'ax + c′ = b + k (partly done or bigger)',
   W4: 'ax + c′ = 0 (the other side zeroed)',
+  P1: 'a(x + c) = b',
+  P2: '−a(x + c) = b',
+  P3: 'n + a(x + c) = b',
+  P4: 'n − a(x + c) = b',
+  P5: 'a(x + c) + bx = d',
+  P6: 'a(x + c) = b + k (the other side not combined yet)',
+  E1: 'n + ax + k = b (the numbers not yet put together)',
+  E2: 'ax + bx + k = d (the x-terms not yet put together)',
+  E4: 'ax + k = b + m (the other side not combined yet)',
+  Q1: 'x + c = ⅟a(b) (after dividing first)',
+  Q2: 'x = ⅟a(b) + k',
+  Q3: 'x + c′ = ⅟a(b) + k (an Add that did not cancel)',
 };
 
 export const UNKNOWN = 'unknown';
@@ -76,6 +105,7 @@ export function shapeOfBoard(board, family = null) {
   if (!board?.left || !board?.right) return { id: UNKNOWN, why: 'no board' };
   if (family === 'flip') return flipShape(board);
   if (family === 'two') return twoShape(board);
+  if (family === 'dist') return distShape(board);
   const xl = board.left.filter((t) => t.kind === 'x').length;
   const xr = board.right.filter((t) => t.kind === 'x').length;
   if (xl + xr !== 1) return { id: UNKNOWN, why: xl + xr === 0 ? 'no x' : 'x on both sides' };
@@ -185,8 +215,55 @@ function twoShape(board) {
   return shaped('D1', { a: coef, b: other[0] });
 }
 
+// Distribute, combine, solve's shapes (Build M): a group or several x-terms first; everything else is read as Two-step reads it.
+const hasX = (t) => t.kind === 'x' || t.kind === 'group';
+function distShape(board) {
+  const xl = board.left.filter(hasX).length;
+  const xr = board.right.filter(hasX).length;
+  if (xl && xr) return { id: UNKNOWN, why: 'x on both sides' };
+  if (!xl && !xr) return { id: UNKNOWN, why: 'no x' };
+  const r = xr > 0;
+  const mine = board[r ? 'right' : 'left'];
+  const theirs = board[r ? 'left' : 'right'];
+  if (!theirs.length) return { id: UNKNOWN, why: 'an empty side' };
+  if (mine.some((t) => !hasX(t) && t.kind !== 'num')) return { id: UNKNOWN, why: `a ${mine.find((t) => !hasX(t) && t.kind !== 'num').kind} beside x` };
+  const groups = mine.filter((t) => t.kind === 'group');
+  const xs = mine.filter((t) => t.kind === 'x');
+  const xNums = nums(mine).map((t) => t.v);
+  const odd = theirs.find((t) => t.kind !== 'num');
+  const other = nums(theirs).map((t) => t.v);
+  const base = { family: 'dist', r, xNums, xSum: sum(nums(mine)), group: groups.length > 0, xPart: mine.filter(hasX).map((t) => (t.kind === 'group' ? `g${t.factor}` : `x${t.coef ?? 1}`)).join(',') };
+  const shaped = (id, params, extra = {}) => ({ ...base, ...extra, id, other, params });
+  if (groups.length) {
+    if (groups.length > 1) return { id: UNKNOWN, why: 'two parentheses' };
+    if (odd) return { id: UNKNOWN, why: `a ${odd.kind} on the other side of a parenthesis` };
+    const g = groups[0];
+    const coef = g.factor;
+    const p = { a: coef, c: g.inner.find((t) => t.kind === 'num')?.v ?? 0, b: other[0], n: base.xSum, factorId: g.id };
+    if (other.length >= 2) return shaped('P6', { ...p, k: other.slice(1) }, { coef });
+    if (xs.length) return shaped('P5', { ...p, bx: xs.map((t) => t.coef ?? 1) }, { coef });
+    if (xNums.length) return shaped(coef > 0 ? 'P3' : 'P4', p, { coef });
+    return shaped(coef > 0 ? 'P1' : 'P2', p, { coef });
+  }
+  if (xs.length >= 2) return shaped('E2', { xs: xs.map((t) => t.coef ?? 1), ids: xs.slice(0, 2).map((t) => t.id) }, { coef: xs.reduce((a, t) => a + (t.coef ?? 1), 0) });
+  const coef = xs[0].coef ?? 1;
+  // after dividing first (or flipping first): the parenthesis's own terms, the other side a fraction or the opposite of a number
+  if (odd) {
+    if (odd.kind !== 'frac' && odd.kind !== 'neg') return { id: UNKNOWN, why: `a ${odd.kind} on the other side` };
+    if (coef !== 1) return { id: UNKNOWN, why: `a ${odd.kind} with a number in front of x` };
+    const q = { n: odd.n, sign: odd.sign ?? 1, neg: odd.kind === 'neg', b: odd.inner?.[0]?.v, k: other };
+    if (!xNums.length && !other.length) return twoShape(board);                               // x = ⅓(15): F5, x = −(5): F4
+    if (!xNums.length) return shaped('Q2', q, { coef });
+    return shaped(other.length ? 'Q3' : 'Q1', { ...q, c: base.xSum }, { coef });
+  }
+  if (xNums.length >= 2) return shaped('E1', { a: coef, nums: xNums, ids: nums(mine).slice(0, 2).map((t) => t.id), b: other }, { coef });
+  if (xNums.length === 1 && other.length >= 2) return shaped('E4', { a: coef, c: xNums[0], b: other[0], k: other.slice(1) }, { coef });
+  const two = twoShape(board);
+  return two.id === UNKNOWN ? two : { ...two, family: 'dist', group: false, xPart: base.xPart };
+}
+
 // (the cards whose boards are read with their own family)
-const FAMILY_OF = { flip: 'flip', 'two-step': 'two' };
+const FAMILY_OF = { flip: 'flip', 'two-step': 'two', 'distribute-solve': 'dist' };
 
 // The shape of a state: the board's, refined by the flags the board does not hold. `waiting` says a move (or a try) waits for Undo.
 export function shapeOf(s) {
@@ -207,7 +284,16 @@ export function shapeOf(s) {
 //   Two-step equations judges Fewer terms (as Add to both sides: x's side only) and Solved for x (x alone with a plain 1 in front).
 //   Flip everything judges No opposite box (green when the move took the minus off x, red when it put one on, grey otherwise) and Solved
 //   for x (x alone with a plain 1 in front).
+//   Distribute, combine, solve judges Fewer terms, No parentheses and Solved for x. Fewer terms is judged only when the x part of x's side
+//   (its x-terms and parenthesis) is unchanged, so only on an Add: its numbers are counted one by one (several are not put together for
+//   the student), and a size that grew counts as worse; after a distribute, a fraction or a flip it is off. No parentheses is green once
+//   no parenthesis is left.
 export function lightsOf(prev, now) {
+  if (now.family === 'dist') {
+    const fewer = prev.xPart !== now.xPart ? 'off' : now.xNums.length < prev.xNums.length ? 'green'
+      : now.xNums.length > prev.xNums.length || Math.abs(now.xSum) > Math.abs(prev.xSum) ? 'red' : prev.xNums.length === 0 ? 'off' : 'neutral';
+    return { fewer, noparen: now.group ? 'off' : 'green', solved: now.coef === 1 && now.xNums.length === 0 && !now.group && now.xPart === 'x1' ? 'green' : 'off' };
+  }
   if (now.family === 'flip') {
     return { noopp: prev.coef < 0 && now.coef > 0 ? 'green' : prev.coef > 0 && now.coef < 0 ? 'red' : 'neutral', solved: now.coef === 1 ? 'green' : 'off' };
   }

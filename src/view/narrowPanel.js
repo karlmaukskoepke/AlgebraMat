@@ -52,8 +52,9 @@ export function miniIcon(id) {
 
 // moves: { [id]: { live, move (the card's data-move, if not the id), action (its data-action, if not choose), attrs (more attributes), flyout, pressed, preview, ring (a steady ring: the move owed), pulse (the
 // move to click now), focus } } ; anything not named is greyed. `disabled`: every live move is off for now (a check being stepped...).
-// `lights`: { key: state } (a light not named is off); `open`: the light opened by hover or a tap; `flash`: lights that flash once.
-export function narrowPanel(moves, { disabled = false, lights = {}, open = null, flash = [] } = {}) {
+// `lights`: { key: state } (a light not named is off); `open`: the light opened by hover or a tap; `flash`: lights that flash once;
+// `hand`: a card's own goals reached by hand, after the two (Distribute, combine, solve: No parentheses, Build M).
+export function narrowPanel(moves, { disabled = false, lights = {}, open = null, flash = [], hand = null } = {}) {
   const el = html('aside', 'lb-panel lx-panel', [], { 'aria-label': 'Moves and goals' });
   const grid = html('div', 'lx-pgrid');
   const dots = (list, cls = '') => html('div', `lx-dots${cls}`, list.map(([key, name]) => dot(key, name, lights[key] ?? 'off', open === key, flash.includes(key))));
@@ -74,7 +75,7 @@ export function narrowPanel(moves, { disabled = false, lights = {}, open = null,
     }
     grid.append(b, dots(m.lights));
   }
-  el.append(grid, html('div', 'lx-hand', [dots(BY_HAND, ' is-row')], { 'aria-label': 'Goals reached by hand' }),
+  el.append(grid, html('div', 'lx-hand', [dots([...BY_HAND, ...(hand ?? [])], ' is-row')], { 'aria-label': 'Goals reached by hand' }),
     html('div', 'lx-solvedrow', [html('span', 'lx-solvedlabel', ['Solved for x']), dots([['solved', 'Solved for x']], ' is-row')]));
   return el;
 }

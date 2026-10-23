@@ -2,7 +2,7 @@ import './style.css';
 import { PROBLEMS_PER_LEVEL } from './engine/generate.js';
 import {
   completeLevel, isPackComplete, isLevelUnlocked, normalizeProgress, mergeProgress, withLegacyCredit,
-  encodeProgress, decodeProgress, doneCount,
+  encodeProgress, decodeProgress, doneCount, nextLevel,
 } from './engine/progress.js';
 import { createStore } from './storage.js';
 import { PACKS, SECTIONS, HIDDEN_PACKS, packById, levelNumber, isWhyLevel, WHY_LABEL } from './packs/index.js';
@@ -19,7 +19,7 @@ import { distributeLightPlay } from './play/distributeLightPlay.js';
 import { valueLightPlay } from './play/valueLightPlay.js';
 import { solveLightPlay } from './play/solveLightPlay.js';
 import { switchPlay } from './play/switchPlay.js';
-import { addBothPlay, divideMovesPlay, flipPlay, twoStepPlay } from './play/solveCards.js';
+import { addBothPlay, divideMovesPlay, flipPlay, twoStepPlay, distSolvePlay } from './play/solveCards.js';
 import { distributeDrillPack, distributeDrillPlay } from './play/distributeDrillPlay.js';
 import { divideNumericPlay } from './play/divideNumericPlay.js';
 import { addBothNumericPlay } from './play/addBothNumericPlay.js';
@@ -77,6 +77,7 @@ const PLAY = {
   'add-both': (level) => (level === 1 ? addBothNumericPlay : addBothPlay),   // Level 1 is numeric (no x): "See why it works"
   'flip-everything': flipPlay,                                                   // (its Level 1, numbers only, is not built yet: Build J)
   'two-step-equations': twoStepPlay,                                             // the new Two-step card (Build K); `two-step` is the old one
+  'distribute-solve': distSolvePlay,                                             // Distribute, combine, solve (Build M)
   'distribute-combine': (level) => (level >= 4 ? distributeTypedPlay : LIGHT ? distributeLightPlay : distributePlay),
 };
 // ?drill=distribute: the Distribute drill of lights round 2 (B6), a hidden pack that exists only with the link.
@@ -263,6 +264,10 @@ function startLevel(packId, level, resume = null) {
   useControls(adapter);
   useMat(adapter);
   $('title').textContent = `${pack.title.toUpperCase()} · ${isWhyLevel(pack, level) ? WHY_LABEL : `Level ${levelNumber(pack, level)}`}`;
+  // a card that links to another card's practice, near the level dots (Build M: Distribute, combine, solve opens Build it's Distribute,
+  // then combine; only a link: that card is unchanged)
+  $('practice').hidden = !pack.practice;
+  if (pack.practice) $('practice').textContent = pack.practice.label;
   persist();
   showScreen('play');
   render();
@@ -606,6 +611,7 @@ document.addEventListener('keydown', (e) => {
 
 $('back').addEventListener('click', goHome);
 $('next-level').addEventListener('click', () => startLevel(play.pack.id, play.level + 1));
+$('practice').addEventListener('click', () => { const to = play?.pack.practice?.pack; if (to) startLevel(to, nextLevel(progress, to) ?? 1); });
 $('save-code').addEventListener('click', () => showSaveCode(encodeProgress(progress)));
 
 // A saved level in play, if it still makes sense to resume.

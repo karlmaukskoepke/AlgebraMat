@@ -15,6 +15,7 @@ import { generateAddBothLevel } from '../engine/generateAddBoth.js';
 import { generateTwoStepLevel } from '../engine/generateTwoStep.js';
 import { generateFlipLevel } from '../engine/generateFlip.js';
 import { generateDivideLevel } from '../engine/generateDivide.js';
+import { generateDistSolveLevel } from '../engine/generateDistSolve.js';
 
 // Group It (built as "Lasso"; its id stays 'lasso' so saved progress and
 // save codes from before the rename still work).
@@ -185,6 +186,20 @@ export const twoStepEquations = {
   generate: (level, seed) => generateTwoStepLevel(level, seed),
 };
 
+// Distribute, combine, solve (Build M, basic form): `3(x + 2) = 15`: drag the factor onto the parenthesis and type each product, combine,
+// then finish as in Two-step. Five levels, shown as saved (no walkthrough: "Practice distributing first" opens Build it's Distribute, then
+// combine). Not `distribute-combine`: that id is Build it's card (expressions), and `distribute-drill` was the hidden drill it replaces.
+export const distributeSolve = {
+  id: 'distribute-solve',
+  title: 'Distribute, combine, solve',
+  subtitle: 'Multiply each piece, then solve',
+  blurb: 'Drag the number onto the parentheses, type each product, combine, then solve.',
+  levels: 5,
+  levelNames: ['a(x ± c) = b', '−a(x ± c) = b', 'n + a(x ± c) = b', 'n − a(x ± c) = b', 'like x-terms'],
+  practice: { pack: 'distribute-combine', label: 'Practice distributing first' },
+  generate: (level, seed) => generateDistSolveLevel(level, seed),
+};
+
 // The rest of the equations are still to come: they show as cards under Solve it, with no levels (so they take no room in saves).
 const soon = (id, title, subtitle) => ({ id, title, subtitle, comingSoon: true, levels: 0, levelNames: [] });
 
@@ -203,6 +218,7 @@ export const PACKS = [
   switchSides,
   twoStep,
   twoStepEquations,
+  distributeSolve,
   soon('multi-step', 'Multi-step equations', 'Variables on both sides'),
 ];
 
@@ -210,7 +226,7 @@ export const PACKS = [
 export const SECTIONS = [
   { id: 'count', title: 'Count it', blurb: 'Adding, subtracting and multiplying numbers', packs: ['combineit', 'flipit', 'lasso'] },
   { id: 'build', title: 'Build it', blurb: 'Expressions, with boxes, circles and groups', packs: ['boxes', 'groups-of-terms', 'distribute-combine', 'value'] },
-  { id: 'solve', title: 'Solve it', blurb: 'Solving equations', packs: ['add-both', 'divide-it', 'flip-everything', 'one-step', 'two-step-equations', 'multi-step'] },
+  { id: 'solve', title: 'Solve it', blurb: 'Solving equations', packs: ['add-both', 'divide-it', 'flip-everything', 'one-step', 'two-step-equations', 'distribute-solve', 'multi-step'] },
 ];
 export const sectionById = (id) => SECTIONS.find((s) => s.id === id);
 export const sectionOf = (packId) => SECTIONS.find((s) => s.packs.includes(packId));

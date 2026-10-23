@@ -8,10 +8,14 @@ import { xTerm, numTerm, fracOf } from './divideBoard.js';
 import { takeFraction, FRACTIONS } from './divide.js';
 
 // ---------- the board: x (with its number in front) on one side, a number on the other ----------
-export const xSideOf = (board) => (board.left.some((t) => t.kind === 'x') ? 'left' : 'right');
+// (a factor times a parenthesis, `3(x + 2)`, is the x term too: its number in front is the factor; Build M, dividing first)
+const hasX = (t) => t.kind === 'x' || t.kind === 'group';
+export const xSideOf = (board) => (board.left.some(hasX) ? 'left' : 'right');
 const otherSideOf = (board) => (xSideOf(board) === 'left' ? 'right' : 'left');
-export const xOf = (board) => board[xSideOf(board)].find((t) => t.kind === 'x');
-export const coefOn = (board) => xOf(board).coef ?? 1;
+export const xOf = (board) => board[xSideOf(board)].find(hasX);
+export const coefOn = (board) => { const t = xOf(board); return t.kind === 'group' ? t.factor : t.coef ?? 1; };
+// the x term with a new number in front: `2x`, or `2(x + 2)` (a factor of 1 leaves the parenthesis's own terms, `x + 2`)
+export const xWith = (t, a) => (t.kind !== 'group' ? [xTerm(a)] : a === 1 ? t.inner.map((u) => (u.kind === 'x' ? xTerm(1) : numTerm(u.v))) : [{ ...t, id: `${t.id}'${a}`, factor: a }]);
 export const otherTerm = (board) => board[otherSideOf(board)][0];
 // the same board with each side's terms made by `f(term, isXSide)`, the left side first (so new terms are numbered as Divide's were)
 export const mapSides = (board, f) => {
@@ -29,8 +33,8 @@ export function applyFraction(board, n, sign = 1) {
   const work = mapSides(board, (terms) => [fracTerm(n, [terms[0]], sign)]);
   const na = (a * sign) / n;
   const next = na === 1
-    ? mapSides(board, (terms, mine) => (mine ? [xTerm(1)] : [fracTerm(n, [numTerm(b)], sign)]))
-    : mapSides(board, (terms, mine) => (mine ? [xTerm(na)] : [numTerm((b * sign) / n)]));
+    ? mapSides(board, (terms, mine) => (mine ? xWith(terms[0], 1) : [fracTerm(n, [numTerm(b)], sign)]))
+    : mapSides(board, (terms, mine) => (mine ? xWith(terms[0], na) : [numTerm((b * sign) / n)]));
   return { work, next };
 }
 

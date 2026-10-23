@@ -34,6 +34,12 @@ import { formatTwoStep } from '../engine/twoStep.js';
 import { startLights } from '../engine/addBothLights.js';
 import { renderTwoStepScreen, introOpen as twoIntroOpen } from '../view/twoStepScreen.js';
 import { twoStepFeedbackText } from '../view/twoStepFeedback.js';
+// Distribute, combine, solve: the loop card (engine/cards/distribute.js) under the Multiply menu and Add's term layer with the distribute move
+import { newDistSolve, solve as distLoop, xAlone as distAlone, DIST_MENU, DIST_SPOT, DIST_LAYER } from '../engine/cards/distribute.js';
+import { formatDistSolve } from '../engine/distSolve.js';
+import { renderDistSolveScreen, introOpen as distIntroOpen } from '../view/distSolveScreen.js';
+import { distSolveFeedbackText } from '../view/distSolveFeedback.js';
+import { bindFactorHint } from '../view/factorHint.js';
 
 // ---------- Add to both sides ----------
 
@@ -195,6 +201,41 @@ export const twoStepPlay = makeSolvePlay({
       case 'multPick': return { type: 'multPick', kind: d.kind };
       case 'flipPick': return { type: 'flipPick' };
       case 'take': return { type: 'take', n: Number(d.n), ...(d.from === 'list' ? { fromList: true } : {}) };
+      default: return null;
+    }
+  },
+});
+
+// ---------- Distribute, combine, solve (Build M) ----------
+
+// The distribute move's blanks and a sum of two x-terms take the x key too (on touch, the pad shows it).
+const xKey = (s) => Boolean(s.lx?.combine) && [...s.board.left, ...s.board.right].find((t) => t.id === s.lx.combine.a)?.kind === 'x';
+
+export const distSolvePlay = makeSolvePlay({
+  pack: 'distribute-solve',
+  loop: distLoop,
+  layer: DIST_LAYER,
+  spot: DIST_SPOT,
+  introOpen: distIntroOpen,
+  format: formatDistSolve,
+  newSession: (problem, { forceMove = false } = {}) => startLights(newDistSolve(problem, { level: problem.logLevel ?? 1, forceMove })),
+  feedbackText: distSolveFeedbackText,
+  buildControls: makeAddBothControls((s) => lightsAnswerLive(s, distLoop) || combineOpen(s) || Boolean(s.lx?.distribute) || DIST_MENU.fracOpen(s), xKey),
+  bindMat: (root, dispatch, getSession) => {
+    const off = [bindLightsMat(root, dispatch, getSession), bindFractionKeys(root, dispatch, getSession, DIST_MENU), bindFactorHint(root)];
+    return () => off.forEach((f) => f?.());
+  },
+  renderMat: (s) => renderDistSolveScreen(s),
+  padOpen: (s) => s.stage !== 'done' && !s.sub && ((blankOpen(s) && amountMode(s)) || combineOpen(s) || Boolean(s.lx?.distribute) || DIST_MENU.fracOpen(s)
+    || (lightsAnswerLive(s, distLoop) && (s.typing === 'answer' || s.ui?.focus === 'answer' || distAlone(s.board)))),
+  matAction(d) {
+    if (ADD_MAT.has(d.action)) return { type: d.action };
+    switch (d.action) {
+      case 'multOpen': return { type: 'multOpen' };
+      case 'multPick': return { type: 'multPick', kind: d.kind };
+      case 'flipPick': return { type: 'flipPick' };
+      case 'take': return { type: 'take', n: Number(d.n), ...(d.from === 'list' ? { fromList: true } : {}) };
+      case 'focus': return d.target === 'dist' ? { type: 'focus', target: 'dist', index: Number(d.index) } : null;
       default: return null;
     }
   },

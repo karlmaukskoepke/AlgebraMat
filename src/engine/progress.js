@@ -184,12 +184,13 @@ export function mergeProgress(a, b) {
 //   v14: 16 data symbols (about 79.3 bits): + Divide it (6), 75 bits in use
 //   v15: 17 data symbols (about 84.2 bits): + Flip everything (6), 81 bits in use (Build J)
 //   v16: 18 data symbols (about 89.2 bits): + Two-step equations, the new card (7), 88 bits in use (Build K)
+//   v17: 19 data symbols (about 94.1 bits): + Distribute, combine, solve (5), 93 bits in use (Build M)
 //
 // The data is a whole number of up to 75 bits, so it is worked out with BigInt: a plain JavaScript number holds only 53 bits
 // exactly, and v11 and v12 codes (57 and 63 bits) were written with plain numbers, which rounded the low bits (Count it and
 // Build it's levels). Those codes can still be read, but what they carry for those cards may be wrong; v13 is exact.
 //
-// New codes are always v16; older codes (written down earlier) still work, and a code from before Combine it's
+// New codes are always v17; older codes (written down earlier) still work, and a code from before Combine it's
 // mixed round (or Boxes & Circles' read-the-model round) brings its levels back in the right places (see
 // normalizeProgress). (Group It's pack id is still `lasso`.) v8 uses 36 of about 39.6 bits.
 
@@ -309,8 +310,19 @@ const LAYOUTS = {
       { id: 'add-both', levels: 6 }, { id: 'divide-it', levels: 6 }, { id: 'flip-everything', levels: 6 }, { id: 'two-step-equations', levels: 7 },
     ],
   },
+  // Distribute, combine, solve, 5 levels (Build M), appended at the end: 93 bits, in 19 symbols (about 94.1). v1-v16 codes read as before.
+  17: {
+    data: 19,
+    packs: [
+      { id: 'flipit', levels: 5 }, { id: 'lasso', levels: 7 }, { id: 'boxes', levels: 6 },
+      { id: 'groups-of-terms', levels: 8 }, { id: 'combineit', levels: 5 }, { id: 'distribute-combine', levels: 5 },
+      { id: 'value', levels: 5 }, { id: 'one-step', levels: 8 }, { id: 'two-step', levels: 8 }, { id: 'switch', levels: 6 },
+      { id: 'add-both', levels: 6 }, { id: 'divide-it', levels: 6 }, { id: 'flip-everything', levels: 6 }, { id: 'two-step-equations', levels: 7 },
+      { id: 'distribute-solve', levels: 5 },
+    ],
+  },
 };
-export const CODE_VERSION = 16;
+export const CODE_VERSION = 17;
 
 // Weighted sum mod 31. Weights 2, 3, 4, … are all nonzero mod 31 and differ
 // by 1 between neighbors, so any single typo or neighbor swap is caught.

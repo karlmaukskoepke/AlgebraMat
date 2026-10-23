@@ -11,7 +11,7 @@ const state = (flipit, lasso = Array(7).fill(false), boxes = Array(6).fill(false
   v: 1,
   packs: {
     combineit: { levels: pad(combine, 5) }, flipit: { levels: pad(flipit, 5) }, lasso: { levels: lasso }, boxes: { levels: pad(boxes, 6) },
-    'groups-of-terms': { levels: terms }, 'distribute-combine': { levels: distribute }, value: { levels: [false, false, false, false] }, 'add-both': { levels: Array(6).fill(false), first: 2 }, 'divide-it': { levels: Array(6).fill(false), first: 2 }, 'flip-everything': { levels: Array(6).fill(false), first: 2 }, 'one-step': { levels: Array(5).fill(false), first: 3 }, 'two-step': { levels: Array(7).fill(false) }, switch: { levels: Array(6).fill(false) }, 'two-step-equations': { levels: Array(7).fill(false) },
+    'groups-of-terms': { levels: terms }, 'distribute-combine': { levels: distribute }, value: { levels: [false, false, false, false] }, 'add-both': { levels: Array(6).fill(false), first: 2 }, 'divide-it': { levels: Array(6).fill(false), first: 2 }, 'flip-everything': { levels: Array(6).fill(false), first: 2 }, 'one-step': { levels: Array(5).fill(false), first: 3 }, 'two-step': { levels: Array(7).fill(false) }, switch: { levels: Array(6).fill(false) }, 'two-step-equations': { levels: Array(7).fill(false) }, 'distribute-solve': { levels: Array(5).fill(false) },
   },
 });
 const state3 = state;
@@ -40,7 +40,7 @@ describe('save code v13', () => {
     const codes = new Set();
     for (const p of allStates3) {
       const code = encodeProgress(p);
-      expect(code).toMatch(/^MAT-J[2-9A-HJKMNP-Z]{19}$/); // "J" is version 16 (Build K)
+      expect(code).toMatch(/^MAT-K[2-9A-HJKMNP-Z]{20}$/); // "K" is version 17 (Build M)
       expect(decodeProgress(code, WITH_BOXES)).toEqual(p);
       codes.add(code);
     }
@@ -269,5 +269,33 @@ describe('save code v13 is exact (the data is a 69-bit number, so it is read and
     expect(back.packs.switch.levels).toEqual([true, true, false, true, false, false]);
     expect(back.packs['add-both'].levels).toEqual([false, true, false, true, true, false]);
     expect(back.packs['add-both'].open).toBe(5);
+  });
+});
+
+// Build M: v17 appends Distribute, combine, solve (5 levels). Every older code decodes to the same progress, and carries into v17 unchanged.
+describe('save code v17 (Build M)', () => {
+  it('carries the new card’s five levels; v16 codes mean what they did and round-trip into v17', async () => {
+    const { readFileSync } = await import('node:fs');
+    const prog = newProgress(PACKS);
+    prog.packs['distribute-solve'].levels = [true, false, true, true, false];
+    prog.packs['two-step-equations'].levels = [true, true, false, false, false, false, true];
+    const code = encodeProgress(prog);
+    expect(code).toMatch(/^MAT-K[2-9A-HJKMNP-Z]{20}$/);
+    expect(decodeProgress(code, PACKS)).toEqual(decodeProgress(encodeProgress(decodeProgress(code, PACKS)), PACKS));
+    expect(decodeProgress(code, PACKS).packs['distribute-solve'].levels).toEqual([true, false, true, true, false]);
+    const all = newProgress(PACKS);
+    for (const e of Object.values(all.packs)) e.levels = e.levels.map(() => true);
+    expect(decodeProgress(encodeProgress(all), PACKS).packs['distribute-solve'].levels).toEqual(Array(5).fill(true));
+    const v16 = encodeProgress(prog, 16);
+    const fromV16 = decodeProgress(v16, PACKS);
+    expect(fromV16.packs['distribute-solve'].levels).toEqual(Array(5).fill(false));          // (v16 has no room for it: unfinished)
+    expect(fromV16.packs['two-step-equations'].levels).toEqual(prog.packs['two-step-equations'].levels);
+    const baseline = JSON.parse(readFileSync(new URL('./parity/baseline/savecodes.json', import.meta.url), 'utf8'));
+    for (const [name, { code: old }] of Object.entries(baseline)) {
+      const p = decodeProgress(old, PACKS);
+      expect(p, name).toBeTruthy();
+      const again = decodeProgress(encodeProgress(p), PACKS);
+      expect(again, name).toEqual(p);
+    }
   });
 });

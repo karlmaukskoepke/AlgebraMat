@@ -307,7 +307,7 @@ describe('shape coverage: every state on 200 problems a level, along every path'
 
 describe('the pack, old progress and save codes', () => {
   it('sits in the old Two-step card\'s slot; the old card is retired but kept with its levels', () => {
-    expect(SECTIONS.find((s) => s.id === 'solve').packs).toEqual(['add-both', 'divide-it', 'flip-everything', 'one-step', 'two-step-equations', 'multi-step']);
+    expect(SECTIONS.find((s) => s.id === 'solve').packs).toEqual(['add-both', 'divide-it', 'flip-everything', 'one-step', 'two-step-equations', 'distribute-solve', 'multi-step']);
     expect(twoStepEquations).toMatchObject({ id: 'two-step-equations', title: 'Two-step equations', levels: 7 });
     expect(twoStepEquations.firstLevel).toBeUndefined();
     expect(twoStepEquations.whyLevel).toBeUndefined();
@@ -316,16 +316,16 @@ describe('the pack, old progress and save codes', () => {
     expect(PACKS.length).toBeLessThanOrEqual(30);                             // the class sheet's limit
   });
   it('v16 codes carry its seven levels; every older code means what it did', () => {
-    expect(CODE_VERSION).toBe(16);
+    expect(CODE_VERSION).toBe(17);                                             // (v17 appends Distribute, combine, solve: Build M)
     const prog = newProgress(PACKS);
     prog.packs['two-step-equations'].levels = [true, false, true, false, false, true, false];
     prog.packs['flip-everything'].levels = [false, true, true, false, true, false];
-    const code = encodeProgress(prog);
+    const code = encodeProgress(prog, 16);
     expect(code).toMatch(/^MAT-J[2-9A-HJKMNP-Z]{19}$/);
     const back = decodeProgress(code, PACKS);
     expect(back.packs['two-step-equations'].levels).toEqual([true, false, true, false, false, true, false]);
     expect(back.packs['flip-everything'].levels).toEqual([false, true, true, false, true, false]);
-    expect(encodeProgress(back)).toBe(code);
+    expect(encodeProgress(back, 16)).toBe(code);
     const v15 = encodeProgress(prog, 15);
     expect(decodeProgress(v15, PACKS).packs['flip-everything'].levels).toEqual([false, true, true, false, true, false]);
     const baseline = JSON.parse(readFileSync(new URL('./parity/baseline/savecodes.json', import.meta.url), 'utf8'));

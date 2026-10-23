@@ -679,3 +679,21 @@ those states never reach the move). The screens that do change were compared by 
 checks that dividing by −1 gives the same rows, words and class-sheet record as the Flip button. The placement quiz is not in the harness
 either: `tests/diagnostic.test.js` checks that its problems and their order are unchanged and that a result saved before Build L opens what
 it opened then.
+
+## Build M (2026-10-23): the Distribute, combine, solve card; the placement quiz fixes
+
+**Compared with the baseline as Build L left it:** problems, class-sheet records, all 25 scripted runs and all 62 screens of Add to both
+sides and Divide it are unchanged, so nothing about them is added. The only differences are save codes:
+
+- The 72 recorded states are now written as **v17** (one symbol longer: the new card's five levels are appended at the end). Each decodes to
+  the same progress as before, and every older code carries into v17 unchanged (`tests/savecode.test.js`). Their keys are already listed
+  above, so they pass here.
+- Five new states, the new card's levels:
+
+| Key | Before | After | Why |
+|---|---|---|---|
+| `savecode:distribute-solve-L1` | none (the card is new) | a v17 code with Distribute, combine, solve's Level 1 done | the new card's levels are saved in the code |
+| `savecode:distribute-solve-L2` | none (the card is new) | a v17 code with its Level 2 done | the same |
+| `savecode:distribute-solve-L3` | none (the card is new) | a v17 code with its Level 3 done | the same |
+| `savecode:distribute-solve-L4` | none (the card is new) | a v17 code with its Level 4 done | the same |
+| `savecode:distribute-solve-L5` | none (the card is new) | a v17 code with its Level 5 done | the same |

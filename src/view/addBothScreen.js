@@ -15,7 +15,8 @@ import { xAlone } from '../engine/addBothMoves.js';
 import { solve, tradeAvailable, tradePending } from '../engine/cards/add.js';
 import { lightsAnswerLive, blankOpen, canChoose, moveOwed, amountMode, canGrab, ADD_SPOT } from '../engine/addBothLights.js';
 import { termText, findTerm, likeKey, crossedText, sideText, previewBoard } from '../engine/lightsGrab.js';
-import { productLabels, needsFlip } from '../engine/distributeDrill.js';
+import { needsFlip } from '../engine/distributeDrill.js';
+import { productLabels } from '../engine/distributeMove.js';
 import { spotOf } from '../engine/spotlight.js';
 import { lightsFeedbackText } from './addBothLightsFeedback.js';
 import { spotlightLayer, findSolveTarget } from './spotlight.js';
@@ -123,10 +124,15 @@ const sideEls = (terms, negIds = []) => {
     const { op, body } = termText(t, i, negIds.includes(t.id) || Boolean(t.fresh));
     const fresh = t.fresh ? ` is-fresh ${(t.kind === 'x' ? t.coef ?? 1 : t.v) < 0 ? 'is-neg' : 'is-pos'}` : '';
     if (op) out.push(html('span', `lb-plus${fresh}`, [op]));
-    out.push(t.kind === 'x' ? html('span', `lb-x${fresh}`, [body]) : html('span', `lb-num${fresh}`, [body]));
+    out.push(t.kind === 'x' ? html('span', `lb-x${fresh}`, [body]) : t.kind === 'group' ? groupInert(body) : html('span', `lb-num${fresh}`, [body]));
   });
   return out;
 };
+// A factor times a parenthesis, inert (an older row): its x is an x of its own, so the check can drop the value into it (Build M).
+function groupInert(body) {
+  const at = body.indexOf('x');
+  return html('span', 'lb-num lb-group', [body.slice(0, at), html('span', 'lb-x', ['x']), body.slice(at + 1)]);
+}
 
 // The line a move leaves above the new equation: the amount (blue) on both sides, x's numbers struck as they combine.
 const xText = (c) => (c === 1 ? 'x' : c === -1 ? `${MINUS}x` : `${String(c).replace('-', MINUS)}x`);
@@ -157,7 +163,7 @@ function eqRow(leftEls, rightEls, cls = '', attrs = {}) {
   return eq;
 }
 const eqClass = (chars) => (chars > 30 ? ' is-xlong' : chars > 20 ? ' is-long' : '');
-const charsOf = (list) => list.map((x) => (x.term ? charsOf([x.term]) : x.kind === 'group' ? 6 + charsOf(x.inner) : x.kind === 'x' || x.x ? 2 : String(signed(x.v)).length + 3)).reduce((a, b) => a + b, 0);
+const charsOf = (list) => list.map((x) => (x.term ? charsOf([x.term]) : x.kind === 'group' || x.kind === 'frac' || x.kind === 'neg' ? 6 + charsOf(x.inner) : x.kind === 'x' || x.x ? 2 : String(signed(x.v)).length + 3)).reduce((a, b) => a + b, 0);
 
 // A token of the newest row: the whole signed term, grabbed with its sign. A subtracted number's minus (or, once tapped, the minus of
 // the negative number) can be tapped to show the term as a negative number.
@@ -193,12 +199,14 @@ function groupEls(s, t, i, subtracted, shownNeg) {
   const holding = carry?.id === `${t.id}:f`;
   const f = t.factor;
   const text = subtracted ? [String(-f)] : f < 0 ? [html('span', 'lx-negsign', [MINUS], i > 0 ? { 'data-minus': t.id } : {}), String(-f)] : [String(f)];
-  const factor = html('span', `lx-factor${shownNeg ? ' lx-negnum' : ''}${holding ? ' is-held' : ''}`, text, {
+  const hinted = s.hint?.kind === 'factor' && s.hint.id === t.id;
+  const owed = moveOwed(s) && !s.lx.distribute;                     // the forced move: the factor to drag is ringed and pulses (Build M)
+  const factor = html('span', `lx-factor${shownNeg ? ' lx-negnum' : ''}${holding ? ' is-held' : ''}${hinted ? ' is-hint' : ''}${owed ? ' is-ring' : ''}`, text, {
     'data-tok': `${t.id}:f`, 'data-factor': t.id, 'data-side': findTerm(s.board, t.id)?.side, 'data-fk': `tok:${t.id}:f`, tabindex: canGrab(s) ? '0' : undefined, role: 'button',
     'aria-label': `The factor ${signed(f).replace(MINUS, 'negative ')}. Enter picks it up; drop it on the parenthesis to distribute.`,
   });
   if (holding || s.ui?.focus === `tok:${t.id}:f`) factor.dataset.lxFocus = '1';
-  const paren = html('span', `lx-paren${holding && carry.slot?.paren ? ' is-combine-target' : ''}`, [`(${sideText(t.inner)})`], { 'data-paren': t.id });
+  const paren = html('span', `lx-paren${holding && carry.slot?.paren ? ' is-combine-target' : ''}${hinted ? ' is-hint' : ''}${owed ? ' is-ring' : ''}`, [`(${sideText(t.inner)})`], { 'data-paren': t.id });
   return [factor, paren];
 }
 
@@ -278,7 +286,8 @@ function rowsOf(s) {
     // the equation the value goes back into: the original, or, for a wrong guess after a move, the current one (the loop's rule)
     const plug = Boolean(s.sub) && i === (s.sub.target === 'current' ? last : 0);
     // x alone with a side that is not worked out (`x = ⅓(15)`, `x = −(5)`): written as it is, nothing to pick up
-    const inert = [...row.board.left, ...row.board.right].some((u) => u.kind !== 'x' && u.kind !== 'num');
+    // (a factor times a parenthesis is live: its factor is grabbed, Build M; a fraction or the opposite of a number beside x is not)
+    const inert = [...row.board.left, ...row.board.right].some((u) => u.kind !== 'x' && u.kind !== 'num' && u.kind !== 'group');
     const live = i === last && !plug && s.stage !== 'done' && !inert;
     const chars = eqClass(charsOf([...row.board.left, ...row.board.right]));
     const tag = row.type === 'fold' && row.label ? [foldTag(row.label)] : [];   // (what a folded fraction or flip did, above it)
@@ -287,13 +296,20 @@ function rowsOf(s) {
     else if (live) eq = eqRow(liveSide(s, 'left'), liveSide(s, 'right'), `lx-live${chars}${s.ui?.carry ? ' is-carrying' : ''}`, { role: 'group', 'aria-label': 'The equation: its terms can be picked up' });
     else {
       // the equation being checked: the value is dragged into its x (or x is tapped), which then changes colour (Build D, Part 2)
-      const side = (terms) => sideEls(terms, s.lx.negIds).map((el) => {
-        if (!plug || !el.classList.contains('lb-x')) return el;
+      let xi = 0;                                                   // which x of the equation, left to right (two on Level 5, Build M)
+      const plugX = (el) => {
         const front = el.textContent.slice(0, -1);                    // the number in front of x stays (`3x`: the Two-step card)
-        const x = s.sub.placing
-          ? html('span', 'lb-x is-plugx is-droptarget', ['x'], { 'data-x': '1', 'data-action': 'placeValue', role: 'button', tabindex: '0', 'aria-label': 'Put your value into x' })
-          : html('span', 'lb-x is-plugx is-placed', ['x'], { 'data-x': '1' });
+        const at = String(xi++);
+        const filled = !s.sub.placing || (s.sub.xs > 1 && s.sub.filled?.includes(Number(at)));
+        const x = !filled
+          ? html('span', 'lb-x is-plugx is-droptarget', ['x'], { 'data-x': '1', 'data-xi': at, 'data-action': 'placeValue', role: 'button', tabindex: '0', 'aria-label': 'Put your value into x' })
+          : html('span', 'lb-x is-plugx is-placed', ['x'], { 'data-x': '1', 'data-xi': at });
         return front ? html('span', 'lb-coef', [front, x]) : x;
+      };
+      const side = (terms) => sideEls(terms, s.lx.negIds).map((el) => {
+        if (!plug) return el;
+        if (el.classList.contains('lb-group')) { const inner = el.querySelector('.lb-x'); inner.replaceWith(plugX(inner)); return el; }
+        return el.classList.contains('lb-x') ? plugX(el) : el;
       });
       eq = eqRow(side(row.board.left), side(row.board.right), chars, { role: 'img', 'aria-label': 'The equation' });
     }
@@ -318,8 +334,7 @@ function sumRow(s) {
     if (t.id === c.a || t.id === c.b) {
       if (findTerm(s.board, t.id).at !== first) return;
       if (k > 0) els.push(html('span', 'lb-plus', ['+']));
-      const xTerm = t.kind === 'x' ? [html('span', 'lb-x', ['x'])] : [];           // an x sum: only the number in front of x is typed
-      els.push(html('span', 'lx-boxwrap', [box, ...xTerm]));
+      els.push(html('span', 'lx-boxwrap', [box]));                                // (an x sum is typed whole, the x too: `5x`, Build M)
     } else {
       const { op, body } = termText(t, k, false);
       if (op) els.push(html('span', 'lb-plus', [op]));
@@ -337,7 +352,7 @@ function productRow(s) {
   const d = s.lx.distribute;
   const f = findTerm(s.board, d.group);
   const g = f.term;
-  const labels = productLabels(g);
+  const labels = productLabels(g).map((l) => l.replace(/-/g, MINUS));
   const els = [];
   let k = 0;
   const pushText = (t) => {
@@ -355,7 +370,9 @@ function productRow(s) {
         type: 'button', 'data-action': 'focus', 'data-target': 'dist', 'data-index': String(j), 'data-fk': `prod:${j}`, 'data-lx-field': '1', 'aria-label': `${labels[j]}: type the product`,
       });
       if (s.ui?.focus === `prod:${j}`) box.dataset.lxFocus = '1';
-      els.push(html('span', 'lx-prod', [html('span', 'lx-prodlabel', [labels[j].replace('-', MINUS)]), html('span', 'lx-prodbox', [box])]));
+      // the x blank has its x printed after it: the number in front of x is typed, with its sign (Build M)
+      const after = term.kind === 'x' ? [html('span', 'lb-x lx-prodx', ['x'])] : [];
+      els.push(html('span', `lx-prod${d.wrong === j ? ' is-wrong' : ''}`, [html('span', 'lx-prodlabel', [labels[j]]), html('span', 'lx-prodbox', [box, ...after])]));
       k += 1;
     });
   });
@@ -447,8 +464,8 @@ function forwardCore(s) {
   if (s.sub?.placing) return { label: 'Next', action: 'nextLine', enabled: false };
   if (s.sub && s.sub.step < C.loop.subTotal(s.sub)) return { label: 'Next', action: 'nextLine', enabled: true };
   if (s.lx.mult) return { label: 'Go', action: 'go', enabled: s.lx.mult.kind === 'flip' || (valid(s.lx.mult.entry) && Number(s.lx.mult.entry) !== 0) };
-  if (s.lx.distribute) return { label: 'Multiply', action: 'lxApply', enabled: s.lx.distribute.entries.every((e) => /\d|x/.test(e)) };
-  if (s.lx.combine) return { label: 'Combine', action: 'lxApply', enabled: valid(s.lx.combine.entry) && !s.lx.combine.wrong };
+  if (s.lx.distribute) return { label: 'Go', action: 'lxApply', enabled: s.lx.distribute.entries.every((e) => /\d/.test(e)) && s.lx.distribute.wrong === null };
+  if (s.lx.combine) return { label: 'Combine', action: 'lxApply', enabled: (valid(s.lx.combine.entry) || /^-?\d*x$/.test(s.lx.combine.entry)) && !s.lx.combine.wrong };
   if (s.combining?.step === 'struck') return { label: 'Next', action: 'crossNext', enabled: true };
   if (s.combining) return { label: 'Check', action: 'check', enabled: false };
   if (s.teachFlow && blankOpen(s) && amountMode(s)) return { label: 'Go', action: 'go', enabled: valid(s.amountEntry) };   // (Karl: Go, as everywhere)
@@ -524,10 +541,10 @@ function panel(s) {
     // one Multiply button: its three options beside it (Build D-2, Part 4); Flip everything is its −1
     moves.multiply = { live: true, action: 'multOpen', pressed: Boolean(s.lx.mult) || Boolean(s.lx.mopts), label: 'Multiply', flyout: s.lx.mopts ? multiplyOptions(['whole', 'frac', 'flip'], s.ui?.preview) : null };
   }
-  const lights = building ? {} : { fewer: s.lights.fewer, fewerHand: s.lx.hand.fewer, solved: s.lights.solved };
+  const lights = building ? {} : { fewer: s.lights.fewer, fewerHand: s.lx.hand.fewer, solved: s.lights.solved, ...(C.handLights ? { noparen: s.lights.noparen ?? 'off' } : {}) };
   const flash = ['red', 'neutral'].includes(s.lights.fewer) && s.history.length > 0 ? ['fewer'] : [];
   C.panel?.(s, moves);                                          // (the card's own moves: the Two-step card's Multiply and Flip)
-  const el = narrowPanel(moves, { disabled, lights, open: s.ui?.light ?? null, flash });
+  const el = narrowPanel(moves, { disabled, lights, open: s.ui?.light ?? null, flash, hand: C.handLights ?? null });
   if (moveOwed(s)) el.classList.add('is-owed');                   // the forced move: the needed move has a steady ring and the pulse
   return el;
 }

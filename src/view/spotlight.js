@@ -111,7 +111,7 @@ function protectedRects(o, error, kind) {
 }
 // The part of an element that is ink: the union of its children's boxes (an equation row is as wide as the screen; its terms are not).
 function contentRect(n) {
-  const kids = [...n.querySelectorAll('.lx-tok, .lb-num, .lb-x, .lb-plus, .lb-equals, .lx-box, .lb-coef, .lb-frac, .lx-paren, .sv-checkrow')];
+  const kids = [...n.querySelectorAll('.lx-tok, .lb-num, .lb-x, .lb-plus, .lb-equals, .lx-box, .lb-coef, .lb-frac, .lx-paren, .lx-factor, .lx-prodlabel, .sv-checkrow')];
   const rects = (kids.length ? kids : [n]).map((k) => k.getBoundingClientRect()).filter((q) => q.width && q.height);
   if (!rects.length) return null;
   return { left: Math.min(...rects.map((q) => q.left)), top: Math.min(...rects.map((q) => q.top)), right: Math.max(...rects.map((q) => q.right)), bottom: Math.max(...rects.map((q) => q.bottom)) };
@@ -335,6 +335,11 @@ export function findSolveTarget(root, target, s = null) {
       return side ? [...side.querySelectorAll('.lb-num')] : [];
     }
     case 'pair': return [...root.querySelectorAll('.lx-live .lx-tok.is-pair')];
+    case 'hinted': return [...root.querySelectorAll('.lx-live .lx-tok.is-hint')];                // the two like terms a reminder names (Build M)
+    // the distribute move (Build M): the factor and its parenthesis; a wrong product's blank, and its label
+    case 'factor': return [...root.querySelectorAll('.lx-live .lx-factor, .lx-live .lx-paren')];
+    case 'prodbox': return root.querySelector('.lx-prod.is-wrong .lx-prodbox') ?? root.querySelector('.lx-prod .lx-prodbox');
+    case 'prodlabel': return root.querySelector('.lx-prod.is-wrong .lx-prodlabel');
     case 'sumbox': return root.querySelector('.lx-box.is-sum');
     case 'blank': return root.querySelector('.lx-ghost.is-chosen .lx-box:not(.is-mirror)');
     case 'fractions': return root.querySelector('.lb-fractionrow');

@@ -3695,3 +3695,19 @@ body[data-input='touch'] #play.is-light #controls .btn-pad { min-width: 48px; mi
 .ts-light .lb-frac .is-blue, .ts-light .lb-neg .is-blue { color: #0072b2; }
 .ts-light .lb-rowwrap.is-fold { position: relative; }
 @media (prefers-reduced-motion: reduce) { .ts-light .dv-ghost .lx-box.is-empty.is-blink::after { animation: none; } }
+
+/* ---------- Distribute, combine, solve (Build M) ---------- */
+/* the factor and its parenthesis lit by the reminder, and ringed (with a pulse) as the move owed on a forced problem */
+.ui-grab .lx-factor.is-hint, .ui-grab .lx-paren.is-hint { outline: 3px solid #0072b2; border-radius: 8px; background: #eef6fc; }
+.ui-grab .lx-factor.is-ring, .ui-grab .lx-paren.is-ring { box-shadow: 0 0 0 3px #0072b2, 0 0 0 6px #fff, 0 0 0 8px #0072b2; border-radius: 8px; }
+.ui-grab .lx-factor.is-ring { animation: ds-pulse 1.4s ease-in-out infinite; }
+@keyframes ds-pulse { 50% { transform: scale(1.08); } }
+@media (prefers-reduced-motion: reduce) { .ui-grab .lx-factor.is-ring { animation: none; } }
+.ui-grab .lx-paren { border-radius: 8px; padding: 0 0.04em; }
+/* the x printed after the x blank: the student types only the number in front of it, with its sign */
+.ui-grab .lx-prodx { margin-left: 2px; color: inherit; }
+.ui-grab .lx-prod.is-wrong .lx-prodlabel { color: #b3261e; }
+/* the card's practice link, beside the level dots (never shown on other cards) */
+.btn-practice { font-size: 15px; padding: 6px 12px; }
+/* the side with the parenthesis is the long one (`5 − 2(x + 2)`), the other side a number: the equals line sits right of centre so it fits */
+.ds-light .lb-eq { grid-template-columns: minmax(0, 1.7fr) auto minmax(0, 1fr); }
