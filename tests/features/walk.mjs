@@ -214,7 +214,7 @@ const WALKS = {
     w.at('Add −6'); await w.addEnter(-6); await w.row('3x = 15 − 6');
     w.at('combine 15 and −6: 9'); await w.combine(9); await w.row('3x = 9');
     w.at('Divide by 3'); await w.divEnter(3); await w.row('x = ⅓(9)');
-    w.at('type 3, check'); await w.answer(3, 4);
+    w.at('type 3, check'); await w.answer(3, 3);
     await w.see('3(3 + 2) = 15', '✓ Balanced');
   },
   async 'm-level-2'(w) {
@@ -223,7 +223,7 @@ const WALKS = {
     w.at('distribute: −2, −8'); await w.distribute(-2, -8); await w.row('−2x + −8 = −4');
     w.at('Add 8, combine'); await w.addEnter(8); await w.row('−2x = −4 + 8'); await w.combine(4); await w.row('−2x = 4');
     w.at('Divide by −2'); await w.divEnter(-2); await w.row('x = −½(4)');
-    w.at('type −2, check'); await w.answer(-2, 4); await w.see('✓ Balanced');
+    w.at('type −2, check'); await w.answer(-2, 3); await w.see('✓ Balanced');
   },
   async 'm-level-3'(w) {
     await w.start(); await w.see('DISTRIBUTE, COMBINE, SOLVE · Level 3', '5 + 2(x + 3) = 17');
@@ -232,7 +232,7 @@ const WALKS = {
     w.at('distribute: 2, 6'); await w.distribute(2, 6); await w.row('5 + 2x + 6 = 17');
     w.at('combine 5 and 6: 11'); await w.combineTerms('5', '6', 11); await w.row('11 + 2x = 17');
     w.at('Add −11, combine, Divide'); await w.addEnter(-11); await w.combine(6); await w.row('2x = 6'); await w.divEnter(2); await w.row('x = ½(6)');
-    w.at('type 3'); await w.answer(3, 3); await w.see('Yes! x = 3');
+    w.at('type 3'); await w.answer(3, 1); await w.see('Yes! x = 3');
   },
   async 'm-level-4'(w) {
     await w.start(); await w.see('DISTRIBUTE, COMBINE, SOLVE · Level 4', '5 − 2(x + 2) = −7');
@@ -242,7 +242,7 @@ const WALKS = {
     w.at('combine 5 and −4: 1'); await w.combineTerms('5', '−4', 1); await w.row('1 + −2x = −7');
     w.at('Add −1, combine'); await w.addEnter(-1); await w.combine(-8); await w.row('−2x = −8');
     w.at('Divide by −2'); await w.divEnter(-2); await w.row('x = −½(−8)');
-    w.at('type 4'); await w.answer(4, 3); await w.see('Yes! x = 4');
+    w.at('type 4'); await w.answer(4, 1); await w.see('Yes! x = 4');
   },
   async 'm-level-5'(w) {
     await w.start(); await w.see('DISTRIBUTE, COMBINE, SOLVE · Level 5', '3(x + 2) + 2x = 41');
@@ -250,7 +250,7 @@ const WALKS = {
     w.at('distribute: 3, 6'); await w.distribute(3, 6); await w.row('3x + 6 + 2x = 41');
     w.at('combine 2x onto 3x: 5x'); await w.combineTerms('2x', '3x', '5x'); await w.row('5x + 6 = 41');
     w.at('Add −6, combine, Divide'); await w.addEnter(-6); await w.combine(35); await w.row('5x = 35'); await w.divEnter(5); await w.row('x = ⅕(35)');
-    w.at('type 7'); await w.answer(7, 3); await w.see('Yes! x = 7');
+    w.at('type 7'); await w.answer(7, 1); await w.see('Yes! x = 7');
   },
   async 'm-drag-labels'(w) {
     await w.start(); await w.see('3(x + 2) = 15');
@@ -291,7 +291,7 @@ const WALKS = {
     if (await w.page.locator('.lx-dot.is-red').count()) throw new Error('dividing first should light nothing red');
     await w.both('m-divide-first');
     w.at('Add −2'); await w.addEnter(-2); await w.row('x = ⅓(15) − 2');
-    w.at('type 3, check'); await w.answer(3, 4); await w.see('3(3 + 2) = 15', '✓ Balanced');
+    w.at('type 3, check'); await w.answer(3, 3); await w.see('3(3 + 2) = 15', '✓ Balanced');
     await w.both('m-check-group');
   },
   async 'm-combine-x'(w) {
@@ -314,8 +314,9 @@ const WALKS = {
     await w.start(); await w.see('DISTRIBUTE, COMBINE, SOLVE · Level 1');
     w.at('Practice distributing first'); await w.click('#practice'); await wait(w.page, 700);
     await w.see('DISTRIBUTE, THEN COMBINE · Level 1');
+    if (await w.page.locator('text=Skip tour').count()) await w.click('text=Skip tour');
     await w.both('m-practice');
-    w.at('← Packs, Solve it'); await w.click('text=← Packs'); await wait(w.page, 500); await w.click('.section-panel.sec-solve'); await wait(w.page, 600);
+    w.at('← Packs, Solve it'); await w.click('text=← Packs'); await wait(w.page, 500); await w.click('text=Solve it'); await wait(w.page, 600);
     await w.see('Distribute, combine, solve', 'Multiply each piece, then solve');
     await w.both('m-home');
   },

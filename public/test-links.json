@@ -205,7 +205,7 @@
       },
       "steps": [
         "Click the button. It opens Distribute, combine, solve, Level 1.",
-        "Click “Practice distributing first” at the top right, beside the level dots.",
+        "Click “Practice distributing first” at the top right, beside the level dots. Click Skip tour if a tour starts.",
         "Click ← Packs, then Solve it."
       ],
       "see": "It opens Build it’s card Distribute, then combine, at its first unfinished level (Level 1 for a fresh student). ← Packs goes to the home screen, where Solve it shows Distribute, combine, solve after Two-step equations; there is no button straight back to the card."

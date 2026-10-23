@@ -3711,3 +3711,5 @@ body[data-input='touch'] #play.is-light #controls .btn-pad { min-width: 48px; mi
 .btn-practice { font-size: 15px; padding: 6px 12px; }
 /* the side with the parenthesis is the long one (`5 − 2(x + 2)`), the other side a number: the equals line sits right of centre so it fits */
 .ds-light .lb-eq { grid-template-columns: minmax(0, 1.7fr) auto minmax(0, 1fr); }
+/* the label of a folded move ("3 · each piece") sits above its row's left edge, small, and never takes a drag meant for the term under it */
+.ds-light .lb-foldtag { pointer-events: none; top: -4px; left: 4px; transform: none; font-size: 14px; }
