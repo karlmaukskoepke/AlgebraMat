@@ -2,7 +2,7 @@
 // recommended level for each card. Built once; `render(...)` updates it.
 
 import { h, buildPad, bindKeys, shown } from './quiz.js';
-import { itemText, itemPad, itemLead, STANDING, packTitle } from '../engine/diagnostic.js';
+import { itemText, itemPad, itemLead, STANDING, packTitle, startLevelOf } from '../engine/diagnostic.js';
 import { packById, sectionById, levelNumber } from '../packs/index.js';
 
 export function createDiagnosticView(root, { onAction, onStop, onPlay, onMap, onRetake }) {
@@ -49,6 +49,7 @@ export function createDiagnosticView(root, { onAction, onStop, onPlay, onMap, on
       h('p', { class: 'quiz-blurb' }, openedNote),
       ...rows.map((r) => {
         const pack = packById(r.pack);
+        const start = startLevelOf(pack, r.rec);
         return h('article', { class: `diag-row is-${r.standing}` },
           h('div', { class: 'diag-row-head' },
             h('h3', {}, packTitle(r.pack)),
@@ -57,8 +58,8 @@ export function createDiagnosticView(root, { onAction, onStop, onPlay, onMap, on
             h('span', { class: 'diag-mark', 'aria-label': p.right ? 'right' : 'not right' }, p.right ? '✓' : '✗'),
             h('span', { class: 'diag-text' }, p.lead === '=' ? `${p.text} = ${p.answer}` : `${p.text}, ${p.lead} ${p.answer}`),
             p.right ? null : h('span', { class: 'diag-typed' }, p.skipped ? 'skipped' : `you typed ${shown(p.typed)}`)))),
-          h('button', { type: 'button', class: 'btn diag-go', dataset: { play: '1', pack: r.pack, level: String(r.rec) } },
-            `Start at Level ${levelNumber(pack, r.rec)}: ${pack.levelNames[r.rec - 1]}`));
+          h('button', { type: 'button', class: 'btn diag-go', dataset: { play: '1', pack: r.pack, level: String(start) } },
+            `Start at Level ${levelNumber(pack, start)}: ${pack.levelNames[start - 1]}`));
       }),
       h('div', { class: 'quiz-actions' },
         h('button', { type: 'button', class: 'btn btn-primary', dataset: { go: 'map' } }, 'Back to the cards'),

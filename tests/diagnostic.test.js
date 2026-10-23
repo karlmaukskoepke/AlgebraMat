@@ -1,9 +1,9 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import {
+import { upgradePlacement, startLevelOf,
   PROBES, TOTAL, DIAGNOSTIC_SECTIONS, probesOf, totalOf, diagnosticItems, newDiagnostic, reduceDiagnostic, readout, applyReadout, itemAnswer, itemText, itemPad, isRight, STANDING,
 } from '../src/engine/diagnostic.js';
 import { loadDiag, saveDiag, clearDiag, readDiag, splitOldDiag, DIAG_KEY, OLD_DIAG_KEY } from '../src/diagStore.js';
-import { PACKS } from '../src/packs/index.js';
+import { PACKS, packById, levelNumber } from '../src/packs/index.js';
 import { newProgress, normalizeProgress, mergeProgress, isLevelUnlocked, openLevels, completeLevel, newTwoStepLevel } from '../src/engine/progress.js';
 import { cardIdFor } from '../src/engine/lightCards.js';
 import { itemLead } from '../src/engine/diagnostic.js';
@@ -297,7 +297,7 @@ describe('Build L: the placement quiz opens the new Two-step card', () => {
   const items = diagnosticItems(SEED, 'solve');
   const at = items.map((it, i) => [it, i]).filter(([it]) => it.pack === 'two-step').map(([, i]) => i);
   const answers = ([l2, l5]) => items.map((it, i) => ((i === at[0] && l2) || (i === at[1] && l5) ? { typed: itemAnswer(it).replace(/ /g, '').replace(/−/g, '-'), skipped: false } : { typed: '', skipped: true }));
-  const row = (right, opts) => readout(SEED, answers(right), items, 'solve', opts).find((r) => r.pack === 'two-step-equations' || r.pack === 'two-step');
+  const row = (right) => readout(SEED, answers(right), items, 'solve').find((r) => r.pack === 'two-step-equations' || r.pack === 'two-step');
   const opened = (p) => [1, 2, 3, 4, 5, 6, 7].filter((l) => isLevelUnlocked(p, 'two-step-equations', l));
 
   it('keeps the probes and their order: the old card’s Levels 2 and 5, the same problems', () => {
@@ -318,18 +318,31 @@ describe('Build L: the placement quiz opens the new Two-step card', () => {
       expect(p.packs['two-step'].open).toBeUndefined();                                 // (the retired card is no longer opened)
     }
   });
-  it('a device with a result finished before Build L lands on the same levels as before: nothing lost, nothing gained', () => {
+  // Build M, Part 1 (Karl, 2026-10-23): a result finished before Build L now opens the new card's levels it showed, with the same mapping
+  // as a new placement, once, when the device loads it; nothing it opened is lost and nothing is credited as finished.
+  it('a device with a result finished before Build L opens the new Two-step levels it showed: nothing lost, nothing credited', () => {
     const before = { seed: SEED, answers: answers([true, true]) };                      // (saved with no version: Build K's place)
     localStorage.setItem(DIAG_KEY, JSON.stringify({ solve: before }));
     const s = loadDiag('solve');
     expect([s.done, s.legacy]).toEqual([true, true]);
-    const r = row([true, true], { legacy: s.legacy });
-    expect([r.pack, r.rec]).toEqual(['two-step', 6]);                                   // what Build K opened: the old card's levels
-    const p = applyReadout(newProgress(PACKS), readout(SEED, s.answers, items, 'solve', { legacy: s.legacy }));
-    expect(opened(p)).toEqual([1]);                                                     // the new card as Build K left it
-    expect(p.packs['two-step'].open).toBe(6);
-    saveDiag(s);                                                                        // (seen again: still Build K's place)
-    expect(loadDiag('solve').legacy).toBe(true);
+    // what that student's device held: Build K's placement (the old card's levels opened, the new card at Level 1), some levels done
+    let old = applyReadout(newProgress(PACKS), readout(SEED, s.answers, items, 'solve'));
+    old = openLevels(old, 'two-step', 6);
+    delete old.packs['two-step-equations'].open;
+    old.packs['add-both'].levels[1] = true;
+    const p = upgradePlacement(old, readout(SEED, s.answers, items, 'solve'));
+    expect(opened(p)).toEqual([1, 2, 3, 4, 5, 6]);                                      // the new card: what the quiz showed
+    expect(p.packs['two-step'].open).toBe(6);                                           // nothing lost
+    for (const [id, e] of Object.entries(p.packs)) expect(e.levels).toEqual(old.packs[id].levels);   // nothing credited
+    for (const [right, levels] of [[[false, false], [1]], [[false, true], [1, 2]], [[true, false], [1, 2, 3, 4]]]) {
+      const q = upgradePlacement(newProgress(PACKS), readout(SEED, answers(right), items, 'solve'));
+      expect(opened(q)).toEqual(levels);
+      expect(q.packs['two-step-equations'].levels.some(Boolean)).toBe(false);
+    }
+    // a level already open further is kept (opening never closes)
+    expect(opened(upgradePlacement(openLevels(newProgress(PACKS), 'two-step-equations', 7), readout(SEED, answers([false, false]), items, 'solve')))).toEqual([1, 2, 3, 4, 5, 6, 7]);
+    saveDiag({ ...s, legacy: false });                                                  // (main.js saves it as today's once upgraded)
+    expect(loadDiag('solve').legacy).toBeUndefined();
     // a result saved part way before Build L, finished now, gets today's readout
     localStorage.setItem(DIAG_KEY, JSON.stringify({ solve: { seed: SEED, answers: before.answers.slice(0, 3) } }));
     const part = loadDiag('solve');
@@ -339,12 +352,23 @@ describe('Build L: the placement quiz opens the new Two-step card', () => {
     saveDiag(done);
     expect(loadDiag('solve').legacy).toBeUndefined();
   });
+  // Build M, Part 1: One-step equations opens at saved Level 3, so a result recommending 1 or 2 read "Start at Level -1" (or 0)
+  it('a result button never shows a level below 1 (One-step equations, both wrong)', () => {
+    const one = packById('one-step');
+    for (const rec of [1, 2, 3, 4, 5]) expect(levelNumber(one, startLevelOf(one, rec))).toBeGreaterThanOrEqual(1);
+    expect(startLevelOf(one, 1)).toBe(3);
+    expect(levelNumber(one, startLevelOf(one, 1))).toBe(1);
+    const r = readout(SEED, items.map(() => ({ typed: '', skipped: true })), items, 'solve').find((x) => x.pack === 'one-step');
+    expect(levelNumber(one, startLevelOf(one, r.rec))).toBe(1);
+    expect(startLevelOf(packById('add-both'), 3)).toBe(3);                              // (a card whose recommendation is in range is unchanged)
+    for (const pack of PACKS.filter((x) => x.levels)) for (let rec = 1; rec <= pack.levels; rec++) expect(levelNumber(pack, startLevelOf(pack, rec))).toBeGreaterThanOrEqual(1);
+  });
   it('a result finished today is saved as today’s and reads back the same', () => {
     let s = newDiagnostic(SEED, 'solve');
     s = { ...s, answers: answers([true, false]), index: items.length, done: true };
     saveDiag(s);
     const back = loadDiag('solve');
     expect(back.legacy).toBeUndefined();
-    expect(row([true, false], { legacy: back.legacy })).toMatchObject({ pack: 'two-step-equations', rec: 4 });
+    expect(row([true, false])).toMatchObject({ pack: 'two-step-equations', rec: 4 });
   });
 });

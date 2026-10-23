@@ -1,7 +1,39 @@
 {
   "_about": "The test-links page (test-links.html) reads this list: Karl's change list. `checks` is the Features to check section at the top: one item per new feature (id, name, build, one link, numbered steps, what you should see), written from the real code and walked through with tests/features/walk.mjs before a build is called finished; the ticks live only in Karl's browser, and an item stays here until Karl has ticked it. The rest of the page: Live = on the site for everyone. Testing = behind a flag, waiting for Karl to keep or retire it. Retired = deleted. Every build adds or updates its entries (CLAUDE.md, Working with Karl). Each entry is a name, one plain sentence (`about`) and, for Live and Testing, its buttons. A button's `query` is the part after the address: card, level, seed, flags, sign-in skipped. `level` in a link is the saved level number (Add to both sides and Divide it: link level 2 is shown as Level 1). `reset: true` clears this browser's progress first; `look` is one sentence on what to look for; `notLive` says plainly why a link won't work on the live site.",
-  "updated": "2026-10-22",
+  "updated": "2026-10-23",
   "checks": [
+    {
+      "id": "m-placement-old",
+      "name": "A student placed by the quiz before Build L now gets the new Two-step levels",
+      "build": "Build M",
+      "link": {
+        "label": "Open as a device placed before Build L",
+        "query": "?olddiag=solve&seed=7&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens the home screen on a device whose Solve it placement quiz was finished before Build L, with both Two-step problems right.",
+        "Click Solve it.",
+        "Look at the Two-step equations card (scroll inside the card to see Levels 5 to 7)."
+      ],
+      "see": "Two-step equations shows Levels 1 to 6 open (Level 7 locked), and none of them marked done. Before this build that device started the card at Level 1."
+    },
+    {
+      "id": "m-placement-level1",
+      "name": "The placement quiz never says “Start at Level −1”",
+      "build": "Build M",
+      "link": {
+        "label": "Open the Solve it placement quiz",
+        "query": "?diag=solve&seed=7&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens the Solve it placement quiz, problem 1 of 10.",
+        "Click “I don’t know” ten times, until the results show.",
+        "Under One-step equations, click the green button."
+      ],
+      "see": "The One-step equations button says “Start at Level 1: ax = b” (it said “Start at Level −1: x + a = b” before). It opens One-step equations at Level 1."
+    },
     {
       "id": "l-menu",
       "name": "The Multiply menu: multiply, divide, fraction (no −1)",
@@ -1022,6 +1054,24 @@
               "label": "Save codes (teacher only)",
               "query": "?codes=1&nosignin=1",
               "look": "With ?codes=1 the Save code and Enter code buttons come back, for moving a student by hand."
+            }
+          ]
+        },
+        {
+          "name": "Build M, Part 1: the placement quiz fixes (2026-10-23)",
+          "about": "A student placed by the Solve it quiz before Build L now gets the new Two-step levels the quiz showed they know (nothing marked done, nothing lost). The quiz results never say “Start at Level −1” any more.",
+          "links": [
+            {
+              "label": "A device placed before Build L",
+              "look": "Solve it: Two-step equations has Levels 1 to 6 open, none done.",
+              "query": "?olddiag=solve&seed=7&nosignin=1",
+              "reset": true
+            },
+            {
+              "label": "The Solve it quiz",
+              "look": "Skip all ten: One-step equations says Start at Level 1.",
+              "query": "?diag=solve&seed=7&nosignin=1",
+              "reset": true
             }
           ]
         },

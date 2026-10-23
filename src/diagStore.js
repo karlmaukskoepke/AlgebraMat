@@ -8,8 +8,8 @@ export const DIAG_KEY = 'mat.diag.v2';
 export const OLD_DIAG_KEY = 'mat.diag.v1';
 
 // What a saved result opens: 2 since Build L (the Two-step probes open the new card). A result finished before that has no `v` and is
-// `legacy`: it opens what it opened then, so a student placed before Build L neither loses nor gains a level. One saved part way gets
-// today's readout when it is finished.
+// `legacy`: since Build M it reads as today's, and the first load opens the new card's levels it showed (main.js, upgradePlacement); it is
+// then saved with `v`.
 export const DIAG_V = 2;
 
 // Whatever was saved for a section, as a clean state or null.
@@ -57,5 +57,13 @@ export function saveDiag(state) {
 export function clearDiag(section) {
   const all = readAll();
   delete all[section];
+  try { localStorage.setItem(DIAG_KEY, JSON.stringify(all)); } catch { /* storage blocked */ }
+}
+
+// A test link (Build M, Part 1): ?olddiag=solve&seed=… puts a Solve it placement on this device as one finished before Build L (no `v`),
+// with both Two-step problems right and the rest skipped, so the load that follows shows what such a device now opens.
+export function saveOldPlacement(section, seed, answers) {
+  const all = readAll();
+  all[section] = { seed, answers };
   try { localStorage.setItem(DIAG_KEY, JSON.stringify(all)); } catch { /* storage blocked */ }
 }

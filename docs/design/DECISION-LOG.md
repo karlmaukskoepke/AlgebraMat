@@ -151,3 +151,28 @@ Ideas recorded, nothing built.
 3. **Other teachers sign up their classes securely.** Design note: keep students anonymous (class codes, no names or emails). This implies
    a real backend in place of the Google Sheet, and a student-data-privacy review (FERPA, COPPA, New York's student data privacy law)
    before anyone outside Karl's district uses it.
+
+## 2026-10-23: Build L review and the Distribute card (Karl; built in Build M)
+
+**Build L's decisions, approved:**
+- Typing `1` then `/` in Multiply on Divide it switches to Divide (Fraction is greyed there).
+- Divide it's "Try dividing both sides." wording stays.
+- The divide label before a number is typed stays ("Dividing by a number is multiplying by 1 over it.").
+- **Students placed by the quiz before Build L get the new Two-step levels** (Build M, Part 1). Their saved placement opens the new card's
+  levels it already showed they know, with the same mapping as a new placement. It only opens levels: nothing is credited as finished,
+  and nothing already open is lost. (Build L had kept them at Level 1 under "nothing lost or gained"; Karl: that start was the bug.)
+- The placement quiz's results never show a level below 1 (One-step equations said "Start at Level −1" when both its problems were wrong).
+
+**The Distribute card ("Distribute, combine, solve"), basic form, one build:**
+1. Solve `3(x + 2) = 15` by distributing, combining, and finishing as in Two-step. Drag the factor onto the parenthesis: a row of blanks,
+   one per product, each labelled with its multiplication (`3 · x`, `3 · 2`); the x blank has the x printed after it; every piece is typed
+   with its sign. The app brings the other terms down. It never writes a solved value.
+2. **The distribute move is shared:** a move of the shared loop any card can turn on, not a drill and not card-only code. The hidden
+   Distribute drill (`?drill=distribute`) is deleted once the shared move is live.
+3. **Divide-first on a group is accepted:** at `3(x + 2) = 15`, dividing both sides by 3 is helpful and writes `x + 2 = ⅓(15)`. A group
+   counts as one term for the single-term rule. A fraction that splits both sides but only partly cancels the factor is legal and neutral.
+4. **Combining x-terms** (`3x + 2x`) is new on the shared layer: the student types every piece, the x too (`5x`); a bare `5` is sent back.
+5. **Levels:** Karl's levels 1 and 2 are merged (both signs of c). Five levels: `a(x ± c) = b`; `−a(x ± c) = b`; `n + a(x ± c) = b`;
+   `n − a(x ± c) = b` (tap the minus first); like x-terms (`a(x ± c) + bx = d`, either order). No walkthrough.
+6. **"Practice distributing first"** links to Build it's "Distribute, then combine" instead of a walkthrough (Build it teaches it).
+7. **Build it's Combine and Distribute modules stay read-only.** Drag features for them are parked for the end of the cards build.

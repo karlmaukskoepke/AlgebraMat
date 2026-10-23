@@ -182,6 +182,25 @@ class Walk {
 
 // ---- one walk per item (same id as in the data file) ---------------------------------------------------------------------------------
 const WALKS = {
+  // ---- Build M, Part 1: the placement quiz ----
+  async 'm-placement-old'(w) {
+    await w.start();
+    w.at('Solve it'); await w.click('.section-panel.sec-solve'); await wait(w.page, 600);
+    const card = (await w.page.evaluate(() => [...document.querySelectorAll('.pack-card')].map((c) => c.innerText).find((x) => x.includes('Add, combine, then take a fraction')) ?? '')).replace(/\s+/g, ' ');
+    const locked = (n) => new RegExp(`Level ${n} Locked`).test(card);
+    for (const n of [1, 2, 3, 4, 5, 6]) if (locked(n)) throw new Error(`Level ${n} of Two-step equations should be open: ${card.slice(0, 300)}`);
+    if (!locked(7)) throw new Error(`Level 7 should still be locked: ${card.slice(0, 300)}`);
+    if (/done|✓/i.test(card)) throw new Error(`no level should be marked done: ${card.slice(0, 300)}`);
+    await w.both('m-placement-old');
+  },
+  async 'm-placement-level1'(w) {
+    await w.start(); await w.see('DIAGNOSTIC', '1 of 10');
+    w.at('I don’t know, ten times'); for (let i = 0; i < 10; i++) await w.click('[data-go="skip"]');
+    await w.see('RESULTS', 'One-step equations', 'Start at Level 1: ax = b'); await w.notSee('Level -1', 'Level −1', 'Level 0');
+    await w.both('m-placement-level1');
+    w.at('click the green button'); await w.click('.diag-go[data-pack="one-step"]'); await wait(w.page, 700);
+    await w.see('ONE-STEP EQUATIONS · Level 1');
+  },
   // ---- Build L: the Multiply menu is multiply / divide / fraction, and Flip leaves it ----
   async 'l-menu'(w) {
     await w.start(); await w.see('DIVIDE IT · Level 2', '5x', '−15');

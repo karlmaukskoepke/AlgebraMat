@@ -48,10 +48,10 @@ import { loadRuns, saveRun } from './fluencyStore.js';
 import { bestScore } from './engine/highscores.js';
 import { CHALLENGES } from './engine/fluency.js';
 import {
-  diagnosticItems, newDiagnostic, reduceDiagnostic, readout, applyReadout, totalOf, DIAGNOSTIC_SECTIONS,
+  diagnosticItems, itemAnswer, newDiagnostic, reduceDiagnostic, readout, applyReadout, upgradePlacement, totalOf, DIAGNOSTIC_SECTIONS,
 } from './engine/diagnostic.js';
 import { createDiagnosticView } from './view/diagnostic.js';
-import { loadDiag, saveDiag, clearDiag } from './diagStore.js';
+import { loadDiag, saveDiag, clearDiag, saveOldPlacement } from './diagStore.js';
 
 const $ = (id) => document.getElementById(id);
 
@@ -316,7 +316,7 @@ function startDiagnostic(section, retake = false) {
   const items = diagnosticItems(state.seed, section);
   const back = () => goHome();
   const finish = () => {
-    const rows = readout(state.seed, state.answers, items, section, { legacy: Boolean(state.legacy) });
+    const rows = readout(state.seed, state.answers, items, section);
     progress = applyReadout(progress, rows);
     persist();
     view.render(state, items, rows, 'I opened the levels you’re ready for. Start where it says, or pick any open level on the pack map.');
@@ -624,6 +624,19 @@ function savedCurrent() {
 // ?level=N opens a Flip It level; ?pack=groupit&level=N opens a Group It level
 // (?pack=lasso, its id from before the rename, still works); ?pack=boxes&level=N
 // opens a Boxes & Circles level.
+// A placement saved before Build L opens the new Two-step levels it showed the student knows (Build M, Part 1): once, when the device
+// loads it. It only opens levels; nothing is credited, and the result is then saved as today's.
+if (params.get('olddiag') === 'solve' && Number.isInteger(urlSeed) && urlSeed >= 0 && !loadDiag('solve')) {
+  const items = diagnosticItems(urlSeed, 'solve');
+  saveOldPlacement('solve', urlSeed, items.map((it) => (it.pack === 'two-step' ? { typed: itemAnswer(it).replace(/ /g, '').replace(/−/g, '-'), skipped: false } : { typed: '', skipped: true })));
+}
+for (const section of DIAGNOSTIC_SECTIONS) {
+  const d = loadDiag(section);
+  if (!d?.legacy) continue;
+  progress = upgradePlacement(progress, readout(d.seed, d.answers, diagnosticItems(d.seed, section), section));
+  saveDiag({ ...d, legacy: false });
+  persist();
+}
 sync.request();   // signed in to a class sheet? catch up
 const urlLevel = Number(params.get('level'));
 const urlPack = packById(params.get('pack') === 'groupit' ? 'lasso' : params.get('pack') ?? 'flipit');

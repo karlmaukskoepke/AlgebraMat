@@ -87,9 +87,9 @@ export function reduceDiagnostic(state, action, items = diagnosticItems(state.se
 // ---------- The readout ----------
 
 // How each card went, and the level to start at: both right → the level after the harder one; the easier one right →
-// the level after it; otherwise from the start. A probe of a retired card says which card it opens now (`opens`, Build L); `legacy`
-// (a result finished before Build L) keeps what it opened then, so a student placed before it neither loses nor gains a level.
-export function readout(seed, answers, items = diagnosticItems(seed), section = 'all', { legacy = false } = {}) {
+// the level after it; otherwise from the start. A probe of a retired card says which card it opens now (`opens`, Build L). A result
+// finished before Build L reads the same way (Build M, 2026-10-23: Karl): see upgradePlacement.
+export function readout(seed, answers, items = diagnosticItems(seed), section = 'all') {
   return probesOf(section).map(({ pack, levels, rec: recOf, opens }) => {
     const mine = items.map((it, i) => ({ it, a: answers[i], i })).filter((x) => x.it.pack === pack);
     const right = mine.map((x) => isRight(x.it, x.a?.typed));
@@ -98,7 +98,7 @@ export function readout(seed, answers, items = diagnosticItems(seed), section = 
       : right[0] ? Math.min(total, levels[0] + 1)
         : right[1] ? levels[0] : 1;
     const standing = right.every(Boolean) ? 'strong' : right.some(Boolean) ? 'growing' : 'start';
-    const now = opens && !legacy ? { pack: opens.pack, rec: opens.level(rec), probed: pack } : { pack, rec };
+    const now = opens ? { pack: opens.pack, rec: opens.level(rec), probed: pack } : { pack, rec };
     return {
       ...now, standing,
       problems: mine.map((x, k) => ({ lead: itemLead(x.it), level: x.it.level, text: itemText(x.it), answer: itemAnswer(x.it), typed: x.a?.typed ?? '', skipped: Boolean(x.a?.skipped), right: right[k] })),
@@ -115,6 +115,14 @@ export const applyReadout = (progress, results) => results.reduce((p, r) => {
   if (r.rec >= (SKIPS_NUMERIC_L1[r.pack] ?? Infinity) && opened.packs[r.pack]) opened.packs[r.pack].levels[0] = true;
   return opened;
 }, progress);
+
+// A result finished before Build L (Build M, Part 1): when this device loads it, it opens on the new card the levels it showed the student
+// knows, with the same mapping as a new placement. It only opens levels: nothing is credited as finished, and nothing already open closes.
+export const upgradePlacement = (progress, results) => results.filter((r) => r.probed).reduce((p, r) => openLevels(p, r.pack, r.rec), progress);
+
+// The level a result's button starts at: never below the card's first level (One-step equations opens at its saved Level 3, so a
+// recommendation of 1 or 2 is its Level 1; it read "Start at Level -1" before Build M).
+export const startLevelOf = (pack, rec) => Math.max(rec, pack?.firstLevel ?? 1);
 
 export const STANDING = { strong: 'Strong', growing: 'Getting there', start: 'Start here' };
 export const packTitle = (id) => PACKS.find((p) => p.id === id)?.title ?? id;
