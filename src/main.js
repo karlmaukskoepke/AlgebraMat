@@ -20,7 +20,6 @@ import { valueLightPlay } from './play/valueLightPlay.js';
 import { solveLightPlay } from './play/solveLightPlay.js';
 import { switchPlay } from './play/switchPlay.js';
 import { addBothPlay, divideMovesPlay, flipPlay, twoStepPlay, distSolvePlay } from './play/solveCards.js';
-import { distributeDrillPack, distributeDrillPlay } from './play/distributeDrillPlay.js';
 import { divideNumericPlay } from './play/divideNumericPlay.js';
 import { addBothNumericPlay } from './play/addBothNumericPlay.js';
 import { boxPlay } from './play/boxPlay.js';
@@ -80,9 +79,6 @@ const PLAY = {
   'distribute-solve': distSolvePlay,                                             // Distribute, combine, solve (Build M)
   'distribute-combine': (level) => (level >= 4 ? distributeTypedPlay : LIGHT ? distributeLightPlay : distributePlay),
 };
-// ?drill=distribute: the Distribute drill of lights round 2 (B6), a hidden pack that exists only with the link.
-const DRILL = new URLSearchParams(location.search).get('drill') === 'distribute';
-if (DRILL) { HIDDEN_PACKS.push(distributeDrillPack); PLAY[distributeDrillPack.id] = distributeDrillPlay; }
 const adapterFor = (packId, level) => (typeof PLAY[packId] === 'function' ? PLAY[packId](level) : PLAY[packId]);
 const newSeed = () => Math.floor(Math.random() * 2 ** 32);
 // Every problem knows which level it was played at, for the anonymous log. (Not `level`: a few packs read that to
@@ -647,9 +643,7 @@ sync.request();   // signed in to a class sheet? catch up
 const urlLevel = Number(params.get('level'));
 const urlPack = packById(params.get('pack') === 'groupit' ? 'lasso' : params.get('pack') ?? 'flipit');
 const resume = savedCurrent();
-if (DRILL) {
-  startLevel(distributeDrillPack.id, 1);
-} else if (DIAGNOSTIC_SECTIONS.includes(params.get('diag'))) {
+if (DIAGNOSTIC_SECTIONS.includes(params.get('diag'))) {
   startDiagnostic(params.get('diag'));                // ?diag=solve opens a section's diagnostic (a test link, Build L)
 } else if (urlPack && PLAY[urlPack.id] && Number.isInteger(urlLevel) && urlLevel >= 1 && urlLevel <= urlPack.levels) {
   startLevel(urlPack.id, urlLevel);

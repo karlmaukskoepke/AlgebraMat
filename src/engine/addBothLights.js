@@ -57,7 +57,7 @@ export const blankOpen = (s) => s.menu === 'add' && !s.scaffold && s.stage === '
 // Can the Add move be previewed or chosen right now (S0)?
 export const canChoose = (s) => s.stage === 'moves' && !s.scaffold && !s.sub && !s.pending && !s.combining && !s.resolving && s.menu !== 'add';
 // The move is owed (the problem after a correct guess) until one is committed: x = [ ] is greyed and Add has a steady ring (the loop's
-// rule; the drill has none).
+// rule).
 export const moveOwed = (s) => Boolean(s.mustMove) && !s.movedOnce && s.stage === 'moves';
 // Can the terms of the newest row be grabbed (B0)? Not while help, a substitution, a half-made move or a combine is going on.
 export const canGrab = (s) => s.stage === 'moves' && !s.scaffold && !s.sub && !s.pending && !s.combining && !s.resolving && !s.lx?.combine && !s.lx?.distribute;
@@ -69,10 +69,9 @@ export const amountMode = (s) => s.menu === 'add' && s.typing !== 'answer' && (!
 export const seesawAdd = (s) => Boolean(s.scaffold) && s.stage === 'moves' && s.menu === 'add' && !s.combining && !s.resolving && s.pending?.kind !== 'cross' && !s.alone;
 
 // Is x = [ ] live? The loop's rule (always, except while a move waits for Undo, a value is being checked, the move is owed, or the
-// seesaw is busy), and not while a sum, products or a multiply of the term layer are open. The drill's x = is live until it is done.
+// seesaw is busy), and not while a sum or the products of a distribute are open.
 export function lightsAnswerLive(s, loop = solve) {
-  if (s.lx?.combine || s.lx?.distribute || s.lx?.mult) return false;
-  if (s.drill) return s.stage !== 'done';
+  if (s.lx?.combine || s.lx?.distribute) return false;
   return loop.answerLive(s);
 }
 
@@ -386,7 +385,7 @@ function typeX(entry, action) {
   return typeInto(entry, action, 'integer');
 }
 
-// ---------- the distribute move (Build M; the hidden drill's move, made shared) ----------
+// ---------- the distribute move (Build M; the hidden Distribute drill's move, made shared; the drill is deleted) ----------
 // Its actions: a subtracted factor's minus tapped (shown as a negative number, needed before distributing), the factor dropped on its
 // parenthesis (the blanks open: one per piece, each labelled with its multiplication), a piece typed or a blank chosen, and Go (or
 // Enter): with every blank filled, the products are checked; right, the app writes the new row from them, bringing the other terms down.

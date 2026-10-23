@@ -3,6 +3,234 @@
   "updated": "2026-10-23",
   "checks": [
     {
+      "id": "m-level-1",
+      "name": "Distribute, combine, solve · Level 1: a(x ± c) = b",
+      "build": "Build M",
+      "link": {
+        "label": "Open Distribute, combine, solve · Level 1",
+        "query": "?pack=distribute-solve&level=1&seed=37&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Distribute, combine, solve, Level 1, on 3(x + 2) = 15.",
+        "Drag the 3 onto the parenthesis. Type 3, press Enter, type 6, press Enter.",
+        "Click Add (the top box in the panel), type −6, press Enter.",
+        "Drag the 15 onto the −6, type 9, press Enter.",
+        "Click Multiply, then Divide, type 3, press Enter.",
+        "Type 3 in x =, press Enter, drag the 3 onto the x, then press Enter until the check ends."
+      ],
+      "see": "The rows read 3x + 6 = 15, then 3x = 15 − 6, then 3x = 9, then x = ⅓(9). The check reads 3(3 + 2) = 15, then ✓ Balanced. The app never writes 3 for you."
+    },
+    {
+      "id": "m-level-2",
+      "name": "Distribute, combine, solve · Level 2: −a(x ± c) = b",
+      "build": "Build M",
+      "link": {
+        "label": "Open Distribute, combine, solve · Level 2",
+        "query": "?pack=distribute-solve&level=2&seed=2&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Level 2 on −2(x + 4) = −4.",
+        "Drag the −2 onto the parenthesis (no tap needed: −2 is the factor). Type −2, Enter, −8, Enter.",
+        "Click Add, type 8, press Enter. Drag the −4 onto the 8, type 4, press Enter.",
+        "Click Multiply, then Divide, type −2, press Enter.",
+        "Type −2 in x =, press Enter, drag it onto the x, press Enter until the check ends."
+      ],
+      "see": "The rows read −2x + −8 = −4, then −2x = −4 + 8, then −2x = 4, then x = −½(4). The check ends ✓ Balanced."
+    },
+    {
+      "id": "m-level-3",
+      "name": "Distribute, combine, solve · Level 3: n + a(x ± c) = b",
+      "build": "Build M",
+      "link": {
+        "label": "Open Distribute, combine, solve · Level 3",
+        "query": "?pack=distribute-solve&level=3&seed=35&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Level 3 on 5 + 2(x + 3) = 17.",
+        "Click Multiply, then Divide.",
+        "Drag the 2 onto the parenthesis. Type 2, Enter, 6, Enter.",
+        "Drag the 5 onto the 6, type 11, press Enter.",
+        "Click Add, type −11, Enter. Drag the 17 onto the −11, type 6, Enter. Click Multiply, Divide, type 2, Enter.",
+        "Type 3 in x =, press Enter."
+      ],
+      "see": "Divide says “That move works once each side is one term.” The rows read 5 + 2x + 6 = 17, then 11 + 2x = 17, then 2x = 6, then x = ½(6). Typing 3 ends “Yes! x = 3”."
+    },
+    {
+      "id": "m-level-4",
+      "name": "Distribute, combine, solve · Level 4: n − a(x ± c) = b",
+      "build": "Build M",
+      "link": {
+        "label": "Open Distribute, combine, solve · Level 4",
+        "query": "?pack=distribute-solve&level=4&seed=126&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Level 4 on 5 − 2(x + 2) = −7.",
+        "Click the minus in front of the 2. Then drag −2 onto the parenthesis. Type −2, Enter, −4, Enter.",
+        "Drag the 5 onto the −4, type 1, press Enter.",
+        "Click Add, type −1, Enter. Drag the −7 onto the −1, type −8, Enter.",
+        "Click Multiply, Divide, type −2, Enter. Type 4 in x =, press Enter."
+      ],
+      "see": "After the tap it reads 5 + −2(x + 2) = −7. The rows read 5 + −2x + −4 = −7, then 1 + −2x = −7, then −2x = −8, then x = −½(−8). Typing 4 ends “Yes! x = 4”."
+    },
+    {
+      "id": "m-level-5",
+      "name": "Distribute, combine, solve · Level 5: like x-terms",
+      "build": "Build M",
+      "link": {
+        "label": "Open Distribute, combine, solve · Level 5",
+        "query": "?pack=distribute-solve&level=5&seed=306&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Level 5 on 3(x + 2) + 2x = 41.",
+        "Drag the 3 onto the parenthesis. Type 3, Enter, 6, Enter.",
+        "Drag the 2x onto the 3x, type 5x, press Enter.",
+        "Click Add, type −6, Enter. Drag the 41 onto the −6, type 35, Enter.",
+        "Click Multiply, Divide, type 5, Enter. Type 7 in x =, press Enter."
+      ],
+      "see": "The rows read 3x + 6 + 2x = 41, then 5x + 6 = 41, then 5x = 35, then x = ⅕(35). Typing 7 ends “Yes! x = 7”."
+    },
+    {
+      "id": "m-drag-labels",
+      "name": "Drag the factor onto the parenthesis: the labels above the blanks",
+      "build": "Build M",
+      "link": {
+        "label": "Open Distribute, combine, solve · Level 1",
+        "query": "?pack=distribute-solve&level=1&seed=37&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Level 1 on 3(x + 2) = 15.",
+        "Drag the 3 a little way and let go anywhere that is not the parenthesis.",
+        "Now drag the 3 onto the parenthesis and let go.",
+        "Type 3, press Enter, type 6, press Enter."
+      ],
+      "see": "Let go elsewhere, the 3 goes back and nothing changes. On the parenthesis, a row of two blue boxes appears under the equation: “3 · x” above the first (an x printed after it) and “3 · 2” above the second. Go writes 3x + 6 = 15, and the panel’s third small dot at the bottom (No parentheses) turns green."
+    },
+    {
+      "id": "m-tap-minus",
+      "name": "Tap the minus first, then distribute 5 − 2(x + 2)",
+      "build": "Build M",
+      "link": {
+        "label": "Open Distribute, combine, solve · Level 4",
+        "query": "?pack=distribute-solve&level=4&seed=126&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Level 4 on 5 − 2(x + 2) = −7.",
+        "Drag the 2 onto the parenthesis.",
+        "Click the minus in front of the 2.",
+        "Drag the −2 onto the parenthesis."
+      ],
+      "see": "The first drag is refused: “Tap the minus first, so −2 is a negative number.” After the tap the equation reads 5 + −2(x + 2) = −7, and then the drag opens the two blanks, labelled “−2 · x” and “−2 · 2”."
+    },
+    {
+      "id": "m-wrong-product",
+      "name": "The wrong second product (the piece not multiplied)",
+      "build": "Build M",
+      "link": {
+        "label": "Open Distribute, combine, solve · Level 1",
+        "query": "?pack=distribute-solve&level=1&seed=37&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Level 1 on 3(x + 2) = 15.",
+        "Drag the 3 onto the parenthesis. Type 3, press Enter, type 2, press Enter.",
+        "Click Undo."
+      ],
+      "see": "The screen greys; the second box (2) and its label “3 · 2” stay lit, with “3 · 2 is not 2. Multiply this piece too. Press Undo and try again.” After Undo the equation is back, the 3 and the parenthesis are outlined, and the hint says “Drag the 3 onto the parenthesis to multiply it by each piece.”"
+    },
+    {
+      "id": "m-divide-first",
+      "name": "Divide first on 3(x + 2) = 15",
+      "build": "Build M",
+      "link": {
+        "label": "Open Distribute, combine, solve · Level 1",
+        "query": "?pack=distribute-solve&level=1&seed=37&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Level 1 on 3(x + 2) = 15.",
+        "Click Multiply, then Divide, type 3, press Enter.",
+        "Click Add, type −2, press Enter.",
+        "Type 3 in x =, press Enter, drag the 3 onto the x, press Enter until the check ends."
+      ],
+      "see": "Dividing writes ⅓(3(x + 2)) = ⅓(15), then x + 2 = ⅓(15), with nothing red. Add writes x = ⅓(15) − 2. The check reads 3(3 + 2) = 15 and ends ✓ Balanced."
+    },
+    {
+      "id": "m-combine-x",
+      "name": "Combine x-terms (Level 5), including a bare number rejected",
+      "build": "Build M",
+      "link": {
+        "label": "Open Distribute, combine, solve · Level 5",
+        "query": "?pack=distribute-solve&level=5&seed=306&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Level 5 on 3(x + 2) + 2x = 41.",
+        "Drag the 3 onto the parenthesis. Type 3, Enter, 6, Enter.",
+        "Drag the 2x onto the 3x. Type 5 and press Enter.",
+        "Press x on the keyboard, then press Enter."
+      ],
+      "see": "Dropping 2x on 3x lights both with “Combine” over them and a box under them. A bare 5 gets the pop-up “Type every piece, including the x.” and nothing changes; with 5x the row reads 5x + 6 = 41."
+    },
+    {
+      "id": "m-ghost-hand",
+      "name": "The ghost hand after 2.5 seconds",
+      "build": "Build M",
+      "link": {
+        "label": "Open Distribute, combine, solve · Level 1",
+        "query": "?pack=distribute-solve&level=1&seed=37&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Level 1 on 3(x + 2) = 15.",
+        "Click I’m stuck.",
+        "Do nothing for 4 seconds."
+      ],
+      "see": "I’m stuck outlines the 3 and the parenthesis and says “Drag the 3 onto the parenthesis to multiply it by each piece.” After about 2.5 seconds a faint 3 travels from the 3 to the parenthesis, and keeps doing so until you act."
+    },
+    {
+      "id": "m-practice",
+      "name": "Practice distributing first",
+      "build": "Build M",
+      "link": {
+        "label": "Open Distribute, combine, solve · Level 1",
+        "query": "?pack=distribute-solve&level=1&seed=37&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Distribute, combine, solve, Level 1.",
+        "Click “Practice distributing first” at the top right, beside the level dots.",
+        "Click ← Packs, then Solve it."
+      ],
+      "see": "It opens Build it’s card Distribute, then combine, at its first unfinished level (Level 1 for a fresh student). ← Packs goes to the home screen, where Solve it shows Distribute, combine, solve after Two-step equations; there is no button straight back to the card."
+    },
+    {
+      "id": "student-distribute",
+      "name": "Play it like a student: Distribute, combine, solve",
+      "build": "Build M",
+      "link": {
+        "label": "Open Distribute, combine, solve · Level 3",
+        "query": "?pack=distribute-solve&level=3&seed=35&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Level 3 on 5 + 2(x + 3) = 17.",
+        "Mistake 1: touch nothing for 11 seconds. Then click I’m stuck.",
+        "Mistake 2: drag the 2 onto the parenthesis and multiply only the first piece: type 2, Enter, 3, Enter. Then click Undo.",
+        "Drag the 2 onto the parenthesis again, type 2, Enter, 6, Enter.",
+        "Mistake 3: Divide too early: click Multiply, then Divide.",
+        "Mistake 4: add the wrong number: click Add, type 5, press Enter. Then click Undo.",
+        "Mistake 5: a wrong sum: drag the 5 onto the 6, type 12, press Enter. Then click Undo."
+      ],
+      "see": "I’m stuck flashes after 10 seconds, and then lights the 2 and the parenthesis (“Drag the 2 onto the parenthesis…”). The half-multiplied product is lit with “2 · 3 is not 3. Multiply this piece too.”; Undo brings the same hint back. Divide says “That move works once each side is one term.” Adding 5 is lit as “did not eliminate the term”. The wrong sum says “5 + 6 is not 12.”, and after Undo the 5 and the 6 are outlined with “5 and 6 are like terms. Drag one onto the other to combine them.”"
+    },
+    {
       "id": "m-placement-old",
       "name": "A student placed by the quiz before Build L now gets the new Two-step levels",
       "build": "Build M",
@@ -1058,6 +1286,42 @@
           ]
         },
         {
+          "name": "Build M: Distribute, combine, solve, a new Solve it card (2026-10-23)",
+          "about": "Solve 3(x + 2) = 15 by dragging the 3 onto the parenthesis and typing each product (3 · x and 3 · 2), then combining and finishing as in Two-step. Dividing first is accepted. Level 4 needs the minus tapped first; Level 5 combines x-terms, typed with the x (5x). “Practice distributing first” opens Build it’s Distribute, then combine.",
+          "links": [
+            {
+              "label": "Level 1 · a(x ± c) = b",
+              "look": "3(x + 2) = 15. Drag the 3 onto the parenthesis.",
+              "query": "?pack=distribute-solve&level=1&seed=37&nosignin=1",
+              "reset": true
+            },
+            {
+              "label": "Level 2 · −a(x ± c) = b",
+              "look": "−2(x + 4) = −4. −2 is the factor; Flip first works too.",
+              "query": "?pack=distribute-solve&level=2&seed=2&nosignin=1",
+              "reset": true
+            },
+            {
+              "label": "Level 3 · n + a(x ± c) = b",
+              "look": "5 + 2(x + 3) = 17.",
+              "query": "?pack=distribute-solve&level=3&seed=35&nosignin=1",
+              "reset": true
+            },
+            {
+              "label": "Level 4 · n − a(x ± c) = b",
+              "look": "5 − 2(x + 2) = −7. Tap the minus first.",
+              "query": "?pack=distribute-solve&level=4&seed=126&nosignin=1",
+              "reset": true
+            },
+            {
+              "label": "Level 5 · like x-terms",
+              "look": "3(x + 2) + 2x = 41. Combine 3x and 2x by typing 5x.",
+              "query": "?pack=distribute-solve&level=5&seed=306&nosignin=1",
+              "reset": true
+            }
+          ]
+        },
+        {
           "name": "Build M, Part 1: the placement quiz fixes (2026-10-23)",
           "about": "A student placed by the Solve it quiz before Build L now gets the new Two-step levels the quiz showed they know (nothing marked done, nothing lost). The quiz results never say “Start at Level −1” any more.",
           "links": [
@@ -1755,11 +2019,6 @@
               "label": "Divide it",
               "query": "?pack=divide-it&level=3&seed=7&nosignin=1",
               "look": "Click Multiply: three options. Hover each. Pick ▢/▢: type 6, the cursor jumps down; type 6 again: the unit-fraction pop-up. Pick ▢ × ( ), type 3, Go: “3 × (5x) makes 15x: still not one x. Try a fraction.”"
-            },
-            {
-              "label": "Distribute drill",
-              "query": "?drill=distribute&nosignin=1",
-              "look": "At −2x = 2: Multiply, then −1 × ( ), then Go: both sides × (−1), then 2x = −2. A whole number works too (negatives allowed)."
             }
           ]
         },
@@ -1771,11 +2030,6 @@
               "label": "Drag across the line",
               "query": "?pack=add-both&level=2&seed=7&nosignin=1",
               "look": "Drag the +8 over the line: −8 appears in red in the equation, before the 11; keep going right past the 11 and it moves after it. Let go a little above or below the line: it lands where it was shown."
-            },
-            {
-              "label": "Distribute drill",
-              "query": "?drill=distribute&nosignin=1",
-              "look": "Tap the minus, drag −2 onto the parentheses, type −2 and Enter: “Type every piece, including the x.” Type −2x. At −2x = 2, Flip everything: a row −2x × (−1) = 2 × (−1), then 2x = −2."
             }
           ]
         },
@@ -1959,11 +2213,6 @@
               "label": "Combine",
               "query": "?pack=add-both&level=3&seed=7&nosignin=1",
               "look": "Drag − 3 across, then drop the 3 on the −1: the two are lit with Combine over them, the rest greys, a box under them; type 2 and press the green Combine. A wrong sum is an error with Undo."
-            },
-            {
-              "label": "Drill: finish with Flip and Multiply",
-              "query": "?drill=distribute&nosignin=1",
-              "look": "At −2x = 2 a hint lights Flip everything; then Multiply, type 2 (1 over 2), Go: x = −1."
             }
           ]
         },
@@ -2505,17 +2754,6 @@
           ]
         },
         {
-          "name": "The Distribute drill",
-          "about": "Kept (Build D): two drill problems solved only by grabbing terms. It has no level button; this link is the way in.",
-          "links": [
-            {
-              "label": "Drill: 5 − 2(x + 2) = 3",
-              "query": "?drill=distribute&nosignin=1",
-              "look": "Dragging the 2 is refused until you tap its minus; then two labelled blanks, −2 and −4, and on to x = −1."
-            }
-          ]
-        },
-        {
           "name": "Errors pop up next to the mistake (spotlight)",
           "about": "A move that makes things worse dims the page, lights up what went wrong, and only Undo goes on; after Undo a hint pops up at the number to work on.",
           "links": [
@@ -2710,6 +2948,10 @@
     {
       "title": "Retired",
       "items": [
+        {
+          "name": "The Distribute drill (Build M)",
+          "about": "The hidden drill behind ?drill=distribute (two fixed problems, its own board) is deleted: its distribute move is now a shared move, on the Distribute, combine, solve card."
+        },
         {
           "name": "Multiply’s −1 option (Build L)",
           "about": "The −1 × ( ) option is deleted from the Multiply menu: Flip everything was in two places. Flip everything is its own button in the panel, and −1 typed in Multiply or Divide is the same move."

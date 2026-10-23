@@ -177,11 +177,166 @@ class Walk {
   async divEnter(n) { await this.click(act('multOpen')); await this.click(`${act('multPick')}[data-kind="div"]`); await this.type(n); await this.enter(); await wait(this.page, 300); }
   // (a right value from Level 3 is checked short: no dragging, one Enter)
   async answer(v, nexts) { await this.click(act('focus')); await this.type(v); await this.enter(); if (await this.page.locator('[data-chip]').count()) await this.drag(); await this.enter(nexts); await wait(this.page, 300); }
+  // Distribute, combine, solve (Build M): the factor dragged onto its parenthesis, then each product typed (Enter goes to the next)
+  async dragFactor(onParen = true) {
+    const f = await this.page.locator('.lx-live .lx-factor').first().boundingBox();
+    const p = await this.page.locator('.lx-live .lx-paren').first().boundingBox();
+    const to = onParen ? { x: p.x + p.width / 2, y: p.y + p.height / 2 } : { x: f.x + f.width / 2, y: f.y + 200 };
+    const m = this.page.mouse;
+    await m.move(f.x + f.width / 2, f.y + f.height / 2); await m.down();
+    await m.move(f.x + f.width / 2 + 10, f.y + f.height / 2, { steps: 3 });
+    await m.move(to.x, to.y, { steps: 12 }); await wait(this.page, 150); await m.up(); await wait(this.page, 400);
+  }
+  async distribute(...products) { await this.dragFactor(); for (const v of products) { await this.type(v); await this.enter(); } await wait(this.page, 300); }
+  // drag one term of the row onto another (by their text as written), type what they make, Enter
+  async combineTerms(from, onto, typed) {
+    const tok = (t) => this.page.locator('.lx-live .lx-tok').filter({ hasText: new RegExp(`^\\s*[+−]?\\s*${t.replace(/[−-]/g, '[−-]?')}\\s*$`) }).first();
+    const f = await tok(from).boundingBox();
+    const t = await tok(onto).boundingBox();
+    const m = this.page.mouse;
+    await m.move(f.x + f.width / 2, f.y + f.height / 2); await m.down();
+    await m.move(f.x + f.width / 2 + 8, f.y + f.height / 2, { steps: 3 });
+    await m.move(t.x + t.width / 2, t.y + t.height / 2, { steps: 12 }); await wait(this.page, 150); await m.up(); await wait(this.page, 400);
+    if (typed !== undefined) { await this.type(typed); await this.enter(); }
+  }
+  async rows() { return (await this.page.evaluate(() => [...document.querySelectorAll('.lb-stack .lb-rowwrap')].map((r) => r.innerText.replace(/\s+/g, '')))); }
+  async row(text) { const rs = await this.rows(); const want = text.replace(/\s+/g, ''); if (!rs.some((r) => r.endsWith(want) || r === want)) throw new Error(`expected a row ${text} after step "${this.step}": ${rs.join(' | ')}`); }
   async box(selector) { return this.page.evaluate((s) => { const r = document.querySelector(s)?.getBoundingClientRect(); return r ? [r.left, r.top, r.right, r.bottom].map(Math.round) : null; }, selector); }
 }
 
 // ---- one walk per item (same id as in the data file) ---------------------------------------------------------------------------------
 const WALKS = {
+  // ---- Build M, Part 2: Distribute, combine, solve ----
+  async 'm-level-1'(w) {
+    await w.start(); await w.see('DISTRIBUTE, COMBINE, SOLVE · Level 1', '3(x + 2) = 15');
+    await w.both('m-level-1');
+    w.at('distribute: 3, 6'); await w.distribute(3, 6); await w.row('3x + 6 = 15');
+    w.at('Add −6'); await w.addEnter(-6); await w.row('3x = 15 − 6');
+    w.at('combine 15 and −6: 9'); await w.combine(9); await w.row('3x = 9');
+    w.at('Divide by 3'); await w.divEnter(3); await w.row('x = ⅓(9)');
+    w.at('type 3, check'); await w.answer(3, 4);
+    await w.see('3(3 + 2) = 15', '✓ Balanced');
+  },
+  async 'm-level-2'(w) {
+    await w.start(); await w.see('DISTRIBUTE, COMBINE, SOLVE · Level 2', '−2(x + 4) = −4');
+    await w.both('m-level-2');
+    w.at('distribute: −2, −8'); await w.distribute(-2, -8); await w.row('−2x + −8 = −4');
+    w.at('Add 8, combine'); await w.addEnter(8); await w.row('−2x = −4 + 8'); await w.combine(4); await w.row('−2x = 4');
+    w.at('Divide by −2'); await w.divEnter(-2); await w.row('x = −½(4)');
+    w.at('type −2, check'); await w.answer(-2, 4); await w.see('✓ Balanced');
+  },
+  async 'm-level-3'(w) {
+    await w.start(); await w.see('DISTRIBUTE, COMBINE, SOLVE · Level 3', '5 + 2(x + 3) = 17');
+    await w.both('m-level-3');
+    w.at('Multiply, Divide'); await w.click(act('multOpen')); await w.click(`${act('multPick')}[data-kind="div"]`); await w.see('That move works once each side is one term.');
+    w.at('distribute: 2, 6'); await w.distribute(2, 6); await w.row('5 + 2x + 6 = 17');
+    w.at('combine 5 and 6: 11'); await w.combineTerms('5', '6', 11); await w.row('11 + 2x = 17');
+    w.at('Add −11, combine, Divide'); await w.addEnter(-11); await w.combine(6); await w.row('2x = 6'); await w.divEnter(2); await w.row('x = ½(6)');
+    w.at('type 3'); await w.answer(3, 3); await w.see('Yes! x = 3');
+  },
+  async 'm-level-4'(w) {
+    await w.start(); await w.see('DISTRIBUTE, COMBINE, SOLVE · Level 4', '5 − 2(x + 2) = −7');
+    await w.both('m-level-4');
+    w.at('tap the minus'); await w.click('.lx-live [data-minus]'); await w.row('5 + −2(x + 2) = −7');
+    w.at('distribute: −2, −4'); await w.distribute(-2, -4); await w.row('5 + −2x + −4 = −7');
+    w.at('combine 5 and −4: 1'); await w.combineTerms('5', '−4', 1); await w.row('1 + −2x = −7');
+    w.at('Add −1, combine'); await w.addEnter(-1); await w.combine(-8); await w.row('−2x = −8');
+    w.at('Divide by −2'); await w.divEnter(-2); await w.row('x = −½(−8)');
+    w.at('type 4'); await w.answer(4, 3); await w.see('Yes! x = 4');
+  },
+  async 'm-level-5'(w) {
+    await w.start(); await w.see('DISTRIBUTE, COMBINE, SOLVE · Level 5', '3(x + 2) + 2x = 41');
+    await w.both('m-level-5');
+    w.at('distribute: 3, 6'); await w.distribute(3, 6); await w.row('3x + 6 + 2x = 41');
+    w.at('combine 2x onto 3x: 5x'); await w.combineTerms('2x', '3x', '5x'); await w.row('5x + 6 = 41');
+    w.at('Add −6, combine, Divide'); await w.addEnter(-6); await w.combine(35); await w.row('5x = 35'); await w.divEnter(5); await w.row('x = ⅕(35)');
+    w.at('type 7'); await w.answer(7, 3); await w.see('Yes! x = 7');
+  },
+  async 'm-drag-labels'(w) {
+    await w.start(); await w.see('3(x + 2) = 15');
+    w.at('drag the 3 elsewhere'); await w.dragFactor(false);
+    if (await w.page.locator('.lx-prod').count()) throw new Error('a drop away from the parenthesis should change nothing');
+    w.at('drag the 3 onto the parenthesis'); await w.dragFactor();
+    const labels = await w.page.locator('.lx-prodlabel').allInnerTexts();
+    if (labels.join('|') !== '3 · x|3 · 2') throw new Error(`the labels should be 3 · x and 3 · 2: ${labels}`);
+    if (!(await w.page.locator('.lx-prod .lx-prodx').count())) throw new Error('the x should be printed after the first blank');
+    await w.both('m-drag-labels');
+    w.at('type 3, 6'); await w.type(3); await w.enter(); await w.type(6); await w.enter(); await w.row('3x + 6 = 15');
+    if (!(await w.page.locator('[data-light="noparen"].is-green').count())) throw new Error('No parentheses should be green');
+  },
+  async 'm-tap-minus'(w) {
+    await w.start(); await w.see('5 − 2(x + 2) = −7');
+    w.at('drag the 2'); await w.dragFactor(); await w.see('Tap the minus first, so −2 is a negative number.');
+    await w.both('m-tap-minus-refused');
+    w.at('tap the minus'); await w.click('.lx-live [data-minus]'); await w.row('5 + −2(x + 2) = −7');
+    w.at('drag the −2'); await w.dragFactor();
+    const labels = await w.page.locator('.lx-prodlabel').allInnerTexts();
+    if (labels.join('|') !== '−2 · x|−2 · 2') throw new Error(`the labels should be −2 · x and −2 · 2: ${labels}`);
+    await w.both('m-tap-minus');
+  },
+  async 'm-wrong-product'(w) {
+    await w.start(); await w.see('3(x + 2) = 15');
+    w.at('distribute: 3, 2'); await w.distribute(3, 2); await w.lateLayer();
+    await w.see('3 · 2 is not 2. Multiply this piece too. Press Undo and try again.');
+    await w.lit('.lx-prod.is-wrong .lx-box');
+    await w.both('m-wrong-product');
+    w.at('Undo'); await w.click(act('undo')); await wait(w.page, 900);
+    await w.see('Drag the 3 onto the parenthesis to multiply it by each piece.');
+    if (!(await w.page.locator('.lx-live .lx-factor.is-hint').count())) throw new Error('the 3 should be outlined');
+    await w.both('m-wrong-product-hint');
+  },
+  async 'm-divide-first'(w) {
+    await w.start(); await w.see('3(x + 2) = 15');
+    w.at('Divide by 3'); await w.divEnter(3); await w.see('⅓(3(x + 2)) = ⅓(15)'); await w.row('x + 2 = ⅓(15)');
+    if (await w.page.locator('.lx-dot.is-red').count()) throw new Error('dividing first should light nothing red');
+    await w.both('m-divide-first');
+    w.at('Add −2'); await w.addEnter(-2); await w.row('x = ⅓(15) − 2');
+    w.at('type 3, check'); await w.answer(3, 4); await w.see('3(3 + 2) = 15', '✓ Balanced');
+    await w.both('m-check-group');
+  },
+  async 'm-combine-x'(w) {
+    await w.start(); await w.see('3(x + 2) + 2x = 41');
+    w.at('distribute: 3, 6'); await w.distribute(3, 6);
+    w.at('drag 2x onto 3x, type 5'); await w.combineTerms('2x', '3x');
+    await w.see('Combine'); await w.both('m-combine-x');
+    await w.type(5); await w.enter(); await w.see('Type every piece, including the x.');
+    await w.both('m-combine-x-bare');
+    w.at('press x, Enter'); await w.page.keyboard.press('x'); await wait(w.page, 200); await w.enter(); await w.row('5x + 6 = 41');
+  },
+  async 'm-ghost-hand'(w) {
+    await w.start(); await w.see('3(x + 2) = 15');
+    w.at('I’m stuck'); await w.stuck(); await w.see('Drag the 3 onto the parenthesis to multiply it by each piece.');
+    w.at('wait 4 seconds'); await wait(w.page, 3300);
+    if (!(await w.page.locator('.lx-handghost').count())) throw new Error('a faint copy of the 3 should be travelling to the parenthesis');
+    await w.shot('m-ghost-hand-768');
+  },
+  async 'm-practice'(w) {
+    await w.start(); await w.see('DISTRIBUTE, COMBINE, SOLVE · Level 1');
+    w.at('Practice distributing first'); await w.click('#practice'); await wait(w.page, 700);
+    await w.see('DISTRIBUTE, THEN COMBINE · Level 1');
+    await w.both('m-practice');
+    w.at('← Packs, Solve it'); await w.click('text=← Packs'); await wait(w.page, 500); await w.click('.section-panel.sec-solve'); await wait(w.page, 600);
+    await w.see('Distribute, combine, solve', 'Multiply each piece, then solve');
+    await w.both('m-home');
+  },
+  async 'student-distribute'(w) {
+    await w.start(); await w.see('5 + 2(x + 3) = 17');
+    w.at('mistake 1: touch nothing for 11 seconds'); await wait(w.page, 11000);
+    if (!(await w.page.locator('.lx-help.is-idle').count())) throw new Error('I’m stuck should be flashing after 10 seconds');
+    await w.stuck(); await w.see('Drag the 2 onto the parenthesis to multiply it by each piece.');
+    w.at('mistake 2: multiply only the first piece'); await w.distribute(2, 3); await w.lateLayer();
+    await w.see('2 · 3 is not 3. Multiply this piece too.');
+    w.at('mistake 2: Undo'); await w.click(act('undo')); await wait(w.page, 900); await w.see('Drag the 2 onto the parenthesis');
+    w.at('distribute: 2, 6'); await w.distribute(2, 6); await w.row('5 + 2x + 6 = 17');
+    w.at('mistake 3: Divide too early'); await w.click(act('multOpen')); await w.click(`${act('multPick')}[data-kind="div"]`); await w.see('That move works once each side is one term.');
+    w.at('mistake 4: Add 5'); await w.addEnter(5); await w.lateLayer(); await w.see('did not eliminate the term');
+    w.at('mistake 4: Undo'); await w.click(act('undo')); await wait(w.page, 900);
+    if (await w.page.locator(act('spotDismiss')).count()) await w.click(act('spotDismiss'));
+    w.at('mistake 5: a wrong sum'); await w.combineTerms('5', '6', 12); await w.lateLayer(); await w.see('5 + 6 is not 12.');
+    await w.both('student-distribute');
+    w.at('mistake 5: Undo'); await w.click(act('undo')); await wait(w.page, 900);
+    await w.see('5 and 6 are like terms. Drag one onto the other to combine them.');
+  },
   // ---- Build M, Part 1: the placement quiz ----
   async 'm-placement-old'(w) {
     await w.start();

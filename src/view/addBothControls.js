@@ -15,7 +15,7 @@ function button(label, action, extra = {}) {
 
 // `liveOf`: is the x = [ ] row live? (engine/addBothLights.js: from the first frame, unless a move is owed.)
 
-// `xKeyOf` (the drill): when the pad also has an x key, for typing products like −2x (Build D-2, Part 3).
+// `xKeyOf`: when the pad also has an x key, for typing a sum of two x-terms like 5x (Distribute, combine, solve: Build M).
 export const makeAddBothControls = (liveOf, xKeyOf = null) => (root, dispatch) => {
   root.innerHTML = '';
   const keys = document.createElement('div');

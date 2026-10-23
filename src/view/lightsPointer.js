@@ -102,7 +102,7 @@ export function bindLightsMat(root, dispatch, getSession) {
     // two fields are buttons), whatever has focus
     const typing = /^[0-9]$/.test(e.key) ? { type: 'digit', digit: Number(e.key) }
       : e.key === '-' || e.key === '−' ? { type: 'toggleSign' } : e.key === 'Backspace' || e.key === 'Delete' ? { type: 'backspace' }
-        : (e.key === 'x' || e.key === 'X') && (getSession?.()?.lx?.distribute || getSession?.()?.lx?.combine) ? { type: 'typeChar', ch: 'x' } : null;   // the drill's products: −2x
+        : (e.key === 'x' || e.key === 'X') && (getSession?.()?.lx?.distribute || getSession?.()?.lx?.combine) ? { type: 'typeChar', ch: 'x' } : null;   // a sum of two x-terms: 5x (Build M)
     if (typing) {
       if (e.target instanceof HTMLElement && e.target.matches('input, textarea, select, [contenteditable]')) return;
       e.preventDefault();

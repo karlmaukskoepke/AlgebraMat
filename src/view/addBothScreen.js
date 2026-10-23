@@ -15,14 +15,13 @@ import { xAlone } from '../engine/addBothMoves.js';
 import { solve, tradeAvailable, tradePending } from '../engine/cards/add.js';
 import { lightsAnswerLive, blankOpen, canChoose, moveOwed, amountMode, canGrab, ADD_SPOT } from '../engine/addBothLights.js';
 import { termText, findTerm, likeKey, crossedText, sideText, previewBoard } from '../engine/lightsGrab.js';
-import { needsFlip } from '../engine/distributeDrill.js';
 import { productLabels } from '../engine/distributeMove.js';
 import { spotOf } from '../engine/spotlight.js';
 import { lightsFeedbackText } from './addBothLightsFeedback.js';
 import { spotlightLayer, findSolveTarget } from './spotlight.js';
 import { boardBlock, trayFor, html, slipShown } from './addBothMat.js';
 import { narrowPanel } from './narrowPanel.js';
-import { multiplyOptions, optionSel } from './multiplyOptions.js';
+import { optionSel } from './multiplyOptions.js';
 import { forwardButton, srLine, notePopup, substBlock as sharedSubstBlock, sideTerms, foldTag, FORCED_TEXT, FIRST_TEXT, placeText } from './solveScreen.js';
 import { firstOpen } from './visit.js';
 // Count it's counters Mat and its words, read-only, for the help at x alone (Build C, Part 3)
@@ -45,21 +44,20 @@ const valid = (t) => /^-?\d+$/.test(t ?? '');
 
 // The forced move (the problem after a correct guess): until the green Next or a move, the page greys out except the problem and the
 // moves (and the move's preview while it is hovered).
-export const introOpen = (s) => moveOwed(s) && !s.introSeen && !s.drill;
+export const introOpen = (s) => moveOwed(s) && !s.introSeen;
 // The very first problem of a visit: "Find the value of x." until the first action.
-const firstUp = (s) => firstOpen() && !s.drill && !s.mustMove && s.rows.length === 1 && s.history.length === 0 && !s.sub && !s.entry && s.stage === 'moves' && !s.scaffold;
+const firstUp = (s) => firstOpen() && !s.mustMove && s.rows.length === 1 && s.history.length === 0 && !s.sub && !s.entry && s.stage === 'moves' && !s.scaffold;
 
 // What the card says that needs no pop-up: the screen itself shows it (the blank, the rule line, the green button's word, x = live).
-export const SILENT = new Set(['dxMultPick', 'dxWholeAsk', 'dxMultAsk', 'dxFlipAsk', 'aTeachDo', 'aAloneBig', 'aPlace', 'aFindX', 'lxMustMove', 'aMustMove', 'aPickAmount', 'aAmountSet', 'aGreen', 'aSolvedBoard', 'aUndone', 'lxUndone',
+export const SILENT = new Set(['aTeachDo', 'aAloneBig', 'aPlace', 'aFindX', 'lxMustMove', 'aMustMove', 'aPickAmount', 'aAmountSet', 'aGreen', 'aSolvedBoard', 'aUndone', 'lxUndone',
   'aStartedOver', 'aPlugIn', 'aPlugCurrent', 'aGuessed', 'lxCombineAsk', 'lxCombined', 'lxCombinedAlone', 'aCorrect', 'aSimplerFirst',
-  'aZeroUndone', 'aAloneCounters', 'aAloneCount', 'aAlonePB', 'aAloneRight', 'aUndoGuess', 'dxProducts', 'dxRight', 'dxCrossed', 'aTraded']);
+  'aZeroUndone', 'aAloneCounters', 'aAloneCount', 'aAlonePB', 'aAloneRight', 'aUndoGuess', 'dxProducts', 'aTraded']);
 // Input nudges with nothing to undo: a small pop-up next to where the student is, no dimming.
 export const NUDGE = {
-  dxMultNo: 'newest',
   typeAnswer: 'answer', answerUnreadable: 'answer', aFinishMoveFirst: 'answer', aUndoFirst: 'answer', aPickKind: 'answer', typeCount: 'answer',
   aAmountBig: 'blank', aAmountZero: 'blank', aGoNotYet: 'forward', aOtherSide: 'forward',
-  aTradeFirst: 'panel', aTradeNot: 'panel', aTradeIntro: 'panel', aLater: 'panel', aNotNeeded: 'panel', aChooseMoveFirst: 'panel', dxDragOnly: 'panel',
-  lxXCross: 'newest', dxTapMinusFirst: 'newest', dxGroupCross: 'newest',
+  aTradeFirst: 'panel', aTradeNot: 'panel', aTradeIntro: 'panel', aLater: 'panel', aNotNeeded: 'panel', aChooseMoveFirst: 'panel',
+  lxXCross: 'newest', dxTapMinusFirst: 'newest',
 };
 
 // A wrong seesaw move's words, from its picture's numbers (Build F, Part 3).
@@ -70,7 +68,7 @@ function slipFeedback(s) {
 }
 
 function popups(s, wrap) {
-  const sp = s.drill ? null : spotOf(s, C.spot);
+  const sp = spotOf(s, C.spot);
   const o = { root: wrap, find: (root, target) => findSolveTarget(root, target, s), undo: '.lx-undo', help: true, moveSel: optionSel, work: '.lb-main' };
   if (C.popups?.(s, wrap, o, sp)) return;                                // the card's own pop-ups first (the Two-step card: its reminders)
   // two small questions at big numbers: their words come from their keys (Build H, Part 3)
@@ -102,11 +100,6 @@ function popups(s, wrap) {
   // Teach me: the move to make, in the Add move's blank, with Add lit; the green button says Do it
   if (s.teachFlow && blankOpen(s)) {
     wrap.append(spotlightLayer({ kind: 'hint', target: 'xnum', move: 'add', place: 'below' }, { ...o, text: C.text(s.feedback) }));
-    return;
-  }
-  // the drill's end: a negative in front of x: a hint lights Flip everything
-  if (s.drill && s.stage !== 'done' && !s.lx.mult && !s.lx.mopts && needsFlip(s.board)) {
-    wrap.append(spotlightLayer({ kind: 'hint', target: 'newest', move: 'multiply', place: 'below' }, { ...o, text: C.text({ key: 'dxFlipHint' }) }));
     return;
   }
   const note = notePopup(s, { silent: C.silent ?? SILENT, nudge: C.nudge ?? NUDGE, text: C.text, scaffold: s.scaffold ? 'board' : null });
@@ -143,7 +136,7 @@ const workEls = (items, negIds = []) => {
   const cancels = struckSum === 0;
   items = items.map((t) => (t.struck && !cancels ? { ...t, struck: false } : t));
   items.forEach((t, i) => {
-    if (t.term) {                                                   // (the drill writes its work rows with whole terms)
+    if (t.term) {                                                   // (a term other than a number or x: a parenthesis, a fraction; Build M)
       const { op, body } = termText(t.term, i, negIds.includes(t.term.id));
       const cls = `${t.added ? ' is-added' : ''}${t.struck ? ' is-struck' : ''}`;
       if (op) out.push(html('span', `lb-plus${t.added ? ' is-added' : ''}`, [op]));
@@ -192,7 +185,7 @@ function token(s, t, i, side, held) {
 
 const valueOfTerm = (t) => (t.kind === 'num' ? t.v : t.kind === 'x' ? (t.coef ?? 1) : t.factor);
 
-// A factor times a parenthesis (the drill): the factor is its own grab handle (dragged onto the parenthesis to distribute), the
+// A factor times a parenthesis (Build M): the factor is its own grab handle (dragged onto the parenthesis to distribute), the
 // parenthesis is where it is dropped.
 function groupEls(s, t, i, subtracted, shownNeg) {
   const carry = s.ui?.carry;
@@ -270,10 +263,6 @@ function rowsOf(s) {
     const newest = s.rows.length > 1 && (i === last || (i === last - 1 && row.type === 'work'));
     const recent = i === last || (i === last - 1 && row.type === 'work');                   // earlier lines are drawn in lighter ink
     const cls = `lb-rowwrap${!newest || settledNow ? ' is-settled' : ''}${row.type === 'work' ? ' has-work' : ''}${recent ? '' : ' is-old'}`;
-    if (row.type === 'times') {                               // the drill's flip or whole number: both sides times (−1), written out (Build D-2)
-      const times = (terms) => [...(terms.length > 1 ? [html('span', 'lb-plus', ['(']), ...sideEls(terms, s.lx.negIds), html('span', 'lb-plus', [')'])] : sideEls(terms, s.lx.negIds)), html('span', 'lb-plus lx-times', ['×']), html('span', 'lb-num is-added', [`(${signed(row.factor ?? -1)})`])];
-      return html('div', `${cls} has-work`, [eqRow(times(row.board.left), times(row.board.right), `lb-work${eqClass(charsOf([...row.board.left, ...row.board.right]) + 12)}`, { 'aria-label': `Both sides times ${signed(row.factor ?? -1).replace(MINUS, 'negative ')}` })]);
-    }
     // a move written as an equation of whole sides: a fraction of both sides, or both sides times −1 (the Two-step card's Multiply)
     if (row.type === 'work' && row.board) {
       const w = eqRow(sideTerms(row.board.left, s), sideTerms(row.board.right, s), `lb-work${row.failed ? ' is-failed' : ''}${eqClass(charsOf([...row.board.left, ...row.board.right]) + 6)}`, { 'aria-hidden': 'true' });
@@ -347,7 +336,8 @@ function sumRow(s) {
   return html('div', 'lx-ghost is-chosen is-sum', [eq]);
 }
 
-// The drill's products: one blank per term of the parenthesis, each labelled with what it is; every piece is typed, the x too (Build D-2).
+// The distribute move's products (Build M): one blank per piece of the parenthesis, each labelled with its multiplication; the x blank has
+// its x printed after it, so the number in front of x is typed with its sign.
 function productRow(s) {
   const d = s.lx.distribute;
   const f = findTerm(s.board, d.group);
@@ -380,32 +370,9 @@ function productRow(s) {
   return html('div', 'lx-ghost is-chosen is-sum is-products', [eqRow(f.side === 'left' ? els : other, f.side === 'left' ? other : els, 'lx-ghosteq lx-sumeq')]);
 }
 
-// The drill's Multiply (Build D-2, Part 4: one button, three options): both sides times a whole number, 1 over a number, or −1, each
-// side in parentheses. `kind` hovered only (no mult yet): the same row, dashed, as a preview.
-function multRow(s, hovered = null) {
-  const kind = hovered ?? s.lx.mult.kind ?? 'frac';
-  const text = hovered ? '' : s.lx.mult.entry;
-  let first = true;
-  const box = (label) => {
-    const live = !hovered && first;
-    const b = html(hovered ? 'span' : 'button', `lx-box is-sum mo-blank${kind === 'frac' ? ' lx-frac1d' : ''}${text ? '' : ' is-empty'}${live && !text ? ' is-blink is-focus' : ''}`, [shown(text)],
-      hovered ? { 'aria-hidden': 'true' } : { type: 'button', 'data-lx-field': '1', 'data-fk': first ? 'mult' : undefined, 'aria-label': label, ...(first ? {} : { tabindex: '-1', 'aria-hidden': 'true' }) });
-    if (live && s.ui?.focus === 'mult') b.dataset.lxFocus = '1';
-    first = false;
-    return b;
-  };
-  const front = () => (kind === 'flip' ? html('span', 'lb-num', [`${MINUS}1`])
-    : kind === 'whole' ? box('Multiply by this whole number')
-      : html('span', 'lx-frac1', [html('span', 'lx-frac1n', ['1']), box('Multiply by 1 over this number')]));
-  const side = (terms) => [front(), html('span', 'lb-plus lx-times', ['×']), html('span', 'lb-plus', ['(']), ...sideEls(terms, s.lx.negIds), html('span', 'lb-plus', [')'])];
-  return html('div', `lx-ghost ${hovered ? 'is-preview' : 'is-chosen is-sum'}`, [eqRow(side(s.board.left), side(s.board.right), 'lx-ghosteq lx-sumeq')], hovered ? { 'aria-hidden': 'true' } : {});
-}
-
 function ghostRow(s) {
   const own = C.ghost?.(s);                                    // (the card's own move row: the Two-step card's Multiply)
   if (own) return own;
-  if (s.lx.mult) return multRow(s);
-  if (s.lx.mopts && ['whole', 'frac', 'flip'].includes(s.ui?.preview)) return multRow(s, s.ui.preview);
   if (s.lx.distribute) return productRow(s);
   if (s.lx.combine) return sumRow(s);
   // (a term being dragged shows where it would land in its own row, not here: Build D-2, Part 3)
@@ -433,14 +400,12 @@ function ghostRow(s) {
 
 // ---------- the work stack, with the rule lines of the moves applied ----------
 
-// A move that helped is written under a solid rule line; one that waits for Undo has none. (The drill draws no rule lines.)
+// A move that helped is written under a solid rule line; one that waits for Undo has none.
 function workStack(s) {
   const rows = rowsOf(s);
-  if (!s.drill) {
-    s.rows.forEach((r, i) => {
-      if (r.type === 'eq' && s.rows[i - 1]?.type === 'work' && !(i === s.rows.length - 1 && s.needUndo)) rows[i]?.classList.add('lx-ruled', 'is-solid');
-    });
-  }
+  s.rows.forEach((r, i) => {
+    if (r.type === 'eq' && s.rows[i - 1]?.type === 'work' && !(i === s.rows.length - 1 && s.needUndo)) rows[i]?.classList.add('lx-ruled', 'is-solid');
+  });
   return html('div', 'lb-stack', [...rows, ghostRow(s)]);
 }
 
@@ -448,7 +413,7 @@ function workStack(s) {
 
 // What moving forward means now: { label, action, enabled }. The first that applies wins.
 export function forwardOf(s) {
-  const sp = s.drill ? null : spotOf(s, C.spot);
+  const sp = spotOf(s, C.spot);
   if (s.stage === 'done') return { label: 'Next problem', action: 'next', enabled: true };
   if (sp?.kind === 'error') return { label: 'Check', action: 'check', enabled: false };
   if (introOpen(s)) return { label: 'Next', action: 'introNext', enabled: true };
@@ -463,7 +428,6 @@ function forwardCore(s) {
   if (own) return own;
   if (s.sub?.placing) return { label: 'Next', action: 'nextLine', enabled: false };
   if (s.sub && s.sub.step < C.loop.subTotal(s.sub)) return { label: 'Next', action: 'nextLine', enabled: true };
-  if (s.lx.mult) return { label: 'Go', action: 'go', enabled: s.lx.mult.kind === 'flip' || (valid(s.lx.mult.entry) && Number(s.lx.mult.entry) !== 0) };
   if (s.lx.distribute) return { label: 'Go', action: 'lxApply', enabled: s.lx.distribute.entries.every((e) => /\d/.test(e)) && s.lx.distribute.wrong === null };
   if (s.lx.combine) return { label: 'Combine', action: 'lxApply', enabled: (valid(s.lx.combine.entry) || /^-?\d*x$/.test(s.lx.combine.entry)) && !s.lx.combine.wrong };
   if (s.combining?.step === 'struck') return { label: 'Next', action: 'crossNext', enabled: true };
@@ -510,7 +474,7 @@ function corners(s) {
   return html('div', 'lx-corners', [undo, html('div', 'lx-cornerright', [over, ...helpButtons(s)])]);
 }
 function helpButtons(s) {
-  const off = Boolean(s.drill) || !C.loop.helpOk(s);              // (the drill has no help ladder)
+  const off = !C.loop.helpOk(s);
   const stuck = btn('I’m stuck', 'stuck', 'btn lx-corner lx-help', { 'data-key': 's', 'data-fk': 'stuck' });
   stuck.disabled = off;
   const out = [stuck];
@@ -526,21 +490,16 @@ function helpButtons(s) {
 
 function panel(s) {
   const building = s.stage === 'build';
-  const disabled = building || s.stage === 'done' || Boolean(s.combining) || Boolean(s.pending) || Boolean(s.sub) || Boolean(s.lx.combine) || Boolean(s.lx.distribute) || (Boolean(s.lx.mult) && !s.drill);
+  const disabled = building || s.stage === 'done' || Boolean(s.combining) || Boolean(s.pending) || Boolean(s.sub) || Boolean(s.lx.combine) || Boolean(s.lx.distribute);
   const menu = s.scaffold || blankOpen(s) ? s.menu : null;
   const moves = {
     add: {
-      live: true, off: Boolean(s.drill), pressed: menu === 'add', preview: canChoose(s) && s.ui?.preview === true, near: canChoose(s) && s.ui?.preview === 'near',
+      live: true, pressed: menu === 'add', preview: canChoose(s) && s.ui?.preview === true, near: canChoose(s) && s.ui?.preview === 'near',
       ring: moveOwed(s) && !blankOpen(s) && !C.tradePending(s), focus: s.ui?.focus === 'add',
     },
   };
   // Trade places is live from Level 4 when x is on the right; the first time, it is the move to click
   if (C.tradeAvailable(s)) moves.trade = { live: true, pulse: C.tradePending(s) };
-  // the drill finishes with Flip everything and Multiply (Build D, Part 3)
-  if (s.drill) {
-    // one Multiply button: its three options beside it (Build D-2, Part 4); Flip everything is its −1
-    moves.multiply = { live: true, action: 'multOpen', pressed: Boolean(s.lx.mult) || Boolean(s.lx.mopts), label: 'Multiply', flyout: s.lx.mopts ? multiplyOptions(['whole', 'frac', 'flip'], s.ui?.preview) : null };
-  }
   const lights = building ? {} : { fewer: s.lights.fewer, fewerHand: s.lx.hand.fewer, solved: s.lights.solved, ...(C.handLights ? { noparen: s.lights.noparen ?? 'off' } : {}) };
   const flash = ['red', 'neutral'].includes(s.lights.fewer) && s.history.length > 0 ? ['fewer'] : [];
   C.panel?.(s, moves);                                          // (the card's own moves: the Two-step card's Multiply and Flip)
@@ -604,7 +563,7 @@ export function renderAddBothScreen(s, card = ADD_CARD) {
   C = card;
   const wrap = html('div', `lb-game lb-eqcard ui-lights ui-grab ui-light${C.cls ? ` ${C.cls}` : ''}`);
   // no banner: the line is kept for screen readers only (while a pop-up is up, it holds the prompt)
-  const sp = s.drill ? null : spotOf(s, C.spot);
+  const sp = spotOf(s, C.spot);
   wrap.append(srLine(C.text(sp ? { key: C.spot.prompt(s), params: {} } : s.feedback)));
   const body = html('div', 'lb-body');
   const main = html('div', 'lb-main');

@@ -1,6 +1,6 @@
 // The one Multiply button's three options (Build D-2, Part 4; Build L, loop rev 2.3), beside the button: Multiply, a whole number
 // × ▢ ( ); Divide, ÷ 1/▢ ( ); and Fraction, ▢/▢ ( ). Hovering one previews it on the equation (dashed); clicking it makes it solid.
-// Shared by every Solve it card with Multiply, and by the Distribute drill (which still has its own −1, behind its flag).
+// Shared by every Solve it card with Multiply.
 
 import { html } from './addBothMat.js';
 
