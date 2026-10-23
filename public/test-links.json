@@ -1322,6 +1322,84 @@
           ]
         },
         {
+          "name": "Build M screenshots (2026-10-23)",
+          "about": "The acceptance pictures at 1366×768 and 1366×650 (they open on GitHub). The report is in the build-m folder of the docs.",
+          "links": [
+            {
+              "label": "01 · Level 1 opening",
+              "query": "https://github.com/karlmaukskoepke/AlgebraMat/blob/main/docs/build-m/m-level-1-768.png",
+              "look": "A picture only: nothing to click.",
+              "notLive": "Opens the picture on GitHub, not the app; GitHub may ask you to sign in."
+            },
+            {
+              "label": "02 · the drag, labelled blanks",
+              "query": "https://github.com/karlmaukskoepke/AlgebraMat/blob/main/docs/build-m/m-drag-labels-768.png",
+              "look": "A picture only: nothing to click.",
+              "notLive": "Opens the picture on GitHub, not the app; GitHub may ask you to sign in."
+            },
+            {
+              "label": "03 · the brought-down row",
+              "query": "https://github.com/karlmaukskoepke/AlgebraMat/blob/main/docs/build-m/m-brought-down-768.png",
+              "look": "A picture only: nothing to click.",
+              "notLive": "Opens the picture on GitHub, not the app; GitHub may ask you to sign in."
+            },
+            {
+              "label": "04 · tap the minus",
+              "query": "https://github.com/karlmaukskoepke/AlgebraMat/blob/main/docs/build-m/m-tap-minus-768.png",
+              "look": "A picture only: nothing to click.",
+              "notLive": "Opens the picture on GitHub, not the app; GitHub may ask you to sign in."
+            },
+            {
+              "label": "05 · the wrong product",
+              "query": "https://github.com/karlmaukskoepke/AlgebraMat/blob/main/docs/build-m/m-wrong-product-768.png",
+              "look": "A picture only: nothing to click.",
+              "notLive": "Opens the picture on GitHub, not the app; GitHub may ask you to sign in."
+            },
+            {
+              "label": "06 · divide first",
+              "query": "https://github.com/karlmaukskoepke/AlgebraMat/blob/main/docs/build-m/m-divide-first-768.png",
+              "look": "A picture only: nothing to click.",
+              "notLive": "Opens the picture on GitHub, not the app; GitHub may ask you to sign in."
+            },
+            {
+              "label": "07 · combine x-terms",
+              "query": "https://github.com/karlmaukskoepke/AlgebraMat/blob/main/docs/build-m/m-combine-x-768.png",
+              "look": "A picture only: nothing to click.",
+              "notLive": "Opens the picture on GitHub, not the app; GitHub may ask you to sign in."
+            },
+            {
+              "label": "08 · the check of a parenthesis",
+              "query": "https://github.com/karlmaukskoepke/AlgebraMat/blob/main/docs/build-m/m-check-group-768.png",
+              "look": "A picture only: nothing to click.",
+              "notLive": "Opens the picture on GitHub, not the app; GitHub may ask you to sign in."
+            },
+            {
+              "label": "09 · I'm stuck",
+              "query": "https://github.com/karlmaukskoepke/AlgebraMat/blob/main/docs/build-m/m-stuck-768.png",
+              "look": "A picture only: nothing to click.",
+              "notLive": "Opens the picture on GitHub, not the app; GitHub may ask you to sign in."
+            },
+            {
+              "label": "10 · the forced-move ring",
+              "query": "https://github.com/karlmaukskoepke/AlgebraMat/blob/main/docs/build-m/m-forced-ring-768.png",
+              "look": "A picture only: nothing to click.",
+              "notLive": "Opens the picture on GitHub, not the app; GitHub may ask you to sign in."
+            },
+            {
+              "label": "11 · the tallest case at 650",
+              "query": "https://github.com/karlmaukskoepke/AlgebraMat/blob/main/docs/build-m/m-worst-650.png",
+              "look": "A picture only: nothing to click.",
+              "notLive": "Opens the picture on GitHub, not the app; GitHub may ask you to sign in."
+            },
+            {
+              "label": "12 · the home screen",
+              "query": "https://github.com/karlmaukskoepke/AlgebraMat/blob/main/docs/build-m/m-home-768.png",
+              "look": "A picture only: nothing to click.",
+              "notLive": "Opens the picture on GitHub, not the app; GitHub may ask you to sign in."
+            }
+          ]
+        },
+        {
           "name": "Build M, Part 1: the placement quiz fixes (2026-10-23)",
           "about": "A student placed by the Solve it quiz before Build L now gets the new Two-step levels the quiz showed they know (nothing marked done, nothing lost). The quiz results never say “Start at Level −1” any more.",
           "links": [

@@ -245,6 +245,16 @@ describe('the worked example, 3(x + 2) = 15', () => {
     q = solvePath(q);
     expect(q.stage).toBe('done');
   });
+  it('a negative factor divided by its size leaves −(x + 2): classified, and flipping it gives x + 2 = −(b)', () => {
+    let s = run(start(P({ level: 2, f: -4, c: 2, x: 3 })), A.div(4));           // −4(x + 2) = −20, ¼
+    expect(boardText(s.board)).toBe('−(x + 2) = −5');
+    expect(shapeOf(s).id).toBe('P2');
+    s = run(s, A.flip());
+    expect(boardText(s.board)).toBe('x + 2 = −(−5)');
+    expect(shapeOf(s).id).toBe('Q1');
+    s = flow(s, [A.add(-2), A.check(3)]);
+    expect(s.stage).toBe('done');
+  });
   it('Add at the parenthesis does not cancel the 2 inside it: Add’s words, then Undo', () => {
     const s = run(start(p), A.add(-2));
     expect(s.needUndo).toBe(true);
