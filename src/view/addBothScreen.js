@@ -390,7 +390,7 @@ function ghostRow(s) {
     type: 'button', 'data-action': 'focus', 'data-target': 'amount', 'data-blank': '1', 'data-fk': 'blank', 'data-lx-field': '1',
     'aria-label': 'The amount to add to both sides', ...(open ? {} : { tabindex: '-1' }),
   });
-  if (open && s.ui?.focus === 'blank') left.dataset.lxFocus = '1';
+  if (typing && s.ui?.focus === 'blank') left.dataset.lxFocus = '1';      // (only while the keys go to it: Build N)
   const right = html('span', `lx-box is-mirror${text ? '' : ' is-empty'}`, [shown(text)], { 'aria-hidden': 'true' });
   const plus = () => html('span', 'lb-plus lx-plus', ['+']);
   slot.append(eqRow([...sideEls(s.board.left, s.lx.negIds), plus(), left], [...sideEls(s.board.right, s.lx.negIds), plus(), right], 'lx-ghosteq'));
@@ -445,7 +445,8 @@ function answerRow(s) {
   const live = C.answerLive(s);
   const text = s.sub && !live ? String(s.sub.typed) : s.entry;
   // x = shows no cursor at first: it blinks once clicked (until anything else happens), and at the last step, x alone on its side
-  const last = live && !amountMode(s) && (C.alone(s.board) || Boolean(s.ui?.fieldCursor));
+  // (and while the keys go into it, once clicked: Build N, the cursor is where the keys go)
+  const last = live && !amountMode(s) && (C.alone(s.board) || Boolean(s.ui?.fieldCursor) || s.typing === 'answer' || s.ui?.focus === 'answer');
   const placing = Boolean(s.sub?.placing);                 // the typed value is what is dragged into x
   const typed = html('button', `ab-typed lb-typed lx-field${text ? '' : ' is-empty'}${last ? ' is-focus' : ''}${last && !text ? ' is-blink' : ''}${live || placing ? '' : ' is-off'}${placing ? ' is-chip' : ''}`, [shown(text)], placing
     ? { type: 'button', 'data-chip': '1', 'data-fk': 'answer', 'data-lx-field': '1', 'aria-label': `Your value ${shown(text)}: drag it into x` }

@@ -9,7 +9,7 @@
 //     matAction    the card's own buttons (null for anything else: the common ones are handled here)
 //     effects      the card's extra effects when the state changes (a log line, what this level has taught)
 
-import { withSpotlight } from '../engine/spotlight.js';
+import { withSpotlight, spotOf } from '../engine/spotlight.js';
 import { withIntro } from './withIntro.js';
 import { recordProblem } from '../lightStore.js';
 
@@ -22,7 +22,7 @@ export function makeSolvePlay(card) {
     noAuto: true,         // nothing advances on a timer: every pause ends with a green button
     lineInMat: true,      // the line is on the Mat (for screen readers: what the card says is a pop-up)
     lightDesign: true,    // no pad on a keyboard, a pop-up keypad on touch, the header fades (Build D)
-    padOpen: card.padOpen,
+    padOpen: (s) => card.padOpen(s) && spotOf(s, card.spot)?.kind !== 'error',   // an error waits for Undo: no keypad (Build N)
     owesMove: card.loop.owesMove,                                   // a correct guess at the first state makes the next problem a move
     steps: () => [],
     newSession: card.newSession,

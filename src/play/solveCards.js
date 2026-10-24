@@ -7,7 +7,7 @@ import { logLights } from './lightsLog.js';
 import { formatAddBoth } from '../engine/addBoth.js';
 import { solve as addLoop, reduceAddBoth } from '../engine/cards/add.js';
 import { xAlone } from '../engine/addBothMoves.js';
-import { newLightsSession, withLights, lightsAnswerLive, lightsSummary, combineOpen, blankOpen, amountMode, ADD_SPOT } from '../engine/addBothLights.js';
+import { newLightsSession, withLights, lightsAnswerLive, lightsSummary, combineOpen, blankOpen, amountMode, seesawAdd, ADD_SPOT } from '../engine/addBothLights.js';
 import { renderAddBothScreen, introOpen as addIntroOpen } from '../view/addBothScreen.js';
 import { lightsFeedbackText } from '../view/addBothLightsFeedback.js';
 import { makeAddBothControls } from '../view/addBothControls.js';
@@ -62,7 +62,7 @@ export const addBothPlay = makeSolvePlay({
   bindMat: (root, dispatch, getSession) => bindLightsMat(root, dispatch, getSession),
   renderMat: (s) => renderAddBothScreen(s),
   // the keypad pops up on touch only while a field is in use: the amount's blank, a sum's blank, x = once tapped or at the last step
-  padOpen: (s) => s.stage !== 'done' && !s.sub && ((blankOpen(s) && amountMode(s)) || combineOpen(s) || Boolean(s.lx?.distribute)
+  padOpen: (s) => s.stage !== 'done' && !s.sub && (((blankOpen(s) || seesawAdd(s)) && amountMode(s)) || combineOpen(s) || Boolean(s.lx?.distribute)
     || (lightsAnswerLive(s) && (s.typing === 'answer' || s.ui?.focus === 'answer' || xAlone(s.board)))),
   effects(before, s) {
     if (before && before.step !== 'done' && s.step === 'done') logLights({ ...lightsSummary(s), problem: formatAddBoth(s.problem) });
@@ -189,7 +189,7 @@ export const twoStepPlay = makeSolvePlay({
     return () => off.forEach((f) => f?.());
   },
   renderMat: (s) => renderTwoStepScreen(s),
-  padOpen: (s) => s.stage !== 'done' && !s.sub && ((blankOpen(s) && amountMode(s)) || combineOpen(s) || TWO_STEP_MENU.typingOpen(s)
+  padOpen: (s) => s.stage !== 'done' && !s.sub && (((blankOpen(s) || seesawAdd(s)) && amountMode(s)) || combineOpen(s) || TWO_STEP_MENU.typingOpen(s)
     || (lightsAnswerLive(s, twoLoop) && (s.typing === 'answer' || s.ui?.focus === 'answer' || twoAlone(s.board)))),
   effects(before, s) {
     if (s.tradeCount > 0 && twoTaught) twoTaught.trade = true;
@@ -227,7 +227,7 @@ export const distSolvePlay = makeSolvePlay({
     return () => off.forEach((f) => f?.());
   },
   renderMat: (s) => renderDistSolveScreen(s),
-  padOpen: (s) => s.stage !== 'done' && !s.sub && ((blankOpen(s) && amountMode(s)) || combineOpen(s) || Boolean(s.lx?.distribute) || DIST_MENU.typingOpen(s)
+  padOpen: (s) => s.stage !== 'done' && !s.sub && (((blankOpen(s) || seesawAdd(s)) && amountMode(s)) || combineOpen(s) || Boolean(s.lx?.distribute) || DIST_MENU.typingOpen(s)
     || (lightsAnswerLive(s, distLoop) && (s.typing === 'answer' || s.ui?.focus === 'answer' || distAlone(s.board)))),
   matAction(d) {
     if (ADD_MAT.has(d.action)) return { type: d.action };

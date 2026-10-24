@@ -101,7 +101,7 @@ function answerRow(s) {
   const live = solve.answerLive(s);
   const placing = Boolean(s.sub?.placing);
   const text = s.sub && !live ? String(s.sub.typed) : s.entry;
-  const last = live && (xAlone(s.board) || Boolean(s.ui?.fieldCursor));   // x = blinks once clicked, and at the last step: x alone
+  const last = live && (xAlone(s.board) || Boolean(s.ui?.fieldCursor) || s.typing === 'answer');   // x = blinks once clicked (and keeps the cursor while typed in), and at the last step: x alone
   const typed = html('button', `ab-typed lb-typed lx-field${text ? '' : ' is-empty'}${last ? ' is-focus' : ''}${last && !text ? ' is-blink' : ''}${placing ? ' is-chip' : ''}${live || placing ? '' : ' is-off'}`, [text ? text.replace('-', MINUS) : ' '], {
     type: 'button', 'data-fk': 'answer', 'data-lx-field': '1',
     ...(placing ? { 'data-chip': '1', 'data-lx-field': '1', 'aria-label': `Your value ${text}: drag it onto x` } : { 'data-action': 'focus', 'data-target': 'answer', 'aria-label': 'Your answer for x' }),

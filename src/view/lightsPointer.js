@@ -126,18 +126,22 @@ export function bindLightsMat(root, dispatch, getSession) {
   };
   window.addEventListener('keydown', onKey, true);
 
-  // after every redraw: focus goes where the screen asks (data-lx-focus), else back to the element that had it
+  // after every redraw: focus goes where the screen asks (data-lx-focus), else back to the element that had it. A field waiting for
+  // typing (the cursor) comes first, unless the screen asks for another field or a term is held: the keys go to the field, so Enter
+  // must not press the Add icon or Undo that had the focus before (from a field, Enter is the green button's; Build N)
   const settle = () => {
     if (!lights()) return;
     const asked = root.querySelector('[data-lx-focus]');
     const a = document.activeElement;
     const lost = !a || a === document.body || !a.isConnected;
     const back = lost && lastKey ? root.querySelector(`[data-fk="${lastKey}"]`) : null;
-    const target = asked ?? back;
+    const field = root.querySelector('[data-lx-field].is-focus:not(:disabled):not(.is-mirror)');
+    const own = asked && (asked.dataset.lxField || asked.matches('.is-held'));
+    const target = own ? asked : field ?? asked ?? back;
     const kb = keyboard;
     keyboard = false;                 // a focus the screen gives is not a keyboard focus (no preview, no field switch)
-    if (target && !target.disabled && target !== a) target.focus({ preventScroll: true });
-    else if (!target) settleTypingFocus(root);          // else the open field, when the focus was lost (Build N)
+    if (target && !target.disabled) { if (target !== a) target.focus({ preventScroll: true }); }
+    else settleTypingFocus(root);                       // else the open field, when the focus was lost (Build N)
     keyboard = kb;
   };
   const obs = new MutationObserver(settle);

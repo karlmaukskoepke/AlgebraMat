@@ -322,11 +322,11 @@ function sideBoxes(geo, s) {
   row.style.setProperty('--mid', `${geo.borderX / geo.W * 100}%`);
   const text = s.amountEntry ?? '';
   const shown = text ? text.replace('-', MINUS) : ' ';
-  const typing = s.typing !== 'answer';
+  const typing = s.typing !== 'answer';         // (the keys go here: the cursor and the focus too, Build N)
   for (const side of ['left', 'right']) {
     const first = side === 'left';
     const box = first
-      ? html('button', `lx-box ab-sidebox${text ? '' : ' is-empty'}${typing && !text ? ' is-blink' : ''}`, [shown], { type: 'button', 'data-action': 'focus', 'data-target': 'amount', 'data-blank': '1', 'data-fk': 'blank', 'data-lx-field': '1', 'aria-label': 'Type the number to add to both sides' })
+      ? html('button', `lx-box ab-sidebox${typing ? ' is-focus' : ''}${text ? '' : ' is-empty'}${typing && !text ? ' is-blink' : ''}`, [shown], { type: 'button', 'data-action': 'focus', 'data-target': 'amount', 'data-blank': '1', 'data-fk': 'blank', 'data-lx-field': '1', 'aria-label': 'Type the number to add to both sides' })
       : html('span', `lx-box ab-sidebox is-mirror${text ? '' : ' is-empty'}`, [shown], { 'aria-hidden': 'true' });
     row.append(html('div', 'ab-sideslot', [box]));
   }

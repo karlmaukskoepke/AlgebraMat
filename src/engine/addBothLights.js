@@ -123,7 +123,11 @@ export function withLights(reduce = reduceAddBoth, { alone = xAlone, menuPreview
     }
 
     // ----- apply with an empty or unreadable blank: the box shakes, nothing else -----
-    if (action.type === 'go' && blankOpen(state) && amountOf(state.amountEntry) === null) return withUi(state, { shake: true, preview: false, focus: 'blank' });
+    // (and the keys go back to the box: after a click on x =, they went on into x =; Build N)
+    if (action.type === 'go' && blankOpen(state) && amountOf(state.amountEntry) === null) {
+      const shaken = withUi(state, { shake: true, preview: false, focus: 'blank' });
+      return shaken.typing === 'answer' ? { ...shaken, typing: 'amount' } : shaken;
+    }
 
     // ----- the seesaw's Add (Build D-2, Part 5): the number is typed once; its counters go onto both sides as it is typed -----
     if (seesawAdd(state) && isTyping(action) && amountMode(state)) {
@@ -156,13 +160,15 @@ export function withLights(reduce = reduceAddBoth, { alone = xAlone, menuPreview
     // greyed while the move is owed
     if ((typingAnswer || (action.type === 'focus' && action.target === 'answer')) && moveOwed(state)) return state;
 
-    // help, a move or a check closes a sum being typed
+    // help, a move (Multiply and Flip too: their blanks would take the keys of a sum still open under them, Build N) or a check closes a
+    // sum being typed
     let input = state;
-    if ((state.lx.combine || state.lx.distribute) && ['stuck', 'teach', 'choose', 'check'].includes(action.type)) { input = structuredClone(state); input.lx.combine = null; input.lx.distribute = null; }
+    if ((state.lx.combine || state.lx.distribute) && ['stuck', 'teach', 'choose', 'check', 'multOpen', 'flipPick'].includes(action.type)) { input = structuredClone(state); input.lx.combine = null; input.lx.distribute = null; }
 
     const s = reduce(input, action);
     if (s === input) return input;                                  // the engine did nothing (a closed sum still counts)
     s.ui = { ...UI0 };
+    if (typingAnswer && ui(state).focus === 'answer') s.ui.focus = 'answer';   // keys typed into x = keep its cursor (Build N)
     const lx = s.lx;
     lx.previewed = false;                                           // the next preview is a new look
 

@@ -33,7 +33,7 @@ const DIVIDE_IT = { whole: 'explain', div: 'live', frac: 'grey', flip: 'explain'
 
 export function makeMultiplyMenu({ xAlone, coefOf, option = (kind) => DIVIDE_IT[kind], greyKey = () => 'aLater', probe = 'fraction', negTop = false }) {
   // Can the move be previewed (hovered) right now? Is its blank open?
-  const canPreview = (s) => s.stage === 'moves' && !s.sub && !s.deal && !s.diag && !s.fail && !s.needUndo && s.menu !== 'fraction' && !xAlone(s.board) && !s.mopts?.kind;
+  const canPreview = (s) => s.stage === 'moves' && !s.sub && !s.deal && !s.diag && !s.fail && !s.needUndo && s.menu !== 'fraction' && s.menu !== 'add' && !s.lx?.combine && !s.lx?.distribute && !xAlone(s.board) && !s.mopts?.kind;   // (not over Add's open blank, a sum or the distribute blanks: it hid the blank the keys go to, Build N)
   const fracOpen = (s) => s.stage === 'moves' && s.menu === 'fraction' && !s.sub && !s.deal && !s.fail && !s.spot?.choose && s.typing !== 'answer';
   // Is one of the menu's blanks waiting for typing (the fraction, the whole number, Divide's number)? The keypad is live and up for it,
   // whether or not x = is (Build N: on the problem after a correct guess, x = waits for a move and the blank took nothing).
@@ -112,6 +112,14 @@ export function makeMultiplyMenu({ xAlone, coefOf, option = (kind) => DIVIDE_IT[
         const opened = inner({ ...state, mopts: null }, { type: 'choose', move: 'fraction' });
         if (opened.menu !== 'fraction') return state;
         return { ...opened, fb: { num, den: '', part: 'den' }, feedback: num.replace('-', '').length > 1 ? { key: 'dUnitFraction', params: {}, bad: false } : null };
+      }
+      // the options open with one of them previewed (the hint after Undo lights Divide and shows its blank; or the pointer is on it): a
+      // digit or the minus picks it and goes into its blank (Build N: it closed the options and went into x =)
+      const shown = m && !m.kind && canPreview(state) ? state.ui?.preview : null;
+      if ((shown === 'div' || shown === 'whole') && option(shown, state) !== 'grey' && (action.type === 'digit' || action.type === 'toggleSign')) {
+        const picked = { ...state, mopts: { kind: shown, entry: '' }, feedback: null, ui: { ...(state.ui ?? {}), preview: false } };
+        const typed = typeInto('', action, 'integer');
+        return { ...picked, mopts: { kind: shown, entry: typed } };
       }
       if (m?.kind && action.type !== 'ui') {
         if (m.kind === 'whole' && isTyping(action)) {
