@@ -3,6 +3,268 @@
   "updated": "2026-10-24",
   "checks": [
     {
+      "id": "p-combine-nudge",
+      "name": "A nudge to combine, after Add",
+      "build": "Build P",
+      "link": {
+        "label": "Open Two-step equations · Level 1",
+        "query": "?pack=two-step-equations&level=1&seed=406&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Two-step equations, Level 1, on 3x + 4 = 19.",
+        "Click Add (the top button in the panel), type −4 and press Enter. The new row reads 3x = 19 − 4.",
+        "Move the pointer away from the panel and take your hands off for 5 seconds.",
+        "Press any key (Shift is fine)."
+      ],
+      "see": "After about 2½ seconds the 19 and the −4 glow and pulse blue. A second or so later a small pop-up under them says “Drag one onto the other to combine them.” and a faint copy of the 19 glides onto the −4, again every few seconds. The key press clears it all at once."
+    },
+    {
+      "id": "p-calc",
+      "name": "Work out a product: dividing first on Distribute",
+      "build": "Build P",
+      "link": {
+        "label": "Open Distribute, combine, solve · Level 1",
+        "query": "?pack=distribute-solve&level=1&seed=37&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Distribute, combine, solve, Level 1, on 3(x + 2) = 15.",
+        "Click Divide (÷), type 3 and press Enter. The new row reads x + 2 = (15) over 3.",
+        "Move the pointer away and take your hands off for 5 seconds.",
+        "Click the fraction bar under (15).",
+        "Type 5 and press Enter.",
+        "Click Add, type −2 and press Enter. Then type 3 in x =, press Enter, drag the 3 onto the x and press Enter for each line until Balanced."
+      ],
+      "see": "After about 2½ seconds the fraction bar glows, then a pop-up says “Click the fraction bar to divide 15 by 3.” with a ring closing in on the bar. Clicking it lights the (15) over 3 and opens a box under it: x + 2 = [ ]. With 5 the row reads x + 2 = 5. Add −2 writes x = 5 − 2 (nothing is worked out at x alone), and the check reads 3(3 + 2) = 15, 3(5) = 15, 15 = 15, then Balanced."
+    },
+    {
+      "id": "p-calc-wrong",
+      "name": "Work out a product: a wrong product, and the × in multiplication form",
+      "build": "Build P",
+      "link": {
+        "label": "Open Distribute, combine, solve · Level 1",
+        "query": "?pack=distribute-solve&level=1&seed=37&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Distribute, combine, solve, Level 1, on 3(x + 2) = 15.",
+        "Click Multiply (the second button), then its second option (a box over a box). Type 1, then 3, and click the green Go. The new row reads x + 2 = ⅓ × (15).",
+        "Click the small × between ⅓ and (15). Type 45 and press Enter.",
+        "Press Undo.",
+        "Click the × again, type 5 and press Enter."
+      ],
+      "see": "A wrong 45 is lit with “check this” and “⅓ × 15 is not 45. Press Undo and try again.”; the ⅓ and the 15 stay lit, not greyed. After Undo a hint lights them: “⅓ × 15 is the same as 15 ÷ 3. Click the × and type it.” With 5 the row reads x + 2 = 5."
+    },
+    {
+      "id": "p-cross-off",
+      "name": "The cross-off when dividing cancels the number in front of x",
+      "build": "Build P",
+      "link": {
+        "label": "Open Two-step equations · Level 1",
+        "query": "?pack=two-step-equations&level=1&seed=406&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Two-step equations, Level 1, on 3x + 4 = 19.",
+        "Click Add, type −4 and press Enter.",
+        "Drag the 19 onto the −4, type 15 and press Enter. The row reads 3x = 15.",
+        "Click Divide (÷), type 3 and press Enter. Watch the row (3x) over 3 for two seconds."
+      ],
+      "see": "In the row (3x) over 3 = (15) over 3, the 3 in front of x and the 3 under it are each struck through with a short red line drawn in, then fade a little; the 15 side is not struck. The next row reads x = (15) over 3, and the struck row stays in the stack until Next."
+    },
+    {
+      "id": "p-cross-off-flip",
+      "name": "The cross-off on a flip: the two minus signs",
+      "build": "Build P",
+      "link": {
+        "label": "Open Flip everything · Level 1",
+        "query": "?pack=flip-everything&level=2&seed=7&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Flip everything, Level 1, on −x = 8.",
+        "Click Flip everything (the fourth button), then the green Go.",
+        "Watch the row −1 × (−x) = −1 × (8) for two seconds."
+      ],
+      "see": "On the x side the minus of −1 and the minus of −x are each struck through with a short red line; the other side is not struck. The next row reads x = −(8)."
+    },
+    {
+      "id": "p-tab-blanks",
+      "name": "Tab and the arrow keys between the distribute blanks",
+      "build": "Build P",
+      "link": {
+        "label": "Open Distribute, combine, solve · Level 1",
+        "query": "?pack=distribute-solve&level=1&seed=37&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Distribute, combine, solve, Level 1, on 3(x + 2) = 15.",
+        "Drag the 3 onto the parenthesis. Type 3, press Tab, type 6.",
+        "Press Shift and Tab together.",
+        "Type 4.",
+        "Press the right arrow key, then the left arrow key.",
+        "Type 3 and press Enter."
+      ],
+      "see": "Tab moves to the second blank. Shift+Tab goes back to the first and shows its 3 selected (white on blue); typing 4 replaces it (4, not 34). The arrows move between the two blanks the same way, each one selected as you land on it. Typing 3 replaces the 4 again, and Enter writes 3x + 6 = 15."
+    },
+    {
+      "id": "p-tab-fraction",
+      "name": "The arrow keys between the top and bottom of a fraction",
+      "build": "Build P",
+      "link": {
+        "label": "Open Divide it · Level 2",
+        "query": "?pack=divide-it&level=3&seed=7&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Divide it, Level 2, on 5x = −15.",
+        "Click Multiply (the second button), then its second option (a box over a box). Type 1, then 4.",
+        "Press the left arrow key.",
+        "Press the right arrow key and type 5.",
+        "Click the green Go."
+      ],
+      "see": "After 1 the cursor jumps to the bottom. The left arrow goes back to the top and selects the 1 (white on blue); the right arrow selects the 4 in the bottom, and typing 5 replaces it. Go writes ⅕(5x) = ⅕(−15)."
+    },
+    {
+      "id": "p-distribute-arcs",
+      "name": "Distribute: arcs the first time, labels only after a wrong product",
+      "build": "Build P",
+      "link": {
+        "label": "Open Distribute, combine, solve · Level 1",
+        "query": "?pack=distribute-solve&level=1&seed=37&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Distribute, combine, solve, Level 1, on 3(x + 2) = 15.",
+        "Drag the 3 onto the parenthesis and let go. Look at the equation and the two blanks.",
+        "Type 3, press Enter, type 5, press Enter.",
+        "Press Undo.",
+        "Drag the 3 onto the parenthesis again."
+      ],
+      "see": "The first time, the 3 turns blue, an arc with a small × runs from it to the x and another to the 2, “3 groups of” sits by the parenthesis, and the two blanks have no labels. The wrong 5 brings the labels “3 · x” and “3 · 2” above the blanks with “3 · 2 is not 5. Press Undo and try again.” After Undo the hint lights the 3 and the parenthesis, and the next drag shows the labels from the start (on this problem only: the next problem starts without them)."
+    },
+    {
+      "id": "p-xboxes",
+      "name": "A bare number for two x-terms gets a picture",
+      "build": "Build P",
+      "link": {
+        "label": "Open Distribute, combine, solve · Level 5",
+        "query": "?pack=distribute-solve&level=5&seed=306&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Distribute, combine, solve, Level 5, on 3(x + 2) + 2x = 41.",
+        "Drag the 3 onto the parenthesis. Type 3, Enter, 6, Enter.",
+        "Drag the 2x onto the 3x. Type 5 and press Enter.",
+        "Press x on the keyboard, then press Enter."
+      ],
+      "see": "A bare 5 brings a picture beside the two terms: three x boxes plus two x boxes, with the question “5 of what?” under them, and nothing changes yet. With 5x the row reads 5x + 6 = 41."
+    },
+    {
+      "id": "p-full-check-two-step",
+      "name": "Every check shows every step: Two-step equations, Level 5",
+      "build": "Build P",
+      "link": {
+        "label": "Open Two-step equations · Level 5",
+        "query": "?pack=two-step-equations&level=5&seed=1565&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Two-step equations, Level 5, on 4 − 3x = −11.",
+        "Click the box after x =, type 5 and press Enter.",
+        "Drag the 5 onto the x.",
+        "Press Enter, and again, and again."
+      ],
+      "see": "The check writes 4 − 3x = −11 with 4 − 3 × 5 = −11 under it, then one line for each Enter: 4 − 15 = −11, then −11 = −11, then ✓ Balanced. (From Level 3 it used to jump straight to Balanced.)"
+    },
+    {
+      "id": "p-full-check-distribute",
+      "name": "Every check shows every step: Distribute, Level 4",
+      "build": "Build P",
+      "link": {
+        "label": "Open Distribute, combine, solve · Level 4",
+        "query": "?pack=distribute-solve&level=4&seed=126&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Distribute, combine, solve, Level 4, on 5 − 2(x + 2) = −7.",
+        "Click the box after x =, type 4 and press Enter.",
+        "Drag the 4 onto the x.",
+        "Press Enter four times, slowly."
+      ],
+      "see": "The parenthesis is worked out where you can see it: 5 − 2(4 + 2) = −7, then 5 − 2(6) = −7, then 5 − 12 = −7, then −7 = −7, one line for each Enter, then ✓ Balanced."
+    },
+    {
+      "id": "p-two-x",
+      "name": "Two x’s: one drop each",
+      "build": "Build P",
+      "link": {
+        "label": "Open Distribute, combine, solve · Level 5",
+        "query": "?pack=distribute-solve&level=5&seed=306&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Distribute, combine, solve, Level 5, on 3(x + 2) + 2x = 41.",
+        "Click the box after x =, type 7 and press Enter.",
+        "Pick up the 7 and hold it over the equation without letting go. Then drop it on the second x (the one in 2x).",
+        "Drag the 7 onto the first x (the one inside the parenthesis).",
+        "Press Enter five times, slowly."
+      ],
+      "see": "While you hold the 7, both x’s glow as places to drop it. The drop fills only the x in 2x: a small green check appears above it and a faint dashed 7 waits under the other x; nothing else happens yet. The second drop fills that x too, and the check begins: 3(7 + 2) + 2 × 7 = 41, then 3(9) + 2 × 7 = 41, 27 + 2 × 7 = 41, 27 + 14 = 41, 41 = 41, Balanced."
+    },
+    {
+      "id": "p-divide-neg-popup",
+      "name": "Dividing by a negative: its own pop-up, once a level",
+      "build": "Build P",
+      "link": {
+        "label": "Open Flip everything · Level 3",
+        "query": "?pack=flip-everything&level=4&seed=213&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Flip everything, Level 3, on −3x = 12.",
+        "Click Divide (÷), press the minus key, type 1 and click Go.",
+        "Press Undo.",
+        "Click Divide (÷), press the minus key, type 3 and click Go."
+      ],
+      "see": "Dividing by −1 is written as dividing, (−3x) over −1 = (12) over −1, with the minus signs and the 1 struck through, and a pop-up says “Dividing by −1 does the same thing as multiplying by −1: every sign flips.” (not the first-flip pop-up). Dividing by −3 then writes (−3x) over −3 = (12) over −3 with no pop-up: it shows once a level."
+    },
+    {
+      "id": "p-whole-explained",
+      "name": "Divide it: the whole number is explained again, and its / still works",
+      "build": "Build P",
+      "link": {
+        "label": "Open Divide it · Level 2",
+        "query": "?pack=divide-it&level=3&seed=7&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Divide it, Level 2, on 5x = −15.",
+        "Click Multiply (the second button), then its first option (a single box). Type 5 and click the green Go.",
+        "Click Multiply again, then the first option. Type 1, then press the / key, then type 5.",
+        "Click the green Go."
+      ],
+      "see": "The first option is not greyed. With 5 it says “5 × (5x) makes 25x: still not one x. Try dividing both sides.” and writes nothing. Typing 1 then / turns it into the fraction 1 over 5 (the 1 on top, the cursor underneath), and Go writes ⅕(5x) = ⅕(−15)."
+    },
+    {
+      "id": "p-lights-divide",
+      "name": "Smaller numbers and One box sit beside Divide",
+      "build": "Build P",
+      "link": {
+        "label": "Open Divide it · Level 2",
+        "query": "?pack=divide-it&level=3&seed=7&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Divide it, Level 2, on 5x = −15.",
+        "Look at the small dots to the right of each button in the panel.",
+        "Click Divide (÷), type 5 and press Enter.",
+        "Point at the two dots to the right of Divide, one at a time."
+      ],
+      "see": "Multiply has one dot beside it (No fractions); Divide has two. After dividing by 5, both of Divide’s dots turn green, and pointing at them shows “Smaller numbers” and “One box”."
+    },
+    {
       "id": "o-panel",
       "name": "The Moves panel: its heading, the names and the symbols",
       "build": "Build O",
@@ -117,7 +379,7 @@
         "Press Undo.",
         "Click Flip everything (the fourth button), then the green Go."
       ],
-      "see": "Dividing by −1 writes −1 × (−3x) = −1 × (12), then 3x = −12. After Undo, the Flip button writes exactly the same two rows."
+      "see": "Dividing by −1 is written as dividing: (−3x) over −1 = (12) over −1, with the two minus signs and the 1 crossed off, “Same as multiplying by −1.” under it, then 3x = −12, and a pop-up: “Dividing by −1 does the same thing as multiplying by −1: every sign flips.” After Undo, the Flip button writes −1 × (−3x) = −1 × (12), then the same 3x = −12."
     },
     {
       "id": "o-fraction-back",
@@ -131,11 +393,11 @@
       "steps": [
         "Click the button. It opens Divide it, Level 2, on 5x = −15.",
         "Click Multiply (the second button). Two options open beside it.",
-        "Click the first option (a single box).",
-        "Click the second option (a box over a box). Type 1, then press the / key, then type 5.",
+        "Click the first option (a single box). Type 5 and click the green Go.",
+        "Click Multiply again, then the second option (a box over a box). Type 1, then press the / key, then type 5.",
         "Click the green Go."
       ],
-      "see": "There are only two options: a box ( ) = box ( ) (greyed) and a box over a box ( ) = box over a box ( ), with no small × or ÷ on them. The first says “That move unlocks on a later card.” The fraction takes 1 on top and 5 underneath on both sides, and Go writes ⅕(5x) = ⅕(−15), then x = ⅕(−15): written as multiplying, not dividing."
+      "see": "There are two options: a box ( ) = box ( ) and a box over a box ( ), with no small × or ÷ on them, neither greyed. The first, with 5, says “5 × (5x) makes 25x: still not one x. Try dividing both sides.” and writes nothing. The fraction takes 1 on top and 5 underneath on both sides, and Go writes ⅕(5x) = ⅕(−15), then x = ⅕(−15): written as multiplying, not dividing."
     },
     {
       "id": "o-hint-divide",
@@ -260,9 +522,9 @@
         "Drag the 2 onto the parenthesis. Type 2, Enter, 6, Enter.",
         "Drag the 5 onto the 6, type 11, press Enter.",
         "Click Add, type −11, Enter. Drag the 17 onto the −11, type 6, Enter. Click Divide (÷), type 2, Enter.",
-        "Type 3 in x =, press Enter."
+        "Type 3 in x =, press Enter. Drag the 3 onto the x, then press Enter for each line until Balanced."
       ],
-      "see": "Divide says “That move works once each side is one term.” The rows read 5 + 2x + 6 = 17, then 11 + 2x = 17, then 2x = 6, then x = (6) over 2. Typing 3 ends “Yes! x = 3”."
+      "see": "Divide says “That move works once each side is one term.” The rows read 5 + 2x + 6 = 17, then 11 + 2x = 17, then 2x = 6, then x = (6) over 2. The check shows every step, one line for each press of Enter: 5 + 2(3 + 3) = 17, 5 + 2(6) = 17, 5 + 12 = 17, 17 = 17, then Balanced and “Yes! x = 3”."
     },
     {
       "id": "m-level-4",
@@ -278,9 +540,9 @@
         "Click the minus in front of the 2. Then drag −2 onto the parenthesis. Type −2, Enter, −4, Enter.",
         "Drag the 5 onto the −4, type 1, press Enter.",
         "Click Add, type −1, Enter. Drag the −7 onto the −1, type −8, Enter.",
-        "Click Divide (÷), type −2, Enter. Type 4 in x =, press Enter."
+        "Click Divide (÷), type −2, Enter. Type 4 in x =, press Enter. Drag the 4 onto the x, then press Enter for each line until Balanced."
       ],
-      "see": "After the tap it reads 5 + −2(x + 2) = −7. The rows read 5 + −2x + −4 = −7, then 1 + −2x = −7, then −2x = −8, then x = (−8) over −2. Typing 4 ends “Yes! x = 4”."
+      "see": "After the tap it reads 5 + −2(x + 2) = −7. The rows read 5 + −2x + −4 = −7, then 1 + −2x = −7, then −2x = −8, then x = (−8) over −2. The check shows every step, one line for each press of Enter: 5 − 2(4 + 2) = −7, 5 − 2(6) = −7, 5 − 12 = −7, −7 = −7, then Balanced and “Yes! x = 4”."
     },
     {
       "id": "m-level-5",
@@ -296,9 +558,9 @@
         "Drag the 3 onto the parenthesis. Type 3, Enter, 6, Enter.",
         "Drag the 2x onto the 3x, type 5x, press Enter.",
         "Click Add, type −6, Enter. Drag the 41 onto the −6, type 35, Enter.",
-        "Click Divide (÷), type 5, Enter. Type 7 in x =, press Enter."
+        "Click Divide (÷), type 5, Enter. Type 7 in x =, press Enter. Drag the 7 onto each x (one at a time), then press Enter for each line until Balanced."
       ],
-      "see": "The rows read 3x + 6 + 2x = 41, then 5x + 6 = 41, then 5x = 35, then x = (35) over 5. Typing 7 ends “Yes! x = 7”."
+      "see": "The rows read 3x + 6 + 2x = 41, then 5x + 6 = 41, then 5x = 35, then x = (35) over 5. The check shows every step, one line for each press of Enter: 3(7 + 2) + 2 × 7 = 41, 3(9) + 2 × 7 = 41, 27 + 2 × 7 = 41, 27 + 14 = 41, 41 = 41, then Balanced and “Yes! x = 7”."
     },
     {
       "id": "m-drag-labels",
@@ -315,7 +577,7 @@
         "Now drag the 3 onto the parenthesis and let go.",
         "Type 3, press Enter, type 6, press Enter."
       ],
-      "see": "Let go elsewhere, the 3 goes back and nothing changes. On the parenthesis, a row of two blue boxes appears under the equation: “3 · x” above the first (an x printed after it) and “3 · 2” above the second. Go writes 3x + 6 = 15, and the panel’s third small dot at the bottom (No parentheses) turns green."
+      "see": "Let go elsewhere, the 3 goes back and nothing changes. On the parenthesis, the 3 turns blue, an arc with a small × runs from it to the x and another to the 2, and “3 groups of” sits by the parenthesis. Two blue boxes appear under the equation with no labels above them (an x printed after the first). Go writes 3x + 6 = 15, and the panel’s third small dot at the bottom (No parentheses) turns green."
     },
     {
       "id": "m-tap-minus",
@@ -332,7 +594,7 @@
         "Click the minus in front of the 2.",
         "Drag the −2 onto the parenthesis."
       ],
-      "see": "The first drag is refused: “Tap the minus first, so −2 is a negative number.” After the tap the equation reads 5 + −2(x + 2) = −7, and then the drag opens the two blanks, labelled “−2 · x” and “−2 · 2”."
+      "see": "The first drag is refused: “Tap the minus first, so −2 is a negative number.” After the tap the equation reads 5 + −2(x + 2) = −7, and then the drag opens the two blanks, with arcs from the −2 to each piece and “−2 groups of”, and no labels over the blanks."
     },
     {
       "id": "m-wrong-product",
@@ -382,7 +644,7 @@
         "Drag the 2x onto the 3x. Type 5 and press Enter.",
         "Press x on the keyboard, then press Enter."
       ],
-      "see": "Dropping 2x on 3x lights both with “Combine” over them and a box under them. A bare 5 gets the pop-up “Type every piece, including the x.” and nothing changes; with 5x the row reads 5x + 6 = 41."
+      "see": "Dropping 2x on 3x lights both with “Combine” over them and a box under them. A bare 5 brings a picture beside them: three x boxes plus two x boxes, and the question “5 of what?”; nothing changes yet. With 5x the row reads 5x + 6 = 41."
     },
     {
       "id": "m-ghost-hand",
@@ -433,9 +695,10 @@
         "Mistake 3: Divide too early: click Divide (÷).",
         "Mistake 4: add the wrong number: click Add, type 5, press Enter. Then click Undo.",
         "Mistake 5: a wrong sum: drag the 5 onto the 6, type 12, press Enter. Then click Undo.",
-        "Mistake 6, a mistake, Undo, then type in the blank: click the button at the top of this item again (it starts the same problem fresh). Drag the 2 onto the parenthesis, type 2, Enter, 6, Enter. Drag the 5 onto the 6, type 11 and press Enter. Click Add, type 11 and press Enter. Wait two seconds and press Undo. Without clicking anything, type −11 and press Enter, then click Next."
+        "Mistake 6, a mistake, Undo, then type in the blank: click the button at the top of this item again (it starts the same problem fresh). Drag the 2 onto the parenthesis, type 2, Enter, 6, Enter. Drag the 5 onto the 6, type 11 and press Enter. Click Add, type 11 and press Enter. Wait two seconds and press Undo. Without clicking anything, type −11 and press Enter, then click Next.",
+        "Wait 3 seconds and watch the nudge: the 17 and the −11 glow and pulse, then a small pop-up says “Drag one onto the other to combine them.” with a faint copy gliding from one to the other."
       ],
-      "see": "I’m stuck flashes after 10 seconds, and then lights the 2 and the parenthesis (“Drag the 2 onto the parenthesis…”). The half-multiplied product is lit with “2 · 3 is not 3. Multiply this piece too.”; Undo brings the same hint back. Divide says “That move works once each side is one term.” Adding 5 is lit as “did not eliminate the term”. The wrong sum says “5 + 6 is not 12.”, and after Undo the 5 and the 6 are outlined with “5 and 6 are like terms. Drag one onto the other to combine them.” Mistake 6: after Undo the Add box is open again; the −11 you type goes straight into it, Enter writes 11 + 2x − 11 = 17 − 11, and Next writes 2x = 17 − 11."
+      "see": "I’m stuck flashes after 10 seconds, and then lights the 2 and the parenthesis (“Drag the 2 onto the parenthesis…”). The half-multiplied product is lit with “2 · 3 is not 3. Multiply this piece too.”; Undo brings the same hint back. Divide says “That move works once each side is one term.” Adding 5 is lit as “did not eliminate the term”. The wrong sum says “5 + 6 is not 12.”, and after Undo the 5 and the 6 are outlined with “5 and 6 are like terms. Drag one onto the other to combine them.” Mistake 6: after Undo the Add box is open again; the −11 you type goes straight into it, Enter writes 11 + 2x − 11 = 17 − 11, and Next writes 2x = 17 − 11. Waiting at 2x = 17 − 11 nudges the 17 and the −11."
     },
     {
       "id": "m-placement-old",
@@ -589,9 +852,9 @@
         "Drag the −11 onto the 4 beside it. A box opens under them: type −15 and press Enter. The row reads −3x = −15.",
         "Click Flip everything (the third box in the panel), then the green Go.",
         "Click Divide (the third button in the panel on the right, with ÷ beside it), type 3 and press Enter.",
-        "Click the box after x =, type 5 and press Enter. Press Enter again (from Level 3 a right answer is checked in one short line)."
+        "Click the box after x =, type 5 and press Enter. Drag the 5 onto the x, then press Enter for each line until Balanced (every check shows every step)."
       ],
-      "see": "After the flip a pop-up says “Multiplying both sides by −1 flips every sign. −x becomes x.” and the row reads 3x = 15. The check starts 4 − 3x = −11 with 4 − 3 × 5 = −11 under it, then Balanced."
+      "see": "After the flip a pop-up says “Multiplying both sides by −1 flips every sign. −x becomes x.” and the row reads 3x = 15. The check starts 4 − 3x = −11, then one line for each Enter: 4 − 3 × 5 = −11, 4 − 15 = −11, −11 = −11, then Balanced."
     },
     {
       "id": "k-flip-intro",
@@ -690,9 +953,9 @@
         "Click Add (the top box in the panel on the right), type −4 and press Enter.",
         "Drag the 19 onto the 4 beside it. A box opens under them: type 15 and press Enter.",
         "Click Divide (the third button in the panel on the right, with ÷ beside it), type 3 and press Enter.",
-        "Click the box after x =, type 5 and press Enter. Press Enter again (from Level 3 a right answer is checked in one short line)."
+        "Click the box after x =, type 5 and press Enter. Drag the 5 onto the x, then press Enter for each line until Balanced (every check shows every step)."
       ],
-      "see": "Adding −4 gives 3x = 19 − 4 (the x term stays second until the 4s cancel). From this level the check is short: 4 + 3 × 5 = 19, then Balanced."
+      "see": "Adding −4 gives 3x = 19 − 4 (the x term stays second until the 4s cancel). The check shows every step: 4 + 3 × 5 = 19, 4 + 15 = 19, 19 = 19, then Balanced."
     },
     {
       "id": "k-level-5",
@@ -724,9 +987,9 @@
         "Click Add (the top box in the panel on the right), type −4 and press Enter.",
         "Drag the −11 onto the 4 beside it. A box opens under them: type −15 and press Enter.",
         "Click Divide (the third button in the panel on the right, with ÷ beside it), type 3 and press Enter.",
-        "Click the box after x =, type −5 and press Enter. Press Enter again (from Level 3 a right answer is checked in one short line)."
+        "Click the box after x =, type −5 and press Enter. Drag the −5 onto the x, then press Enter for each line until Balanced (every check shows every step)."
       ],
-      "see": "The rows read 3x = −11 − 4, then 3x = −15 and x = (−15) over 3. The check reads 3 × (−5) + 4 = −11, then Balanced."
+      "see": "The rows read 3x = −11 − 4, then 3x = −15 and x = (−15) over 3. The check reads 3 × (−5) + 4 = −11, −15 + 4 = −11, −11 = −11, then Balanced."
     },
     {
       "id": "k-level-7",
@@ -743,9 +1006,9 @@
         "Click Add (the top box in the panel on the right), type −4 and press Enter.",
         "Drag the 19 onto the 4 beside it. A box opens under them: type 15 and press Enter. The row reads −3x = 15.",
         "Click Divide (the third button in the panel on the right, with ÷ beside it), type −3 (the minus key, then 3) and press Enter.",
-        "Click the box after x =, type −5 and press Enter. Press Enter again (from Level 3 a right answer is checked in one short line)."
+        "Click the box after x =, type −5 and press Enter. Drag the −5 onto the x, then press Enter for each line until Balanced (every check shows every step)."
       ],
-      "see": "Dividing by −3 finishes in one move: x = (15) over −3, and the line says “Same as multiplying by −⅓.” The check reads 19 = 4 − 3 × (−5), then Balanced."
+      "see": "Dividing by −3 finishes in one move: x = (15) over −3, and the line says “Same as multiplying by −⅓.” The check reads 19 = 4 − 3 × (−5), 19 = 4 + 15, 19 = 19, then Balanced."
     },
     {
       "id": "student-two-step",
@@ -763,9 +1026,10 @@
         "Mistake 3, a move that makes it worse: the Add box is still open under the equation, so type 4 and press Enter. A good response lights the 4 and the 4 that was added, says they did not eliminate the term, and leaves only Undo. Press Undo, then Got it.",
         "Mistake 4, a move at the wrong moment: click Divide (÷, greyed). A good response is a small note, “That move works once each side is one term.”, and nothing locked.",
         "Mistake 5, a wrong sum: the Add box is open again, so type −4 and press Enter. Drag the 19 onto the 4, type 23 and press Enter. A good response says “19 − 4 is not 23. Press Undo and try again.” with the two numbers still readable. Press Undo: the hint lights 19 and −4 and says to drag one onto the other.",
-        "Mistake 6, a mistake, Undo, then type in the blank: click the button at the top of this item again (it starts the same problem fresh). Click Add (the first box in the panel on the right), type 4 and press Enter. Wait two seconds and press Undo. Without clicking anything, type −4 and press Enter, then click Next."
+        "Mistake 6, a mistake, Undo, then type in the blank: click the button at the top of this item again (it starts the same problem fresh). Click Add (the first box in the panel on the right), type 4 and press Enter. Wait two seconds and press Undo. Without clicking anything, type −4 and press Enter, then click Next.",
+        "Wait 3 seconds and watch the nudge: the 19 and the −4 glow and pulse, then a small pop-up under them says “Drag one onto the other to combine them.” and a faint 19 glides onto the −4. Putting two numbers together is a step with only one thing to do, so it is nudged; choosing a move never is."
       ],
-      "see": "Every mistake gets a calm answer in the real numbers, Undo is the way out of each error, and the hint after Undo points at the next move. Nothing is ever worked out for you. Mistake 6: after Undo the Add box is open again; the −4 you type goes straight into it, Enter writes 3x + 4 − 4 = 19 − 4, and Next writes 3x = 19 − 4."
+      "see": "Every mistake gets a calm answer in the real numbers, Undo is the way out of each error, and the hint after Undo points at the next move. Nothing is ever worked out for you. Mistake 6: after Undo the Add box is open again; the −4 you type goes straight into it, Enter writes 3x + 4 − 4 = 19 − 4, and Next writes 3x = 19 − 4. Waiting at 3x = 19 − 4 nudges the 19 and the −4 (it never chooses a move for you)."
     },
     {
       "id": "j-level-1",
@@ -980,9 +1244,10 @@
         "Mistake 3, dividing by a number that does not split: click Divide (÷), type 2 and click Go. Wait two seconds. A good response says 3 boxes can’t make 2 equal groups and pulses Undo. Press Undo: the boxes, the counters and the fractions to choose from appear, ½ crossed off. Click ⅓.",
         "Mistake 4, forgetting the sign at the end: the equation is now −x = 4. Type 4, press Enter, drag it onto the x, press Next twice and wait. Press Undo. A good response says −x = 4 means the opposite of x is 4, so x is not 4, and lights Flip everything.",
         "Mistake 5, pressing I’m stuck again and again: press it twice. A good response repeats the reminder with the real numbers (this card has no pictures yet) and still leaves the move to you.",
-        "Mistake 6, a mistake, Undo, then type in the blank: click the button at the top of this item again (it starts the same problem fresh). Click the box after x =, type 12 and press Enter. Drag it onto the x, press Next twice and wait two seconds. Press Undo, then Got it. Click Divide (÷), click the box under the bar, press the minus key and type 3. Click Go."
+        "Mistake 6, a mistake, Undo, then type in the blank: click the button at the top of this item again (it starts the same problem fresh). Click the box after x =, type 12 and press Enter. Drag it onto the x, press Next twice and wait two seconds. Press Undo, then Got it. Click Divide (÷), click the box under the bar, press the minus key and type 3. Click Go.",
+        "Wait 3 seconds and watch the nudge: x is alone now, so a good response nudges nothing. The other side is yours to work out."
       ],
-      "see": "Every mistake gets a short message built from the student’s own numbers, and there is always one clear thing to press next. Nothing gives the answer away. Mistake 6: the −3 goes into the box you clicked (under both bars), and Go writes (−3x) over −3 = (12) over −3."
+      "see": "Every mistake gets a short message built from the student’s own numbers, and there is always one clear thing to press next. Nothing gives the answer away. Mistake 6: the −3 goes into the box you clicked (under both bars), and Go writes (−3x) over −3 = (12) over −3. Waiting at the end nudges nothing: x is alone."
     },
     {
       "id": "i-check-shadow",
@@ -1366,9 +1631,10 @@
         "Mistake 3, a move that makes it worse: type 8 (the box under the equation is open) and click the green Go. Wait two seconds. A good response marks the 16 “got bigger”, explains with your own numbers (+8 + +8 did not eliminate the term), and pulses Undo. Press Undo, then Got it.",
         "Mistake 4, a move that only half cancels: type −5 and click Go. Wait two seconds. A good response marks the leftover 3 “still here” and says +8 was only partially canceled by the −5 you added. Press Undo, then Got it.",
         "Mistake 5, pressing I’m stuck again and again: press it four times. A good response gives a bigger clue each time (look at the +8, then which number cancels it, then choose Add, then “−8 cancels the +8. Add it to both sides yourself.”) and still leaves the move to you.",
-        "Mistake 6, a mistake, Undo, then type in the blank: click the button at the top of this item again (it starts the same problem fresh). Click Add (the first box in the panel on the right), type 8 and click the green Go. Wait two seconds and press Undo. Without clicking anything, type −8, then click Go."
+        "Mistake 6, a mistake, Undo, then type in the blank: click the button at the top of this item again (it starts the same problem fresh). Click Add (the first box in the panel on the right), type 8 and click the green Go. Wait two seconds and press Undo. Without clicking anything, type −8, then click Go.",
+        "Wait 3 seconds and watch the nudge: x is alone now, so a good response nudges nothing. Working out −4 − 8 and typing x is yours to do."
       ],
-      "see": "Every mistake gets a short message built from the student’s own numbers, and there is always one clear thing to press next. Nobody is left stuck, and nothing gives the answer away. Mistake 6: after Undo the Add box under the equation is open again; the −8 you type goes straight into it, and Go writes x = −4 − 8."
+      "see": "Every mistake gets a short message built from the student’s own numbers, and there is always one clear thing to press next. Nobody is left stuck, and nothing gives the answer away. Mistake 6: after Undo the Add box under the equation is open again; the −8 you type goes straight into it, and Go writes x = −4 − 8. Waiting at the end nudges nothing: x is alone."
     },
     {
       "id": "student-divide",
@@ -1383,13 +1649,14 @@
         "Click the button. It opens Divide it, Level 2, on 5x = −15. You are going to play a student who gets things wrong.",
         "Mistake 1, ignoring the screen: touch nothing for 10 seconds. A good response is a gentle flashing of I’m stuck, with nothing else changing and nothing taken away.",
         "Mistake 2, a wrong answer from the start: click the box after x =, type −15 (copying the number on the right) and press Enter. Drag the −15 onto the x. Press Next twice and wait two seconds. A good response writes 5x = −15 with 5 × (−15) = −15 under it, turns that into −75 = −15, says the equation is not balanced, and leaves only Undo to press. Press Undo, then Got it.",
-        "Mistake 3, a move that is not open on this card: click Multiply, then its first option (a single box). A good response says “That move unlocks on a later card.” in a small note, and nothing is locked.",
+        "Mistake 3, a move that does not get one x: click Multiply, then its first option (a single box), type 5 and click Go. A good response says “5 × (5x) makes 25x: still not one x. Try dividing both sides.” in a small note, and writes nothing.",
         "Mistake 4, flipping the sign: click Divide (÷), press the minus key, type 1 and click Go. A good response says the sign changes but there are still 5 x’s, and points to dividing.",
         "Mistake 5, dividing by a number that does not split: click Divide (÷), type 2 and click Go. Wait two seconds. A good response says it doesn’t split (5 boxes can’t make 2 equal groups, and −15 can’t be shared into 2 equal groups), and pulses Undo. Press Undo: it shows the five x boxes and the fractions to choose from. Press Got it.",
         "Mistake 6, pressing I’m stuck: press it twice. A good response gives a bigger clue the second time (first the 5 boxes and 15 counters, then “take ⅕ of both sides”) and still leaves the move to you.",
-        "Mistake 7, a mistake, Undo, then type in the blank: click the button at the top of this item again (it starts the same problem fresh). Click the box after x =, type 3 and press Enter. Drag the 3 onto the x, press Next twice and wait two seconds. Press Undo. Without clicking anything, type 5, then click the green Go."
+        "Mistake 7, a mistake, Undo, then type in the blank: click the button at the top of this item again (it starts the same problem fresh). Click the box after x =, type 3 and press Enter. Drag the 3 onto the x, press Next twice and wait two seconds. Press Undo. Without clicking anything, type 5, then click the green Go.",
+        "Wait 3 seconds and watch the nudge: x is alone now, so a good response nudges nothing (and on 5x = −15, choosing the move is the thinking: only I’m stuck flashes, after 10 seconds)."
       ],
-      "see": "Every mistake gets a short message built from the student’s own numbers, and there is always one clear thing to press next. Nobody is left stuck, and nothing gives the answer away. Mistake 7: after Undo the hint lights the Divide button and shows its blank under each side; the 5 you type goes straight into it, on both sides, and Go writes (5x) over 5 = (−15) over 5."
+      "see": "Every mistake gets a short message built from the student’s own numbers, and there is always one clear thing to press next. Nobody is left stuck, and nothing gives the answer away. Mistake 7: after Undo the hint lights the Divide button and shows its blank under each side; the 5 you type goes straight into it, on both sides, and Go writes (5x) over 5 = (−15) over 5. Waiting at the end nudges nothing: x is alone."
     }
   ],
   "sections": [
@@ -1409,6 +1676,24 @@
               "label": "Save codes (teacher only)",
               "query": "?codes=1&nosignin=1",
               "look": "With ?codes=1 the Save code and Enter code buttons come back, for moving a student by hand."
+            }
+          ]
+        },
+        {
+          "name": "Build P: nudges, working out a product, cross-offs and a fuller check (2026-10-24)",
+          "about": "After about 2½ seconds of nothing, a step with only one thing to do is nudged: two numbers to put together glow, then a small pop-up says to drag one onto the other (choosing a move is never nudged). After dividing first, a product like (15) over 3 can be worked out by clicking its fraction bar (or the × in ⅓ × 15). Dividing and flipping cross off what cancels. Tab and the arrows move between blanks. Distribute shows arcs and “3 groups of” instead of labels until a wrong product. A bare 5 for 2x + 3x gets a picture of x boxes. Every check shows every step, and each x takes its own drop. Dividing by −1 looks like dividing; Divide it’s whole number is explained again; Smaller numbers and One box sit beside Divide.",
+          "links": [
+            {
+              "label": "Two-step equations · Level 1",
+              "query": "?pack=two-step-equations&level=1&seed=406&nosignin=1",
+              "reset": true,
+              "look": "Add −4, then wait: the 19 and the −4 glow, then the pop-up."
+            },
+            {
+              "label": "Distribute, combine, solve · Level 1",
+              "query": "?pack=distribute-solve&level=1&seed=37&nosignin=1",
+              "reset": true,
+              "look": "Divide by 3, then click the fraction bar and type 5."
             }
           ]
         },
