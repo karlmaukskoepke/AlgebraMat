@@ -203,3 +203,21 @@ or negative, to both sides.
 6. **The screen part of the safety net is repaired first** (Build N found every recorded screen listed as an intended change, so the
    screenshot check passed whatever the screens looked like). The screens are re-baselined to `main` as it was (Build N), the old screen
    entries move to a dated history section the harness does not read, and every screen difference from then on is listed one by one.
+
+## 2026-10-23: nudges and Distribute polish (Karl; built in Build P)
+
+1. **The nudge rule.** After about 2.5 seconds with nothing happening, the app nudges when the next step is **mechanical and there is
+   only one thing to do** (combine two numbers, calculate a product): the target glows and pulses, then a small pop-up says what to do,
+   with a faint ghost of the action. It **waits for I'm stuck when choosing the move is the thinking**; otherwise the app gives the move
+   away. A nudge is not help: nothing is recorded on the class sheet. The 10-second I'm stuck flash is separate and unchanged.
+2. **Collapse is off for every card.** The check always shows every step, one per press of Next or Enter, ending Balanced or Not
+   balanced, because Karl wants students to watch the order of operations.
+3. **One drop per x** when the equation has several x's: every empty x glows while the value is dragged, a drop fills that x only, and
+   the copy completes when every x has it.
+4. **Distribute's operation labels (`3 · x`, `3 · 2`) appear only after a wrong product.** The first time, the dragged factor is shown in
+   colour with arcs to each term inside the parenthesis and "3 groups of"; the labels are the scaffold after a wrong product (recorded
+   as `hint`), and the next problem starts without them.
+5. **The loop spec goes to rev 2.5** (section 4: no collapsing; sections 2A and 6: the nudge rule).
+
+**Build O's decisions, approved:** Divide it's whole-number option is live but explained again (with the `/` shortcut); "Smaller
+numbers" and "One box" move beside Divide; a folded Divide move's tag reads "both sides ÷ 5"; Divide-made fractions stay in division form.
