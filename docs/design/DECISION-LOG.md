@@ -238,3 +238,24 @@ arrows with a physical keyboard.
    replaced.
 4. **Distribution appears at the group level** (Level 5), with the shared distribute move from Build M.
 5. The loop spec's guess rule (section 1B) says "x on one side before checking" on cards with x on both sides (rev 2.6).
+
+## 2026-10-24: redraw and drag bugs (Karl, testing Builds P and R; built in Build S)
+
+What Karl found: picking up an x-term made it and the row under it vanish and the last step's animation play again; typing x after a
+division, or clicking the fraction bar, replayed the cross-off of the two 3s; the equation's text size jumped from step to step (large,
+small, large); with x on the right (`8 = 5x + 3`) dragging the `+ 3` across did nothing; Flip everything's cross-off was too fast and too
+flat to see the two minus signs turn positive.
+
+1. **Re-rendering never replays an entrance animation and never hides what the student is holding.** An entrance or cross-off plays
+   once, when its row or mark first appears; a redraw for any other reason (a pickup, typing, a click, Undo, hover, a pop-up, the nudge)
+   leaves every row already on screen exactly as it was.
+2. **The font size never changes while the student works a problem.** It is chosen once, when the problem starts, from that problem's
+   worst case, and kept through every row, fold, pop-up, check, Undo and Start over. The loop's rule stays: fold rows when space runs
+   out, never shrink text.
+3. **Every drag either works or snaps back with a message, never silently fails**, from either side of the =, and the first drag after
+   a message works.
+4. **Flip everything's cross-off is slower and shows the signs turning:** a vertical stroke through each minus sign makes it a plus, one
+   mark at a time, then the pair resolves into the positive result. The cross-off of the two 3s is unchanged.
+
+**Build Q (panel polish) is still pending.** Build R's report said "there was no Build Q"; that was wrong: Build Q is the panel polish
+(icons, spacing, the lighter hint, the three-option Multiply menu) and comes next, after Build S.
