@@ -50,7 +50,17 @@ async function click(page, sel) {
   await pause(page);
   return true;
 }
-const press = async (page, key, times = 1) => { for (let i = 0; i < times; i++) { await page.keyboard.press(key); await pause(page, 90); } };
+// (a touch student with no keyboard types on the keypad: a number key on a keyboard would hide it, as it should)
+let padOnly = false;
+const PAD_KEY = (key) => (/^[0-9]$/.test(key) ? `#controls .pad button[data-digit="${key}"]` : key === '-' ? '#controls .pad button[data-action="toggleSign"]' : key === 'Backspace' ? '#controls .pad button[data-action="backspace"]' : null);
+const press = async (page, key, times = 1) => {
+  for (let i = 0; i < times; i++) {
+    const sel = padOnly ? PAD_KEY(key) : null;
+    if (sel) { const b = page.locator(sel).first(); if (await b.isVisible().catch(() => false) && !(await b.isDisabled())) await b.tap(); }
+    else await page.keyboard.press(key);
+    await pause(page, 90);
+  }
+};
 // the equation's x-number (5 in 5x = −15), read from the first row
 async function coef(page) {
   const t = (await page.locator('.lb-stack').first().innerText().catch(() => '')).replace(/\s+/g, '');
@@ -68,7 +78,7 @@ async function undo(page) { if (!(await click(page, '.spot-undo'))) await click(
 // a value typed in x = and checked to the end (Enter through the lines, and the value carried onto x)
 async function guess(page, v) {
   await click(page, act('focus'));
-  await page.keyboard.type(String(v));
+  for (const ch of String(v)) await press(page, ch);
   await press(page, 'Enter');
   await pause(page, 250);
   for (let i = 0; i < 8; i++) { if (await visible(page, '.spot-layer.is-error')) break; await press(page, 'Enter'); await pause(page, 200); }
@@ -201,6 +211,7 @@ for (const level of NAMED ? LEVELS : []) {
     for (const tapPad of TOUCH ? [true, false] : [false]) {
       const { ctx, page, errors } = await fresh(level);
       let r;
+      padOnly = tapPad;
       try {
         await reach(page, ctx);
         const got = await canType(page, { tapPad });

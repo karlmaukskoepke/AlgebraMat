@@ -264,9 +264,9 @@
         "Mistake 3: Divide too early: click Multiply, then Divide.",
         "Mistake 4: add the wrong number: click Add, type 5, press Enter. Then click Undo.",
         "Mistake 5: a wrong sum: drag the 5 onto the 6, type 12, press Enter. Then click Undo.",
-        "Mistake 6, a mistake, Undo, then type in the blank: click the button at the top of this item again (it starts the same problem fresh). Drag the 2 onto the parenthesis, type 2, Enter, 6, Enter. Drag the 5 onto the 6, type 11 and press Enter. Click Add, type 11 and press Enter. Wait two seconds and press Undo. Without clicking anything, type −11 and press Enter."
+        "Mistake 6, a mistake, Undo, then type in the blank: click the button at the top of this item again (it starts the same problem fresh). Drag the 2 onto the parenthesis, type 2, Enter, 6, Enter. Drag the 5 onto the 6, type 11 and press Enter. Click Add, type 11 and press Enter. Wait two seconds and press Undo. Without clicking anything, type −11 and press Enter, then click Next."
       ],
-      "see": "I’m stuck flashes after 10 seconds, and then lights the 2 and the parenthesis (“Drag the 2 onto the parenthesis…”). The half-multiplied product is lit with “2 · 3 is not 3. Multiply this piece too.”; Undo brings the same hint back. Divide says “That move works once each side is one term.” Adding 5 is lit as “did not eliminate the term”. The wrong sum says “5 + 6 is not 12.”, and after Undo the 5 and the 6 are outlined with “5 and 6 are like terms. Drag one onto the other to combine them.” Mistake 6: after Undo the Add box is open again; the −11 you type goes straight into it, and Enter writes 2x = 17 − 11."
+      "see": "I’m stuck flashes after 10 seconds, and then lights the 2 and the parenthesis (“Drag the 2 onto the parenthesis…”). The half-multiplied product is lit with “2 · 3 is not 3. Multiply this piece too.”; Undo brings the same hint back. Divide says “That move works once each side is one term.” Adding 5 is lit as “did not eliminate the term”. The wrong sum says “5 + 6 is not 12.”, and after Undo the 5 and the 6 are outlined with “5 and 6 are like terms. Drag one onto the other to combine them.” Mistake 6: after Undo the Add box is open again; the −11 you type goes straight into it, Enter writes 11 + 2x − 11 = 17 − 11, and Next writes 2x = 17 − 11."
     },
     {
       "id": "m-placement-old",
@@ -662,9 +662,9 @@
         "Mistake 3, a move that makes it worse: the Add box is still open under the equation, so type 4 and press Enter. A good response lights the 4 and the 4 that was added, says they did not eliminate the term, and leaves only Undo. Press Undo, then Got it.",
         "Mistake 4, a move at the wrong moment: click Multiply and the second option (÷ 1 over ▢). A good response is a small note, “That move works once each side is one term.”, and nothing locked.",
         "Mistake 5, a wrong sum: the Add box is open again, so type −4 and press Enter. Drag the 19 onto the 4, type 23 and press Enter. A good response says “19 − 4 is not 23. Press Undo and try again.” with the two numbers still readable. Press Undo: the hint lights 19 and −4 and says to drag one onto the other.",
-        "Mistake 6, a mistake, Undo, then type in the blank: click the button at the top of this item again (it starts the same problem fresh). Click Add (the first box in the panel on the right), type 4 and press Enter. Wait two seconds and press Undo. Without clicking anything, type −4 and press Enter."
+        "Mistake 6, a mistake, Undo, then type in the blank: click the button at the top of this item again (it starts the same problem fresh). Click Add (the first box in the panel on the right), type 4 and press Enter. Wait two seconds and press Undo. Without clicking anything, type −4 and press Enter, then click Next."
       ],
-      "see": "Every mistake gets a calm answer in the real numbers, Undo is the way out of each error, and the hint after Undo points at the next move. Nothing is ever worked out for you. Mistake 6: after Undo the Add box is open again; the −4 you type goes straight into it, and Enter writes 3x = 19 − 4."
+      "see": "Every mistake gets a calm answer in the real numbers, Undo is the way out of each error, and the hint after Undo points at the next move. Nothing is ever worked out for you. Mistake 6: after Undo the Add box is open again; the −4 you type goes straight into it, Enter writes 3x + 4 − 4 = 19 − 4, and Next writes 3x = 19 − 4."
     },
     {
       "id": "j-level-1",

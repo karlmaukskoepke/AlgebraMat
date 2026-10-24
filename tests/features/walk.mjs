@@ -352,7 +352,8 @@ const WALKS = {
     w.at('mistake 6: Add 11, Enter'); await w.addEnter(11); await w.lateLayer(); await w.see('did not eliminate the term');
     w.at('mistake 6: Undo, type −11, Enter'); await w.click(act('undo')); await wait(w.page, 800); await w.type('-11');
     await w.typedIn('[data-fk="blank"]', '−11');
-    await w.enter(); await wait(w.page, 400); await w.see('2x = 17 − 11');
+    await w.enter(); await wait(w.page, 400); await w.see('11 + 2x − 11 = 17 − 11');
+    await w.click(act('foldNext')); await wait(w.page, 400); await w.row('2x = 17 − 11'); await w.shot('student-distribute-typed-after-undo');
   },
   // ---- Build M, Part 1: the placement quiz ----
   async 'm-placement-old'(w) {
@@ -607,7 +608,8 @@ const WALKS = {
     w.at('mistake 6: Add 4, Enter'); await w.addEnter(4); await w.lateLayer(); await w.see('did not eliminate the term');
     w.at('mistake 6: Undo, type −4, Enter'); await w.click(act('undo')); await wait(w.page, 800); await w.type('-4');
     await w.typedIn('[data-fk="blank"]', '−4');
-    await w.enter(); await wait(w.page, 400); await w.see('3x = 19 − 4');
+    await w.enter(); await wait(w.page, 400); await w.see('3x + 4 − 4 = 19 − 4');
+    await w.click(act('foldNext')); await wait(w.page, 400); await w.row('3x = 19 − 4'); await w.shot('student-two-step-typed-after-undo');
   },
   async 'f-no-0-1-minus1'(w) {
     await w.start();
@@ -912,7 +914,7 @@ const WALKS = {
     w.at('mistake 6: Add 8, Go'); await w.add(8); await w.lateLayer(); await w.see('did not eliminate the term');
     w.at('mistake 6: Undo, type −8'); await w.click(act('undo')); await wait(w.page, 800); await w.type('-8');
     await w.typedIn('[data-fk="blank"]', '−8');
-    w.at('mistake 6: Go'); await w.click(act('go')); await wait(w.page, 400); await w.see('x = −4 − 8');
+    w.at('mistake 6: Go'); await w.click(act('go')); await wait(w.page, 400); await w.see('x = −4 − 8'); await w.shot('student-add-typed-after-undo');
   },
 
   async 'student-divide'(w) {
@@ -955,7 +957,7 @@ const WALKS = {
     await w.click(act('nextLine')); await w.click(act('nextLine')); await w.lateLayer(); await w.see('not balanced');
     w.at('mistake 7: Undo, type 5'); await w.click(act('undo')); await wait(w.page, 800); await w.type(5);
     await w.typedIn(DIV_BOX, '5'); await w.see('Dividing by 5 is multiplying by ⅕.');
-    w.at('mistake 7: Go'); await w.click(act('go')); await wait(w.page, 400); await w.see('⅕(5x) = ⅕(−15)');
+    w.at('mistake 7: Go'); await w.click(act('go')); await wait(w.page, 400); await w.see('⅕(5x) = ⅕(−15)'); await w.shot('student-divide-typed-after-undo');
   },
 
   // ---- Build I ----
@@ -1188,7 +1190,7 @@ const WALKS = {
     w.at('mistake 6: Undo, Got it'); await w.click(act('undo')); await wait(w.page, 800); await w.click(act('spotDismiss'));
     w.at('mistake 6: Multiply, Divide, click the box, −3'); await w.click(act('multOpen')); await w.click(`${act('multPick')}[data-kind="div"]`);
     await w.click(DIV_BOX); await w.page.keyboard.press('-'); await w.type(3); await w.typedIn(DIV_BOX, '3');
-    w.at('mistake 6: Go'); await w.click(act('go')); await wait(w.page, 400); await w.see('−⅓(−3x) = −⅓(12)');
+    w.at('mistake 6: Go'); await w.click(act('go')); await wait(w.page, 400); await w.see('−⅓(−3x) = −⅓(12)'); await w.shot('student-flip-typed-after-undo');
   },
   // ---- Build N: typing after a mistake ----
   async 'n-type-after-mistake'(w) {
