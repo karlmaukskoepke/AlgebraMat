@@ -221,3 +221,20 @@ or negative, to both sides.
 
 **Build O's decisions, approved:** Divide it's whole-number option is live but explained again (with the `/` shortcut); "Smaller
 numbers" and "One box" move beside Divide; a folded Divide move's tag reads "both sides ÷ 5"; Divide-made fractions stay in division form.
+
+**Karl's answers to Build P's decisions (2026-10-24, all approved):** I'm stuck at `x + 2 = (15)/3` points at working out the product; no
+combine nudge on Add to both sides (x is already alone there); the second value of a two-x check is to sit under its x (done in Build R's
+shared column grid); a Divide-made fraction is to be drawn in division form in the check's copy too (still to do); Karl tries Tab and the
+arrows with a physical keyboard.
+
+## 2026-10-24: Variables on both sides (Karl; built in Build R)
+
+1. **x on one side before checking** (Karl's rule from Build D-2, Part 3). With x on both sides the student must end with x on one side
+   before checking: `x =` stays greyed, with a short note ("Get x on one side first."), until x is on only one side. No forced-move rule
+   on this card (the student cannot guess first).
+2. **Moving an x-term works three ways:** the Add move with an x-term amount (Add has two options: a number, `+ ▢`, or an x-term,
+   `+ ▢x`), dragging the x-term across the midline (its sign flips live, as for numbers), and, later, combining.
+3. **The check with two or more x's:** one drop per x (built in Build P), on a shared column grid, so each value sits under the x it
+   replaced.
+4. **Distribution appears at the group level** (Level 5), with the shared distribute move from Build M.
+5. The loop spec's guess rule (section 1B) says "x on one side before checking" on cards with x on both sides (rev 2.6).
