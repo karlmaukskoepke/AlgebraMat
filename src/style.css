@@ -3740,3 +3740,15 @@ body[data-input='touch'] #play.is-light #controls .btn-pad { min-width: 48px; mi
    faint ghost of the value waiting above it ---------- */
 .ui-light.is-carrying-value .lb-x.is-droptarget, .is-carrying-value .ui-light .lb-x.is-droptarget { background: #dff0fb; box-shadow: 0 0 0 6px rgba(0, 114, 178, 0.25); animation: none; }
 .ui-light .lb-xwait { position: absolute; left: 50%; top: calc(100% + 8px); transform: translateX(-50%); padding: 0 6px; border: 2px dashed #0072b2; border-radius: 8px; background: #fff; color: #0072b2; opacity: 0.5; font: 800 20px/26px 'Lexend', system-ui, sans-serif; pointer-events: none; white-space: nowrap; }
+
+/* ---------- Build P, Part 1: the nudge. The target glows and pulses (a steady highlight under reduced motion); a small pop-up; a faint
+   ghost of the action ---------- */
+@keyframes nudge-pulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(0, 114, 178, 0.0); background: #fff; } 50% { box-shadow: 0 0 0 8px rgba(0, 114, 178, 0.28); background: #e3f1fb; } }
+.ui-light .nudge-glow, .ui-light .nudge-still { outline: 4px solid #0072b2; outline-offset: 2px; border-radius: 10px; }
+.ui-light .nudge-glow { animation: nudge-pulse 1.1s ease-in-out infinite; }
+.ui-light .nudge-still { background: #e3f1fb; box-shadow: 0 0 0 6px rgba(0, 114, 178, 0.22); }
+@media (prefers-reduced-motion: reduce) { .ui-light .nudge-glow { animation: none; background: #e3f1fb; box-shadow: 0 0 0 6px rgba(0, 114, 178, 0.22); } }
+.nudge-ghost { position: fixed; left: 0; top: 0; z-index: 950; pointer-events: none; opacity: 0; }
+.nudge-ghost.is-term { padding: 0 10px; border: 3px dashed #0072b2; border-radius: 10px; background: rgba(255, 255, 255, 0.85); color: #0072b2; white-space: nowrap; }
+.nudge-ghost.is-click { width: 44px; height: 44px; border: 4px solid #0072b2; border-radius: 50%; background: rgba(0, 114, 178, 0.12); }
+.spot-layer.is-nudge .spot-box { border-color: #0b5f8f; }

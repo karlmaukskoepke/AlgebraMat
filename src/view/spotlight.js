@@ -287,7 +287,7 @@ export function spotlightLayer(spot, o) {
     Object.assign(box.style, { left: `${left}px`, top: `${top}px` });
     if (!error && spot.move && o.moveSel) o.root.querySelector(o.moveSel(spot.move))?.classList.add('spot-move');
   };
-  place = run;
+  if (!o.keepPlace) place = run;          // (a nudge, Build P, places itself and leaves the page's pop-up the one placed again on resize)
   requestAnimationFrame(run);
   // a move's new row fades in after its work row: the error waits for it (so the move is seen first), and is placed again then
   requestAnimationFrame(() => {
