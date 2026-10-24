@@ -4,7 +4,7 @@
 // on it? Run it on a laptop setup (a mouse and a keyboard) and on a touch setup (a touchscreen in tablet mode, with the keypad and
 // with a keyboard too).
 //
-//   node tests/typing/sweep.mjs [address] [--touch] [--random N] [--levels 2,3] [--pack divide-it] [--seed 7]
+//   node tests/typing/sweep.mjs [address] [--touch] [--random N] [--no-named] [--levels 2,3] [--pack divide-it] [--seed 7] [--shots folder]
 //
 // The address is the app's front door (default: Vite's dev server on port 5173). Prints one line a state (PASS, FAIL or "not
 // offered": the screen rightly offers no Divide there, like an error waiting for Undo), then the failures with the steps to reach
@@ -21,6 +21,7 @@ const PACK = flag('--pack', 'divide-it');
 const SEED = Number(flag('--seed', 7));
 const LEVELS = flag('--levels', '2,3,4,5,6').split(',').map(Number);
 const SHOTS = flag('--shots', null);
+const NAMED = !args.includes('--no-named');           // (the random runs alone)
 
 function loadPlaywright() {
   const require = createRequire(import.meta.url);
@@ -118,7 +119,7 @@ async function canType(page, { tapPad = false } = {}) {
   let name = 'the Divide blank';
   if (!box) {
     // no Divide here: then x = is the field, when it is waiting for a value (x alone, or clicked)
-    const x = await visible(page, '[data-fk="answer"]:not(:disabled)');
+    const x = await visible(page, '[data-fk="answer"]:not(:disabled):not(.is-chip)');   // (not the value being checked, carried onto x)
     const said = (await page.locator('.spot-box').allInnerTexts().catch(() => [])).join(' / ').replace(/\s+/g, ' ');
     if (!x) return { offered: false, why: said ? `the screen says: ${said}` : 'no Divide option and no x = here' };
     await x.click(); await pause(page);
@@ -193,7 +194,7 @@ const RANDOM_ACTS = [
 
 const results = [];
 const say = (r) => console.log(`${r.ok === undefined ? 'not offered' : r.ok ? 'PASS' : 'FAIL'}  L${r.level} ${r.state}${r.ok ? (r.why === 'x =' ? ' (x =)' : '') : `: ${r.why}`}`);
-for (const level of LEVELS) {
+for (const level of NAMED ? LEVELS : []) {
   for (const [state, reach] of Object.entries(STATES)) {
     for (const tapPad of TOUCH ? [true, false] : [false]) {
       const { ctx, page, errors } = await fresh(level);

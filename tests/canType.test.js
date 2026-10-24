@@ -71,7 +71,8 @@ function rng(seed) { let t = seed >>> 0; return () => { t += 0x6d2b79f5; let r =
 function reachable(play, pack, levels) {
   const seen = new Map();
   const keep = (s, path) => {
-    if (!play.padOpen(s) && !seesawAdd(s)) return;              // (the seesaw's Add boxes take a typed number too)
+    // (the seesaw's Add boxes take a typed number too; and x = holding digits typed straight in, with no click: the keys go there)
+    if (!play.padOpen(s) && !seesawAdd(s) && !(s.entry && s.stage !== 'done' && !s.sub)) return;
     const k = JSON.stringify([shapeOf(s).id, s.problem?.logLevel, s.mopts?.kind ?? Boolean(s.mopts), s.menu, s.typing, s.ui?.focus, s.ui?.preview, Boolean(s.fb?.num), s.fb?.part,
       Boolean(s.lx?.distribute), Boolean(s.lx?.combine), s.lx?.distribute?.index, Boolean(s.spot), s.spot?.kind, s.mustMove && !s.movedOnce, Boolean(s.entry), Boolean(s.mopts?.entry)]);
     if (!seen.has(k)) seen.set(k, { s, path: [...path] });
@@ -139,6 +140,7 @@ describe('Build N: can I type? On every card, in every state where it waits for 
         root.replaceChildren(play.renderMat(cur, {}));
         await settle();
         try {
+          if (root.querySelector('.spot-layer.is-error')) continue;   // an error waits for Undo: every key is held, by design
           const texts = () => new Map([...root.querySelectorAll('[data-lx-field]:not(.is-mirror)')].map((e) => [fieldKey(e), e.textContent.trim()]));
           const active = () => (document.activeElement?.dataset?.lxField ? fieldKey(document.activeElement) : document.activeElement?.className || document.activeElement?.tagName);
           // clear what is typed in the field the keys go to, then type 3 (a field holding a digit already may refuse a second)

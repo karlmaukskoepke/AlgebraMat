@@ -446,7 +446,9 @@ function answerRow(s) {
   const text = s.sub && !live ? String(s.sub.typed) : s.entry;
   // x = shows no cursor at first: it blinks once clicked (until anything else happens), and at the last step, x alone on its side
   // (and while the keys go into it, once clicked: Build N, the cursor is where the keys go)
-  const last = live && !amountMode(s) && (C.alone(s.board) || Boolean(s.ui?.fieldCursor) || s.typing === 'answer' || s.ui?.focus === 'answer');
+  // (never while a sum, the distribute blanks or a Multiply blank takes the keys)
+  const free = !s.mopts?.kind && !(s.menu === 'fraction' && s.typing !== 'answer') && !s.lx?.combine && !s.lx?.distribute;
+  const last = live && !amountMode(s) && free && (C.alone(s.board) || Boolean(s.ui?.fieldCursor) || s.typing === 'answer' || s.ui?.focus === 'answer');
   const placing = Boolean(s.sub?.placing);                 // the typed value is what is dragged into x
   const typed = html('button', `ab-typed lb-typed lx-field${text ? '' : ' is-empty'}${last ? ' is-focus' : ''}${last && !text ? ' is-blink' : ''}${live || placing ? '' : ' is-off'}${placing ? ' is-chip' : ''}`, [shown(text)], placing
     ? { type: 'button', 'data-chip': '1', 'data-fk': 'answer', 'data-lx-field': '1', 'aria-label': `Your value ${shown(text)}: drag it into x` }

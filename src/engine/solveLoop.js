@@ -174,6 +174,7 @@ export function createSolveLoop(card) {
       if (entry === s.entry) return state;
       fold(s);                                                                              // typing a value commits the move before it
       s.entry = entry;
+      s.typing = 'answer';                                    // the keys are going into x = now: it keeps the cursor (Build N)
       return s;
     }
 
