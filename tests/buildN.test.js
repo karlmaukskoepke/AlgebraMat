@@ -78,6 +78,20 @@ describe('Build N: the Divide blank takes a typed number', () => {
   });
 
   // (Two-step divides once each side is one term: tests/canType.test.js reaches it there)
+  it('Divide it: on touch, the hint after Undo brings the keypad up for the Divide blank it shows; a tap on the box picks Divide; Backspace keeps it', async () => {
+    m = await mat(divideMovesPlay, divideMovesPlay.newSession(problem('divide-it', 4), {}));
+    await m.run({ type: 'focus', target: 'answer' }, { type: 'digit', digit: 9 }, { type: 'check' }, { type: 'placeValue' }, ...Array(4).fill({ type: 'nextLine' }), { type: 'undo' });
+    expect(divideMovesPlay.padOpen(m.s)).toBe(true);
+    expect(m.padOn()).toBe(true);
+    await m.press('Backspace');
+    expect(m.s.mopts).toBeTruthy();                          // the options (and the blank) stay
+    expect(m.root.querySelector(DIV_BOX).classList.contains('is-focus')).toBe(true);
+    await m.click(DIV_BOX);
+    expect(m.s.mopts.kind).toBe('div');
+    await m.press('3');
+    expect(m.text(DIV_BOX)).toBe('3');
+  });
+
   for (const [name, play, pack, level] of [['Divide it', divideMovesPlay, 'divide-it', 4], ['Flip everything', flipPlay, 'flip-everything', 4],
     ['Distribute, combine, solve', distSolvePlay, 'distribute-solve', 1]]) {
     it(`${name}: on touch, the keypad comes up for the Divide blank and the Multiply blank`, async () => {

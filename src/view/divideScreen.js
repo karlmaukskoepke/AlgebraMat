@@ -6,7 +6,7 @@
 
 import { html } from './addBothMat.js';
 import { stackRows, substBlock, forwardButton, srLine, notePopup, FORCED_TEXT, FIRST_TEXT, placeText } from './solveScreen.js';
-import { fracOpen, canPreview, fracOf, typingOpen } from '../engine/divideBlank.js';
+import { fracOpen, canPreview, fracOf, typingOpen, previewTyped } from '../engine/divideBlank.js';
 import { multiplyOptions, optionSel } from './multiplyOptions.js';
 import { goReady, MULT_KINDS } from '../engine/multiplyMenu.js';
 import { moveRow as sharedMoveRow, fractionChoices as sharedFractionChoices } from './multiplyRow.js';
@@ -24,7 +24,7 @@ const valid = (t) => /^-?\d+$/.test(t ?? '');
 
 // The move's row under the newest equation and the fractions to choose from after a failed try are the shared Multiply move's
 // (view/multiplyRow.js, lifted out of this file in Build J).
-const moveRow = (s) => sharedMoveRow(s, { fracOpen, canPreview });
+const moveRow = (s) => sharedMoveRow(s, { fracOpen, canPreview, previewTyped });
 const fractionChoices = (s) => sharedFractionChoices(s, divideFeedbackText);
 
 // ---------- the group diagram, in the checking space while the counters are up ----------

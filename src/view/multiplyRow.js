@@ -26,20 +26,25 @@ function fracBox(s, mirror, open) {
   return html('span', `dv-fracblank${mirror ? ' is-mirror' : ''}`, [part('num'), html('span', 'dv-fracbar'), part('den'), ...(open && !mirror ? [html('span', 'dv-retype', ['Tap a box to retype it'])] : [])]);
 }
 // The whole-number option's blank (Build D-2, Part 4): typed on one side, mirrored on the other.
-function wholeBox(s, mirror) {
+// A blank shown while its option is only previewed, with the options open (the hint after Undo lights Divide): typing goes into it, so
+// it shows the cursor, and a tap on it picks the option (Build N).
+const pickAttrs = (s, kind) => (s.mopts && !s.mopts.kind ? { 'data-action': 'multPick', 'data-kind': kind } : {});
+function wholeBox(s, mirror, typeable = false) {
   const chosen = s.mopts?.kind === 'whole';
   const text = chosen ? s.mopts.entry : '';
-  return html(mirror ? 'span' : 'button', `lx-box mo-blank${chosen && !mirror ? ' is-focus' : ''}${text ? '' : ' is-empty'}${chosen && !mirror && !text ? ' is-blink' : ''}${mirror ? ' is-mirror' : ''}`,
-    [text ? text.replace('-', MINUS) : ' '], mirror ? { 'aria-hidden': 'true' } : { type: 'button', 'data-lx-field': '1', 'aria-label': 'The whole number to multiply both sides by' });
+  const cursor = (chosen || typeable) && !mirror;
+  return html(mirror ? 'span' : 'button', `lx-box mo-blank${cursor ? ' is-focus' : ''}${text ? '' : ' is-empty'}${cursor && !text ? ' is-blink' : ''}${mirror ? ' is-mirror' : ''}`,
+    [text ? text.replace('-', MINUS) : ' '], mirror ? { 'aria-hidden': 'true' } : { type: 'button', 'data-lx-field': '1', 'aria-label': 'The whole number to multiply both sides by', ...(chosen ? {} : pickAttrs(s, 'whole')) });
 }
 
 // Divide's blank (Build L): the 1/ printed (−1/ once a minus is typed: the sign goes on the top), the student types the bottom, one digit.
-function divBox(s, mirror) {
+function divBox(s, mirror, typeable = false) {
   const chosen = s.mopts?.kind === 'div';
   const entry = chosen ? s.mopts.entry : '';
   const digit = entry.replace('-', '');
-  const bottom = html(mirror ? 'span' : 'button', `lx-box dv-fracpart mo-divpart${chosen && !mirror ? ' is-focus' : ''}${digit ? '' : ' is-empty'}${chosen && !mirror && !digit ? ' is-blink' : ''}${mirror ? ' is-mirror' : ''}`, [digit || ' '],
-    mirror ? { 'aria-hidden': 'true' } : { type: 'button', 'data-lx-field': '1', 'aria-label': 'The number to divide both sides by' });
+  const cursor = (chosen || typeable) && !mirror;
+  const bottom = html(mirror ? 'span' : 'button', `lx-box dv-fracpart mo-divpart${cursor ? ' is-focus' : ''}${digit ? '' : ' is-empty'}${cursor && !digit ? ' is-blink' : ''}${mirror ? ' is-mirror' : ''}`, [digit || ' '],
+    mirror ? { 'aria-hidden': 'true' } : { type: 'button', 'data-lx-field': '1', 'aria-label': 'The number to divide both sides by', ...(chosen ? {} : pickAttrs(s, 'div')) });
   return html('span', `dv-fracblank mo-divblank${mirror ? ' is-mirror' : ''}`, [html('span', 'mo-divtop', [entry.startsWith('-') ? `${MINUS}1` : '1']), html('span', 'dv-fracbar'), bottom]);
 }
 // The line beside Divide's row: what dividing is, in the real number once it is typed.
@@ -63,11 +68,12 @@ export function moveRow(s, menu, { blueFlip = false } = {}) {
   const slot = html('div', `lx-ghost dv-ghost${chosen ? ' is-chosen' : hovered ? ' is-preview' : ''}`);
   if (!kind) return slot;
   const typedOn = xSideOf(s.board);
-  const front = (mirror) => (kind === 'frac' ? fracBox(s, mirror, open) : kind === 'whole' ? wholeBox(s, mirror) : kind === 'div' ? divBox(s, mirror) : html('span', `lb-num${blueFlip ? ' is-blue' : ''}`, [`${MINUS}1`]));
+  const typeable = !chosen && Boolean(menu.previewTyped?.(s));       // (typing goes into the shown blank: Build N)
+  const front = (mirror) => (kind === 'frac' ? fracBox(s, mirror, open) : kind === 'whole' ? wholeBox(s, mirror, typeable) : kind === 'div' ? divBox(s, mirror, typeable) : html('span', `lb-num${blueFlip ? ' is-blue' : ''}`, [`${MINUS}1`]));
   const side = (terms, mirror) => [front(mirror), html('span', 'lb-plus dv-times', ['×']), html('span', 'lb-plus', ['(']), ...sideTerms(terms, s), html('span', 'lb-plus', [')'])];
   slot.append(equationRow(side(s.board.left, typedOn !== 'left'), side(s.board.right, typedOn !== 'right'), 'lx-ghosteq'));
   if (kind === 'div') slot.append(divLabel(s));
-  if (!chosen) slot.setAttribute('aria-hidden', 'true');
+  if (!chosen && !typeable) slot.setAttribute('aria-hidden', 'true');
   return slot;
 }
 
