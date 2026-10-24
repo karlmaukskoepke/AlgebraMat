@@ -22,7 +22,7 @@ import { spotlightLayer, findSolveTarget } from './spotlight.js';
 import { boardBlock, trayFor, html, slipShown } from './addBothMat.js';
 import { narrowPanel } from './narrowPanel.js';
 import { optionSel } from './multiplyOptions.js';
-import { forwardButton, srLine, notePopup, substBlock as sharedSubstBlock, sideTerms, foldTag, sameAsLine, divisorOf, FORCED_TEXT, FIRST_TEXT, placeText } from './solveScreen.js';
+import { forwardButton, srLine, notePopup, substBlock as sharedSubstBlock, sideTerms, waitingGhost, foldTag, sameAsLine, divisorOf, FORCED_TEXT, FIRST_TEXT, placeText } from './solveScreen.js';
 import { firstOpen } from './visit.js';
 // Count it's counters Mat and its words, read-only, for the help at x alone (Build C, Part 3)
 import { renderMat as renderCountersMat } from './mat.js';
@@ -293,9 +293,12 @@ function rowsOf(s) {
         const front = el.textContent.slice(0, -1);                    // the number in front of x stays (`3x`: the Two-step card)
         const at = String(xi++);
         const filled = !s.sub.placing || (s.sub.xs > 1 && s.sub.filled?.includes(Number(at)));
+        // more than one x (Build P, Part 8): a drop each; a filled x gets the small green check above it (Build H), an empty one a faint
+        // ghost of the value waiting once another x has it
+        const manyX = (s.sub.xs ?? 1) > 1;
         const x = !filled
-          ? html('span', 'lb-x is-plugx is-droptarget', ['x'], { 'data-x': '1', 'data-xi': at, 'data-action': 'placeValue', role: 'button', tabindex: '0', 'aria-label': 'Put your value into x' })
-          : html('span', 'lb-x is-plugx is-placed', ['x'], { 'data-x': '1', 'data-xi': at });
+          ? html('span', `lb-x is-plugx is-droptarget${manyX ? ' has-xmark' : ''}`, ['x', ...(manyX && s.sub.filled?.length ? [waitingGhost(s.sub.typed)] : [])], { 'data-x': '1', 'data-xi': at, 'data-action': 'placeValue', role: 'button', tabindex: '0', 'aria-label': 'Put your value into x' })
+          : html('span', `lb-x is-plugx is-placed${manyX ? ' has-xmark' : ''}`, ['x', ...(manyX ? [html('span', 'lb-xcheck', ['✓'], { 'aria-label': 'This x has the value' })] : [])], { 'data-x': '1', 'data-xi': at });
         return front ? html('span', 'lb-coef', [front, x]) : x;
       };
       const side = (terms) => sideEls(terms, s.lx.negIds).map((el) => {

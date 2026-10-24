@@ -194,11 +194,13 @@ describe('the worked example, 3x + 4 = 19', () => {
     expect(s.feedback.key).toBe('aPartial');
     expect(s.stuck).toBe(0);
   });
-  it('collapses the check from Level 3; full at Levels 1 and 2', () => {
+  it('never collapses the check (loop spec rev 2.5): every level places the value, then shows every step', () => {
     const solved = (level) => flow(start(p, level), [A.add(-4), (st) => combine(st), A.frac(3), [{ type: 'focus', target: 'answer' }, ...digits(5), { type: 'check' }]]);
-    expect(solved(1).sub.collapsed).toBe(false);
-    expect(solved(2).sub.collapsed).toBe(false);
-    expect(solved(3).sub.collapsed).toBe(true);
+    for (const level of [1, 2, 3, 4, 5]) {
+      const s = solved(level);
+      expect(s.sub.placing).toBe(true);
+      expect(s.sub.collapsed).toBeUndefined();
+    }
   });
 });
 

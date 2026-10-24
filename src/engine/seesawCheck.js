@@ -31,9 +31,9 @@ export function checkMirror(s) {
     return { index: -1, final: false, left: ids('l', target.left), right: ids('r', target.right), tilt: 0, ok: null, board: target };
   }
   const { states, lines } = substitutionLines(target, s.sub.typed);
-  const total = s.sub.collapsed ? 2 : lines.length + 1;
+  const total = lines.length + 1;
   const final = s.sub.step >= total;
-  const index = final ? states.length - 1 : s.sub.collapsed ? 0 : Math.max(0, Math.min(s.sub.step, states.length) - 1);
+  const index = final ? states.length - 1 : Math.max(0, Math.min(s.sub.step, states.length) - 1);
   const at = states[index];
   const draw = (side, items) => items.map((it, i) => fromItem(it, `m${side}${index}_${i}`));
   const left = draw('l', at.left);

@@ -194,7 +194,6 @@ const loop = createSolveLoop({
     delete s.slipPair;
     if (s.stage === 'build') { s.stage = 'moves'; s.step = 'moves'; s.built = { constant: 0, other: 0, x: false }; s.pick = null; }
   },
-  collapse: () => false,                                                       // a single-step card: the check never collapses
   mustMoveKey: () => 'lxMustMove',
   touched: (s) => s.amountEntry !== '' || s.tradeCount > 0,
   // something of the card's holds x = [ ] back: the seesaw being built, a half-made move, the pairs; in the seesaw, until x is alone

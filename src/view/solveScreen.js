@@ -52,6 +52,7 @@ function termsOf(side, s, o) {
       const manyX = o.plug && (s.sub?.xs ?? 1) > 1;
       const xel = html('span', `lb-x${o.plug ? ' is-plugx' : ''}${dropOn ? ' is-droptarget' : ''}${filled ? ' is-placed' : ''}${manyX ? ' has-xmark' : ''}`, ['x'], { 'data-x': '1', 'data-xi': String(xi), ...(dropOn ? { 'data-action': 'placeValue', role: 'button', tabindex: '0', 'aria-label': 'Put your value into x' } : {}) });
       if (manyX && filled) xel.append(html('span', 'lb-xcheck', ['✓'], { 'aria-label': 'This x has the value' }));
+      else if (manyX && dropOn && s.sub.filled?.length) xel.append(waitingGhost(s.sub.typed));
       // the number in front of x, with its sign (`−x`, `−3x`: Flip everything, Build J)
       const front = c > 1 || c < -1 ? String(c).replace('-', MINUS) : c === -1 ? MINUS : null;
       // (a negative one is its own piece, so a spotlight on it covers the minus too; Divide's positive ones are as before)
@@ -64,6 +65,9 @@ function termsOf(side, s, o) {
   });
   return out;
 }
+
+// An x still waiting for the value once another x has it: a faint ghost of the value above it (Build P, Part 8)
+export const waitingGhost = (v) => html('span', 'lb-xwait', [signed(v)], { 'aria-hidden': 'true' });
 
 const charsOf = (list) => list.map((x) => (x.kind === 'frac' || x.kind === 'neg' || x.kind === 'group' ? 5 + charsOf(x.inner) : x.kind === 'times' ? 7 + charsOf(x.inner) : x.kind === 'x' ? ((x.coef ?? 1) > 1 ? 2 : (x.coef ?? 1) < 0 ? String(x.coef).length : 1) : String(signed(x.v)).length + 3)).reduce((a, b) => a + b, 0);
 const eqClass = (chars) => (chars > 30 ? ' is-xlong' : chars > 20 ? ' is-long' : '');
@@ -270,6 +274,18 @@ const HINT_WAIT = 2500;
 const HINT_EVERY = 2600;
 const reduceMotion = () => typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+// The empty x nearest a drop on the row being checked (its number left to right), or undefined
+function nearestX(root, x) {
+  let best;
+  let gap = Infinity;
+  root.querySelectorAll('[data-x][data-action="placeValue"]').forEach((el) => {
+    const r = el.getBoundingClientRect();
+    const d = Math.abs((r.left + r.right) / 2 - x);
+    if (d < gap) { gap = d; best = Number(el.dataset.xi); }
+  });
+  return best;
+}
+
 export function bindValueDrag(root, dispatch) {
   let ghost = null;
   let shadow = null;
@@ -285,12 +301,16 @@ export function bindValueDrag(root, dispatch) {
     ghost.remove();
     ghost = null;
     // letting go over x, or anywhere on the outlined equation, places the value (a kind drop zone; small fingers, small x)
+    root.classList.remove('is-carrying-value');
     const over = document.elementFromPoint(e.clientX, e.clientY)?.closest('[data-x][data-action="placeValue"], .is-plugrow');
     const sh = shadow;
     shadow = null;
     if (over && root.contains(over)) {
-      sh?.solid();                                                         // the copy stays where it is and turns solid: the check draws it there
-      dispatch({ type: 'placeValue', ...(over.dataset?.xi !== undefined && over.matches('[data-x]') ? { index: Number(over.dataset.xi) } : {}) });
+      // with more than one x, a drop fills one x only (loop spec rev 2.5): the x it landed on, or on the row, the empty x nearest the drop
+      const at = over.matches('[data-x]') ? Number(over.dataset.xi) : nearestX(root, e.clientX);
+      const empties = root.querySelectorAll('[data-x][data-action="placeValue"]').length;
+      if (empties <= 1) sh?.solid(); else sh?.back();                      // the copy stays and turns solid once the last x has the value
+      dispatch({ type: 'placeValue', ...(Number.isInteger(at) ? { index: at } : {}) });
     } else sh?.back();                                                     // anywhere else: the copy slides back, and nothing changes
   };
   const down = (e) => {
@@ -299,6 +319,7 @@ export function bindValueDrag(root, dispatch) {
     e.preventDefault();
     ghost = html('div', 'sv-ghost', [chip.textContent]);
     document.body.append(ghost);
+    root.classList.add('is-carrying-value');                              // every x still waiting for the value glows as a drop target
     shadow = slideShadow(root);
     move(e);
     document.addEventListener('pointermove', move);

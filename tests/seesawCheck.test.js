@@ -75,11 +75,9 @@ describe('the mirror of a check on the seesaw', () => {
     expect(twelve.left[0]).toMatchObject({ type: 'group', n: 12, xlabel: true });
   });
 
-  it('collapsed checks (none on this card) would show the first line, then the last', () => {
+  it('shows each line of the check in turn (no card collapses it, rev 2.5)', () => {
     const s = check(toX('x+a', 8, -12), -12);
-    s.sub = { ...s.sub, collapsed: true, step: 1 };
+    s.sub = { ...s.sub, placing: false, step: 1 };
     expect(checkMirror(s).index).toBe(0);
-    s.sub = { ...s.sub, step: 2 };
-    expect(checkMirror(s)).toMatchObject({ index: 1, final: true });
   });
 });

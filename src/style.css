@@ -3735,3 +3735,8 @@ body[data-input='touch'] #play.is-light #controls .btn-pad { min-width: 48px; mi
 .mo-sameas .is-blue { color: #0072b2; }
 .ts-light .lx-ghost .mo-sameas, .dv-light .lx-ghost .mo-sameas { margin-top: 6px; }
 .lx-movewrap:has(.mo-flyout) .lx-move[data-tip]::after { display: none; }
+
+/* ---------- Build P, Part 8: one drop per x. While the value is carried every empty x glows; once one x has it, each empty x shows a
+   faint ghost of the value waiting above it ---------- */
+.ui-light.is-carrying-value .lb-x.is-droptarget, .is-carrying-value .ui-light .lb-x.is-droptarget { background: #dff0fb; box-shadow: 0 0 0 6px rgba(0, 114, 178, 0.25); animation: none; }
+.ui-light .lb-xwait { position: absolute; left: 50%; top: calc(100% + 8px); transform: translateX(-50%); padding: 0 6px; border: 2px dashed #0072b2; border-radius: 8px; background: #fff; color: #0072b2; opacity: 0.5; font: 800 20px/26px 'Lexend', system-ui, sans-serif; pointer-events: none; white-space: nowrap; }

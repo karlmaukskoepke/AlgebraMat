@@ -50,7 +50,6 @@ const loop = createSolveLoop({
   extra: () => ({ fail: null, deal: null, diag: null, pic: null, taught: 0, tried: [] }),   // tried: fractions that failed on this problem (Build D)
   snapshotExtra: () => ({ fail: null, deal: null, diag: null, pic: null }),
   resetState: (s) => { s.fail = null; s.deal = null; s.diag = null; s.pic = null; },
-  collapse: () => false,                                                          // a single-step card: the check never collapses
   mustMoveKey: () => 'aMustMove',
   undoKey: () => 'dUndone',
   // a fraction that did not split waits for Undo (or a new try): I'm stuck then says so first (Build A)

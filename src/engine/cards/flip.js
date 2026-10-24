@@ -60,7 +60,6 @@ const loop = createSolveLoop({
   }),
   snapshotExtra: () => ({ fail: null, deal: null, diag: null, pic: null }),
   resetState: (s) => { s.fail = null; s.deal = null; s.diag = null; s.pic = null; },
-  collapse: () => false,                                                          // a single-step card: the check never collapses
   mustMoveKey: () => 'aMustMove',
   undoKey: () => 'aUndone',
   touched: (s) => s.tradeCount > 0,

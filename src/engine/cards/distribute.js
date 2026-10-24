@@ -70,7 +70,6 @@ const loop = createSolveLoop({
   resetState(s) {
     Object.assign(s, { fail: null, deal: null, diag: null, pic: null, mopts: null, amountEntry: '', zeroOther: false, work: null, alone: null, prevBoard: s.board, lastFlip: false, startOver: false });
   },
-  collapse: (level) => level >= 3,                                              // a multi-step card: full checks at Levels 1-2 (loop spec §6)
   mustMoveKey: () => 'lxMustMove',
   reminderOnly: true,                                                            // basic form: I'm stuck gives the reminder only
   touched: (s) => s.amountEntry !== '',

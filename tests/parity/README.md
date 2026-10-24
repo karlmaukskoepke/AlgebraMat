@@ -1,6 +1,6 @@
 # Parity tests: proving nothing changed for students
 
-These checks compare the app as it is now with a **baseline** recorded from an earlier commit. The data baseline (problems, save codes, class-sheet events, traces) was recorded from `main` at `0415e23` (2026-10-17), before Build A. The screens were recorded again from `main` at `aa647e9` (2026-10-24, after Build N), because every earlier screen had been listed as an intended change and the check could no longer fail. A difference is a failure unless `INTENDED-CHANGES.md` lists it above its history line.
+These checks compare the app as it is now with a **baseline** recorded from an earlier commit. The data baseline (problems, save codes, class-sheet events, traces) was recorded from `main` at `0415e23` (2026-10-17), before Build A. The screens were recorded again from `main` at `aa647e9` (2026-10-24, after Build N), because every earlier screen had been listed as an intended change and the check could no longer fail, and again from `main` at `b7c62f3` (the end of Build O) before Build P. A difference is a failure unless `INTENDED-CHANGES.md` lists it above its history line.
 
 ## How to run
 

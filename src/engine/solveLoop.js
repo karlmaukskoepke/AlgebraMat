@@ -25,7 +25,6 @@ import { climb, remind, teach as teachShape } from './solveit/registry.js';
 //   resetState(s)      the card's fields back to a bare state (a new equation state, or Start over)
 //   tag(p, typed, s)   the slip tag of a wrong typed value (null when right); `s` is the state it was typed in
 //   slip(s, typed, tag) the line for a wrong value: { key, params }
-//   collapse(level)    does the substitution check collapse at this level? (never, on a single-step card)
 //   reduce(s, action, api)  the card's own actions: undefined (not mine), 'ignore' (no change), or the changed state
 //   (the help rungs and Teach me are not the card's: they are the scaffold registry's, keyed by the shape of the equation on screen,
 //   engine/solveit/registry.js; a card registers its entries there)
@@ -88,10 +87,10 @@ export function createSolveLoop(card) {
   // The problem after a correct guess: shown with a move first.
   const moveOwed = (s) => Boolean(s.mustMove) && !s.movedOnce && s.stage === 'moves';
 
-  // The substitution: lines, then the mark. Collapsed: the first line, then the mark (a wrong value is always full).
-  const subTotal = (sub) => (sub.collapsed ? 2 : sub.lines.length + 1);
+  // The substitution: every line, then the mark. No card collapses it (loop spec rev 2.5, §4: the student watches the order of operations).
+  const subTotal = (sub) => sub.lines.length + 1;
   // What of the check is on screen: the lines written so far (the first appears when the value is placed on x), and the mark.
-  const subView = (sub) => ({ lines: sub.collapsed ? (sub.step >= 1 ? [sub.lines[0]] : []) : sub.lines.slice(0, Math.min(sub.step, sub.lines.length)), mark: sub.step >= subTotal(sub), last: sub.step - 1, landed: Boolean(sub.landed) });
+  const subView = (sub) => ({ lines: sub.lines.slice(0, Math.min(sub.step, sub.lines.length)), mark: sub.step >= subTotal(sub), last: sub.step - 1, landed: Boolean(sub.landed) });
 
   // ---------- committing a move ----------
   // A move that the card has worked out: `rows` are the work rows and the new equation, `next` the new board, `label` the folded
@@ -203,11 +202,10 @@ export function createSolveLoop(card) {
         const current = !correct && kind === 'guess';
         const target = current ? s.board : s.rows[0].board;
         const work = substitutionLines(target, typed);
-        const collapsed = correct && card.collapse(s.level);
-        // (an equation with more than one x takes a drop in each: `xs` of them, `filled` the ones that have it; Build H, Part 1)
-        s.sub = { kind, typed, ok: correct, tag, target: current ? 'current' : 'original', lines: work.lines, collapsed, placing: !collapsed, step: collapsed ? 1 : 0, xs: xCount(target), filled: [] };
-        if (s.sub.placing) return say(s, 'aPlace', { typed: signed(typed), where: s.sub.target });
-        return say(s, correct || kind === 'value' ? 'aPlugIn' : 'aPlugCurrent', { typed: signed(typed), where: s.sub.target });
+        // the value is dropped into x; an equation with more than one x takes a drop in each, nothing fills itself (`xs` of them, `filled`
+        // the ones that have it; Build H, Part 1; loop spec rev 2.5)
+        s.sub = { kind, typed, ok: correct, tag, target: current ? 'current' : 'original', lines: work.lines, placing: true, step: 0, xs: xCount(target), filled: [] };
+        return say(s, 'aPlace', { typed: signed(typed), where: s.sub.target });
       }
       // the value goes onto x (dragged, or tapped there)
       case 'placeValue': {
