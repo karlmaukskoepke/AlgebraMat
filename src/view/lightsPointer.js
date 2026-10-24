@@ -9,6 +9,7 @@ import { bindAddBothMat } from './addBothPointer.js';
 import { bindGrab } from './lightsGrabPointer.js';
 import { bindHelpTimer } from './helpTimer.js';
 import { bindValueDrag, HELP_BUTTONS } from './solveScreen.js';
+import { typedAction, settleTypingFocus } from './typingKeys.js';
 
 const ADD = '.lb-move[data-move="add"]';
 
@@ -100,9 +101,7 @@ export function bindLightsMat(root, dispatch, getSession) {
     if (e.key === 'Escape') { keyboard = true; e.preventDefault(); dispatch({ type: 'lxCancel' }); return; }
     // digits, the sign and Backspace go to the open blank or to x = (the page's own keys skip a focused button on the Mat, and the
     // two fields are buttons), whatever has focus
-    const typing = /^[0-9]$/.test(e.key) ? { type: 'digit', digit: Number(e.key) }
-      : e.key === '-' || e.key === '−' ? { type: 'toggleSign' } : e.key === 'Backspace' || e.key === 'Delete' ? { type: 'backspace' }
-        : (e.key === 'x' || e.key === 'X') && (getSession?.()?.lx?.distribute || getSession?.()?.lx?.combine) ? { type: 'typeChar', ch: 'x' } : null;   // a sum of two x-terms: 5x (Build M)
+    const typing = typedAction(e, getSession?.());
     if (typing) {
       if (e.target instanceof HTMLElement && e.target.matches('input, textarea, select, [contenteditable]')) return;
       e.preventDefault();
@@ -135,12 +134,11 @@ export function bindLightsMat(root, dispatch, getSession) {
     const lost = !a || a === document.body || !a.isConnected;
     const back = lost && lastKey ? root.querySelector(`[data-fk="${lastKey}"]`) : null;
     const target = asked ?? back;
-    if (target && !target.disabled && target !== a) {
-      const kb = keyboard;
-      keyboard = false;                 // a focus the screen gives is not a keyboard focus (no preview, no field switch)
-      target.focus({ preventScroll: true });
-      keyboard = kb;
-    }
+    const kb = keyboard;
+    keyboard = false;                 // a focus the screen gives is not a keyboard focus (no preview, no field switch)
+    if (target && !target.disabled && target !== a) target.focus({ preventScroll: true });
+    else if (!target) settleTypingFocus(root);          // else the open field, when the focus was lost (Build N)
+    keyboard = kb;
   };
   const obs = new MutationObserver(settle);
   obs.observe(root, { childList: true });

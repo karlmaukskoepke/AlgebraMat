@@ -8,5 +8,5 @@ import { makeMultiplyMenu } from './multiplyMenu.js';
 export { MULT_KINDS, multOpen } from './multiplyMenu.js';
 
 const menu = makeMultiplyMenu({ xAlone, coefOf });
-export const { canPreview, fracOpen, fracOf } = menu;
+export const { canPreview, fracOpen, fracOf, typingOpen } = menu;
 export const withFractionBlank = menu.withMenu;

@@ -1,11 +1,7 @@
-// The number pad for Divide it (the answer row is in the work stack on the Mat). Live only when the x = [ ] row is. Flip everything uses
-// the same pad with its own loop (Build J).
+// The number pad for Divide it and Flip everything (the answer row is in the work stack on the Mat). `live`: is a field waiting for
+// typing (x = [ ], or a Multiply blank: Build N)? The card's play adapter says.
 
-import { answerLive as divideAnswerLive } from '../engine/divideMoves.js';
-
-export const buildDivideControls = (root, dispatch) => buildSolvePad(root, dispatch, divideAnswerLive);
-
-export function buildSolvePad(root, dispatch, answerLive) {
+export function buildSolvePad(root, dispatch, live) {
   root.innerHTML = '';
   const keys = document.createElement('div');
   keys.className = 'pad';
@@ -29,7 +25,7 @@ export function buildSolvePad(root, dispatch, answerLive) {
   return {
     update(s) {
       const done = s.stage === 'done' || s.step === 'levelDone';
-      const on = !done && s.stage === 'moves' && answerLive(s);
+      const on = !done && s.stage === 'moves' && live(s);
       for (const b of keys.querySelectorAll('button')) b.disabled = !on;
     },
   };

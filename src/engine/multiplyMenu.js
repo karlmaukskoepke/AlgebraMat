@@ -35,6 +35,9 @@ export function makeMultiplyMenu({ xAlone, coefOf, option = (kind) => DIVIDE_IT[
   // Can the move be previewed (hovered) right now? Is its blank open?
   const canPreview = (s) => s.stage === 'moves' && !s.sub && !s.deal && !s.diag && !s.fail && !s.needUndo && s.menu !== 'fraction' && !xAlone(s.board) && !s.mopts?.kind;
   const fracOpen = (s) => s.stage === 'moves' && s.menu === 'fraction' && !s.sub && !s.deal && !s.fail && !s.spot?.choose && s.typing !== 'answer';
+  // Is one of the menu's blanks waiting for typing (the fraction, the whole number, Divide's number)? The keypad is live and up for it,
+  // whether or not x = is (Build N: on the problem after a correct guess, x = waits for a move and the blank took nothing).
+  const typingOpen = (s) => fracOpen(s) || (s.stage === 'moves' && !s.sub && (s.mopts?.kind === 'whole' || s.mopts?.kind === 'div'));
   // The fraction in the blank: { n } when it is 1 over 2..6 (a top left empty counts as 1), else null; with negTop, −1 over 2..6 too
   // ({ n, sign: −1 }).
   function fracOf(fb) {
@@ -192,5 +195,5 @@ export function makeMultiplyMenu({ xAlone, coefOf, option = (kind) => DIVIDE_IT[
     };
   }
 
-  return { withMenu, canPreview, fracOpen, fracOf };
+  return { withMenu, canPreview, fracOpen, fracOf, typingOpen };
 }

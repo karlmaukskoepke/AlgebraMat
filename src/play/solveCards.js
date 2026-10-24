@@ -15,13 +15,13 @@ import { bindLightsMat } from '../view/lightsPointer.js';
 // Divide it: the loop card (engine/divideMoves.js) under its fraction blank (engine/divideBlank.js), on its screen
 import { newDivide, reduceDivide, DIVIDE_SPOT, solve as divideLoop } from '../engine/divideMoves.js';
 import { formatDivide } from '../engine/divide.js';
-import { withFractionBlank, fracOpen } from '../engine/divideBlank.js';
+import { withFractionBlank, typingOpen } from '../engine/divideBlank.js';
 import { renderDivideScreen, introOpen as divideIntroOpen } from '../view/divideScreen.js';
-import { buildDivideControls } from '../view/divideControls.js';
 import { divideFeedbackText } from '../view/divideFeedback.js';
 import { bindValueDrag, bindForwardKey } from '../view/solveScreen.js';
 import { bindHelpTimer } from '../view/helpTimer.js';
 import { bindFractionKeys } from '../view/fractionKeys.js';
+import { bindTypingKeys } from '../view/typingKeys.js';
 // Flip everything: the loop card (engine/cards/flip.js) under the shared Multiply menu (engine/multiplyMenu.js), on its screen
 import { newFlip, reduceFlip, solve as flipLoop, FLIP_SPOT, FLIP_MENU } from '../engine/cards/flip.js';
 import { formatFlip } from '../engine/flip.js';
@@ -105,13 +105,14 @@ export const divideMovesPlay = makeSolvePlay({
   format: formatDivide,
   newSession: (problem, { forceMove = false } = {}) => newDivide(problem, { level: problem.logLevel ?? 2, forceMove }),
   feedbackText: divideFeedbackText,
-  buildControls: buildDivideControls,
+  // the keypad types into x = and into the Multiply menu's blanks (Build N: the blanks too, whether or not x = is live)
+  buildControls: (root, dispatch) => buildSolvePad(root, dispatch, (s) => divideLoop.answerLive(s) || typingOpen(s)),
   renderMat: (s) => renderDivideScreen(s),
   bindMat: (root, dispatch, getSession) => {
-    const off = [bindValueDrag(root, dispatch), bindForwardKey(root), bindHelpTimer(root), bindFractionKeys(root, dispatch, getSession)];
+    const off = [bindTypingKeys(root, dispatch, getSession), bindValueDrag(root, dispatch), bindForwardKey(root), bindHelpTimer(root), bindFractionKeys(root, dispatch, getSession)];
     return () => off.forEach((f) => f());
   },
-  padOpen: (s) => s.stage !== 'done' && !s.sub && (fracOpen(s) || (divideLoop.answerLive(s) && (s.typing === 'answer' || divideLoop.alone(s)))),
+  padOpen: (s) => s.stage !== 'done' && !s.sub && (typingOpen(s) || (divideLoop.answerLive(s) && (s.typing === 'answer' || divideLoop.alone(s)))),
   matAction(d) {
     switch (d.action) {
       case 'multOpen': return { type: 'multOpen' };
@@ -141,13 +142,13 @@ export const flipPlay = makeSolvePlay({
     return newFlip(problem, { level: problem.logLevel ?? 2, forceMove, introTrade: !flipTaught.trade, introFlip: !flipTaught.flip });
   },
   feedbackText: flipFeedbackText,
-  buildControls: (root, dispatch) => buildSolvePad(root, dispatch, flipLoop.answerLive),
+  buildControls: (root, dispatch) => buildSolvePad(root, dispatch, (s) => flipLoop.answerLive(s) || FLIP_MENU.typingOpen(s)),
   renderMat: (s) => renderFlipScreen(s),
   bindMat: (root, dispatch, getSession) => {
-    const off = [bindValueDrag(root, dispatch), bindForwardKey(root), bindHelpTimer(root), bindFractionKeys(root, dispatch, getSession, FLIP_MENU)];
+    const off = [bindTypingKeys(root, dispatch, getSession), bindValueDrag(root, dispatch), bindForwardKey(root), bindHelpTimer(root), bindFractionKeys(root, dispatch, getSession, FLIP_MENU)];
     return () => off.forEach((f) => f());
   },
-  padOpen: (s) => s.stage !== 'done' && !s.sub && (FLIP_MENU.fracOpen(s) || (flipLoop.answerLive(s) && (s.typing === 'answer' || flipLoop.alone(s)))),
+  padOpen: (s) => s.stage !== 'done' && !s.sub && (FLIP_MENU.typingOpen(s) || (flipLoop.answerLive(s) && (s.typing === 'answer' || flipLoop.alone(s)))),
   effects(before, s) {
     if (s.tradeCount > 0 && flipTaught) flipTaught.trade = true;
     if (s.flipCount > 0 && flipTaught) flipTaught.flip = true;
@@ -182,13 +183,13 @@ export const twoStepPlay = makeSolvePlay({
     return startLights(newTwoStep(problem, { level: problem.logLevel ?? 1, forceMove, introTrade: !twoTaught.trade, introFlip: !twoTaught.flip }));
   },
   feedbackText: twoStepFeedbackText,
-  buildControls: makeAddBothControls((s) => lightsAnswerLive(s, twoLoop) || combineOpen(s) || TWO_STEP_MENU.fracOpen(s)),
+  buildControls: makeAddBothControls((s) => lightsAnswerLive(s, twoLoop) || combineOpen(s) || TWO_STEP_MENU.typingOpen(s)),
   bindMat: (root, dispatch, getSession) => {
     const off = [bindLightsMat(root, dispatch, getSession), bindFractionKeys(root, dispatch, getSession, TWO_STEP_MENU)];
     return () => off.forEach((f) => f?.());
   },
   renderMat: (s) => renderTwoStepScreen(s),
-  padOpen: (s) => s.stage !== 'done' && !s.sub && ((blankOpen(s) && amountMode(s)) || combineOpen(s) || TWO_STEP_MENU.fracOpen(s)
+  padOpen: (s) => s.stage !== 'done' && !s.sub && ((blankOpen(s) && amountMode(s)) || combineOpen(s) || TWO_STEP_MENU.typingOpen(s)
     || (lightsAnswerLive(s, twoLoop) && (s.typing === 'answer' || s.ui?.focus === 'answer' || twoAlone(s.board)))),
   effects(before, s) {
     if (s.tradeCount > 0 && twoTaught) twoTaught.trade = true;
@@ -220,13 +221,13 @@ export const distSolvePlay = makeSolvePlay({
   format: formatDistSolve,
   newSession: (problem, { forceMove = false } = {}) => startLights(newDistSolve(problem, { level: problem.logLevel ?? 1, forceMove })),
   feedbackText: distSolveFeedbackText,
-  buildControls: makeAddBothControls((s) => lightsAnswerLive(s, distLoop) || combineOpen(s) || Boolean(s.lx?.distribute) || DIST_MENU.fracOpen(s), xKey),
+  buildControls: makeAddBothControls((s) => lightsAnswerLive(s, distLoop) || combineOpen(s) || Boolean(s.lx?.distribute) || DIST_MENU.typingOpen(s), xKey),
   bindMat: (root, dispatch, getSession) => {
     const off = [bindLightsMat(root, dispatch, getSession), bindFractionKeys(root, dispatch, getSession, DIST_MENU), bindFactorHint(root)];
     return () => off.forEach((f) => f?.());
   },
   renderMat: (s) => renderDistSolveScreen(s),
-  padOpen: (s) => s.stage !== 'done' && !s.sub && ((blankOpen(s) && amountMode(s)) || combineOpen(s) || Boolean(s.lx?.distribute) || DIST_MENU.fracOpen(s)
+  padOpen: (s) => s.stage !== 'done' && !s.sub && ((blankOpen(s) && amountMode(s)) || combineOpen(s) || Boolean(s.lx?.distribute) || DIST_MENU.typingOpen(s)
     || (lightsAnswerLive(s, distLoop) && (s.typing === 'answer' || s.ui?.focus === 'answer' || distAlone(s.board)))),
   matAction(d) {
     if (ADD_MAT.has(d.action)) return { type: d.action };
