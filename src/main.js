@@ -504,7 +504,8 @@ window.matchMedia('(orientation: portrait)').addEventListener('change', () => {
 // no keyboard a compact keypad pops up only while a field is in use (the adapter's `padOpen`), and goes on Check and Next.
 let inputMode = window.matchMedia('(pointer: coarse)').matches && !window.matchMedia('(hover: hover)').matches ? 'touch' : 'keys';
 document.body.dataset.input = inputMode;
-document.addEventListener('keydown', (e) => {
+// (on the window, registered before any card's keys: a card that takes the digit stops it there, and the keypad must still go; Build N)
+window.addEventListener('keydown', (e) => {
   if (inputMode !== 'keys' && /^[0-9]$/.test(e.key)) { inputMode = 'keys'; document.body.dataset.input = inputMode; }
 }, true);
 // The header and the level dots show at the start of each problem for about 3 seconds, then fade to a thin strip; the pointer at the

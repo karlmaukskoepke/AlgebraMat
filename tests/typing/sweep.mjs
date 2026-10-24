@@ -140,6 +140,8 @@ async function canType(page, { tapPad = false } = {}) {
   const focused = await page.evaluate((sel) => document.activeElement?.matches?.(sel) ?? false, field);
   if (!after.endsWith(digit)) return { offered: true, ok: false, why: `KEY LOST: pressed ${digit}; ${name} shows “${after || 'nothing'}”` };
   if (!tapPad && !focused) return { offered: true, ok: false, why: `no focus: the ${digit} landed in ${name}, but the focus is on ${await page.evaluate(() => document.activeElement?.className || document.activeElement?.tagName)}` };
+  // a touchscreen with a keyboard: the first number key hides the keypad (it would cover the screen while the student types)
+  if (TOUCH && !tapPad && (await page.evaluate(() => document.body.dataset.input)) !== 'keys') return { offered: true, ok: false, why: `the ${digit} landed in ${name}, but the keypad stayed up after a key was pressed` };
   return { offered: true, ok: true, why: name };
 }
 
