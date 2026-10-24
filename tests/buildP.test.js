@@ -164,3 +164,36 @@ describe('Part 2: calculate a product on the divide-first route', () => {
     expect(boardText(s.board)).toBe('x + 3 = 7');
   });
 });
+
+describe('Part 4: moving between blanks with the keyboard', () => {
+  it('the distribute products: Tab (blankMove +1) goes on, Shift+Tab back; the contents are selected, so typing replaces them', () => {
+    const p = P({ f: 3, c: 2, x: 3 });
+    let s = start(p);
+    const g = s.board.left[0];
+    s = run(s, [{ type: 'lxDistribute', id: g.id }, ...digits(3), { type: 'blankMove', dir: 1 }, ...digits(6)]);
+    expect(s.lx.distribute).toMatchObject({ entries: ['3', '6'], focus: 1 });
+    s = run(s, [{ type: 'blankMove', dir: -1 }]);
+    expect(s.lx.distribute).toMatchObject({ focus: 0, sel: true });
+    s = run(s, digits(4));
+    expect(s.lx.distribute).toMatchObject({ entries: ['4', '6'], sel: false });
+    expect(run(s, [{ type: 'blankMove', dir: -1 }])).toBe(s);              // nothing before the first
+    s = run(s, [{ type: 'blankMove', dir: 1 }, { type: 'backspace' }]);
+    expect(s.lx.distribute.entries).toEqual(['4', '']);
+  });
+  it('the fraction blank: → to the bottom, ← to the top, the contents selected; Enter in the top goes on to an empty bottom', () => {
+    const p = P({ f: 3, c: 2, x: 3 });
+    let s = run(start(p), [{ type: 'multOpen' }, { type: 'multPick', kind: 'frac' }, ...digits(1)]);
+    expect(s.fb).toMatchObject({ num: '1', part: 'den' });
+    s = run(s, [{ type: 'blankMove', dir: -1 }]);
+    expect(s.fb).toMatchObject({ part: 'num', sel: true });
+    s = run(s, [{ type: 'go' }]);
+    expect(s.fb).toMatchObject({ part: 'den' });
+    expect(s.fb.sel).toBeFalsy();
+    expect(s.feedback?.key).not.toBe('dBlankBad');
+    s = run(s, [...digits(3), { type: 'blankMove', dir: -1 }, ...digits(2)]);
+    expect(s.fb).toMatchObject({ num: '2', den: '3', part: 'den', sel: true });
+    s = run(s, digits(5));
+    expect(s.fb).toMatchObject({ num: '2', den: '5' });
+    expect(s.fb.sel).toBeFalsy();
+  });
+});

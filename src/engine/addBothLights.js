@@ -473,16 +473,27 @@ function distributeAction(state, action, alone, opts) {
   if (d && isTyping(action)) {
     if (action.type === 'typeChar') return state;                                   // (the x is printed after the x blank)
     const k = d.focus;
-    const entry = typeInto(d.wrong === k ? '' : d.entries[k], action, 'integer');
-    if (entry === d.entries[k] && d.wrong !== k) return state;
+    const entry = typeInto(d.wrong === k || (d.sel && action.type !== 'toggleSign') ? '' : d.entries[k], action, 'integer');
+    if (entry === d.entries[k] && d.wrong !== k && !d.sel) return state;
     const s = structuredClone(state);
     s.lx.distribute.entries[k] = entry;
     s.lx.distribute.wrong = null;
+    s.lx.distribute.sel = false;
     s.ui = { ...UI0, focus: `prod:${k}` };
     return say(s, 'dxProducts');
   }
+  // Tab or → to the next blank, Shift+Tab or ← to the one before (Build P, Part 4): its contents are selected, so typing replaces them
+  if (d && action.type === 'blankMove') {
+    const k = Math.max(0, Math.min(d.entries.length - 1, d.focus + (action.dir > 0 ? 1 : -1)));
+    if (k === d.focus) return state;
+    const s = structuredClone(state);
+    Object.assign(s.lx.distribute, { focus: k, sel: d.entries[k] !== '' });
+    s.ui = { ...UI0, focus: `prod:${k}` };
+    return s;
+  }
   if (d && action.type === 'focus' && action.target === 'dist') {
     const s = structuredClone(state);
+    s.lx.distribute.sel = false;
     s.lx.distribute.focus = Math.max(0, Math.min(d.entries.length - 1, Number(action.index) || 0));
     s.ui = { ...UI0, focus: `prod:${s.lx.distribute.focus}` };
     return s;
@@ -524,7 +535,7 @@ function distributeAction(state, action, alone, opts) {
   const empty = d.entries.findIndex((e) => !pieceTyped(e));
   if (empty >= 0) {
     const s = structuredClone(state);
-    if (action.type === 'go' && pieceTyped(d.entries[d.focus])) { s.lx.distribute.focus = empty; s.ui = { ...UI0, focus: `prod:${empty}` }; return s; }
+    if (action.type === 'go' && pieceTyped(d.entries[d.focus])) { Object.assign(s.lx.distribute, { focus: empty, sel: false }); s.ui = { ...UI0, focus: `prod:${empty}` }; return s; }
     s.ui = { ...UI0, shake: true, focus: `prod:${empty}` };
     return s;
   }

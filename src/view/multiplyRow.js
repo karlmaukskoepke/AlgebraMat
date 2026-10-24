@@ -19,7 +19,7 @@ function fracBox(s, mirror, open) {
   const part = (p) => {
     const text = fb[p];
     const focus = open && !mirror && fb.part === p;
-    return html(mirror ? 'span' : 'button', `lx-box dv-fracpart${focus ? ' is-focus' : ''}${text ? '' : ' is-empty'}${focus && !text ? ' is-blink' : ''}${mirror ? ' is-mirror' : ''}`, [text ? text.replace('-', MINUS) : ' '],
+    return html(mirror ? 'span' : 'button', `lx-box dv-fracpart${focus ? ' is-focus' : ''}${focus && fb.sel && text ? ' is-selected' : ''}${text ? '' : ' is-empty'}${focus && !text ? ' is-blink' : ''}${mirror ? ' is-mirror' : ''}`, [text ? text.replace('-', MINUS) : ' '],
       mirror ? { 'aria-hidden': 'true' } : { type: 'button', 'data-action': 'focus', 'data-target': p, 'data-lx-field': '1', 'aria-label': p === 'num' ? 'The top of the fraction' : 'The bottom of the fraction', ...(open ? {} : { tabindex: '-1' }) });
   };
   // the cue under the open blank: a click or tap on a box clears it (Build H, Part 1)

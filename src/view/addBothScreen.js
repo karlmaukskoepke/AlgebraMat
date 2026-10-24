@@ -373,7 +373,7 @@ function productRow(s) {
     g.inner.forEach((term, j) => {
       if (k > 0) els.push(html('span', 'lb-plus', ['+']));
       const text = d.entries[j];
-      const box = html('button', `lx-box is-sum${d.wrong === j ? ' is-wrong' : ''}${d.focus === j ? ' is-focus' : ''}${s.ui?.shake && d.focus === j ? ' is-shake' : ''}${text ? '' : ' is-empty'}${d.focus === j && !text ? ' is-blink' : ''}`, [shown(text)], {
+      const box = html('button', `lx-box is-sum${d.wrong === j ? ' is-wrong' : ''}${d.focus === j ? ' is-focus' : ''}${d.focus === j && d.sel && text ? ' is-selected' : ''}${s.ui?.shake && d.focus === j ? ' is-shake' : ''}${text ? '' : ' is-empty'}${d.focus === j && !text ? ' is-blink' : ''}`, [shown(text)], {
         type: 'button', 'data-action': 'focus', 'data-target': 'dist', 'data-index': String(j), 'data-fk': `prod:${j}`, 'data-lx-field': '1', 'aria-label': `${labels[j]}: type the product`,
       });
       if (s.ui?.focus === `prod:${j}`) box.dataset.lxFocus = '1';

@@ -21,6 +21,8 @@ import { isTyping, typeInto } from './entry.js';
 import { FRACTIONS } from './divide.js';
 
 const FB0 = { num: '', den: '', part: 'num' };
+// The blank's state with `sel` (its contents selected: Build P, Part 4) only while it is true
+const FB = ({ sel, ...rest }) => (sel ? { ...rest, sel } : rest);
 // the options, in order (Build L: Flip everything left the menu; it is its own button. Build O: Divide left it too; it is the panel's
 // Divide button, `divPick`, a second way in to the same move: kind 'div')
 export const MULT_KINDS = ['whole', 'frac'];
@@ -199,24 +201,31 @@ export function makeMultiplyMenu({ xAlone, coefOf, option = (kind) => DIVIDE_IT[
       const fb = state.fb ?? FB0;
       if (fracOpen(state)) {
         // typing goes into the blank: the top, then (after "/") the bottom
-        if (action.type === 'fracSlash' || (action.type === 'typeChar' && action.ch === '/')) return { ...state, fb: { ...fb, part: 'den' } };
+        if (action.type === 'fracSlash' || (action.type === 'typeChar' && action.ch === '/')) return { ...state, fb: FB({ ...fb, part: 'den', sel: false }) };
+        // Tab or → to the bottom, Shift+Tab or ← to the top (Build P, Part 4): the box's contents are selected, so typing replaces them
+        if (action.type === 'blankMove') {
+          const part = action.dir > 0 ? 'den' : 'num';
+          return part === fb.part ? state : { ...state, fb: FB({ ...fb, part, sel: fb[part] !== '' }) };
+        }
         if (isTyping(action) && (action.type !== 'toggleSign' || (negTop && fb.part === 'num'))) {
           if (action.type === 'backspace' && fb[fb.part] === '' && fb.part === 'den') return { ...state, fb: { ...fb, part: 'num' } };
-          const v = typeInto(fb[fb.part], action, 'integer');
-          if (v === fb[fb.part]) return state;
+          const v = typeInto(fb.sel && action.type !== 'toggleSign' ? '' : fb[fb.part], action, 'integer');
+          if (v === fb[fb.part]) return fb.sel ? { ...state, fb: FB({ ...fb, sel: false }) } : state;
           // one digit each (Build D-2, Part 4): a second digit is not a unit fraction (66, 55)
           if (v.replace('-', '').length > 1) return { ...state, feedback: { key: 'dUnitFraction', params: {}, bad: false } };
           const done = /\d/.test(v);
           // the top's digit typed (or − and a digit): the cursor jumps to the bottom
-          if (fb.part === 'num') return { ...state, fb: { ...fb, num: v, part: done ? 'den' : 'num' }, feedback: null };
-          const next = { ...state, fb: { ...fb, den: v } };
+          if (fb.part === 'num') return { ...state, fb: FB({ ...fb, num: v, part: done ? 'den' : 'num', sel: done && fb.den !== '' }), feedback: null };
+          const next = { ...state, fb: FB({ ...fb, den: v, sel: false }) };
           // a top that is not 1 over a bottom: not a unit fraction
           return done && !unitTop(fb.num) ? { ...next, feedback: { key: 'dUnitFraction', params: {}, bad: false } } : { ...next, feedback: null };
         }
         if (action.type === 'fracStuck') return { ...state, feedback: { key: 'dUnitFraction', params: {}, bad: false } };
         // a click or tap on either box clears it and puts the cursor in it (Build H, Part 1)
-        if (action.type === 'focus' && (action.target === 'num' || action.target === 'den')) return { ...state, fb: { ...fb, [action.target]: '', part: action.target }, feedback: null };
+        if (action.type === 'focus' && (action.target === 'num' || action.target === 'den')) return { ...state, fb: FB({ ...fb, [action.target]: '', part: action.target, sel: false }), feedback: null };
         if (action.type === 'go') {
+          // Enter in the top goes on to an empty bottom (Build P, Part 4: Enter goes next; Go at the last)
+          if (fb.part === 'num' && fb.den === '' && fb.num !== '') return { ...state, fb: FB({ ...fb, part: 'den', sel: false }) };
           const f = fracOf(fb);
           if (!f) return { ...state, fb: { ...fb, part: fb.den ? fb.part : 'den' }, feedback: { key: 'dBlankBad', params: {}, bad: true } };
           const s = reduce({ ...state, fb: FB0 }, { type: 'take', n: f.n, ...(f.sign ? { sign: f.sign } : {}) });

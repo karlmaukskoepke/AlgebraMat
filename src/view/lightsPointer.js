@@ -9,6 +9,7 @@ import { bindAddBothMat } from './addBothPointer.js';
 import { bindGrab } from './lightsGrabPointer.js';
 import { bindHelpTimer } from './helpTimer.js';
 import { bindNudge } from './nudge.js';
+import { bindBlankKeys } from './blankKeys.js';
 import { bindValueDrag, HELP_BUTTONS } from './solveScreen.js';
 import { typedAction, settleTypingFocus } from './typingKeys.js';
 
@@ -20,6 +21,7 @@ export function bindLightsMat(root, dispatch, getSession) {
   const unbindHelp = bindHelpTimer(root);
   const unbindValue = bindValueDrag(root, dispatch);          // the value checked is dragged into x
   const unbindNudge = bindNudge(root, getSession);             // a mechanical step with one thing to do is nudged (Build P)
+  const unbindBlanks = bindBlankKeys(root, dispatch);           // Tab and the arrows between a row's blanks (Build P)
   let pointerType = 'mouse';
   let keyboard = false;          // was the last input a key (so a focus is the keyboard's, not a click's)?
   let lastKey = null;            // data-fk of the element that had focus, to give it back after a redraw
@@ -164,6 +166,7 @@ export function bindLightsMat(root, dispatch, getSession) {
     unbindHelp();
     unbindValue();
     unbindNudge();
+    unbindBlanks();
     obs.disconnect();
     document.removeEventListener('pointerdown', onPointerDown, true);
     root.removeEventListener('pointerover', onOver);

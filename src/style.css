@@ -3762,3 +3762,6 @@ button.lb-divbar.is-calc:hover, button.lb-divbar.is-calc:focus-visible { backgro
 .ui-light .lb-frac.nudge-glow, .ui-light .lb-frac.nudge-still, .ui-light .lb-calcdot.nudge-glow, .ui-light .lb-divbar.nudge-glow { outline-offset: 4px; }
 
 .ui-light button.lb-divbar.is-calc.nudge-glow, .ui-light button.lb-divbar.is-calc.nudge-still { background: linear-gradient(#0072b2, #0072b2) center / 100% 4px no-repeat, #e3f1fb; }
+
+/* ---------- Build P, Part 4: a blank moved to with Tab or an arrow has its contents selected (typing replaces them) ---------- */
+.lx-box.is-selected { background: #0072b2 !important; color: #fff !important; }

@@ -40,6 +40,7 @@ import { formatDistSolve } from '../engine/distSolve.js';
 import { renderDistSolveScreen, introOpen as distIntroOpen } from '../view/distSolveScreen.js';
 import { distSolveFeedbackText } from '../view/distSolveFeedback.js';
 import { bindFactorHint } from '../view/factorHint.js';
+import { bindBlankKeys } from '../view/blankKeys.js';
 
 // ---------- Add to both sides ----------
 
@@ -109,7 +110,7 @@ export const divideMovesPlay = makeSolvePlay({
   buildControls: (root, dispatch) => buildSolvePad(root, dispatch, (s) => divideLoop.answerLive(s) || typingOpen(s)),
   renderMat: (s) => renderDivideScreen(s),
   bindMat: (root, dispatch, getSession) => {
-    const off = [bindTypingKeys(root, dispatch, getSession), bindValueDrag(root, dispatch), bindForwardKey(root), bindHelpTimer(root), bindFractionKeys(root, dispatch, getSession)];
+    const off = [bindTypingKeys(root, dispatch, getSession), bindValueDrag(root, dispatch), bindForwardKey(root), bindHelpTimer(root), bindFractionKeys(root, dispatch, getSession), bindBlankKeys(root, dispatch)];
     return () => off.forEach((f) => f());
   },
   padOpen: (s) => s.stage !== 'done' && !s.sub && (typingOpen(s) || (divideLoop.answerLive(s) && (s.typing === 'answer' || divideLoop.alone(s)))),
@@ -146,7 +147,7 @@ export const flipPlay = makeSolvePlay({
   buildControls: (root, dispatch) => buildSolvePad(root, dispatch, (s) => flipLoop.answerLive(s) || FLIP_MENU.typingOpen(s)),
   renderMat: (s) => renderFlipScreen(s),
   bindMat: (root, dispatch, getSession) => {
-    const off = [bindTypingKeys(root, dispatch, getSession), bindValueDrag(root, dispatch), bindForwardKey(root), bindHelpTimer(root), bindFractionKeys(root, dispatch, getSession, FLIP_MENU)];
+    const off = [bindTypingKeys(root, dispatch, getSession), bindValueDrag(root, dispatch), bindForwardKey(root), bindHelpTimer(root), bindFractionKeys(root, dispatch, getSession, FLIP_MENU), bindBlankKeys(root, dispatch)];
     return () => off.forEach((f) => f());
   },
   padOpen: (s) => s.stage !== 'done' && !s.sub && (FLIP_MENU.typingOpen(s) || (flipLoop.answerLive(s) && (s.typing === 'answer' || flipLoop.alone(s)))),
