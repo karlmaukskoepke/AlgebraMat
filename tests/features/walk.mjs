@@ -33,6 +33,7 @@ const checks = data.checks ?? [];
 // ---- what a person does ----------------------------------------------------------------------------------------------------------
 const act = (a) => `[data-action="${a}"]`;
 const wait = (page, ms) => page.waitForTimeout(ms);
+const DIV_BOX = '.mo-divblank:not(.is-mirror) .mo-divpart';     // the Divide blank's box (Build L)
 
 class Walk {
   constructor(page, item) { this.page = page; this.item = item; this.errors = []; page.on('pageerror', (e) => this.errors.push(String(e))); }
@@ -97,6 +98,13 @@ class Walk {
   async divide(n) { await this.click(act('multOpen')); await this.click(`${act('multPick')}[data-kind="div"]`); await this.type(n); await this.click(act('go')); await wait(this.page, 300); }
   async solve(v) { await this.click(act('focus')); await this.type(v); await this.enter(); await this.drag(); await this.click(act('nextLine')); await this.click(act('nextLine')); }
   async type(text) { await this.page.keyboard.type(String(text)); await wait(this.page, 200); }
+  // what was typed shows in the field (Build N: and the field has the focus)
+  async typedIn(selector, text) {
+    const got = await this.page.evaluate((sel) => { const e = [...document.querySelectorAll(sel)].find((x) => x.offsetParent); return e ? { text: e.textContent.trim(), focused: document.activeElement === e } : null; }, selector);
+    if (!got) throw new Error(`no field ${selector} on screen after step "${this.step}"`);
+    if (got.text !== text) throw new Error(`the field should show ${text} but shows “${got.text}” after step "${this.step}"`);
+    if (!got.focused) throw new Error(`the field showing ${text} should have the focus after step "${this.step}"`);
+  }
   async enter(times = 1) { for (let i = 0; i < times; i++) { await this.page.keyboard.press('Enter'); await wait(this.page, 250); } }
   async drag() {                                    // the typed value, dragged from the x = box onto the x
     const from = await this.page.locator('[data-chip]').first().boundingBox();
@@ -337,6 +345,14 @@ const WALKS = {
     await w.both('student-distribute');
     w.at('mistake 5: Undo'); await w.click(act('undo')); await wait(w.page, 900);
     await w.see('5 and 6 are like terms. Drag one onto the other to combine them.');
+    // mistake 6 (Build N): a mistake, Undo, then type in the blank, from a fresh start
+    w.at('mistake 6: start again'); await w.start();
+    w.at('mistake 6: distribute 2, 6'); await w.distribute(2, 6); await w.row('5 + 2x + 6 = 17');
+    w.at('mistake 6: 5 onto 6, 11'); await w.combineTerms('5', '6', 11); await wait(w.page, 400);
+    w.at('mistake 6: Add 11, Enter'); await w.addEnter(11); await w.lateLayer(); await w.see('did not eliminate the term');
+    w.at('mistake 6: Undo, type −11, Enter'); await w.click(act('undo')); await wait(w.page, 800); await w.type('-11');
+    await w.typedIn('[data-fk="blank"]', '−11');
+    await w.enter(); await wait(w.page, 400); await w.see('2x = 17 − 11');
   },
   // ---- Build M, Part 1: the placement quiz ----
   async 'm-placement-old'(w) {
@@ -586,6 +602,12 @@ const WALKS = {
     await w.both('student-two-step');
     w.at('mistake 5: Undo'); await w.click(act('undo')); await wait(w.page, 800);
     await w.see('19 and −4 are on the same side. Put them together: drag one onto the other and type what they make.');
+    // mistake 6 (Build N): a mistake, Undo, then type in the blank, from a fresh start
+    w.at('mistake 6: start again'); await w.start();
+    w.at('mistake 6: Add 4, Enter'); await w.addEnter(4); await w.lateLayer(); await w.see('did not eliminate the term');
+    w.at('mistake 6: Undo, type −4, Enter'); await w.click(act('undo')); await wait(w.page, 800); await w.type('-4');
+    await w.typedIn('[data-fk="blank"]', '−4');
+    await w.enter(); await wait(w.page, 400); await w.see('3x = 19 − 4');
   },
   async 'f-no-0-1-minus1'(w) {
     await w.start();
@@ -885,6 +907,12 @@ const WALKS = {
     const clues = ['Look at the +8 next to x.', 'Which number would cancel the +8?', 'Choose "Add ___ to both sides" and pick an amount.', '−8 cancels the +8. Add it to both sides yourself.'];
     clues.forEach((c, i) => { if (!says[i].includes(c)) throw new Error(`press ${i + 1} of I’m stuck should say "${c}"`); });
     await w.shot('student-add-stuck');
+    // mistake 6 (Build N): a mistake, Undo, then type in the blank, from a fresh start
+    w.at('mistake 6: start again'); await w.start();
+    w.at('mistake 6: Add 8, Go'); await w.add(8); await w.lateLayer(); await w.see('did not eliminate the term');
+    w.at('mistake 6: Undo, type −8'); await w.click(act('undo')); await wait(w.page, 800); await w.type('-8');
+    await w.typedIn('[data-fk="blank"]', '−8');
+    w.at('mistake 6: Go'); await w.click(act('go')); await wait(w.page, 400); await w.see('x = −4 − 8');
   },
 
   async 'student-divide'(w) {
@@ -921,6 +949,13 @@ const WALKS = {
     if (!one.includes('5 boxes and 15 counters.')) throw new Error(`press 1 of I’m stuck should talk about the 5 boxes and 15 counters. On screen: ${one.slice(0, 300)}`);
     if (!two.includes('take ⅕ of both sides')) throw new Error(`press 2 of I’m stuck should say to take ⅕ of both sides. On screen: ${two.slice(0, 300)}`);
     await w.shot('student-divide-stuck');
+    // mistake 7 (Build N): a mistake, Undo, then type in the blank, from a fresh start
+    w.at('mistake 7: start again'); await w.start();
+    w.at('mistake 7: type 3, check it'); await w.click(act('focus')); await w.type(3); await w.enter(); await w.drag();
+    await w.click(act('nextLine')); await w.click(act('nextLine')); await w.lateLayer(); await w.see('not balanced');
+    w.at('mistake 7: Undo, type 5'); await w.click(act('undo')); await wait(w.page, 800); await w.type(5);
+    await w.typedIn(DIV_BOX, '5'); await w.see('Dividing by 5 is multiplying by ⅕.');
+    w.at('mistake 7: Go'); await w.click(act('go')); await wait(w.page, 400); await w.see('⅕(5x) = ⅕(−15)');
   },
 
   // ---- Build I ----
@@ -1146,6 +1181,39 @@ const WALKS = {
     w.at('mistake 5: I’m stuck twice'); await w.stuck(); const one = await w.text(); await w.stuck(); const two = await w.text();
     for (const t of [one, two]) if (!t.includes('−x means x has a minus. To get rid of it, multiply both sides by −1: Flip everything.')) throw new Error(`I’m stuck should give the reminder: ${t.slice(0, 300)}`);
     await w.shot('student-flip-stuck');
+    // mistake 6 (Build N): a mistake, Undo, then type in the blank, from a fresh start
+    w.at('mistake 6: start again'); await w.start();
+    w.at('mistake 6: type 12, check'); await w.click(act('focus')); await w.type(12); await w.enter(); await w.drag();
+    await w.click(act('nextLine')); await w.click(act('nextLine')); await w.lateLayer(); await w.see('not balanced');
+    w.at('mistake 6: Undo, Got it'); await w.click(act('undo')); await wait(w.page, 800); await w.click(act('spotDismiss'));
+    w.at('mistake 6: Multiply, Divide, click the box, −3'); await w.click(act('multOpen')); await w.click(`${act('multPick')}[data-kind="div"]`);
+    await w.click(DIV_BOX); await w.page.keyboard.press('-'); await w.type(3); await w.typedIn(DIV_BOX, '3');
+    w.at('mistake 6: Go'); await w.click(act('go')); await wait(w.page, 400); await w.see('−⅓(−3x) = −⅓(12)');
+  },
+  // ---- Build N: typing after a mistake ----
+  async 'n-type-after-mistake'(w) {
+    await w.start(); await w.see('DIVIDE IT · Level 3', '3x = 6');
+    w.at('type 9, check it'); await w.click(act('focus')); await w.type(9); await w.enter(); await w.drag();
+    await w.click(act('nextLine')); await w.click(act('nextLine')); await w.lateLayer(); await w.see('When x = 9, the equation is not balanced.');
+    w.at('Undo'); await w.click(act('undo')); await wait(w.page, 800);
+    await w.see('divide both sides by 3');
+    if (!(await w.page.locator(DIV_BOX).count())) throw new Error('the hint should show the Divide blank');
+    await w.shot('n-hint-after-undo');
+    w.at('type 3'); await w.type(3); await w.typedIn(DIV_BOX, '3'); await w.see('Dividing by 3 is multiplying by ⅓.');
+    await w.both('n-type-after-mistake');
+    w.at('click the box, Backspace, 3'); await w.click(DIV_BOX); await w.page.keyboard.press('Backspace'); await wait(w.page, 200); await w.type(3); await w.typedIn(DIV_BOX, '3');
+    w.at('Go'); await w.click(act('go')); await wait(w.page, 400); await w.see('⅓(3x) = ⅓(6)', 'x = ⅓(6)');
+  },
+  async 'n-type-after-right'(w) {
+    await w.start(); await w.see('DIVIDE IT · Level 3', '3x = 6');
+    w.at('type 2, check it'); await w.click(act('focus')); await w.type(2); await w.enter(); await w.drag();
+    await w.click(act('nextLine')); await w.click(act('nextLine')); await w.click(act('next')); await wait(w.page, 600);
+    await w.see('2x = 30', 'Your mental math is very strong.');
+    w.at('Next'); await w.click(act('introNext'));
+    w.at('Multiply, Divide, 2'); await w.click(act('multOpen')); await w.click(`${act('multPick')}[data-kind="div"]`); await w.type(2);
+    await w.typedIn(DIV_BOX, '2'); await w.see('Dividing by 2 is multiplying by ½.');
+    await w.both('n-type-after-right');
+    w.at('Go'); await w.click(act('go')); await wait(w.page, 400); await w.see('½(2x) = ½(30)', 'x = ½(30)');
   },
 };
 
