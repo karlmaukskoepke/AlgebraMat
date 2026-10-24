@@ -40,13 +40,13 @@ describe('Divide it: the fraction blank and the list after a fraction that does 
 // are Multiply, Divide and Fraction (the −1 option left: Flip everything is its own button); on Divide it, Divide is the move, Multiply is
 // explained, and Fraction is greyed.
 describe('Build D-2 and Build L: Divide it’s Multiply options and the fraction blank', () => {
-  it('opens two options (Build O); the Divide button opens its blank; the whole number is greyed here; a second click closes them', () => {
+  it('opens two options (Build O); the Divide button opens its blank; the whole number is explained here (Build P); a second click closes them', () => {
     let s = run(start(), { type: 'multOpen' });
     expect([Boolean(s.mopts), s.menu]).toEqual([true, null]);
     expect(run(s, { type: 'multOpen' }).mopts).toBe(null);
     s = run(s, { type: 'ui', patch: { preview: 'div' } });
     expect(s.ui.preview).toBe('div');
-    expect(run(s, { type: 'multPick', kind: 'whole' }).feedback.key).toBe('aLater');
+    expect(run(s, { type: 'multPick', kind: 'whole' }, digit(5), { type: 'go' }).feedback.key).toBe('dWholeNo');   // "5 × (5x) makes 25x: still not one x."
     expect(fracOpen(run(s, { type: 'multPick', kind: 'frac' }))).toBe(true);
     s = run(s, { type: 'divPick' });
     expect([s.mopts, fracOpen(s)]).toEqual([{ kind: 'div', entry: '' }, false]);

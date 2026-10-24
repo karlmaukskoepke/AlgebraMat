@@ -36,7 +36,7 @@ export const okDivisor = (t) => /^-?\d$/.test(t ?? '');
 export const goReady = (m) => m.kind === 'flip' || (m.kind === 'whole' && okWhole(m.entry)) || (m.kind === 'div' && okDivisor(m.entry));
 // Divide it's options (Build O): the Divide button and the Fraction (unit fractions) are the move; the whole number is greyed; −1 (dividing
 // by −1) is explained
-const DIVIDE_IT = { whole: 'grey', div: 'live', frac: 'live', flip: 'explain' };
+const DIVIDE_IT = { whole: 'explain', div: 'live', frac: 'live', flip: 'explain' };
 
 export function makeMultiplyMenu({ xAlone, coefOf, option = (kind) => DIVIDE_IT[kind], greyKey = () => 'aLater', probe = 'fraction', negTop = false }) {
   // Can the move be previewed (hovered) right now? Is its blank open?
@@ -83,16 +83,36 @@ export function makeMultiplyMenu({ xAlone, coefOf, option = (kind) => DIVIDE_IT[
       if (opened.menu !== 'fraction') return { ...state, feedback: opened.feedback ?? state.feedback };
       const s = reduce({ ...opened, fb: FB0 }, { type: 'take', n, ...(d < 0 ? { sign: -1 } : {}) });
       if (s === opened || (s.history?.length ?? 0) === (opened.history?.length ?? 0)) return { ...state, feedback: s.feedback ?? state.feedback };
-      return shownAsDivision(s);
+      return d < 0 ? dividedByNegative(shownAsDivision(s), state, n) : shownAsDivision(s);
+    }
+    // Dividing by −1 with the Divide button (Build P, Part 9): the same move as Flip everything (its record, shapes, check and lights), drawn
+    // in division form, `(−x)/(−1) = (12)/(−1)`, then `x = (12)/(−1)`. Where −1 is only explained (Divide it), the card's words, as before.
+    function divideByMinusOne(state) {
+      const s = flipGo(state);
+      if (option('flip', state) !== 'live' || (s.history?.length ?? 0) === (state.history?.length ?? 0)) return s;
+      return dividedByNegative(shownAsDivision(s, true), state, 1);
+    }
+    // After dividing by a negative: its own pop-up, once a level (`divNegIntro`, separate from the first flip's), when the move helped:
+    // "Dividing by −1 does the same thing as multiplying by −1: every sign flips." The Flip button's first-flip pop-up is its own, so a
+    // divide never uses it up (the flip count is the Flip button's).
+    function dividedByNegative(s, before, n) {
+      const out = { ...s, flipCount: before.flipCount ?? s.flipCount };
+      if (out.feedback?.key === 'fFlipIntro') out.feedback = { key: xAlone(out.board) ? 'aSolvedBoard' : 'aFindX', params: {}, bad: false };
+      if (out.needUndo || out.feedback?.bad) return out;
+      out.divNegCount = (before.divNegCount ?? 0) + 1;
+      if (before.divNegIntro && !before.divNegCount) out.feedback = { key: 'dDivNegIntro', params: { n }, bad: false };
+      return out;
     }
     // A move made with the Divide button is drawn in division form (Build O, display only): its rows, and the folded row's tag, carry
     // `shown: 'div'`. The move itself, its boards and everything stored or checked are those of taking 1/n.
-    function shownAsDivision(s) {
+    // (a flip made by dividing by −1, Build P: its `−(12)` is drawn `(12)/(−1)` too, and its folded tag reads "both sides ÷ −1")
+    function shownAsDivision(s, flip = false) {
       const from = s.history.at(-1)?.rows?.length ?? s.rows.length;
       const rows = s.rows.map((r, i) => (i >= from && r.board ? { ...r, shown: 'div' } : r));
       // its fractions stay in division form in the rows after it too (`x + 2 = (15)/3`, then `x = (15)/3 − 2`): their ids, view state only
-      const ids = rows.slice(from).flatMap((r) => (r.board ? [...r.board.left, ...r.board.right] : [])).filter((t) => t.kind === 'frac').map((t) => t.id);
-      return { ...s, rows, divIds: [...new Set([...(s.divIds ?? []), ...ids])], ...(s.unfolded && s.foldLabel && typeof s.foldLabel === 'object' ? { foldLabel: { ...s.foldLabel, shown: 'div' } } : {}) };
+      const ids = rows.slice(from).flatMap((r) => (r.board ? [...r.board.left, ...r.board.right] : [])).filter((t) => t.kind === 'frac' || (flip && t.kind === 'neg')).map((t) => t.id);
+      const label = flip ? { n: 1, sign: -1 } : {};
+      return { ...s, rows, divIds: [...new Set([...(s.divIds ?? []), ...ids])], ...(s.unfolded && s.foldLabel && typeof s.foldLabel === 'object' ? { foldLabel: { ...s.foldLabel, ...label, shown: 'div' } } : {}) };
     }
     // Only one move is selected at a time (Build O, Part 1): opening Multiply or choosing Flip clears an Add left selected, as if it had
     // not been clicked (its box and its yellow state go).
@@ -170,7 +190,8 @@ export function makeMultiplyMenu({ xAlone, coefOf, option = (kind) => DIVIDE_IT[
           }
         }
         if (action.type === 'go') {
-          if (m.kind === 'flip' || ((m.kind === 'whole' || m.kind === 'div') && m.entry === '-1')) return flipGo(state);
+          if (m.kind === 'div' && m.entry === '-1') return divideByMinusOne(state);
+          if (m.kind === 'flip' || (m.kind === 'whole' && m.entry === '-1')) return flipGo(state);
           if (m.kind === 'div') return divideGo(state, m.entry);
           if (option(m.kind, state) === 'live') return inner({ ...state, mopts: null }, { type: m.kind });
           if (m.kind === 'whole' && !okWhole(m.entry)) return { ...state, feedback: { key: 'dBlankBad', params: {}, bad: true } };

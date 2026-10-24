@@ -141,7 +141,7 @@ export const flipPlay = makeSolvePlay({
   format: formatFlip,
   newSession: (problem, { forceMove = false, flags = null } = {}) => {
     flipTaught = flags ?? flipTaught ?? {};
-    return newFlip(problem, { level: problem.logLevel ?? 2, forceMove, introTrade: !flipTaught.trade, introFlip: !flipTaught.flip });
+    return { ...newFlip(problem, { level: problem.logLevel ?? 2, forceMove, introTrade: !flipTaught.trade, introFlip: !flipTaught.flip }), divNegIntro: !flipTaught.divneg };
   },
   feedbackText: flipFeedbackText,
   buildControls: (root, dispatch) => buildSolvePad(root, dispatch, (s) => flipLoop.answerLive(s) || FLIP_MENU.typingOpen(s)),
@@ -154,6 +154,7 @@ export const flipPlay = makeSolvePlay({
   effects(before, s) {
     if (s.tradeCount > 0 && flipTaught) flipTaught.trade = true;
     if (s.flipCount > 0 && flipTaught) flipTaught.flip = true;
+    if (s.divNegCount > 0 && flipTaught) flipTaught.divneg = true;          // (dividing by a negative is pointed out once a level too: Build P)
   },
   matAction(d) {
     switch (d.action) {
@@ -185,7 +186,7 @@ export const twoStepPlay = makeSolvePlay({
   format: formatTwoStep,
   newSession: (problem, { forceMove = false, flags = null } = {}) => {
     twoTaught = flags ?? twoTaught ?? {};
-    return startLights(newTwoStep(problem, { level: problem.logLevel ?? 1, forceMove, introTrade: !twoTaught.trade, introFlip: !twoTaught.flip }));
+    return { ...startLights(newTwoStep(problem, { level: problem.logLevel ?? 1, forceMove, introTrade: !twoTaught.trade, introFlip: !twoTaught.flip })), divNegIntro: !twoTaught.divneg };
   },
   feedbackText: twoStepFeedbackText,
   buildControls: makeAddBothControls((s) => lightsAnswerLive(s, twoLoop) || combineOpen(s) || TWO_STEP_MENU.typingOpen(s)),
@@ -199,6 +200,7 @@ export const twoStepPlay = makeSolvePlay({
   effects(before, s) {
     if (s.tradeCount > 0 && twoTaught) twoTaught.trade = true;
     if (s.flipCount > 0 && twoTaught) twoTaught.flip = true;
+    if (s.divNegCount > 0 && twoTaught) twoTaught.divneg = true;
   },
   matAction(d) {
     if (ADD_MAT.has(d.action)) return { type: d.action };
@@ -218,6 +220,8 @@ export const twoStepPlay = makeSolvePlay({
 // The distribute move's blanks and a sum of two x-terms take the x key too (on touch, the pad shows it).
 const xKey = (s) => Boolean(s.lx?.combine) && [...s.board.left, ...s.board.right].find((t) => t.id === s.lx.combine.a)?.kind === 'x';
 
+let distTaught = null;  // dividing by a negative is pointed out once a level (Build P)
+
 export const distSolvePlay = makeSolvePlay({
   pack: 'distribute-solve',
   loop: distLoop,
@@ -225,7 +229,13 @@ export const distSolvePlay = makeSolvePlay({
   spot: DIST_SPOT,
   introOpen: distIntroOpen,
   format: formatDistSolve,
-  newSession: (problem, { forceMove = false } = {}) => startLights(newDistSolve(problem, { level: problem.logLevel ?? 1, forceMove })),
+  newSession: (problem, { forceMove = false, flags = null } = {}) => {
+    distTaught = flags ?? distTaught ?? {};
+    return { ...startLights(newDistSolve(problem, { level: problem.logLevel ?? 1, forceMove })), divNegIntro: !distTaught.divneg };
+  },
+  effects(before, s) {
+    if (s.divNegCount > 0 && distTaught) distTaught.divneg = true;         // (dividing by a negative is pointed out once a level: Build P)
+  },
   feedbackText: distSolveFeedbackText,
   buildControls: makeAddBothControls((s) => lightsAnswerLive(s, distLoop) || combineOpen(s) || calcOpen(s) || Boolean(s.lx?.distribute) || DIST_MENU.typingOpen(s), xKey),
   bindMat: (root, dispatch, getSession) => {

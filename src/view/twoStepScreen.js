@@ -34,7 +34,7 @@ const CARD = {
   teach: false,
   cls: 'ts-light',
   silent: new Set([...SILENT, 'dPickFraction', 'lxCombined', 'lxCombinedAlone']),
-  nudge: { ...NUDGE, wOneTerm: 'panel', aLaterLevel: 'panel', fFlipIntro: 'panel', dBlankBad: 'answer', dUnitFraction: 'blank', dDivOneDigit: 'blank', dDivBad: 'preview', dDivZero: 'preview', dForced: 'fractions' },
+  nudge: { ...NUDGE, wOneTerm: 'panel', aLaterLevel: 'panel', fFlipIntro: 'panel', dDivNegIntro: 'panel', dBlankBad: 'answer', dUnitFraction: 'blank', dDivOneDigit: 'blank', dDivBad: 'preview', dDivZero: 'preview', dForced: 'fractions' },
   // the Multiply row: its preview while an option is hovered, then the chosen option (Divide's 1/▢, or −1)
   // (with only the options open, the Add move's row is the empty slot: opening Multiply clears an Add left selected, Build O)
   ghost: (s) => (s.mopts?.kind || fracOpen(s) || (KINDS.includes(s.ui?.preview) && TWO_STEP_MENU.canPreview(s)) ? moveRow(s, TWO_STEP_MENU, { blueFlip: true }) : null),

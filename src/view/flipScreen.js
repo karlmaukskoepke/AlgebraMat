@@ -103,7 +103,7 @@ const SILENT = new Set(['aPlace', 'aFindX', 'aMustMove', 'dPickFraction', 'aPlug
   'aSimplerFirst', 'aUndoGuess', 'fTraded']);
 const NUDGE = {
   dBlankBad: 'answer', dUnitFraction: 'blank', dDivOneDigit: 'blank', dDivBad: 'preview', dDivZero: 'preview', typeAnswer: 'answer', answerUnreadable: 'answer', aUndoFirst: 'answer', aFinishMoveFirst: 'answer',
-  aLater: 'panel', aLaterLevel: 'panel', aNotNeeded: 'panel', aTradeNot: 'panel', aTradeIntro: 'panel', fFlipIntro: 'panel', dForced: 'fractions',
+  aLater: 'panel', aLaterLevel: 'panel', aNotNeeded: 'panel', aTradeNot: 'panel', aTradeIntro: 'panel', fFlipIntro: 'panel', dDivNegIntro: 'panel', dForced: 'fractions',
 };
 
 const REMINDER = {

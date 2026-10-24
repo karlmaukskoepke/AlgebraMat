@@ -17,7 +17,8 @@ const digit = (d) => ({ type: 'digit', digit: d });
 const divide = (n) => [{ type: 'divPick' }, ...(n < 0 ? [{ type: 'toggleSign' }] : []), digit(Math.abs(n)), { type: 'go' }];
 const flipButton = [{ type: 'flipPick' }, { type: 'go' }];
 // what a student sees and what the class sheet gets: the rows, the board, the lights, the words (ids aside)
-const view = (s) => JSON.stringify({ rows: s.rows, board: s.board, lights: s.lights, feedback: s.feedback, history: s.history.length, moves: s.moves, label: s.lastMove }).replace(/"id":"[^"]*"/g, '');
+// (a row's `shown: 'div'` is the drawing only: dividing by −1 is drawn in division form since Build P, Part 9; the move is the same)
+const view = (s) => JSON.stringify({ rows: s.rows, board: s.board, lights: s.lights, feedback: s.feedback, history: s.history.length, moves: s.moves, label: s.lastMove }).replace(/"id":"[^"]*"/g, '').replace(/,"shown":"div"/g, '');
 
 describe('the menu', () => {
   it('has two options again (Build O: Divide is its own button), and no −1 option', () => {

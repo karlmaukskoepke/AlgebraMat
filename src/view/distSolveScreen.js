@@ -38,7 +38,7 @@ const CARD = {
   cls: 'ts-light ds-light',
   handLights: [['noparen', 'No parentheses']],
   silent: new Set([...SILENT, 'dPickFraction', 'lxCombined', 'lxCombinedAlone', 'dxDistributed']),
-  nudge: { ...NUDGE, wOneTerm: 'panel', dBlankBad: 'answer', dUnitFraction: 'blank', dDivOneDigit: 'blank', dDivBad: 'preview', dDivZero: 'preview', dForced: 'fractions', dxTypeX: 'sumbox', dxNegFactor: 'newest' },
+  nudge: { ...NUDGE, wOneTerm: 'panel', dDivNegIntro: 'panel', dBlankBad: 'answer', dUnitFraction: 'blank', dDivOneDigit: 'blank', dDivBad: 'preview', dDivZero: 'preview', dForced: 'fractions', dxTypeX: 'sumbox', dxNegFactor: 'newest' },
   ghost: (s) => (s.mopts?.kind || fracOpen(s) || (KINDS.includes(s.ui?.preview) && DIST_MENU.canPreview(s)) ? moveRow(s, DIST_MENU, { blueFlip: true }) : null),
   forward(s) {
     if (s.mopts?.kind) return { label: 'Go', action: 'go', enabled: goReady(s.mopts) };

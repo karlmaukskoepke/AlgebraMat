@@ -12,8 +12,9 @@ import { moveIcon } from './lightScreen.js';
 // left of each button (drawn, with an accessible name), as a cue to what the move does.
 export const PANEL_MOVES = [
   { id: 'add', label: 'Addition property of equality: add the same number to both sides', symbol: 'plus', lights: [['fewer', 'Fewer terms']] },
-  { id: 'multiply', label: 'Multiplication property of equality', symbol: 'times', lights: [['nofrac', 'No fractions'], ['smaller', 'Smaller numbers'], ['onebox', 'One box']] },
-  { id: 'divide', label: 'Division property of equality', symbol: 'divide', lights: [] },
+  // (Smaller numbers and One box sit beside Divide, the move that usually earns them: Build P, Part 9, Karl's answer to Build O)
+  { id: 'multiply', label: 'Multiplication property of equality', symbol: 'times', lights: [['nofrac', 'No fractions']] },
+  { id: 'divide', label: 'Division property of equality', symbol: 'divide', lights: [['smaller', 'Smaller numbers'], ['onebox', 'One box']] },
   { id: 'flip', label: 'Multiplication property of equality: multiply both sides by −1', symbol: 'flip', lights: [['noopp', 'No opposite box']] },
   { id: 'trade', label: 'Symmetric property of equality: if a = b, then b = a', symbol: 'trade', lights: [['xleft', 'x on the left']] },
 ];

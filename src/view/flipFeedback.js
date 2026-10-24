@@ -23,6 +23,8 @@ const M = {
   aLaterLevel: () => 'That move unlocks on a later level.',
   // the first flip of a level that helps (Build K)
   fFlipIntro: () => 'Multiplying both sides by −1 flips every sign. −x becomes x.',
+  // dividing by a negative with the Divide button, once a level (Build P, Part 9)
+  dDivNegIntro: (p) => (Number(p.n) === 1 ? 'Dividing by −1 does the same thing as multiplying by −1: every sign flips.' : `Dividing by −${p.n} flips every sign, just like multiplying by a negative does, and then divides by ${p.n}.`),
 };
 
 export function flipFeedbackText(fb) {

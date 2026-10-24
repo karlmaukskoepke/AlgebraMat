@@ -9,6 +9,11 @@ import { nudgeOf } from '../src/engine/nudge.js';
 import { shapeOf, shapeOfBoard } from '../src/engine/solveit/shape.js';
 import { calcTerm } from '../src/engine/addBothLights.js';
 import { boardText, lineText } from '../src/engine/solveTerms.js';
+import { makeFlip } from '../src/engine/flip.js';
+import { newFlip, reduceFlip, FLIP_MENU, FLIP_SPOT } from '../src/engine/cards/flip.js';
+import { makeRecord } from '../src/engine/eventlog.js';
+import { flipFeedbackText } from '../src/view/flipFeedback.js';
+import { PANEL_MOVES } from '../src/view/narrowPanel.js';
 
 const layer = withSpotlight(DIST_LAYER, DIST_SPOT);
 const P = (o) => makeDistSolve({ level: 1, ...o });
@@ -237,5 +242,46 @@ describe('Part 6: a bare number for like x-terms gets a picture', () => {
     expect(s.supportsShown).toContain('hint');
     s = run(s, [{ type: 'typeChar', ch: 'x' }, { type: 'lxApply' }]);
     expect(boardText(s.board)).toBe('5x + 6 = 41');
+  });
+});
+
+// ---------- Part 9: Build O's follow-ups ----------
+
+describe('Part 9: dividing by a negative keeps its division look; its own pop-up once a level', () => {
+  const r = withSpotlight(FLIP_MENU.withMenu(reduceFlip), FLIP_SPOT);
+  const go = (s, ...a) => a.reduce(r, s);
+  const divideBy = (n) => [{ type: 'divPick' }, ...(n < 0 ? [{ type: 'toggleSign' }] : []), { type: 'digit', digit: Math.abs(n) }, { type: 'go' }];
+  const flipButton = [{ type: 'flipPick' }, { type: 'go' }];
+  const strip = (s) => JSON.stringify({ rows: s.rows, board: s.board, lights: s.lights }).replace(/"id":"[^"]*"/g, '').replace(/,"shown":"div"/g, '');
+  it('÷ −1 is stored as Flip everything (same rows, lights and record), drawn as division, and says its own words, not the first flip\'s', () => {
+    const p = makeFlip(1, -5);                                                  // −x = 5
+    const fresh = () => ({ ...newFlip(p, { level: 4, introFlip: true }), divNegIntro: true });
+    const byDivide = go(fresh(), ...divideBy(-1));
+    const byButton = go(fresh(), ...flipButton);
+    expect(strip(byDivide)).toBe(strip(byButton));
+    expect(byDivide.rows.slice(1).every((row) => row.shown === 'div')).toBe(true);
+    expect(byDivide.divIds.length).toBe(1);                                      // the −(5) of x = −(5) is drawn (5)/(−1)
+    expect(byButton.feedback.key).toBe('fFlipIntro');
+    expect(byDivide.feedback).toMatchObject({ key: 'dDivNegIntro', params: { n: 1 } });
+    expect(flipFeedbackText(byDivide.feedback)).toBe('Dividing by −1 does the same thing as multiplying by −1: every sign flips.');
+    expect(byDivide.flipCount).toBe(0);                                          // the Flip button's first-flip pop-up is still to come
+    const finish = (s) => go(s, { type: 'digit', digit: 5 }, { type: 'toggleSign' }, { type: 'check' }, { type: 'placeValue' }, { type: 'nextLine' }, { type: 'nextLine' });
+    const rec = (s) => makeRecord(finish(s), { t: 0, pack: 'flip-everything', level: 4, problem: '−x = 5' });
+    expect(rec(byDivide)).toEqual(rec(byButton));
+  });
+  it('÷ −3: "Dividing by −3 flips every sign … and then divides by 3"; once a level only', () => {
+    const p = makeFlip(3, -4);                                                  // −3x = 12
+    const s = go({ ...newFlip(p, { level: 4 }), divNegIntro: true }, ...divideBy(-3));
+    expect(flipFeedbackText(s.feedback)).toBe('Dividing by −3 flips every sign, just like multiplying by a negative does, and then divides by 3.');
+    expect(s.divNegCount).toBe(1);
+    expect(go({ ...newFlip(p, { level: 4 }), divNegIntro: false }, ...divideBy(-3)).feedback.key).not.toBe('dDivNegIntro');
+  });
+});
+
+describe('Part 9: the lights beside Divide', () => {
+  it('Smaller numbers and One box sit beside Divide; No fractions stays beside Multiply', () => {
+    const lights = Object.fromEntries(PANEL_MOVES.map((m) => [m.id, m.lights.map(([k]) => k)]));
+    expect(lights.divide).toEqual(['smaller', 'onebox']);
+    expect(lights.multiply).toEqual(['nofrac']);
   });
 });

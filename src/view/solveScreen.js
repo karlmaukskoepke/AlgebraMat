@@ -72,6 +72,11 @@ function termsOf(side, s, o) {
       const el = html('span', 'lb-frac', [struckText(`${t.sign < 0 ? MINUS : ''}${fractionText(t.n)}`, cancel?.outer ?? null, 'is-blue'), ...dot, '(', ...inner(), ')']);
       if (calc || o.calcOn === t.id) el.dataset.calc = t.id;
       out.push(el);
+    } else if (t.kind === 'times' && o.div) {
+      // a flip made by dividing by −1 (Build P, Part 9): division form, `(−x)/(−1)`, the two minus signs and the 1 struck
+      out.push(divisionEl(inner(), struckText(`${MINUS}1`, cancel ? 'all' : null, 'lb-divbot is-blue')));
+    } else if (t.kind === 'neg' && s?.divIds?.includes(t.id)) {
+      out.push(divisionEl(termsOf(t.inner, s, { ...o, live: false, plug: false, work: false }), `${MINUS}1`));         // `x = (12)/(−1)`
     } else if (t.kind === 'times') {
       // both sides times a number, written out: `−1 × (−x)` (Flip everything's work row, Build J); the number in blue (loop §3D)
       out.push(html('span', 'lb-frac', [html('span', 'is-blue', [struckText(signed(t.f), cancel?.outer ?? null), ' ×']), ' (', ...inner(), ')']));
@@ -124,12 +129,13 @@ function calcButton(t, cls, label, text = '') {
 }
 // The small line under a Divide row: "Same as multiplying by ⅕." (−⅓ for a divisor of −3)
 export function sameAsLine(n, sign = 1) {
-  return html('p', 'mo-sameas', ['Same as multiplying by ', html('span', 'is-blue', [`${sign < 0 ? MINUS : ''}${fractionText(n)}`]), '.']);
+  return html('p', 'mo-sameas', ['Same as multiplying by ', html('span', 'is-blue', [`${sign < 0 ? MINUS : ''}${n === 1 ? '1' : fractionText(n)}`]), '.']);
 }
 // the divisor of a row made with the Divide button (its first fraction), or null
 export function divisorOf(row) {
   if (row?.shown !== 'div' || row.failed) return null;
-  const f = [...row.board.left, ...row.board.right].find((t) => t.kind === 'frac');
+  const f = [...row.board.left, ...row.board.right].find((t) => t.kind === 'frac' || (t.kind === 'times' && t.f === -1));
+  if (f?.kind === 'times') return { n: 1, sign: -1 };                                          // (dividing by −1: Build P)
   return f ? { n: f.n, sign: f.sign < 0 ? -1 : 1 } : null;
 }
 

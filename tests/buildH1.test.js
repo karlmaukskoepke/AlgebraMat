@@ -82,8 +82,10 @@ describe('Divide it: a slash in the fraction (item 7; Build O: the Fraction opti
   const run = (s, ...actions) => actions.reduce(R, s);
   const start = () => newDivide({ ...makeDivide(5, -3), logLevel: 3 }, { level: 3 });
   // Build O: on Divide it the whole number is greyed again and the Fraction option is live (as before Build L): 1, /, 5 is typed there
-  it('the whole number is greyed here (a tap says why); in the Fraction option 1, /, 5 makes 1/5', () => {
-    expect(run(start(), { type: 'multOpen' }, { type: 'multPick', kind: 'whole' }).feedback.key).toBe('aLater');
+  it('the whole number is explained here (Build P: live again); 1, / from it opens the fraction; in the Fraction option 1, /, 5 makes 1/5', () => {
+    expect(run(start(), { type: 'multOpen' }, { type: 'multPick', kind: 'whole' }, digit(5), { type: 'go' }).feedback.key).toBe('dWholeNo');
+    const slash = run(start(), { type: 'multOpen' }, { type: 'multPick', kind: 'whole' }, digit(1), { type: 'fracSlash' });
+    expect([fracOpen(slash), slash.fb]).toEqual([true, { num: '1', den: '', part: 'den' }]);
     let s = run(start(), { type: 'multOpen' }, { type: 'multPick', kind: 'frac' }, digit(1));
     expect([fracOpen(s), s.fb]).toEqual([true, { num: '1', den: '', part: 'den' }]);
     s = run(s, { type: 'fracSlash' }, digit(5), { type: 'go' });
