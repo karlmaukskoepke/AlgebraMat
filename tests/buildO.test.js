@@ -226,3 +226,26 @@ describe('Build O, Part 5: the hint after Undo lights the Divide button', () => 
     expect(m.s.mopts).toEqual({ kind: 'div', entry: '5' });
   });
 });
+
+describe('Build O: a fraction made with Divide stays in division form in the rows after it', () => {
+  it('Distribute, combine, solve: divide 3(x + 2) = 15 by 3, then Add −2: x = (15)/3 − 2', async () => {
+    const s0 = distSolvePlay.newSession(problem('distribute-solve', 1), {});
+    const factor = s0.board.left.find((t) => t.kind === 'group')?.factor;
+    m = await mat(distSolvePlay, s0);
+    await m.run({ type: 'divPick' }, digit(factor), { type: 'go' });
+    await m.run({ type: 'foldNext' });
+    const c = m.s.board.left.find((t) => t.kind === 'num')?.v;
+    await m.run({ type: 'choose', move: 'add' }, ...String(Math.abs(c)).split('').map((d) => digit(Number(d))), ...(c > 0 ? [{ type: 'toggleSign' }] : []), { type: 'go' });
+    const last = [...m.root.querySelectorAll('.lb-stack .lb-rowwrap')].at(-1);
+    expect(last.querySelector('.lb-divfrac')).not.toBeNull();
+    expect(last.textContent).not.toMatch(/[½⅓¼⅕⅙]/);
+  });
+});
+
+describe('Build O: clicking Divide again empties its blank for a new try', () => {
+  it('Divide it: Divide, −1, Go (explained), then Divide again: the blank is empty and still open', () => {
+    const s = [{ type: 'divPick' }, { type: 'toggleSign' }, digit(1), { type: 'go' }, { type: 'divPick' }].reduce(divideMovesPlay.reduce, divideMovesPlay.newSession(problem('divide-it', 3), {}));
+    expect(s.mopts).toEqual({ kind: 'div', entry: '' });
+    expect(boardText([digit(5), { type: 'go' }].reduce(divideMovesPlay.reduce, s).board)).toBe('x = ⅕(−15)');
+  });
+});

@@ -88,7 +88,9 @@ export function makeMultiplyMenu({ xAlone, coefOf, option = (kind) => DIVIDE_IT[
     function shownAsDivision(s) {
       const from = s.history.at(-1)?.rows?.length ?? s.rows.length;
       const rows = s.rows.map((r, i) => (i >= from && r.board ? { ...r, shown: 'div' } : r));
-      return { ...s, rows, ...(s.unfolded && s.foldLabel && typeof s.foldLabel === 'object' ? { foldLabel: { ...s.foldLabel, shown: 'div' } } : {}) };
+      // its fractions stay in division form in the rows after it too (`x + 2 = (15)/3`, then `x = (15)/3 − 2`): their ids, view state only
+      const ids = rows.slice(from).flatMap((r) => (r.board ? [...r.board.left, ...r.board.right] : [])).filter((t) => t.kind === 'frac').map((t) => t.id);
+      return { ...s, rows, divIds: [...new Set([...(s.divIds ?? []), ...ids])], ...(s.unfolded && s.foldLabel && typeof s.foldLabel === 'object' ? { foldLabel: { ...s.foldLabel, shown: 'div' } } : {}) };
     }
     // Only one move is selected at a time (Build O, Part 1): opening Multiply or choosing Flip clears an Add left selected, as if it had
     // not been clicked (its box and its yellow state go).
@@ -109,10 +111,10 @@ export function makeMultiplyMenu({ xAlone, coefOf, option = (kind) => DIVIDE_IT[
         if (probed === base || probed.menu !== probe) return probed;
         return { ...base, mopts: { kind: 'flip', entry: '' }, typing: null, feedback: null, ui: { ...(base.ui ?? {}), preview: false } };
       }
-      // the Divide button (Build O): its blank under both sides, solid, waiting for one digit. A second click cancels it. Where Divide is
-      // greyed, the card's reason.
+      // the Divide button (Build O): its blank under both sides, solid, waiting for one digit. Clicking it again empties the blank for a
+      // new try (Esc or Undo cancels it). Where Divide is greyed, the card's reason.
       if (action.type === 'divPick') {
-        if (m?.kind === 'div') return { ...state, mopts: null, feedback: null };
+        if (m?.kind === 'div') return { ...state, mopts: { kind: 'div', entry: '' }, feedback: null };
         if (option('div', state) === 'grey') return { ...state, feedback: { key: greyKey('div', state), params: {}, bad: false } };
         const base = clearOthers(state);
         const probed = reduce(base, { type: 'choose', move: probe });

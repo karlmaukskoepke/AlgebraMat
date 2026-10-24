@@ -31,7 +31,7 @@ function termsOf(side, s, o) {
       // a factor times a parenthesis, written as it is: `3(x + 2)`, `−2(x − 4)` (Build M)
       const f = subGroup ? -t.factor : t.factor;
       out.push(html('span', 'lb-frac lb-group', [f === 1 ? '' : f === -1 ? MINUS : String(f).replace('-', MINUS), '(', ...termsOf(t.inner, s, { ...o, live: false }), ')']));
-    } else if (t.kind === 'frac' && o.div) {
+    } else if (t.kind === 'frac' && (o.div || s?.divIds?.includes(t.id))) {
       // a row made with the Divide button, in division form (Build O, display only): the side in parentheses over a bar, n beneath
       out.push(divisionEl(termsOf(t.inner, s, { ...o, live: false, plug: false }), `${t.sign < 0 ? MINUS : ''}${t.n}`));
     } else if (t.kind === 'frac') {
