@@ -90,6 +90,11 @@ function popups(s, wrap) {
     wrap.append(spotlightLayer({ kind: 'intro', lit: ['calc', 'calcbox', 'forward'] }, { ...o, text: null }));
     return;
   }
+  // two x-terms combined with a bare number (Build P, Part 6): the picture, two x boxes and three x boxes, and "5 of what?", under the pair
+  if (s.lx.combine?.pic && !s.lx.combine.wrong) {
+    wrap.append(spotlightLayer({ kind: 'hint', target: 'pair', place: 'below', lit: ['sumbox', 'forward'] }, { ...o, text: null, extra: xBoxesPicture(s.lx.combine.pic, C.text(s.feedback)) }));
+    return;
+  }
   // combining two terms dropped together: they are lit with "Combine" over them, the box for their sum under them, the rest greyed
   if (s.lx.combine && !s.lx.combine.wrong) {
     wrap.append(spotlightLayer({ kind: 'intro', target: 'pair', label: 'Combine', labelTop: true, lit: ['sumbox', 'forward'] }, { ...o, text: null }));
@@ -110,6 +115,33 @@ function popups(s, wrap) {
   const note = notePopup(s, { silent: C.silent ?? SILENT, nudge: C.nudge ?? NUDGE, text: C.text, scaffold: s.scaffold ? 'board' : null });
   if (note) { wrap.append(spotlightLayer(note.spot, { ...o, text: note.text })); return; }
   if (firstUp(s)) wrap.append(spotlightLayer({ kind: 'note', place: 'below' }, { ...o, text: FIRST_TEXT }));
+}
+
+// The picture for two x-terms combined with a bare number (Build P, Part 6; Solve it's own small drawing): the x boxes of each term (a
+// negative term's boxes say −x), a plus between, and the question under them, "5 of what?".
+function xBoxesPicture({ a, b }, question) {
+  const NS = 'http://www.w3.org/2000/svg';
+  const BOX = 30;
+  const GAP = 6;
+  const groups = [a, b];
+  const widths = groups.map((n) => Math.abs(n) * (BOX + GAP) - GAP);
+  const PLUS = 30;
+  const W = widths[0] + PLUS + widths[1] + 8;
+  const H = BOX + 8;
+  const svg = document.createElementNS(NS, 'svg');
+  for (const [k, v] of Object.entries({ class: 'xb-svg', viewBox: `0 0 ${W} ${H}`, width: W, height: H, role: 'img', 'aria-label': `${Math.abs(a)} x boxes and ${Math.abs(b)} x boxes` })) svg.setAttribute(k, v);
+  const mk = (name, attrs, text) => { const n = document.createElementNS(NS, name); for (const [k, v] of Object.entries(attrs)) n.setAttribute(k, v); if (text) n.textContent = text; svg.append(n); return n; };
+  let x = 4;
+  groups.forEach((n, g) => {
+    for (let i = 0; i < Math.abs(n); i++) {
+      mk('rect', { x, y: 4, width: BOX, height: BOX, rx: 6, class: `xb-box${n < 0 ? ' is-neg' : ''}` });
+      mk('text', { x: x + BOX / 2, y: 4 + BOX / 2 + 6, 'text-anchor': 'middle', class: 'xb-x' }, n < 0 ? `${MINUS}x` : 'x');
+      x += BOX + GAP;
+    }
+    x -= GAP;
+    if (g === 0) { mk('text', { x: x + PLUS / 2, y: 4 + BOX / 2 + 8, 'text-anchor': 'middle', class: 'xb-plus' }, '+'); x += PLUS; }
+  });
+  return html('div', 'xb-pic', [svg, html('p', 'spot-text xb-question', [question])]);
 }
 
 // ---------- the rows, written as they are said ----------

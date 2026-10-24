@@ -17,6 +17,7 @@ const M = {
   dxProductWrong: (p) => `${p.product} is not ${p.typed}.${p.tag === 'dist-sign-lost' ? ' Look at the signs.' : p.tag === 'dist-unmultiplied' ? ' Multiply this piece too.' : ''} Press Undo and try again.`,
   dxDistributed: () => 'Distributed: every piece multiplied.',
   dxTypeX: () => 'Type every piece, including the x.',
+  dxXBoxes: (p) => `${p.typed} of what?`,
   wOneTerm: () => 'That move works once each side is one term.',
 };
 

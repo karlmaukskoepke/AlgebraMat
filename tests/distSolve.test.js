@@ -331,7 +331,7 @@ describe('the rules of each level', () => {
     expect(shapeOf(s).id).toBe('E2');
     expect(run(s, A.stuck()).feedback).toMatchObject({ key: 'mCombineHint', params: { g1: '3x', g2: '2x' } });
     const bare = run(s, combine(s, 'x', '5'));
-    expect(bare.feedback.key).toBe('dxTypeX');
+    expect(bare.feedback.key).toBe('dxXBoxes');                             // (Build P: the x boxes' picture, "5 of what?")
     expect(bare.lx.combine).not.toBe(null);
     expect(bare.needUndo).toBe(false);
     const wrong = run(s, combine(s, 'x', '6x'));

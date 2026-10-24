@@ -223,3 +223,19 @@ describe('Part 5: Distribute does not give the multiplication away', () => {
     expect(s.lx.labels).toBeFalsy();
   });
 });
+
+describe('Part 6: a bare number for like x-terms gets a picture', () => {
+  it('2x onto 3x typed 5: the picture (3 x boxes and 2 x boxes, "5 of what?") is the scaffold, recorded as hint; then 5x combines', () => {
+    const p = P({ level: 5, f: 3, c: 2, bx: 2, x: 7 });                     // 3(x + 2) + 2x = 41
+    let s = start(p);
+    s = run(s, [{ type: 'lxDistribute', id: s.board.left[0].id }, ...digits(3), { type: 'go' }, ...digits(6), { type: 'go' }]);
+    expect(boardText(s.board)).toBe('3x + 6 + 2x = 41');
+    const [a, , b] = s.board.left;
+    s = run(s, [{ type: 'lxDrop', id: b.id, slot: { side: 'left', onto: a.id } }, ...digits(5), { type: 'lxApply' }]);
+    expect(s.feedback.key).toBe('dxXBoxes');
+    expect(s.lx.combine.pic).toEqual({ a: 3, b: 2 });
+    expect(s.supportsShown).toContain('hint');
+    s = run(s, [{ type: 'typeChar', ch: 'x' }, { type: 'lxApply' }]);
+    expect(boardText(s.board)).toBe('5x + 6 = 41');
+  });
+});

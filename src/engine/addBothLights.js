@@ -270,7 +270,14 @@ function grabAction(state, action, wrapped, alone, opts = {}) {
     const c = lx.combine;
     const isX = combineIsX(state);
     // two x-terms: a bare number is sent back, the x is part of the answer (Build M)
-    if (isX && /^-?\d+$/.test(c.entry)) return say(withUi(state, { shake: true }), 'dxTypeX', {}, false);
+    // a bare number is sent back with a picture (Build P, Part 6): two x boxes and three x boxes, "5 of what?" (the scaffold: `hint`)
+    if (isX && /^-?\d+$/.test(c.entry)) {
+      const s = structuredClone(withUi(state, { shake: true, focus: 'sum' }));
+      const [ta, tb] = [c.a, c.b].map((id) => findTerm(s.board, id)).sort((p, q) => p.at - q.at).map((f) => f.term.coef ?? 1);
+      s.lx.combine = { ...c, pic: { a: ta, b: tb } };
+      if (!s.supportsShown.includes('hint')) s.supportsShown.push('hint');
+      return say(s, 'dxXBoxes', { a: signed(ta), b: signed(tb), typed: c.entry.replace('-', MINUS) }, false);
+    }
     if (isX ? xCoefOf(c.entry) === null : !/^-?\d+$/.test(c.entry)) return withUi(state, { shake: true });
     const s = structuredClone(state);
     const total = valueOf(findTerm(s.board, c.a).term) + valueOf(findTerm(s.board, c.b).term);

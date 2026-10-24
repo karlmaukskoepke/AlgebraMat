@@ -3778,3 +3778,12 @@ button.lb-divbar.is-calc:hover, button.lb-divbar.is-calc:focus-visible { backgro
 .ui-grab .lx-ghost.is-products { margin-top: 30px; }
 .dx-timesdot { fill: #fff; stroke: #0072b2; stroke-width: 2; }
 .dx-times { font-size: 16px; }
+
+/* ---------- Build P, Part 6: a bare number for like x-terms gets a picture: the x boxes of each term, "5 of what?" ---------- */
+.xb-pic { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.xb-svg { max-width: 100%; height: auto; }
+.xb-box { fill: #fff; stroke: #1f1d1a; stroke-width: 2.5; }
+.xb-box.is-neg { stroke-dasharray: 5 3; }
+.xb-x { font: 800 17px 'Lexend', system-ui, sans-serif; fill: #0072b2; }
+.xb-plus { font: 800 24px 'Lexend', system-ui, sans-serif; fill: #1f1d1a; }
+.xb-question { font-size: 22px !important; text-align: center; margin: 0; }
