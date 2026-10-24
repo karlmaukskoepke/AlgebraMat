@@ -22,26 +22,6 @@ Every difference the parity harness finds must be listed here, or it fails. The 
 | `event:add-both/red-then-stuck` | supports `hint, model, move` | supports `hint`; stuck still 3 | [2.6] |
 | `event:add-both/zero-other-then-undo-stuck` | supports `hint, model` | supports `hint`; stuck still 2 | [2.6] |
 | `event:divide-it/failed-then-stuck` | supports `model, guided` | supports `hint, model`; stuck still 3 | [2.6] |
-| `screen:add-helpful-move@1366x768` | Six lights Add doesn't judge copied Fewer terms' green | Only Fewer terms and Solved for x show a state | [2.7] |
-| `screen:add-helpful-move@1366x650` | as above | as above | [2.7] |
-| `screen:add-end@1366x768` | as above | as above | [2.7] |
-| `screen:add-end@1366x650` | as above | as above | [2.7] |
-| `screen:add-alone-stuck-1@1366x768` | as above | as above (the line is unchanged) | [2.7] |
-| `screen:add-alone-stuck-1@1366x650` | as above | as above | [2.7] |
-| `screen:add-alone-stuck-2@1366x768` | The seesaw, with nothing to do | The work stack, the two numbers outlined, the sum question | [2.3], [2.7] |
-| `screen:add-alone-stuck-2@1366x650` | as above | as above | [2.3], [2.7] |
-| `screen:add-alone-stuck-3@1366x768` | Party or Battle? (about to write the value) | The sum question with "In a party the teams join." | [2.3], [2.7] |
-| `screen:add-alone-stuck-3@1366x650` | as above | as above | [2.3], [2.7] |
-| `screen:add-alone-teach@1366x768` | The seesaw and "Add −8 to the left…" | The sum help in full | [2.2], [2.3], [2.7] |
-| `screen:add-alone-teach@1366x650` | as above | as above | [2.2], [2.3], [2.7] |
-| `screen:add-partial-stuck-4@1366x768` | The seesaw with "−8 cancels the +3" | "…Let's undo it first: press Undo." on the bare screen | [2.6] |
-| `screen:add-partial-stuck-4@1366x650` | as above | as above | [2.6] |
-| `screen:add-partial-teach@1366x768` | The seesaw forcing −8 | Undo first | [2.6] |
-| `screen:add-partial-teach@1366x650` | as above | as above | [2.6] |
-| `screen:add-red-stuck@1366x768` | The reminder rung over the red move | Undo first | [2.6] |
-| `screen:add-red-stuck@1366x650` | as above | as above | [2.6] |
-| `screen:div-failed-stuck@1366x768` | The counters over the failed fraction | Undo first | [2.6] |
-| `screen:div-failed-stuck@1366x650` | as above | as above | [2.6] |
 
 ## Below the pixel tolerance (the harness passes; listed for the record)
 
@@ -85,33 +65,6 @@ Problems and save codes are unchanged (PASS). The class-sheet records are unchan
 | `trace:divide-it/teach-me#0-` | the choice, its prompt and its greyed rules | no choice | The loop has no choice: the prompt is “Find x.”, the fraction move and x = are live from the start, Undo returns to the same state (“Undone. Pick a different fraction.”), Start over says “Back to the start.” |
 | `trace:divide-it/wrong-guess-then-undo#0-` | the choice, its prompt and its greyed rules | no choice | The loop has no choice: the prompt is “Find x.”, the fraction move and x = are live from the start, Undo returns to the same state (“Undone. Pick a different fraction.”), Start over says “Back to the start.” |
 | `trace:divide-it/x-alone-then-stuck-x2#0-` | the choice, its prompt and its greyed rules | no choice | The loop has no choice: the prompt is “Find x.”, the fraction move and x = are live from the start, Undo returns to the same state (“Undone. Pick a different fraction.”), Start over says “Back to the start.” |
-| `screen:add-L2-stuck-2@1366x650` | the classic screen | the lights layout (preview row, blank in the equation, rule line and Next, bottom row, corner Undo / Start over) | Build C, Part 1 |
-| `screen:add-L2-stuck-2@1366x768` | the classic screen | the lights layout (preview row, blank in the equation, rule line and Next, bottom row, corner Undo / Start over) | Build C, Part 1 |
-| `screen:add-forced-move@1366x650` | the classic screen | the lights layout (preview row, blank in the equation, rule line and Next, bottom row, corner Undo / Start over) | Build C, Part 1 |
-| `screen:add-forced-move@1366x768` | the classic screen | the lights layout (preview row, blank in the equation, rule line and Next, bottom row, corner Undo / Start over) | Build C, Part 1 |
-| `screen:add-opening@1366x650` | the classic screen | the lights layout (preview row, blank in the equation, rule line and Next, bottom row, corner Undo / Start over) | Build C, Part 1 |
-| `screen:add-opening@1366x768` | the classic screen | the lights layout (preview row, blank in the equation, rule line and Next, bottom row, corner Undo / Start over) | Build C, Part 1 |
-| `screen:add-partial-move@1366x650` | the classic screen | the lights layout (preview row, blank in the equation, rule line and Next, bottom row, corner Undo / Start over) | Build C, Part 1 |
-| `screen:add-partial-move@1366x768` | the classic screen | the lights layout (preview row, blank in the equation, rule line and Next, bottom row, corner Undo / Start over) | Build C, Part 1 |
-| `screen:add-red-move@1366x650` | the classic screen | the lights layout (preview row, blank in the equation, rule line and Next, bottom row, corner Undo / Start over) | Build C, Part 1 |
-| `screen:add-red-move@1366x768` | the classic screen | the lights layout (preview row, blank in the equation, rule line and Next, bottom row, corner Undo / Start over) | Build C, Part 1 |
-| `screen:add-stuck-1@1366x650` | the classic screen | the lights layout (preview row, blank in the equation, rule line and Next, bottom row, corner Undo / Start over) | Build C, Part 1 |
-| `screen:add-stuck-1@1366x768` | the classic screen | the lights layout (preview row, blank in the equation, rule line and Next, bottom row, corner Undo / Start over) | Build C, Part 1 |
-| `screen:add-stuck-2@1366x650` | the classic screen | the lights layout (preview row, blank in the equation, rule line and Next, bottom row, corner Undo / Start over) | Build C, Part 1 |
-| `screen:add-stuck-2@1366x768` | the classic screen | the lights layout (preview row, blank in the equation, rule line and Next, bottom row, corner Undo / Start over) | Build C, Part 1 |
-| `screen:add-stuck-3@1366x650` | the classic screen | the lights layout (preview row, blank in the equation, rule line and Next, bottom row, corner Undo / Start over) | Build C, Part 1 |
-| `screen:add-stuck-3@1366x768` | the classic screen | the lights layout (preview row, blank in the equation, rule line and Next, bottom row, corner Undo / Start over) | Build C, Part 1 |
-| `screen:add-stuck-4@1366x650` | the classic screen | the lights layout (preview row, blank in the equation, rule line and Next, bottom row, corner Undo / Start over) | Build C, Part 1 |
-| `screen:add-stuck-4@1366x768` | the classic screen | the lights layout (preview row, blank in the equation, rule line and Next, bottom row, corner Undo / Start over) | Build C, Part 1 |
-| `screen:add-teach@1366x650` | the classic screen | the lights layout (preview row, blank in the equation, rule line and Next, bottom row, corner Undo / Start over) | Build C, Part 1 |
-| `screen:add-teach@1366x768` | the classic screen | the lights layout (preview row, blank in the equation, rule line and Next, bottom row, corner Undo / Start over) | Build C, Part 1 |
-| `screen:add-wrong-guess-undone@1366x650` | the classic screen | the lights layout (preview row, blank in the equation, rule line and Next, bottom row, corner Undo / Start over) | Build C, Part 1 |
-| `screen:add-wrong-guess-undone@1366x768` | the classic screen | the lights layout (preview row, blank in the equation, rule line and Next, bottom row, corner Undo / Start over) | Build C, Part 1 |
-| `screen:add-wrong-guess@1366x650` | the classic screen | the lights layout (preview row, blank in the equation, rule line and Next, bottom row, corner Undo / Start over) | Build C, Part 1 |
-| `screen:add-wrong-guess@1366x768` | the classic screen | the lights layout (preview row, blank in the equation, rule line and Next, bottom row, corner Undo / Start over) | Build C, Part 1 |
-| `screen:div-failed@1366x768` | the classic screen with the choice | no Guess x / Use a move buttons in the line | Build C, Part 1 |
-| `screen:div-opening@1366x650` | the classic screen with the choice | no Guess x / Use a move buttons in the line | Build C, Part 1 |
-| `screen:div-opening@1366x768` | the classic screen with the choice | no Guess x / Use a move buttons in the line | Build C, Part 1 |
 
 ## Build C, Part 2 (2026-10-18): errors are spotlight pop-ups, and Undo is the only way out
 
@@ -126,9 +79,6 @@ The scripted runs now go through the spotlight (`withSpotlight`) as students pla
 | `event:divide-it/failed-then-stuck` | supports `hint, model`, stuck 3 | supports `model`, stuck 1 | the same over the fraction that didn't split |
 
 No new class-sheet words. The hint after Undo is not asked for, so it adds nothing to `supports`. Traces: after an error's Undo the line's message is the hint (`aStuckHint`, `dPickFraction`, `aStuckSolved`), and on Add the move stays open with its blank cleared (the scripted runs `red-then-undo` and `wrong-guess-then-undo` type the amount straight in). Screens with an error (`add-red-move`, `add-partial-move`, `add-wrong-guess`, `div-failed`) show the dimmed page, the lit part and the pop-up.
-| `screen:div-wrong-guess@1366x768` | the substitution ending “Not balanced” | the same, dimmed, the failing line lit (“not balanced”), the pop-up beside it, Undo pulsing | Part 2 |
-| `screen:div-wrong-guess@1366x650` | as above | as above | Part 2 |
-| `screen:div-failed@1366x650` | the failed row, in red | the same, dimmed, the row lit (“doesn’t split”), the pop-up beside it, Undo pulsing | Part 2 |
 
 ## Build C, Part 3 (2026-10-18): help at x alone is Party/Battle at the numbers, then Count it's counters
 
@@ -152,70 +102,7 @@ Problems, save codes, class-sheet records and the engine traces are unchanged (t
 - **No pad on a keyboard** (the screens are taken with a mouse); the header fades to a strip after 3 seconds (the screens are taken before that).
 - **x = blinks only at the last step**; the first problem of a visit shows "Find the value of x.".
 
-| Key | Before | After | Why |
-|---|---|---|---|
-| `screen:add-opening@1366x768` | the Build C screen | the light design | Part 1 |
-| `screen:add-opening@1366x650` | the Build C screen | the light design | Part 1 |
-| `screen:add-helpful-move@1366x768` | the Build C screen | the light design | Part 1 |
-| `screen:add-helpful-move@1366x650` | the Build C screen | the light design | Part 1 |
-| `screen:add-red-move@1366x768` | the Build C screen | the light design | Part 1 |
-| `screen:add-red-move@1366x650` | the Build C screen | the light design | Part 1 |
-| `screen:add-partial-move@1366x768` | the Build C screen | the light design | Part 1 |
-| `screen:add-partial-move@1366x650` | the Build C screen | the light design | Part 1 |
-| `screen:add-stuck-1@1366x768` | the Build C screen | the light design | Part 1 |
-| `screen:add-stuck-1@1366x650` | the Build C screen | the light design | Part 1 |
-| `screen:add-stuck-2@1366x768` | the Build C screen | the light design | Part 1 |
-| `screen:add-stuck-2@1366x650` | the Build C screen | the light design | Part 1 |
-| `screen:add-stuck-3@1366x768` | the Build C screen | the light design | Part 1 |
-| `screen:add-stuck-3@1366x650` | the Build C screen | the light design | Part 1 |
-| `screen:add-stuck-4@1366x768` | the Build C screen | the light design | Part 1 |
-| `screen:add-stuck-4@1366x650` | the Build C screen | the light design | Part 1 |
-| `screen:add-teach@1366x768` | the Build C screen | the light design | Part 1 |
-| `screen:add-teach@1366x650` | the Build C screen | the light design | Part 1 |
-| `screen:add-wrong-guess@1366x768` | the Build C screen | the light design | Part 1 |
-| `screen:add-wrong-guess@1366x650` | the Build C screen | the light design | Part 1 |
-| `screen:add-wrong-guess-undone@1366x768` | the Build C screen | the light design | Part 1 |
-| `screen:add-wrong-guess-undone@1366x650` | the Build C screen | the light design | Part 1 |
-| `screen:add-forced-move@1366x768` | the Build C screen | the light design | Part 1 |
-| `screen:add-forced-move@1366x650` | the Build C screen | the light design | Part 1 |
-| `screen:add-end@1366x768` | the Build C screen | the light design | Part 1 |
-| `screen:add-end@1366x650` | the Build C screen | the light design | Part 1 |
-| `screen:add-partial-stuck-4@1366x768` | the Build C screen | the light design | Part 1 |
-| `screen:add-partial-stuck-4@1366x650` | the Build C screen | the light design | Part 1 |
-| `screen:add-partial-teach@1366x768` | the Build C screen | the light design | Part 1 |
-| `screen:add-partial-teach@1366x650` | the Build C screen | the light design | Part 1 |
-| `screen:add-alone-stuck-1@1366x768` | the Build C screen | the light design | Part 1 |
-| `screen:add-alone-stuck-1@1366x650` | the Build C screen | the light design | Part 1 |
-| `screen:add-alone-stuck-2@1366x768` | the Build C screen | the light design | Part 1 |
-| `screen:add-alone-stuck-2@1366x650` | the Build C screen | the light design | Part 1 |
-| `screen:add-alone-stuck-3@1366x768` | the Build C screen | the light design | Part 1 |
-| `screen:add-alone-stuck-3@1366x650` | the Build C screen | the light design | Part 1 |
-| `screen:add-alone-teach@1366x768` | the Build C screen | the light design | Part 1 |
-| `screen:add-alone-teach@1366x650` | the Build C screen | the light design | Part 1 |
-| `screen:add-red-stuck@1366x768` | the Build C screen | the light design | Part 1 |
-| `screen:add-red-stuck@1366x650` | the Build C screen | the light design | Part 1 |
-| `screen:add-L2-stuck-2@1366x768` | the Build C screen | the light design | Part 1 |
-| `screen:add-L2-stuck-2@1366x650` | the Build C screen | the light design | Part 1 |
-| `screen:div-opening@1366x768` | the Build C screen | the light design | Part 1 |
-| `screen:div-opening@1366x650` | the Build C screen | the light design | Part 1 |
-| `screen:div-helpful-move@1366x768` | the Build C screen | the light design | Part 1 |
-| `screen:div-helpful-move@1366x650` | the Build C screen | the light design | Part 1 |
-| `screen:div-failed@1366x768` | the Build C screen | the light design | Part 1 |
-| `screen:div-failed@1366x650` | the Build C screen | the light design | Part 1 |
-| `screen:div-stuck-1@1366x768` | the Build C screen | the light design | Part 1 |
-| `screen:div-stuck-1@1366x650` | the Build C screen | the light design | Part 1 |
-| `screen:div-stuck-2@1366x768` | the Build C screen | the light design | Part 1 |
-| `screen:div-stuck-2@1366x650` | the Build C screen | the light design | Part 1 |
-| `screen:div-teach@1366x768` | the Build C screen | the light design | Part 1 |
-| `screen:div-teach@1366x650` | the Build C screen | the light design | Part 1 |
-| `screen:div-wrong-guess@1366x768` | the Build C screen | the light design | Part 1 |
-| `screen:div-wrong-guess@1366x650` | the Build C screen | the light design | Part 1 |
-| `screen:div-end@1366x768` | the Build C screen | the light design | Part 1 |
-| `screen:div-end@1366x650` | the Build C screen | the light design | Part 1 |
-| `screen:div-failed-stuck@1366x768` | the Build C screen | the light design | Part 1 |
-| `screen:div-failed-stuck@1366x650` | the Build C screen | the light design | Part 1 |
-| `screen:div-alone-stuck-1@1366x768` | the Build C screen | the light design | Part 1 |
-| `screen:div-alone-stuck-1@1366x650` | the Build C screen | the light design | Part 1 |
+(Its screen rows are in the history section at the end: the screens were re-baselined on 2026-10-24.)
 
 ## Build D, Part 2 (2026-10-18): checking a value side by side
 
@@ -329,7 +216,6 @@ class-sheet records (events) and the save codes are identical. Every remaining d
 | `trace:add-both/*` (check, place) | `feedback.params` without `where`; `sub.target: null` | `where` and `sub.target` `'original'` / `'current'` | The loop's check (shared with Divide it): it says which equation the value goes into |
 | `trace:add-both/wrong-guess-then-undo#3` | `aGuessed` (bad: "This unbalances the equation") | `aPlugCurrent` | The loop's words: a wrong guess is not judged before its lines are worked through (no verdict before the steps) |
 | `trace:add-both/stuck-x4-then-solve#10-` | `rows` stays at the original equation in the seesaw | the move's work row and `x = −4 + −8` are written | Loop §6: a scaffold never blanks the stack; a move made on the seesaw is written into the work like any other |
-| `screen:add-helpful-move@*`, `screen:add-alone-teach@*` | green Next after the move; dashed rule line; Start over greyed | green Check (greyed until x is typed); solid rule line; Start over live | The loop: a move that leaves x alone is committed at once (the next thing is typing x), and Start over is live once anything has been done (spec §1C). Pairs in `docs/build-e/be-01-…` |
 
 Not in the scripted runs, but changed by the same rules (unit tests updated): a second move while one waits for Undo now says
 `aUndoFirst` (stacking is gone, so shapes S5 and S6 can no longer happen); in the seesaw, a move that only partly helps waits for Undo, and
@@ -417,70 +303,7 @@ Every screen of both Solve it cards changed, and nothing else did: problems, sav
 - **Both cards:** the page is wider (up to 1280 px instead of 960), so the seesaw fits beside the work.
 - **Add:** x =, the green button and the corners sit a little lower, at one height in every state, and the seesaw, its tray and the walks at x alone draw in the right-hand space.
 
-| Key | Why |
-|---|---|
-| `screen:add-L2-stuck-2@1366x650` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
-| `screen:add-L2-stuck-2@1366x768` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
-| `screen:add-alone-stuck-1@1366x650` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
-| `screen:add-alone-stuck-1@1366x768` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
-| `screen:add-alone-stuck-2@1366x650` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
-| `screen:add-alone-stuck-2@1366x768` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
-| `screen:add-alone-stuck-3@1366x650` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
-| `screen:add-alone-stuck-3@1366x768` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
-| `screen:add-alone-teach@1366x650` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
-| `screen:add-alone-teach@1366x768` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
-| `screen:add-end@1366x650` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
-| `screen:add-end@1366x768` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
-| `screen:add-forced-move@1366x650` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
-| `screen:add-forced-move@1366x768` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
-| `screen:add-helpful-move@1366x650` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
-| `screen:add-helpful-move@1366x768` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
-| `screen:add-opening@1366x650` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
-| `screen:add-opening@1366x768` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
-| `screen:add-partial-move@1366x650` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
-| `screen:add-partial-move@1366x768` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
-| `screen:add-partial-stuck-4@1366x650` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
-| `screen:add-partial-stuck-4@1366x768` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
-| `screen:add-partial-teach@1366x650` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
-| `screen:add-partial-teach@1366x768` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
-| `screen:add-red-move@1366x650` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
-| `screen:add-red-move@1366x768` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
-| `screen:add-red-stuck@1366x650` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
-| `screen:add-red-stuck@1366x768` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
-| `screen:add-stuck-1@1366x650` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
-| `screen:add-stuck-1@1366x768` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
-| `screen:add-stuck-2@1366x650` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
-| `screen:add-stuck-2@1366x768` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
-| `screen:add-stuck-3@1366x650` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
-| `screen:add-stuck-3@1366x768` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
-| `screen:add-stuck-4@1366x650` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
-| `screen:add-stuck-4@1366x768` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
-| `screen:add-teach@1366x650` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
-| `screen:add-teach@1366x768` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
-| `screen:add-wrong-guess-undone@1366x650` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
-| `screen:add-wrong-guess-undone@1366x768` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
-| `screen:add-wrong-guess@1366x650` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
-| `screen:add-wrong-guess@1366x768` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
-| `screen:div-alone-stuck-1@1366x650` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
-| `screen:div-alone-stuck-1@1366x768` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
-| `screen:div-end@1366x650` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
-| `screen:div-end@1366x768` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
-| `screen:div-failed-stuck@1366x650` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
-| `screen:div-failed-stuck@1366x768` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
-| `screen:div-failed@1366x650` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
-| `screen:div-failed@1366x768` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
-| `screen:div-helpful-move@1366x650` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
-| `screen:div-helpful-move@1366x768` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
-| `screen:div-opening@1366x650` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
-| `screen:div-opening@1366x768` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
-| `screen:div-stuck-1@1366x650` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
-| `screen:div-stuck-1@1366x768` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
-| `screen:div-stuck-2@1366x650` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
-| `screen:div-stuck-2@1366x768` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
-| `screen:div-teach@1366x650` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
-| `screen:div-teach@1366x768` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
-| `screen:div-wrong-guess@1366x650` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
-| `screen:div-wrong-guess@1366x768` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
+(Its screen rows are in the history section at the end: the screens were re-baselined on 2026-10-24.)
 
 ## Build F, Part 3: the help gaps (2026-10-20)
 
@@ -502,16 +325,7 @@ Compared screen by screen with the code before this part (`main` at `5a528b1`): 
 - **The check's first row, wherever a check is on screen** (`add-end`): the value dropped into x is blue.
 - **Walk and help screens** (`add-alone-stuck-2`, `add-alone-stuck-3`, `div-alone-stuck-1`, `div-failed-stuck`, `div-stuck-1`, `div-stuck-2`): a few pixels only (under 0.2%).
 
-| Key | Why |
-|---|---|
-| `screen:add-wrong-guess@1366x768` | the last check row is lit with "Not balanced"; the substituted value is blue |
-| `screen:add-wrong-guess@1366x650` | as above |
-| `screen:div-wrong-guess@1366x768` | as above |
-| `screen:div-wrong-guess@1366x650` | as above |
-| `screen:div-end@1366x768` | the substituted value is blue in the first check row |
-| `screen:div-end@1366x650` | as above |
-| `screen:add-end@1366x768` | as above |
-| `screen:add-end@1366x650` | as above |
+(Its screen rows are in the history section at the end: the screens were re-baselined on 2026-10-24.)
 
 ## Build H, Part 2: the seesaw mirrors the check (2026-10-21)
 
@@ -526,16 +340,7 @@ Compared with the code before this part: no scripted run and no screen changed (
 Compared screen by screen with the code before this part (`main` at `25f65f0`): no scripted run changed (no trace, event, problem or save code: the new first line is drawn by the screen, not kept in the state, and the number of Next presses is the same), only the four screens that show a check. Each is already allowed by an earlier part; listed again with what this part did.
 - **Every check** (`add-wrong-guess`, `add-end`, `div-wrong-guess`, `div-end`): the check space starts with the equation itself, every x blue (`x + 8 = −4`, `5x = −15`); the line with the value is directly under it, each value under the x it replaced (the first line moves right a little when the value is wider than x). Everything below moves down one row.
 
-| Key | Why |
-|---|---|
-| `screen:add-wrong-guess@1366x768` | the check's new first line, the equation; the value under its x |
-| `screen:add-wrong-guess@1366x650` | as above |
-| `screen:add-end@1366x768` | as above |
-| `screen:add-end@1366x650` | as above |
-| `screen:div-wrong-guess@1366x768` | as above |
-| `screen:div-wrong-guess@1366x650` | as above |
-| `screen:div-end@1366x768` | as above |
-| `screen:div-end@1366x650` | as above |
+(Its screen rows are in the history section at the end: the screens were re-baselined on 2026-10-24.)
 
 ## Build I, Parts 2 and 3: big numbers one question at a time; a party of negatives keeps its sign (2026-10-21)
 
@@ -697,3 +502,240 @@ sides and Divide it are unchanged, so nothing about them is added. The only diff
 | `savecode:distribute-solve-L3` | none (the card is new) | a v17 code with its Level 3 done | the same |
 | `savecode:distribute-solve-L4` | none (the card is new) | a v17 code with its Level 4 done | the same |
 | `savecode:distribute-solve-L5` | none (the card is new) | a v17 code with its Level 5 done | the same |
+
+<!-- history: nothing below this line is read by the harness -->
+
+## History: screen changes accepted by the re-baseline of 2026-10-24 (Build O, Part 0)
+
+Build N found that all 62 recorded screens were listed above as intended changes, so the screen check passed whatever the screens looked like. On 2026-10-24 the screens were recorded again from `main` as it was then (Build N, `aa647e9`), with four more states (Divide it's Multiply menu open, and the opening of Flip everything, Two-step equations and Distribute, combine, solve), and the harness's Divide steps were fixed to reach the real move. The rows below are what each earlier build listed, kept for the record; the harness reads nothing below the history line, so every screen difference from now on must be listed above it, one key per row.
+
+### From "Intended changes since the baseline"
+
+| Key | Before | After | Why |
+|---|---|---|---|
+| `screen:add-helpful-move@1366x768` | Six lights Add doesn't judge copied Fewer terms' green | Only Fewer terms and Solved for x show a state | [2.7] |
+| `screen:add-helpful-move@1366x650` | as above | as above | [2.7] |
+| `screen:add-end@1366x768` | as above | as above | [2.7] |
+| `screen:add-end@1366x650` | as above | as above | [2.7] |
+| `screen:add-alone-stuck-1@1366x768` | as above | as above (the line is unchanged) | [2.7] |
+| `screen:add-alone-stuck-1@1366x650` | as above | as above | [2.7] |
+| `screen:add-alone-stuck-2@1366x768` | The seesaw, with nothing to do | The work stack, the two numbers outlined, the sum question | [2.3], [2.7] |
+| `screen:add-alone-stuck-2@1366x650` | as above | as above | [2.3], [2.7] |
+| `screen:add-alone-stuck-3@1366x768` | Party or Battle? (about to write the value) | The sum question with "In a party the teams join." | [2.3], [2.7] |
+| `screen:add-alone-stuck-3@1366x650` | as above | as above | [2.3], [2.7] |
+| `screen:add-alone-teach@1366x768` | The seesaw and "Add −8 to the left…" | The sum help in full | [2.2], [2.3], [2.7] |
+| `screen:add-alone-teach@1366x650` | as above | as above | [2.2], [2.3], [2.7] |
+| `screen:add-partial-stuck-4@1366x768` | The seesaw with "−8 cancels the +3" | "…Let's undo it first: press Undo." on the bare screen | [2.6] |
+| `screen:add-partial-stuck-4@1366x650` | as above | as above | [2.6] |
+| `screen:add-partial-teach@1366x768` | The seesaw forcing −8 | Undo first | [2.6] |
+| `screen:add-partial-teach@1366x650` | as above | as above | [2.6] |
+| `screen:add-red-stuck@1366x768` | The reminder rung over the red move | Undo first | [2.6] |
+| `screen:add-red-stuck@1366x650` | as above | as above | [2.6] |
+| `screen:div-failed-stuck@1366x768` | The counters over the failed fraction | Undo first | [2.6] |
+| `screen:div-failed-stuck@1366x650` | as above | as above | [2.6] |
+
+### From "Build C, Part 1 (2026-10-18): the lights layout is the default; Guess x / Use a move and the tucked layout are deleted"
+
+| Key | Before | After | Why |
+|---|---|---|---|
+| `screen:add-L2-stuck-2@1366x650` | the classic screen | the lights layout (preview row, blank in the equation, rule line and Next, bottom row, corner Undo / Start over) | Build C, Part 1 |
+| `screen:add-L2-stuck-2@1366x768` | the classic screen | the lights layout (preview row, blank in the equation, rule line and Next, bottom row, corner Undo / Start over) | Build C, Part 1 |
+| `screen:add-forced-move@1366x650` | the classic screen | the lights layout (preview row, blank in the equation, rule line and Next, bottom row, corner Undo / Start over) | Build C, Part 1 |
+| `screen:add-forced-move@1366x768` | the classic screen | the lights layout (preview row, blank in the equation, rule line and Next, bottom row, corner Undo / Start over) | Build C, Part 1 |
+| `screen:add-opening@1366x650` | the classic screen | the lights layout (preview row, blank in the equation, rule line and Next, bottom row, corner Undo / Start over) | Build C, Part 1 |
+| `screen:add-opening@1366x768` | the classic screen | the lights layout (preview row, blank in the equation, rule line and Next, bottom row, corner Undo / Start over) | Build C, Part 1 |
+| `screen:add-partial-move@1366x650` | the classic screen | the lights layout (preview row, blank in the equation, rule line and Next, bottom row, corner Undo / Start over) | Build C, Part 1 |
+| `screen:add-partial-move@1366x768` | the classic screen | the lights layout (preview row, blank in the equation, rule line and Next, bottom row, corner Undo / Start over) | Build C, Part 1 |
+| `screen:add-red-move@1366x650` | the classic screen | the lights layout (preview row, blank in the equation, rule line and Next, bottom row, corner Undo / Start over) | Build C, Part 1 |
+| `screen:add-red-move@1366x768` | the classic screen | the lights layout (preview row, blank in the equation, rule line and Next, bottom row, corner Undo / Start over) | Build C, Part 1 |
+| `screen:add-stuck-1@1366x650` | the classic screen | the lights layout (preview row, blank in the equation, rule line and Next, bottom row, corner Undo / Start over) | Build C, Part 1 |
+| `screen:add-stuck-1@1366x768` | the classic screen | the lights layout (preview row, blank in the equation, rule line and Next, bottom row, corner Undo / Start over) | Build C, Part 1 |
+| `screen:add-stuck-2@1366x650` | the classic screen | the lights layout (preview row, blank in the equation, rule line and Next, bottom row, corner Undo / Start over) | Build C, Part 1 |
+| `screen:add-stuck-2@1366x768` | the classic screen | the lights layout (preview row, blank in the equation, rule line and Next, bottom row, corner Undo / Start over) | Build C, Part 1 |
+| `screen:add-stuck-3@1366x650` | the classic screen | the lights layout (preview row, blank in the equation, rule line and Next, bottom row, corner Undo / Start over) | Build C, Part 1 |
+| `screen:add-stuck-3@1366x768` | the classic screen | the lights layout (preview row, blank in the equation, rule line and Next, bottom row, corner Undo / Start over) | Build C, Part 1 |
+| `screen:add-stuck-4@1366x650` | the classic screen | the lights layout (preview row, blank in the equation, rule line and Next, bottom row, corner Undo / Start over) | Build C, Part 1 |
+| `screen:add-stuck-4@1366x768` | the classic screen | the lights layout (preview row, blank in the equation, rule line and Next, bottom row, corner Undo / Start over) | Build C, Part 1 |
+| `screen:add-teach@1366x650` | the classic screen | the lights layout (preview row, blank in the equation, rule line and Next, bottom row, corner Undo / Start over) | Build C, Part 1 |
+| `screen:add-teach@1366x768` | the classic screen | the lights layout (preview row, blank in the equation, rule line and Next, bottom row, corner Undo / Start over) | Build C, Part 1 |
+| `screen:add-wrong-guess-undone@1366x650` | the classic screen | the lights layout (preview row, blank in the equation, rule line and Next, bottom row, corner Undo / Start over) | Build C, Part 1 |
+| `screen:add-wrong-guess-undone@1366x768` | the classic screen | the lights layout (preview row, blank in the equation, rule line and Next, bottom row, corner Undo / Start over) | Build C, Part 1 |
+| `screen:add-wrong-guess@1366x650` | the classic screen | the lights layout (preview row, blank in the equation, rule line and Next, bottom row, corner Undo / Start over) | Build C, Part 1 |
+| `screen:add-wrong-guess@1366x768` | the classic screen | the lights layout (preview row, blank in the equation, rule line and Next, bottom row, corner Undo / Start over) | Build C, Part 1 |
+| `screen:div-failed@1366x768` | the classic screen with the choice | no Guess x / Use a move buttons in the line | Build C, Part 1 |
+| `screen:div-opening@1366x650` | the classic screen with the choice | no Guess x / Use a move buttons in the line | Build C, Part 1 |
+| `screen:div-opening@1366x768` | the classic screen with the choice | no Guess x / Use a move buttons in the line | Build C, Part 1 |
+
+### From "Build C, Part 2 (2026-10-18): errors are spotlight pop-ups, and Undo is the only way out"
+
+| Key | Before | After | Why |
+|---|---|---|---|
+| `screen:div-wrong-guess@1366x768` | the substitution ending “Not balanced” | the same, dimmed, the failing line lit (“not balanced”), the pop-up beside it, Undo pulsing | Part 2 |
+| `screen:div-wrong-guess@1366x650` | as above | as above | Part 2 |
+| `screen:div-failed@1366x650` | the failed row, in red | the same, dimmed, the row lit (“doesn’t split”), the pop-up beside it, Undo pulsing | Part 2 |
+
+### From "Build D, Part 1 (2026-10-18): the light design"
+
+| Key | Before | After | Why |
+|---|---|---|---|
+| `screen:add-opening@1366x768` | the Build C screen | the light design | Part 1 |
+| `screen:add-opening@1366x650` | the Build C screen | the light design | Part 1 |
+| `screen:add-helpful-move@1366x768` | the Build C screen | the light design | Part 1 |
+| `screen:add-helpful-move@1366x650` | the Build C screen | the light design | Part 1 |
+| `screen:add-red-move@1366x768` | the Build C screen | the light design | Part 1 |
+| `screen:add-red-move@1366x650` | the Build C screen | the light design | Part 1 |
+| `screen:add-partial-move@1366x768` | the Build C screen | the light design | Part 1 |
+| `screen:add-partial-move@1366x650` | the Build C screen | the light design | Part 1 |
+| `screen:add-stuck-1@1366x768` | the Build C screen | the light design | Part 1 |
+| `screen:add-stuck-1@1366x650` | the Build C screen | the light design | Part 1 |
+| `screen:add-stuck-2@1366x768` | the Build C screen | the light design | Part 1 |
+| `screen:add-stuck-2@1366x650` | the Build C screen | the light design | Part 1 |
+| `screen:add-stuck-3@1366x768` | the Build C screen | the light design | Part 1 |
+| `screen:add-stuck-3@1366x650` | the Build C screen | the light design | Part 1 |
+| `screen:add-stuck-4@1366x768` | the Build C screen | the light design | Part 1 |
+| `screen:add-stuck-4@1366x650` | the Build C screen | the light design | Part 1 |
+| `screen:add-teach@1366x768` | the Build C screen | the light design | Part 1 |
+| `screen:add-teach@1366x650` | the Build C screen | the light design | Part 1 |
+| `screen:add-wrong-guess@1366x768` | the Build C screen | the light design | Part 1 |
+| `screen:add-wrong-guess@1366x650` | the Build C screen | the light design | Part 1 |
+| `screen:add-wrong-guess-undone@1366x768` | the Build C screen | the light design | Part 1 |
+| `screen:add-wrong-guess-undone@1366x650` | the Build C screen | the light design | Part 1 |
+| `screen:add-forced-move@1366x768` | the Build C screen | the light design | Part 1 |
+| `screen:add-forced-move@1366x650` | the Build C screen | the light design | Part 1 |
+| `screen:add-end@1366x768` | the Build C screen | the light design | Part 1 |
+| `screen:add-end@1366x650` | the Build C screen | the light design | Part 1 |
+| `screen:add-partial-stuck-4@1366x768` | the Build C screen | the light design | Part 1 |
+| `screen:add-partial-stuck-4@1366x650` | the Build C screen | the light design | Part 1 |
+| `screen:add-partial-teach@1366x768` | the Build C screen | the light design | Part 1 |
+| `screen:add-partial-teach@1366x650` | the Build C screen | the light design | Part 1 |
+| `screen:add-alone-stuck-1@1366x768` | the Build C screen | the light design | Part 1 |
+| `screen:add-alone-stuck-1@1366x650` | the Build C screen | the light design | Part 1 |
+| `screen:add-alone-stuck-2@1366x768` | the Build C screen | the light design | Part 1 |
+| `screen:add-alone-stuck-2@1366x650` | the Build C screen | the light design | Part 1 |
+| `screen:add-alone-stuck-3@1366x768` | the Build C screen | the light design | Part 1 |
+| `screen:add-alone-stuck-3@1366x650` | the Build C screen | the light design | Part 1 |
+| `screen:add-alone-teach@1366x768` | the Build C screen | the light design | Part 1 |
+| `screen:add-alone-teach@1366x650` | the Build C screen | the light design | Part 1 |
+| `screen:add-red-stuck@1366x768` | the Build C screen | the light design | Part 1 |
+| `screen:add-red-stuck@1366x650` | the Build C screen | the light design | Part 1 |
+| `screen:add-L2-stuck-2@1366x768` | the Build C screen | the light design | Part 1 |
+| `screen:add-L2-stuck-2@1366x650` | the Build C screen | the light design | Part 1 |
+| `screen:div-opening@1366x768` | the Build C screen | the light design | Part 1 |
+| `screen:div-opening@1366x650` | the Build C screen | the light design | Part 1 |
+| `screen:div-helpful-move@1366x768` | the Build C screen | the light design | Part 1 |
+| `screen:div-helpful-move@1366x650` | the Build C screen | the light design | Part 1 |
+| `screen:div-failed@1366x768` | the Build C screen | the light design | Part 1 |
+| `screen:div-failed@1366x650` | the Build C screen | the light design | Part 1 |
+| `screen:div-stuck-1@1366x768` | the Build C screen | the light design | Part 1 |
+| `screen:div-stuck-1@1366x650` | the Build C screen | the light design | Part 1 |
+| `screen:div-stuck-2@1366x768` | the Build C screen | the light design | Part 1 |
+| `screen:div-stuck-2@1366x650` | the Build C screen | the light design | Part 1 |
+| `screen:div-teach@1366x768` | the Build C screen | the light design | Part 1 |
+| `screen:div-teach@1366x650` | the Build C screen | the light design | Part 1 |
+| `screen:div-wrong-guess@1366x768` | the Build C screen | the light design | Part 1 |
+| `screen:div-wrong-guess@1366x650` | the Build C screen | the light design | Part 1 |
+| `screen:div-end@1366x768` | the Build C screen | the light design | Part 1 |
+| `screen:div-end@1366x650` | the Build C screen | the light design | Part 1 |
+| `screen:div-failed-stuck@1366x768` | the Build C screen | the light design | Part 1 |
+| `screen:div-failed-stuck@1366x650` | the Build C screen | the light design | Part 1 |
+| `screen:div-alone-stuck-1@1366x768` | the Build C screen | the light design | Part 1 |
+| `screen:div-alone-stuck-1@1366x650` | the Build C screen | the light design | Part 1 |
+
+### From "Build E, P4 (2026-10-19): Add to both sides on the shared loop"
+
+| Key | Before | After | Why |
+|---|---|---|---|
+| `screen:add-helpful-move@*`, `screen:add-alone-teach@*` | green Next after the move; dashed rule line; Start over greyed | green Check (greyed until x is typed); solid rule line; Start over live | The loop: a move that leaves x alone is committed at once (the next thing is typing x), and Start over is live once anything has been done (spec §1C). Pairs in `docs/build-e/be-01-…` |
+
+### From "Build F, Part 2: the seesaw beside the work (2026-10-20)"
+
+| Key | Before | After | Why |
+|---|---|---|---|
+| `screen:add-L2-stuck-2@1366x650` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
+| `screen:add-L2-stuck-2@1366x768` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
+| `screen:add-alone-stuck-1@1366x650` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
+| `screen:add-alone-stuck-1@1366x768` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
+| `screen:add-alone-stuck-2@1366x650` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
+| `screen:add-alone-stuck-2@1366x768` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
+| `screen:add-alone-stuck-3@1366x650` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
+| `screen:add-alone-stuck-3@1366x768` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
+| `screen:add-alone-teach@1366x650` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
+| `screen:add-alone-teach@1366x768` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
+| `screen:add-end@1366x650` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
+| `screen:add-end@1366x768` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
+| `screen:add-forced-move@1366x650` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
+| `screen:add-forced-move@1366x768` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
+| `screen:add-helpful-move@1366x650` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
+| `screen:add-helpful-move@1366x768` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
+| `screen:add-opening@1366x650` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
+| `screen:add-opening@1366x768` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
+| `screen:add-partial-move@1366x650` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
+| `screen:add-partial-move@1366x768` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
+| `screen:add-partial-stuck-4@1366x650` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
+| `screen:add-partial-stuck-4@1366x768` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
+| `screen:add-partial-teach@1366x650` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
+| `screen:add-partial-teach@1366x768` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
+| `screen:add-red-move@1366x650` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
+| `screen:add-red-move@1366x768` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
+| `screen:add-red-stuck@1366x650` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
+| `screen:add-red-stuck@1366x768` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
+| `screen:add-stuck-1@1366x650` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
+| `screen:add-stuck-1@1366x768` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
+| `screen:add-stuck-2@1366x650` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
+| `screen:add-stuck-2@1366x768` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
+| `screen:add-stuck-3@1366x650` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
+| `screen:add-stuck-3@1366x768` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
+| `screen:add-stuck-4@1366x650` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
+| `screen:add-stuck-4@1366x768` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
+| `screen:add-teach@1366x650` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
+| `screen:add-teach@1366x768` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
+| `screen:add-wrong-guess-undone@1366x650` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
+| `screen:add-wrong-guess-undone@1366x768` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
+| `screen:add-wrong-guess@1366x650` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
+| `screen:add-wrong-guess@1366x768` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
+| `screen:div-alone-stuck-1@1366x650` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
+| `screen:div-alone-stuck-1@1366x768` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
+| `screen:div-end@1366x650` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
+| `screen:div-end@1366x768` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
+| `screen:div-failed-stuck@1366x650` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
+| `screen:div-failed-stuck@1366x768` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
+| `screen:div-failed@1366x650` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
+| `screen:div-failed@1366x768` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
+| `screen:div-helpful-move@1366x650` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
+| `screen:div-helpful-move@1366x768` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
+| `screen:div-opening@1366x650` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
+| `screen:div-opening@1366x768` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
+| `screen:div-stuck-1@1366x650` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
+| `screen:div-stuck-1@1366x768` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
+| `screen:div-stuck-2@1366x650` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
+| `screen:div-stuck-2@1366x768` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
+| `screen:div-teach@1366x650` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
+| `screen:div-teach@1366x768` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
+| `screen:div-wrong-guess@1366x650` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
+| `screen:div-wrong-guess@1366x768` | the wider page; on Add the seesaw and walks beside the work, one height for the work |
+
+### From "Build H, Part 1: the quick fixes (2026-10-21)"
+
+| Key | Before | After | Why |
+|---|---|---|---|
+| `screen:add-wrong-guess@1366x768` | the last check row is lit with "Not balanced"; the substituted value is blue |
+| `screen:add-wrong-guess@1366x650` | as above |
+| `screen:div-wrong-guess@1366x768` | as above |
+| `screen:div-wrong-guess@1366x650` | as above |
+| `screen:div-end@1366x768` | the substituted value is blue in the first check row |
+| `screen:div-end@1366x650` | as above |
+| `screen:add-end@1366x768` | as above |
+| `screen:add-end@1366x650` | as above |
+
+### From "Build I, Part 1: the check writes the equation, then the value under each x (2026-10-21)"
+
+| Key | Before | After | Why |
+|---|---|---|---|
+| `screen:add-wrong-guess@1366x768` | the check's new first line, the equation; the value under its x |
+| `screen:add-wrong-guess@1366x650` | as above |
+| `screen:add-end@1366x768` | as above |
+| `screen:add-end@1366x650` | as above |
+| `screen:div-wrong-guess@1366x768` | as above |
+| `screen:div-wrong-guess@1366x650` | as above |
+| `screen:div-end@1366x768` | as above |
+| `screen:div-end@1366x650` | as above |

@@ -3,6 +3,7 @@
 //   npm run parity -- --no-screens  the same without the screenshots (no browser needed)
 //   npm run parity -- --list        print every difference (not just the first 15)
 //   npm run parity -- --record      write a new baseline (only on purpose: it accepts whatever the code does now)
+//   npm run parity -- --record-screens   the same for the screens only (the four data families are left as they are)
 // A difference is a failure unless INTENDED-CHANGES.md lists its key.
 
 import fs from 'node:fs';
@@ -15,6 +16,7 @@ const BASE = path.join(HERE, 'baseline');
 const SHOTS = path.join(BASE, 'screens');
 const OUT = path.join(HERE, 'out');
 const args = new Set(process.argv.slice(2));
+const recordScreens = args.has('--record-screens');
 const record = args.has('--record');
 const list = args.has('--list');                         // print every difference, not the first 15
 const screens = !args.has('--no-screens');
@@ -25,10 +27,13 @@ const t0 = Date.now();
 const now = collect();
 
 // The keys INTENDED-CHANGES.md allows to differ: the first cell of each table row that starts with `. "#N-" allows step N on.
+// Everything after the HISTORY line is the record of earlier re-baselined changes, and allows nothing.
+export const HISTORY = '<!-- history: nothing below this line is read by the harness -->';
 function intended() {
   const file = path.join(HERE, 'INTENDED-CHANGES.md');
   if (!fs.existsSync(file)) return [];
-  return [...fs.readFileSync(file, 'utf8').matchAll(/^\|\s*`([^`]+)`\s*\|/gm)].map((m) => m[1]);
+  const live = fs.readFileSync(file, 'utf8').split(HISTORY)[0];
+  return [...live.matchAll(/^\|\s*`([^`]+)`\s*\|/gm)].map((m) => m[1]);
 }
 const allowed = intended();
 const matchOf = (key) => allowed.find((a) => {
@@ -87,8 +92,9 @@ if (screens) {
   const { takeScreens, pixelDiff } = await import('./screens.mjs');
   const shots = await takeScreens();
   if (!shots) console.log('SKIP  screens: no Playwright here (set PLAYWRIGHT_PATH, or run with --no-screens)');
-  else if (record) {
+  else if (record || recordScreens) {
     fs.mkdirSync(SHOTS, { recursive: true });
+    for (const f of fs.readdirSync(SHOTS)) if (f.endsWith('.png')) fs.rmSync(path.join(SHOTS, f));
     for (const [n, png] of Object.entries(shots)) fs.writeFileSync(path.join(SHOTS, `${n}.png`), png);
     console.log(`Recorded ${Object.keys(shots).length} screens.`);
   } else {
@@ -101,11 +107,13 @@ if (screens) {
       const share = await pixelDiff(fs.readFileSync(file), png);
       if (share > TOLERANCE) diffs.push({ key: `screen:${n}`, before: `${(share * 100).toFixed(2)}% of pixels differ (see tests/parity/out/${n}.png)` });
     }
+    // a recorded screen that is no longer taken is a difference too
+    for (const f of fs.readdirSync(SHOTS)) if (f.endsWith('.png') && !(f.slice(0, -4) in shots)) diffs.push({ key: `screen:${f.slice(0, -4)}`, before: 'recorded', after: 'no longer taken' });
     report(`screens (${Object.keys(shots).length})`, diffs);
   }
 }
 
-if (!record) {
+if (!record && !recordScreens) {
   const stale = allowed.filter((a) => !used.has(a));
   if (stale.length) console.log(`NOTE  listed in INTENDED-CHANGES.md but nothing differed there: ${stale.join(', ')}`);
 }

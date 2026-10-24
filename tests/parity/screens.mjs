@@ -1,4 +1,4 @@
-// The screens part of the parity harness: the key states of Add to both sides and Divide it, at 1366×768 and 1366×650, with the
+// The screens part of the parity harness: the key states of Add to both sides and Divide it (and the opening of each later Solve it card), at 1366×768 and 1366×650, with the
 // flags off and fixed seeds, taken from the real app (Vite's dev server) in Chromium. Animations and the blinking cursor are
 // switched off so two runs of the same state give the same picture. Compared by pixel difference with a small tolerance.
 
@@ -23,8 +23,9 @@ async function loadPlaywright() {
 const ADD4 = 'pack=add-both&level=4&seed=7';          // x + 8 = −4
 const DIV3 = 'pack=divide-it&level=3&seed=7';          // 5x = −15
 const add = (k) => [['click', '[data-action="choose"][data-move="add"]'], ['type', k], ['click', '[data-action="go"]']];
-// (Build D: the fraction is typed into the move's blank, 1 then n, and the green Go takes it)
-const take = (n) => [['click', '[data-action="choose"][data-move="fraction"]'], ['type', 1], ['type', n], ['click', '[data-action="go"]']];
+// Dividing by n, the way main does it now (2026-10-24, Build O, Part 0): Multiply, its Divide option, n, Go. (Before, these steps clicked
+// a "Take a fraction" button that has not existed since Build D-2, so the div-* moves never happened and those pictures showed no move.)
+const take = (n) => [['click', '[data-action="multOpen"]'], ['click', '[data-action="multPick"][data-kind="div"]'], ['type', n], ['click', '[data-action="go"]']];
 const stuck = ['click', '[data-action="stuck"]'];
 const teach = ['click', '[data-action="teach"]'];
 const next = ['click', '[data-action="nextLine"]'];
@@ -64,6 +65,11 @@ export const STATES = {
   'div-end': [DIV3, [...take(5), ['type', -3], check, ['click', '[data-action="placeValue"]'], next, next, next, next]],
   'div-failed-stuck': [DIV3, [...take(2), stuck]],
   'div-alone-stuck-1': [DIV3, [...take(5), stuck]],
+  // (Build O, Part 0: the Multiply menu, and the panel of every other Solve it card, so a change to the shared screen shows here)
+  'div-menu': [DIV3, [['click', '[data-action="multOpen"]']]],
+  'flip-opening': ['pack=flip-everything&level=4&seed=7', []],
+  'two-opening': ['pack=two-step-equations&level=1&seed=7', []],
+  'dist-opening': ['pack=distribute-solve&level=1&seed=7', []],
 };
 
 const FREEZE = '*,*::before,*::after{animation:none!important;transition:none!important;caret-color:transparent!important}';

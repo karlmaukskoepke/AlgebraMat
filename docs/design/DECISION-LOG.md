@@ -176,3 +176,30 @@ Ideas recorded, nothing built.
    `n − a(x ± c) = b` (tap the minus first); like x-terms (`a(x ± c) + bx = d`, either order). No walkthrough.
 6. **"Practice distributing first"** links to Build it's "Distribute, then combine" instead of a walkthrough (Build it teaches it).
 7. **Build it's Combine and Distribute modules stay read-only.** Drag features for them are parked for the end of the cards build.
+
+## 2026-10-23: the Moves panel (Karl; built in Build O)
+
+**Why:** the panel is a column of pictures with no heading, its hover names are informal, and division (the move students think of) is
+hidden inside the Multiply menu. Students also read "subtract" as a separate move, when the property is one: add the same number, positive
+or negative, to both sides.
+
+1. **The panel is headed "Moves".** Each move's hover name is its formal property of equality: Add, "Addition property of equality: add the
+   same number to both sides"; Multiply, "Multiplication property of equality"; Divide, "Division property of equality"; Flip everything,
+   "Multiplication property of equality: multiply both sides by −1"; Trade places, "Symmetric property of equality: if a = b, then b = a".
+   Order: Add, Multiply, Divide, Flip everything, Trade places.
+2. **There is no subtraction move.** Add is the addition property: the student adds a positive or a negative. No card offers or names
+   "subtract ___ from both sides" as a move. Arithmetic inside help ("Subtract 15 − 2 to find how many are left") stays: that is arithmetic,
+   not a move.
+3. **Each move button gets a larger floating symbol to its left** (not a small symbol on the button): + for Add, × for Multiply, ÷ for
+   Divide, a small circle of two arrows for Flip everything, a double arrow for Trade places. Build L's small × and ÷ on the Multiply menu's
+   options go.
+4. **Divide returns as its own button** with a visible division form (`( )/n = ( )/n`), alongside Multiply. This partly reverses Build L
+   (which moved division into the Multiply menu): Multiply's menu goes back to whole number and fraction, and the Divide button is a second
+   way in. **Divide is display-only:** it is stored and checked exactly as multiplying by 1/n (`−1/3` for a divisor of −3). A row made with
+   the Divide button is drawn in division form (`(5x)/5 = (−15)/5`, then `x = (−15)/5`) with a small line under it, "Same as multiplying by
+   1/5."; a row made with the Fraction option is drawn as before. Dividing by −3 is written with −3 under each bar. Dividing by −1 is Flip
+   everything.
+5. **The loop spec goes to rev 2.4** (sections 1C, 2 and 5: the panel, the move list, the Multiply menu and the Divide button).
+6. **The screen part of the safety net is repaired first** (Build N found every recorded screen listed as an intended change, so the
+   screenshot check passed whatever the screens looked like). The screens are re-baselined to `main` as it was (Build N), the old screen
+   entries move to a dated history section the harness does not read, and every screen difference from then on is listed one by one.
