@@ -7,7 +7,7 @@ import { logLights } from './lightsLog.js';
 import { formatAddBoth } from '../engine/addBoth.js';
 import { solve as addLoop, reduceAddBoth } from '../engine/cards/add.js';
 import { xAlone } from '../engine/addBothMoves.js';
-import { newLightsSession, withLights, lightsAnswerLive, lightsSummary, combineOpen, blankOpen, amountMode, seesawAdd, ADD_SPOT } from '../engine/addBothLights.js';
+import { newLightsSession, withLights, lightsAnswerLive, lightsSummary, combineOpen, calcOpen, blankOpen, amountMode, seesawAdd, ADD_SPOT } from '../engine/addBothLights.js';
 import { renderAddBothScreen, introOpen as addIntroOpen } from '../view/addBothScreen.js';
 import { lightsFeedbackText } from '../view/addBothLightsFeedback.js';
 import { makeAddBothControls } from '../view/addBothControls.js';
@@ -172,6 +172,8 @@ let twoTaught = null;   // the first Trade places and the first flip of a level 
 
 // Add to both sides' Mat buttons that a move-only card uses too (no seesaw, no counters): Apply, dragging a number into the blank
 const ADD_MAT = new Set(['lxApply']);
+// A product clicked to be worked out (Build P, Part 2)
+const calcAction = (d) => (d.action === 'lxCalc' ? { type: 'lxCalc', id: d.id } : null);
 
 export const twoStepPlay = makeSolvePlay({
   pack: 'two-step-equations',
@@ -224,16 +226,17 @@ export const distSolvePlay = makeSolvePlay({
   format: formatDistSolve,
   newSession: (problem, { forceMove = false } = {}) => startLights(newDistSolve(problem, { level: problem.logLevel ?? 1, forceMove })),
   feedbackText: distSolveFeedbackText,
-  buildControls: makeAddBothControls((s) => lightsAnswerLive(s, distLoop) || combineOpen(s) || Boolean(s.lx?.distribute) || DIST_MENU.typingOpen(s), xKey),
+  buildControls: makeAddBothControls((s) => lightsAnswerLive(s, distLoop) || combineOpen(s) || calcOpen(s) || Boolean(s.lx?.distribute) || DIST_MENU.typingOpen(s), xKey),
   bindMat: (root, dispatch, getSession) => {
     const off = [bindLightsMat(root, dispatch, getSession), bindFractionKeys(root, dispatch, getSession, DIST_MENU), bindFactorHint(root)];
     return () => off.forEach((f) => f?.());
   },
   renderMat: (s) => renderDistSolveScreen(s),
-  padOpen: (s) => s.stage !== 'done' && !s.sub && (((blankOpen(s) || seesawAdd(s)) && amountMode(s)) || combineOpen(s) || Boolean(s.lx?.distribute) || DIST_MENU.typingOpen(s)
+  padOpen: (s) => s.stage !== 'done' && !s.sub && (((blankOpen(s) || seesawAdd(s)) && amountMode(s)) || combineOpen(s) || calcOpen(s) || Boolean(s.lx?.distribute) || DIST_MENU.typingOpen(s)
     || (lightsAnswerLive(s, distLoop) && (s.typing === 'answer' || s.ui?.focus === 'answer' || distAlone(s.board)))),
   matAction(d) {
     if (ADD_MAT.has(d.action)) return { type: d.action };
+    if (calcAction(d)) return calcAction(d);
     switch (d.action) {
       case 'multOpen': return { type: 'multOpen' };
       case 'divPick': return { type: 'divPick' };

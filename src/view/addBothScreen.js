@@ -13,7 +13,7 @@ import { MINUS } from '../engine/expr.js';
 import { signed } from '../engine/addBoth.js';
 import { xAlone } from '../engine/addBothMoves.js';
 import { solve, tradeAvailable, tradePending } from '../engine/cards/add.js';
-import { lightsAnswerLive, blankOpen, canChoose, moveOwed, amountMode, canGrab, ADD_SPOT } from '../engine/addBothLights.js';
+import { lightsAnswerLive, blankOpen, canChoose, moveOwed, amountMode, canGrab, calcTerm, ADD_SPOT } from '../engine/addBothLights.js';
 import { termText, findTerm, likeKey, crossedText, sideText, previewBoard } from '../engine/lightsGrab.js';
 import { productLabels } from '../engine/distributeMove.js';
 import { spotOf } from '../engine/spotlight.js';
@@ -50,7 +50,7 @@ const firstUp = (s) => firstOpen() && !s.mustMove && s.rows.length === 1 && s.hi
 
 // What the card says that needs no pop-up: the screen itself shows it (the blank, the rule line, the green button's word, x = live).
 export const SILENT = new Set(['aTeachDo', 'aAloneBig', 'aPlace', 'aFindX', 'lxMustMove', 'aMustMove', 'aPickAmount', 'aAmountSet', 'aGreen', 'aSolvedBoard', 'aUndone', 'lxUndone',
-  'aStartedOver', 'aPlugIn', 'aPlugCurrent', 'aGuessed', 'lxCombineAsk', 'lxCombined', 'lxCombinedAlone', 'aCorrect', 'aSimplerFirst',
+  'aStartedOver', 'aPlugIn', 'aPlugCurrent', 'aGuessed', 'lxCombineAsk', 'lxCombined', 'lxCombinedAlone', 'lxCalcAsk', 'lxCalculated', 'aCorrect', 'aSimplerFirst',
   'aZeroUndone', 'aAloneCounters', 'aAloneCount', 'aAlonePB', 'aAloneRight', 'aUndoGuess', 'dxProducts', 'aTraded']);
 // Input nudges with nothing to undo: a small pop-up next to where the student is, no dimming.
 export const NUDGE = {
@@ -83,6 +83,11 @@ function popups(s, wrap) {
   if (s.scaffold && s.stage === 'moves' && s.feedback?.key === 'aBuilt' && !s.menu) {
     // (the equation and the seesaw it is about stay lit with the moves: never grey out what the question is about, Build H)
     wrap.append(spotlightLayer({ kind: 'intro', lit: ['panel', 'newest', 'board'] }, { ...o, text: C.text(s.feedback) }));
+    return;
+  }
+  // a product being worked out (Build P, Part 2): the factor and its number lit, the blank under them, the rest greyed
+  if (s.lx.calc && !s.lx.calc.wrong) {
+    wrap.append(spotlightLayer({ kind: 'intro', lit: ['calc', 'calcbox', 'forward'] }, { ...o, text: null }));
     return;
   }
   // combining two terms dropped together: they are lit with "Combine" over them, the box for their sum under them, the rest greyed
@@ -284,7 +289,13 @@ function rowsOf(s) {
     const tag = row.type === 'fold' && row.label ? [foldTag(row.label)] : [];   // (what a folded fraction or flip did, above it)
     let eq;
     const div = { div: row.shown === 'div' };
-    if (inert && !plug) eq = eqRow(sideTerms(row.board.left, s, div), sideTerms(row.board.right, s, div), `${div.div ? 'is-division ' : ''}${chars}`, { role: 'img', 'aria-label': 'The equation' });
+    // a product that can be worked out on the newest row (Build P, Part 2): its × (or its fraction bar) is a button; while its blank is
+    // open, it is marked so it stays lit
+    if (i === last && !plug && s.stage !== 'done') {
+      if (s.lx.calc) div.calcOn = s.lx.calc.id;
+      else if (canGrab(s)) div.calc = calcTerm(s, C.alone)?.id;
+    }
+    if (inert && !plug) eq = eqRow(sideTerms(row.board.left, s, div), sideTerms(row.board.right, s, div), `${div.div ? 'is-division ' : ''}${chars}`, { role: div.calc ? 'group' : 'img', 'aria-label': 'The equation' });
     else if (live) eq = eqRow(liveSide(s, 'left'), liveSide(s, 'right'), `lx-live${chars}${s.ui?.carry ? ' is-carrying' : ''}`, { role: 'group', 'aria-label': 'The equation: its terms can be picked up' });
     else {
       // the equation being checked: the value is dragged into its x (or x is tapped), which then changes colour (Build D, Part 2)
@@ -376,9 +387,23 @@ function productRow(s) {
   return html('div', 'lx-ghost is-chosen is-sum is-products', [eqRow(f.side === 'left' ? els : other, f.side === 'left' ? other : els, 'lx-ghosteq lx-sumeq')]);
 }
 
+// A product being worked out (Build P, Part 2): the side it is on, with a blank in its place for the signed product
+function calcRow(s) {
+  const c = s.lx.calc;
+  const f = findTerm(s.board, c.id);
+  const box = html('button', `lx-box is-sum is-calc${c.wrong ? ' is-wrong' : ''}${s.ui?.shake ? ' is-shake' : ''}${c.entry ? '' : ' is-empty is-blink'} is-focus`, [shown(c.entry)], {
+    type: 'button', 'data-fk': 'calc', 'data-lx-field': '1', 'aria-label': 'The product, worked out',
+  });
+  if (s.ui?.focus === 'calc') box.dataset.lxFocus = '1';
+  const mine = sideTerms(s.board[f.side], s, { swap: { [c.id]: html('span', 'lx-boxwrap', [box]) } });
+  const other = sideTerms(s.board[f.side === 'left' ? 'right' : 'left'], s);
+  return html('div', 'lx-ghost is-chosen is-sum is-calcrow', [eqRow(f.side === 'left' ? mine : other, f.side === 'left' ? other : mine, 'lx-ghosteq lx-sumeq')]);
+}
+
 function ghostRow(s) {
   const own = C.ghost?.(s);                                    // (the card's own move row: the Two-step card's Multiply)
   if (own) return own;
+  if (s.lx.calc) return calcRow(s);
   if (s.lx.distribute) return productRow(s);
   if (s.lx.combine) return sumRow(s);
   // (a term being dragged shows where it would land in its own row, not here: Build D-2, Part 3)
@@ -436,6 +461,7 @@ function forwardCore(s) {
   if (s.sub && s.sub.step < C.loop.subTotal(s.sub)) return { label: 'Next', action: 'nextLine', enabled: true };
   if (s.lx.distribute) return { label: 'Go', action: 'lxApply', enabled: s.lx.distribute.entries.every((e) => /\d/.test(e)) && s.lx.distribute.wrong === null };
   if (s.lx.combine) return { label: 'Combine', action: 'lxApply', enabled: (valid(s.lx.combine.entry) || /^-?\d*x$/.test(s.lx.combine.entry)) && !s.lx.combine.wrong };
+  if (s.lx.calc) return { label: 'Go', action: 'lxApply', enabled: valid(s.lx.calc.entry) && !s.lx.calc.wrong };
   if (s.combining?.step === 'struck') return { label: 'Next', action: 'crossNext', enabled: true };
   if (s.combining) return { label: 'Check', action: 'check', enabled: false };
   if (s.teachFlow && blankOpen(s) && amountMode(s)) return { label: 'Go', action: 'go', enabled: valid(s.amountEntry) };   // (Karl: Go, as everywhere)
@@ -453,7 +479,7 @@ function answerRow(s) {
   // x = shows no cursor at first: it blinks once clicked (until anything else happens), and at the last step, x alone on its side
   // (and while the keys go into it, once clicked: Build N, the cursor is where the keys go)
   // (never while a sum, the distribute blanks or a Multiply blank takes the keys)
-  const free = !s.mopts?.kind && !(s.menu === 'fraction' && s.typing !== 'answer') && !s.lx?.combine && !s.lx?.distribute;
+  const free = !s.mopts?.kind && !(s.menu === 'fraction' && s.typing !== 'answer') && !s.lx?.combine && !s.lx?.distribute && !s.lx?.calc;
   const last = live && !amountMode(s) && free && (C.alone(s.board) || Boolean(s.ui?.fieldCursor) || s.typing === 'answer' || s.ui?.focus === 'answer');
   const placing = Boolean(s.sub?.placing);                 // the typed value is what is dragged into x
   const typed = html('button', `ab-typed lb-typed lx-field${text ? '' : ' is-empty'}${last ? ' is-focus' : ''}${last && !text ? ' is-blink' : ''}${live || placing ? '' : ' is-off'}${placing ? ' is-chip' : ''}`, [shown(text)], placing

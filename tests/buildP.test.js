@@ -5,9 +5,10 @@ import { makeDistSolve } from '../src/engine/distSolve.js';
 import { newDistSolve, DIST_SPOT, DIST_LAYER } from '../src/engine/cards/distribute.js';
 import { startLights } from '../src/engine/addBothLights.js';
 import { withSpotlight } from '../src/engine/spotlight.js';
-import { lineText } from '../src/engine/solveTerms.js';
 import { nudgeOf } from '../src/engine/nudge.js';
-import { shapeOfBoard } from '../src/engine/solveit/shape.js';
+import { shapeOf, shapeOfBoard } from '../src/engine/solveit/shape.js';
+import { calcTerm } from '../src/engine/addBothLights.js';
+import { boardText, lineText } from '../src/engine/solveTerms.js';
 
 const layer = withSpotlight(DIST_LAYER, DIST_SPOT);
 const P = (o) => makeDistSolve({ level: 1, ...o });
@@ -101,5 +102,65 @@ describe('Part 1: the combine nudge, on every shape with terms to put together',
     const before = JSON.stringify(s);
     nudgeOf(s);
     expect(JSON.stringify(s)).toBe(before);
+  });
+});
+
+// ---------- Part 2: calculate a product ----------
+
+const divide = (n) => [{ type: 'divPick' }, ...(n < 0 ? [{ type: 'toggleSign' }] : []), { type: 'digit', digit: Math.abs(n) }, { type: 'go' }];
+const calcIt = (s, v) => [{ type: 'lxCalc', id: calcTerm(s).id }, ...digits(v), { type: 'lxApply' }];
+
+describe('Part 2: calculate a product on the divide-first route', () => {
+  const p = P({ f: 3, c: 2, x: 3 });                                      // 3(x + 2) = 15
+  it('x + 2 = ⅓(15): the product is worked out to 5, then Add −2, then x is typed', () => {
+    let s = run(start(p), divide(3));
+    expect(boardText(s.board)).toBe('x + 2 = ⅓(15)');
+    expect(shapeOf(s).id).toBe('Q1');
+    expect(nudgeOf(s)).toMatchObject({ kind: 'calc', div: true });         // the nudge: the fraction bar
+    s = run(s, calcIt(s, 5));
+    expect(boardText(s.board)).toBe('x + 2 = 5');
+    expect(shapeOf(s).id).toBe('Q4');
+    expect(s.rows.at(-1).board).toBe(s.board);
+    s = run(s, [{ type: 'choose', move: 'add' }, ...digits(-2), { type: 'go' }]);
+    expect(boardText(s.board)).toBe('x = 5 − 2');
+    expect(shapeOf(s).id).toBe('Q5');
+    expect(calcTerm(s)).toBeNull();
+    s = run(s, [...typeValue(3), { type: 'placeValue' }, ...Array(6).fill({ type: 'nextLine' })]);
+    expect(s.stage).toBe('done');
+  });
+  it('a wrong product waits for Undo with the factor and number lit; after Undo the hint lights the product', () => {
+    let s = run(start(p), divide(3));
+    s = run(s, calcIt(s, 45));
+    expect(s.feedback).toMatchObject({ key: 'lxCalcWrong', bad: true });
+    expect(DIST_SPOT.error(s)).toMatchObject({ target: 'calcbox', lit: ['calc'] });
+    expect(run(s, [{ type: 'lxApply' }, { type: 'stuck' }])).toBe(s);       // Undo is the only way out
+    s = run(s, [{ type: 'undo' }]);
+    expect(s.lx.calc).toBeNull();
+    expect(s.spot).toMatchObject({ kind: 'hint', target: 'calc' });
+    expect(s.feedback.key).toBe('mCalcHint');
+    expect(s.feedback.params).toMatchObject({ expr: '15 ÷ 3', div: true });
+    expect(s.supportsShown).not.toContain('model');
+  });
+  it('Undo after a product takes it back; at x alone there is nothing to work out', () => {
+    let s = run(start(p), divide(3));
+    const before = boardText(s.board);
+    s = run(s, calcIt(s, 5));
+    s = run(s, [{ type: 'undo' }]);
+    expect(boardText(s.board)).toBe(before);
+    // x = ⅓(9) on the other route: no product to work out, the student types x
+    const alone = { ...s, board: { left: [{ id: 'q1', kind: 'x', coef: 1 }], right: [{ id: 'q2', kind: 'frac', n: 3, inner: [{ id: 'q3', kind: 'num', v: 9 }] }] } };
+    expect(calcTerm(alone)).toBeNull();
+    expect(run(alone, [{ type: 'lxCalc', id: 'q2' }])).toBe(alone);
+  });
+  it('the multiplication form (the Fraction option) words it ⅓ × 15; a negative divisor keeps its sign', () => {
+    const q = P({ f: -2, c: 3, x: 4 });                                    // −2(x + 3) = −14
+    let s = run(start(q), divide(-2));
+    expect(nudgeOf(s)).toMatchObject({ kind: 'calc' });
+    s = run(s, calcIt(s, 6));
+    expect(s.feedback.key).toBe('lxCalcWrong');
+    expect(s.feedback.params.expr).toBe('−14 ÷ (−2)');
+    s = run(s, [{ type: 'undo' }]);
+    s = run(s, calcIt(s, 7));
+    expect(boardText(s.board)).toBe('x + 3 = 7');
   });
 });

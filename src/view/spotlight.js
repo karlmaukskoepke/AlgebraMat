@@ -111,7 +111,7 @@ function protectedRects(o, error, kind) {
 }
 // The part of an element that is ink: the union of its children's boxes (an equation row is as wide as the screen; its terms are not).
 function contentRect(n) {
-  const kids = [...n.querySelectorAll('.lx-tok, .lb-num, .lb-x, .lb-plus, .lb-equals, .lx-box, .lb-coef, .lb-frac, .lx-paren, .lx-factor, .lx-prodlabel, .sv-checkrow')];
+  const kids = [...n.querySelectorAll('.lx-tok, .lb-num, .lb-x, .lb-plus, .lb-equals, .lx-box, .lb-coef, .lb-frac, .lx-paren, .lx-factor, .lx-prodlabel, .sv-checkrow, .lb-divbot, .lb-divbar')];
   const rects = (kids.length ? kids : [n]).map((k) => k.getBoundingClientRect()).filter((q) => q.width && q.height);
   if (!rects.length) return null;
   return { left: Math.min(...rects.map((q) => q.left)), top: Math.min(...rects.map((q) => q.top)), right: Math.max(...rects.map((q) => q.right)), bottom: Math.max(...rects.map((q) => q.bottom)) };
@@ -341,6 +341,9 @@ export function findSolveTarget(root, target, s = null) {
     case 'prodbox': return root.querySelector('.lx-prod.is-wrong .lx-prodbox') ?? root.querySelector('.lx-prod .lx-prodbox');
     case 'prodlabel': return root.querySelector('.lx-prod.is-wrong .lx-prodlabel');
     case 'sumbox': return root.querySelector('.lx-box.is-sum');
+    // a product being worked out (Build P, Part 2): the factor and its number in the newest row, and its blank
+    case 'calc': return root.querySelector('.lb-stack .lb-rowwrap [data-calc]');
+    case 'calcbox': return root.querySelector('.lx-box.is-calc');
     case 'blank': return root.querySelector('.lx-ghost.is-chosen .lx-box:not(.is-mirror)');
     case 'fractions': return root.querySelector('.lb-fractionrow');
     case 'board': return root.querySelector('.ab-boardwrap, .sv-diagram .gd');

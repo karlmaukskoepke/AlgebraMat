@@ -9,6 +9,7 @@ import { MINUS } from '../../expr.js';
 import { termText } from '../../lightsGrab.js';
 import { ADD_RUNGS } from './add.js';
 import { TWO_STEP_RUNGS } from './twoStep.js';
+import { productOf, calcParams } from '../../nudge.js';
 
 const opened = (s, api, r) => (r ? api.say(s, r.key, r.params ?? {}) : api.say(s, 'aFindX'));
 const entry = (after) => {
@@ -45,8 +46,18 @@ function likeHint(kind) {
 // P6 and E4: the other side still two numbers (an Add cancelled the number beside x): Two-step's W2 reminder, "Put them together".
 const OTHER = { ladder: ['hintPopup'], hintPopup: TWO_STEP_RUNGS.W2.hintPopup };
 
-// Q1 `x + 2 = ⅓(15)`: Add to both sides' reminder for the number beside x.
-const Q1 = entry((s, before) => ADD_RUNGS.S1.hintPopup.after(s, before));
+// Q1 `x + 2 = ⅓(15)`: the product lit, to be worked out (Build P, Part 2: "⅓ × 15 is the same as 15 ÷ 3. Click the × and type it.");
+// after an Add that did not cancel was undone, Add to both sides' reminder for the number beside x, as before.
+function calcHint(s) {
+  const f = productOf(s.board);
+  if (!f) return null;
+  const t = [...s.board.left, ...s.board.right].find((u) => u.id === f.id);
+  s.hint = { kind: 'calc', id: t.id };
+  return { target: 'calc', key: 'mCalcHint', params: calcParams(s, t) };
+}
+const Q1 = entry((s, before) => (before?.needUndo && before?.feedback?.key !== 'lxCalcWrong' ? ADD_RUNGS.S1.hintPopup.after(s, before) : calcHint(s)));
+// Q4 `x + 2 = 5` (the product worked out): Add to both sides' reminder for the number beside x.
+const Q4 = entry((s, before) => ADD_RUNGS.S1.hintPopup.after(s, before));
 
 export const DISTRIBUTE_RUNGS = {
   P1: P, P2: P, P3: P, P4: P, P5: P, P6: OTHER,
@@ -54,4 +65,6 @@ export const DISTRIBUTE_RUNGS = {
   Q1,
   Q2: { none: 'mWorkOut' },                       // x is alone: the other side is the student's to work out, then type x
   Q3: { waiting: true },
+  Q4,
+  Q5: { none: 'mWorkOut' },                       // x is alone: the student works out the other side and types x
 };

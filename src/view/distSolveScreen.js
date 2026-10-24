@@ -22,6 +22,7 @@ export const introOpen = (s) => moveOwed(s) && !s.introSeen;
 const REMINDER = {
   mDistributeHint: { target: 'factor' }, mTapMinusHint: { target: 'factor' }, mCombineHint: { target: 'hinted' }, wCombineHint: { target: 'otherSide' },
   aStuckHint: { target: 'xnum', move: 'add' }, dReminder: { target: 'coef', move: 'divOption' }, mWorkOut: { target: 'answer' },
+  mCalcHint: { target: 'calc' },
   fFlipHint: { target: 'coef', move: 'flip' }, fSignHint: { target: 'coef', move: 'flip' }, fNegHint: { target: 'answer' }, fFracHint: { target: 'answer' },
 };
 

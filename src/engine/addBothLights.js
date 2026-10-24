@@ -19,6 +19,10 @@ import { sizesOf } from './cards/addHelp.js';
 import { findTerm, outcomeOf, reorderBoard, combineBoard, pairText, valueOf, crossBoard, otherSide, termText } from './lightsGrab.js';
 import { productLabels, rightProducts, pieceOf, pieceTyped, productSlip, distributeBoard } from './distributeMove.js';
 import { MINUS } from './expr.js';
+import { signed, fractionText } from './solveTerms.js';
+import { newId } from './lightsGrab.js';
+import { productOf, calcParams } from './nudge.js';
+export { calcParams };
 
 const slotSide = (board, id) => otherSide(findTerm(board, id).side);
 
@@ -60,8 +64,10 @@ export const canChoose = (s) => s.stage === 'moves' && !s.scaffold && !s.sub && 
 // rule).
 export const moveOwed = (s) => Boolean(s.mustMove) && !s.movedOnce && s.stage === 'moves';
 // Can the terms of the newest row be grabbed (B0)? Not while help, a substitution, a half-made move or a combine is going on.
-export const canGrab = (s) => s.stage === 'moves' && !s.scaffold && !s.sub && !s.pending && !s.combining && !s.resolving && !s.lx?.combine && !s.lx?.distribute;
+export const canGrab = (s) => s.stage === 'moves' && !s.scaffold && !s.sub && !s.pending && !s.combining && !s.resolving && !s.lx?.combine && !s.lx?.distribute && !s.lx?.calc;
 export const combineOpen = (s) => Boolean(s.lx?.combine);
+// A product being worked out (Build P, Part 2): its blank takes the keys
+export const calcOpen = (s) => Boolean(s.lx?.calc);
 // Do keys go to the blank (true) or to x = (false)? The open blank wins until it is applied or cancelled, or x = is tapped.
 export const amountMode = (s) => s.menu === 'add' && s.typing !== 'answer' && (!s.pending || s.pending.second) && !s.combining;
 
@@ -71,7 +77,7 @@ export const seesawAdd = (s) => Boolean(s.scaffold) && s.stage === 'moves' && s.
 // Is x = [ ] live? The loop's rule (always, except while a move waits for Undo, a value is being checked, the move is owed, or the
 // seesaw is busy), and not while a sum or the products of a distribute are open.
 export function lightsAnswerLive(s, loop = solve) {
-  if (s.lx?.combine || s.lx?.distribute) return false;
+  if (s.lx?.combine || s.lx?.distribute || s.lx?.calc) return false;
   return loop.answerLive(s);
 }
 
@@ -111,7 +117,7 @@ export function withLights(reduce = reduceAddBoth, { alone = xAlone, menuPreview
     };
     if (action.type === 'lxCancel') {
       if (ui(state).carry) return withUi(state, { carry: null });
-      if (state.lx.combine || state.lx.distribute) return closeCombine(state);
+      if (state.lx.combine || state.lx.distribute || state.lx.calc) return closeCombine(state);
       if (blankOpen(state)) return cancel(state);
       return ui(state).preview ? withUi(state, { preview: false }) : state;
     }
@@ -163,7 +169,7 @@ export function withLights(reduce = reduceAddBoth, { alone = xAlone, menuPreview
     // help, a move (Multiply and Flip too: their blanks would take the keys of a sum still open under them, Build N) or a check closes a
     // sum being typed
     let input = state;
-    if ((state.lx.combine || state.lx.distribute) && ['stuck', 'teach', 'choose', 'check', 'multOpen', 'flipPick', 'divPick'].includes(action.type)) { input = structuredClone(state); input.lx.combine = null; input.lx.distribute = null; }
+    if ((state.lx.combine || state.lx.distribute || state.lx.calc) && ['stuck', 'teach', 'choose', 'check', 'multOpen', 'flipPick', 'divPick'].includes(action.type)) { input = structuredClone(state); input.lx.combine = null; input.lx.distribute = null; input.lx.calc = null; }
 
     const s = reduce(input, action);
     if (s === input) return input;                                  // the engine did nothing (a closed sum still counts)
@@ -232,6 +238,7 @@ const closeCombine = (state) => {
   const s = structuredClone(state);
   s.lx.combine = null;
   s.lx.distribute = null;
+  s.lx.calc = null;
   s.ui = { ...UI0 };
   return say(s, moveOwed(s) ? 'lxMustMove' : 'aFindX');
 };
@@ -245,6 +252,10 @@ function grabAction(state, action, wrapped, alone, opts = {}) {
     const d = distributeAction(state, action, alone, opts);
     if (d) return d;
   }
+  // ----- a product worked out (Build P, Part 2): the × (or the fraction bar) clicked, the signed product typed, Enter or Go -----
+  const calc = calcAction(state, action, alone);
+  if (calc) return calc;
+
   // ----- the sum of a combine: typed into its blank, applied with Enter or ✓ (two x-terms: every piece is typed, the x too: Build M) -----
   if (lx.combine && isTyping(action)) {
     const entry = combineIsX(state) ? typeX(lx.combine.wrong ? '' : lx.combine.entry, action) : typeInto(lx.combine.wrong ? '' : lx.combine.entry, action, 'integer');
@@ -284,7 +295,7 @@ function grabAction(state, action, wrapped, alone, opts = {}) {
 
   // ----- Undo: a combine being typed closes; a reorder, a minus tap or a combine is taken back here -----
   if (action.type === 'undo') {
-    if (lx.combine || lx.distribute) return closeCombine(state);
+    if (lx.combine || lx.distribute || lx.calc) return closeCombine(state);
     const top = state.history[state.history.length - 1];
     if (state.sub || !top?.lxKind) return null;
     const s = structuredClone(state);
@@ -292,7 +303,7 @@ function grabAction(state, action, wrapped, alone, opts = {}) {
     if (top.lxKind === 'minus') s.lx.negIds = s.lx.negIds.includes(top.id) ? s.lx.negIds.filter((x) => x !== top.id) : [...s.lx.negIds, top.id];
     else {
       Object.assign(s, { board: top.board, rows: top.rows, prevBoard: top.prevBoard });
-      if (top.lxKind === 'combine') { s.lights = top.lights; s.lx.hand = top.hand; if (top.negIds) s.lx.negIds = top.negIds; }
+      if (top.lxKind === 'combine' || top.lxKind === 'calc') { s.lights = top.lights; s.lx.hand = top.hand; if (top.negIds) s.lx.negIds = top.negIds; }
       if (top.lxKind === 'distribute') { Object.assign(s, { lights: top.lights, unfolded: false, movedOnce: top.movedOnce }); s.lx.negIds = top.negIds; }
     }
     s.ui = { ...UI0 };
@@ -377,6 +388,66 @@ function grabAction(state, action, wrapped, alone, opts = {}) {
   s.lx.combine = { a: out.a, b: out.b, side: out.side, entry: '', wrong: false };
   s.ui.focus = 'sum';
   return say(s, 'lxCombineAsk', sumParams(s));
+}
+
+// ---------- calculating a product (Build P, Part 2) ----------
+// After dividing first (or taking a fraction) a side can read `⅓(15)`, a factor times a number. While x is not alone the student can work
+// it out: the × between them (the fraction bar, in division form) opens a blank for the signed product; Enter or Go applies it and the
+// side becomes that one number. A wrong product waits for Undo (the factor and the number stay lit), then the hint. Never at x alone
+// (`x = ⅓(15)`): there the student types x, and the solved value is never displayed.
+const calcValue = (t) => (t.sign < 0 ? -1 : 1) * t.inner[0].v / t.n;
+// The product that can be worked out on this state: its term, or null
+export function calcTerm(s, alone = xAlone) {
+  if (!s.board || alone(s.board)) return null;
+  const f = productOf(s.board);
+  return f ? findTerm(s.board, f.id).term : null;
+}
+function calcAction(state, action, alone) {
+  const lx = state.lx;
+  if (action.type === 'lxCalc') {
+    if (!canGrab(state)) return state;
+    const t = calcTerm(state, alone);
+    if (!t || (action.id && action.id !== t.id)) return state;
+    const s = structuredClone(state);
+    Object.assign(s, { menu: null, amountEntry: '', typing: null, hint: null, spot: null });
+    s.lx.calc = { id: t.id, entry: '', wrong: false };
+    s.ui = { ...UI0, focus: 'calc' };
+    return say(s, 'lxCalcAsk', calcParams(s, t));
+  }
+  if (!lx.calc) return null;
+  const t = findTerm(state.board, lx.calc.id)?.term;
+  if (!t) return null;
+  if (isTyping(action)) {
+    const entry = typeInto(lx.calc.wrong ? '' : lx.calc.entry, action, 'integer');
+    if (entry === lx.calc.entry && !lx.calc.wrong) return state;
+    const s = structuredClone(state);
+    s.lx.calc = { ...s.lx.calc, entry, wrong: false };
+    s.ui = { ...UI0, focus: 'calc' };
+    return s;
+  }
+  if (action.type === 'lxApply' || action.type === 'go') {
+    const c = lx.calc;
+    if (!/^-?\d+$/.test(c.entry)) return withUi(state, { shake: true, focus: 'calc' });
+    const s = structuredClone(state);
+    const value = calcValue(t);
+    if (Number(c.entry) !== value) {
+      s.lx.calc = { ...c, wrong: true };
+      s.lx.log.sumsWrong += 1;
+      s.ui = { ...UI0 };
+      return say(s, 'lxCalcWrong', { ...calcParams(s, t), typed: c.entry.replace('-', '−') }, true);
+    }
+    s.history.push({ lxKind: 'calc', board: s.board, rows: [...s.rows], prevBoard: s.prevBoard, lights: s.lights, hand: s.lx.hand, negIds: s.lx.negIds });
+    const side = findTerm(s.board, t.id).side;
+    const next = { ...s.board, [side]: s.board[side].map((u) => (u.id === t.id ? { id: newId(), kind: 'num', v: value } : u)) };
+    s.board = next;
+    s.prevBoard = next;
+    s.rows.push({ type: 'eq', board: next });
+    s.lights = { ...s.lights, solved: alone(next) ? 'green' : 'off' };
+    s.lx.calc = null;
+    s.ui = { ...UI0 };
+    return say(s, 'lxCalculated', { value: signed(value) });
+  }
+  return null;
 }
 
 // ---------- combining two x-terms (Build M): the sum typed whole, `5x` ----------
@@ -530,6 +601,7 @@ export const ADD_ERRORS = {
   aUndoGuess: { target: 'subst', lit: ['substLast', 'board'] },                // (and the seesaw that shows the two sides, when it is up)
   aWrong: { target: 'subst', clear: true, lit: ['substLast', 'board'] },
   lxCombineWrong: { target: 'sumbox', label: 'check this', lit: ['pair'] },       // (the two numbers being combined stay lit too)
+  lxCalcWrong: { target: 'calcbox', label: 'check this', lit: ['calc'] },          // (the factor and its number stay lit: Build P, Part 2)
 };
 // A wrong move on the seesaw (Build F, Part 3): a picture spotlight. The pair that combined beside x is drawn again, its cancelled pairs
 // crossed off and what is left (or what joined) lit; the side without x is lit too. Undo, then the hint, as on the bare screen. The

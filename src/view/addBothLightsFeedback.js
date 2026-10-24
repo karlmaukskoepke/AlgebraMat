@@ -11,6 +11,11 @@ const LX = {
   lxCombineAsk: (p) => (p.x ? `What is ${p.sum}? Type the number in front of x.` : `What is ${p.sum}? Type it in the box.`),
   lxCombineWrong: (p) => `${p.sum} is not ${String(p.typed).replace('-', '−')}. Press Undo and try again.`,
   lxCombined: () => 'Combined: one term instead of two.',
+  // a product worked out (Build P, Part 2)
+  lxCalcAsk: (p) => `What is ${p.expr}? Type it in the box.`,
+  lxCalcWrong: (p) => `${p.expr} is not ${p.typed}. Press Undo and try again.`,
+  lxCalculated: () => 'Worked out: one number.',
+  mCalcHint: (p) => { const by = p.by.startsWith('−') ? `(${p.by})` : p.by; return p.div ? `${p.expr}: what times ${p.by} makes ${p.b}? Click the fraction bar and type it.` : `${p.expr} is the same as ${p.b} ÷ ${by}. Click the × and type it.`; },
   lxCombinedAlone: () => 'Combined. Now type what x is.',
   lxNegShown: (p) => `Subtracting is adding a negative: this is ${p.neg}, a negative number. Tap its minus again to go back.`,
   lxUndone: () => 'Undone.',

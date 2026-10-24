@@ -7,17 +7,21 @@
 
 import { html } from './addBothMat.js';
 import { spotlightLayer } from './spotlight.js';
-import { nudgeOf } from '../engine/nudge.js';
+import { nudgeOf, calcParams } from '../engine/nudge.js';
 
 export const NUDGE_WAIT = 2500;        // idle before the glow
 const GLOW_MS = 1500;                  // the glow alone, before the pop-up
 const GHOST_EVERY = 3600;              // the ghost again, while nothing happens
 const reduceMotion = () => typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-// The words of each nudge (the Part 2 nudge adds its own)
-export function nudgeText(n, board) {
+// The words of each nudge
+export function nudgeText(n, s) {
   if (n.kind === 'combine') return 'Drag one onto the other to combine them.';
-  if (n.kind === 'calc') return n.text ?? '';
+  if (n.kind === 'calc') {
+    const t = [...s.board.left, ...s.board.right].find((u) => u.id === n.id);
+    const p = calcParams(s, t);
+    return p.div ? `Click the fraction bar to divide ${p.b} by ${p.by}.` : `Click the × to work out ${p.expr}.`;
+  }
   return '';
 }
 
@@ -25,7 +29,7 @@ export function nudgeText(n, board) {
 function targetsOf(root, n) {
   const tok = (id) => root.querySelector(`.lx-live [data-tok="${id}"]`);
   if (n.kind === 'combine') return [tok(n.a), tok(n.b)].filter(Boolean);
-  if (n.kind === 'calc') return [root.querySelector(`.lx-live [data-calc="${n.id}"]`)].filter(Boolean);
+  if (n.kind === 'calc') return [root.querySelector(`.lb-stack [data-action="lxCalc"][data-id="${n.id}"]`)].filter(Boolean);   // (the × or the fraction bar)
   return [];
 }
 
@@ -101,7 +105,7 @@ export function bindNudge(root, getSession, { of = nudgeOf, text = nudgeText } =
       return;
     }
     if (phase === 'glow' && now - idleSince >= NUDGE_WAIT + GLOW_MS) {
-      const words = text(n, s.board);
+      const words = text(n, s);
       const layer = spotlightLayer({ kind: 'nudge', target: targets.length > 1 ? targets : targets[0], place: 'below' }, { root, find: () => null, text: words, keepPlace: true });
       layer.classList.add('is-nudgelayer');
       document.body.append(layer);

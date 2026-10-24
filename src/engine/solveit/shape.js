@@ -51,6 +51,8 @@
 //   Q1  x + c = ⅟a(b)         after dividing first: the parenthesis's terms, the other side a fraction (or −(b), after a flip)
 //   Q2  x = ⅟a(b) + k         Q1 after the Add that cancels c: x is alone, the other side is left as it is
 //   Q3  x + c′ = ⅟a(b) + k    an Add at Q1 that did not cancel: waits for Undo
+//   Q4  x + c = b             Q1 with its product worked out (Build P, Part 2: `x + 2 = ⅓(15)` → `x + 2 = 5`)
+//   Q5  x = b + k             Q4 after the Add that cancels c: x is alone, the other side not combined (the student types x)
 
 // The same Add shape with x on the right is the R twin: the same id, with `r: true` (and so on every Flip shape: `12 = −x` is F1, r).
 
@@ -90,6 +92,8 @@ export const SHAPES = {
   Q1: 'x + c = ⅟a(b) (after dividing first)',
   Q2: 'x = ⅟a(b) + k',
   Q3: 'x + c′ = ⅟a(b) + k (an Add that did not cancel)',
+  Q4: 'x + c = b (after the product was worked out)',
+  Q5: 'x = b + k (after Q4\'s Add)',
 };
 
 export const UNKNOWN = 'unknown';
@@ -258,6 +262,9 @@ function distShape(board) {
   }
   if (xNums.length >= 2) return shaped('E1', { a: coef, nums: xNums, ids: nums(mine).slice(0, 2).map((t) => t.id), b: other }, { coef });
   if (xNums.length === 1 && other.length >= 2) return shaped('E4', { a: coef, c: xNums[0], b: other[0], k: other.slice(1) }, { coef });
+  // a plain x after a product was worked out on the divide-first route (Build P, Part 2): `x + 2 = 5`, then `x = 5 − 2`
+  if (coef === 1 && xNums.length === 1 && other.length === 1) return shaped('Q4', { c: xNums[0], b: other[0] }, { coef });
+  if (coef === 1 && !xNums.length && other.length >= 2) return shaped('Q5', { b: other[0], k: other.slice(1) }, { coef });
   const two = twoShape(board);
   return two.id === UNKNOWN ? two : { ...two, family: 'dist', group: false, xPart: base.xPart };
 }

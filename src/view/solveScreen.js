@@ -26,16 +26,27 @@ function termsOf(side, s, o) {
   const out = [];
   side.forEach((t, i) => {
     const subGroup = i > 0 && t.kind === 'group' && t.factor < 0;                  // `5 − 2(x + 2)` (Build M)
+    if (o.swap?.[t.id]) { if (i > 0) out.push(html('span', 'lb-plus', ['+'])); out.push(o.swap[t.id]); return; }   // (a blank in its place: Build P)
     if (i > 0) out.push(html('span', 'lb-plus', [(t.kind === 'num' && t.v < 0) || subGroup ? MINUS : '+']));
     if (t.kind === 'group') {
       // a factor times a parenthesis, written as it is: `3(x + 2)`, `−2(x − 4)` (Build M)
       const f = subGroup ? -t.factor : t.factor;
       out.push(html('span', 'lb-frac lb-group', [f === 1 ? '' : f === -1 ? MINUS : String(f).replace('-', MINUS), '(', ...termsOf(t.inner, s, { ...o, live: false }), ')']));
     } else if (t.kind === 'frac' && (o.div || s?.divIds?.includes(t.id))) {
-      // a row made with the Divide button, in division form (Build O, display only): the side in parentheses over a bar, n beneath
-      out.push(divisionEl(termsOf(t.inner, s, { ...o, live: false, plug: false }), `${t.sign < 0 ? MINUS : ''}${t.n}`));
+      // a row made with the Divide button, in division form (Build O, display only): the side in parentheses over a bar, n beneath.
+      // A product that can be worked out (Build P, Part 2): the bar is the button
+      const calc = o.calc === t.id;
+      const bar = calc ? calcButton(t, 'lb-divbar is-calc', 'Divide: work it out') : null;
+      const el = divisionEl(termsOf(t.inner, s, { ...o, live: false, plug: false }), `${t.sign < 0 ? MINUS : ''}${t.n}`, bar);
+      if (calc || o.calcOn === t.id) el.dataset.calc = t.id;
+      out.push(el);
     } else if (t.kind === 'frac') {
-      out.push(html('span', 'lb-frac', [html('span', 'is-blue', [`${t.sign < 0 ? MINUS : ''}${fractionText(t.n)}`]), '(', ...termsOf(t.inner, s, { ...o, live: false, plug: false }), ')']));
+      // a product that can be worked out (Build P, Part 2): a small × between the fraction and its number is the button
+      const calc = o.calc === t.id;
+      const dot = calc ? [calcButton(t, 'lb-calcdot', 'Multiply: work it out', '×')] : [];
+      const el = html('span', 'lb-frac', [html('span', 'is-blue', [`${t.sign < 0 ? MINUS : ''}${fractionText(t.n)}`]), ...dot, '(', ...termsOf(t.inner, s, { ...o, live: false, plug: false }), ')']);
+      if (calc || o.calcOn === t.id) el.dataset.calc = t.id;
+      out.push(el);
     } else if (t.kind === 'times') {
       // both sides times a number, written out: `−1 × (−x)` (Flip everything's work row, Build J); the number in blue (loop §3D)
       out.push(html('span', 'lb-frac', [html('span', 'is-blue', [`${signed(t.f)} ×`]), ' (', ...termsOf(t.inner, s, { ...o, live: false, plug: false }), ')']));
@@ -79,8 +90,12 @@ export const sideTerms = (terms, s, o = {}) => termsOf(terms, s, { live: false, 
 
 // Division form (Build O): `(5x)` over a bar, the divisor under it in the operation's blue. `top` is the side's elements; `bottom` the
 // divisor's text, or an element (the Divide button's blank).
-export function divisionEl(top, bottom) {
-  return html('span', 'lb-frac lb-divfrac', [html('span', 'lb-divtop', ['(', ...top, ')']), html('span', 'lb-divbar'), typeof bottom === 'string' ? html('span', 'lb-divbot is-blue', [bottom]) : bottom]);
+export function divisionEl(top, bottom, bar = null) {
+  return html('span', 'lb-frac lb-divfrac', [html('span', 'lb-divtop', ['(', ...top, ')']), bar ?? html('span', 'lb-divbar'), typeof bottom === 'string' ? html('span', 'lb-divbot is-blue', [bottom]) : bottom]);
+}
+// The × (or the fraction bar) of a product that can be worked out: a button (Build P, Part 2)
+function calcButton(t, cls, label, text = '') {
+  return html('button', cls, text ? [text] : [], { type: 'button', 'data-action': 'lxCalc', 'data-id': t.id, 'aria-label': label });
 }
 // The small line under a Divide row: "Same as multiplying by ⅕." (−⅓ for a divisor of −3)
 export function sameAsLine(n, sign = 1) {

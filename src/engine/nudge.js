@@ -5,6 +5,8 @@
 // half is view/nudge.js. Pure logic, no DOM.
 
 import { isLike } from './lightsGrab.js';
+import { signed, fractionText } from './solveTerms.js';
+import { MINUS } from './expr.js';
 
 // x alone on its side: the side holds one term, x with nothing in front of it (`x = −3 + 5` is typed, never nudged)
 export function xAloneOn(board) {
@@ -48,10 +50,25 @@ export function productOf(board) {
   return null;
 }
 
-// What to nudge on this state: { kind: 'combine', a, b, side }, or null. Only while x is not alone: at x
-// alone the student types x (the solved value is never displayed).
+// A product's words (Build P, Part 2): `⅓ × 15` (or `15 ÷ 3`, in division form: a fraction the Divide button made), the number, the divisor
+export function calcParams(s, t) {
+  const div = Boolean(s.divIds?.includes(t.id));
+  const b = t.inner[0].v;
+  const neg = t.sign < 0;
+  return {
+    div,
+    expr: div ? `${signed(b)} ÷ ${neg ? `(${MINUS}${t.n})` : t.n}` : `${neg ? MINUS : ''}${fractionText(t.n)} × ${signed(b)}`,
+    b: signed(b),
+    by: `${neg ? MINUS : ''}${t.n}`,
+  };
+}
+
+// What to nudge on this state: { kind: 'calc', id, side, div } (a product to work out: Build P, Part 2) or { kind: 'combine', a, b, side },
+// or null. Only while x is not alone: at x alone the student types x (the solved value is never displayed).
 export function nudgeOf(s) {
   if (!quietState(s) || !s.board || xAloneOn(s.board)) return null;
+  const calc = productOf(s.board);
+  if (calc) return { kind: 'calc', ...calc, div: Boolean(s.divIds?.includes(calc.id)) };
   const pair = combinablePair(s.board);
   if (pair) return { kind: 'combine', ...pair };
   return null;
