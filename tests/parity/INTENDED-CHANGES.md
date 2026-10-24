@@ -503,6 +503,85 @@ sides and Divide it are unchanged, so nothing about them is added. The only diff
 | `savecode:distribute-solve-L4` | none (the card is new) | a v17 code with its Level 4 done | the same |
 | `savecode:distribute-solve-L5` | none (the card is new) | a v17 code with its Level 5 done | the same |
 
+## Build O, Part 2 (2026-10-24): the Moves panel's heading, names and symbols
+
+Compared with the screens re-baselined in Part 0. Problems, save codes, class-sheet records and scripted runs are unchanged (PASS). Every
+screen shows the panel, so every screen changed, and only there: the heading, the symbols, the wider panel. The hover names (each move's
+property of equality) show only on hover, which no recorded state does. No subtraction wording was found to remove (see the report).
+
+| Key | Before | After | Why |
+|---|---|---|---|
+| `screen:add-opening@1366x768` | the panel as Build N left it | the heading "Moves"; a symbol to the left of each move (+, ×, a circle of two arrows, a double arrow); the panel about 30 px wider | Build O, Part 2 |
+| `screen:add-helpful-move@1366x768` | the panel as Build N left it | the heading "Moves"; a symbol to the left of each move (+, ×, a circle of two arrows, a double arrow); the panel about 30 px wider | Build O, Part 2 |
+| `screen:add-red-move@1366x768` | the panel as Build N left it | the heading "Moves"; a symbol to the left of each move (+, ×, a circle of two arrows, a double arrow); the panel about 30 px wider | Build O, Part 2 |
+| `screen:add-partial-move@1366x768` | the panel as Build N left it | the heading "Moves"; a symbol to the left of each move (+, ×, a circle of two arrows, a double arrow); the panel about 30 px wider | Build O, Part 2 |
+| `screen:add-stuck-1@1366x768` | the panel as Build N left it | the heading "Moves"; a symbol to the left of each move (+, ×, a circle of two arrows, a double arrow); the panel about 30 px wider | Build O, Part 2 |
+| `screen:add-stuck-2@1366x768` | the panel as Build N left it | the heading "Moves"; a symbol to the left of each move (+, ×, a circle of two arrows, a double arrow); the panel about 30 px wider | Build O, Part 2 |
+| `screen:add-stuck-3@1366x768` | the panel as Build N left it | the heading "Moves"; a symbol to the left of each move (+, ×, a circle of two arrows, a double arrow); the panel about 30 px wider | Build O, Part 2 |
+| `screen:add-stuck-4@1366x768` | the panel as Build N left it | the heading "Moves"; a symbol to the left of each move (+, ×, a circle of two arrows, a double arrow); the panel about 30 px wider | Build O, Part 2 |
+| `screen:add-teach@1366x768` | the panel as Build N left it | the heading "Moves"; a symbol to the left of each move (+, ×, a circle of two arrows, a double arrow); the panel about 30 px wider | Build O, Part 2 |
+| `screen:add-wrong-guess@1366x768` | the panel as Build N left it | the heading "Moves"; a symbol to the left of each move (+, ×, a circle of two arrows, a double arrow); the panel about 30 px wider | Build O, Part 2 |
+| `screen:add-wrong-guess-undone@1366x768` | the panel as Build N left it | the heading "Moves"; a symbol to the left of each move (+, ×, a circle of two arrows, a double arrow); the panel about 30 px wider | Build O, Part 2 |
+| `screen:add-forced-move@1366x768` | the panel as Build N left it | the heading "Moves"; a symbol to the left of each move (+, ×, a circle of two arrows, a double arrow); the panel about 30 px wider | Build O, Part 2 |
+| `screen:add-end@1366x768` | the panel as Build N left it | the heading "Moves"; a symbol to the left of each move (+, ×, a circle of two arrows, a double arrow); the panel about 30 px wider | Build O, Part 2 |
+| `screen:add-partial-stuck-4@1366x768` | the panel as Build N left it | the heading "Moves"; a symbol to the left of each move (+, ×, a circle of two arrows, a double arrow); the panel about 30 px wider | Build O, Part 2 |
+| `screen:add-partial-teach@1366x768` | the panel as Build N left it | the heading "Moves"; a symbol to the left of each move (+, ×, a circle of two arrows, a double arrow); the panel about 30 px wider | Build O, Part 2 |
+| `screen:add-alone-stuck-1@1366x768` | the panel as Build N left it | the heading "Moves"; a symbol to the left of each move (+, ×, a circle of two arrows, a double arrow); the panel about 30 px wider | Build O, Part 2 |
+| `screen:add-alone-stuck-2@1366x768` | the panel as Build N left it | the heading "Moves"; a symbol to the left of each move (+, ×, a circle of two arrows, a double arrow); the panel about 30 px wider | Build O, Part 2 |
+| `screen:add-alone-stuck-3@1366x768` | the panel as Build N left it | the heading "Moves"; a symbol to the left of each move (+, ×, a circle of two arrows, a double arrow); the panel about 30 px wider | Build O, Part 2 |
+| `screen:add-alone-teach@1366x768` | the panel as Build N left it | the heading "Moves"; a symbol to the left of each move (+, ×, a circle of two arrows, a double arrow); the panel about 30 px wider | Build O, Part 2 |
+| `screen:add-red-stuck@1366x768` | the panel as Build N left it | the heading "Moves"; a symbol to the left of each move (+, ×, a circle of two arrows, a double arrow); the panel about 30 px wider | Build O, Part 2 |
+| `screen:add-L2-stuck-2@1366x768` | the panel as Build N left it | the heading "Moves"; a symbol to the left of each move (+, ×, a circle of two arrows, a double arrow); the panel about 30 px wider | Build O, Part 2 |
+| `screen:div-opening@1366x768` | the panel as Build N left it | the heading "Moves"; a symbol to the left of each move (+, ×, a circle of two arrows, a double arrow); the panel about 30 px wider | Build O, Part 2 |
+| `screen:div-helpful-move@1366x768` | the panel as Build N left it | the heading "Moves"; a symbol to the left of each move (+, ×, a circle of two arrows, a double arrow); the panel about 30 px wider | Build O, Part 2 |
+| `screen:div-failed@1366x768` | the panel as Build N left it | the heading "Moves"; a symbol to the left of each move (+, ×, a circle of two arrows, a double arrow); the panel about 30 px wider | Build O, Part 2 |
+| `screen:div-stuck-1@1366x768` | the panel as Build N left it | the heading "Moves"; a symbol to the left of each move (+, ×, a circle of two arrows, a double arrow); the panel about 30 px wider | Build O, Part 2 |
+| `screen:div-stuck-2@1366x768` | the panel as Build N left it | the heading "Moves"; a symbol to the left of each move (+, ×, a circle of two arrows, a double arrow); the panel about 30 px wider | Build O, Part 2 |
+| `screen:div-teach@1366x768` | the panel as Build N left it | the heading "Moves"; a symbol to the left of each move (+, ×, a circle of two arrows, a double arrow); the panel about 30 px wider | Build O, Part 2 |
+| `screen:div-wrong-guess@1366x768` | the panel as Build N left it | the heading "Moves"; a symbol to the left of each move (+, ×, a circle of two arrows, a double arrow); the panel about 30 px wider | Build O, Part 2 |
+| `screen:div-end@1366x768` | the panel as Build N left it | the heading "Moves"; a symbol to the left of each move (+, ×, a circle of two arrows, a double arrow); the panel about 30 px wider | Build O, Part 2 |
+| `screen:div-failed-stuck@1366x768` | the panel as Build N left it | the heading "Moves"; a symbol to the left of each move (+, ×, a circle of two arrows, a double arrow); the panel about 30 px wider | Build O, Part 2 |
+| `screen:div-alone-stuck-1@1366x768` | the panel as Build N left it | the heading "Moves"; a symbol to the left of each move (+, ×, a circle of two arrows, a double arrow); the panel about 30 px wider | Build O, Part 2 |
+| `screen:div-menu@1366x768` | the panel as Build N left it | the heading "Moves"; a symbol to the left of each move (+, ×, a circle of two arrows, a double arrow); the panel about 30 px wider; the Multiply options without their small × and ÷, and further left | Build O, Part 2 |
+| `screen:flip-opening@1366x768` | the panel as Build N left it | the heading "Moves"; a symbol to the left of each move (+, ×, a circle of two arrows, a double arrow); the panel about 30 px wider | Build O, Part 2 |
+| `screen:two-opening@1366x768` | the panel as Build N left it | the heading "Moves"; a symbol to the left of each move (+, ×, a circle of two arrows, a double arrow); the panel about 30 px wider | Build O, Part 2 |
+| `screen:dist-opening@1366x768` | the panel as Build N left it | the heading "Moves"; a symbol to the left of each move (+, ×, a circle of two arrows, a double arrow); the panel about 30 px wider | Build O, Part 2 |
+| `screen:add-opening@1366x650` | the panel as Build N left it | the heading "Moves"; a symbol to the left of each move (+, ×, a circle of two arrows, a double arrow); the panel about 30 px wider | Build O, Part 2 |
+| `screen:add-helpful-move@1366x650` | the panel as Build N left it | the heading "Moves"; a symbol to the left of each move (+, ×, a circle of two arrows, a double arrow); the panel about 30 px wider | Build O, Part 2 |
+| `screen:add-red-move@1366x650` | the panel as Build N left it | the heading "Moves"; a symbol to the left of each move (+, ×, a circle of two arrows, a double arrow); the panel about 30 px wider | Build O, Part 2 |
+| `screen:add-partial-move@1366x650` | the panel as Build N left it | the heading "Moves"; a symbol to the left of each move (+, ×, a circle of two arrows, a double arrow); the panel about 30 px wider | Build O, Part 2 |
+| `screen:add-stuck-1@1366x650` | the panel as Build N left it | the heading "Moves"; a symbol to the left of each move (+, ×, a circle of two arrows, a double arrow); the panel about 30 px wider | Build O, Part 2 |
+| `screen:add-stuck-2@1366x650` | the panel as Build N left it | the heading "Moves"; a symbol to the left of each move (+, ×, a circle of two arrows, a double arrow); the panel about 30 px wider | Build O, Part 2 |
+| `screen:add-stuck-3@1366x650` | the panel as Build N left it | the heading "Moves"; a symbol to the left of each move (+, ×, a circle of two arrows, a double arrow); the panel about 30 px wider | Build O, Part 2 |
+| `screen:add-stuck-4@1366x650` | the panel as Build N left it | the heading "Moves"; a symbol to the left of each move (+, ×, a circle of two arrows, a double arrow); the panel about 30 px wider | Build O, Part 2 |
+| `screen:add-teach@1366x650` | the panel as Build N left it | the heading "Moves"; a symbol to the left of each move (+, ×, a circle of two arrows, a double arrow); the panel about 30 px wider | Build O, Part 2 |
+| `screen:add-wrong-guess@1366x650` | the panel as Build N left it | the heading "Moves"; a symbol to the left of each move (+, ×, a circle of two arrows, a double arrow); the panel about 30 px wider | Build O, Part 2 |
+| `screen:add-wrong-guess-undone@1366x650` | the panel as Build N left it | the heading "Moves"; a symbol to the left of each move (+, ×, a circle of two arrows, a double arrow); the panel about 30 px wider | Build O, Part 2 |
+| `screen:add-forced-move@1366x650` | the panel as Build N left it | the heading "Moves"; a symbol to the left of each move (+, ×, a circle of two arrows, a double arrow); the panel about 30 px wider | Build O, Part 2 |
+| `screen:add-end@1366x650` | the panel as Build N left it | the heading "Moves"; a symbol to the left of each move (+, ×, a circle of two arrows, a double arrow); the panel about 30 px wider | Build O, Part 2 |
+| `screen:add-partial-stuck-4@1366x650` | the panel as Build N left it | the heading "Moves"; a symbol to the left of each move (+, ×, a circle of two arrows, a double arrow); the panel about 30 px wider | Build O, Part 2 |
+| `screen:add-partial-teach@1366x650` | the panel as Build N left it | the heading "Moves"; a symbol to the left of each move (+, ×, a circle of two arrows, a double arrow); the panel about 30 px wider | Build O, Part 2 |
+| `screen:add-alone-stuck-1@1366x650` | the panel as Build N left it | the heading "Moves"; a symbol to the left of each move (+, ×, a circle of two arrows, a double arrow); the panel about 30 px wider | Build O, Part 2 |
+| `screen:add-alone-stuck-2@1366x650` | the panel as Build N left it | the heading "Moves"; a symbol to the left of each move (+, ×, a circle of two arrows, a double arrow); the panel about 30 px wider | Build O, Part 2 |
+| `screen:add-alone-stuck-3@1366x650` | the panel as Build N left it | the heading "Moves"; a symbol to the left of each move (+, ×, a circle of two arrows, a double arrow); the panel about 30 px wider | Build O, Part 2 |
+| `screen:add-alone-teach@1366x650` | the panel as Build N left it | the heading "Moves"; a symbol to the left of each move (+, ×, a circle of two arrows, a double arrow); the panel about 30 px wider | Build O, Part 2 |
+| `screen:add-red-stuck@1366x650` | the panel as Build N left it | the heading "Moves"; a symbol to the left of each move (+, ×, a circle of two arrows, a double arrow); the panel about 30 px wider | Build O, Part 2 |
+| `screen:add-L2-stuck-2@1366x650` | the panel as Build N left it | the heading "Moves"; a symbol to the left of each move (+, ×, a circle of two arrows, a double arrow); the panel about 30 px wider | Build O, Part 2 |
+| `screen:div-opening@1366x650` | the panel as Build N left it | the heading "Moves"; a symbol to the left of each move (+, ×, a circle of two arrows, a double arrow); the panel about 30 px wider | Build O, Part 2 |
+| `screen:div-helpful-move@1366x650` | the panel as Build N left it | the heading "Moves"; a symbol to the left of each move (+, ×, a circle of two arrows, a double arrow); the panel about 30 px wider | Build O, Part 2 |
+| `screen:div-failed@1366x650` | the panel as Build N left it | the heading "Moves"; a symbol to the left of each move (+, ×, a circle of two arrows, a double arrow); the panel about 30 px wider | Build O, Part 2 |
+| `screen:div-stuck-1@1366x650` | the panel as Build N left it | the heading "Moves"; a symbol to the left of each move (+, ×, a circle of two arrows, a double arrow); the panel about 30 px wider | Build O, Part 2 |
+| `screen:div-stuck-2@1366x650` | the panel as Build N left it | the heading "Moves"; a symbol to the left of each move (+, ×, a circle of two arrows, a double arrow); the panel about 30 px wider | Build O, Part 2 |
+| `screen:div-teach@1366x650` | the panel as Build N left it | the heading "Moves"; a symbol to the left of each move (+, ×, a circle of two arrows, a double arrow); the panel about 30 px wider | Build O, Part 2 |
+| `screen:div-wrong-guess@1366x650` | the panel as Build N left it | the heading "Moves"; a symbol to the left of each move (+, ×, a circle of two arrows, a double arrow); the panel about 30 px wider | Build O, Part 2 |
+| `screen:div-end@1366x650` | the panel as Build N left it | the heading "Moves"; a symbol to the left of each move (+, ×, a circle of two arrows, a double arrow); the panel about 30 px wider | Build O, Part 2 |
+| `screen:div-failed-stuck@1366x650` | the panel as Build N left it | the heading "Moves"; a symbol to the left of each move (+, ×, a circle of two arrows, a double arrow); the panel about 30 px wider | Build O, Part 2 |
+| `screen:div-alone-stuck-1@1366x650` | the panel as Build N left it | the heading "Moves"; a symbol to the left of each move (+, ×, a circle of two arrows, a double arrow); the panel about 30 px wider | Build O, Part 2 |
+| `screen:div-menu@1366x650` | the panel as Build N left it | the heading "Moves"; a symbol to the left of each move (+, ×, a circle of two arrows, a double arrow); the panel about 30 px wider; the Multiply options without their small × and ÷, and further left | Build O, Part 2 |
+| `screen:flip-opening@1366x650` | the panel as Build N left it | the heading "Moves"; a symbol to the left of each move (+, ×, a circle of two arrows, a double arrow); the panel about 30 px wider | Build O, Part 2 |
+| `screen:two-opening@1366x650` | the panel as Build N left it | the heading "Moves"; a symbol to the left of each move (+, ×, a circle of two arrows, a double arrow); the panel about 30 px wider | Build O, Part 2 |
+| `screen:dist-opening@1366x650` | the panel as Build N left it | the heading "Moves"; a symbol to the left of each move (+, ×, a circle of two arrows, a double arrow); the panel about 30 px wider | Build O, Part 2 |
+
 <!-- history: nothing below this line is read by the harness -->
 
 ## History: screen changes accepted by the re-baseline of 2026-10-24 (Build O, Part 0)

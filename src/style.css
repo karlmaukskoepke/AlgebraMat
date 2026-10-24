@@ -3713,3 +3713,12 @@ body[data-input='touch'] #play.is-light #controls .btn-pad { min-width: 48px; mi
 .ds-light .lb-eq { grid-template-columns: minmax(0, 1.7fr) auto minmax(0, 1fr); }
 /* the label of a folded move ("3 · each piece") sits above its row's left edge, small, and never takes a drag meant for the term under it */
 .ds-light .lb-foldtag { pointer-events: none; top: -4px; left: 4px; transform: none; font-size: 14px; }
+
+/* ---------- Build O: the Moves panel (loop rev 2.4): a quiet heading, a floating symbol left of each move, the property as its name ---------- */
+.ui-light .lx-panel .lx-head { font: 700 13px 'Lexend', system-ui, sans-serif; letter-spacing: 0.06em; text-transform: uppercase; color: #8a8576; text-align: center; padding: 0 2px; }
+.ui-light .lx-pgrid { grid-template-columns: 28px 58px auto; gap: 12px 6px; }
+.lx-symcell { display: grid; place-items: center; width: 28px; height: 100%; }
+.lx-symbol { display: block; width: 26px; height: 26px; }
+.lx-symcell:has(+ .lx-move.is-grey) .lx-symbol { opacity: 0.45; }
+.ui-light .lx-panel .lx-move[data-tip]:hover::after, .ui-light .lx-panel .lx-move[data-tip]:focus-visible::after { right: calc(100% + 44px); white-space: normal; width: max-content; max-width: 300px; line-height: 1.3; }
+.ui-light .lx-panel .mo-flyout { right: calc(100% + 44px); }

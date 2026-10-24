@@ -5,13 +5,12 @@
 import { html } from './addBothMat.js';
 
 const box = () => html('span', 'mo-box');
-const sign = (t) => html('span', 'mo-sign', [t], { 'aria-hidden': 'true' });
 const unit = () => html('span', 'mo-frac', [html('span', 'mo-one', ['1']), html('span', 'mo-bar'), box()]);
 const frac = () => html('span', 'mo-frac', [box(), html('span', 'mo-bar'), box()]);
-// each option is the move's own form, both sides: n ( ) = n ( ), with a small × or ÷ beside it
+// each option is the move's own form, both sides: n ( ) = n ( ) (Build O: the small × and ÷ beside them went; the panel's symbols say it)
 const LOOK = {
-  whole: () => [sign('×'), box(), ' ( ) = ', box(), ' ( )'],
-  div: () => [sign('÷'), unit(), ' ( ) = ', unit(), ' ( )'],
+  whole: () => [box(), ' ( ) = ', box(), ' ( )'],
+  div: () => [unit(), ' ( ) = ', unit(), ' ( )'],
   frac: () => [frac(), ' ( ) = ', frac(), ' ( )'],
   flip: () => ['−1 × ( )'],
 };
