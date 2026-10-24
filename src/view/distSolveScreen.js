@@ -6,15 +6,15 @@
 
 import { renderAddBothScreen, SILENT, NUDGE } from './addBothScreen.js';
 import { moveRow, fractionChoices } from './multiplyRow.js';
-import { multiplyOptions } from './multiplyOptions.js';
-import { goReady, MULT_KINDS } from '../engine/multiplyMenu.js';
+import { multiplyMoves } from './multiplyOptions.js';
+import { goReady } from '../engine/multiplyMenu.js';
 import { spotlightLayer } from './spotlight.js';
 import { distSolveFeedbackText } from './distSolveFeedback.js';
 import { solve, xAlone, singleTerm, optionOf, hasGroup, DIST_MENU, DIST_SPOT, coefOn } from '../engine/cards/distribute.js';
 import { lightsAnswerLive, moveOwed } from '../engine/addBothLights.js';
 
 const { fracOpen, fracOf } = DIST_MENU;
-const KINDS = [...MULT_KINDS, 'flip'];
+const KINDS = ['whole', 'div', 'frac', 'flip'];
 
 export const introOpen = (s) => moveOwed(s) && !s.introSeen;
 
@@ -47,13 +47,11 @@ const CARD = {
   // Multiply (Divide live once each side is one term) and Flip everything (its own button, the same rule). On a forced problem the move
   // owed is the factor while there is a parenthesis (ringed in the row), else the move this equation needs.
   panel(s, moves) {
-    const grey = MULT_KINDS.filter((k) => optionOf(k, s) !== 'live');
-    const flyout = s.mopts && !s.mopts.kind ? multiplyOptions(MULT_KINDS, s.ui?.preview, grey) : null;
     const owed = moveOwed(s) && !s.menu && !s.mopts && !s.sub && !xAlone(s.board);
     const one = singleTerm(s.board) && !hasGroup(s.board);
     const flipNeeded = one && coefOn(s.board) < 0;
-    moves.multiply = { live: true, move: 'mult', action: 'multOpen', label: 'Multiply', pressed: s.menu === 'fraction' || (Boolean(s.mopts) && s.mopts.kind !== 'flip'), ring: owed && one && !flipNeeded, flyout };
-    if (optionOf('flip', s) === 'live') moves.flip = { live: true, move: 'flip', action: 'flipPick', label: 'Flip everything (× −1)', pressed: s.mopts?.kind === 'flip', ring: owed && flipNeeded, attrs: { 'data-mopt': 'flip' } };
+    Object.assign(moves, multiplyMoves(s, optionOf, { ring: owed && one && !flipNeeded ? 'divide' : null }));
+    if (optionOf('flip', s) === 'live') moves.flip = { live: true, move: 'flip', action: 'flipPick', pressed: s.mopts?.kind === 'flip', ring: owed && flipNeeded, attrs: { 'data-mopt': 'flip' } };
     if (owed && (one || hasGroup(s.board))) moves.add.ring = false;
   },
   popups(s, wrap, o, sp) {

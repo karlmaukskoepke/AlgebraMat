@@ -55,12 +55,12 @@ const coefText = (c) => (c === 1 ? 'x' : c === -1 ? '−x' : `${signed(c)}x`);
 // What Multiply's options are on this card (Build L): the whole number and the general fraction belong to later cards; Divide is live once
 // each side is one term; Flip everything (its own button, or dividing by −1) too, from Level 5. A greyed option says why when tapped.
 export function optionOf(kind, s) {
-  if (kind === 'whole' || kind === 'frac') return 'grey';
+  if (kind === 'whole') return 'grey';                                    // (Build O: the Fraction option is live again, like Divide)
   if (kind === 'flip' && s.level < FLIP_LEVEL) return 'grey';
   return singleTerm(s.board) ? 'live' : 'grey';
 }
 export function greyKey(kind, s) {
-  if (kind === 'whole' || kind === 'frac') return 'aLater';
+  if (kind === 'whole') return 'aLater';
   if (kind === 'flip' && s.level < FLIP_LEVEL) return 'aLaterLevel';
   return 'wOneTerm';
 }

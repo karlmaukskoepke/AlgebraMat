@@ -27,7 +27,7 @@ const ACTIONS = [
   ...[0, 1, 2, 3, 5, 7].map((digit) => ({ type: 'digit', digit })), { type: 'toggleSign' }, { type: 'backspace' }, { type: 'typeChar', ch: 'x' }, { type: 'fracSlash' },
   { type: 'check' }, { type: 'nextLine' }, { type: 'foldNext' }, { type: 'placeValue' }, { type: 'go' }, { type: 'next' },
   { type: 'undo' }, { type: 'spotDismiss' }, { type: 'introNext' }, { type: 'stuck' }, { type: 'teach' }, { type: 'startOver' }, { type: 'lxCancel' },
-  { type: 'multOpen' }, { type: 'multPick', kind: 'whole' }, { type: 'multPick', kind: 'div' }, { type: 'multPick', kind: 'frac' }, { type: 'flipPick' },
+  { type: 'multOpen' }, { type: 'multPick', kind: 'whole' }, { type: 'divPick' }, { type: 'multPick', kind: 'frac' }, { type: 'flipPick' },
   ...[2, 3, 4, 5].map((n) => ({ type: 'take', n })), { type: 'choose', move: 'add' }, { type: 'choose', move: 'distribute' }, { type: 'lxApply' },
   { type: 'ui', patch: { preview: 'div' } }, { type: 'ui', patch: { preview: 'whole' } },
 ];
@@ -38,7 +38,7 @@ function moves(s) {
   const sh = shapeOf(s);
   const out = [[{ type: 'foldNext' }], [{ type: 'nextLine' }, { type: 'nextLine' }, { type: 'nextLine' }], [{ type: 'lxApply' }], [{ type: 'teach' }, { type: 'go' }, { type: 'foldNext' }]];
   if (sh.xSum) out.push([{ type: 'choose', move: 'add' }, ...digits(-sh.xSum), { type: 'go' }, { type: 'lxApply' }, { type: 'foldNext' }]);
-  if (sh.coef && Math.abs(sh.coef) > 1) out.push([{ type: 'multOpen' }, { type: 'multPick', kind: 'div' }, ...digits(sh.coef), { type: 'go' }, { type: 'foldNext' }]);
+  if (sh.coef && Math.abs(sh.coef) > 1) out.push([{ type: 'divPick' }, ...digits(sh.coef), { type: 'go' }, { type: 'foldNext' }]);
   if (sh.coef < 0) out.push([{ type: 'flipPick' }, { type: 'go' }, { type: 'foldNext' }]);
   if (sh.group) out.push([{ type: 'choose', move: 'distribute' }, { type: 'focus', target: 'dist', index: 0 }, ...digits(sh.params?.a * sh.params?.n || 0), { type: 'go' }, ...digits(sh.params?.a * sh.params?.c || 0), { type: 'go' }, { type: 'foldNext' }]);
   // Distribute's moves (Build M): tap a subtracted factor's minus, drop the factor on its parenthesis and type the products, and drop a

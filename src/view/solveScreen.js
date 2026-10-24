@@ -31,6 +31,9 @@ function termsOf(side, s, o) {
       // a factor times a parenthesis, written as it is: `3(x + 2)`, `−2(x − 4)` (Build M)
       const f = subGroup ? -t.factor : t.factor;
       out.push(html('span', 'lb-frac lb-group', [f === 1 ? '' : f === -1 ? MINUS : String(f).replace('-', MINUS), '(', ...termsOf(t.inner, s, { ...o, live: false }), ')']));
+    } else if (t.kind === 'frac' && o.div) {
+      // a row made with the Divide button, in division form (Build O, display only): the side in parentheses over a bar, n beneath
+      out.push(divisionEl(termsOf(t.inner, s, { ...o, live: false, plug: false }), `${t.sign < 0 ? MINUS : ''}${t.n}`));
     } else if (t.kind === 'frac') {
       out.push(html('span', 'lb-frac', [html('span', 'is-blue', [`${t.sign < 0 ? MINUS : ''}${fractionText(t.n)}`]), '(', ...termsOf(t.inner, s, { ...o, live: false, plug: false }), ')']));
     } else if (t.kind === 'times') {
@@ -66,11 +69,29 @@ const charsOf = (list) => list.map((x) => (x.kind === 'frac' || x.kind === 'neg'
 const eqClass = (chars) => (chars > 30 ? ' is-xlong' : chars > 20 ? ' is-long' : '');
 
 const sideEls = (board, s, o) => { const oo = { ...o, xi: { n: 0 } }; return [termsOf(board.left, s, oo), termsOf(board.right, s, oo)]; };
-// A side as written, inert (the move's preview row).
-export const sideTerms = (terms, s) => termsOf(terms, s, { live: false, plug: false });
+const isDiv = (row) => row.shown === 'div';
+// A side as written, inert (the move's preview row). `div`: its fractions in division form (a row made with the Divide button, Build O).
+export const sideTerms = (terms, s, o = {}) => termsOf(terms, s, { live: false, plug: false, ...o });
+
+// Division form (Build O): `(5x)` over a bar, the divisor under it in the operation's blue. `top` is the side's elements; `bottom` the
+// divisor's text, or an element (the Divide button's blank).
+export function divisionEl(top, bottom) {
+  return html('span', 'lb-frac lb-divfrac', [html('span', 'lb-divtop', ['(', ...top, ')']), html('span', 'lb-divbar'), typeof bottom === 'string' ? html('span', 'lb-divbot is-blue', [bottom]) : bottom]);
+}
+// The small line under a Divide row: "Same as multiplying by ⅕." (−⅓ for a divisor of −3)
+export function sameAsLine(n, sign = 1) {
+  return html('p', 'mo-sameas', ['Same as multiplying by ', html('span', 'is-blue', [`${sign < 0 ? MINUS : ''}${fractionText(n)}`]), '.']);
+}
+// the divisor of a row made with the Divide button (its first fraction), or null
+export function divisorOf(row) {
+  if (row?.shown !== 'div' || row.failed) return null;
+  const f = [...row.board.left, ...row.board.right].find((t) => t.kind === 'frac');
+  return f ? { n: f.n, sign: f.sign < 0 ? -1 : 1 } : null;
+}
 
 // What a folded move says it did, above its equation: `⅓ of both sides`, `−⅓ of both sides`, `−1 × both sides` (Build J).
 export function foldTag(label) {
+  if (label.shown === 'div') return html('span', 'lb-foldtag', ['both sides ', html('span', 'is-blue', [`÷ ${label.sign < 0 ? MINUS : ''}${label.n}`])]);   // (made with Divide, Build O)
   if (label.dist !== undefined) return html('span', 'lb-foldtag', [html('span', 'is-blue', [`${signed(label.dist)} ·`]), ' each piece']);   // a distribute (Build M)
   if (label.flip) return html('span', 'lb-foldtag', [html('span', 'is-blue', [`${MINUS}1 ×`]), ' both sides']);
   return html('span', 'lb-foldtag', [html('span', 'is-blue', [`${label.sign < 0 ? MINUS : ''}${fractionText(label.n)}`]), ' of both sides']);
@@ -84,15 +105,16 @@ export function stackRows(s) {
   return s.rows.map((row, i) => {
     if (row.type === 'work') {
       // a move written as an equation: the fraction of both whole sides (a failed try is marked)
-      const [l, r] = sideEls(row.board, s, { live: false, plug: false });
-      const w = equationRow(l, r, `lb-work${row.failed ? ' is-failed' : ''}${eqClass(charsOf([...row.board.left, ...row.board.right]))}`);
+      const [l, r] = sideEls(row.board, s, { live: false, plug: false, div: isDiv(row) });
+      const w = equationRow(l, r, `lb-work${row.failed ? ' is-failed' : ''}${isDiv(row) ? ' is-division' : ''}${eqClass(charsOf([...row.board.left, ...row.board.right]))}`);
       w.setAttribute('aria-hidden', 'true');
       if (row.failed) w.append(html('span', 'lb-failmark', ['✗']));
-      return html('div', 'lb-rowwrap has-work is-settled', [w]);
+      const d = divisorOf(row);
+      return html('div', 'lb-rowwrap has-work is-settled', [w, ...(d ? [sameAsLine(d.n, d.sign)] : [])]);
     }
     const plug = i === plugIdx;
-    const [l, r] = sideEls(row.board, s, { live: i === last, plug });
-    const eq = equationRow(l, r, eqClass(charsOf([...row.board.left, ...row.board.right])));
+    const [l, r] = sideEls(row.board, s, { live: i === last, plug, div: isDiv(row) });
+    const eq = equationRow(l, r, `${isDiv(row) ? 'is-division ' : ''}` + eqClass(charsOf([...row.board.left, ...row.board.right])));
     eq.setAttribute('role', 'img');
     eq.setAttribute('aria-label', 'The equation');
     const kids = [];                                                // which equation is being checked is said on its own line above the check rows

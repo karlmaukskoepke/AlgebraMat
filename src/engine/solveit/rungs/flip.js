@@ -26,7 +26,7 @@ const REMINDERS = {
   },
   // ax = b after a flip: Multiply's options open with Divide lit and previewed (Build L) (Divide it's reminder, with these numbers)
   F3(s, shape) {
-    s.mopts = { kind: null, entry: '' };
+    s.mopts = { kind: null, entry: '', lit: 'div' };              // (Build O: the Divide button is lit, not Multiply's options)
     s.ui = { ...(s.ui ?? {}), preview: 'div' };
     return { target: 'coef', key: 'dReminder', params: { boxes: shape.params.a, frac: fractionText(shape.params.a) }, move: 'divOption' };
   },

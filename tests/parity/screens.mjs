@@ -25,7 +25,8 @@ const DIV3 = 'pack=divide-it&level=3&seed=7';          // 5x = −15
 const add = (k) => [['click', '[data-action="choose"][data-move="add"]'], ['type', k], ['click', '[data-action="go"]']];
 // Dividing by n, the way main does it now (2026-10-24, Build O, Part 0): Multiply, its Divide option, n, Go. (Before, these steps clicked
 // a "Take a fraction" button that has not existed since Build D-2, so the div-* moves never happened and those pictures showed no move.)
-const take = (n) => [['click', '[data-action="multOpen"]'], ['click', '[data-action="multPick"][data-kind="div"]'], ['type', n], ['click', '[data-action="go"]']];
+// (Build O, Part 3: the Divide button, its own way in to the same move)
+const take = (n) => [['click', '[data-action="divPick"]'], ['type', n], ['click', '[data-action="go"]']];
 const stuck = ['click', '[data-action="stuck"]'];
 const teach = ['click', '[data-action="teach"]'];
 const next = ['click', '[data-action="nextLine"]'];

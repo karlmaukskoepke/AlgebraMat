@@ -14,14 +14,14 @@ import { coefOn } from '../src/engine/fractionMove.js';
 
 // Build L: the Multiply menu is Multiply / Divide / Fraction; Flip everything left it (its own button); −1 typed is Flip everything.
 const digit = (d) => ({ type: 'digit', digit: d });
-const divide = (n) => [{ type: 'multOpen' }, { type: 'multPick', kind: 'div' }, ...(n < 0 ? [{ type: 'toggleSign' }] : []), digit(Math.abs(n)), { type: 'go' }];
+const divide = (n) => [{ type: 'divPick' }, ...(n < 0 ? [{ type: 'toggleSign' }] : []), digit(Math.abs(n)), { type: 'go' }];
 const flipButton = [{ type: 'flipPick' }, { type: 'go' }];
 // what a student sees and what the class sheet gets: the rows, the board, the lights, the words (ids aside)
 const view = (s) => JSON.stringify({ rows: s.rows, board: s.board, lights: s.lights, feedback: s.feedback, history: s.history.length, moves: s.moves, label: s.lastMove }).replace(/"id":"[^"]*"/g, '');
 
 describe('the menu', () => {
-  it('has three options, in order, and no −1 option', () => {
-    expect(MULT_KINDS).toEqual(['whole', 'div', 'frac']);
+  it('has two options again (Build O: Divide is its own button), and no −1 option', () => {
+    expect(MULT_KINDS).toEqual(['whole', 'frac']);
     expect(goReady({ kind: 'div', entry: '-3' })).toBe(true);
     expect([goReady({ kind: 'div', entry: '-' }), goReady({ kind: 'div', entry: '' }), goReady({ kind: 'div', entry: '12' })]).toEqual([false, false, false]);
   });
@@ -31,9 +31,9 @@ describe('Flip everything: Divide from saved Level 4, a negative divisor, and di
   const r = withSpotlight(FLIP_MENU.withMenu(reduceFlip), FLIP_SPOT);
   const go = (s, ...a) => a.reduce(r, s);
   it('which options are live: Divide from Level 4; Multiply and Fraction greyed; Flip is the button', () => {
-    expect(MULT_KINDS.map((k) => flipOption(k, { level: 3 }))).toEqual(['grey', 'grey', 'grey']);
-    expect(MULT_KINDS.map((k) => flipOption(k, { level: 4 }))).toEqual(['grey', 'live', 'grey']);
-    expect(go(newFlip(makeFlip(3, -4), { level: 4 }), { type: 'multOpen' }, { type: 'multPick', kind: 'frac' }).feedback.key).toBe('aLater');
+    expect(['whole', 'div', 'frac'].map((k) => flipOption(k, { level: 3 }))).toEqual(['grey', 'grey', 'grey']);
+    expect(['whole', 'div', 'frac'].map((k) => flipOption(k, { level: 4 }))).toEqual(['grey', 'live', 'live']);   // (Build O: Fraction live with Divide)
+    expect(go(newFlip(makeFlip(3, -4), { level: 4 }), { type: 'multOpen' }, { type: 'multPick', kind: 'whole' }).feedback.key).toBe('aLater');
   });
   it('−3x = 12: dividing by −3 is −⅓ of both sides in one move; by 3 then the flip, or the flip then by 3, also finish', () => {
     const p = makeFlip(3, -4);
@@ -54,7 +54,7 @@ describe('Flip everything: Divide from saved Level 4, a negative divisor, and di
     expect(rec(byDivide)).toEqual(rec(byButton));
   });
   it('the Divide row is written in multiplication form (its label is the screen’s); a second digit gets the pop-up', () => {
-    const s = go(newFlip(makeFlip(3, -4), { level: 4 }), { type: 'multOpen' }, { type: 'multPick', kind: 'div' }, { type: 'toggleSign' }, digit(3), digit(3));
+    const s = go(newFlip(makeFlip(3, -4), { level: 4 }), { type: 'divPick' }, { type: 'toggleSign' }, digit(3), digit(3));
     expect([s.mopts, s.feedback.key, flipFeedbackText(s.feedback)]).toEqual([{ kind: 'div', entry: '-3' }, 'dDivOneDigit', 'Enter a one-digit number to divide by.']);
   });
 });
@@ -73,11 +73,11 @@ describe('Two-step: Divide once each side is one term; a negative and −1 only 
   it('the options before and after the Add: Divide greyed with Build K’s words, then live', () => {
     const p = makeTwoStep('ax+b', 3, 4, 5);
     const s = start(p, 1);
-    expect(MULT_KINDS.map((k) => optionOf(k, s))).toEqual(['grey', 'grey', 'grey']);
-    expect(twoStepFeedbackText(run(s, { type: 'multOpen' }, { type: 'multPick', kind: 'div' }).feedback)).toBe('That move works once each side is one term.');
+    expect(['whole', 'div', 'frac'].map((k) => optionOf(k, s))).toEqual(['grey', 'grey', 'grey']);
+    expect(twoStepFeedbackText(run(s, { type: 'divPick' }).feedback)).toBe('That move works once each side is one term.');
     const one = toSingle(s);
     expect(boardText(one.board)).toBe('3x = 15');
-    expect(MULT_KINDS.map((k) => optionOf(k, one))).toEqual(['grey', 'live', 'grey']);
+    expect(['whole', 'div', 'frac'].map((k) => optionOf(k, one))).toEqual(['grey', 'live', 'live']);
     expect(boardText(run(one, ...divide(3)).board)).toBe('x = ⅓(15)');
   });
   it('below Level 5, dividing by −3 or by −1 says it unlocks on a later level, and the blank stays open', () => {

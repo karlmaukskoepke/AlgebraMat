@@ -163,7 +163,7 @@ export function withLights(reduce = reduceAddBoth, { alone = xAlone, menuPreview
     // help, a move (Multiply and Flip too: their blanks would take the keys of a sum still open under them, Build N) or a check closes a
     // sum being typed
     let input = state;
-    if ((state.lx.combine || state.lx.distribute) && ['stuck', 'teach', 'choose', 'check', 'multOpen', 'flipPick'].includes(action.type)) { input = structuredClone(state); input.lx.combine = null; input.lx.distribute = null; }
+    if ((state.lx.combine || state.lx.distribute) && ['stuck', 'teach', 'choose', 'check', 'multOpen', 'flipPick', 'divPick'].includes(action.type)) { input = structuredClone(state); input.lx.combine = null; input.lx.distribute = null; }
 
     const s = reduce(input, action);
     if (s === input) return input;                                  // the engine did nothing (a closed sum still counts)

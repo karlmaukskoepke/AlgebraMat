@@ -90,7 +90,7 @@ const digits = (n) => [...String(Math.abs(n))].map((d) => ({ type: 'digit', digi
 const A = {
   add: (k) => [{ type: 'choose', move: 'add' }, ...digits(k), { type: 'go' }],
   // (Build L: taking ⅓ is dividing by 3 on Multiply's Divide option; −⅓ is dividing by −3)
-  frac: (n, sign = 1) => [{ type: 'multOpen' }, { type: 'multPick', kind: 'div' }, ...(sign < 0 ? [{ type: 'toggleSign' }] : []), { type: 'digit', digit: n }, { type: 'go' }],
+  frac: (n, sign = 1) => [{ type: 'divPick' }, ...(sign < 0 ? [{ type: 'toggleSign' }] : []), { type: 'digit', digit: n }, { type: 'go' }],
   flip: () => [{ type: 'flipPick' }, { type: 'go' }],
   trade: () => [{ type: 'choose', move: 'trade' }],
   check: (v) => [{ type: 'focus', target: 'answer' }, ...digits(v), { type: 'check' }, { type: 'placeValue' }, ...Array(6).fill({ type: 'nextLine' })],
@@ -133,10 +133,11 @@ describe('the worked example, 3x + 4 = 19', () => {
     expect(s.stage).toBe('done');
     expect(s.clean).toBe(true);
   });
-  it('Divide and the flip are greyed until each side is one term; Multiply and the general fraction belong to later cards', () => {
-    const s = run(start(p, 5), [{ type: 'multOpen' }, { type: 'multPick', kind: 'div' }]);
+  it('Divide, the fraction and the flip are greyed until each side is one term; the whole number belongs to a later card', () => {
+    const s = run(start(p, 5), [{ type: 'divPick' }]);
     expect(s.feedback.key).toBe('wOneTerm');
-    expect(run(start(p, 5), [{ type: 'multOpen' }, { type: 'multPick', kind: 'frac' }]).feedback.key).toBe('aLater');
+    expect(run(start(p, 5), [{ type: 'multOpen' }, { type: 'multPick', kind: 'frac' }]).feedback.key).toBe('wOneTerm');
+    expect(run(start(p, 5), [{ type: 'multOpen' }, { type: 'multPick', kind: 'whole' }]).feedback.key).toBe('aLater');
     expect(s.menu).not.toBe('fraction');
     expect(run(start(p, 5), [{ type: 'greyMove', move: 'flip' }]).feedback.key).toBe('wOneTerm');
     expect(run(start(p, 1), [{ type: 'greyMove', move: 'flip' }]).feedback.key).toBe('aLaterLevel');

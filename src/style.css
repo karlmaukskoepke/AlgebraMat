@@ -3722,3 +3722,16 @@ body[data-input='touch'] #play.is-light #controls .btn-pad { min-width: 48px; mi
 .lx-symcell:has(+ .lx-move.is-grey) .lx-symbol { opacity: 0.45; }
 .ui-light .lx-panel .lx-move[data-tip]:hover::after, .ui-light .lx-panel .lx-move[data-tip]:focus-visible::after { right: calc(100% + 44px); white-space: normal; width: max-content; max-width: 300px; line-height: 1.3; }
 .ui-light .lx-panel .mo-flyout { right: calc(100% + 44px); }
+
+/* ---------- Build O: the Divide button's division form: each side in parentheses over a big bar, the divisor (or its blank) beneath ---------- */
+.lb-divfrac { display: inline-flex; flex-direction: column; align-items: center; vertical-align: middle; line-height: 1.05; margin: 0 2px; }
+.lb-divtop { white-space: nowrap; }
+.lb-divbar { align-self: stretch; min-width: 40px; border-top: 4px solid #0072b2; margin: 4px 0 4px; }
+.lb-divbot { white-space: nowrap; color: #0072b2; }
+.lb-eq.is-division .lb-side, .lx-ghosteq.is-division .lb-side { align-items: center; }
+.lx-ghost.is-preview .lx-ghosteq.is-division .lb-divbar { border-top-color: #8fb7d3; border-top-style: dashed; }
+.lb-divfrac .dv-fracpart { margin-top: 2px; }
+.mo-sameas { margin: 2px 0 0; font: 700 17px 'Lexend', system-ui, sans-serif; color: #5d5a52; text-align: center; }
+.mo-sameas .is-blue { color: #0072b2; }
+.ts-light .lx-ghost .mo-sameas, .dv-light .lx-ghost .mo-sameas { margin-top: 6px; }
+.lx-movewrap:has(.mo-flyout) .lx-move[data-tip]::after { display: none; }

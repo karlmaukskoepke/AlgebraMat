@@ -17,7 +17,7 @@ const go = (s, ...a) => a.reduce(r, s);
 const keys = (t) => [...String(t)].map((ch) => (/\d/.test(ch) ? { type: 'digit', digit: Number(ch) } : { type: 'typeChar', ch }));
 const flip = [{ type: 'flipPick' }, { type: 'go' }];
 // (Build L: taking 1/3 is dividing by 3 on Multiply's Divide option, and −1/3 is dividing by −3)
-const frac = (text) => { const [top, n] = text.split('/'); return [{ type: 'multOpen' }, { type: 'multPick', kind: 'div' }, ...(top.startsWith('-') ? [{ type: 'typeChar', ch: '-' }] : []), ...keys(n), { type: 'go' }]; };
+const frac = (text) => { const [top, n] = text.split('/'); return [{ type: 'divPick' }, ...(top.startsWith('-') ? [{ type: 'typeChar', ch: '-' }] : []), ...keys(n), { type: 'go' }]; };
 const check = (v) => [...keys(v), { type: 'check' }, { type: 'placeValue' }, { type: 'nextLine' }, { type: 'nextLine' }];
 const said = (s) => flipFeedbackText(s.feedback);
 const seeds = 200;
@@ -105,7 +105,7 @@ describe('the moves', () => {
     expect(boardText(s.board)).toBe('3x = −12');
     expect(spotOf(s, FLIP_SPOT)).toMatchObject({ kind: 'hint', move: 'divOption' });
     expect(said(s)).toBe('To get one x, divide both sides by 3 (that is, multiply by ⅓): one of the 3 x boxes is ⅓.');
-    expect([s.mopts, s.ui.preview]).toEqual([{ kind: null, entry: '' }, 'div']);
+    expect([s.mopts, s.ui.preview]).toEqual([{ kind: null, entry: '', lit: 'div' }, 'div']);   // (Build O: the Divide button lit)
   });
   it('a fraction that does not split gets the shared Divide feedback, and the fraction cycle after Undo', () => {
     let s = go(newFlip(makeFlip(3, -4), { level: 4 }), ...frac('1/2'));
@@ -114,12 +114,12 @@ describe('the moves', () => {
     s = go(s, { type: 'undo' });
     expect(spotOf(s, FLIP_SPOT)).toMatchObject({ kind: 'hint', choose: true });
   });
-  it('Multiply here (Build L): the whole number and the fraction are greyed; Divide is greyed until saved Level 4; no −1 option', () => {
+  it('Multiply here (Build O): the whole number is greyed; Divide and the fraction are greyed until saved Level 4; no −1 option', () => {
     const l2 = go(newFlip(makeFlip(1, -5), { level: 2 }), { type: 'multOpen' });
     expect(l2.mopts).toEqual({ kind: null, entry: '' });
     expect(go(l2, { type: 'multPick', kind: 'whole' }).feedback.key).toBe('aLater');
-    expect(go(l2, { type: 'multPick', kind: 'div' }).feedback.key).toBe('aLaterLevel');
-    expect(go(l2, { type: 'multPick', kind: 'frac' }).feedback.key).toBe('aLater');
+    expect(go(l2, { type: 'divPick' }).feedback.key).toBe('aLaterLevel');
+    expect(go(l2, { type: 'multPick', kind: 'frac' }).feedback.key).toBe('aLaterLevel');
     expect(go(l2, { type: 'multPick', kind: 'flip' }).mopts).toBe(null);                       // (not an option: it closes the menu, nothing else)
     expect(boardText(go(newFlip(makeFlip(1, -5), { level: 2 }), ...flip).board)).toBe('x = −(5)');
     expect(go(newFlip(makeFlip(1, -5), { level: 2 }), { type: 'greyMove', move: 'add' }).feedback.key).toBe('aLater');

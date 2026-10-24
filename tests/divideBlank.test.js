@@ -40,39 +40,35 @@ describe('Divide it: the fraction blank and the list after a fraction that does 
 // are Multiply, Divide and Fraction (the −1 option left: Flip everything is its own button); on Divide it, Divide is the move, Multiply is
 // explained, and Fraction is greyed.
 describe('Build D-2 and Build L: Divide it’s Multiply options and the fraction blank', () => {
-  it('opens three options; Divide opens its blank; Fraction is greyed here; a second click closes them', () => {
+  it('opens two options (Build O); the Divide button opens its blank; the whole number is greyed here; a second click closes them', () => {
     let s = run(start(), { type: 'multOpen' });
     expect([Boolean(s.mopts), s.menu]).toEqual([true, null]);
     expect(run(s, { type: 'multOpen' }).mopts).toBe(null);
     s = run(s, { type: 'ui', patch: { preview: 'div' } });
     expect(s.ui.preview).toBe('div');
-    expect(run(s, { type: 'multPick', kind: 'frac' }).feedback.key).toBe('aLater');
-    s = run(s, { type: 'multPick', kind: 'div' });
+    expect(run(s, { type: 'multPick', kind: 'whole' }).feedback.key).toBe('aLater');
+    expect(fracOpen(run(s, { type: 'multPick', kind: 'frac' }))).toBe(true);
+    s = run(s, { type: 'divPick' });
     expect([s.mopts, fracOpen(s)]).toEqual([{ kind: 'div', entry: '' }, false]);
   });
-  it('a whole number, or −1 typed in it, is solid, then Go says why it does not leave one x', () => {
-    let s = run(start(), { type: 'multOpen' }, { type: 'multPick', kind: 'whole' }, digit(3), { type: 'go' });
-    expect(s.feedback).toMatchObject({ key: 'dWholeNo', params: { n: 3, a: 5, made: 15 } });
-    expect(boardText(s.board)).toBe('5x = −15');
-    s = run(start(), { type: 'multOpen' }, { type: 'multPick', kind: 'whole' }, digit(1), { type: 'toggleSign' }, { type: 'go' });
-    expect(s.feedback.key).toBe('dFlipNo');                                  // (−1 is Flip everything, which Divide it explains)
-    expect(run(s, { type: 'undo' }).mopts).toBe(null);
-    expect(run(start(), { type: 'multOpen' }, { type: 'multPick', kind: 'div' }, { type: 'toggleSign' }, digit(1), { type: 'go' }).feedback.key).toBe('dFlipNo');
+  it('dividing by −1 is Flip everything, which Divide it explains', () => {
+    expect(run(start(), { type: 'divPick' }, { type: 'toggleSign' }, digit(1), { type: 'go' }).feedback.key).toBe('dFlipNo');
   });
   it('dividing by 5 is taking ⅕ of both sides: the same rows, lights and history', () => {
-    const div = run(start(), { type: 'multOpen' }, { type: 'multPick', kind: 'div' }, digit(5), { type: 'go' });
+    const div = run(start(), { type: 'divPick' }, digit(5), { type: 'go' });
     const frac = run(start(), { type: 'choose', move: 'fraction' }, digit(1), digit(5), { type: 'go' });
-    const view = (s) => JSON.stringify({ rows: s.rows, board: s.board, lights: s.lights, feedback: s.feedback, history: s.history.length, menu: s.menu }).replace(/"id":"[^"]*"/g, '');
+    // (Build O: the Divide button's rows carry `shown: 'div'`, how they are drawn; everything else is the same)
+    const view = (s) => JSON.stringify({ rows: s.rows.map(({ shown, ...r }) => r), board: s.board, lights: s.lights, feedback: s.feedback, history: s.history.length, menu: s.menu }).replace(/"id":"[^"]*"/g, '');
     expect(view(div)).toBe(view(frac));
     expect(boardText(div.board)).toBe('x = ⅕(−15)');
     expect(div.mopts).toBe(null);
   });
   it('Divide takes one digit (a second one gets the pop-up), ignores a slash, and refuses 0, 1, 7-9 and, here, a negative', () => {
-    let s = run(start(), { type: 'multOpen' }, { type: 'multPick', kind: 'div' }, digit(5), digit(5));
+    let s = run(start(), { type: 'divPick' }, digit(5), digit(5));
     expect([s.mopts.entry, s.feedback.key]).toEqual(['5', 'dDivOneDigit']);
     expect(run(s, { type: 'fracSlash' }).mopts.entry).toBe('5');
     expect(run(s, { type: 'typeChar', ch: '/' }).mopts.entry).toBe('5');
-    const tryIt = (...keys) => run(start(), { type: 'multOpen' }, { type: 'multPick', kind: 'div' }, ...keys, { type: 'go' });
+    const tryIt = (...keys) => run(start(), { type: 'divPick' }, ...keys, { type: 'go' });
     expect(tryIt(digit(0)).feedback.key).toBe('dDivZero');
     expect(tryIt(digit(7)).feedback.key).toBe('dDivBad');
     expect(tryIt(digit(1)).feedback.key).toBe('dDivBad');
@@ -80,7 +76,7 @@ describe('Build D-2 and Build L: Divide it’s Multiply options and the fraction
     expect([neg.feedback.key, neg.feedback.params.typed, boardText(neg.board), neg.mopts]).toEqual(['dDivBad', -5, '5x = −15', { kind: 'div', entry: '-5' }]);
   });
   it('dividing by a number that does not split fails visibly, as the fraction did, and the fraction cycle follows Undo', () => {
-    let s = run(start(), { type: 'multOpen' }, { type: 'multPick', kind: 'div' }, digit(2), { type: 'go' });
+    let s = run(start(), { type: 'divPick' }, digit(2), { type: 'go' });
     expect([s.feedback.key, s.tried]).toEqual(['dFail', [2]]);
     s = run(s, { type: 'undo' });
     expect([s.feedback.key, s.spot.choose, s.menu]).toEqual(['dWhichFraction', true, 'fraction']);

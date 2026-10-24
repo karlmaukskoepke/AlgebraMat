@@ -2,8 +2,8 @@
 // The move icons, one under the other, each a 44 px target, and beside each the small collapsed lights (round dots) of the goals it
 // serves; a dot opens into its goal on hover, focus or a tap (Karl kept them, rev 2). Headed "Moves" (Build O); no labels. Hovering a move (or
 // focusing it) shows its name beside it; on a card with a preview, the move's preview shows on the equation too (the card's pointer
-// code does that, starting faintly as the pointer comes near). The four moves are the properties of equality, in order: Add,
-// Multiply (Take a fraction is multiplying by one), Flip everything, Trade places. A card says which are live; the rest are greyed (a tap says why).
+// code does that, starting faintly as the pointer comes near). The five moves are the properties of equality, in order (Build O): Add,
+// Multiply, Divide (a second way in to multiplying by 1/n), Flip everything, Trade places. A card says which are live; the rest are greyed (a tap says why).
 
 import { html } from './addBothMat.js';
 import { moveIcon } from './lightScreen.js';
@@ -13,6 +13,7 @@ import { moveIcon } from './lightScreen.js';
 export const PANEL_MOVES = [
   { id: 'add', label: 'Addition property of equality: add the same number to both sides', symbol: 'plus', lights: [['fewer', 'Fewer terms']] },
   { id: 'multiply', label: 'Multiplication property of equality', symbol: 'times', lights: [['nofrac', 'No fractions'], ['smaller', 'Smaller numbers'], ['onebox', 'One box']] },
+  { id: 'divide', label: 'Division property of equality', symbol: 'divide', lights: [] },
   { id: 'flip', label: 'Multiplication property of equality: multiply both sides by −1', symbol: 'flip', lights: [['noopp', 'No opposite box']] },
   { id: 'trade', label: 'Symmetric property of equality: if a = b, then b = a', symbol: 'trade', lights: [['xleft', 'x on the left']] },
 ];
@@ -43,6 +44,9 @@ const dashBox = (x, y) => svgEl('rect', { x, y, width: 8, height: 11, rx: 2, fil
 const MINI = {
   add: () => [txt(5, 18, '+', BLUE, 13), dashBox(10, 8), txt(26, 18, '=', GREY, 13), txt(37, 18, '+', BLUE, 13), dashBox(42, 8)],
   multiply: () => [txt(5, 18, 'n', BLUE, 12), txt(13, 18, '( )', GREY, 11), txt(26, 18, '=', GREY, 13), txt(35, 18, 'n', BLUE, 12), txt(43, 18, '( )', GREY, 11)],
+  // `( )/n = ( )/n` (Build O): parentheses over a fraction bar, n beneath, on both sides
+  divide: () => [txt(10, 11, '( )', GREY, 10), svgEl('path', { d: 'M3 14 H17', stroke: BLUE, 'stroke-width': 1.6 }), txt(10, 24, 'n', BLUE, 10), txt(26, 18, '=', GREY, 13),
+    txt(42, 11, '( )', GREY, 10), svgEl('path', { d: 'M35 14 H49', stroke: BLUE, 'stroke-width': 1.6 }), txt(42, 24, 'n', BLUE, 10)],
   flip: () => [txt(9, 18, '−x', GREY, 12), svgEl('path', { d: 'M19 14 H31', stroke: BLUE, 'stroke-width': 1.8, 'marker-end': 'url(#lx-ah)' }), txt(42, 18, 'x', BLUE, 13)],
 };
 // The floating symbols (Build O): + × ÷, a small circle of two arrows (Flip everything), a double arrow (Trade places). 26 px, in ink.
@@ -69,7 +73,7 @@ export function miniIcon(id) {
   return svg;
 }
 
-// moves: { [id]: { live, move (the card's data-move, if not the id), action (its data-action, if not choose), attrs (more attributes), flyout, pressed, preview, ring (a steady ring: the move owed), pulse (the
+// moves: { [id]: { live, greyed (drawn greyed but keeps its own action: a tap says why; Build O), move (the card's data-move, if not the id), action (its data-action, if not choose), attrs (more attributes), flyout, pressed, preview, ring (a steady ring: the move owed), pulse (the
 // move to click now), focus } } ; anything not named is greyed. `disabled`: every live move is off for now (a check being stepped...).
 // `lights`: { key: state } (a light not named is off); `open`: the light opened by hover or a tap; `flash`: lights that flash once;
 // `hand`: a card's own goals reached by hand, after the two (Distribute, combine, solve: No parentheses, Build M).
@@ -82,8 +86,9 @@ export function narrowPanel(moves, { disabled = false, lights = {}, open = null,
     const id = o?.move ?? m.id;
     let b;
     if (o?.live) {
-      b = html('button', `btn btn-move lb-move lx-move${o.pressed ? ' is-on' : ''}${o.preview ? ' is-preview' : ''}${o.near ? ' is-near' : ''}${o.ring ? ' is-target is-ring' : ''}${o.pulse ? ' is-target' : ''}`, [miniIcon(m.id)], {
+      b = html('button', `btn btn-move lb-move lx-move${o.greyed ? ' is-grey' : ''}${o.pressed ? ' is-on' : ''}${o.preview ? ' is-preview' : ''}${o.near ? ' is-near' : ''}${o.ring ? ' is-target is-ring' : ''}${o.pulse ? ' is-target' : ''}`, [miniIcon(m.id)], {
         type: 'button', 'data-action': o.action ?? 'choose', 'data-move': id, 'aria-label': m.label, 'data-tip': m.label, 'data-fk': id, 'aria-pressed': String(Boolean(o.pressed)),
+        ...(o.greyed ? { 'aria-disabled': 'true' } : {}),
         ...(o.attrs ?? {}),
       });
       b.disabled = disabled || Boolean(o.off);

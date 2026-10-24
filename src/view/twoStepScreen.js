@@ -5,15 +5,15 @@
 
 import { renderAddBothScreen, SILENT, NUDGE } from './addBothScreen.js';
 import { moveRow, fractionChoices } from './multiplyRow.js';
-import { multiplyOptions } from './multiplyOptions.js';
-import { goReady, MULT_KINDS } from '../engine/multiplyMenu.js';
+import { multiplyMoves } from './multiplyOptions.js';
+import { goReady } from '../engine/multiplyMenu.js';
 import { spotlightLayer } from './spotlight.js';
 import { twoStepFeedbackText } from './twoStepFeedback.js';
 import { solve, xAlone, singleTerm, optionOf, tradeAvailable, tradePending, TWO_STEP_MENU, TWO_STEP_SPOT, FLIP_LEVEL, coefOn } from '../engine/cards/twoStep.js';
 import { lightsAnswerLive, moveOwed } from '../engine/addBothLights.js';
 
 const { fracOpen, fracOf } = TWO_STEP_MENU;
-const KINDS = [...MULT_KINDS, 'flip'];                    // (the options, and −1 from the Flip button: their rows)
+const KINDS = ['whole', 'div', 'frac', 'flip'];                    // (the options, and −1 from the Flip button: their rows)
 
 export const introOpen = (s) => moveOwed(s) && !s.introSeen;
 
@@ -47,13 +47,11 @@ const CARD = {
   // everything (its own button, from Level 5, once each side is one term; dividing by −1 is the same move). The move owed on a forced problem has the steady ring: Trade places when x is on the
   // right, else the move this equation needs.
   panel(s, moves) {
-    const grey = MULT_KINDS.filter((k) => optionOf(k, s) !== 'live');
-    const flyout = s.mopts && !s.mopts.kind ? multiplyOptions(MULT_KINDS, s.ui?.preview, grey) : null;
     const owed = moveOwed(s) && !s.menu && !s.mopts && !s.sub && !xAlone(s.board);
     const one = singleTerm(s.board);
     const flipNeeded = one && coefOn(s.board) < 0 && s.level >= FLIP_LEVEL;
-    moves.multiply = { live: true, move: 'mult', action: 'multOpen', label: 'Multiply', pressed: s.menu === 'fraction' || (Boolean(s.mopts) && s.mopts.kind !== 'flip'), ring: owed && one && !flipNeeded && !moves.trade, flyout };
-    if (optionOf('flip', s) === 'live') moves.flip = { live: true, move: 'flip', action: 'flipPick', label: 'Flip everything (× −1)', pressed: s.mopts?.kind === 'flip', ring: owed && flipNeeded && !moves.trade, attrs: { 'data-mopt': 'flip' } };
+    Object.assign(moves, multiplyMoves(s, optionOf, { ring: owed && one && !flipNeeded && !moves.trade ? 'divide' : null }));
+    if (optionOf('flip', s) === 'live') moves.flip = { live: true, move: 'flip', action: 'flipPick', pressed: s.mopts?.kind === 'flip', ring: owed && flipNeeded && !moves.trade, attrs: { 'data-mopt': 'flip' } };
     if (moves.trade && owed) { moves.trade.ring = true; moves.trade.pulse = true; }
     if (owed && (one || moves.trade)) moves.add.ring = false;
   },

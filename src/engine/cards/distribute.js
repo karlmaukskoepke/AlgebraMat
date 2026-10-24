@@ -45,10 +45,10 @@ const coefText = (c) => (c === 1 ? 'x' : c === -1 ? '−x' : `${signed(c)}x`);
 // What Multiply's options are on this card: Divide and Flip everything once each side is one term (a negative divides too: −⅓ in one
 // move); the whole number and the general fraction belong to later cards.
 export function optionOf(kind, s) {
-  if (kind === 'whole' || kind === 'frac') return 'grey';
+  if (kind === 'whole') return 'grey';                                    // (Build O: the Fraction option is live again, like Divide)
   return singleTerm(s.board) ? 'live' : 'grey';
 }
-export const greyKey = (kind) => (kind === 'whole' || kind === 'frac' ? 'aLater' : 'wOneTerm');
+export const greyKey = (kind) => (kind === 'whole' ? 'aLater' : 'wOneTerm');
 
 // The lights after a move the term layer makes (a distribute): Fewer terms is not judged there; No parentheses and Solved for x are.
 export const distLights = (s, board) => { const l = lightsOf(shape(s.prevBoard ?? board), shape(board)); return { ...l, fewer: 'off' }; };

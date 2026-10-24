@@ -1,8 +1,9 @@
-// The one Multiply button's three options (Build D-2, Part 4; Build L, loop rev 2.3), beside the button: Multiply, a whole number
-// × ▢ ( ); Divide, ÷ 1/▢ ( ); and Fraction, ▢/▢ ( ). Hovering one previews it on the equation (dashed); clicking it makes it solid.
+// The one Multiply button's options (Build D-2, Part 4; Build O, loop rev 2.4: two again, as before Build L), beside the button: a whole
+// number ▢ ( ) and a fraction ▢/▢ ( ). Divide is the panel's own button (Build O), drawn here too: `multiplyMoves`. Hovering one previews it on the equation (dashed); clicking it makes it solid.
 // Shared by every Solve it card with Multiply.
 
 import { html } from './addBothMat.js';
+import { optionsOpen, MULT_KINDS } from '../engine/multiplyMenu.js';
 
 const box = () => html('span', 'mo-box');
 const unit = () => html('span', 'mo-frac', [html('span', 'mo-one', ['1']), html('span', 'mo-bar'), box()]);
@@ -25,7 +26,24 @@ export function multiplyOptions(kinds, preview, grey = []) {
 }
 
 // The spotlight's selector for a move it lights: a Multiply option ('divOption', 'fracOption'), or a panel move.
-export const optionSel = (m) => (m === 'divOption' ? '[data-mopt="div"]' : m === 'fracOption' ? '[data-mopt="frac"]' : `[data-move="${m}"]`);
+// (Build O: 'divOption', the move the hints name, is the Divide button)
+export const optionSel = (m) => (m === 'divOption' ? '[data-move="div"]' : m === 'fracOption' ? '[data-mopt="frac"]' : `[data-move="${m}"]`);
+
+// The panel's Multiply and Divide buttons on a card with the Multiply menu (Build O): Multiply opens its two options; Divide (its own
+// button, a second way in to the same move) is chosen in one click, previewed on hover (data-mopt), greyed where the card says so (a tap
+// says why), and lit by the hint after Undo. `option(kind, s)` is the card's; `ring`: which of the two has the forced move's ring.
+export function multiplyMoves(s, option, { move = 'mult', ring = null } = {}) {
+  const grey = MULT_KINDS.filter((k) => option(k, s) === 'grey');
+  const open = optionsOpen(s);
+  const divGrey = option('div', s) === 'grey';
+  return {
+    multiply: { live: true, move, action: 'multOpen', pressed: (s.menu === 'fraction' && !s.fail) || open || s.mopts?.kind === 'whole', ring: ring === 'multiply', flyout: open ? multiplyOptions(MULT_KINDS, s.ui?.preview, grey) : null },
+    divide: {
+      live: true, greyed: divGrey, move: 'div', action: 'divPick', pressed: s.mopts?.kind === 'div', ring: ring === 'divide' && !divGrey,
+      preview: !s.mopts?.kind && s.ui?.preview === 'div' && !divGrey, attrs: { 'data-mopt': 'div' },
+    },
+  };
+}
 
 // Hovering an option (or a keyboard focus on it) previews it: the kind under the pointer, or false.
 export function bindMultiplyHover(root, dispatch, getSession) {

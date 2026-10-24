@@ -6,9 +6,9 @@
 
 import { html } from './addBothMat.js';
 import { stackRows, substBlock, forwardButton, srLine, notePopup, FORCED_TEXT, FIRST_TEXT, placeText } from './solveScreen.js';
-import { fracOpen, canPreview, fracOf, typingOpen, previewTyped } from '../engine/divideBlank.js';
-import { multiplyOptions, optionSel } from './multiplyOptions.js';
-import { goReady, MULT_KINDS } from '../engine/multiplyMenu.js';
+import { fracOpen, canPreview, fracOf, typingOpen, previewTyped, divideOption } from '../engine/divideBlank.js';
+import { multiplyMoves, optionSel } from './multiplyOptions.js';
+import { goReady } from '../engine/multiplyMenu.js';
 import { moveRow as sharedMoveRow, fractionChoices as sharedFractionChoices } from './multiplyRow.js';
 import { groupDiagram } from './groupDiagram.js';
 import { divideFeedbackText } from './divideFeedback.js';
@@ -135,14 +135,12 @@ function corners(s) {
   return html('div', 'lx-corners', [undo, html('div', 'lx-cornerright', [over, ...help])]);
 }
 
-// The narrow panel: Multiply (Take a fraction) is the live move; its lights are Smaller numbers and One box.
+// The narrow panel: Divide and Multiply (its Fraction) are the live moves; their lights are Smaller numbers and One box.
 function panel(s) {
   const mapLight = (v) => (v === 'neutral' ? 'off' : v);
   const owed = solve.moveOwed(s) && !s.menu && !s.sub && !xAlone(s.board) && !s.scaffold;
-  // one Multiply button: a click opens its three options beside it (Build D-2, Part 4): Multiply (explained), Divide (the move), Fraction
-  // (greyed: a later card; Build L)
-  const flyout = s.mopts && !s.mopts.kind ? multiplyOptions(MULT_KINDS, s.ui?.preview, ['frac']) : null;
-  const el = narrowPanel({ multiply: { live: true, move: 'fraction', action: 'multOpen', label: 'Multiply', pressed: s.menu === 'fraction' || Boolean(s.mopts), ring: owed && !s.mopts, flyout } }, {
+  // Multiply opens its two options (Build O: the whole number greyed, the Fraction live); Divide is its own button, the move owed
+  const el = narrowPanel(multiplyMoves(s, divideOption, { move: 'fraction', ring: owed && !s.mopts ? 'divide' : null }), {
     disabled: s.stage === 'done' || Boolean(s.sub),
     lights: { smaller: mapLight(s.lights.smaller), onebox: mapLight(s.lights.onebox), solved: xAlone(s.board) ? 'green' : 'off' },
   });

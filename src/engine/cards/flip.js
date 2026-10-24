@@ -139,14 +139,14 @@ export const solve = loop;
 // button's.
 export function flipOption(kind, s) {
   if (kind === 'flip') return 'live';
-  if (kind === 'div') return s.level >= FRACTION_LEVEL ? 'live' : 'grey';
+  if (kind === 'div' || kind === 'frac') return s.level >= FRACTION_LEVEL ? 'live' : 'grey';    // (Build O: the Fraction option is back)
   return 'grey';
 }
 export const FLIP_MENU = makeMultiplyMenu({
   xAlone,
   coefOf: coefOn,
   option: flipOption,
-  greyKey: (kind, s) => (kind === 'div' && s.level < FRACTION_LEVEL ? 'aLaterLevel' : 'aLater'),
+  greyKey: (kind, s) => ((kind === 'div' || kind === 'frac') && s.level < FRACTION_LEVEL ? 'aLaterLevel' : 'aLater'),
   probe: 'flip',
   negTop: true,
 });

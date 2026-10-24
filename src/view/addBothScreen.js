@@ -22,7 +22,7 @@ import { spotlightLayer, findSolveTarget } from './spotlight.js';
 import { boardBlock, trayFor, html, slipShown } from './addBothMat.js';
 import { narrowPanel } from './narrowPanel.js';
 import { optionSel } from './multiplyOptions.js';
-import { forwardButton, srLine, notePopup, substBlock as sharedSubstBlock, sideTerms, foldTag, FORCED_TEXT, FIRST_TEXT, placeText } from './solveScreen.js';
+import { forwardButton, srLine, notePopup, substBlock as sharedSubstBlock, sideTerms, foldTag, sameAsLine, divisorOf, FORCED_TEXT, FIRST_TEXT, placeText } from './solveScreen.js';
 import { firstOpen } from './visit.js';
 // Count it's counters Mat and its words, read-only, for the help at x alone (Build C, Part 3)
 import { renderMat as renderCountersMat } from './mat.js';
@@ -265,9 +265,11 @@ function rowsOf(s) {
     const cls = `lb-rowwrap${!newest || settledNow ? ' is-settled' : ''}${row.type === 'work' ? ' has-work' : ''}${recent ? '' : ' is-old'}`;
     // a move written as an equation of whole sides: a fraction of both sides, or both sides times −1 (the Two-step card's Multiply)
     if (row.type === 'work' && row.board) {
-      const w = eqRow(sideTerms(row.board.left, s), sideTerms(row.board.right, s), `lb-work${row.failed ? ' is-failed' : ''}${eqClass(charsOf([...row.board.left, ...row.board.right]) + 6)}`, { 'aria-hidden': 'true' });
+      const div = { div: row.shown === 'div' };                            // (made with the Divide button: division form, Build O)
+      const w = eqRow(sideTerms(row.board.left, s, div), sideTerms(row.board.right, s, div), `lb-work${row.failed ? ' is-failed' : ''}${div.div ? ' is-division' : ''}${eqClass(charsOf([...row.board.left, ...row.board.right]) + 6)}`, { 'aria-hidden': 'true' });
       if (row.failed) w.append(html('span', 'lb-failmark', ['✗']));
-      return html('div', `${cls} has-work`, [w]);
+      const d = divisorOf(row);
+      return html('div', `${cls} has-work`, [w, ...(d ? [sameAsLine(d.n, d.sign)] : [])]);
     }
     if (row.type === 'work') {
       return html('div', cls, [eqRow(workEls(row.work.left, s.lx.negIds), workEls(row.work.right, s.lx.negIds), `lb-work${eqClass(charsOf([...row.work.left, ...row.work.right]))}`, { 'aria-hidden': 'true' })]);
@@ -281,7 +283,8 @@ function rowsOf(s) {
     const chars = eqClass(charsOf([...row.board.left, ...row.board.right]));
     const tag = row.type === 'fold' && row.label ? [foldTag(row.label)] : [];   // (what a folded fraction or flip did, above it)
     let eq;
-    if (inert && !plug) eq = eqRow(sideTerms(row.board.left, s), sideTerms(row.board.right, s), chars, { role: 'img', 'aria-label': 'The equation' });
+    const div = { div: row.shown === 'div' };
+    if (inert && !plug) eq = eqRow(sideTerms(row.board.left, s, div), sideTerms(row.board.right, s, div), `${div.div ? 'is-division ' : ''}${chars}`, { role: 'img', 'aria-label': 'The equation' });
     else if (live) eq = eqRow(liveSide(s, 'left'), liveSide(s, 'right'), `lx-live${chars}${s.ui?.carry ? ' is-carrying' : ''}`, { role: 'group', 'aria-label': 'The equation: its terms can be picked up' });
     else {
       // the equation being checked: the value is dragged into its x (or x is tapped), which then changes colour (Build D, Part 2)

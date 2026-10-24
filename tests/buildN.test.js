@@ -40,8 +40,8 @@ async function mat(play, s) {
   await settle();
   return m;
 }
-const DIV_BOX = '.mo-divblank:not(.is-mirror) .mo-divpart';
-const openDivide = [{ type: 'multOpen' }, { type: 'multPick', kind: 'div' }];
+const DIV_BOX = '.mo-divpart:not(.is-mirror)';                   // (Build O: under the Divide button's bar)
+const openDivide = [{ type: 'divPick' }];
 let m = null;
 afterEach(() => { m?.off?.(); m = null; document.body.replaceChildren(); });
 
@@ -98,7 +98,8 @@ describe('Build N: the Divide blank takes a typed number', () => {
       let opened = 0;
       const s0 = play.newSession(problem(pack, level), {});
       for (const kind of ['div', 'whole']) {
-        const s = [{ type: 'multOpen' }, { type: 'multPick', kind }].reduce(play.reduce, s0);
+        const open = kind === 'div' ? [{ type: 'divPick' }] : [{ type: 'multOpen' }, { type: 'multPick', kind }];   // (Build O: Divide is its own button)
+        const s = open.reduce(play.reduce, s0);
         if (s.mopts?.kind !== kind) continue;                // (an option greyed on this card or level)
         opened += 1;
         expect(play.padOpen(s), `${name} ${kind}`).toBe(true);

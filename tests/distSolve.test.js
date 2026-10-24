@@ -111,7 +111,7 @@ const groupOf = (s) => [...s.board.left, ...s.board.right].find((t) => t.kind ==
 const xSide = (s) => (s.board.left.some((t) => t.kind === 'x' || t.kind === 'group') ? 'left' : 'right');
 const A = {
   add: (k) => (st) => [...(st?.menu === 'add' ? [] : [{ type: 'choose', move: 'add' }]), ...digits(k), { type: 'go' }],
-  div: (n) => [{ type: 'multOpen' }, { type: 'multPick', kind: 'div' }, ...(n < 0 ? [{ type: 'toggleSign' }] : []), { type: 'digit', digit: Math.abs(n) }, { type: 'go' }],
+  div: (n) => [{ type: 'divPick' }, ...(n < 0 ? [{ type: 'toggleSign' }] : []), { type: 'digit', digit: Math.abs(n) }, { type: 'go' }],
   flip: () => [{ type: 'flipPick' }, { type: 'go' }],
   check: (v) => [{ type: 'focus', target: 'answer' }, ...digits(v), { type: 'check' }, { type: 'placeValue' }, { type: 'placeValue' }, ...Array(8).fill({ type: 'nextLine' })],
   minus: (s) => [{ type: 'lxMinus', id: groupOf(s).id }],
@@ -281,7 +281,7 @@ describe('the rules of each level', () => {
     const p = P({ level: 3, n: 5, f: 2, c: 3, x: 5 });                           // 5 + 2(x + 3) = 21
     let s = start(p);
     expect(optionOf('div', s)).toBe('grey');
-    expect(run(s, [{ type: 'multOpen' }, { type: 'multPick', kind: 'div' }]).feedback.key).toBe('wOneTerm');
+    expect(run(s, [{ type: 'divPick' }]).feedback.key).toBe('wOneTerm');
     s = run(s, A.add(-5));
     expect(boardText(s.board)).toBe('2(x + 3) = 21 − 5');
     expect(shapeOf(s).id).toBe('P6');

@@ -116,6 +116,7 @@ export const divideMovesPlay = makeSolvePlay({
   matAction(d) {
     switch (d.action) {
       case 'multOpen': return { type: 'multOpen' };
+      case 'divPick': return { type: 'divPick' };
       case 'multPick': return { type: 'multPick', kind: d.kind };
       case 'take': return { type: 'take', n: Number(d.n), ...(d.from === 'list' ? { fromList: true } : {}) };
       case 'deal': return { type: 'deal', group: Number(d.group) };
@@ -156,6 +157,7 @@ export const flipPlay = makeSolvePlay({
   matAction(d) {
     switch (d.action) {
       case 'multOpen': return { type: 'multOpen' };
+      case 'divPick': return { type: 'divPick' };
       case 'multPick': return { type: 'multPick', kind: d.kind };
       case 'flipPick': return { type: 'flipPick' };
       case 'take': return { type: 'take', n: Number(d.n), ...(d.from === 'list' ? { fromList: true } : {}) };
@@ -199,6 +201,7 @@ export const twoStepPlay = makeSolvePlay({
     if (ADD_MAT.has(d.action)) return { type: d.action };
     switch (d.action) {
       case 'multOpen': return { type: 'multOpen' };
+      case 'divPick': return { type: 'divPick' };
       case 'multPick': return { type: 'multPick', kind: d.kind };
       case 'flipPick': return { type: 'flipPick' };
       case 'take': return { type: 'take', n: Number(d.n), ...(d.from === 'list' ? { fromList: true } : {}) };
@@ -233,6 +236,7 @@ export const distSolvePlay = makeSolvePlay({
     if (ADD_MAT.has(d.action)) return { type: d.action };
     switch (d.action) {
       case 'multOpen': return { type: 'multOpen' };
+      case 'divPick': return { type: 'divPick' };
       case 'multPick': return { type: 'multPick', kind: d.kind };
       case 'flipPick': return { type: 'flipPick' };
       case 'take': return { type: 'take', n: Number(d.n), ...(d.from === 'list' ? { fromList: true } : {}) };

@@ -1,10 +1,11 @@
 // The Multiply move's menu and its blanks, shared by every card that multiplies both sides (lifted out of Divide it in Build J;
-// before that it was Divide's own: Build D, Part 4 and Build D-2, Part 4). The one Multiply button opens three options beside it,
-// `s.mopts` (Build L, loop rev 2.3): Multiply, a whole number ▢ × ( ); Divide, 1/▢ × ( ) (the student types only n, one digit, a minus
-// allowed); and Fraction, ▢/▢ × ( ). Hovering one previews it on the equation (`ui.preview` is its kind); clicking it makes it solid.
-// Flip everything is not an option: it is the card's own panel button (`flipPick`), and typing −1 in Multiply (or dividing by −1) is the
-// same move. Dividing by n is taking 1/n of both sides through the card's own `take` (−n is −1/n: the sign on the top), the same code
-// path as the Fraction blank (typed `1/5`, or its top and bottom filled). A card says what each option is on it:
+// before that it was Divide's own: Build D, Part 4 and Build D-2, Part 4). The one Multiply button opens two options beside it,
+// `s.mopts` (Build O, loop rev 2.4): Multiply, a whole number ▢ × ( ); and Fraction, ▢/▢ × ( ). The panel's Divide button (`divPick`) is a
+// second way in to the same move: one digit under a fraction bar on both sides (a minus allowed), kind 'div'. Hovering a move previews it
+// on the equation (`ui.preview` is its kind); clicking it makes it solid. Flip everything is its own panel button (`flipPick`), and
+// typing −1 in Multiply (or dividing by −1) is the same move. Dividing by n is taking 1/n of both sides through the card's own `take`
+// (−n is −1/n: the sign on the top), the same code path as the Fraction blank; only the drawing differs (`shown: 'div'` on its rows).
+// A card says what each move is on it:
 //   'live'     the move (Divide; Flip everything, which the card's own `flip` applies)
 //   'explain'  Go says why it does not get one x (Divide it's whole number and −1)
 //   'grey'     a tap says it unlocks later (or the card's own reason)
@@ -20,16 +21,20 @@ import { isTyping, typeInto } from './entry.js';
 import { FRACTIONS } from './divide.js';
 
 const FB0 = { num: '', den: '', part: 'num' };
-// the options, in order (Build L: Flip everything left the menu; it is its own button)
-export const MULT_KINDS = ['whole', 'div', 'frac'];
+// the options, in order (Build L: Flip everything left the menu; it is its own button. Build O: Divide left it too; it is the panel's
+// Divide button, `divPick`, a second way in to the same move: kind 'div')
+export const MULT_KINDS = ['whole', 'frac'];
 export const multOpen = (s) => Boolean(s.mopts);
+// Are Multiply's two options showing beside it? (Not while the hint after Undo only lights the Divide button: `lit`.)
+export const optionsOpen = (s) => Boolean(s.mopts) && !s.mopts.kind && !s.mopts.lit;
 const okWhole = (t) => /^-?\d+$/.test(t ?? '');
 // Divide's blank holds one digit, with a minus allowed
 export const okDivisor = (t) => /^-?\d$/.test(t ?? '');
 // Is the green Go live for the option chosen? (−1 is Flip everything, with nothing to type)
 export const goReady = (m) => m.kind === 'flip' || (m.kind === 'whole' && okWhole(m.entry)) || (m.kind === 'div' && okDivisor(m.entry));
-// Divide it's options: Divide is the move; a whole number and −1 are explained; the general fraction belongs to a later card
-const DIVIDE_IT = { whole: 'explain', div: 'live', frac: 'grey', flip: 'explain' };
+// Divide it's options (Build O): the Divide button and the Fraction (unit fractions) are the move; the whole number is greyed; −1 (dividing
+// by −1) is explained
+const DIVIDE_IT = { whole: 'grey', div: 'live', frac: 'live', flip: 'explain' };
 
 export function makeMultiplyMenu({ xAlone, coefOf, option = (kind) => DIVIDE_IT[kind], greyKey = () => 'aLater', probe = 'fraction', negTop = false }) {
   // Can the move be previewed (hovered) right now? Is its blank open?
@@ -67,6 +72,7 @@ export function makeMultiplyMenu({ xAlone, coefOf, option = (kind) => DIVIDE_IT[
     // gate, a forced path) leaves the Divide blank open with the card's words
     function divideGo(state, entry) {
       if (!okDivisor(entry)) return { ...state, feedback: { key: 'dDivBad', params: { neg: negTop }, bad: true } };
+      if (option('div', state) === 'grey') return { ...state, feedback: { key: greyKey('div', state), params: {}, bad: false } };
       const d = Number(entry);
       const n = Math.abs(d);
       if (n === 0) return { ...state, feedback: { key: 'dDivZero', params: {}, bad: true } };
@@ -75,7 +81,14 @@ export function makeMultiplyMenu({ xAlone, coefOf, option = (kind) => DIVIDE_IT[
       if (opened.menu !== 'fraction') return { ...state, feedback: opened.feedback ?? state.feedback };
       const s = reduce({ ...opened, fb: FB0 }, { type: 'take', n, ...(d < 0 ? { sign: -1 } : {}) });
       if (s === opened || (s.history?.length ?? 0) === (opened.history?.length ?? 0)) return { ...state, feedback: s.feedback ?? state.feedback };
-      return s;
+      return shownAsDivision(s);
+    }
+    // A move made with the Divide button is drawn in division form (Build O, display only): its rows, and the folded row's tag, carry
+    // `shown: 'div'`. The move itself, its boards and everything stored or checked are those of taking 1/n.
+    function shownAsDivision(s) {
+      const from = s.history.at(-1)?.rows?.length ?? s.rows.length;
+      const rows = s.rows.map((r, i) => (i >= from && r.board ? { ...r, shown: 'div' } : r));
+      return { ...s, rows, ...(s.unfolded && s.foldLabel && typeof s.foldLabel === 'object' ? { foldLabel: { ...s.foldLabel, shown: 'div' } } : {}) };
     }
     // Only one move is selected at a time (Build O, Part 1): opening Multiply or choosing Flip clears an Add left selected, as if it had
     // not been clicked (its box and its yellow state go).
@@ -83,7 +96,7 @@ export function makeMultiplyMenu({ xAlone, coefOf, option = (kind) => DIVIDE_IT[
     return (state, action) => {
       const m = state.mopts;
       if (action.type === 'multOpen') {
-        if (m && !m.kind) return { ...state, mopts: null, ui: { ...(state.ui ?? {}), preview: false } };     // a second click closes them
+        if (m && !m.kind && !m.lit) return { ...state, mopts: null, ui: { ...(state.ui ?? {}), preview: false } };     // a second click closes them
         const base = clearOthers(state);
         const probed = reduce(base, { type: 'choose', move: probe });
         if (probed === base || probed.menu !== probe) return probed;                       // not now (the card says why)
@@ -95,6 +108,16 @@ export function makeMultiplyMenu({ xAlone, coefOf, option = (kind) => DIVIDE_IT[
         const probed = reduce(base, { type: 'choose', move: probe });
         if (probed === base || probed.menu !== probe) return probed;
         return { ...base, mopts: { kind: 'flip', entry: '' }, typing: null, feedback: null, ui: { ...(base.ui ?? {}), preview: false } };
+      }
+      // the Divide button (Build O): its blank under both sides, solid, waiting for one digit. A second click cancels it. Where Divide is
+      // greyed, the card's reason.
+      if (action.type === 'divPick') {
+        if (m?.kind === 'div') return { ...state, mopts: null, feedback: null };
+        if (option('div', state) === 'grey') return { ...state, feedback: { key: greyKey('div', state), params: {}, bad: false } };
+        const base = clearOthers(state);
+        const probed = reduce(base, { type: 'choose', move: probe });
+        if (probed === base || probed.menu !== probe) return probed;
+        return { ...base, mopts: { kind: 'div', entry: '' }, typing: null, feedback: null, ui: { ...(base.ui ?? {}), preview: false } };
       }
       if (action.type === 'multPick' && m && MULT_KINDS.includes(action.kind)) {
         const what = option(action.kind, state);
@@ -167,6 +190,7 @@ export function makeMultiplyMenu({ xAlone, coefOf, option = (kind) => DIVIDE_IT[
         }
         const preview = action.patch?.preview;
         if (preview && !canPreview(state)) return state;
+        if (['whole', 'div', 'frac', 'flip'].includes(preview) && option(preview, state) === 'grey') return state;   // (a greyed move is not previewed)
         if ((state.ui?.preview ?? false) === (preview ?? false)) return state;
         return { ...state, ui: { ...(state.ui ?? {}), preview: preview ?? false } };
       }
@@ -209,5 +233,5 @@ export function makeMultiplyMenu({ xAlone, coefOf, option = (kind) => DIVIDE_IT[
     };
   }
 
-  return { withMenu, canPreview, fracOpen, fracOf, typingOpen, previewTyped };
+  return { withMenu, canPreview, fracOpen, fracOf, typingOpen, previewTyped, option };
 }

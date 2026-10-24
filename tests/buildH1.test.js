@@ -77,26 +77,17 @@ describe('Not balanced keeps its reason lit (item 1) and the numbers stay lit at
   });
 });
 
-describe('Divide it: a slash in the whole-number blank (item 7; Build L: it opens Divide here); a box is retyped by tapping it (item 8)', () => {
+describe('Divide it: a slash in the fraction (item 7; Build O: the Fraction option is live here again); a box is retyped by tapping it (item 8)', () => {
   const R = withSpotlight(withFractionBlank(reduceDivide), DIVIDE_SPOT);
   const run = (s, ...actions) => actions.reduce(R, s);
   const start = () => newDivide({ ...makeDivide(5, -3), logLevel: 3 }, { level: 3 });
-  // Build L: the Fraction option is greyed on Divide it, and Divide is live: 1 then / is dividing, so the Divide blank opens (its 1/ printed)
-  it('1, /, 5 makes 1/5: on Divide it (the Fraction option greyed) the Divide blank opens, and 5 is what it divides by', () => {
-    let s = run(start(), { type: 'multOpen' }, { type: 'multPick', kind: 'whole' }, digit(1));
-    expect(s.mopts).toMatchObject({ kind: 'whole', entry: '1' });
-    s = run(s, { type: 'fracSlash' });
-    expect([s.mopts, fracOpen(s)]).toEqual([{ kind: 'div', entry: '' }, false]);
-    s = run(s, digit(5), { type: 'go' });
+  // Build O: on Divide it the whole number is greyed again and the Fraction option is live (as before Build L): 1, /, 5 is typed there
+  it('the whole number is greyed here (a tap says why); in the Fraction option 1, /, 5 makes 1/5', () => {
+    expect(run(start(), { type: 'multOpen' }, { type: 'multPick', kind: 'whole' }).feedback.key).toBe('aLater');
+    let s = run(start(), { type: 'multOpen' }, { type: 'multPick', kind: 'frac' }, digit(1));
+    expect([fracOpen(s), s.fb]).toEqual([true, { num: '1', den: '', part: 'den' }]);
+    s = run(s, { type: 'fracSlash' }, digit(5), { type: 'go' });
     expect(boardText(s.board)).toBe('x = ⅕(−15)');
-  });
-  it('the slash typed as a character does the same; an empty whole-number blank opens Divide too', () => {
-    const s = run(start(), { type: 'multOpen' }, { type: 'multPick', kind: 'whole' }, { type: 'typeChar', ch: '/' });
-    expect([fracOpen(s), s.mopts]).toEqual([false, { kind: 'div', entry: '' }]);
-  });
-  it('a top that is not 1 says the general fraction unlocks on a later card, and the blank stays', () => {
-    const s = run(start(), { type: 'multOpen' }, { type: 'multPick', kind: 'whole' }, digit(1), digit(2), { type: 'fracSlash' });
-    expect([s.feedback.key, s.mopts]).toEqual(['aLater', { kind: 'whole', entry: '12' }]);
   });
   it('where the Fraction option is live (the later Multiply card), the slash still opens the fraction blank with the typed top', () => {
     const menu = makeMultiplyMenu({ xAlone, coefOf, option: (k) => (k === 'frac' ? 'live' : 'explain') });

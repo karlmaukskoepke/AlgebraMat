@@ -5,8 +5,8 @@
 
 import { html } from './addBothMat.js';
 import { stackRows, substBlock, forwardButton, srLine, notePopup, FORCED_TEXT, FIRST_TEXT, placeText } from './solveScreen.js';
-import { multiplyOptions, optionSel } from './multiplyOptions.js';
-import { goReady, MULT_KINDS } from '../engine/multiplyMenu.js';
+import { multiplyMoves, optionSel } from './multiplyOptions.js';
+import { goReady } from '../engine/multiplyMenu.js';
 import { moveRow as sharedMoveRow, fractionChoices as sharedFractionChoices } from './multiplyRow.js';
 import { flipFeedbackText } from './flipFeedback.js';
 import { narrowPanel } from './narrowPanel.js';
@@ -84,11 +84,9 @@ function panel(s) {
   const mapLight = (v) => (v === 'neutral' ? 'off' : v);
   const owed = solve.moveOwed(s) && !s.menu && !s.mopts && !s.sub && !xAlone(s.board);
   const negated = coefOn(s.board) < 0;
-  const grey = MULT_KINDS.filter((k) => flipOption(k, s) !== 'live');
-  const flyout = s.mopts && !s.mopts.kind ? multiplyOptions(MULT_KINDS, s.ui?.preview, grey) : null;
   const moves = {
-    multiply: { live: true, move: 'fraction', action: 'multOpen', label: 'Multiply', pressed: s.menu === 'fraction' || (Boolean(s.mopts) && s.mopts.kind !== 'flip'), ring: owed && !negated, flyout },
-    flip: { live: true, move: 'flip', action: 'flipPick', label: 'Flip everything (× −1)', pressed: s.mopts?.kind === 'flip', ring: owed && negated, attrs: { 'data-mopt': 'flip' } },
+    ...multiplyMoves(s, flipOption, { move: 'fraction', ring: owed && !negated ? 'divide' : null }),
+    flip: { live: true, move: 'flip', action: 'flipPick', pressed: s.mopts?.kind === 'flip', ring: owed && negated, attrs: { 'data-mopt': 'flip' } },
   };
   if (tradeAvailable(s)) moves.trade = { live: true, pulse: tradePending(s) };
   const el = narrowPanel(moves, {

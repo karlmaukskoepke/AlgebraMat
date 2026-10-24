@@ -148,7 +148,7 @@ describe('Build E, P2: lights from shapes', () => {
 describe('Build J: the shape of every state on Flip everything', () => {
   const r = withSpotlight(FLIP_MENU.withMenu(reduceFlip), FLIP_SPOT);
   // (Build L: ⅟n is dividing by n on Multiply's Divide option; −⅟n is dividing by −n)
-  const frac = (top, n) => [{ type: 'multOpen' }, { type: 'multPick', kind: 'div' }, ...(top < 0 ? [{ type: 'typeChar', ch: '-' }] : []), { type: 'digit', digit: n }, { type: 'go' }];
+  const frac = (top, n) => [{ type: 'divPick' }, ...(top < 0 ? [{ type: 'typeChar', ch: '-' }] : []), { type: 'digit', digit: n }, { type: 'go' }];
   const flip = [{ type: 'flipPick' }, { type: 'go' }];
   for (let level = 2; level <= 6; level++) {
     it(`Level ${level}: ${SEEDS * 5} problems, both orders, −⅟a in one move, a flip that makes it worse, a fraction that does not split, the slips`, () => {
