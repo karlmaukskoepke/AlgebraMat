@@ -505,86 +505,25 @@ sides and Divide it are unchanged, so nothing about them is added. The only diff
 
 ## Build O, Parts 3-5 (2026-10-24): the Divide button; the Multiply menu goes back to two options; the hints light Divide
 
+(Its screen rows are in the history section at the end: the screens were re-baselined from `main` at `b7c62f3` (end of Build O) on 2026-10-24, before Build P.)
+
 Compared with the screens recorded again after Part 2. Problems, save codes, class-sheet records and all 25 scripted runs are unchanged
 (PASS): the Divide button is stored and checked as taking 1/n (the scripted runs take the fraction directly, and their rows, lights,
 help and records are the same). The harness's Divide steps now click the Divide button (Multiply no longer has a Divide option).
 
 | Key | Before | After | Why |
 |---|---|---|---|
-| `screen:add-opening@1366x768` | the panel with four moves | a Divide button (`( )/n = ( )/n`, the ÷ symbol beside it) between Multiply and Flip everything; the panel one row taller | Build O, Part 3 |
-| `screen:add-helpful-move@1366x768` | the panel with four moves | a Divide button (`( )/n = ( )/n`, the ÷ symbol beside it) between Multiply and Flip everything; the panel one row taller | Build O, Part 3 |
-| `screen:add-red-move@1366x768` | the panel with four moves | a Divide button (`( )/n = ( )/n`, the ÷ symbol beside it) between Multiply and Flip everything; the panel one row taller | Build O, Part 3 |
-| `screen:add-partial-move@1366x768` | the panel with four moves | a Divide button (`( )/n = ( )/n`, the ÷ symbol beside it) between Multiply and Flip everything; the panel one row taller | Build O, Part 3 |
-| `screen:add-stuck-1@1366x768` | the panel with four moves | a Divide button (`( )/n = ( )/n`, the ÷ symbol beside it) between Multiply and Flip everything; the panel one row taller | Build O, Part 3 |
-| `screen:add-stuck-2@1366x768` | the panel with four moves | a Divide button (`( )/n = ( )/n`, the ÷ symbol beside it) between Multiply and Flip everything; the panel one row taller | Build O, Part 3 |
-| `screen:add-stuck-3@1366x768` | the panel with four moves | a Divide button (`( )/n = ( )/n`, the ÷ symbol beside it) between Multiply and Flip everything; the panel one row taller | Build O, Part 3 |
-| `screen:add-stuck-4@1366x768` | the panel with four moves | a Divide button (`( )/n = ( )/n`, the ÷ symbol beside it) between Multiply and Flip everything; the panel one row taller | Build O, Part 3 |
-| `screen:add-teach@1366x768` | the panel with four moves | a Divide button (`( )/n = ( )/n`, the ÷ symbol beside it) between Multiply and Flip everything; the panel one row taller | Build O, Part 3 |
-| `screen:add-wrong-guess@1366x768` | the panel with four moves | a Divide button (`( )/n = ( )/n`, the ÷ symbol beside it) between Multiply and Flip everything; the panel one row taller | Build O, Part 3 |
-| `screen:add-wrong-guess-undone@1366x768` | the panel with four moves | a Divide button (`( )/n = ( )/n`, the ÷ symbol beside it) between Multiply and Flip everything; the panel one row taller | Build O, Part 3 |
-| `screen:add-forced-move@1366x768` | the panel with four moves | a Divide button (`( )/n = ( )/n`, the ÷ symbol beside it) between Multiply and Flip everything; the panel one row taller | Build O, Part 3 |
-| `screen:add-end@1366x768` | the panel with four moves | a Divide button (`( )/n = ( )/n`, the ÷ symbol beside it) between Multiply and Flip everything; the panel one row taller | Build O, Part 3 |
-| `screen:add-partial-stuck-4@1366x768` | the panel with four moves | a Divide button (`( )/n = ( )/n`, the ÷ symbol beside it) between Multiply and Flip everything; the panel one row taller | Build O, Part 3 |
-| `screen:add-partial-teach@1366x768` | the panel with four moves | a Divide button (`( )/n = ( )/n`, the ÷ symbol beside it) between Multiply and Flip everything; the panel one row taller | Build O, Part 3 |
-| `screen:add-alone-stuck-1@1366x768` | the panel with four moves | a Divide button (`( )/n = ( )/n`, the ÷ symbol beside it) between Multiply and Flip everything; the panel one row taller | Build O, Part 3 |
-| `screen:add-alone-stuck-2@1366x768` | the panel with four moves | a Divide button (`( )/n = ( )/n`, the ÷ symbol beside it) between Multiply and Flip everything; the panel one row taller | Build O, Part 3 |
-| `screen:add-alone-stuck-3@1366x768` | the panel with four moves | a Divide button (`( )/n = ( )/n`, the ÷ symbol beside it) between Multiply and Flip everything; the panel one row taller | Build O, Part 3 |
-| `screen:add-alone-teach@1366x768` | the panel with four moves | a Divide button (`( )/n = ( )/n`, the ÷ symbol beside it) between Multiply and Flip everything; the panel one row taller | Build O, Part 3 |
-| `screen:add-red-stuck@1366x768` | the panel with four moves | a Divide button (`( )/n = ( )/n`, the ÷ symbol beside it) between Multiply and Flip everything; the panel one row taller | Build O, Part 3 |
-| `screen:add-L2-stuck-2@1366x768` | the panel with four moves | a Divide button (`( )/n = ( )/n`, the ÷ symbol beside it) between Multiply and Flip everything; the panel one row taller | Build O, Part 3 |
-| `screen:div-opening@1366x768` | the panel with four moves | a Divide button (`( )/n = ( )/n`, the ÷ symbol beside it) between Multiply and Flip everything; the panel one row taller | Build O, Part 3 |
-| `screen:div-helpful-move@1366x768` | `⅕(5x) = ⅕(−15)` and `x = ⅕(−15)` | `(5x)/5 = (−15)/5`, "Same as multiplying by ⅕." under it, then `x = (−15)/5` (the harness divides with the Divide button); a Divide button (`( )/n = ( )/n`, the ÷ symbol beside it) between Multiply and Flip everything; the panel one row taller | Build O, Parts 3 and 4 |
-| `screen:div-failed@1366x768` | `½(5x) = ½(−15)` crossed out, Multiply yellow | `(5x)/2 = (−15)/2` crossed out; no move yellow while it waits for Undo; a Divide button (`( )/n = ( )/n`, the ÷ symbol beside it) between Multiply and Flip everything; the panel one row taller | Build O, Parts 3 and 4 |
-| `screen:div-stuck-1@1366x768` | the panel with four moves | a Divide button (`( )/n = ( )/n`, the ÷ symbol beside it) between Multiply and Flip everything; the panel one row taller | Build O, Part 3 |
-| `screen:div-stuck-2@1366x768` | the panel with four moves | a Divide button (`( )/n = ( )/n`, the ÷ symbol beside it) between Multiply and Flip everything; the panel one row taller | Build O, Part 3 |
-| `screen:div-teach@1366x768` | the panel with four moves | a Divide button (`( )/n = ( )/n`, the ÷ symbol beside it) between Multiply and Flip everything; the panel one row taller | Build O, Part 3 |
-| `screen:div-wrong-guess@1366x768` | the panel with four moves | a Divide button (`( )/n = ( )/n`, the ÷ symbol beside it) between Multiply and Flip everything; the panel one row taller | Build O, Part 3 |
-| `screen:div-end@1366x768` | the rows in multiplication form | the same rows in division form, with the "same as" line; the check beside them unchanged; a Divide button (`( )/n = ( )/n`, the ÷ symbol beside it) between Multiply and Flip everything; the panel one row taller | Build O, Parts 3 and 4 |
-| `screen:div-failed-stuck@1366x768` | as above, under the Undo-first pop-up | as above; a Divide button (`( )/n = ( )/n`, the ÷ symbol beside it) between Multiply and Flip everything; the panel one row taller | Build O, Parts 3 and 4 |
-| `screen:div-alone-stuck-1@1366x768` | the rows in multiplication form | the same rows in division form, with the "same as" line; a Divide button (`( )/n = ( )/n`, the ÷ symbol beside it) between Multiply and Flip everything; the panel one row taller | Build O, Parts 3 and 4 |
-| `screen:div-menu@1366x768` | three options (`▢ ( )`, `1/▢ ( )`, `▢/▢ ( )`, the last greyed) | two options: the whole number greyed, the fraction live; a Divide button (`( )/n = ( )/n`, the ÷ symbol beside it) between Multiply and Flip everything; the panel one row taller | Build O, Parts 3 and 4 |
-| `screen:flip-opening@1366x768` | the panel with four moves | a Divide button (`( )/n = ( )/n`, the ÷ symbol beside it) between Multiply and Flip everything; the panel one row taller | Build O, Part 3 |
-| `screen:two-opening@1366x768` | the panel with four moves | a Divide button (`( )/n = ( )/n`, the ÷ symbol beside it) between Multiply and Flip everything; the panel one row taller | Build O, Part 3 |
-| `screen:dist-opening@1366x768` | the panel with four moves | a Divide button (`( )/n = ( )/n`, the ÷ symbol beside it) between Multiply and Flip everything; the panel one row taller | Build O, Part 3 |
-| `screen:add-opening@1366x650` | the panel with four moves | a Divide button (`( )/n = ( )/n`, the ÷ symbol beside it) between Multiply and Flip everything; the panel one row taller | Build O, Part 3 |
-| `screen:add-helpful-move@1366x650` | the panel with four moves | a Divide button (`( )/n = ( )/n`, the ÷ symbol beside it) between Multiply and Flip everything; the panel one row taller | Build O, Part 3 |
-| `screen:add-red-move@1366x650` | the panel with four moves | a Divide button (`( )/n = ( )/n`, the ÷ symbol beside it) between Multiply and Flip everything; the panel one row taller | Build O, Part 3 |
-| `screen:add-partial-move@1366x650` | the panel with four moves | a Divide button (`( )/n = ( )/n`, the ÷ symbol beside it) between Multiply and Flip everything; the panel one row taller | Build O, Part 3 |
-| `screen:add-stuck-1@1366x650` | the panel with four moves | a Divide button (`( )/n = ( )/n`, the ÷ symbol beside it) between Multiply and Flip everything; the panel one row taller | Build O, Part 3 |
-| `screen:add-stuck-2@1366x650` | the panel with four moves | a Divide button (`( )/n = ( )/n`, the ÷ symbol beside it) between Multiply and Flip everything; the panel one row taller | Build O, Part 3 |
-| `screen:add-stuck-3@1366x650` | the panel with four moves | a Divide button (`( )/n = ( )/n`, the ÷ symbol beside it) between Multiply and Flip everything; the panel one row taller | Build O, Part 3 |
-| `screen:add-stuck-4@1366x650` | the panel with four moves | a Divide button (`( )/n = ( )/n`, the ÷ symbol beside it) between Multiply and Flip everything; the panel one row taller | Build O, Part 3 |
-| `screen:add-teach@1366x650` | the panel with four moves | a Divide button (`( )/n = ( )/n`, the ÷ symbol beside it) between Multiply and Flip everything; the panel one row taller | Build O, Part 3 |
-| `screen:add-wrong-guess@1366x650` | the panel with four moves | a Divide button (`( )/n = ( )/n`, the ÷ symbol beside it) between Multiply and Flip everything; the panel one row taller | Build O, Part 3 |
-| `screen:add-wrong-guess-undone@1366x650` | the panel with four moves | a Divide button (`( )/n = ( )/n`, the ÷ symbol beside it) between Multiply and Flip everything; the panel one row taller | Build O, Part 3 |
-| `screen:add-forced-move@1366x650` | the panel with four moves | a Divide button (`( )/n = ( )/n`, the ÷ symbol beside it) between Multiply and Flip everything; the panel one row taller | Build O, Part 3 |
-| `screen:add-end@1366x650` | the panel with four moves | a Divide button (`( )/n = ( )/n`, the ÷ symbol beside it) between Multiply and Flip everything; the panel one row taller | Build O, Part 3 |
-| `screen:add-partial-stuck-4@1366x650` | the panel with four moves | a Divide button (`( )/n = ( )/n`, the ÷ symbol beside it) between Multiply and Flip everything; the panel one row taller | Build O, Part 3 |
-| `screen:add-partial-teach@1366x650` | the panel with four moves | a Divide button (`( )/n = ( )/n`, the ÷ symbol beside it) between Multiply and Flip everything; the panel one row taller | Build O, Part 3 |
-| `screen:add-alone-stuck-1@1366x650` | the panel with four moves | a Divide button (`( )/n = ( )/n`, the ÷ symbol beside it) between Multiply and Flip everything; the panel one row taller | Build O, Part 3 |
-| `screen:add-alone-stuck-2@1366x650` | the panel with four moves | a Divide button (`( )/n = ( )/n`, the ÷ symbol beside it) between Multiply and Flip everything; the panel one row taller | Build O, Part 3 |
-| `screen:add-alone-stuck-3@1366x650` | the panel with four moves | a Divide button (`( )/n = ( )/n`, the ÷ symbol beside it) between Multiply and Flip everything; the panel one row taller | Build O, Part 3 |
-| `screen:add-alone-teach@1366x650` | the panel with four moves | a Divide button (`( )/n = ( )/n`, the ÷ symbol beside it) between Multiply and Flip everything; the panel one row taller | Build O, Part 3 |
-| `screen:add-red-stuck@1366x650` | the panel with four moves | a Divide button (`( )/n = ( )/n`, the ÷ symbol beside it) between Multiply and Flip everything; the panel one row taller | Build O, Part 3 |
-| `screen:add-L2-stuck-2@1366x650` | the panel with four moves | a Divide button (`( )/n = ( )/n`, the ÷ symbol beside it) between Multiply and Flip everything; the panel one row taller | Build O, Part 3 |
-| `screen:div-opening@1366x650` | the panel with four moves | a Divide button (`( )/n = ( )/n`, the ÷ symbol beside it) between Multiply and Flip everything; the panel one row taller | Build O, Part 3 |
-| `screen:div-helpful-move@1366x650` | `⅕(5x) = ⅕(−15)` and `x = ⅕(−15)` | `(5x)/5 = (−15)/5`, "Same as multiplying by ⅕." under it, then `x = (−15)/5` (the harness divides with the Divide button); a Divide button (`( )/n = ( )/n`, the ÷ symbol beside it) between Multiply and Flip everything; the panel one row taller | Build O, Parts 3 and 4 |
-| `screen:div-failed@1366x650` | `½(5x) = ½(−15)` crossed out, Multiply yellow | `(5x)/2 = (−15)/2` crossed out; no move yellow while it waits for Undo; a Divide button (`( )/n = ( )/n`, the ÷ symbol beside it) between Multiply and Flip everything; the panel one row taller | Build O, Parts 3 and 4 |
-| `screen:div-stuck-1@1366x650` | the panel with four moves | a Divide button (`( )/n = ( )/n`, the ÷ symbol beside it) between Multiply and Flip everything; the panel one row taller | Build O, Part 3 |
-| `screen:div-stuck-2@1366x650` | the panel with four moves | a Divide button (`( )/n = ( )/n`, the ÷ symbol beside it) between Multiply and Flip everything; the panel one row taller | Build O, Part 3 |
-| `screen:div-teach@1366x650` | the panel with four moves | a Divide button (`( )/n = ( )/n`, the ÷ symbol beside it) between Multiply and Flip everything; the panel one row taller | Build O, Part 3 |
-| `screen:div-wrong-guess@1366x650` | the panel with four moves | a Divide button (`( )/n = ( )/n`, the ÷ symbol beside it) between Multiply and Flip everything; the panel one row taller | Build O, Part 3 |
-| `screen:div-end@1366x650` | the rows in multiplication form | the same rows in division form, with the "same as" line; the check beside them unchanged; a Divide button (`( )/n = ( )/n`, the ÷ symbol beside it) between Multiply and Flip everything; the panel one row taller | Build O, Parts 3 and 4 |
-| `screen:div-failed-stuck@1366x650` | as above, under the Undo-first pop-up | as above; a Divide button (`( )/n = ( )/n`, the ÷ symbol beside it) between Multiply and Flip everything; the panel one row taller | Build O, Parts 3 and 4 |
-| `screen:div-alone-stuck-1@1366x650` | the rows in multiplication form | the same rows in division form, with the "same as" line; a Divide button (`( )/n = ( )/n`, the ÷ symbol beside it) between Multiply and Flip everything; the panel one row taller | Build O, Parts 3 and 4 |
-| `screen:div-menu@1366x650` | three options (`▢ ( )`, `1/▢ ( )`, `▢/▢ ( )`, the last greyed) | two options: the whole number greyed, the fraction live; a Divide button (`( )/n = ( )/n`, the ÷ symbol beside it) between Multiply and Flip everything; the panel one row taller | Build O, Parts 3 and 4 |
-| `screen:flip-opening@1366x650` | the panel with four moves | a Divide button (`( )/n = ( )/n`, the ÷ symbol beside it) between Multiply and Flip everything; the panel one row taller | Build O, Part 3 |
-| `screen:two-opening@1366x650` | the panel with four moves | a Divide button (`( )/n = ( )/n`, the ÷ symbol beside it) between Multiply and Flip everything; the panel one row taller | Build O, Part 3 |
-| `screen:dist-opening@1366x650` | the panel with four moves | a Divide button (`( )/n = ( )/n`, the ÷ symbol beside it) between Multiply and Flip everything; the panel one row taller | Build O, Part 3 |
 
 **Not in the screen set** (checked in `tests/buildO.test.js` and walked in Features to check): the hint after Undo lights the Divide
 button with its preview (it opened Multiply's options); the Divide preview's big bars on hover; dividing by −3 (−3 under each bar,
 "Same as multiplying by −⅓."); Flip everything and Two-step's Fraction option live again; the Add card's Divide greyed.
+
+## Build P (2026-10-24): nudges, calculate a product, cross-off, moving between blanks, Distribute polish, full checks, one drop per x
+
+The screens were re-baselined from `main` at `b7c62f3` (Build O as finished) before this build. Every screen difference is listed below, one key per row.
+
+| Key | Before | After | Why |
+|---|---|---|---|
 
 <!-- history: nothing below this line is read by the harness -->
 
@@ -901,3 +840,78 @@ property of equality) show only on hover, which no recorded state does. No subtr
 | `screen:flip-opening@1366x650` | the panel as Build N left it | the heading "Moves"; a symbol to the left of each move (+, ×, a circle of two arrows, a double arrow); the panel about 30 px wider | Build O, Part 2 |
 | `screen:two-opening@1366x650` | the panel as Build N left it | the heading "Moves"; a symbol to the left of each move (+, ×, a circle of two arrows, a double arrow); the panel about 30 px wider | Build O, Part 2 |
 | `screen:dist-opening@1366x650` | the panel as Build N left it | the heading "Moves"; a symbol to the left of each move (+, ×, a circle of two arrows, a double arrow); the panel about 30 px wider | Build O, Part 2 |
+
+## History: Build O, Parts 3-5 screen rows (accepted by the re-baseline of 2026-10-24, before Build P)
+
+| Key | Before | After | Why |
+|---|---|---|---|
+| `screen:add-opening@1366x768` | the panel with four moves | a Divide button (`( )/n = ( )/n`, the ÷ symbol beside it) between Multiply and Flip everything; the panel one row taller | Build O, Part 3 |
+| `screen:add-helpful-move@1366x768` | the panel with four moves | a Divide button (`( )/n = ( )/n`, the ÷ symbol beside it) between Multiply and Flip everything; the panel one row taller | Build O, Part 3 |
+| `screen:add-red-move@1366x768` | the panel with four moves | a Divide button (`( )/n = ( )/n`, the ÷ symbol beside it) between Multiply and Flip everything; the panel one row taller | Build O, Part 3 |
+| `screen:add-partial-move@1366x768` | the panel with four moves | a Divide button (`( )/n = ( )/n`, the ÷ symbol beside it) between Multiply and Flip everything; the panel one row taller | Build O, Part 3 |
+| `screen:add-stuck-1@1366x768` | the panel with four moves | a Divide button (`( )/n = ( )/n`, the ÷ symbol beside it) between Multiply and Flip everything; the panel one row taller | Build O, Part 3 |
+| `screen:add-stuck-2@1366x768` | the panel with four moves | a Divide button (`( )/n = ( )/n`, the ÷ symbol beside it) between Multiply and Flip everything; the panel one row taller | Build O, Part 3 |
+| `screen:add-stuck-3@1366x768` | the panel with four moves | a Divide button (`( )/n = ( )/n`, the ÷ symbol beside it) between Multiply and Flip everything; the panel one row taller | Build O, Part 3 |
+| `screen:add-stuck-4@1366x768` | the panel with four moves | a Divide button (`( )/n = ( )/n`, the ÷ symbol beside it) between Multiply and Flip everything; the panel one row taller | Build O, Part 3 |
+| `screen:add-teach@1366x768` | the panel with four moves | a Divide button (`( )/n = ( )/n`, the ÷ symbol beside it) between Multiply and Flip everything; the panel one row taller | Build O, Part 3 |
+| `screen:add-wrong-guess@1366x768` | the panel with four moves | a Divide button (`( )/n = ( )/n`, the ÷ symbol beside it) between Multiply and Flip everything; the panel one row taller | Build O, Part 3 |
+| `screen:add-wrong-guess-undone@1366x768` | the panel with four moves | a Divide button (`( )/n = ( )/n`, the ÷ symbol beside it) between Multiply and Flip everything; the panel one row taller | Build O, Part 3 |
+| `screen:add-forced-move@1366x768` | the panel with four moves | a Divide button (`( )/n = ( )/n`, the ÷ symbol beside it) between Multiply and Flip everything; the panel one row taller | Build O, Part 3 |
+| `screen:add-end@1366x768` | the panel with four moves | a Divide button (`( )/n = ( )/n`, the ÷ symbol beside it) between Multiply and Flip everything; the panel one row taller | Build O, Part 3 |
+| `screen:add-partial-stuck-4@1366x768` | the panel with four moves | a Divide button (`( )/n = ( )/n`, the ÷ symbol beside it) between Multiply and Flip everything; the panel one row taller | Build O, Part 3 |
+| `screen:add-partial-teach@1366x768` | the panel with four moves | a Divide button (`( )/n = ( )/n`, the ÷ symbol beside it) between Multiply and Flip everything; the panel one row taller | Build O, Part 3 |
+| `screen:add-alone-stuck-1@1366x768` | the panel with four moves | a Divide button (`( )/n = ( )/n`, the ÷ symbol beside it) between Multiply and Flip everything; the panel one row taller | Build O, Part 3 |
+| `screen:add-alone-stuck-2@1366x768` | the panel with four moves | a Divide button (`( )/n = ( )/n`, the ÷ symbol beside it) between Multiply and Flip everything; the panel one row taller | Build O, Part 3 |
+| `screen:add-alone-stuck-3@1366x768` | the panel with four moves | a Divide button (`( )/n = ( )/n`, the ÷ symbol beside it) between Multiply and Flip everything; the panel one row taller | Build O, Part 3 |
+| `screen:add-alone-teach@1366x768` | the panel with four moves | a Divide button (`( )/n = ( )/n`, the ÷ symbol beside it) between Multiply and Flip everything; the panel one row taller | Build O, Part 3 |
+| `screen:add-red-stuck@1366x768` | the panel with four moves | a Divide button (`( )/n = ( )/n`, the ÷ symbol beside it) between Multiply and Flip everything; the panel one row taller | Build O, Part 3 |
+| `screen:add-L2-stuck-2@1366x768` | the panel with four moves | a Divide button (`( )/n = ( )/n`, the ÷ symbol beside it) between Multiply and Flip everything; the panel one row taller | Build O, Part 3 |
+| `screen:div-opening@1366x768` | the panel with four moves | a Divide button (`( )/n = ( )/n`, the ÷ symbol beside it) between Multiply and Flip everything; the panel one row taller | Build O, Part 3 |
+| `screen:div-helpful-move@1366x768` | `⅕(5x) = ⅕(−15)` and `x = ⅕(−15)` | `(5x)/5 = (−15)/5`, "Same as multiplying by ⅕." under it, then `x = (−15)/5` (the harness divides with the Divide button); a Divide button (`( )/n = ( )/n`, the ÷ symbol beside it) between Multiply and Flip everything; the panel one row taller | Build O, Parts 3 and 4 |
+| `screen:div-failed@1366x768` | `½(5x) = ½(−15)` crossed out, Multiply yellow | `(5x)/2 = (−15)/2` crossed out; no move yellow while it waits for Undo; a Divide button (`( )/n = ( )/n`, the ÷ symbol beside it) between Multiply and Flip everything; the panel one row taller | Build O, Parts 3 and 4 |
+| `screen:div-stuck-1@1366x768` | the panel with four moves | a Divide button (`( )/n = ( )/n`, the ÷ symbol beside it) between Multiply and Flip everything; the panel one row taller | Build O, Part 3 |
+| `screen:div-stuck-2@1366x768` | the panel with four moves | a Divide button (`( )/n = ( )/n`, the ÷ symbol beside it) between Multiply and Flip everything; the panel one row taller | Build O, Part 3 |
+| `screen:div-teach@1366x768` | the panel with four moves | a Divide button (`( )/n = ( )/n`, the ÷ symbol beside it) between Multiply and Flip everything; the panel one row taller | Build O, Part 3 |
+| `screen:div-wrong-guess@1366x768` | the panel with four moves | a Divide button (`( )/n = ( )/n`, the ÷ symbol beside it) between Multiply and Flip everything; the panel one row taller | Build O, Part 3 |
+| `screen:div-end@1366x768` | the rows in multiplication form | the same rows in division form, with the "same as" line; the check beside them unchanged; a Divide button (`( )/n = ( )/n`, the ÷ symbol beside it) between Multiply and Flip everything; the panel one row taller | Build O, Parts 3 and 4 |
+| `screen:div-failed-stuck@1366x768` | as above, under the Undo-first pop-up | as above; a Divide button (`( )/n = ( )/n`, the ÷ symbol beside it) between Multiply and Flip everything; the panel one row taller | Build O, Parts 3 and 4 |
+| `screen:div-alone-stuck-1@1366x768` | the rows in multiplication form | the same rows in division form, with the "same as" line; a Divide button (`( )/n = ( )/n`, the ÷ symbol beside it) between Multiply and Flip everything; the panel one row taller | Build O, Parts 3 and 4 |
+| `screen:div-menu@1366x768` | three options (`▢ ( )`, `1/▢ ( )`, `▢/▢ ( )`, the last greyed) | two options: the whole number greyed, the fraction live; a Divide button (`( )/n = ( )/n`, the ÷ symbol beside it) between Multiply and Flip everything; the panel one row taller | Build O, Parts 3 and 4 |
+| `screen:flip-opening@1366x768` | the panel with four moves | a Divide button (`( )/n = ( )/n`, the ÷ symbol beside it) between Multiply and Flip everything; the panel one row taller | Build O, Part 3 |
+| `screen:two-opening@1366x768` | the panel with four moves | a Divide button (`( )/n = ( )/n`, the ÷ symbol beside it) between Multiply and Flip everything; the panel one row taller | Build O, Part 3 |
+| `screen:dist-opening@1366x768` | the panel with four moves | a Divide button (`( )/n = ( )/n`, the ÷ symbol beside it) between Multiply and Flip everything; the panel one row taller | Build O, Part 3 |
+| `screen:add-opening@1366x650` | the panel with four moves | a Divide button (`( )/n = ( )/n`, the ÷ symbol beside it) between Multiply and Flip everything; the panel one row taller | Build O, Part 3 |
+| `screen:add-helpful-move@1366x650` | the panel with four moves | a Divide button (`( )/n = ( )/n`, the ÷ symbol beside it) between Multiply and Flip everything; the panel one row taller | Build O, Part 3 |
+| `screen:add-red-move@1366x650` | the panel with four moves | a Divide button (`( )/n = ( )/n`, the ÷ symbol beside it) between Multiply and Flip everything; the panel one row taller | Build O, Part 3 |
+| `screen:add-partial-move@1366x650` | the panel with four moves | a Divide button (`( )/n = ( )/n`, the ÷ symbol beside it) between Multiply and Flip everything; the panel one row taller | Build O, Part 3 |
+| `screen:add-stuck-1@1366x650` | the panel with four moves | a Divide button (`( )/n = ( )/n`, the ÷ symbol beside it) between Multiply and Flip everything; the panel one row taller | Build O, Part 3 |
+| `screen:add-stuck-2@1366x650` | the panel with four moves | a Divide button (`( )/n = ( )/n`, the ÷ symbol beside it) between Multiply and Flip everything; the panel one row taller | Build O, Part 3 |
+| `screen:add-stuck-3@1366x650` | the panel with four moves | a Divide button (`( )/n = ( )/n`, the ÷ symbol beside it) between Multiply and Flip everything; the panel one row taller | Build O, Part 3 |
+| `screen:add-stuck-4@1366x650` | the panel with four moves | a Divide button (`( )/n = ( )/n`, the ÷ symbol beside it) between Multiply and Flip everything; the panel one row taller | Build O, Part 3 |
+| `screen:add-teach@1366x650` | the panel with four moves | a Divide button (`( )/n = ( )/n`, the ÷ symbol beside it) between Multiply and Flip everything; the panel one row taller | Build O, Part 3 |
+| `screen:add-wrong-guess@1366x650` | the panel with four moves | a Divide button (`( )/n = ( )/n`, the ÷ symbol beside it) between Multiply and Flip everything; the panel one row taller | Build O, Part 3 |
+| `screen:add-wrong-guess-undone@1366x650` | the panel with four moves | a Divide button (`( )/n = ( )/n`, the ÷ symbol beside it) between Multiply and Flip everything; the panel one row taller | Build O, Part 3 |
+| `screen:add-forced-move@1366x650` | the panel with four moves | a Divide button (`( )/n = ( )/n`, the ÷ symbol beside it) between Multiply and Flip everything; the panel one row taller | Build O, Part 3 |
+| `screen:add-end@1366x650` | the panel with four moves | a Divide button (`( )/n = ( )/n`, the ÷ symbol beside it) between Multiply and Flip everything; the panel one row taller | Build O, Part 3 |
+| `screen:add-partial-stuck-4@1366x650` | the panel with four moves | a Divide button (`( )/n = ( )/n`, the ÷ symbol beside it) between Multiply and Flip everything; the panel one row taller | Build O, Part 3 |
+| `screen:add-partial-teach@1366x650` | the panel with four moves | a Divide button (`( )/n = ( )/n`, the ÷ symbol beside it) between Multiply and Flip everything; the panel one row taller | Build O, Part 3 |
+| `screen:add-alone-stuck-1@1366x650` | the panel with four moves | a Divide button (`( )/n = ( )/n`, the ÷ symbol beside it) between Multiply and Flip everything; the panel one row taller | Build O, Part 3 |
+| `screen:add-alone-stuck-2@1366x650` | the panel with four moves | a Divide button (`( )/n = ( )/n`, the ÷ symbol beside it) between Multiply and Flip everything; the panel one row taller | Build O, Part 3 |
+| `screen:add-alone-stuck-3@1366x650` | the panel with four moves | a Divide button (`( )/n = ( )/n`, the ÷ symbol beside it) between Multiply and Flip everything; the panel one row taller | Build O, Part 3 |
+| `screen:add-alone-teach@1366x650` | the panel with four moves | a Divide button (`( )/n = ( )/n`, the ÷ symbol beside it) between Multiply and Flip everything; the panel one row taller | Build O, Part 3 |
+| `screen:add-red-stuck@1366x650` | the panel with four moves | a Divide button (`( )/n = ( )/n`, the ÷ symbol beside it) between Multiply and Flip everything; the panel one row taller | Build O, Part 3 |
+| `screen:add-L2-stuck-2@1366x650` | the panel with four moves | a Divide button (`( )/n = ( )/n`, the ÷ symbol beside it) between Multiply and Flip everything; the panel one row taller | Build O, Part 3 |
+| `screen:div-opening@1366x650` | the panel with four moves | a Divide button (`( )/n = ( )/n`, the ÷ symbol beside it) between Multiply and Flip everything; the panel one row taller | Build O, Part 3 |
+| `screen:div-helpful-move@1366x650` | `⅕(5x) = ⅕(−15)` and `x = ⅕(−15)` | `(5x)/5 = (−15)/5`, "Same as multiplying by ⅕." under it, then `x = (−15)/5` (the harness divides with the Divide button); a Divide button (`( )/n = ( )/n`, the ÷ symbol beside it) between Multiply and Flip everything; the panel one row taller | Build O, Parts 3 and 4 |
+| `screen:div-failed@1366x650` | `½(5x) = ½(−15)` crossed out, Multiply yellow | `(5x)/2 = (−15)/2` crossed out; no move yellow while it waits for Undo; a Divide button (`( )/n = ( )/n`, the ÷ symbol beside it) between Multiply and Flip everything; the panel one row taller | Build O, Parts 3 and 4 |
+| `screen:div-stuck-1@1366x650` | the panel with four moves | a Divide button (`( )/n = ( )/n`, the ÷ symbol beside it) between Multiply and Flip everything; the panel one row taller | Build O, Part 3 |
+| `screen:div-stuck-2@1366x650` | the panel with four moves | a Divide button (`( )/n = ( )/n`, the ÷ symbol beside it) between Multiply and Flip everything; the panel one row taller | Build O, Part 3 |
+| `screen:div-teach@1366x650` | the panel with four moves | a Divide button (`( )/n = ( )/n`, the ÷ symbol beside it) between Multiply and Flip everything; the panel one row taller | Build O, Part 3 |
+| `screen:div-wrong-guess@1366x650` | the panel with four moves | a Divide button (`( )/n = ( )/n`, the ÷ symbol beside it) between Multiply and Flip everything; the panel one row taller | Build O, Part 3 |
+| `screen:div-end@1366x650` | the rows in multiplication form | the same rows in division form, with the "same as" line; the check beside them unchanged; a Divide button (`( )/n = ( )/n`, the ÷ symbol beside it) between Multiply and Flip everything; the panel one row taller | Build O, Parts 3 and 4 |
+| `screen:div-failed-stuck@1366x650` | as above, under the Undo-first pop-up | as above; a Divide button (`( )/n = ( )/n`, the ÷ symbol beside it) between Multiply and Flip everything; the panel one row taller | Build O, Parts 3 and 4 |
+| `screen:div-alone-stuck-1@1366x650` | the rows in multiplication form | the same rows in division form, with the "same as" line; a Divide button (`( )/n = ( )/n`, the ÷ symbol beside it) between Multiply and Flip everything; the panel one row taller | Build O, Parts 3 and 4 |
+| `screen:div-menu@1366x650` | three options (`▢ ( )`, `1/▢ ( )`, `▢/▢ ( )`, the last greyed) | two options: the whole number greyed, the fraction live; a Divide button (`( )/n = ( )/n`, the ÷ symbol beside it) between Multiply and Flip everything; the panel one row taller | Build O, Parts 3 and 4 |
+| `screen:flip-opening@1366x650` | the panel with four moves | a Divide button (`( )/n = ( )/n`, the ÷ symbol beside it) between Multiply and Flip everything; the panel one row taller | Build O, Part 3 |
+| `screen:two-opening@1366x650` | the panel with four moves | a Divide button (`( )/n = ( )/n`, the ÷ symbol beside it) between Multiply and Flip everything; the panel one row taller | Build O, Part 3 |
+| `screen:dist-opening@1366x650` | the panel with four moves | a Divide button (`( )/n = ( )/n`, the ÷ symbol beside it) between Multiply and Flip everything; the panel one row taller | Build O, Part 3 |
