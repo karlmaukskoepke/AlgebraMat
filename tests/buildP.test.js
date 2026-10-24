@@ -197,3 +197,29 @@ describe('Part 4: moving between blanks with the keyboard', () => {
     expect(s.fb.sel).toBeFalsy();
   });
 });
+
+describe('Part 5: Distribute does not give the multiplication away', () => {
+  const p = P({ f: 3, c: 2, x: 3 });
+  const dist = (s, ps) => [{ type: 'lxDistribute', id: s.board.left[0].id }, ...ps.flatMap((v, k) => [{ type: 'focus', target: 'dist', index: k }, ...digits(v)]), { type: 'lxApply' }];
+  it('no labels the first time; a wrong product shows them (recorded as hint) for the rest of the problem; the next problem starts without', () => {
+    let s = start(p);
+    s = run(s, [{ type: 'lxDistribute', id: s.board.left[0].id }]);
+    expect(s.lx.labels).toBeFalsy();
+    const s0 = start(p);
+    s = run(s0, dist(s0, [3, 5]));
+    expect(s.feedback.key).toBe('dxProductWrong');
+    expect(s.lx.labels).toBe(true);
+    expect(s.supportsShown).toContain('hint');
+    s = run(s, [{ type: 'undo' }]);
+    expect(s.lx.labels).toBe(true);
+    s = run(s, [{ type: 'lxDistribute', id: s.board.left[0].id }]);
+    expect(s.lx.labels).toBe(true);
+    expect(start(P({ f: 2, c: 3, x: 4 })).lx.labels).toBeFalsy();
+  });
+  it('a right distribute records nothing', () => {
+    const s0 = start(p);
+    const s = run(s0, dist(s0, [3, 6]));
+    expect(s.supportsShown).toEqual([]);
+    expect(s.lx.labels).toBeFalsy();
+  });
+});

@@ -199,12 +199,15 @@ function groupEls(s, t, i, subtracted, shownNeg) {
   const text = subtracted ? [String(-f)] : f < 0 ? [html('span', 'lx-negsign', [MINUS], i > 0 ? { 'data-minus': t.id } : {}), String(-f)] : [String(f)];
   const hinted = s.hint?.kind === 'factor' && s.hint.id === t.id;
   const owed = moveOwed(s) && !s.lx.distribute;                     // the forced move: the factor to drag is ringed and pulses (Build M)
-  const factor = html('span', `lx-factor${shownNeg ? ' lx-negnum' : ''}${holding ? ' is-held' : ''}${hinted ? ' is-hint' : ''}${owed ? ' is-ring' : ''}`, text, {
+  const dist = s.lx.distribute?.group === t.id;                    // being distributed: the factor in colour, arcs to each piece (Build P)
+  const factor = html('span', `lx-factor${shownNeg ? ' lx-negnum' : ''}${holding ? ' is-held' : ''}${hinted ? ' is-hint' : ''}${owed ? ' is-ring' : ''}${dist ? ' is-distributing' : ''}`, text, {
     'data-tok': `${t.id}:f`, 'data-factor': t.id, 'data-side': findTerm(s.board, t.id)?.side, 'data-fk': `tok:${t.id}:f`, tabindex: canGrab(s) ? '0' : undefined, role: 'button',
     'aria-label': `The factor ${signed(f).replace(MINUS, 'negative ')}. Enter picks it up; drop it on the parenthesis to distribute.`,
   });
   if (holding || s.ui?.focus === `tok:${t.id}:f`) factor.dataset.lxFocus = '1';
-  const paren = html('span', `lx-paren${holding && carry.slot?.paren ? ' is-combine-target' : ''}${hinted ? ' is-hint' : ''}${owed ? ' is-ring' : ''}`, [`(${sideText(t.inner)})`], { 'data-paren': t.id });
+  // (each piece inside is its own span, for the arcs drawn to it while the factor is distributed: Build P, Part 5)
+  const pieces = t.inner.flatMap((u, k) => { const { op, body } = termText(u, k, false); return [...(op ? [` ${op} `] : []), html('span', 'lx-piece', [body], { 'data-piece-of': t.id })]; });
+  const paren = html('span', `lx-paren${holding && carry.slot?.paren ? ' is-combine-target' : ''}${hinted ? ' is-hint' : ''}${owed ? ' is-ring' : ''}`, ['(', ...pieces, ')'], { 'data-paren': t.id });
   return [factor, paren];
 }
 
@@ -379,7 +382,8 @@ function productRow(s) {
       if (s.ui?.focus === `prod:${j}`) box.dataset.lxFocus = '1';
       // the x blank has its x printed after it: the number in front of x is typed, with its sign (Build M)
       const after = term.kind === 'x' ? [html('span', 'lb-x lx-prodx', ['x'])] : [];
-      els.push(html('span', `lx-prod${d.wrong === j ? ' is-wrong' : ''}`, [html('span', 'lx-prodlabel', [labels[j]]), html('span', 'lx-prodbox', [box, ...after])]));
+      // the label (`3 · x`) is the scaffold after a wrong product (Build P, Part 5): until then its place is kept, empty, so nothing moves
+      els.push(html('span', `lx-prod${d.wrong === j ? ' is-wrong' : ''}`, [html('span', `lx-prodlabel${s.lx.labels ? '' : ' is-hidden'}`, [labels[j]], s.lx.labels ? {} : { 'aria-hidden': 'true' }), html('span', 'lx-prodbox', [box, ...after])]));
       k += 1;
     });
   });
@@ -636,5 +640,44 @@ export function renderAddBothScreen(s, card = ADD_CARD) {
   body.append(main, panel(s));
   wrap.append(body);
   popups(s, wrap);
+  if (s.lx.distribute) distributeArcs(wrap, s);
   return wrap;
+}
+
+// While the factor is distributed (Build P, Part 5): an arc from the factor to each piece inside the parenthesis, a small × on each, and
+// "3 groups of" by the parenthesis, drawn under the row once it is on screen (in the room the labels would take: nothing moves).
+function distributeArcs(wrap, s) {
+  const g = findTerm(s.board, s.lx.distribute.group)?.term;
+  if (!g) return;
+  const draw = () => {
+    const f = wrap.querySelector(`.lx-live [data-factor="${g.id}"]`);
+    const paren = wrap.querySelector(`.lx-live [data-paren="${g.id}"]`);
+    const pieces = [...wrap.querySelectorAll(`.lx-live [data-piece-of="${g.id}"]`)];
+    const row = f?.closest('.lb-rowwrap');
+    if (!f || !paren || !pieces.length || !row || row.querySelector('.dx-arcs')) return;
+    const box = row.getBoundingClientRect();
+    const at = (el) => { const r = el.getBoundingClientRect(); return { x: r.left + r.width / 2 - box.left, y: r.bottom - box.top - 6 }; };
+    const from = at(f);
+    const NS = 'http://www.w3.org/2000/svg';
+    const svg = document.createElementNS(NS, 'svg');
+    svg.setAttribute('class', 'dx-arcs');
+    svg.setAttribute('aria-hidden', 'true');
+    const mk = (name, attrs, text) => { const n = document.createElementNS(NS, name); for (const [k, v] of Object.entries(attrs)) n.setAttribute(k, v); if (text) n.textContent = text; svg.append(n); return n; };
+    const depth = 30;
+    pieces.forEach((p) => {
+      const to = at(p);
+      const c = { x: (from.x + to.x) / 2, y: Math.max(from.y, to.y) + depth * 1.6 };          // the control point, under both
+      mk('path', { d: `M${from.x} ${from.y} Q${c.x} ${c.y} ${to.x} ${to.y}`, class: 'dx-arc' });
+      mk('path', { d: `M${to.x - 6} ${to.y + 10} L${to.x} ${to.y} L${to.x + 6} ${to.y + 10}`, class: 'dx-arrowhead' });
+      // the small × at the bottom of the arc (a quadratic's middle: a quarter of each end and half the control point)
+      const m = { x: (from.x + to.x) / 4 + c.x / 2, y: (from.y + to.y) / 4 + c.y / 2 };
+      mk('circle', { cx: m.x, cy: m.y, r: 10, class: 'dx-timesdot' });
+      mk('text', { x: m.x, y: m.y + 6, class: 'dx-times', 'text-anchor': 'middle' }, '×');
+    });
+    const pr = paren.getBoundingClientRect();
+    const factorText = signed(g.factor).replace('-', MINUS);
+    mk('text', { x: pr.right - box.left + 10, y: pr.bottom - box.top + 22, class: 'dx-groups' }, `${factorText} groups of`);
+    row.append(svg);
+  };
+  if (typeof requestAnimationFrame === 'function') requestAnimationFrame(draw);
 }

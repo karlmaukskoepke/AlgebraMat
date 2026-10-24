@@ -547,6 +547,9 @@ function distributeAction(state, action, alone, opts) {
     const tag = productSlip(g, wrong, typed);
     Object.assign(s.lx.distribute, { wrong, focus: wrong });
     s.lx.log.productsWrong = (s.lx.log.productsWrong ?? 0) + 1;
+    // the products' labels (`3 · x`, `3 · 2`) appear now, the scaffold, for the rest of this problem (Build P, Part 5): a reminder (`hint`)
+    s.lx.labels = true;
+    if (!s.supportsShown.includes('hint')) s.supportsShown.push('hint');
     s.answers.push({ typed: `${productLabels(g)[wrong]} = ${d.entries[wrong]}`, tag });
     s.tags.push(tag);
     s.ui = { ...UI0, focus: `prod:${wrong}` };

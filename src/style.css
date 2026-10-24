@@ -3765,3 +3765,16 @@ button.lb-divbar.is-calc:hover, button.lb-divbar.is-calc:focus-visible { backgro
 
 /* ---------- Build P, Part 4: a blank moved to with Tab or an arrow has its contents selected (typing replaces them) ---------- */
 .lx-box.is-selected { background: #0072b2 !important; color: #fff !important; }
+
+/* ---------- Build P, Part 5: distributing. The factor in colour, an arc from it to each piece inside the parenthesis with a small × on
+   each, and "3 groups of" by the parenthesis; the products' labels are kept hidden until a wrong product ---------- */
+.ui-grab .lx-prodlabel.is-hidden { visibility: hidden; }
+.ui-light .lx-factor.is-distributing { color: #0072b2; font-weight: 800; }
+.ui-light .lb-rowwrap:has(.dx-arcs) { position: relative; }
+.dx-arcs { position: absolute; left: 0; top: 0; width: 100%; height: calc(100% + 40px); overflow: visible; pointer-events: none; z-index: 3; }
+.dx-arc, .dx-arrowhead { fill: none; stroke: #0072b2; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+.dx-times { fill: #0072b2; font: 800 18px 'Lexend', system-ui, sans-serif; }
+.dx-groups { fill: #0072b2; font: 800 17px 'Lexend', system-ui, sans-serif; }
+.ui-grab .lx-ghost.is-products { margin-top: 30px; }
+.dx-timesdot { fill: #fff; stroke: #0072b2; stroke-width: 2; }
+.dx-times { font-size: 16px; }
