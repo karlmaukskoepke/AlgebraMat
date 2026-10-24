@@ -217,14 +217,24 @@ class Walk {
   async distribute(...products) { await this.dragFactor(); for (const v of products) { await this.type(v); await this.enter(); } await wait(this.page, 300); }
   // drag one term of the row onto another (by their text as written), type what they make, Enter
   async combineTerms(from, onto, typed) {
-    const tok = (t) => this.page.locator('.lx-live .lx-tok').filter({ hasText: new RegExp(`^\\s*[+−]?\\s*${t.replace(/[−-]/g, '[−-]?')}\\s*$`) }).first();
-    const f = await tok(from).boundingBox();
-    const t = await tok(onto).boundingBox();
+    const tok = (t) => this.page.locator('.lx-live .lx-tok').filter({ hasText: new RegExp(`^\\s*[+−]?\\s*${t.replace(/[−-]/g, '[−-]?')}\\s*$`) });
+    const f = await tok(from).nth(from === onto ? 1 : 0).boundingBox();   // two alike: the second one onto the first
+    const t = await tok(onto).first().boundingBox();
     const m = this.page.mouse;
     await m.move(f.x + f.width / 2, f.y + f.height / 2); await m.down();
     await m.move(f.x + f.width / 2 + 8, f.y + f.height / 2, { steps: 3 });
     await m.move(t.x + t.width / 2, t.y + t.height / 2, { steps: 12 }); await wait(this.page, 150); await m.up(); await wait(this.page, 400);
     if (typed !== undefined) { await this.type(typed); await this.enter(); }
+  }
+  // Variables on both sides (Build R): an x-term (by its text) dragged across the = and let go at the end of the other side
+  async crossTerm(text, toSide) {
+    const from = await this.page.locator(`.lx-live .lb-${toSide === 'left' ? 'right' : 'left'} .lx-tok`).filter({ hasText: new RegExp(`^\\s*[+−]?\\s*${text.replace(/[−-]/g, '[−-]?')}\\s*$`) }).first().boundingBox();
+    const side = await this.page.locator(`.lx-live .lb-${toSide}`).first().boundingBox();
+    const m = this.page.mouse;
+    await m.move(from.x + from.width / 2, from.y + from.height / 2); await m.down();
+    await m.move(from.x + from.width / 2 + (toSide === 'left' ? -10 : 10), from.y + from.height / 2, { steps: 3 });
+    const to = toSide === 'left' ? side.x + side.width - 10 : side.x + side.width + 20;
+    await m.move(to, side.y + side.height / 2, { steps: 14 }); await wait(this.page, 200); await m.up(); await wait(this.page, 500);
   }
   async rows() { return (await this.page.evaluate(() => [...document.querySelectorAll('.lb-stack .lb-rowwrap')].map((r) => r.innerText.replace(/\s+/g, '')))); }
   async row(text) { const rs = await this.rows(); const want = text.replace(/\s+/g, ''); if (!rs.some((r) => r.endsWith(want) || r === want)) throw new Error(`expected a row ${text} after step "${this.step}": ${rs.join(' | ')}`); }
@@ -233,6 +243,112 @@ class Walk {
 
 // ---- one walk per item (same id as in the data file) ---------------------------------------------------------------------------------
 const WALKS = {
+  // ---- Build R: Variables on both sides ----
+  async 'r-level-1'(w) {
+    await w.start(); await w.see('VARIABLES ON BOTH SIDES · Level 1', '7x = 4x + 15'); await w.both('r-level-1');
+    w.at('drag the 4x across'); await w.crossTerm('4x', 'left'); await w.row('7x − 4x = 15');
+    w.at('combine to 3x'); await w.combineTerms('−4x', '7x', '3x'); await w.row('3x = 15');
+    w.at('Divide 3'); await w.divEnter(3); await w.row('x = (15) 3');
+    w.at('type 5, drop in each x, Enter for each line'); await w.answer(5, 4);
+    await w.see('7 × 5 = 4 × 5 + 15', '35 = 4 × 5 + 15', '35 = 20 + 15', '35 = 35', '✓ Balanced');
+  },
+  async 'r-level-2'(w) {
+    await w.start(); await w.see('5x + 5 = 2x + 14'); await w.both('r-level-2');
+    w.at('drag the 2x across'); await w.crossTerm('2x', 'left'); await w.row('5x + 5 − 2x = 14');
+    w.at('combine to 3x'); await w.combineTerms('−2x', '5x', '3x'); await w.row('3x + 5 = 14');
+    w.at('Add −5, combine'); await w.addEnter(-5); await w.row('3x = 14 − 5'); await w.combine(9); await w.row('3x = 9');
+    w.at('Divide 3, type 3'); await w.divEnter(3); await w.row('x = (9) 3'); await w.answer(3, 5); await w.see('20 = 20', '✓ Balanced');
+  },
+  async 'r-level-3'(w) {
+    await w.start(); await w.see('4x + 11 = 8x − 1'); await w.both('r-level-3');
+    w.at('drag the 4x across'); await w.crossTerm('4x', 'right'); await w.row('11 = 8x − 1 − 4x');
+    w.at('combine to 4x'); await w.combineTerms('−4x', '8x', '4x'); await w.row('11 = 4x − 1');
+    w.at('Trade places'); await w.click(`${act('choose')}[data-move="trade"]`); await w.row('4x − 1 = 11');
+    w.at('Add 1, combine, Divide 4'); await w.addEnter(1); await w.combine(12); await w.row('4x = 12'); await w.divEnter(4); await w.row('x = (12) 4');
+  },
+  async 'r-level-4'(w) {
+    await w.start(); await w.see('2x − 5 = −2x + 11'); await w.both('r-level-4');
+    w.at('Add, + ▢x, 2'); await w.click(`${act('choose')}[data-move="add"]`); await w.click(`${act('addPick')}[data-kind="x"]`); await w.type(2); await w.enter(); await wait(w.page, 300);
+    await w.row('2x − 5 + 2x = 11');
+    w.at('combine to 4x'); await w.combineTerms('2x', '2x', '4x'); await w.row('4x − 5 = 11');
+    w.at('Add 5, combine'); await w.addEnter(5); await w.combine(16); await w.row('4x = 16');
+    w.at('Divide 4, type 4'); await w.divEnter(4); await w.answer(4, 5); await w.see('2 × 4 − 5 = −2 × 4 + 11', '3 = 3', '✓ Balanced');
+  },
+  async 'r-level-5'(w) {
+    await w.start(); await w.see('4(x − 3) = 2x − 6'); await w.both('r-level-5');
+    w.at('distribute: 4, −12'); await w.distribute(4, -12); await w.row('4x + −12 = 2x − 6');
+    w.at('Next'); await w.click(act('foldNext')); await wait(w.page, 300);
+    w.at('drag the 2x across'); await w.crossTerm('2x', 'left'); await w.row('4x + −12 − 2x = −6');
+    w.at('combine to 2x'); await w.combineTerms('−2x', '4x', '2x'); await w.row('2x + −12 = −6');
+    w.at('Add 12, combine, Divide 2'); await w.addEnter(12); await w.combine(6); await w.row('2x = 6'); await w.divEnter(2); await w.row('x = (6) 2');
+  },
+  async 'r-cross-drag'(w) {
+    await w.start(); await w.see('8x − 14 = 5x + 10');
+    w.at('hold the 5x over the left side');
+    const from = await w.page.locator('.lx-live .lb-right .lx-tok').first().boundingBox();
+    const side = await w.page.locator('.lx-live .lb-left').first().boundingBox();
+    const m = w.page.mouse;
+    await m.move(from.x + from.width / 2, from.y + from.height / 2); await m.down();
+    await m.move(from.x - 10, from.y + from.height / 2, { steps: 3 }); await m.move(side.x + side.width - 10, side.y + side.height / 2, { steps: 14 }); await wait(w.page, 400);
+    await w.see('−5x');
+    if (!(await w.page.locator('.lx-tok.is-crossing, .lx-tok.is-fresh, .is-crossing').count())) throw new Error('the term should turn red and read −5x over the left side');
+    await w.both('r-cross-drag');
+    w.at('let go'); await m.up(); await wait(w.page, 600); await w.row('8x − 14 − 5x = 10');
+    if (!(await w.page.locator('[data-light="xone"].is-green').count())) throw new Error('x on one side should be green');
+  },
+  async 'r-add-xterm'(w) {
+    await w.start(); await w.see('8x − 14 = 5x + 10');
+    w.at('Add'); await w.click(`${act('choose')}[data-move="add"]`);
+    if ((await w.page.locator('.ao-flyout .mo-opt').count()) !== 2) throw new Error('Add should show two options');
+    w.at('+ ▢x, −5'); await w.click(`${act('addPick')}[data-kind="x"]`); await w.type(-5);
+    if ((await w.page.locator('.lx-ghost .lx-addx').count()) !== 2) throw new Error('an x should be printed after each box');
+    await w.both('r-add-menu');
+    await w.enter(); await wait(w.page, 400); await w.row('8x − 14 − 5x = 10');
+  },
+  async 'r-x-greyed'(w) {
+    await w.start(); await w.see('8x − 14 = 5x + 10', 'Get x on one side first.');
+    w.at('type 8 in x ='); await w.click('[data-fk="answer"]').catch(() => {}); await w.type(8);
+    if ((await w.page.locator('[data-fk="answer"]').innerText()).trim() === '8') throw new Error('x = should take nothing while x is on both sides');
+    await w.both('r-x-greyed');
+    w.at('drag the 5x across'); await w.crossTerm('5x', 'left'); await w.notSee('Get x on one side first.');
+    w.at('type 8 again'); await w.click(act('focus')); await w.type(8);
+    if ((await w.page.locator('[data-fk="answer"]').innerText()).trim() !== '8') throw new Error('x = should take the 8 now');
+  },
+  async 'r-combine-x'(w) {
+    await w.start(); await w.see('8x − 14 = 5x + 10');
+    w.at('drag the 5x across'); await w.crossTerm('5x', 'left');
+    w.at('−5x onto 8x, 3'); await w.combineTerms('−5x', '8x', 3); await w.see('3 of what?');
+    await w.both('r-combine-x');
+    w.at('x, Enter'); await w.page.keyboard.press('x'); await wait(w.page, 200); await w.enter(); await w.row('3x − 14 = 10');
+  },
+  async 'r-two-x-check'(w) {
+    await w.start(); await w.see('7x = 4x + 15');
+    w.at('solve to x alone'); await w.crossTerm('4x', 'left'); await w.combineTerms('−4x', '7x', '3x'); await w.divEnter(3);
+    w.at('type 5, drop on the second x'); await w.click(act('focus')); await w.type(5); await w.enter(); await w.dragTo('[data-x][data-xi="1"]');
+    if ((await w.page.locator('[data-xi="1"] .lb-xcheck').count()) !== 1) throw new Error('the x in 4x should get a green check');
+    if ((await w.page.locator('[data-xi="0"] .lb-xwait').count()) !== 1) throw new Error('the other x should show a faint 5 waiting');
+    await w.both('r-two-x-midway');
+    w.at('drop on the first x'); await w.dragTo('[data-x][data-xi="0"]');
+    await w.pairs('7x=4x+15', '7×5=4×5+15');
+    await w.both('r-two-x-complete');
+    w.at('Enter four times'); await w.enter(4); await w.see('35 = 4 × 5 + 15', '35 = 20 + 15', '35 = 35', '✓ Balanced');
+  },
+  async 'student-both'(w) {
+    await w.start(); await w.see('5x + 5 = 2x + 14');
+    w.at('mistake 1: Add 2x'); await w.click(`${act('choose')}[data-move="add"]`); await w.click(`${act('addPick')}[data-kind="x"]`); await w.type(2); await w.enter(); await w.lateLayer();
+    await w.see('did not eliminate the term', 'got bigger'); await w.shot('student-both-sign-lost');
+    w.at('mistake 1: Undo'); await w.click(act('undo')); await wait(w.page, 800); await w.see('Move this x-term to the other side. Drag it across the =, or use Add.');
+    await w.both('r-stuck');
+    w.at('mistake 2: type 3 in x ='); await w.click(act('spotDismiss')).catch(() => {}); await w.click('[data-fk="answer"]').catch(() => {}); await w.type(3); await w.enter();
+    await w.see('Get x on one side first.');
+    if ((await w.page.locator('.sv-checklist .sv-checkrow').count())) throw new Error('nothing should be checked while x is on both sides');
+    w.at('mistake 3: drag 2x across, combine as 7x'); await w.crossTerm('2x', 'left'); await w.combineTerms('−2x', '5x', '7x'); await w.lateLayer();
+    await w.see('is not 7x'); await w.shot('student-both-sizes');
+    w.at('mistake 3: Undo'); await w.click(act('undo')); await wait(w.page, 800);
+    if ((await w.page.locator('.lx-live .lx-tok.is-hint').count()) !== 2) throw new Error('the 5x and the −2x should be outlined after Undo');
+    await w.see('5x and −2x are like terms. Drag one onto the other to combine them.'); await w.shot('student-both-hint');
+  },
+
   // ---- Build P: nudges, calculate a product, cross-off, moving between blanks, Distribute polish, full checks, one drop per x ----
   async 'p-combine-nudge'(w) {
     await w.start(); await w.see('TWO-STEP EQUATIONS · Level 1', '3x + 4 = 19');

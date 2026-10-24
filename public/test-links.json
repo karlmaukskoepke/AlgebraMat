@@ -3,6 +3,197 @@
   "updated": "2026-10-24",
   "checks": [
     {
+      "id": "r-level-1",
+      "name": "Variables on both sides, Level 1: ax = bx + c",
+      "build": "Build R",
+      "link": {
+        "label": "Open Variables on both sides · Level 1",
+        "query": "?pack=variables-both-sides&level=1&seed=21&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Variables on both sides, Level 1, on 7x = 4x + 15.",
+        "Drag the 4x across the = onto the left side and let go.",
+        "Drag the −4x onto the 7x, type 3x and press Enter.",
+        "Click Divide (÷), type 3 and press Enter.",
+        "Click the box after x =, type 5 and press Enter. Drag the 5 onto each x (one at a time), then press Enter for each line until Balanced."
+      ],
+      "see": "The drag writes 7x − 4x = 4x + 15 − 4x with the two 4x struck on the right, then 7x − 4x = 15. Combining gives 3x = 15, dividing gives x = (15) over 3. The check reads 7 × 5 = 4 × 5 + 15, then 35 = 4 × 5 + 15, 35 = 20 + 15, 35 = 35, Balanced."
+    },
+    {
+      "id": "r-level-2",
+      "name": "Variables on both sides, Level 2: ax + b = cx + d",
+      "build": "Build R",
+      "link": {
+        "label": "Open Variables on both sides · Level 2",
+        "query": "?pack=variables-both-sides&level=2&seed=21&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Level 2 on 5x + 5 = 2x + 14.",
+        "Drag the 2x across the = onto the left side.",
+        "Drag the −2x onto the 5x, type 3x and press Enter.",
+        "Click Add, type −5 and press Enter. Drag the 14 onto the −5, type 9 and press Enter.",
+        "Click Divide (÷), type 3 and press Enter. Type 3 in x =, press Enter, drag the 3 onto each x and press Enter for each line."
+      ],
+      "see": "The rows read 5x + 5 − 2x = 14, then 3x + 5 = 14, 3x = 14 − 5, 3x = 9 and x = (9) over 3. The check ends 20 = 20 and Balanced."
+    },
+    {
+      "id": "r-level-3",
+      "name": "Variables on both sides, Level 3: more x on the right, then Trade places",
+      "build": "Build R",
+      "link": {
+        "label": "Open Variables on both sides · Level 3",
+        "query": "?pack=variables-both-sides&level=3&seed=7&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Level 3 on 4x + 11 = 8x − 1.",
+        "Drag the 4x across the = onto the right side.",
+        "Drag the −4x onto the 8x, type 4x and press Enter.",
+        "Click Trade places (the fifth button).",
+        "Click Add, type 1 and press Enter. Drag the 11 onto the 1, type 12 and press Enter. Click Divide (÷), type 4 and press Enter."
+      ],
+      "see": "After the drag x is on the right: 11 = 8x − 1 − 4x, then 11 = 4x − 1. Trade places writes 4x − 1 = 11. Then 4x = 11 + 1, 4x = 12 and x = (12) over 4."
+    },
+    {
+      "id": "r-level-4",
+      "name": "Variables on both sides, Level 4: negatives",
+      "build": "Build R",
+      "link": {
+        "label": "Open Variables on both sides · Level 4",
+        "query": "?pack=variables-both-sides&level=4&seed=11&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Level 4 on 2x − 5 = −2x + 11.",
+        "Click Add, then its second option (+ ▢x). Type 2 and press Enter.",
+        "Drag the 2x onto the 2x beside it, type 4x and press Enter.",
+        "Click Add, type 5 and press Enter. Drag the 11 onto the 5, type 16 and press Enter.",
+        "Click Divide (÷), type 4 and press Enter. Type 4 in x =, press Enter, drag the 4 onto each x and press Enter for each line."
+      ],
+      "see": "Adding 2x cancels the −2x on the right: 2x − 5 + 2x = 11. Then 4x − 5 = 11, 4x = 11 + 5, 4x = 16, x = (16) over 4. The check works one side at a time, from 2 × 4 − 5 = −2 × 4 + 11 to 3 = 3, then Balanced."
+    },
+    {
+      "id": "r-level-5",
+      "name": "Variables on both sides, Level 5: a parenthesis",
+      "build": "Build R",
+      "link": {
+        "label": "Open Variables on both sides · Level 5",
+        "query": "?pack=variables-both-sides&level=5&seed=11&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Level 5 on 4(x − 3) = 2x − 6.",
+        "Drag the 4 onto the parenthesis. Type 4, Enter, −12, Enter. Press Next.",
+        "Drag the 2x across the = onto the left side.",
+        "Drag the −2x onto the 4x, type 2x and press Enter.",
+        "Click Add, type 12 and press Enter. Drag the −6 onto the 12, type 6 and press Enter. Click Divide (÷), type 2 and press Enter."
+      ],
+      "see": "The drag onto the parenthesis shows arcs and “4 groups of”; the products write 4x + −12 = 2x − 6. Then 4x + −12 − 2x = −6, 2x + −12 = −6, 2x = −6 + 12, 2x = 6 and x = (6) over 2."
+    },
+    {
+      "id": "r-cross-drag",
+      "name": "Drag an x-term across the = (it turns negative)",
+      "build": "Build R",
+      "link": {
+        "label": "Open Variables on both sides · Level 2",
+        "query": "?pack=variables-both-sides&level=2&seed=7&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Level 2 on 8x − 14 = 5x + 10.",
+        "Pick up the 5x and hold it over the left side, without letting go.",
+        "Let go there."
+      ],
+      "see": "While you hold it over the left side the term turns red and reads −5x, with a grey preview 8x − 14 − 5x = 10 in the row. Letting go writes 8x − 14 − 5x = 5x + 10 − 5x with the two 5x struck, then 8x − 14 − 5x = 10. The dot “x on one side” turns green."
+    },
+    {
+      "id": "r-add-xterm",
+      "name": "Add an x-term: Add’s second option",
+      "build": "Build R",
+      "link": {
+        "label": "Open Variables on both sides · Level 2",
+        "query": "?pack=variables-both-sides&level=2&seed=7&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Level 2 on 8x − 14 = 5x + 10.",
+        "Click Add (the top button). Two options open beside it: + ▢ and + ▢x.",
+        "Click the second option (+ ▢x). Type −5 and press Enter."
+      ],
+      "see": "The second option puts an x after each box: 8x − 14 + ▢x = 5x + 10 + ▢x. Typing −5 shows −5 in both boxes, and Enter writes the same rows as the drag: 8x − 14 − 5x = 10."
+    },
+    {
+      "id": "r-x-greyed",
+      "name": "x = stays greyed until x is on one side",
+      "build": "Build R",
+      "link": {
+        "label": "Open Variables on both sides · Level 2",
+        "query": "?pack=variables-both-sides&level=2&seed=7&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Level 2 on 8x − 14 = 5x + 10.",
+        "Click the box after x = and type 8.",
+        "Drag the 5x across the = onto the left side.",
+        "Click the box after x = and type 8 again."
+      ],
+      "see": "At first x = is greyed with “Get x on one side first.” under it, and typing does nothing. Once x is on one side the note goes and the 8 appears in x =."
+    },
+    {
+      "id": "r-combine-x",
+      "name": "Combine x-terms; a bare number gets the x-box picture",
+      "build": "Build R",
+      "link": {
+        "label": "Open Variables on both sides · Level 2",
+        "query": "?pack=variables-both-sides&level=2&seed=7&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Level 2 on 8x − 14 = 5x + 10.",
+        "Drag the 5x across the = onto the left side.",
+        "Drag the −5x onto the 8x. Type 3 and press Enter.",
+        "Press x on the keyboard, then press Enter."
+      ],
+      "see": "A bare 3 brings the picture: eight x boxes and five x boxes marked −x, with “3 of what?”; nothing changes. With 3x the row reads 3x − 14 = 10."
+    },
+    {
+      "id": "r-two-x-check",
+      "name": "The check with two x’s: one drop each, the values under their x",
+      "build": "Build R",
+      "link": {
+        "label": "Open Variables on both sides · Level 1",
+        "query": "?pack=variables-both-sides&level=1&seed=21&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Level 1 on 7x = 4x + 15.",
+        "Drag the 4x across the = onto the left side. Drag the −4x onto the 7x, type 3x and press Enter. Click Divide (÷), type 3 and press Enter.",
+        "Type 5 in x = and press Enter. Drag the 5 onto the second x (in 4x).",
+        "Drag the 5 onto the first x (in 7x).",
+        "Press Enter four times, slowly."
+      ],
+      "see": "After the first drop only the x in 4x has a green check, and a faint dashed 5 waits under the other x. After the second the check starts 7x = 4x + 15 with 7 × 5 = 4 × 5 + 15 under it, each blue 5 straight under its x. Then 35 = 4 × 5 + 15, 35 = 20 + 15, 35 = 35, Balanced."
+    },
+    {
+      "id": "student-both",
+      "name": "Play it like a student: Variables on both sides",
+      "build": "Build R",
+      "link": {
+        "label": "Open Variables on both sides · Level 2",
+        "query": "?pack=variables-both-sides&level=2&seed=21&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Level 2 on 5x + 5 = 2x + 14. You are going to play a student who gets things wrong.",
+        "Mistake 1, the sign lost when moving an x-term: click Add, then its second option (+ ▢x), type 2 and press Enter. Wait two seconds. A good response lights the move as “got bigger”, says +2x + +2x did not eliminate the term, and leaves only Undo. Press Undo: the hint lights the 2x with a ghost of it gliding across the = and says “Move this x-term to the other side. Drag it across the =, or use Add.”",
+        "Mistake 2, checking before x is on one side: click the box after x =, type 3 and press Enter. A good response: x = stays greyed with “Get x on one side first.” and nothing is checked.",
+        "Mistake 3, combining by adding the sizes: drag the 2x across the = onto the left side, then drag the −2x onto the 5x, type 7x and press Enter. A good response says “5x + −2x is not 7x. Press Undo and try again.” with both terms lit. Press Undo: the 5x and the −2x are outlined and a pop-up says “5x and −2x are like terms. Drag one onto the other to combine them.”"
+      ],
+      "see": "Each mistake gets a calm answer in the student’s own numbers, Undo is the way out of each error, and the hint after Undo points at the next move. x = never takes a value while x is on both sides. Nothing is worked out for you."
+    },
+    {
       "id": "p-combine-nudge",
       "name": "A nudge to combine, after Add",
       "build": "Build P",
@@ -1676,6 +1867,42 @@
               "label": "Save codes (teacher only)",
               "query": "?codes=1&nosignin=1",
               "look": "With ?codes=1 the Save code and Enter code buttons come back, for moving a student by hand."
+            }
+          ]
+        },
+        {
+          "name": "Build R: Variables on both sides (2026-10-24)",
+          "about": "The new card in Solve it, after Distribute, combine, solve (it replaces “Multi-step equations, soon”). Get the x-terms on one side by dragging one across the = (its sign flips) or with Add’s new second option (+ ▢x), combine, then finish as in Two-step. x = waits, with “Get x on one side first.”, until x is on one side. Level 5 has parentheses (distribute first). Every check with two x’s takes a drop in each, and the values sit under their x.",
+          "links": [
+            {
+              "label": "Variables on both sides · Level 1",
+              "query": "?pack=variables-both-sides&level=1&seed=21&nosignin=1",
+              "reset": true,
+              "look": "7x = 4x + 15"
+            },
+            {
+              "label": "Variables on both sides · Level 2",
+              "query": "?pack=variables-both-sides&level=2&seed=21&nosignin=1",
+              "reset": true,
+              "look": "5x + 5 = 2x + 14"
+            },
+            {
+              "label": "Variables on both sides · Level 3",
+              "query": "?pack=variables-both-sides&level=3&seed=7&nosignin=1",
+              "reset": true,
+              "look": "4x + 11 = 8x − 1: x ends on the right"
+            },
+            {
+              "label": "Variables on both sides · Level 4",
+              "query": "?pack=variables-both-sides&level=4&seed=11&nosignin=1",
+              "reset": true,
+              "look": "2x − 5 = −2x + 11"
+            },
+            {
+              "label": "Variables on both sides · Level 5",
+              "query": "?pack=variables-both-sides&level=5&seed=11&nosignin=1",
+              "reset": true,
+              "look": "4(x − 3) = 2x − 6"
             }
           ]
         },
