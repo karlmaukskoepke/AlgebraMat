@@ -34,7 +34,7 @@ const checks = data.checks ?? [];
 const act = (a) => `[data-action="${a}"]`;
 const wait = (page, ms) => page.waitForTimeout(ms);
 const DIV_BOX = '.mo-divpart:not(.is-mirror)';                  // the Divide blank's box, under the bar (Build O)
-const DIV = '[data-action="divPick"]';                            // the Divide button (Build O)
+const DIV = '.lx-move[data-action="divPick"]';                   // the Divide button (Build O; its shown blank picks it too)
 
 class Walk {
   constructor(page, item) { this.page = page; this.item = item; this.errors = []; page.on('pageerror', (e) => this.errors.push(String(e))); }
@@ -62,7 +62,7 @@ class Walk {
       await wait(this.page, 250);
       return;
     }
-    throw new Error(`nothing to click for ${sel}`);
+    throw new Error(`nothing to click for ${sel} after step "${this.step}"`);
   }
   // the typed value picked up and carried toward x, not let go (Build I); then let go at a place on the page
   async hold() {

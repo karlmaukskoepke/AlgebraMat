@@ -81,3 +81,28 @@ the two-option menu with the fraction back; the hint lighting Divide; and Build 
 Updated (28 earlier items) to the Divide button and the division-form rows. Removed (5), because what they described no longer exists:
 Build L's three-option menu, its Divide preview, its negative and −1 items (replaced by Build O's), and Build H's "a slash in the
 whole-number box" (see the decisions).
+
+All 80 items on the list were walked on the live site (GitHub Pages) after the last push: every one passes. Pictures of the Build O
+items, the before/after of both bugs, and the panel on each card at both sizes are in this folder.
+
+## Other surprises
+
+- **A click the moment the pointer lands can be lost** in the walk's robot browser (on the code before this build too): the panel redraws
+  for the hover, and Chromium drops the press. A hand moves in before it presses, so I don't think students meet it; the walk now
+  points first, as a hand does. Worth watching for on a fast touchpad.
+- **While Multiply's options are open, pointing at Divide shows its blank ready for typing** (Build N's rule that a shown blank takes the
+  keys). Typing a digit then picks Divide. I kept it.
+- **Clicking Divide again empties its blank for a new try** instead of cancelling it (Esc or Undo cancels). Without that, a student who
+  divided by −1 on Divide it, read the note and clicked Divide again lost the move and typed into x = instead.
+
+## Decisions for Karl
+
+1. **Divide it's whole-number option.** The brief greys it, so the old teaching message ("5 × (5x) makes 25x: still not one x. Try
+   dividing both sides.") can no longer be reached, and the `/` shortcut from the whole-number box is unreachable on every card.
+   *Recommendation:* make the whole number live-but-explained on Divide it again, as before Build L. It costs nothing and keeps a useful
+   wrong move.
+2. **Where the lights sit.** Divide has no dots of its own; "Smaller numbers" and "One box" stay beside Multiply even when Divide earned
+   them. *Recommendation:* move those two beside Divide (the move that usually earns them).
+3. **A folded Divide move's tag reads "both sides ÷ 5".** *Recommendation:* keep.
+4. **Divide-made fractions stay in division form in later rows** (`x = (15)/3 − 2`). *Recommendation:* keep; switching form mid-problem
+   would be confusing.
