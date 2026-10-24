@@ -35,6 +35,7 @@ export function bindLightsMat(root, dispatch, getSession) {
   };
   document.addEventListener('pointerdown', onPointerDown, true);
 
+  let leftAdd = false;           // the pointer has just left the Add icon: no faint preview again until it has gone away and come back
   const onOver = (e) => {
     if (e.pointerType !== 'mouse' || !lights()) return;
     if (e.target.closest?.(ADD) && getSession?.()?.ui?.preview !== true) preview(true);
@@ -42,9 +43,14 @@ export function bindLightsMat(root, dispatch, getSession) {
   const onOut = (e) => {
     if (e.pointerType !== 'mouse' || !lights()) return;
     const from = e.target.closest?.(ADD);
-    // (a redraw swaps the icon under a still pointer: going from the old icon to the new one is not leaving it)
-    if (!from || !from.isConnected || e.relatedTarget?.closest?.(ADD) || (e.relatedTarget && from.contains(e.relatedTarget))) return;
-    if (getSession?.()?.ui?.preview === true) dispatch({ type: 'ui', patch: { preview: 'near' } });   // still near
+    // (a redraw swaps the icon under a still pointer: going from the old icon to the new one is not leaving it. But an icon already
+    // redrawn when its pointerout arrives, with somewhere else to go, was left: the grab layer's own hover redraws the panel first, and
+    // that kept the preview alive after the pointer had gone, Build O)
+    if (!from || e.relatedTarget?.closest?.(ADD) || (e.relatedTarget && from.contains(e.relatedTarget))) return;
+    if (!from.isConnected && !e.relatedTarget) return;
+    // the preview ends the moment the pointer leaves (Build O, Part 1: it stayed faint while the pointer went on to the next move)
+    leftAdd = true;
+    if (getSession?.()?.ui?.preview) preview(false);
   };
   root.addEventListener('pointerover', onOver);
   root.addEventListener('pointerout', onOut);
@@ -61,8 +67,11 @@ export function bindLightsMat(root, dispatch, getSession) {
     const d = Math.hypot(dx, dy);
     const cur = s.ui?.preview;
     if (d === 0 || cur === true) return;                              // on the icon: the full preview (pointerover)
-    if (d <= NEAR && cur !== 'near') dispatch({ type: 'ui', patch: { preview: 'near' } });
-    else if (d > NEAR && cur === 'near') preview(false);
+    if (d > NEAR) leftAdd = false;
+    // (never while the pointer is on another move or its options: that move's own preview, or none, is shown)
+    const onOther = Boolean(e.target?.closest?.('.lx-panel [data-action], .lx-panel [data-mopt], .mo-flyout'));
+    if (d <= NEAR && !leftAdd && !onOther && !cur) dispatch({ type: 'ui', patch: { preview: 'near' } });
+    else if (cur === 'near' && (d > NEAR || onOther)) preview(false);
   };
   document.addEventListener('pointermove', onMove);
 

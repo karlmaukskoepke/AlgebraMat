@@ -77,18 +77,21 @@ export function makeMultiplyMenu({ xAlone, coefOf, option = (kind) => DIVIDE_IT[
       if (s === opened || (s.history?.length ?? 0) === (opened.history?.length ?? 0)) return { ...state, feedback: s.feedback ?? state.feedback };
       return s;
     }
+    // Only one move is selected at a time (Build O, Part 1): opening Multiply or choosing Flip clears an Add left selected, as if it had
+    // not been clicked (its box and its yellow state go).
+    const clearOthers = (st) => (fracOpen(st) ? { ...st, menu: null, fb: FB0 } : st.menu === 'add' ? { ...st, menu: null, amountEntry: '', hint: null } : st);
     return (state, action) => {
       const m = state.mopts;
       if (action.type === 'multOpen') {
         if (m && !m.kind) return { ...state, mopts: null, ui: { ...(state.ui ?? {}), preview: false } };     // a second click closes them
-        const base = fracOpen(state) ? { ...state, menu: null, fb: FB0 } : state;
+        const base = clearOthers(state);
         const probed = reduce(base, { type: 'choose', move: probe });
         if (probed === base || probed.menu !== probe) return probed;                       // not now (the card says why)
         return { ...base, mopts: { kind: null, entry: '' }, typing: null, feedback: null, ui: { ...(base.ui ?? {}), preview: false } };
       }
       // Flip everything, from the card's own Flip button: the −1 row, solid, waiting for Go
       if (action.type === 'flipPick' && option('flip', state) === 'live') {
-        const base = fracOpen(state) ? { ...state, menu: null, fb: FB0 } : state;
+        const base = clearOthers(state);
         const probed = reduce(base, { type: 'choose', move: probe });
         if (probed === base || probed.menu !== probe) return probed;
         return { ...base, mopts: { kind: 'flip', entry: '' }, typing: null, feedback: null, ui: { ...(base.ui ?? {}), preview: false } };

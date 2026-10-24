@@ -37,8 +37,20 @@ export function bindMultiplyHover(root, dispatch, getSession) {
     if (o && !(e.relatedTarget && e.relatedTarget.closest?.('[data-mopt]'))) set(false);
   };
   const focus = (e) => { const o = e.target.closest?.('[data-mopt]'); if (o) set(o.dataset.mopt); };
+  // a keyboard focus leaving the move ends its preview too (Build O, Part 1). (A redraw takes the focused button away for a moment:
+  // wait, then look where the focus and the pointer really are.)
+  const blur = (e) => {
+    if (!e.target.closest?.('[data-mopt]')) return;
+    setTimeout(() => {
+      const a = document.activeElement;
+      if (a?.closest?.('[data-mopt]') || root.querySelector('[data-mopt]:hover')) return;
+      const p = getSession()?.ui?.preview;
+      if (['whole', 'div', 'frac', 'flip'].includes(p)) dispatch({ type: 'ui', patch: { preview: false } });
+    }, 0);
+  };
   root.addEventListener('pointerover', over);
   root.addEventListener('pointerout', out);
   root.addEventListener('focusin', focus);
-  return () => { root.removeEventListener('pointerover', over); root.removeEventListener('pointerout', out); root.removeEventListener('focusin', focus); };
+  root.addEventListener('focusout', blur);
+  return () => { root.removeEventListener('pointerover', over); root.removeEventListener('pointerout', out); root.removeEventListener('focusin', focus); root.removeEventListener('focusout', blur); };
 }
