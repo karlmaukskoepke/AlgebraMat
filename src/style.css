@@ -3787,3 +3787,13 @@ button.lb-divbar.is-calc:hover, button.lb-divbar.is-calc:focus-visible { backgro
 .xb-x { font: 800 17px 'Lexend', system-ui, sans-serif; fill: #0072b2; }
 .xb-plus { font: 800 24px 'Lexend', system-ui, sans-serif; fill: #1f1d1a; }
 .xb-question { font-size: 22px !important; text-align: center; margin: 0; }
+
+/* ---------- Build P, Part 3: the cross-off on a move's work row: a fraction (or a division) and the number it cancels, or a flip's two
+   minus signs, each struck through (a line, not colour alone), then faded a little; it stays in the stack ---------- */
+.xo.is-struck { position: relative; display: inline-block; animation: xo-fade 0.4s 1.3s ease-in forwards; }
+.xo.is-struck::after { content: ''; position: absolute; left: -3px; right: -3px; top: 52%; border-top: 4px solid #a3281b; transform: rotate(-18deg) scaleX(0); transform-origin: left; animation: xo-strike 0.45s 0.7s ease-out forwards; }
+@keyframes xo-strike { to { transform: rotate(-18deg) scaleX(1); } }
+@keyframes xo-fade { to { opacity: 0.55; } }
+.is-settled .xo.is-struck, .lb-stack .lb-rowwrap.is-old .xo.is-struck { animation: none; opacity: 0.55; }
+.is-settled .xo.is-struck::after, .lb-stack .lb-rowwrap.is-old .xo.is-struck::after { animation: none; transform: rotate(-18deg) scaleX(1); }
+@media (prefers-reduced-motion: reduce) { .xo.is-struck { animation: none; opacity: 0.55; } .xo.is-struck::after { animation: none; transform: rotate(-18deg) scaleX(1); } }

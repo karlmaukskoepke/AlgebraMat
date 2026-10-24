@@ -522,6 +522,11 @@ button with its preview (it opened Multiply's options); the Divide preview's big
 
 The screens were re-baselined from `main` at `b7c62f3` (Build O as finished) before this build. Every screen difference is listed below, one key per row.
 
+**Below the screen check (listed for the record; walked in Features to check):**
+- Part 3, the cross-off: `div-helpful-move` (and every Divide, Fraction or Flip work row) gains a strike line on the fraction and the number it cancels. The harness freezes animations at their first frame, where the line has not been drawn yet (it grows in after 0.7 s), so the pixels are the same.
+- Parts 1 and 2, the nudges: they appear only after 2.5 seconds with nothing happening; the harness photographs each state sooner.
+- Parts 2, 5, 6 and 8 (calculate a product, the distribute arcs and hidden labels, the x-box picture, one drop per x) and Part 7 (full checks on Two-step and Distribute): none of the 35 recorded states reaches them.
+
 | Key | Before | After | Why |
 |---|---|---|---|
 

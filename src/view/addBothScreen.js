@@ -305,7 +305,7 @@ function rowsOf(s) {
     const cls = `lb-rowwrap${!newest || settledNow ? ' is-settled' : ''}${row.type === 'work' ? ' has-work' : ''}${recent ? '' : ' is-old'}`;
     // a move written as an equation of whole sides: a fraction of both sides, or both sides times −1 (the Two-step card's Multiply)
     if (row.type === 'work' && row.board) {
-      const div = { div: row.shown === 'div' };                            // (made with the Divide button: division form, Build O)
+      const div = { div: row.shown === 'div', work: !row.failed };         // (made with the Divide button: division form, Build O; the cross-off, Build P)
       const w = eqRow(sideTerms(row.board.left, s, div), sideTerms(row.board.right, s, div), `lb-work${row.failed ? ' is-failed' : ''}${div.div ? ' is-division' : ''}${eqClass(charsOf([...row.board.left, ...row.board.right]) + 6)}`, { 'aria-hidden': 'true' });
       if (row.failed) w.append(html('span', 'lb-failmark', ['✗']));
       const d = divisorOf(row);
