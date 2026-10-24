@@ -53,6 +53,10 @@
 //   Q3  x + c′ = ⅟a(b) + k    an Add at Q1 that did not cancel: waits for Undo
 //   Q4  x + c = b             Q1 with its product worked out (Build P, Part 2: `x + 2 = ⅓(15)` → `x + 2 = 5`)
 //   Q5  x = b + k             Q4 after the Add that cancels c: x is alone, the other side not combined (the student types x)
+// Variables on both sides (Build R; read with the card's family: shapeOfBoard(board, 'both')). x-terms on both sides are its own shapes;
+// once x is on one side the board is read as Distribute's (E2 `ax + bx + k = d`, then Two-step's W1, W2, D1, F2…; mirrored as r).
+//   V1  ax + b = cx + d       x-terms on both sides (any numbers, either order), no parenthesis
+//   VP  a(x + b) = cx + d     x on both sides with a parenthesis on either side (or both): distribute first
 
 // The same Add shape with x on the right is the R twin: the same id, with `r: true` (and so on every Flip shape: `12 = −x` is F1, r).
 
@@ -94,6 +98,8 @@ export const SHAPES = {
   Q3: 'x + c′ = ⅟a(b) + k (an Add that did not cancel)',
   Q4: 'x + c = b (after the product was worked out)',
   Q5: 'x = b + k (after Q4\'s Add)',
+  V1: 'ax + b = cx + d (x on both sides)',
+  VP: 'a(x + b) = cx + d (x on both sides, a parenthesis)',
 };
 
 export const UNKNOWN = 'unknown';
@@ -110,6 +116,7 @@ export function shapeOfBoard(board, family = null) {
   if (family === 'flip') return flipShape(board);
   if (family === 'two') return twoShape(board);
   if (family === 'dist') return distShape(board);
+  if (family === 'both') return bothShape(board);
   const xl = board.left.filter((t) => t.kind === 'x').length;
   const xr = board.right.filter((t) => t.kind === 'x').length;
   if (xl + xr !== 1) return { id: UNKNOWN, why: xl + xr === 0 ? 'no x' : 'x on both sides' };
@@ -269,8 +276,26 @@ function distShape(board) {
   return two.id === UNKNOWN ? two : { ...two, family: 'dist', group: false, xPart: base.xPart };
 }
 
+// Variables on both sides (Build R): x on both sides is its own shape; x on one side is read as Distribute's boards are. `small` is the
+// x-term to move first in the reminder: the one with the smaller number in front (so the x-term left keeps a plus), its side `from`.
+function bothShape(board) {
+  const xl = board.left.filter(hasX);
+  const xr = board.right.filter(hasX);
+  if (!xl.length || !xr.length) return distShape(board);
+  if ([...board.left, ...board.right].some((t) => !hasX(t) && t.kind !== 'num')) return { id: UNKNOWN, why: 'a fraction with x on both sides' };
+  const coef = (t) => (t.kind === 'group' ? t.factor : t.coef ?? 1);
+  const base = { family: 'both', r: false, xNums: nums(board.left).map((t) => t.v), xSum: sum(nums(board.left)), other: nums(board.right).map((t) => t.v) };
+  if ([...xl, ...xr].some((t) => t.kind === 'group')) {
+    const g = [...xl, ...xr].find((t) => t.kind === 'group');
+    return { ...base, id: 'VP', group: true, params: { factorId: g.id, a: g.factor } };
+  }
+  const xs = [...xl.map((t) => ({ t, side: 'left' })), ...xr.map((t) => ({ t, side: 'right' }))];
+  const small = xs.reduce((m, q) => (Math.abs(coef(q.t)) < Math.abs(coef(m.t)) || (Math.abs(coef(q.t)) === Math.abs(coef(m.t)) && q.side === 'right' && m.side === 'left') ? q : m));
+  return { ...base, id: 'V1', group: false, params: { xl: xl.map(coef), xr: xr.map(coef), small: small.t.id, from: small.side, c: coef(small.t) } };
+}
+
 // (the cards whose boards are read with their own family)
-const FAMILY_OF = { flip: 'flip', 'two-step': 'two', 'distribute-solve': 'dist' };
+const FAMILY_OF = { flip: 'flip', 'two-step': 'two', 'distribute-solve': 'dist', 'variables-both-sides': 'both' };
 
 // The shape of a state: the board's, refined by the flags the board does not hold. `waiting` says a move (or a try) waits for Undo.
 export function shapeOf(s) {

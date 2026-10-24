@@ -171,7 +171,8 @@ const workEls = (items, negIds = []) => {
   // a cross-off only where the numbers really cancel (+8 and −8), never +8 and +8 (Build D-2)
   const struckSum = items.filter((t) => t.struck && !t.x && !(t.term && t.term.kind !== 'num')).reduce((a, t) => a + (t.term ? t.term.v : t.v), 0);
   const cancels = struckSum === 0;
-  items = items.map((t) => (t.struck && !cancels ? { ...t, struck: false } : t));
+  const xStruck = items.filter((t) => t.struck && t.x).reduce((a, t) => a + (t.coef ?? 1), 0) === 0;     // (x-terms cancel too: Build R)
+  items = items.map((t) => (t.struck && !(t.x ? xStruck : cancels) ? { ...t, struck: false } : t));
   items.forEach((t, i) => {
     if (t.term) {                                                   // (a term other than a number or x: a parenthesis, a fraction; Build M)
       const { op, body } = termText(t.term, i, negIds.includes(t.term.id));
@@ -182,7 +183,7 @@ const workEls = (items, negIds = []) => {
     }
     const sub = i > 0 && (t.x ? (t.coef ?? 1) < 0 : t.v < 0);
     if (i > 0) out.push(html('span', `lb-plus${t.added ? ' is-added' : ''}`, [sub ? MINUS : '+']));
-    out.push(t.x ? html('span', 'lb-x', [xText(sub ? -(t.coef ?? 1) : t.coef ?? 1)]) : html('span', `lb-num${t.added ? ' is-added' : ''}${t.struck ? ' is-struck' : ''}`, [sub ? String(-t.v) : signed(t.v)]));
+    out.push(t.x ? html('span', `lb-x${t.added ? ' is-added' : ''}${t.struck ? ' is-struck' : ''}`, [xText(sub ? -(t.coef ?? 1) : t.coef ?? 1)]) : html('span', `lb-num${t.added ? ' is-added' : ''}${t.struck ? ' is-struck' : ''}`, [sub ? String(-t.v) : signed(t.v)]));
   });
   return out;
 };
@@ -206,13 +207,14 @@ function token(s, t, i, side, held) {
   if (t.kind === 'group') kids.push(...groupEls(s, t, i, subtracted, shownNeg));
   else if (shownNeg) kids.push(html('span', 'lx-body lx-negnum', [html('span', 'lx-negsign', [MINUS], { 'data-minus': t.id }), body.slice(1)]));
   else kids.push(html('span', `lx-body${t.kind === 'x' ? ' lb-x' : ' lb-num'}`, [body]));
-  const hint = (s.hint?.kind === 'cancel' && s.hint.id === t.id) || (s.hint?.kind === 'sum' && s.hint.ids.includes(t.id));
+  const hint = (s.hint?.kind === 'cancel' && s.hint.id === t.id) || (s.hint?.kind === 'sum' && s.hint.ids.includes(t.id)) || (s.hint?.kind === 'cross' && s.hint.id === t.id);
+  const crossHint = s.hint?.kind === 'cross' && s.hint.id === t.id;            // (moved across the =: Variables on both sides, Build R)
   const c = s.lx.combine;
   const said = op ? `${op === '+' ? 'plus' : 'minus'} ${body.replace(MINUS, 'negative ')}` : body.replace(MINUS, 'negative ');
   const lifted = s.ui?.drag?.id === t.id;                                          // the term being dragged leaves a dashed gap
   // an addition that did not cancel: the sum it made is drawn larger, under its spotlight (Build D-2)
   const big = ['aRed', 'aRed3'].includes(s.feedback?.key) && t.kind === 'num' && s.board[side].some((u) => u.kind === 'x');
-  const el = html('span', `lx-tok${hint ? ' is-hint' : ''}${c && (c.a === t.id || c.b === t.id) ? ' is-pair' : ''}${held ? ' is-held' : ''}${lifted ? ' is-lifted' : ''}${big ? ' is-bigsum' : ''}${valueOfTerm(t) < 0 ? ' is-neg' : ' is-pos'}`, kids, {
+  const el = html('span', `lx-tok${hint ? ' is-hint' : ''}${crossHint ? ' is-crosshint' : ''}${c && (c.a === t.id || c.b === t.id) ? ' is-pair' : ''}${held ? ' is-held' : ''}${lifted ? ' is-lifted' : ''}${big ? ' is-bigsum' : ''}${valueOfTerm(t) < 0 ? ' is-neg' : ' is-pos'}`, kids, {
     'data-tok': t.id, 'data-side': side, 'data-like': likeKey(t), 'data-fk': `tok:${t.id}`, tabindex: canGrab(s) ? '0' : undefined,
     role: 'button', 'aria-label': `${said}. Enter picks it up${subtracted || neg ? '; the minus key shows it as a negative number' : ''}.`,
   });
@@ -460,7 +462,11 @@ function ghostRow(s) {
   if (typing && s.ui?.focus === 'blank') left.dataset.lxFocus = '1';      // (only while the keys go to it: Build N)
   const right = html('span', `lx-box is-mirror${text ? '' : ' is-empty'}`, [shown(text)], { 'aria-hidden': 'true' });
   const plus = () => html('span', 'lb-plus lx-plus', ['+']);
-  slot.append(eqRow([...sideEls(s.board.left, s.lx.negIds), plus(), left], [...sideEls(s.board.right, s.lx.negIds), plus(), right], 'lx-ghosteq'));
+  // an x-term (Variables on both sides, Build R): the x printed after each box, so the number in front of x is typed with its sign
+  const xKind = open ? s.addKind === 'x' : s.ui?.preview === 'addX';
+  const xAfter = () => (xKind ? [html('span', 'lb-x lx-addx', ['x'])] : []);
+  if (xKind) left.setAttribute('aria-label', 'The number in front of x, to add an x-term to both sides');
+  slot.append(eqRow([...sideEls(s.board.left, s.lx.negIds), plus(), left, ...xAfter()], [...sideEls(s.board.right, s.lx.negIds), plus(), right, ...xAfter()], 'lx-ghosteq'));
   if (!open) slot.setAttribute('aria-hidden', 'true');
   return slot;
 }
@@ -525,7 +531,10 @@ function answerRow(s) {
   if (live && s.ui?.focus === 'answer') typed.dataset.lxFocus = '1';
   const f = forwardButton(forwardOf(s));
   if (!f.disabled && ['next', 'nextLine', 'foldNext', 'introNext'].includes(f.dataset.action)) f.dataset.lxFocus = '1';   // the one thing to do
-  return html('div', 'lb-answerrow lx-answer', [html('strong', `lb-prompt${live || placing ? '' : ' is-off'}`, ['x =']), typed, f]);
+  const row = html('div', 'lb-answerrow lx-answer', [html('strong', `lb-prompt${live || placing ? '' : ' is-off'}`, ['x =']), typed, f]);
+  const note = C.answerNote?.(s);                                    // (a card's reason x = waits: "Get x on one side first.", Build R)
+  if (note) row.append(html('p', 'lx-answernote', [note]));
+  return row;
 }
 
 // The checking space: once the value is in x, the copy of the equation with the value in parentheses, then a line a press of the green
@@ -571,7 +580,7 @@ function panel(s) {
   };
   // Trade places is live from Level 4 when x is on the right; the first time, it is the move to click
   if (C.tradeAvailable(s)) moves.trade = { live: true, pulse: C.tradePending(s) };
-  const lights = building ? {} : { fewer: s.lights.fewer, fewerHand: s.lx.hand.fewer, solved: s.lights.solved, ...(C.handLights ? { noparen: s.lights.noparen ?? 'off' } : {}) };
+  const lights = building ? {} : { fewer: s.lights.fewer, fewerHand: s.lx.hand.fewer, solved: s.lights.solved, ...Object.fromEntries((C.handLights ?? []).map(([k]) => [k, s.lights[k] ?? 'off'])) };
   const flash = ['red', 'neutral'].includes(s.lights.fewer) && s.history.length > 0 ? ['fewer'] : [];
   C.panel?.(s, moves);                                          // (the card's own moves: the Two-step card's Multiply and Flip)
   const el = narrowPanel(moves, { disabled, lights, open: s.ui?.light ?? null, flash, hand: C.handLights ?? null });

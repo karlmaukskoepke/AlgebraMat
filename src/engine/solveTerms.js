@@ -159,7 +159,7 @@ export function equationSegs(board) {
   const termSegs = (t) => {
     if (t.kind === 'x') {
       const c = t.coef ?? 1;
-      const front = c === 1 ? [] : [{ text: c === -1 ? MINUS : signed(c), cls: '' }];
+      const front = c === 1 ? [] : [{ text: c === -1 ? MINUS : signed(c), cls: '', front: true }];      // (`front`: the start of an x-term)
       return [...front, { text: 'x', cls: 'is-blue', xi: xi++ }];
     }
     if (t.kind === 'frac') return [{ text: `${fractionText(t.n)}(`, cls: '' }, ...sideSegs(t.inner), { text: ')', cls: '' }];

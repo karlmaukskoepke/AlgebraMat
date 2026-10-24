@@ -89,8 +89,8 @@ const xConstant = (board) => board[xSideOf(board)].filter((t) => t.kind === 'num
 // `menuPreview(state, kind)`, whether a Multiply option's preview (a hover on it: 'whole', 'div', 'frac', 'flip') goes to the card's own menu.
 // `distribute: true` turns on the distribute move (Build M: a factor dragged onto its parenthesis, one typed product a piece), with
 // `lights(state, board)` the card's lights after it and `fold(state)` the loop's fold (the move before it is committed first).
-export function withLights(reduce = reduceAddBoth, { alone = xAlone, menuPreview = null, distribute = false, lights = null, fold = null } = {}) {
-  const opts = { distribute, lights, fold };
+export function withLights(reduce = reduceAddBoth, { alone = xAlone, menuPreview = null, distribute = false, lights = null, fold = null, xAdd = false } = {}) {
+  const opts = { distribute, lights, fold, xAdd };
   const wrapped = (state, action) => {
     // ----- view state only -----
     if (action.type === 'ui') {
@@ -346,6 +346,15 @@ function grabAction(state, action, wrapped, alone, opts = {}) {
     s.ui = { ...UI0, focus: `tok:${action.id}` };
     return out.kind === 'snapX' ? say(s, 'lxXCross', { side: findTerm(state.board, action.id)?.side ?? 'left' }) : s;
   }
+  if (out.kind === 'crossX' && opts.xAdd) {
+    // an x-term carried across the = on a card with x on both sides (Variables on both sides, Build R): the Add of its opposite, the same
+    // rows and judging as the Add button's x-term option
+    const s0 = structuredClone(state);
+    Object.assign(s0, { menu: 'add', addKind: 'x', typing: null, amountEntry: String(-(findTerm(state.board, action.id).term.coef ?? 1)), hint: null, ui: { ...UI0 } });
+    const s = wrapped(s0, { type: 'go' });
+    if (s.history.length <= s0.history.length) { const back = logged(structuredClone(state)); back.feedback = s.feedback; return back; }
+    return logged(s);
+  }
   if (out.kind === 'crossX') {
     // x carried across when the other side has x too (no card has such an equation yet): the opposite lands in its slot
     const s = logged(structuredClone(state));
@@ -359,7 +368,7 @@ function grabAction(state, action, wrapped, alone, opts = {}) {
   if (out.kind === 'cross') {
     // the engine's own move, with the amount from the term: the same rows the Add button writes, judged the same way
     const s0 = structuredClone(state);
-    Object.assign(s0, { menu: 'add', typing: null, amountEntry: String(out.amount), hint: null, ui: { ...UI0 } });
+    Object.assign(s0, { menu: 'add', typing: null, amountEntry: String(out.amount), hint: null, ui: { ...UI0 }, ...(opts.xAdd ? { addKind: 'num' } : {}) });
     const s = wrapped(s0, { type: 'go' });
     if (s.history.length <= s0.history.length) {                      // the engine said no (too big): nothing moves
       const back = logged(structuredClone(state));

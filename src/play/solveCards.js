@@ -41,6 +41,12 @@ import { renderDistSolveScreen, introOpen as distIntroOpen } from '../view/distS
 import { distSolveFeedbackText } from '../view/distSolveFeedback.js';
 import { bindFactorHint } from '../view/factorHint.js';
 import { bindBlankKeys } from '../view/blankKeys.js';
+// Variables on both sides (Build R): the loop card under the Multiply menu and Add's term layer (x-terms across the =, the distribute move)
+import { newBothSides, solve as bothLoop, xAlone as bothAlone, BOTH_MENU, BOTH_SPOT, BOTH_LAYER } from '../engine/cards/bothSides.js';
+import { formatBoth } from '../engine/bothSides.js';
+import { renderBothSidesScreen, introOpen as bothIntroOpen } from '../view/bothSidesScreen.js';
+import { bothSidesFeedbackText } from '../view/bothSidesFeedback.js';
+import { bindCrossHint } from '../view/crossHint.js';
 
 // ---------- Add to both sides ----------
 
@@ -249,6 +255,49 @@ export const distSolvePlay = makeSolvePlay({
     if (ADD_MAT.has(d.action)) return { type: d.action };
     if (calcAction(d)) return calcAction(d);
     switch (d.action) {
+      case 'multOpen': return { type: 'multOpen' };
+      case 'divPick': return { type: 'divPick' };
+      case 'multPick': return { type: 'multPick', kind: d.kind };
+      case 'flipPick': return { type: 'flipPick' };
+      case 'take': return { type: 'take', n: Number(d.n), ...(d.from === 'list' ? { fromList: true } : {}) };
+      case 'focus': return d.target === 'dist' ? { type: 'focus', target: 'dist', index: Number(d.index) } : null;
+      default: return null;
+    }
+  },
+});
+
+// ---------- Variables on both sides (Build R) ----------
+
+let bothTaught = null;  // dividing by a negative is pointed out once a level (Build P)
+
+export const bothSidesPlay = makeSolvePlay({
+  pack: 'variables-both-sides',
+  loop: bothLoop,
+  layer: BOTH_LAYER,
+  spot: BOTH_SPOT,
+  introOpen: bothIntroOpen,
+  format: formatBoth,
+  newSession: (problem, { flags = null } = {}) => {
+    bothTaught = flags ?? bothTaught ?? {};
+    return { ...startLights(newBothSides(problem, { level: problem.logLevel ?? 1 })), divNegIntro: !bothTaught.divneg };
+  },
+  effects(before, s) {
+    if (s.divNegCount > 0 && bothTaught) bothTaught.divneg = true;
+  },
+  feedbackText: bothSidesFeedbackText,
+  buildControls: makeAddBothControls((s) => lightsAnswerLive(s, bothLoop) || combineOpen(s) || calcOpen(s) || Boolean(s.lx?.distribute) || BOTH_MENU.typingOpen(s), xKey),
+  bindMat: (root, dispatch, getSession) => {
+    const off = [bindLightsMat(root, dispatch, getSession), bindFractionKeys(root, dispatch, getSession, BOTH_MENU), bindFactorHint(root), bindCrossHint(root)];
+    return () => off.forEach((f) => f?.());
+  },
+  renderMat: (s) => renderBothSidesScreen(s),
+  padOpen: (s) => s.stage !== 'done' && !s.sub && (((blankOpen(s) || seesawAdd(s)) && amountMode(s)) || combineOpen(s) || calcOpen(s) || Boolean(s.lx?.distribute) || BOTH_MENU.typingOpen(s)
+    || (lightsAnswerLive(s, bothLoop) && (s.typing === 'answer' || s.ui?.focus === 'answer' || bothAlone(s.board)))),
+  matAction(d) {
+    if (ADD_MAT.has(d.action)) return { type: d.action };
+    if (calcAction(d)) return calcAction(d);
+    switch (d.action) {
+      case 'addPick': return { type: 'addPick', kind: d.kind };
       case 'multOpen': return { type: 'multOpen' };
       case 'divPick': return { type: 'divPick' };
       case 'multPick': return { type: 'multPick', kind: d.kind };

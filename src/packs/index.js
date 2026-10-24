@@ -16,6 +16,7 @@ import { generateTwoStepLevel } from '../engine/generateTwoStep.js';
 import { generateFlipLevel } from '../engine/generateFlip.js';
 import { generateDivideLevel } from '../engine/generateDivide.js';
 import { generateDistSolveLevel } from '../engine/generateDistSolve.js';
+import { generateBothLevel } from '../engine/generateBoth.js';
 
 // Group It (built as "Lasso"; its id stays 'lasso' so saved progress and
 // save codes from before the rename still work).
@@ -200,6 +201,19 @@ export const distributeSolve = {
   generate: (level, seed) => generateDistSolveLevel(level, seed),
 };
 
+// Variables on both sides (Build R, basic form): `5x + 2 = 3x + 10`: get the x-terms on one side (Add an x-term, or drag one across the
+// =), combine, then finish as in Two-step; x = waits until x is on one side. Five levels, shown as saved (no walkthrough). It replaces the
+// "Multi-step equations (soon)" placeholder, which had no levels and so nothing saved.
+export const variablesBothSides = {
+  id: 'variables-both-sides',
+  title: 'Variables on both sides',
+  subtitle: 'Get x on one side, then solve',
+  blurb: 'Move an x-term across the = (or add its opposite), combine, then solve.',
+  levels: 5,
+  levelNames: ['ax = bx + c', 'ax + b = cx + d', 'more x on the right', 'negatives', 'parentheses'],
+  generate: (level, seed) => generateBothLevel(level, seed),
+};
+
 // The rest of the equations are still to come: they show as cards under Solve it, with no levels (so they take no room in saves).
 const soon = (id, title, subtitle) => ({ id, title, subtitle, comingSoon: true, levels: 0, levelNames: [] });
 
@@ -219,14 +233,14 @@ export const PACKS = [
   twoStep,
   twoStepEquations,
   distributeSolve,
-  soon('multi-step', 'Multi-step equations', 'Variables on both sides'),
+  variablesBothSides,
 ];
 
 // The home screen's three sections (Karl, 2026-10-04): which cards live under each, and its color (a pastel).
 export const SECTIONS = [
   { id: 'count', title: 'Count it', blurb: 'Adding, subtracting and multiplying numbers', packs: ['combineit', 'flipit', 'lasso'] },
   { id: 'build', title: 'Build it', blurb: 'Expressions, with boxes, circles and groups', packs: ['boxes', 'groups-of-terms', 'distribute-combine', 'value'] },
-  { id: 'solve', title: 'Solve it', blurb: 'Solving equations', packs: ['add-both', 'divide-it', 'flip-everything', 'one-step', 'two-step-equations', 'distribute-solve', 'multi-step'] },
+  { id: 'solve', title: 'Solve it', blurb: 'Solving equations', packs: ['add-both', 'divide-it', 'flip-everything', 'one-step', 'two-step-equations', 'distribute-solve', 'variables-both-sides'] },
 ];
 export const sectionById = (id) => SECTIONS.find((s) => s.id === id);
 export const sectionOf = (packId) => SECTIONS.find((s) => s.packs.includes(packId));

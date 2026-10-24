@@ -19,7 +19,7 @@ import { distributeLightPlay } from './play/distributeLightPlay.js';
 import { valueLightPlay } from './play/valueLightPlay.js';
 import { solveLightPlay } from './play/solveLightPlay.js';
 import { switchPlay } from './play/switchPlay.js';
-import { addBothPlay, divideMovesPlay, flipPlay, twoStepPlay, distSolvePlay } from './play/solveCards.js';
+import { addBothPlay, divideMovesPlay, flipPlay, twoStepPlay, distSolvePlay, bothSidesPlay } from './play/solveCards.js';
 import { divideNumericPlay } from './play/divideNumericPlay.js';
 import { addBothNumericPlay } from './play/addBothNumericPlay.js';
 import { boxPlay } from './play/boxPlay.js';
@@ -76,7 +76,8 @@ const PLAY = {
   'add-both': (level) => (level === 1 ? addBothNumericPlay : addBothPlay),   // Level 1 is numeric (no x): "See why it works"
   'flip-everything': flipPlay,                                                   // (its Level 1, numbers only, is not built yet: Build J)
   'two-step-equations': twoStepPlay,                                             // the new Two-step card (Build K); `two-step` is the old one
-  'distribute-solve': distSolvePlay,                                             // Distribute, combine, solve (Build M)
+  'distribute-solve': distSolvePlay,
+  'variables-both-sides': bothSidesPlay,                                            // Variables on both sides (Build R)                                             // Distribute, combine, solve (Build M)
   'distribute-combine': (level) => (level >= 4 ? distributeTypedPlay : LIGHT ? distributeLightPlay : distributePlay),
 };
 const adapterFor = (packId, level) => (typeof PLAY[packId] === 'function' ? PLAY[packId](level) : PLAY[packId]);

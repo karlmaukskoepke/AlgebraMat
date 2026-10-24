@@ -3674,7 +3674,7 @@ body[data-input='touch'] #play.is-light #controls .btn-pad { min-width: 48px; mi
 .spot-choices.is-big .btn:disabled:not(.is-picked) { opacity: 0.35; }
 
 /* ---------- Build I, Part 1: the check's first line is the equation itself, the value under each x ---------- */
-.sv-pad { display: inline-block; width: 0; }
+.sv-pad, .sv-pad1 { display: inline-block; width: 0; }
 .ui-light .sv-checklist .sv-line2 { margin-top: -2px; }
 .sv-shadowline { position: fixed; left: 0; top: 0; z-index: 940; pointer-events: none; white-space: nowrap; color: #2b2a26; opacity: 0.45; line-height: 1.3; }
 .sv-shadowline .is-blue { color: #0072b2; }
@@ -3797,3 +3797,17 @@ button.lb-divbar.is-calc:hover, button.lb-divbar.is-calc:focus-visible { backgro
 .is-settled .xo.is-struck, .lb-stack .lb-rowwrap.is-old .xo.is-struck { animation: none; opacity: 0.55; }
 .is-settled .xo.is-struck::after, .lb-stack .lb-rowwrap.is-old .xo.is-struck::after { animation: none; transform: rotate(-18deg) scaleX(1); }
 @media (prefers-reduced-motion: reduce) { .xo.is-struck { animation: none; opacity: 0.55; } .xo.is-struck::after { animation: none; transform: rotate(-18deg) scaleX(1); } }
+
+/* ---------- Build R: Variables on both sides. An x-term added and struck in a work row; the x after Add's box; the note under x = while x
+   is on both sides; Add's two options beside it ---------- */
+.lb-x.is-added { color: #0072b2; }
+.lb-x.is-struck { position: relative; }
+.lb-x.is-struck::after { content: ''; position: absolute; left: -2px; right: -2px; top: 54%; border-top: 4px solid #a3281b; transform: scaleX(0); transform-origin: left; animation: lb-strike 0.5s 0.8s ease-out forwards; }
+.lb-work .lb-x.is-struck { animation: lb-drop 0.5s 1.5s ease-in forwards; }
+.is-settled .lb-x.is-struck::after { animation: none; transform: scaleX(1); }
+.is-settled .lb-work .lb-x.is-struck { animation: none; opacity: 0.25; }
+@media (prefers-reduced-motion: reduce) { .lb-x.is-struck::after { animation: none; transform: scaleX(1); } .lb-work .lb-x.is-struck { animation: none; } }
+.lx-addx { color: #0072b2; margin-left: 2px; }
+.lx-answer { position: relative; }
+.lx-answernote { position: absolute; left: 0; right: 0; top: calc(100% + 4px); margin: 0; text-align: center; font: 700 17px 'Lexend', system-ui, sans-serif; color: #5d5a52; white-space: nowrap; }
+.ao-flyout .ao-x { color: #0072b2; font-weight: 800; }

@@ -535,6 +535,24 @@ The screens were re-baselined from `main` at `b7c62f3` (Build O as finished) bef
 | Key | Before | After | Why |
 |---|---|---|---|
 
+
+## Build R (2026-10-24): the Variables on both sides card
+
+Problems, class-sheet records and the 25 scripted runs of Add to both sides and Divide it are unchanged; Flip everything, Two-step and
+Distribute are covered by their unit tests (unchanged). The save code gains a v18 layout with the new card's five levels at the end (20
+symbols); every older code decodes as before (tests/bothSides.test.js).
+
+| Key | Before | After | Why |
+|---|---|---|---|
+| `savecode:variables-both-sides-L1` | none (the card is new) | a v18 code with Variables on both sides' Level 1 done | the new card's levels are saved in the code |
+| `savecode:variables-both-sides-L2` | none (the card is new) | a v18 code with its Level 2 done | the same |
+| `savecode:variables-both-sides-L3` | none (the card is new) | a v18 code with its Level 3 done | the same |
+| `savecode:variables-both-sides-L4` | none (the card is new) | a v18 code with its Level 4 done | the same |
+| `savecode:variables-both-sides-L5` | none (the card is new) | a v18 code with its Level 5 done | the same |
+
+**Below the screen check:** the shared column grid changes a check only when the equation has two or more x's (none of the 35 recorded
+states has); the note under `x =`, Add's two options and the x-term blank are on the new card only.
+
 <!-- history: nothing below this line is read by the harness -->
 
 ## History: screen changes accepted by the re-baseline of 2026-10-24 (Build O, Part 0)

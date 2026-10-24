@@ -183,7 +183,14 @@ export function stackRows(s) {
 // keeps the first line ready (hidden): picking the value up slides a faint copy of it in (bindValueDrag).
 function substList(s, sub, view) {
   const target = sub.target === 'current' ? s.board : s.rows[0].board;
-  const head = equationSegs(target).map((seg) => (seg.xi !== undefined ? html('span', seg.cls, [seg.text], { 'data-pair': String(seg.xi) }) : seg.cls ? html('span', seg.cls, [seg.text]) : seg.text));
+  const segs = equationSegs(target);
+  // with several x's, line 1 has a space kept before each x-term (its number in front, then the x), for the shared column grid (rev 2.6)
+  const many = segs.filter((seg) => seg.xi !== undefined).length > 1;
+  const head = segs.flatMap((seg, j) => {
+    const el = seg.xi !== undefined ? html('span', seg.cls, [seg.text], { 'data-pair': String(seg.xi) }) : seg.cls ? html('span', seg.cls, [seg.text]) : seg.text;
+    const startsX = many && (seg.xi !== undefined ? !(j > 0 && segs[j - 1].front) : seg.front);
+    return startsX ? [html('span', 'sv-pad1'), el] : [el];
+  });
   if (!view.lines.length) {
     const list = checkSpace([], view.mark ? sub.ok : null);
     if (sub.placing) list.append(html('div', 'sv-line1src', head, { hidden: '', 'aria-hidden': 'true' }));
@@ -223,13 +230,16 @@ function alignPairs(list) {
     if (!top || !sub) return;
     top.style.marginLeft = '';
     const pads = [...sub.querySelectorAll('.sv-pad')];
-    pads.forEach((p) => { p.style.width = '0px'; });
+    const pads1 = [...top.querySelectorAll('.sv-pad1')];
+    [...pads, ...pads1].forEach((p) => { p.style.width = '0px'; });
     const xs = [...top.querySelectorAll('[data-pair]')];
     const vs = [...sub.querySelectorAll('[data-pair]')];
     const mid = (e) => { const r = e.getBoundingClientRect(); return (r.left + r.right) / 2; };
     for (let i = 0; i < Math.min(xs.length, vs.length, pads.length); i++) {
       const d = mid(xs[i]) - mid(vs[i]);
-      if (i === 0 && d < 0) top.style.marginLeft = `${-d}px`;
+      // several x's (rev 2.6): one column grid for both lines; a value right of its x opens a space before that x-term in line 1 instead
+      if (pads1[i] && d < 0) pads1[i].style.width = `${-d}px`;
+      else if (i === 0 && d < 0) top.style.marginLeft = `${-d}px`;
       else if (d > 0) pads[i].style.width = `${d}px`;
     }
   };

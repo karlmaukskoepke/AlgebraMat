@@ -7,7 +7,7 @@
 // No later build can break typing on any card without failing here.
 
 import { describe, it, expect, afterEach } from 'vitest';
-import { addBothPlay, divideMovesPlay, flipPlay, twoStepPlay, distSolvePlay } from '../src/play/solveCards.js';
+import { addBothPlay, divideMovesPlay, flipPlay, twoStepPlay, distSolvePlay, bothSidesPlay } from '../src/play/solveCards.js';
 import { packById } from '../src/packs/index.js';
 import { shapeOf } from '../src/engine/solveit/shape.js';
 import { seesawAdd } from '../src/engine/addBothLights.js';
@@ -18,6 +18,7 @@ const CARDS = [
   ['Flip everything', 'flip-everything', flipPlay, [2, 3, 4, 5, 6]],
   ['Two-step equations', 'two-step-equations', twoStepPlay, [1, 2, 3, 4, 5, 6, 7]],
   ['Distribute, combine, solve', 'distribute-solve', distSolvePlay, [1, 2, 3, 4, 5]],
+  ['Variables on both sides', 'variables-both-sides', bothSidesPlay, [1, 2, 3, 4, 5]],             // (Build R)
 ];
 
 // what a student can do (an action a card does not have leaves its state alone)
@@ -30,6 +31,7 @@ const ACTIONS = [
   { type: 'multOpen' }, { type: 'multPick', kind: 'whole' }, { type: 'divPick' }, { type: 'multPick', kind: 'frac' }, { type: 'flipPick' },
   ...[2, 3, 4, 5].map((n) => ({ type: 'take', n })), { type: 'choose', move: 'add' }, { type: 'choose', move: 'distribute' }, { type: 'lxApply' },
   { type: 'ui', patch: { preview: 'div' } }, { type: 'ui', patch: { preview: 'whole' } },
+  { type: 'addPick', kind: 'num' }, { type: 'addPick', kind: 'x' },                          // (Add's two options: Build R)
 ];
 // the moves that make progress (so the walks get past the first equation and reach every shape): Add the opposite of the number on
 // x's side, divide by x's number, flip, fold the move, answer x correctly; each as the steps a student takes
@@ -40,6 +42,11 @@ function moves(s) {
   if (sh.xSum) out.push([{ type: 'choose', move: 'add' }, ...digits(-sh.xSum), { type: 'go' }, { type: 'lxApply' }, { type: 'foldNext' }]);
   if (sh.coef && Math.abs(sh.coef) > 1) out.push([{ type: 'divPick' }, ...digits(sh.coef), { type: 'go' }, { type: 'foldNext' }]);
   if (sh.coef < 0) out.push([{ type: 'flipPick' }, { type: 'go' }, { type: 'foldNext' }]);
+  // x on both sides (Build R): drag the smaller x-term across the =, or Add its opposite as an x-term
+  if (sh.id === 'V1') {
+    out.push([{ type: 'lxDrop', id: sh.params.small, slot: { side: sh.params.from === 'left' ? 'right' : 'left', at: 0 } }]);
+    out.push([{ type: 'addPick', kind: 'x' }, ...digits(-sh.params.c), { type: 'go' }]);
+  }
   if (sh.group) out.push([{ type: 'choose', move: 'distribute' }, { type: 'focus', target: 'dist', index: 0 }, ...digits(sh.params?.a * sh.params?.n || 0), { type: 'go' }, ...digits(sh.params?.a * sh.params?.c || 0), { type: 'go' }, { type: 'foldNext' }]);
   // Distribute's moves (Build M): tap a subtracted factor's minus, drop the factor on its parenthesis and type the products, and drop a
   // term on a like term to open the combine blank (then type the sum: two x-terms take the x too)
