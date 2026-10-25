@@ -151,6 +151,15 @@ Ideas recorded, nothing built.
 3. **Other teachers sign up their classes securely.** Design note: keep students anonymous (class codes, no names or emails). This implies
    a real backend in place of the Google Sheet, and a student-data-privacy review (FERPA, COPPA, New York's student data privacy law)
    before anyone outside Karl's district uses it.
+4. **Just-in-time hints for choosing a move** (Karl, 2026-10-25; not for now). After a pause with no move, a visual clue: the move
+   button glows, a ghost of the action, a short note ("try distributing", "try adding the opposite of 1"). Design notes: this is not
+   the 2.5-second nudge, which only covers mechanical steps with one possible action; a hint that names the move is help and records
+   `hint`; the wait must allow for slower processors (proposal: the 10-second I'm stuck flash stays; a glow on the move at about 12-15
+   seconds; the words only after about 20; the wait adapts to the student's own pace, for example at least 2.5 times that student's
+   median time per step on this level, and doubles after a dismissed hint). Tutoring systems tend to make hints student-requested or
+   trigger them on errors or long inactivity, not after a few seconds, so a short fixed timer risks teaching students to wait for the
+   hint: check this against classroom data (the class sheet's step times) first.
+5. **A teacher setting for that wait time** (later).
 
 ## 2026-10-23: Build L review and the Distribute card (Karl; built in Build M)
 
@@ -259,3 +268,24 @@ flat to see the two minus signs turn positive.
 
 **Build Q (panel polish) is still pending.** Build R's report said "there was no Build Q"; that was wrong: Build Q is the panel polish
 (icons, spacing, the lighter hint, the three-option Multiply menu) and comes next, after Build S.
+
+## 2026-10-25: scaffolds follow the screen; stacked x-term Add (Karl; built in Build T)
+
+1. **The check never writes × for multiplication.** Every substituted line writes a product with parentheses: `7(3)`, `−3(−4)`, `2(7)`,
+   `3(3 + 2)`; at most a dot between two numbers. "7 × 3" next to all the x's was confusing.
+2. **Flip's red stroke is centred on its minus**, extending equally above and below, so the minus reads as a plus (not a capital T).
+3. **A refused drag names a move that applies.** "x is already on the left side… Try moving a number." only says "Try moving the number"
+   where a number sits on x's side; at `ax = b` it says to divide; at x alone, to type its value.
+4. **Help wording uses the form on the screen.** A row made with the Divide button (a fraction bar) gets division words ("15 divided by
+   3"); a row made with the Fraction option gets fraction words ("⅓ of 15"). Before anything is divided, the hint naming the move may
+   give both ways ("Divide both sides by 5, which is the same as multiplying by ⅕").
+5. **Undo after a wrong typed amount returns to that blank**, not to the gesture before it: a wrong distribute keeps the distribute in
+   progress (the factor in colour, the arcs, "3 groups of", the labels, the blanks empty and focused); a wrong sum or a wrong product
+   keeps its two terms lit and its blank empty and focused.
+6. **An Add that empties one side is the wrong cancel** (`0 = −2x + 10`): legal, but a deliberate teaching exception to "a legal move is
+   never red": the spotlight, Undo and a hint (cancel just one x-term), recorded as `hint` with the slip tag `zeroed-side`.
+7. **Adding an x-term is stacked under the x-terms**, like adding in a column: a dashed box under the first x-term on each side, one
+   amount mirrored in both, the cancelling pair crossed out, then the new row with the added x-term beside the one it was added to.
+   An amount that cancels no x-term gets the spotlight ("To cancel 3x, add −3x."), Undo and a hint. Constants stay in line.
+8. Karl's ideas for later are in "Eventually" (items 4 and 5: hints on a timer for choosing a move, and a teacher setting for the wait).
+
