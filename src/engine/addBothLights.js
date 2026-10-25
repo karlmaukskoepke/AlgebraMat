@@ -96,7 +96,7 @@ export function withLights(reduce = reduceAddBoth, { alone = xAlone, menuPreview
     // ----- view state only -----
     if (action.type === 'ui') {
       const patch = { ...action.patch };
-      if (menuPreview && ['frac', 'div', 'flip', 'whole'].includes(patch.preview)) return menuPreview(state, patch.preview) ? reduce(state, action) : state;
+      if (menuPreview && ['frac', 'div', 'unit', 'flip', 'whole'].includes(patch.preview)) return menuPreview(state, patch.preview === 'unit' ? 'div' : patch.preview) ? reduce(state, action) : state;
       // (Add's two options, Build S: hovering one while the blank is open previews its form)
       const addOpt = patch.preview === 'addX' || patch.preview === 'addNum';
       if (patch.preview && (addOpt ? !blankOpen(state) : !canChoose(state))) return state;

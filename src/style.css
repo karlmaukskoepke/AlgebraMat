@@ -3878,3 +3878,11 @@ button.lb-divbar.is-calc:hover, button.lb-divbar.is-calc:focus-visible { backgro
    hint shows; nothing round the number or the x (the hint's frame is not drawn on them) ---------- */
 .lb-coefdot { display: inline-block; margin: 0 0.14em; color: #0072b2; font-weight: 900; transform: scale(1.5); }
 .spot-layer.is-hint[data-spot="coef"] .spot-frame { display: none; }
+
+/* ---------- Build Q, Part 4: the Multiply menu's three options, each with a larger symbol floating to its left (the panel's style); the
+   middle one, one over a blank, prints its 1 over the bar ---------- */
+.mo-optrow { display: flex; align-items: center; gap: 8px; }
+.mo-optrow .lx-symcell { height: auto; }
+.mo-optrow.is-grey .lx-symbol { opacity: 0.45; }
+.mo-unitblank .mo-unitone { line-height: 1; color: #0072b2; font-weight: 800; }
+.mo-unitblank.is-mirror .mo-unitone { opacity: 0.8; }

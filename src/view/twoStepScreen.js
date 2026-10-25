@@ -13,7 +13,7 @@ import { solve, xAlone, singleTerm, optionOf, tradeAvailable, tradePending, TWO_
 import { lightsAnswerLive, moveOwed } from '../engine/addBothLights.js';
 
 const { fracOpen, fracOf } = TWO_STEP_MENU;
-const KINDS = ['whole', 'div', 'frac', 'flip'];                    // (the options, and −1 from the Flip button: their rows)
+const KINDS = ['whole', 'div', 'unit', 'frac', 'flip'];                    // (the options, and −1 from the Flip button: their rows)
 
 export const introOpen = (s) => moveOwed(s) && !s.introSeen;
 

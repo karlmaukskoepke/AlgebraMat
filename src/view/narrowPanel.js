@@ -67,6 +67,9 @@ const SYMBOLS = {
   plus: ['Plus sign', () => [line('M13 4 V22'), line('M4 13 H22')]],
   times: ['Times sign', () => [line('M6 6 L20 20'), line('M20 6 L6 20')]],
   divide: ['Division sign', () => [line('M4 13 H22'), svgEl('circle', { cx: 13, cy: 6, r: 2.4, fill: INK }), svgEl('circle', { cx: 13, cy: 20, r: 2.4, fill: INK })]],
+  // (the Multiply menu's fraction option, Build Q: two small boxes over and under a bar)
+  fraction: ['Fraction', () => [svgEl('rect', { x: 8, y: 2.5, width: 10, height: 8, rx: 2, fill: 'none', stroke: INK, 'stroke-width': 2.4 }), line('M4 13 H22'),
+    svgEl('rect', { x: 8, y: 15.5, width: 10, height: 8, rx: 2, fill: 'none', stroke: INK, 'stroke-width': 2.4 })]],
   flip: ['Cycle between minus and plus', () => [...CIRCLING.flip(), line('M2 16 H7.5', 2.8), line('M24.5 16 H30 M27.25 13.25 V18.75', 2.8)], 32],
   trade: ['Equals sign with two circling arrows', () => [...CIRCLING.trade(), line('M10.5 13 H21.5 M10.5 19 H21.5', 2.8)], 32],
 };

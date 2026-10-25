@@ -14,7 +14,7 @@ import { solve, xAlone, singleTerm, optionOf, hasGroup, DIST_MENU, DIST_SPOT, co
 import { lightsAnswerLive, moveOwed } from '../engine/addBothLights.js';
 
 const { fracOpen, fracOf } = DIST_MENU;
-const KINDS = ['whole', 'div', 'frac', 'flip'];
+const KINDS = ['whole', 'div', 'unit', 'frac', 'flip'];
 
 export const introOpen = (s) => moveOwed(s) && !s.introSeen;
 

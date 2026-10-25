@@ -3,7 +3,8 @@
 // Shared by every Solve it card with Multiply.
 
 import { html } from './addBothMat.js';
-import { optionsOpen, MULT_KINDS } from '../engine/multiplyMenu.js';
+import { optionsOpen, MULT_KINDS, asCardKind } from '../engine/multiplyMenu.js';
+import { moveSymbol } from './narrowPanel.js';
 
 const box = () => html('span', 'mo-box');
 const unit = () => html('span', 'mo-frac', [html('span', 'mo-one', ['1']), html('span', 'mo-bar'), box()]);
@@ -15,14 +16,17 @@ const LOOK = {
   frac: () => [frac(), ' ( ) = ', frac(), ' ( )'],
   flip: () => ['−1 × ( )'],
 };
-const SAID = { whole: 'Multiply both sides by a whole number', div: 'Divide both sides by a number', frac: 'Multiply both sides by a fraction', flip: 'Multiply both sides by −1' };
+const SAID = { whole: 'Multiply both sides by a whole number', div: 'Divide both sides by a number', unit: 'Multiply both sides by one over a number', frac: 'Multiply both sides by a fraction', flip: 'Multiply both sides by −1' };
+LOOK.unit = LOOK.div;                                       // (Build Q: Build L's one over a blank, back as the middle option)
+// the larger symbol floating left of each option (Build Q: the panel's style): × a whole number, ÷ one over a blank, a small fraction
+const SYMBOL = { whole: 'times', unit: 'divide', frac: 'fraction' };
 
 // kinds: which options, in order; preview: the kind hovered now; grey: options greyed on this card (a tap says why; Build J). A greyed
 // option is not previewed.
 export function multiplyOptions(kinds, preview, grey = []) {
-  return html('div', 'mo-flyout', kinds.map((k) => html('button', `btn mo-opt${preview === k ? ' is-preview' : ''}${grey.includes(k) ? ' is-grey' : ''}`, LOOK[k](), {
+  return html('div', 'mo-flyout', kinds.map((k) => html('div', `mo-optrow${grey.includes(k) ? ' is-grey' : ''}`, [moveSymbol(SYMBOL[k]), html('button', `btn mo-opt${preview === k ? ' is-preview' : ''}${grey.includes(k) ? ' is-grey' : ''}`, LOOK[k](), {
     type: 'button', 'data-action': 'multPick', 'data-kind': k, ...(grey.includes(k) ? { 'aria-disabled': 'true' } : { 'data-mopt': k }), 'aria-label': SAID[k],
-  })), { role: 'group', 'aria-label': 'Multiply by' });
+  })])), { role: 'group', 'aria-label': 'Multiply by' });
 }
 
 // The spotlight's selector for a move it lights: a Multiply option ('divOption', 'fracOption'), or a panel move.
@@ -33,7 +37,7 @@ export const optionSel = (m) => (m === 'divOption' ? '[data-move="div"]' : m ===
 // button, a second way in to the same move) is chosen in one click, previewed on hover (data-mopt), greyed where the card says so (a tap
 // says why), and lit by the hint after Undo. `option(kind, s)` is the card's; `ring`: which of the two has the forced move's ring.
 export function multiplyMoves(s, option, { move = 'mult', ring = null } = {}) {
-  const grey = MULT_KINDS.filter((k) => option(k, s) === 'grey');
+  const grey = MULT_KINDS.filter((k) => option(asCardKind(k), s) === 'grey');
   const open = optionsOpen(s);
   const divGrey = option('div', s) === 'grey';
   const divCycle = s.menu === 'fraction' && !s.fail && s.tryForm === 'div';      // (Build T: the choices after a division are Divide's)
@@ -66,7 +70,7 @@ export function bindMultiplyHover(root, dispatch, getSession) {
       const a = document.activeElement;
       if (a?.closest?.(OPT) || root.querySelector('[data-mopt]:hover, [data-aopt]:hover')) return;
       const p = getSession()?.ui?.preview;
-      if (['whole', 'div', 'frac', 'flip', 'addX', 'addNum'].includes(p)) dispatch({ type: 'ui', patch: { preview: false } });
+      if (['whole', 'div', 'unit', 'frac', 'flip', 'addX', 'addNum'].includes(p)) dispatch({ type: 'ui', patch: { preview: false } });
     }, 0);
   };
   root.addEventListener('pointerover', over);

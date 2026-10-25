@@ -15,7 +15,7 @@ import { solve, xAlone, xBoth, OPTION_LIVE, tradeAvailable, BOTH_MENU, BOTH_SPOT
 import { lightsAnswerLive } from '../engine/addBothLights.js';
 
 const { fracOpen, fracOf } = BOTH_MENU;
-const KINDS = ['whole', 'div', 'frac', 'flip'];
+const KINDS = ['whole', 'div', 'unit', 'frac', 'flip'];
 
 export const introOpen = () => false;                    // (no forced move on this card: there is no guess at the first state)
 

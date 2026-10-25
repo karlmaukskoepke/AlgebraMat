@@ -24,8 +24,11 @@ const FB0 = { num: '', den: '', part: 'num' };
 // The blank's state with `sel` (its contents selected: Build P, Part 4) only while it is true
 const FB = ({ sel, ...rest }) => (sel ? { ...rest, sel } : rest);
 // the options, in order (Build L: Flip everything left the menu; it is its own button. Build O: Divide left it too; it is the panel's
-// Divide button, `divPick`, a second way in to the same move: kind 'div')
-export const MULT_KINDS = ['whole', 'frac'];
+// Divide button, `divPick`, a second way in to the same move: kind 'div'. Build Q: three options again, the middle one Build L's one over a
+// blank, kind 'unit': `1/▢`, one digit, a minus allowed, written in multiplication form; live wherever the Divide button is)
+export const MULT_KINDS = ['whole', 'unit', 'frac'];
+// what an option is on a card: the one-over-a-blank option is what the Divide button is (Build Q)
+export const asCardKind = (kind) => (kind === 'unit' ? 'div' : kind);
 export const multOpen = (s) => Boolean(s.mopts);
 // Are Multiply's two options showing beside it? (Not while the hint after Undo only lights the Divide button: `lit`.)
 export const optionsOpen = (s) => Boolean(s.mopts) && !s.mopts.kind && !s.mopts.lit;
@@ -33,19 +36,21 @@ const okWhole = (t) => /^-?\d+$/.test(t ?? '');
 // Divide's blank holds one digit, with a minus allowed
 export const okDivisor = (t) => /^-?\d$/.test(t ?? '');
 // Is the green Go live for the option chosen? (−1 is Flip everything, with nothing to type)
-export const goReady = (m) => m.kind === 'flip' || (m.kind === 'whole' && okWhole(m.entry)) || (m.kind === 'div' && okDivisor(m.entry));
+export const goReady = (m) => m.kind === 'flip' || (m.kind === 'whole' && okWhole(m.entry)) || ((m.kind === 'div' || m.kind === 'unit') && okDivisor(m.entry));
 // Divide it's options (Build O): the Divide button and the Fraction (unit fractions) are the move; the whole number is greyed; −1 (dividing
 // by −1) is explained
 const DIVIDE_IT = { whole: 'explain', div: 'live', frac: 'live', flip: 'explain' };
 
-export function makeMultiplyMenu({ xAlone, coefOf, option = (kind) => DIVIDE_IT[kind], greyKey = () => 'aLater', probe = 'fraction', negTop = false }) {
+export function makeMultiplyMenu({ xAlone, coefOf, option: cardOption = (kind) => DIVIDE_IT[kind], greyKey: cardGreyKey = () => 'aLater', probe = 'fraction', negTop = false }) {
+  const option = (kind, s) => cardOption(asCardKind(kind), s);
+  const greyKey = (kind, s) => cardGreyKey(asCardKind(kind), s);
   // Can the move be previewed (hovered) right now? Is its blank open?
   const canPreview = (s) => s.stage === 'moves' && !s.sub && !s.deal && !s.diag && !s.fail && !s.needUndo && s.menu !== 'fraction' && s.menu !== 'add' && !s.lx?.combine && !s.lx?.distribute && !xAlone(s.board) && !s.mopts?.kind;   // (not over Add's open blank, a sum or the distribute blanks: it hid the blank the keys go to, Build N)
-  const previewTyped = (s) => Boolean(s.mopts) && !s.mopts.kind && canPreview(s) && (s.ui?.preview === 'div' || s.ui?.preview === 'whole') && option(s.ui.preview, s) !== 'grey';
+  const previewTyped = (s) => Boolean(s.mopts) && !s.mopts.kind && canPreview(s) && ['div', 'whole', 'unit'].includes(s.ui?.preview) && option(s.ui.preview, s) !== 'grey';
   const fracOpen = (s) => s.stage === 'moves' && s.menu === 'fraction' && !s.sub && !s.deal && !s.fail && !s.spot?.choose && s.typing !== 'answer';
   // Is one of the menu's blanks waiting for typing (the fraction, the whole number, Divide's number)? The keypad is live and up for it,
   // whether or not x = is (Build N: on the problem after a correct guess, x = waits for a move and the blank took nothing).
-  const typingOpen = (s) => fracOpen(s) || (s.stage === 'moves' && !s.sub && (s.mopts?.kind === 'whole' || s.mopts?.kind === 'div')) || previewTyped(s);
+  const typingOpen = (s) => fracOpen(s) || (s.stage === 'moves' && !s.sub && ['whole', 'div', 'unit'].includes(s.mopts?.kind)) || previewTyped(s);
   // the options open with Divide or Multiply shown on the equation (the hint after Undo lights Divide): a digit goes into its blank
   // The fraction in the blank: { n } when it is 1 over 2..6 (a top left empty counts as 1), else null; with negTop, −1 over 2..6 too
   // ({ n, sign: −1 }).
@@ -89,6 +94,25 @@ export function makeMultiplyMenu({ xAlone, coefOf, option = (kind) => DIVIDE_IT[
         return shownAsDivision({ ...s, fail: { ...s.fail, div: true }, tryForm: 'div', feedback: fb });
       }
       return d < 0 ? dividedByNegative(shownAsDivision(s), state, n) : shownAsDivision(s);
+    }
+    // The Multiply menu's one over a blank (Build Q; Build L's option): taking 1/n of both sides, as the Fraction option with a top of 1,
+    // written in multiplication form (`⅕(5x) = ⅕(−15)`) with a line under the work row, "Dividing by 5 is multiplying by ⅕." (`shown:
+    // 'unit'` on its rows: display only). The same checks and words as the Divide button; −1 is Flip everything.
+    function unitGo(state, entry) {
+      if (!okDivisor(entry)) return { ...state, feedback: { key: 'dDivBad', params: { neg: negTop }, bad: true } };
+      if (option('unit', state) === 'grey') return { ...state, feedback: { key: greyKey('unit', state), params: {}, bad: false } };
+      const d = Number(entry);
+      if (d === -1) return flipGo(state);
+      const n = Math.abs(d);
+      if (n === 0) return { ...state, feedback: { key: 'dDivZero', params: {}, bad: true } };
+      if (!FRACTIONS.includes(n) || (d < 0 && !negTop)) return { ...state, feedback: { key: 'dDivBad', params: { neg: negTop, typed: d }, bad: true } };
+      const opened = inner({ ...state, mopts: null }, { type: 'choose', move: 'fraction' });
+      if (opened.menu !== 'fraction') return { ...state, feedback: opened.feedback ?? state.feedback };
+      const s = reduce({ ...opened, fb: FB0 }, { type: 'take', n, ...(d < 0 ? { sign: -1 } : {}) });
+      if (s === opened || (s.history?.length ?? 0) === (opened.history?.length ?? 0)) return { ...state, feedback: s.feedback ?? state.feedback };
+      if (s.fail) return s;
+      const from = s.history.at(-1)?.rows?.length ?? s.rows.length;
+      return { ...s, rows: s.rows.map((r, i) => (i >= from && r.type === 'work' && r.board ? { ...r, shown: 'unit' } : r)) };
     }
     // Dividing by −1 with the Divide button (Build P, Part 9): the same move as Flip everything (its record, shapes, check and lights), drawn
     // in division form, `(−x)/(−1) = (12)/(−1)`, then `x = (12)/(−1)`. Where −1 is only explained (Divide it), the card's words, as before.
@@ -186,8 +210,8 @@ export function makeMultiplyMenu({ xAlone, coefOf, option = (kind) => DIVIDE_IT[
           const entry = typeInto(m.entry, action, 'integer');
           return entry === m.entry ? state : { ...state, mopts: { ...m, entry }, feedback: null };
         }
-        // Divide's blank: one digit, a minus allowed; a "/" means nothing here (the 1/ is printed)
-        if (m.kind === 'div') {
+        // Divide's blank, and the one over a blank (Build Q): one digit, a minus allowed; a "/" means nothing here (the 1/ is printed)
+        if (m.kind === 'div' || m.kind === 'unit') {
           if (action.type === 'fracSlash' || (action.type === 'typeChar' && action.ch === '/')) return state;
           if (isTyping(action)) {
             const entry = typeInto(m.entry, action, 'integer');
@@ -200,6 +224,7 @@ export function makeMultiplyMenu({ xAlone, coefOf, option = (kind) => DIVIDE_IT[
           if (m.kind === 'div' && m.entry === '-1') return divideByMinusOne(state);
           if (m.kind === 'flip' || (m.kind === 'whole' && m.entry === '-1')) return flipGo(state);
           if (m.kind === 'div') return divideGo(state, m.entry);
+          if (m.kind === 'unit') return unitGo(state, m.entry);
           if (option(m.kind, state) === 'live') return inner({ ...state, mopts: null }, { type: m.kind });
           if (m.kind === 'whole' && !okWhole(m.entry)) return { ...state, feedback: { key: 'dBlankBad', params: {}, bad: true } };
           const a = coefOf(state.board);
@@ -222,7 +247,7 @@ export function makeMultiplyMenu({ xAlone, coefOf, option = (kind) => DIVIDE_IT[
         }
         const preview = action.patch?.preview;
         if (preview && !canPreview(state)) return state;
-        if (['whole', 'div', 'frac', 'flip'].includes(preview) && option(preview, state) === 'grey') return state;   // (a greyed move is not previewed)
+        if (['whole', 'div', 'unit', 'frac', 'flip'].includes(preview) && option(preview, state) === 'grey') return state;   // (a greyed move is not previewed)
         if ((state.ui?.preview ?? false) === (preview ?? false)) return state;
         return { ...state, ui: { ...(state.ui ?? {}), preview: preview ?? false } };
       }

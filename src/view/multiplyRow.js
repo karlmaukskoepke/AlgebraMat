@@ -5,7 +5,7 @@
 // split, the boxes and the counters with the fractions to choose from (the ones tried crossed off). x may be on either side.
 
 import { html } from './addBothMat.js';
-import { sideTerms, divisionEl, sameAsLine } from './solveScreen.js';
+import { sideTerms, divisionEl, sameAsLine, dividingLine } from './solveScreen.js';
 import { equationRow } from './lightScreen.js';
 import { groupDiagram } from './groupDiagram.js';
 import { FRACTIONS } from '../engine/divide.js';
@@ -46,6 +46,23 @@ function divBox(s, mirror, typeable = false) {
   return html(mirror ? 'span' : 'button', `lx-box dv-fracpart mo-divpart${cursor ? ' is-focus' : ''}${digit ? '' : ' is-empty'}${cursor && !digit ? ' is-blink' : ''}${mirror ? ' is-mirror' : ''}`, [entry ? entry.replace('-', MINUS) : ' '],
     mirror ? { 'aria-hidden': 'true' } : { type: 'button', 'data-lx-field': '1', 'aria-label': 'The number to divide both sides by', ...(chosen ? {} : typeable ? { 'data-action': 'divPick' } : {}) });
 }
+// The Multiply menu's one over a blank (Build Q; Build L's): the 1 printed over a bar, one box under it; the other side mirrors it.
+function unitBox(s, mirror, typeable = false) {
+  const chosen = s.mopts?.kind === 'unit';
+  const entry = chosen ? s.mopts.entry : '';
+  const cursor = (chosen || typeable) && !mirror;
+  const digit = /\d/.test(entry);
+  const box = html(mirror ? 'span' : 'button', `lx-box dv-fracpart mo-unitpart${cursor ? ' is-focus' : ''}${digit ? '' : ' is-empty'}${cursor && !digit ? ' is-blink' : ''}${mirror ? ' is-mirror' : ''}`, [entry ? entry.replace('-', MINUS) : ' '],
+    mirror ? { 'aria-hidden': 'true' } : { type: 'button', 'data-lx-field': '1', 'aria-label': 'The number under the 1', ...(chosen ? {} : pickAttrs(s, 'unit')) });
+  return html('span', `dv-fracblank mo-unitblank${mirror ? ' is-mirror' : ''}`, [html('span', 'mo-unitone', ['1']), html('span', 'dv-fracbar'), box]);
+}
+// …and its line once a digit is typed: "Dividing by 5 is multiplying by ⅕."
+function unitLabel(s) {
+  const entry = s.mopts?.kind === 'unit' ? s.mopts.entry : '';
+  if (!/^-?[2-9]$/.test(entry)) return null;
+  const d = Number(entry);
+  return dividingLine(Math.abs(d), Math.sign(d));
+}
 // The line under Divide's row once a digit is typed: what dividing by it is ("Same as multiplying by ⅕.")
 function divLabel(s) {
   const entry = s.mopts?.kind === 'div' ? s.mopts.entry : '';
@@ -66,13 +83,13 @@ export function moveRow(s, menu, { blueFlip = false } = {}) {
   if (!kind) return slot;
   const typedOn = xSideOf(s.board);
   const typeable = !chosen && Boolean(menu.previewTyped?.(s));       // (typing goes into the shown blank: Build N)
-  const front = (mirror) => (kind === 'frac' ? fracBox(s, mirror, open) : kind === 'whole' ? wholeBox(s, mirror, typeable) : html('span', `lb-num${blueFlip ? ' is-blue' : ''}`, [`${MINUS}1`]));
+  const front = (mirror) => (kind === 'frac' ? fracBox(s, mirror, open) : kind === 'whole' ? wholeBox(s, mirror, typeable) : kind === 'unit' ? unitBox(s, mirror, typeable) : html('span', `lb-num${blueFlip ? ' is-blue' : ''}`, [`${MINUS}1`]));
   // Divide (Build O): each whole side in parentheses over a big fraction bar, the blank beneath it
   const side = kind === 'div'
     ? (terms, mirror) => [divisionEl(sideTerms(terms, s), divBox(s, mirror, typeable))]
     : (terms, mirror) => [front(mirror), html('span', 'lb-plus dv-times', ['×']), html('span', 'lb-plus', ['(']), ...sideTerms(terms, s), html('span', 'lb-plus', [')'])];
   slot.append(equationRow(side(s.board.left, typedOn !== 'left'), side(s.board.right, typedOn !== 'right'), `lx-ghosteq${kind === 'div' ? ' is-division' : ''}`));
-  const label = kind === 'div' ? divLabel(s) : null;
+  const label = kind === 'div' ? divLabel(s) : kind === 'unit' ? unitLabel(s) : null;
   if (label) slot.append(label);
   if (!chosen && !typeable) slot.setAttribute('aria-hidden', 'true');
   return slot;

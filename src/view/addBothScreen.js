@@ -22,7 +22,7 @@ import { spotlightLayer, findSolveTarget } from './spotlight.js';
 import { boardBlock, trayFor, html, slipShown } from './addBothMat.js';
 import { narrowPanel } from './narrowPanel.js';
 import { optionSel } from './multiplyOptions.js';
-import { forwardButton, srLine, notePopup, substBlock as sharedSubstBlock, sideTerms, waitingGhost, foldTag, sameAsLine, divisorOf, rowKey, markFlips, FORCED_TEXT, FIRST_TEXT, placeText } from './solveScreen.js';
+import { forwardButton, srLine, notePopup, substBlock as sharedSubstBlock, sideTerms, waitingGhost, foldTag, sameAsLine, divisorOf, rowLine, rowKey, markFlips, FORCED_TEXT, FIRST_TEXT, placeText } from './solveScreen.js';
 import { liveOf, onMounted } from './keepRows.js';
 import { stackAt } from '../engine/cards/bothSides.js';
 import { firstOpen } from './visit.js';
@@ -330,8 +330,8 @@ function rowsOf(s) {
       const div = { div: row.shown === 'div', work: !row.failed, mi: { n: 0 } };   // (made with the Divide button: division form, Build O; the cross-off, Build P)
       const w = eqRow(sideTerms(row.board.left, s, div), sideTerms(row.board.right, s, div), `lb-work${row.failed ? ' is-failed' : ''}${div.div ? ' is-division' : ''}${eqClass(charsOf([...row.board.left, ...row.board.right]) + 6)}`, { 'aria-hidden': 'true' });
       if (row.failed) w.append(html('span', 'lb-failmark', ['✗']));
-      const d = divisorOf(row);
-      return html('div', `${cls} has-work`, [w, ...(d ? [sameAsLine(d.n, d.sign)] : [])]);
+      const line = rowLine(row);
+      return html('div', `${cls} has-work`, [w, ...(line ? [line] : [])]);
     }
     if (row.type === 'work') {
       const stack = row.work.stack ? ' is-stacked' : '';                // (an x-term added in a column, Build T, Part 5)

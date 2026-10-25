@@ -148,6 +148,20 @@ export function divisorOf(row) {
   return f ? { n: f.n, sign: f.sign < 0 ? -1 : 1 } : null;
 }
 
+// The line under a work row made with the Multiply menu's one over a blank (Build Q): "Dividing by 5 is multiplying by ⅕."
+export function dividingLine(n, sign = 1) {
+  const by = `${sign < 0 ? MINUS : ''}${n}`;
+  return html('p', 'mo-sameas', ['Dividing by ', html('span', 'is-blue', [by]), ' is multiplying by ', html('span', 'is-blue', [`${sign < 0 ? MINUS : ''}${fractionText(n)}`]), '.']);
+}
+// The line a work row carries under it, if any: Divide's "Same as multiplying by ⅕.", or the one over a blank's "Dividing by 5 is…"
+export function rowLine(row) {
+  const d = divisorOf(row);
+  if (d) return sameAsLine(d.n, d.sign);
+  if (row?.shown !== 'unit' || row.failed) return null;
+  const f = [...row.board.left, ...row.board.right].find((t) => t.kind === 'frac');
+  return f ? dividingLine(f.n, f.sign < 0 ? -1 : 1) : null;
+}
+
 // What a folded move says it did, above its equation: `⅓ of both sides`, `−⅓ of both sides`, `−1 × both sides` (Build J).
 export function foldTag(label) {
   if (label.shown === 'div') return html('span', 'lb-foldtag', ['both sides ', html('span', 'is-blue', [`÷ ${label.sign < 0 ? MINUS : ''}${label.n}`])]);   // (made with Divide, Build O)
@@ -192,8 +206,8 @@ export function stackRows(s) {
       const w = equationRow(l, r, `lb-work${row.failed ? ' is-failed' : ''}${isDiv(row) ? ' is-division' : ''}${eqClass(charsOf([...row.board.left, ...row.board.right]))}`);
       w.setAttribute('aria-hidden', 'true');
       if (row.failed) w.append(html('span', 'lb-failmark', ['✗']));
-      const d = divisorOf(row);
-      return html('div', 'lb-rowwrap has-work is-settled', [w, ...(d ? [sameAsLine(d.n, d.sign)] : [])]);
+      const line = rowLine(row);
+      return html('div', 'lb-rowwrap has-work is-settled', [w, ...(line ? [line] : [])]);
     }
     const plug = i === plugIdx;
     const [l, r] = sideEls(row.board, s, { live: i === last, plug, div: isDiv(row) });
