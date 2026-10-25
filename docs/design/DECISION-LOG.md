@@ -289,3 +289,30 @@ flat to see the two minus signs turn positive.
    An amount that cancels no x-term gets the spotlight ("To cancel 3x, add −3x."), Undo and a hint. Constants stay in line.
 8. Karl's ideas for later are in "Eventually" (items 4 and 5: hints on a timer for choosing a move, and a teacher setting for the wait).
 
+
+## 2026-10-24: panel polish (Karl's review of Build O; built in Build Q)
+
+**Why:** Build O's two arrow symbols were hard to read at panel size; Divide's fraction bars made the work crowded, with highlights,
+boxes and notes spilling into the next row; the hint before dividing (a box round the coefficient and another round the x) was too much;
+and taking the division option out of the Multiply menu removed a moment Karl wants students to have.
+
+1. **Two new symbols.** Flip everything: two rounded arrows making a circle, like a recycling symbol with two arrows, a minus at the left
+   and a plus at the right; one arrow curves up and right from the minus to the plus, the other curves down and left from the plus back
+   to the minus ("cycling between negative and positive"; accessible name "Cycle between minus and plus"). Trade places: an equals sign
+   in the middle with the same two circling arrows round it ("Equals sign with two circling arrows"). About 26 px, ink, drawn, and
+   still clear at that size, at 1366×768 and 1366×650, browser zoom 100% and 125%.
+2. **More vertical room wherever the division bar needs it.** Every row is tall enough for the tallest thing it can hold (a division
+   row with its bars and blanks, a group, a fraction, a cross-off), so nothing a lit area, outline, blank or pop-up anchor draws crosses
+   into the next row. The "Same as multiplying by 1/5." line under a Divide row gets its own reserved line. Fit still wins and the text
+   size never drops: if the problem no longer fits, fold sooner (loop spec 3B), never shrink.
+3. **A lighter hint when the next move is dividing.** Instead of boxing the coefficient and the x, the row shows a multiplication dot
+   between them (`5 · x`, only while the hint shows) and previews the Divide button's fraction bars with the box beneath. The same is
+   I'm stuck's first rung; the second is the model ("Model it": boxes equal to the amount, the amount dealt out) where the card has one.
+4. **The Multiply menu has three options again**, each with a larger floating symbol to its left in the panel's style: a whole number
+   (`n ( ) = n ( )`, ×), one over a blank (`1/▢ ( ) = 1/▢ ( )`, ÷; Build L's option: one digit, a minus allowed, written in
+   multiplication form with the line "Dividing by 5 is multiplying by 1/5.", stored as the fraction move with a top of 1), and a fraction
+   (`▢/▢ ( ) = ▢/▢ ( )`, a small fraction picture). **The Divide button stays as well: division is reachable two ways on purpose.**
+   Karl: a student who clicks Multiply may notice a division option there and question it, and that question is the point.
+5. Flip's cross-off (about 3.4 s a flip since Build S) can be skipped: any key, click or Next finishes it at once.
+6. The real-browser sweeps run before every push, and their results go in the report.
+7. **The loop spec goes to rev 2.9** (sections 1C, 2, 3B, 5 and 6).
