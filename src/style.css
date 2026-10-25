@@ -3847,3 +3847,29 @@ button.lb-divbar.is-calc:hover, button.lb-divbar.is-calc:focus-visible { backgro
 .lb-work.is-stacked .lx-under { font-size: 1em; }
 .lx-ghost.is-stacked .lx-under .lx-box { min-height: 0.95em; font-size: 0.8em; }
 .lx-ghost.is-stacked .lx-under .lx-addx { color: #0072b2; }
+
+/* ---------- Build Q, Part 2: room for the division bar. Every row of the work keeps what it draws (a lit area, an outline, a blank, an
+   arc) inside its own box: a little room above and below each row, more round a row in division form, and the Divide row's "Same as
+   multiplying by ⅕." on a line of its own. Lit areas are drawn tight to their term so they fit that room. The room is in em, so it
+   follows the problem's one text size (fitSize.js measures it; text never shrinks for it: older rows fold instead, below). ---------- */
+.ui-light .lb-stack > .lb-rowwrap { padding-block: 0.1em; }
+/* (Divide it and Flip everything draw their rows in `.lb-rows`: only their division rows take room; nothing lit there spills) */
+.ui-light :is(.lb-stack, .lb-rows) > .lb-rowwrap:has(> .lb-eq.is-division) { padding-block: 0.22em; }
+.ui-light :is(.lb-stack, .lb-rows) > .lb-rowwrap > .mo-sameas { display: block; margin: 0.25em 0 0.1em; line-height: 1.3; min-height: 1.3em; }
+/* (Distribute's arcs and "3 groups of" hang under the factor's row: that row keeps room for them while they show) */
+.ui-light :is(.lb-stack, .lb-rows) > .lb-rowwrap:has(.dx-arcs) { padding-bottom: 1.6em; }
+.ui-light .nudge-glow, .ui-light .nudge-still { outline-offset: -1px; }
+@keyframes nudge-pulse-in { 0%, 100% { box-shadow: 0 0 0 0 rgba(0, 114, 178, 0.0); } 50% { box-shadow: 0 0 0 3px rgba(0, 114, 178, 0.3); } }
+.ui-light .nudge-glow { animation-name: nudge-pulse-in; }
+.ui-light .nudge-still { box-shadow: 0 0 0 3px rgba(0, 114, 178, 0.22); }
+@media (prefers-reduced-motion: reduce) { .ui-light .nudge-glow { box-shadow: 0 0 0 3px rgba(0, 114, 178, 0.22); } }
+
+/* Fold sooner (loop spec 3B, Build Q): when a problem's worst case does not fit at its text size, the size chooser marks the Mat
+   `data-fold-older` and the folded moves before the last one go out of sight, leaving the original equation, a small ⋮ under it, the
+   last folded move and the move being worked. */
+[data-fold-older] :is(.lb-stack, .lb-rows) > .lb-rowwrap.is-old:not(:first-child):has(~ .lb-rowwrap.is-old),
+[data-fold-older] :is(.lb-stack, .lb-rows) > .lb-rowwrap.is-fold:has(~ .lb-rowwrap.is-fold) { display: none; }
+[data-fold-older] :is(.lb-stack, .lb-rows):has(> .lb-rowwrap.is-old ~ .lb-rowwrap.is-old ~ .lb-rowwrap.is-old) > .lb-rowwrap:first-child::after,
+[data-fold-older] :is(.lb-stack, .lb-rows):has(> .lb-rowwrap.is-fold ~ .lb-rowwrap.is-fold) > .lb-rowwrap:first-child::after {
+  content: '⋮'; display: block; text-align: center; font: 800 0.8em/0.9 'Lexend', system-ui, sans-serif; color: #6f6b60;
+}

@@ -96,24 +96,31 @@ export function chooseSize(matRoot, adapter, session) {
     probe.style.left = `${pr.left + parseFloat(ps.borderLeftWidth) + parseFloat(ps.paddingLeft) + window.scrollX}px`;
     probe.style.width = `${page.clientWidth - parseFloat(ps.paddingLeft) - parseFloat(ps.paddingRight)}px`;
   };
+  // the largest size at which the worst case fits; at each size, first with every row, then with the older folded moves out of sight
+  // (fold sooner, Build Q: rows fold, text never shrinks). If none fits, the smallest size, folding older moves if it scrolls without.
   let chosen = SIZES.at(-1);
+  let fold = false;
+  const fitsAt = (size, folded, strict) => {
+    setSize(probe, size);
+    if (folded) probe.dataset.foldOlder = '1'; else delete probe.dataset.foldOlder;
+    return states.every((s) => {
+      const tree = adapter.renderMat(s, {});
+      tree.querySelectorAll('.spot-layer').forEach((n) => n.remove());           // (pop-ups float over the page: no room of their own)
+      probe.replaceChildren(tree);
+      place();
+      const tall = probe.scrollHeight <= room + 1 && (!strict || !s.sub?.placing || popupRoom(probe, box.top));
+      const wide = probe.scrollWidth <= probe.clientWidth + 1 && fitsAcross(probe);
+      return tall && wide;
+    });
+  };
   try {
-    for (const size of SIZES) {
-      setSize(probe, size);
-      const fits = states.every((s) => {
-        const tree = adapter.renderMat(s, {});
-        tree.querySelectorAll('.spot-layer').forEach((n) => n.remove());           // (pop-ups float over the page: no room of their own)
-        probe.replaceChildren(tree);
-        place();
-        const tall = probe.scrollHeight <= room + 1 && (!s.sub?.placing || popupRoom(probe, box.top));
-        const wide = probe.scrollWidth <= probe.clientWidth + 1 && fitsAcross(probe);
-        return tall && wide;
-      });
-      if (fits) { chosen = size; break; }
-    }
+    const found = SIZES.flatMap((size) => [[size, false], [size, true]]).find(([size, folded]) => fitsAt(size, folded, true));
+    if (found) [chosen, fold] = found;
+    else fold = !fitsAt(chosen, false, false);
   } finally {
     probe.remove();
   }
   setSize(matRoot, chosen);
+  if (fold) matRoot.dataset.foldOlder = '1'; else delete matRoot.dataset.foldOlder;
   return chosen;
 }
