@@ -205,7 +205,7 @@ describe('Build O, Part 4: the Multiply menu has two options again', () => {
   it('Divide it: whole number live but explained (Build P, Part 9; it was greyed in Build O); Fraction live, drawn in multiplication form', async () => {
     m = await mat(divideMovesPlay, divideMovesPlay.newSession(problem('divide-it', 3), {}));
     await m.run({ type: 'multOpen' });
-    expect([...m.root.querySelectorAll('.mo-opt')].map((b) => [b.dataset.kind, b.classList.contains('is-grey')])).toEqual([['whole', false], ['frac', false]]);
+    expect([...m.root.querySelectorAll('.mo-opt')].map((b) => [b.dataset.kind, b.classList.contains('is-grey')])).toEqual([['whole', false], ['unit', false], ['frac', false]]);   // (Build Q: the middle option, one over a blank)
     await m.run({ type: 'multPick', kind: 'frac' }, digit(1), digit(5), { type: 'go' });
     expect(m.q('.lb-work').textContent.replace(/\s+/g, '')).toBe('⅕(5x)=⅕(−15)');
     expect(m.q('.lb-divfrac')).toBeNull();

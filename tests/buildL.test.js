@@ -21,8 +21,9 @@ const flipButton = [{ type: 'flipPick' }, { type: 'go' }];
 const view = (s) => JSON.stringify({ rows: s.rows, board: s.board, lights: s.lights, feedback: s.feedback, history: s.history.length, moves: s.moves, label: s.lastMove }).replace(/"id":"[^"]*"/g, '').replace(/,"shown":"div"/g, '');
 
 describe('the menu', () => {
-  it('has two options again (Build O: Divide is its own button), and no −1 option', () => {
-    expect(MULT_KINDS).toEqual(['whole', 'frac']);
+  it('has three options again (Build Q: whole number, one over a blank, fraction; Divide is its own button too), and no −1 option', () => {
+    expect(MULT_KINDS).toEqual(['whole', 'unit', 'frac']);
+    expect(goReady({ kind: 'unit', entry: '-3' })).toBe(true);
     expect(goReady({ kind: 'div', entry: '-3' })).toBe(true);
     expect([goReady({ kind: 'div', entry: '-' }), goReady({ kind: 'div', entry: '' }), goReady({ kind: 'div', entry: '12' })]).toEqual([false, false, false]);
   });
