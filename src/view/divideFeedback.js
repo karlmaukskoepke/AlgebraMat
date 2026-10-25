@@ -18,7 +18,7 @@ const sg = (v) => (v < 0 ? `−${-v}` : `${v}`);
 const WORDS = { 2: 'two', 3: 'three', 4: 'four', 5: 'five', 6: 'six' };
 
 const M = {
-  dWhichFraction: (p) => `We want only one of the ${WORDS[p.boxes] ?? p.boxes} x boxes.\nWhat fraction of these boxes should we find?`,
+  dWhichFraction: (p) => `We want only one of the ${WORDS[p.boxes] ?? p.boxes} x boxes.\n${p.div ? 'What should we divide both sides by?' : 'What fraction of these boxes should we find?'}`,
   // the Multiply options (Build D-2, Part 4)
   dUnitFraction: () => 'Enter a unit fraction, like ⅕ or ½.',
   dWholeNo: (p) => `${sg(p.n)} × (${p.a}x) makes ${sg(p.made)}x: still not one x. Try dividing both sides.`,
@@ -34,11 +34,12 @@ const M = {
   dUndone: () => 'Undone. Pick a different fraction.',
   dForced: (p) => `For this one, take ${p.frac} of both sides.`,
   dFail: (p) => {
-    if (!p.boxesSplit && !p.countersSplit) return `${p.boxes} boxes can't make ${p.n} equal groups, and ${p.b} can't be shared into ${p.n} equal groups (${p.left} left over). Press Undo and try another fraction.`;
-    if (!p.boxesSplit) return `${p.boxes} boxes can't make ${p.n} equal groups. Press Undo and try another fraction.`;
-    return `${p.b} can't be shared into ${p.n} equal groups (${p.left} left over). Press Undo and try another fraction.`;
+    const again = p.div ? 'Press Undo and try another number to divide by.' : 'Press Undo and try another fraction.';   // (Build T: as drawn)
+    if (!p.boxesSplit && !p.countersSplit) return `${p.boxes} boxes can't make ${p.n} equal groups, and ${p.b} can't be shared into ${p.n} equal groups (${p.left} left over). ${again}`;
+    if (!p.boxesSplit) return `${p.boxes} boxes can't make ${p.n} equal groups. ${again}`;
+    return `${p.b} can't be shared into ${p.n} equal groups (${p.left} left over). ${again}`;
   },
-  dFail3: (p) => `${p.frac} doesn't split evenly. Press Undo and try another fraction. Try I’m stuck.`,
+  dFail3: (p) => (p.div ? `Dividing by ${p.n} doesn't come out even. Press Undo and try another number. Try I’m stuck.` : `${p.frac} doesn't split evenly. Press Undo and try another fraction. Try I’m stuck.`),
   // I'm stuck at a state with x not alone: the counters (the number in front outlined), then choosing and dealing, then guided
   dModel: (p) => `${p.boxes} boxes and ${p.size} counters. What fraction of both sides leaves one box? Choose it, share the counters, and keep one group.`,
   dStuck2: () => 'Choose a fraction of both sides: the boxes and the counters split into that many groups. Then share out every counter and keep one group.',
@@ -52,10 +53,10 @@ const M = {
   dStuckGuided: (p) => `${p.boxes} boxes: take ${p.frac} of both sides to leave one box. Tap ${p.frac}, then share out the counters and keep one group.`,
   dTeach: (p) => `Step by step: ${p.boxes} boxes, so take ${p.frac} of both sides. Tap ${p.frac}.`,
   // I'm stuck at x alone with an unevaluated side (x = ⅓(6)): the diagram of the right side, on every rung
-  dDiag1: (p) => `What is ${p.frac} of ${p.val}? Share the counters into ${p.n} equal groups: tap a group to give it a counter.`,
+  dDiag1: (p) => `What is ${p.what ?? `${p.frac} of ${p.val}`}? Share the counters into ${p.n} equal groups: tap a group to give it a counter.`,
   dDiag2: (p) => `Share the ${p.size} counters into ${p.n} equal groups: tap a group to give it a counter. Then keep 1 of the ${p.n} groups.`,
   dDiag3: (p) => `The counters are already in ${p.n} equal groups, with 1 of the ${p.n} kept. Count it, and type what x is.`,
-  dDiagKept: (p) => `You kept 1 of the groups: that is ${p.frac} of it. Count what is in it, and type x.`,
+  dDiagKept: (p) => `You kept 1 of the groups: that is ${p.what ?? `${p.frac} of it`}. Count what is in it, and type x.`,
   // a value that does not balance (Build D, Part 2): what the check showed; the slip's own words are kept for the class's notes
   dWrong: (p) => `When x = ${p.typed}, the equation is not balanced.`,
   dSlip: (p) => (SLIP[p.tag] ?? SLIP.unmatched)(p),

@@ -40,7 +40,7 @@ import { climb, remind, teach as teachShape } from './solveit/registry.js';
 export function undoFirst(s, say, reason) {
   s.helped = true;
   if (!s.supportsShown.includes('hint')) s.supportsShown.push('hint');
-  return say(s, 'aUndoFirstHelp', { reason });
+  return say(s, 'aUndoFirstHelp', { reason: reason === 'fail' && s.fail?.div ? 'failDiv' : reason });   // (Build T: a division said as one)
 }
 
 export function createSolveLoop(card) {

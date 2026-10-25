@@ -86,6 +86,57 @@
       "see": "The first time the message ends “Let’s keep x there. Try moving the number.” (the 4 is beside x). At 3x = 15 it ends “Let’s keep x there. To get one x from 3x, divide both sides by 3.” The 3x goes back both times."
     },
     {
+      "id": "t-help-division",
+      "name": "I’m stuck at x = (15) over 3 talks about dividing",
+      "build": "Build T",
+      "link": {
+        "label": "Open Two-step equations · Level 1",
+        "query": "?pack=two-step-equations&level=1&seed=406&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Two-step equations, Level 1, on 3x + 4 = 19.",
+        "Click Add (the top box), type −4 and press Enter. Drag the 19 onto the 4 beside it, type 15 and press Enter. The row reads 3x = 15.",
+        "Click Divide (the third button, with ÷ beside it), type 3 and press Enter. The last row reads x = (15) over 3.",
+        "Click I’m stuck."
+      ],
+      "see": "The pop-up says “x is 15 divided by 3. Work it out, then type x.” It says nothing about multiplying by ⅓ or taking a fraction: the row has a fraction bar, so the help talks about dividing."
+    },
+    {
+      "id": "t-help-fraction",
+      "name": "I’m stuck at x = ⅓(15) talks about a fraction of 15",
+      "build": "Build T",
+      "link": {
+        "label": "Open Two-step equations · Level 1",
+        "query": "?pack=two-step-equations&level=1&seed=406&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Two-step equations, Level 1, on 3x + 4 = 19.",
+        "Click Add (the top box), type −4 and press Enter. Drag the 19 onto the 4 beside it, type 15 and press Enter. The row reads 3x = 15.",
+        "Click Multiply (the second button), then its second option (a box over a box). Type 1, then 3, and click the green Go. The last row reads x = ⅓(15).",
+        "Click I’m stuck."
+      ],
+      "see": "The pop-up says “x is ⅓ of 15. Work it out, then type x.” It says nothing about dividing: the row was made with the fraction, so the help talks about a fraction of 15."
+    },
+    {
+      "id": "t-divide-again",
+      "name": "A division that doesn’t come out even: the choices after Undo are numbers to divide by",
+      "build": "Build T",
+      "link": {
+        "label": "Open Divide it · Level 2",
+        "query": "?pack=divide-it&level=3&seed=7&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Divide it, Level 2, on 5x = −15.",
+        "Click Divide (÷), type 2 and click Go. Wait two seconds.",
+        "Press Undo.",
+        "Click ÷ 5."
+      ],
+      "see": "After Go: “5 boxes can’t make 2 equal groups, and −15 can’t be shared into 2 equal groups (1 left over). Press Undo and try another number to divide by.” After Undo: the five x boxes, “What should we divide both sides by?”, and ÷ 2 (crossed off), ÷ 3, ÷ 4, ÷ 5, ÷ 6; the Divide button is lit, not Multiply. ÷ 5 writes (5x) over 5 = (−15) over 5, then x = (−15) over 5."
+    },
+    {
       "id": "s-pickup",
       "name": "Pick up an x-term: nothing else disappears",
       "build": "Build S",
@@ -479,7 +530,7 @@
         "Press Undo.",
         "Click the × again, type 5 and press Enter."
       ],
-      "see": "A wrong 45 is lit with “check this” and “⅓ × 15 is not 45. Press Undo and try again.”; the ⅓ and the 15 stay lit, not greyed. After Undo a hint lights them: “⅓ × 15 is the same as 15 ÷ 3. Click the × and type it.” With 5 the row reads x + 2 = 5."
+      "see": "A wrong 45 is lit with “check this” and “⅓ × 15 is not 45. Press Undo and try again.”; the ⅓ and the 15 stay lit, not greyed. After Undo a hint lights them: “⅓ × 15 is ⅓ of 15: split 15 into 3 equal groups and take one. Click the × and type it.” (fraction words, since the row was made with the fraction) With 5 the row reads x + 2 = 5."
     },
     {
       "id": "p-cross-off",
@@ -1668,7 +1719,7 @@
         "Click the button. It opens Flip everything, Level 3, on −3x = 12. You are going to play a student who gets things wrong.",
         "Mistake 1, ignoring the screen: touch nothing for 10 seconds. A good response is a gentle flashing of I’m stuck, and nothing else changing.",
         "Mistake 2, dropping the signs: click the box after x =, type 12 and press Enter. Drag it onto the x, press Next twice and wait two seconds. A good response shows −3(12) = 12 turn into −36 = 12, says it is not balanced, and leaves only Undo. Press Undo: the hint says the minus belongs to x and lights the Flip button. Press Got it.",
-        "Mistake 3, dividing by a number that does not split: click Divide (÷), type 2 and click Go. Wait two seconds. A good response says 3 boxes can’t make 2 equal groups and pulses Undo. Press Undo: the boxes, the counters and the fractions to choose from appear, ½ crossed off. Click ⅓.",
+        "Mistake 3, dividing by a number that does not split: click Divide (÷), type 2 and click Go. Wait two seconds. A good response says 3 boxes can’t make 2 equal groups and pulses Undo. Press Undo: the boxes and the counters appear with “What should we divide both sides by?” and ÷ 2 (crossed off) to ÷ 6. Click ÷ 3.",
         "Mistake 4, forgetting the sign at the end: the equation is now −x = 4. Type 4, press Enter, drag it onto the x, press Next twice and wait. Press Undo. A good response says −x = 4 means the opposite of x is 4, so x is not 4, and lights Flip everything.",
         "Mistake 5, pressing I’m stuck again and again: press it twice. A good response repeats the reminder with the real numbers (this card has no pictures yet) and still leaves the move to you.",
         "Mistake 6, a mistake, Undo, then type in the blank: click the button at the top of this item again (it starts the same problem fresh). Click the box after x =, type 12 and press Enter. Drag it onto the x, press Next twice and wait two seconds. Press Undo, then Got it. Click Divide (÷), click the box under the bar, press the minus key and type 3. Click Go.",
@@ -2080,7 +2131,7 @@
         "Mistake 2, a wrong answer from the start: click the box after x =, type −15 (copying the number on the right) and press Enter. Drag the −15 onto the x. Press Next twice and wait two seconds. A good response writes 5x = −15 with 5(−15) = −15 under it, turns that into −75 = −15, says the equation is not balanced, and leaves only Undo to press. Press Undo, then Got it.",
         "Mistake 3, a move that does not get one x: click Multiply, then its first option (a single box), type 5 and click Go. A good response says “5 × (5x) makes 25x: still not one x. Try dividing both sides.” in a small note, and writes nothing.",
         "Mistake 4, flipping the sign: click Divide (÷), press the minus key, type 1 and click Go. A good response says the sign changes but there are still 5 x’s, and points to dividing.",
-        "Mistake 5, dividing by a number that does not split: click Divide (÷), type 2 and click Go. Wait two seconds. A good response says it doesn’t split (5 boxes can’t make 2 equal groups, and −15 can’t be shared into 2 equal groups), and pulses Undo. Press Undo: it shows the five x boxes and the fractions to choose from. Press Got it.",
+        "Mistake 5, dividing by a number that does not split: click Divide (÷), type 2 and click Go. Wait two seconds. A good response says it doesn’t split (5 boxes can’t make 2 equal groups, and −15 can’t be shared into 2 equal groups), and pulses Undo. Press Undo: it shows the five x boxes and asks “What should we divide both sides by?” with ÷ 2 (crossed off) to ÷ 6 to choose from: you divided, so it talks about dividing. Press Got it.",
         "Mistake 6, pressing I’m stuck: press it twice. A good response gives a bigger clue the second time (first the 5 boxes and 15 counters, then “take ⅕ of both sides”) and still leaves the move to you.",
         "Mistake 7, a mistake, Undo, then type in the blank: click the button at the top of this item again (it starts the same problem fresh). Click the box after x =, type 3 and press Enter. Drag the 3 onto the x, press Next twice and wait two seconds. Press Undo. Without clicking anything, type 5, then click the green Go.",
         "Wait 3 seconds and watch the nudge: x is alone now, so a good response nudges nothing (and on 5x = −15, choosing the move is the thinking: only I’m stuck flashes, after 10 seconds).",

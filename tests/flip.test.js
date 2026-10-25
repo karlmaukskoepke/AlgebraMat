@@ -110,9 +110,11 @@ describe('the moves', () => {
   it('a fraction that does not split gets the shared Divide feedback, and the fraction cycle after Undo', () => {
     let s = go(newFlip(makeFlip(3, -4), { level: 4 }), ...frac('1/2'));
     expect(shapeOf(s).id).toBe('FF');
-    expect(said(s)).toBe("3 boxes can't make 2 equal groups. Press Undo and try another fraction.");
+    // (made with the Divide button, so said as a division: Build T)
+    expect(said(s)).toBe("3 boxes can't make 2 equal groups. Press Undo and try another number to divide by.");
     s = go(s, { type: 'undo' });
     expect(spotOf(s, FLIP_SPOT)).toMatchObject({ kind: 'hint', choose: true });
+    expect(s.tryForm).toBe('div');
   });
   it('Multiply here (Build O): the whole number is greyed; Divide and the fraction are greyed until saved Level 4; no −1 option', () => {
     const l2 = go(newFlip(makeFlip(1, -5), { level: 2 }), { type: 'multOpen' });

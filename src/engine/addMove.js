@@ -22,7 +22,10 @@ export function judgeAdd(s, api, amount, o) {
   api.commit(s, { rows: [{ type: 'work', work: (o.work ?? workLine)(before, amount) }, { type: 'eq', board: next }], next, label: null, helpful, lights, keepScaffold: s.scaffold });
   if (helpful) delete s.slipPair;                                // (a wrong move keeps its pair for the picture until Undo, Build F)
   // what the addition did, in the student's numbers (Build D-2): the number next to x before the move, and the amount added
-  const params = { amount: signed(amount), before: plus(sumNums(before[xSideOf(before)])), added: plus(amount) };
+  // (Build T: x alone before the move has no number beside it to name, never "+0")
+  const xSide = before[xSideOf(before)];
+  const beside = xSide.some((t) => t.kind === 'num');
+  const params = { amount: signed(amount), before: beside ? plus(sumNums(before[xSideOf(before)])) : '', added: plus(amount), ...(xSide.length === 1 && xSide[0].kind === 'x' && (xSide[0].coef ?? 1) === 1 ? { wasAlone: true } : {}) };
   s.prevBoard = next;
   s.resolving = false;
   s.reds = lights.fewer === 'red' || s.zeroOther ? redsBefore + 1 : 0;                      // a red or a zeroed side counts toward three

@@ -7,6 +7,7 @@
 import { createSolveLoop } from './solveLoop.js';
 import { shapeOfBoard, lightsOf } from './solveit/shape.js';
 import { signed, fractionText, boardText } from './solveTerms.js';
+import { fracWords, divForm } from './formWords.js';
 import { startBoard, coefOf, xAlone, pileSize, DEAL_ROUND_LEVEL } from './divideBoard.js';
 import { hintAfterUndo } from './solveit/registry.js';
 import { tagDivide, groupsOf, FRACTIONS, legalFractions, formatDivide } from './divide.js';
@@ -110,7 +111,7 @@ const loop = createSolveLoop({
         const left = total - dealt(d);
         if (left > 0) return say(s, 'dShareFirst', { left }, true);
         if (!evenGroups(d.groups)) return say(s, 'dUneven', { holds: d.groups.join(', ') }, true);
-        if (s.diag) { d.kept = gi; return say(s, 'dDiagKept', { frac: fractionText(d.n) }); }
+        if (s.diag) { d.kept = gi; const t = s.board.right[0]; return say(s, 'dDiagKept', { frac: fractionText(d.n), ...(t?.kind === 'frac' ? { what: fracWords(t, divForm(s, t)) } : {}) }); }
         const n = s.deal.n;
         const pic = { n, boxes: coefOf(s.board), size: pileSize(s.board), neg: s.board.right[0].v < 0, groups: [...s.deal.groups], kept: gi };
         s.deal = null;

@@ -13,9 +13,7 @@ const M = {
     ? `In ${p.neg} = ${p.b} the minus belongs to x. Flip everything first: multiply both sides by −1.`
     : `${p.neg} = ${p.b} means the opposite of x is ${p.b}, so x is not ${p.b}. Flip everything: multiply both sides by −1.`),
   fNegHint: (p) => `x is alone. −(${p.b}) means the opposite of ${p.b}. Work it out and type x.`,
-  fFracHint: (p) => (p.neg
-    ? `x is alone. ${p.f}(${p.b}) is the opposite of 1 of ${p.n} equal groups of ${p.b}. Work it out and type x.`
-    : `x is alone. ${p.f}(${p.b}) is 1 of ${p.n} equal groups of ${p.b}. Work it out and type x.`),
+  fFracHint: (p) => `x is ${p.words}. Work it out, then type x.`,      // (Build T: "15 divided by 3" or "⅓ of 15", as drawn)
   // a flip of x with no minus (the spotlight, then Undo)
   fWorse: (p) => `Flipping ${p.was} = ${p.b} made ${p.now} = ${p.nb}: now x has a minus. Press Undo.`,
   fWrong: (p) => `When x = ${p.typed}, the equation is not balanced.`,

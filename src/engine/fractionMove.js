@@ -71,6 +71,7 @@ export function takeStep(s, action, api, say, split) {
   if (!check.ok) {
     if (!s.tried.includes(n)) s.tried = [...s.tried, n];
     s.fail = { n, boxesSplit: check.boxesSplit, countersSplit: check.countersSplit };
+    s.tryForm = 'frac';                                                            // (Build T: the form the help after Undo talks in)
     s.reds += 1;
     const work = mapSides(s.board, (terms) => [fracTerm(n, [terms[0]], sign)]);
     s.rows.push({ type: 'work', board: work, failed: true });

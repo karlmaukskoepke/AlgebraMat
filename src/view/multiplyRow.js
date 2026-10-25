@@ -86,13 +86,15 @@ export function fractionChoices(s, textOf) {
   const size = other.kind === 'num' ? Math.min(36, Math.abs(other.v)) : 0;
   const boxes = Math.abs(coefOn(b));
   const wrap = html('div', 'dv-choose');
-  const [want, ask] = textOf({ key: 'dWhichFraction', params: { boxes } }).split('\n');
+  const div = s.tryForm === 'div';                                 // (Build T: after a division, numbers to divide by)
+  const [want, ask] = textOf({ key: 'dWhichFraction', params: { boxes, div } }).split('\n');
   wrap.append(groupDiagram({ n: 1, boxes, size, neg: other.kind === 'num' && other.v < 0, groups: null, pile: size, kept: null, tap: null, bracketBoxes: true }),
     html('p', 'spot-text', [want]), html('p', 'spot-text', [ask]));
   const row = html('div', 'dv-choices');
   for (const n of FRACTIONS) {
     const tried = s.tried.includes(n);
-    const btn = html('button', `btn dv-choice${tried ? ' is-tried' : ''}`, [fractionText(n)], { type: 'button', 'data-action': 'take', 'data-n': n, 'data-from': 'list', 'aria-label': `${fractionText(n)}${tried ? ', tried already' : ''}` });
+    const label = div ? `÷ ${n}` : fractionText(n);
+    const btn = html('button', `btn dv-choice${tried ? ' is-tried' : ''}`, [label], { type: 'button', 'data-action': 'take', 'data-n': n, 'data-from': 'list', 'aria-label': `${div ? `divide by ${n}` : fractionText(n)}${tried ? ', tried already' : ''}` });
     btn.disabled = tried;
     row.append(btn);
   }

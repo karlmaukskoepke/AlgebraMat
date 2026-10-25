@@ -36,6 +36,7 @@ const UNDO_REASON = {
   partial: 'That move only partly cancelled the number next to x.',
   zero: 'That move made the other side 0, but x isn’t alone.',
   fail: 'That fraction doesn’t split evenly.',
+  failDiv: 'That division doesn’t come out even.',
   flip: 'That flip put a minus on x.',
   boxes: 'Adding a number does not take x boxes away.',
 };
@@ -99,6 +100,7 @@ const M = {
   aGreen: () => 'Fewer terms: that move helped. Keep going, or type your guess for x.',
   // an addition that did not cancel, and one that only partly did, in the student's own numbers (Build D-2)
   aRed: (p) => (p.before ? `Adding to both sides is used to eliminate terms by adding the opposite. ${p.before} + ${p.added} did not eliminate the term. Let’s try again.`
+    : p.wasAlone ? `x was already alone: adding ${p.added} put a number next to it. Press Undo.`
     : 'That didn’t give you fewer terms. Try adding the opposite of the number next to x. Undo it and try a different number to add to both sides.'),
   aZeroOther: () => 'The right side is 0, but x isn’t any more alone. Look at the left side. Press Undo.',
   aZeroUndone: () => 'What do we add to both sides to eliminate this?',
@@ -107,6 +109,7 @@ const M = {
     ? `Party! ${p.a} and ${p.b} join: now ${p.sum} is beside x, more than before. Press Undo.`
     : `Battle! ${p.a} and ${p.b}: ${p.pairs} ${p.pairs === 1 ? 'pair cancels' : 'pairs cancel'} (crossed off), but ${p.sum} is still beside x. Press Undo.`),
   aRed3: (p) => (p.before ? `Adding to both sides is used to eliminate terms by adding the opposite. ${p.before} + ${p.added} did not eliminate the term. Let’s try again, or try I’m stuck.`
+    : p.wasAlone ? `x was already alone: adding ${p.added} put a number next to it. Press Undo.`
     : 'That didn’t give you fewer terms. Undo it and try a different number, or try I’m stuck.'),
   aPartial: (p) => (p.before ? `${p.before} was only partially canceled by the ${p.added} you added. What value instead of ${p.added} would have completely canceled the ${p.before}?`
     : `The ${p.con} is still there, partly cancelled. What would cancel it all? Undo it and try a different number.`),

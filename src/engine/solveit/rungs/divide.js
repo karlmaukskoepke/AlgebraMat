@@ -6,6 +6,7 @@
 import { fractionText, signed } from '../../solveTerms.js';
 import { coefOf, pileSize, diagOf } from '../../divideBoard.js';
 import { coefOn } from '../../fractionMove.js';
+import { fracWords, divForm } from '../../formWords.js';
 
 // After a fraction that did not split, Undo brings back the boxes and the counters, "We want only one of the five x boxes.", and the
 // fractions to choose from, the ones tried crossed off (Build D, Part 4). Shared by every card that takes a fraction (Build J): x may be
@@ -13,7 +14,7 @@ import { coefOn } from '../../fractionMove.js';
 export function fractionCycleHint(s, before) {
   if (!before?.fail || !s.tried.length) return null;
   s.menu = 'fraction';
-  return { target: 'coef', key: 'dWhichFraction', params: { boxes: Math.abs(coefOn(s.board)) }, choose: true };
+  return { target: 'coef', key: 'dWhichFraction', params: { boxes: Math.abs(coefOn(s.board)), div: s.tryForm === 'div' }, choose: true };
 }
 
 // D1 `ax = b`
@@ -69,6 +70,9 @@ const D1 = {
   },
 };
 
+// The words for D2's fraction in the form on the screen (Build T): `what: '15 divided by 3'` under a fraction bar, '⅓ of 15' otherwise
+const d2Words = (s) => { const t = s.board.right[0]; return t?.kind === 'frac' ? { what: fracWords(t, divForm(s, t)) } : {}; };
+
 // D2 `x = ⅟a(b)`: the counters of the right side, in a pile ready to deal, then already in groups with one kept
 const D2 = {
   ladder: ['modelIt', 'guided'],
@@ -79,7 +83,7 @@ const D2 = {
       s.scaffold = true;
       s.diag = diagOf(s.board);
       s.diag.groups = Array(s.diag.n).fill(0);
-      return say(s, 'dDiag1', { frac: fractionText(s.diag.n), val: s.diag.val, n: s.diag.n });
+      return say(s, 'dDiag1', { frac: fractionText(s.diag.n), val: s.diag.val, n: s.diag.n, ...d2Words(s) });
     },
   },
   guided: {

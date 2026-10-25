@@ -160,6 +160,12 @@ class Walk {
     const tight = t.replace(/\s+/g, '');
     for (const w of words) if (!t.includes(w) && !tight.includes(w.replace(/\s+/g, ''))) throw new Error(`expected to see "${w}" after step "${this.step}". On screen: ${t.slice(0, 400)}`);
   }
+  // the words of the pop-ups on screen (not the rows: a division row keeps its own “Same as multiplying by ⅓.” line)
+  async popupNot(...words) {
+    const t = await this.page.evaluate(() => [...document.querySelectorAll('.spot-box')].map((e) => e.innerText).join(' '));
+    if (!t) throw new Error(`a pop-up should be showing after step "${this.step}"`);
+    for (const w of words) if (t.toLowerCase().includes(w.toLowerCase())) throw new Error(`the pop-up should not say "${w}" after step "${this.step}": ${t}`);
+  }
   async notSee(...words) {
     const t = await this.text();
     for (const w of words) if (t.includes(w)) throw new Error(`did not expect to see "${w}" after step "${this.step}"`);
@@ -333,6 +339,31 @@ const WALKS = {
     await w.enter(4); await wait(w.page, 300); await w.see('35 = 4(5) + 15', '35 = 20 + 15', '35 = 35', '✓ Balanced');
     if (await w.page.evaluate(() => [...document.querySelectorAll('.sv-checklist .sv-checkrow')].some((r) => r.innerText.includes('×')))) throw new Error('no line of the check should have a ×');
     await w.both('t-parens-both-sides');
+  },
+  async 't-help-division'(w) {
+    await w.start(); await w.see('3x + 4 = 19');
+    w.at('Add −4, combine'); await w.addEnter(-4); await w.combine(15); await w.row('3x = 15');
+    w.at('Divide 3'); await w.divEnter(3); await w.row('x = (15) 3');
+    w.at('I’m stuck'); await w.stuck(); await w.see('x is 15 divided by 3. Work it out, then type x.'); await w.popupNot('⅓', 'fraction');
+    await w.both('t-help-division');
+  },
+  async 't-help-fraction'(w) {
+    await w.start(); await w.see('3x + 4 = 19');
+    w.at('Add −4, combine'); await w.addEnter(-4); await w.combine(15); await w.row('3x = 15');
+    w.at('Multiply, the fraction, 1 then 3, Go'); await w.click(act('multOpen')); await w.click(`.mo-opt${act('multPick')}[data-kind="frac"]`); await w.type(1); await w.type(3); await w.click(act('go')); await wait(w.page, 400);
+    await w.row('x = ⅓(15)');
+    w.at('I’m stuck'); await w.stuck(); await w.see('x is ⅓ of 15. Work it out, then type x.'); await w.popupNot('divid');
+    await w.both('t-help-fraction');
+  },
+  async 't-divide-again'(w) {
+    await w.start(); await w.see('5x = −15');
+    w.at('Divide 2, Go'); await w.divide(2); await w.lateLayer();
+    await w.see('Press Undo and try another number to divide by.');
+    w.at('Undo'); await w.click(act('undo')); await wait(w.page, 800);
+    await w.see('We want only one of the five x boxes.', 'What should we divide both sides by?', '÷ 2', '÷ 5'); await w.notSee('½', '⅕');
+    if (!(await w.page.locator(`${DIV}[aria-pressed="true"], ${DIV}.is-pressed`).count())) throw new Error('the Divide button should be lit');
+    await w.both('t-divide-again');
+    w.at('÷ 5'); await w.click(`${act('take')}[data-n="5"]`); await wait(w.page, 600); await w.row('x = (−15) 5');
   },
   async 't-flip-plus'(w) {
     await w.start(); await w.see('−3x = 12');
@@ -582,7 +613,7 @@ const WALKS = {
     await w.lit('.lb-stack [data-calc]');
     await w.both('p-calc-wrong');
     w.at('Undo'); await w.click(act('undo')); await wait(w.page, 1500);
-    await w.see('⅓ × 15 is the same as 15 ÷ 3. Click the × and type it.');
+    await w.see('⅓ × 15 is ⅓ of 15: split 15 into 3 equal groups and take one. Click the × and type it.');
     await w.both('p-calc-hint');
     w.at('the × again, 5, Enter'); await w.click('[data-action="lxCalc"]'); await w.type(5); await w.enter(); await wait(w.page, 300); await w.row('x + 2 = 5');
   },
@@ -1553,7 +1584,7 @@ const WALKS = {
     await w.see('doesn’t split', '5 boxes can\'t make 2 equal groups');
     await w.shot('student-divide-half');
     w.at('mistake 5: Undo, Got it'); await w.click(act('undo')); await wait(w.page, 800);
-    await w.see('We want only one of the five x boxes.', '½', '⅓', '¼', '⅕', '⅙');
+    await w.see('We want only one of the five x boxes.', 'What should we divide both sides by?', '÷ 2', '÷ 3', '÷ 4', '÷ 5', '÷ 6');
     await w.click(act('spotDismiss'));
     w.at('mistake 6: I’m stuck, twice');
     await w.stuck(); const one = await w.text();
@@ -1784,8 +1815,8 @@ const WALKS = {
     await w.click(act('spotDismiss'));
     w.at('mistake 3: ½'); await w.divide(2); await w.lateLayer();
     await w.see('3 boxes can\'t make 2 equal groups');
-    w.at('mistake 3: Undo, ⅓'); await w.click(act('undo')); await wait(w.page, 800);
-    await w.see('We want only one of the three x boxes.');
+    w.at('mistake 3: Undo, ÷ 3'); await w.click(act('undo')); await wait(w.page, 800);
+    await w.see('We want only one of the three x boxes.', 'What should we divide both sides by?', '÷ 3');
     await w.click(`${act('take')}[data-n="3"]`); await wait(w.page, 400); await w.see('−x = 4');
     w.at('mistake 4: type 4, check, Undo'); await w.click(act('focus')); await w.type(4); await w.enter(); await w.drag();
     await w.click(act('nextLine')); await w.click(act('nextLine')); await w.lateLayer();

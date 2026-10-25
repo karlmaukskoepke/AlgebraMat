@@ -60,6 +60,9 @@ export function calcParams(s, t) {
     expr: div ? `${signed(b)} ÷ ${neg ? `(${MINUS}${t.n})` : t.n}` : `${neg ? MINUS : ''}${fractionText(t.n)} × ${signed(b)}`,
     b: signed(b),
     by: `${neg ? MINUS : ''}${t.n}`,
+    of: `${neg ? MINUS : ''}${fractionText(t.n)} of ${signed(b)}`,   // (Build T: fraction words for a fraction, no division words)
+    n: t.n,
+    neg,
   };
 }
 

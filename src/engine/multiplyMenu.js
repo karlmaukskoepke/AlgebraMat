@@ -83,6 +83,11 @@ export function makeMultiplyMenu({ xAlone, coefOf, option = (kind) => DIVIDE_IT[
       if (opened.menu !== 'fraction') return { ...state, feedback: opened.feedback ?? state.feedback };
       const s = reduce({ ...opened, fb: FB0 }, { type: 'take', n, ...(d < 0 ? { sign: -1 } : {}) });
       if (s === opened || (s.history?.length ?? 0) === (opened.history?.length ?? 0)) return { ...state, feedback: s.feedback ?? state.feedback };
+      if (s.fail) {
+        // a division that does not come out even (Build T): said as a division, and the choices after Undo are numbers to divide by
+        const fb = s.feedback ? { ...s.feedback, params: { ...s.feedback.params, div: true } } : s.feedback;
+        return shownAsDivision({ ...s, fail: { ...s.fail, div: true }, tryForm: 'div', feedback: fb });
+      }
       return d < 0 ? dividedByNegative(shownAsDivision(s), state, n) : shownAsDivision(s);
     }
     // Dividing by −1 with the Divide button (Build P, Part 9): the same move as Flip everything (its record, shapes, check and lights), drawn
@@ -119,6 +124,8 @@ export function makeMultiplyMenu({ xAlone, coefOf, option = (kind) => DIVIDE_IT[
     const clearOthers = (st) => (fracOpen(st) ? { ...st, menu: null, fb: FB0 } : st.menu === 'add' ? { ...st, menu: null, amountEntry: '', hint: null } : st);
     return (state, action) => {
       const m = state.mopts;
+      // a choice after a division that did not come out even is a number to divide by (Build T): the Divide button's move again
+      if (action.type === 'take' && action.fromList && state.tryForm === 'div' && state.spot?.choose) return divideGo({ ...state, spot: null }, String(action.n));
       if (action.type === 'multOpen') {
         if (m && !m.kind && !m.lit) return { ...state, mopts: null, ui: { ...(state.ui ?? {}), preview: false } };     // a second click closes them
         const base = clearOthers(state);

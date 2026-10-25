@@ -5,7 +5,10 @@
 
 import { fractionText, signed } from '../../solveTerms.js';
 import { fractionCycleHint } from './divide.js';
+import { fracWords, divForm } from '../../formWords.js';
 
+// The one term on the side without x (`(15)/3` in `x = (15)/3`), or null
+const aloneSide = (board) => { const side = board.left.some((t) => t.kind === 'x') ? board.right : board.left; return side.length === 1 ? side[0] : null; };
 const record = (s) => { if (!s.supportsShown.includes('hint')) s.supportsShown.push('hint'); };
 const xText = (a) => (a === 1 ? '−x' : `−${a}x`);
 
@@ -32,12 +35,17 @@ const REMINDERS = {
   },
   // x = −(b): x is alone; the other side is the opposite of a number
   F4(s, shape) {
+    // (Build T: made by dividing by −1, it is drawn `(12)/(−1)` and said as a division)
+    const t = aloneSide(s.board);
+    if (divForm(s, t)) return { target: 'answer', key: 'fFracHint', params: { words: `${signed(shape.params.b)} divided by −1` } };
     return { target: 'answer', key: 'fNegHint', params: { b: signed(shape.params.b) } };
   },
   // x = ⅟a(b) or −⅟a(b): x is alone; the other side is a fraction of a number
+  // (Build T: in the form on the screen: "x is 15 divided by 3." under a fraction bar, "x is ⅓ of 15." for `⅓(15)`)
   F5(s, shape) {
-    const f = `${shape.params.sign < 0 ? '−' : ''}${fractionText(shape.params.n)}`;
-    return { target: 'answer', key: 'fFracHint', params: { f, b: signed(shape.params.b), n: shape.params.n, neg: shape.params.sign < 0 } };
+    const t = aloneSide(s.board);
+    const words = t?.kind === 'frac' ? fracWords(t, divForm(s, t)) : `${shape.params.sign < 0 ? '−' : ''}${fractionText(shape.params.n)} of ${signed(shape.params.b)}`;
+    return { target: 'answer', key: 'fFracHint', params: { words } };
   },
 };
 

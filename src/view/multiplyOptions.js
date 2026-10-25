@@ -36,10 +36,11 @@ export function multiplyMoves(s, option, { move = 'mult', ring = null } = {}) {
   const grey = MULT_KINDS.filter((k) => option(k, s) === 'grey');
   const open = optionsOpen(s);
   const divGrey = option('div', s) === 'grey';
+  const divCycle = s.menu === 'fraction' && !s.fail && s.tryForm === 'div';      // (Build T: the choices after a division are Divide's)
   return {
-    multiply: { live: true, move, action: 'multOpen', pressed: (s.menu === 'fraction' && !s.fail) || open || s.mopts?.kind === 'whole', ring: ring === 'multiply', flyout: open ? multiplyOptions(MULT_KINDS, s.ui?.preview, grey) : null },
+    multiply: { live: true, move, action: 'multOpen', pressed: (s.menu === 'fraction' && !s.fail && !divCycle) || open || s.mopts?.kind === 'whole', ring: ring === 'multiply', flyout: open ? multiplyOptions(MULT_KINDS, s.ui?.preview, grey) : null },
     divide: {
-      live: true, greyed: divGrey, move: 'div', action: 'divPick', pressed: s.mopts?.kind === 'div', ring: ring === 'divide' && !divGrey,
+      live: true, greyed: divGrey, move: 'div', action: 'divPick', pressed: s.mopts?.kind === 'div' || divCycle, ring: ring === 'divide' && !divGrey,
       preview: !s.mopts?.kind && s.ui?.preview === 'div' && !divGrey, attrs: { 'data-mopt': 'div' },
     },
   };

@@ -602,6 +602,21 @@ Distribute `3(7 + 2) + 2(7) = 41`, Variables `7(5) = 4(5) + 15`, Flip `−3(−4
 3 px higher at 32 px); the last sentence of "x is already on the left side…", which now fits the equation's shape, and three new
 refusal messages (an x inside the other side's parenthesis; a number still to work out; x alone on a fraction).
 
+**Part 2.** Problems, save codes, class-sheet records and the 25 scripted runs are unchanged (the records keep their keys; only the
+words differ). One recorded screen differs at 1366×768 (at 1366×650 it differs by less than the tolerance):
+
+| Key | Before | After | Why |
+|---|---|---|---|
+| `screen:div-alone-stuck-1@1366x768` | at `x = (−15)/5` (made with the Divide button), I'm stuck asks "What is ⅕ of −15? Share the counters…" | "What is −15 divided by 5? Share the counters…" | Part 2: help talks in the form on the screen (0.91% of pixels) |
+
+**Below the screen check (no recorded state shows them):** "x is 15 divided by 3. Work it out, then type x." / "x is ⅓ of 15. Work it out,
+then type x." at x alone on Flip everything, Two-step, Distribute and Variables (was "⅓(15) is 1 of 3 equal groups of 15"); Divide it's
+kept group ("that is −15 divided by 5"); a division that does not come out even ("…try another number to divide by.", "That division
+doesn’t come out even. Let’s undo it first", and after Undo "What should we divide both sides by?" with ÷ 2 … ÷ 6, the Divide button lit);
+the product hint in fraction form ("⅓ × 15 is ⅓ of 15: split 15 into 3 equal groups and take one.", was "…the same as 15 ÷ 3"); a number
+added while x was already alone ("x was already alone: adding +2 put a number next to it. Press Undo.", was "+0 + +2 did not eliminate
+the term").
+
 <!-- history: nothing below this line is read by the harness -->
 
 ## History: screen changes accepted by the re-baseline of 2026-10-24 (Build O, Part 0)
