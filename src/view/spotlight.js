@@ -13,6 +13,8 @@
 //   NOTE: a message with nothing lit and nothing dimmed, below the work. NUDGE: a small note next to the x = field (type a number,
 //   too big...), with nothing to undo.
 
+import { liveOf } from './keepRows.js';
+
 const BOX_W = 340;
 const BUBBLE_W = 300;                 // the small questions side by side at the numbers (Build H, Part 3)
 const NUDGE_W = 270;
@@ -150,7 +152,9 @@ function candidates({ kind, spot, r, pad, labelBottom, bw, bh, area, side, workB
 
 // spot: { kind, target, label, move, lit: [targets], place, buttons } ; o: { root, find(root, target) → Element, text, undo: selector,
 // moveSel(move) → selector, work: selector of the work area }
-export function spotlightLayer(spot, o) {
+export function spotlightLayer(spot, given) {
+  // (o.root is the Mat on screen: a Mat redrawn keeping its rows is laid onto the one already there, Build S)
+  const o = Object.defineProperty({ ...given }, 'root', { get: () => liveOf(given.root), enumerable: true });
   const kind = spot.kind;
   const error = kind === 'error';
   const layer = el('div', `spot-layer is-${kind}`, [], { 'data-spot': spot.target ?? '' });

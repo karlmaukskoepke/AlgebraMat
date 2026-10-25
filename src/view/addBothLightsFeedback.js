@@ -8,6 +8,9 @@ const LX = {
   // round 2 (SPEC-LIGHTS-EXPERIMENT-ADD-rev02.md)
   lxMustMove: () => 'Show this one with a move first.',
   lxXCross: (p) => `x is already on the ${p.side === 'right' ? 'right' : 'left'} side of the equation. Let’s keep x there. Try moving a number.`,
+  // a drop that cannot work says why, and the term goes back (Build S: never a silent drop)
+  lxUnlike: (p) => (p.group ? 'A parenthesis has to be distributed before anything joins it. Drag its number onto the parenthesis first.' : 'Only like terms combine: an x-term with an x-term, a number with a number.'),
+  lxFactorParen: (p) => `Drag the ${p.factor} onto its parenthesis to multiply it in.`,
   lxCombineAsk: (p) => (p.x ? `What is ${p.sum}? Type the number in front of x.` : `What is ${p.sum}? Type it in the box.`),
   lxCombineWrong: (p) => `${p.sum} is not ${String(p.typed).replace('-', '−')}. Press Undo and try again.`,
   lxCombined: () => 'Combined: one term instead of two.',

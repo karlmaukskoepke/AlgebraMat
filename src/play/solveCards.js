@@ -105,6 +105,7 @@ export const addBothPlay = makeSolvePlay({
 
 export const divideMovesPlay = makeSolvePlay({
   pack: 'divide-it',
+  grab: false,                     // (no terms to pick up: the honest path uses the moves)
   loop: divideLoop,
   layer: withFractionBlank(reduceDivide),
   spot: DIVIDE_SPOT,
@@ -140,6 +141,7 @@ let flipTaught = null;  // the first Trade places of a level is pointed out once
 
 export const flipPlay = makeSolvePlay({
   pack: 'flip-everything',
+  grab: false,                     // (no terms to pick up: the honest path uses the moves)
   loop: flipLoop,
   layer: FLIP_MENU.withMenu(reduceFlip),
   spot: FLIP_SPOT,

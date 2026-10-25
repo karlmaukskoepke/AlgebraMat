@@ -51,6 +51,9 @@ import {
 } from './engine/diagnostic.js';
 import { createDiagnosticView } from './view/diagnostic.js';
 import { loadDiag, saveDiag, clearDiag, saveOldPlacement } from './diagStore.js';
+import { redrawMat } from './view/keepRows.js';
+import { chooseSize } from './view/fitSize.js';
+import { nextMove } from './engine/solveit/honest.js';
 
 const $ = (id) => document.getElementById(id);
 
@@ -350,6 +353,11 @@ function dispatch(action) {
   if (play.session !== before) render(before);
 }
 
+// The standing browser tests (tests/screenSweep.test.js) drive the dev server's page with the card's own actions: only in development
+if (import.meta.env?.DEV) {
+  window.__mat = { dispatch: (a) => dispatch(a), session: () => play?.session, adapter: () => play?.adapter, nextMove: () => nextMove(play.session, { grab: play.adapter.grab !== false }) };
+}
+
 // A card can owe a move problem (Add to both sides: a correct guess forces the next problem to be solved with a move, and if that
 // was the last problem of the level, one more is added). The extra problem is one the level didn't already have.
 function extraProblem(pack, level, seed, used) {
@@ -492,6 +500,13 @@ function fitMatToPhone(svg) {
   svg.setAttribute('viewBox', `${x0} ${vb.y} ${x1 - x0} ${vb.height}`);
 }
 
+// A new window size: a Solve it card's text size is chosen again for the new room (Build S)
+let resized = null;
+window.addEventListener('resize', () => {
+  clearTimeout(resized);
+  resized = setTimeout(() => { if (play?.adapter?.keepRows && !play.finished && !document.getElementById('play').hidden) render(); }, 150);
+});
+
 // Turning the phone: the Mat was cropped (or not) for the old shape, so draw it again for the new one.
 window.matchMedia('(orientation: portrait)').addEventListener('change', () => {
   if (!play || play.finished || document.getElementById('play').hidden) return;
@@ -550,7 +565,17 @@ function render(before) {
   hintLine.hidden = finished || !fx.hint;
   if (finished) return;
 
-  matRoot.replaceChildren(adapter.renderMat(session, fx));
+  // (a Solve it card keeps the rows already on screen, so a redraw never replays their animations, and its text size is chosen once a
+  // problem, from the problem's worst case, so it never changes while the student works: Build S)
+  if (adapter.keepRows) {
+    const sized = `${play.pack.id}|${play.level}|${play.seed}|${play.index}|${window.innerWidth}x${window.innerHeight}`;
+    if (play.sized !== sized) { play.sized = sized; chooseSize(matRoot, adapter, session); }
+    redrawMat(matRoot, adapter.renderMat(session, fx));
+  } else {
+    matRoot.style.removeProperty('--eq-size');
+    matRoot.style.removeProperty('--work-size');
+    matRoot.replaceChildren(adapter.renderMat(session, fx));
+  }
   fitMatToPhone(matRoot.firstElementChild);
   hintLine.textContent = fx.hint ? `Hint: ${adapter.feedbackText(fx.hint)}` : '';
   feedback.textContent = adapter.feedbackText(session.feedback);

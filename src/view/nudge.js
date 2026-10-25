@@ -8,6 +8,7 @@
 import { html } from './addBothMat.js';
 import { spotlightLayer } from './spotlight.js';
 import { nudgeOf, calcParams } from '../engine/nudge.js';
+import { onRedraw } from './keepRows.js';
 
 export const NUDGE_WAIT = 2500;        // idle before the glow
 const GLOW_MS = 1500;                  // the glow alone, before the pop-up
@@ -124,11 +125,10 @@ export function bindNudge(root, getSession, { of = nudgeOf, text = nudgeText } =
   document.addEventListener('keydown', reset, true);
   document.addEventListener('wheel', reset, true);
   // a redraw of the Mat is a change on screen: the wait starts again (as the I'm stuck timer does)
-  const obs = new MutationObserver(reset);
-  obs.observe(root, { childList: true });
+  const unwatch = onRedraw(root, reset);
   return () => {
     clearInterval(timer);
-    obs.disconnect();
+    unwatch();
     clear();
     document.removeEventListener('pointerdown', reset, true);
     document.removeEventListener('keydown', reset, true);

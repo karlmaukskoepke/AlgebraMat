@@ -22,7 +22,8 @@ import { spotlightLayer, findSolveTarget } from './spotlight.js';
 import { boardBlock, trayFor, html, slipShown } from './addBothMat.js';
 import { narrowPanel } from './narrowPanel.js';
 import { optionSel } from './multiplyOptions.js';
-import { forwardButton, srLine, notePopup, substBlock as sharedSubstBlock, sideTerms, waitingGhost, foldTag, sameAsLine, divisorOf, FORCED_TEXT, FIRST_TEXT, placeText } from './solveScreen.js';
+import { forwardButton, srLine, notePopup, substBlock as sharedSubstBlock, sideTerms, waitingGhost, foldTag, sameAsLine, divisorOf, rowKey, markFlips, FORCED_TEXT, FIRST_TEXT, placeText } from './solveScreen.js';
+import { liveOf, onMounted } from './keepRows.js';
 import { firstOpen } from './visit.js';
 // Count it's counters Mat and its words, read-only, for the help at x alone (Build C, Part 3)
 import { renderMat as renderCountersMat } from './mat.js';
@@ -57,7 +58,7 @@ export const NUDGE = {
   typeAnswer: 'answer', answerUnreadable: 'answer', aFinishMoveFirst: 'answer', aUndoFirst: 'answer', aPickKind: 'answer', typeCount: 'answer',
   aAmountBig: 'blank', aAmountZero: 'blank', aGoNotYet: 'forward', aOtherSide: 'forward',
   aTradeFirst: 'panel', aTradeNot: 'panel', aTradeIntro: 'panel', aLater: 'panel', aNotNeeded: 'panel', aChooseMoveFirst: 'panel',
-  lxXCross: 'newest', dxTapMinusFirst: 'newest',
+  lxXCross: 'newest', dxTapMinusFirst: 'newest', lxUnlike: 'newest', lxFactorParen: 'newest',
 };
 
 // A wrong seesaw move's words, from its picture's numbers (Build F, Part 3).
@@ -292,22 +293,19 @@ function liveSide(s, side) {
   });
 }
 
-// An animation plays once: a later render of the same state (typing a digit, say) draws it already settled.
-let playedKey = null;
-
+// An animation plays once (Build S): each row carries a key (data-rk), and the Mat is redrawn keeping the rows already on screen
+// (view/keepRows.js), so a row's entrance and its cross-off play when it first appears and never again: not on a pickup, a key, a click,
+// Undo or a hover. (A guess's row is not a row of the stack: it is drawn with the check.)
 function rowsOf(s) {
   const last = s.rows.length - 1;
-  const key = s.work && s.rows.length > 1 ? `w${s.rows.length}:${JSON.stringify(s.work)}` : s.sub?.kind === 'guess' ? `g${s.sub.typed}` : null;
-  const settledNow = key !== null && key === playedKey;
-  playedKey = key;
-  return s.rows.map((row, i) => {
+  const rows = s.rows.map((row, i) => {
     // the move just made animates: its work row and the new equation (a combine or a reorder adds no work row, so only its row)
     const newest = s.rows.length > 1 && (i === last || (i === last - 1 && row.type === 'work'));
     const recent = i === last || (i === last - 1 && row.type === 'work');                   // earlier lines are drawn in lighter ink
-    const cls = `lb-rowwrap${!newest || settledNow ? ' is-settled' : ''}${row.type === 'work' ? ' has-work' : ''}${recent ? '' : ' is-old'}`;
+    const cls = `lb-rowwrap${!newest ? ' is-settled' : ''}${row.type === 'work' ? ' has-work' : ''}${recent ? '' : ' is-old'}`;
     // a move written as an equation of whole sides: a fraction of both sides, or both sides times −1 (the Two-step card's Multiply)
     if (row.type === 'work' && row.board) {
-      const div = { div: row.shown === 'div', work: !row.failed };         // (made with the Divide button: division form, Build O; the cross-off, Build P)
+      const div = { div: row.shown === 'div', work: !row.failed, mi: { n: 0 } };   // (made with the Divide button: division form, Build O; the cross-off, Build P)
       const w = eqRow(sideTerms(row.board.left, s, div), sideTerms(row.board.right, s, div), `lb-work${row.failed ? ' is-failed' : ''}${div.div ? ' is-division' : ''}${eqClass(charsOf([...row.board.left, ...row.board.right]) + 6)}`, { 'aria-hidden': 'true' });
       if (row.failed) w.append(html('span', 'lb-failmark', ['✗']));
       const d = divisorOf(row);
@@ -358,6 +356,8 @@ function rowsOf(s) {
     }
     return html('div', `${cls}${plug ? ' is-plugrow' : ''}${tag.length ? ' is-fold' : ''}`, [...tag, eq]);
   });
+  rows.forEach((el, i) => { el.dataset.rk = rowKey(s.rows[i], i); });
+  return markFlips(rows);
 }
 
 // ---------- the ghost row: the move's preview and blank, or the blank for a sum ----------
@@ -452,10 +452,13 @@ function ghostRow(s) {
   const usable = open || canChoose(s);
   const slot = html('div', `lx-ghost${open ? ' is-chosen' : preview ? ' is-preview' : near ? ' is-near' : ''}${usable ? ' is-usable' : ''}`);
   if (!usable) return slot;
-  const typing = open && amountMode(s);
+  // an option of Add hovered or focused while its blank is open (Variables on both sides, Build S): its form, with dashed blanks
+  const optKind = open && s.ui?.preview === 'addX' ? 'x' : open && s.ui?.preview === 'addNum' ? 'num' : null;
+  if (optKind) slot.classList.add('is-optpreview');
+  const typing = open && amountMode(s) && !optKind;
   const text = open ? s.amountEntry : '';
   // the left box is the input; the right box mirrors it as typed
-  const left = html('button', `lx-box${typing ? ' is-focus' : ''}${s.ui?.shake ? ' is-shake' : ''}${text ? '' : ' is-empty'}${typing && !text ? ' is-blink' : ''}`, [shown(text)], {
+  const left = optKind ? html('span', `lx-box is-mirror${text ? '' : ' is-empty'}`, [shown(text)], { 'aria-hidden': 'true' }) : html('button', `lx-box${typing ? ' is-focus' : ''}${s.ui?.shake ? ' is-shake' : ''}${text ? '' : ' is-empty'}${typing && !text ? ' is-blink' : ''}`, [shown(text)], {
     type: 'button', 'data-action': 'focus', 'data-target': 'amount', 'data-blank': '1', 'data-fk': 'blank', 'data-lx-field': '1',
     'aria-label': 'The amount to add to both sides', ...(open ? {} : { tabindex: '-1' }),
   });
@@ -463,7 +466,7 @@ function ghostRow(s) {
   const right = html('span', `lx-box is-mirror${text ? '' : ' is-empty'}`, [shown(text)], { 'aria-hidden': 'true' });
   const plus = () => html('span', 'lb-plus lx-plus', ['+']);
   // an x-term (Variables on both sides, Build R): the x printed after each box, so the number in front of x is typed with its sign
-  const xKind = open ? s.addKind === 'x' : s.ui?.preview === 'addX';
+  const xKind = optKind ? optKind === 'x' : open ? s.addKind === 'x' : s.ui?.preview === 'addX';
   const xAfter = () => (xKind ? [html('span', 'lb-x lx-addx', ['x'])] : []);
   if (xKind) left.setAttribute('aria-label', 'The number in front of x, to add an x-term to both sides');
   slot.append(eqRow([...sideEls(s.board.left, s.lx.negIds), plus(), left, ...xAfter()], [...sideEls(s.board.right, s.lx.negIds), plus(), right, ...xAfter()], 'lx-ghosteq'));
@@ -691,9 +694,10 @@ function distributeArcs(wrap, s) {
   const g = findTerm(s.board, s.lx.distribute.group)?.term;
   if (!g) return;
   const draw = () => {
-    const f = wrap.querySelector(`.lx-live [data-factor="${g.id}"]`);
-    const paren = wrap.querySelector(`.lx-live [data-paren="${g.id}"]`);
-    const pieces = [...wrap.querySelectorAll(`.lx-live [data-piece-of="${g.id}"]`)];
+    const root = liveOf(wrap);                                        // (the Mat on screen: the rows were kept, Build S)
+    const f = root.querySelector(`.lx-live [data-factor="${g.id}"]`);
+    const paren = root.querySelector(`.lx-live [data-paren="${g.id}"]`);
+    const pieces = [...root.querySelectorAll(`.lx-live [data-piece-of="${g.id}"]`)];
     const row = f?.closest('.lb-rowwrap');
     if (!f || !paren || !pieces.length || !row || row.querySelector('.dx-arcs')) return;
     const box = row.getBoundingClientRect();
@@ -720,5 +724,6 @@ function distributeArcs(wrap, s) {
     mk('text', { x: pr.right - box.left + 10, y: pr.bottom - box.top + 22, class: 'dx-groups' }, `${factorText} groups of`);
     row.append(svg);
   };
+  onMounted(wrap, draw);                                             // at once, so a redraw never shows the row without them
   if (typeof requestAnimationFrame === 'function') requestAnimationFrame(draw);
 }

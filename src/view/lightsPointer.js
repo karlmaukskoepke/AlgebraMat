@@ -12,6 +12,7 @@ import { bindNudge } from './nudge.js';
 import { bindBlankKeys } from './blankKeys.js';
 import { bindValueDrag, HELP_BUTTONS } from './solveScreen.js';
 import { typedAction, settleTypingFocus } from './typingKeys.js';
+import { onRedraw } from './keepRows.js';
 
 const ADD = '.lb-move[data-move="add"]';
 
@@ -157,8 +158,7 @@ export function bindLightsMat(root, dispatch, getSession) {
     else settleTypingFocus(root);                       // else the open field, when the focus was lost (Build N)
     keyboard = kb;
   };
-  const obs = new MutationObserver(settle);
-  obs.observe(root, { childList: true });
+  const unwatch = onRedraw(root, settle);
 
   return () => {
     unbindGrab?.();
@@ -167,7 +167,7 @@ export function bindLightsMat(root, dispatch, getSession) {
     unbindValue();
     unbindNudge();
     unbindBlanks();
-    obs.disconnect();
+    unwatch();
     document.removeEventListener('pointerdown', onPointerDown, true);
     root.removeEventListener('pointerover', onOver);
     root.removeEventListener('pointerout', onOut);

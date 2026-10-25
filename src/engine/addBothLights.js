@@ -96,7 +96,9 @@ export function withLights(reduce = reduceAddBoth, { alone = xAlone, menuPreview
     if (action.type === 'ui') {
       const patch = { ...action.patch };
       if (menuPreview && ['frac', 'div', 'flip', 'whole'].includes(patch.preview)) return menuPreview(state, patch.preview) ? reduce(state, action) : state;
-      if (patch.preview && !canChoose(state)) return state;
+      // (Add's two options, Build S: hovering one while the blank is open previews its form)
+      const addOpt = patch.preview === 'addX' || patch.preview === 'addNum';
+      if (patch.preview && (addOpt ? !blankOpen(state) : !canChoose(state))) return state;
       if ((patch.carry || patch.drag) && !canGrab(state)) return state;
       const next = withUi(state, patch);
       if (sameUi(next, state)) return state;
@@ -191,7 +193,7 @@ export function withLights(reduce = reduceAddBoth, { alone = xAlone, menuPreview
         break;
       case 'go': {
         if (menuPreview && state.menu !== 'add' && !state.scaffold) break;        // (another move's Go: a card's own Multiply menu)
-        if (s.history.length <= state.history.length && !s.scaffold) break;    // the engine said no (too big, say)
+        if (!madeMove(state, s) && !s.scaffold) break;                        // the engine said no (too big, say)
         if (s.scaffold) break;
         lx.moves += 1;
         const before = state.board;
@@ -246,6 +248,10 @@ const sumParams = (s) => ({ sum: pairText(s.board, s.lx.combine.a, s.lx.combine.
 
 // The actions that are the wrapper's own: a drop (pointer or keyboard), a minus tap, the sum of a combine typed and applied, and the
 // Undo of a reorder, a minus tap or a combine. Returns null for anything else.
+// Did the engine make the move? Its board changed. (Not the history's length: a move made while the one before it still shows its work
+// folds that one first, which empties the history, so a dropped term that did move read as refused and nothing happened; Build S)
+const madeMove = (before, after) => after !== before && JSON.stringify(after.board) !== JSON.stringify(before.board);
+
 function grabAction(state, action, wrapped, alone, opts = {}) {
   const lx = state.lx;
   if (opts.distribute) {
@@ -333,6 +339,15 @@ function grabAction(state, action, wrapped, alone, opts = {}) {
   // ----- a term dropped (B1–B3): a pointer drag, or the keyboard's Enter on a carried term -----
   if (action.type !== 'lxDrop') return null;
   if (!canGrab(state)) return withUi(state, { carry: null });
+  // a parenthesis's factor let go on the equation but not on its parenthesis: it goes back, and says where it goes (Build S)
+  if (action.slot?.factorMiss) {
+    const g = findTerm(state.board, action.id)?.term;
+    const s = structuredClone(state);
+    s.lx.log.drags += 1;
+    s.lx.log.outcomes.snapBack += 1;
+    s.ui = { ...UI0 };
+    return g?.kind === 'group' ? say(s, 'lxFactorParen', { factor: signed(g.factor).replace('-', MINUS) }) : s;
+  }
   const out = outcomeOf(state.board, action.id, action.slot);
   const logged = (s) => {
     s.lx.log.drags += 1;
@@ -344,7 +359,11 @@ function grabAction(state, action, wrapped, alone, opts = {}) {
   if (out.kind === 'none' || out.kind === 'snapX') {
     const s = logged(structuredClone(state));
     s.ui = { ...UI0, focus: `tok:${action.id}` };
-    return out.kind === 'snapX' ? say(s, 'lxXCross', { side: findTerm(state.board, action.id)?.side ?? 'left' }) : s;
+    if (out.kind === 'snapX') return say(s, 'lxXCross', { side: findTerm(state.board, action.id)?.side ?? 'left' });
+    // (Build S: every drop that does nothing says why. Dropped where it was, or away from the equation, it just goes back)
+    const term = findTerm(state.board, action.id)?.term;
+    if (action.slot?.onto && action.slot.onto !== action.id) return say(s, 'lxUnlike', { group: findTerm(state.board, action.slot.onto)?.term?.kind === 'group' || term?.kind === 'group' });
+    return s;
   }
   if (out.kind === 'crossX' && opts.xAdd) {
     // an x-term carried across the = on a card with x on both sides (Variables on both sides, Build R): the Add of its opposite, the same
@@ -352,7 +371,7 @@ function grabAction(state, action, wrapped, alone, opts = {}) {
     const s0 = structuredClone(state);
     Object.assign(s0, { menu: 'add', addKind: 'x', typing: null, amountEntry: String(-(findTerm(state.board, action.id).term.coef ?? 1)), hint: null, ui: { ...UI0 } });
     const s = wrapped(s0, { type: 'go' });
-    if (s.history.length <= s0.history.length) { const back = logged(structuredClone(state)); back.feedback = s.feedback; return back; }
+    if (!madeMove(s0, s)) { const back = logged(structuredClone(state)); back.feedback = s.feedback; return back; }
     return logged(s);
   }
   if (out.kind === 'crossX') {
@@ -370,7 +389,7 @@ function grabAction(state, action, wrapped, alone, opts = {}) {
     const s0 = structuredClone(state);
     Object.assign(s0, { menu: 'add', typing: null, amountEntry: String(out.amount), hint: null, ui: { ...UI0 }, ...(opts.xAdd ? { addKind: 'num' } : {}) });
     const s = wrapped(s0, { type: 'go' });
-    if (s.history.length <= s0.history.length) {                      // the engine said no (too big): nothing moves
+    if (!madeMove(s0, s)) {                                          // the engine said no (too big): nothing moves
       const back = logged(structuredClone(state));
       back.feedback = s.feedback;
       return back;

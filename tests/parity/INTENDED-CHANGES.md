@@ -553,6 +553,20 @@ symbols); every older code decodes as before (tests/bothSides.test.js).
 **Below the screen check:** the shared column grid changes a check only when the equation has two or more x's (none of the 35 recorded
 states has); the note under `x =`, Add's two options and the x-term blank are on the new card only.
 
+## Build S (2026-10-24): redraws keep the rows, one text size a problem, every drag works or says why, Flip's slower cross-off
+
+Problems, save codes, class-sheet records and the 25 scripted runs are unchanged (the drag that used to do nothing, and the new
+messages for a drop that cannot work, are not in any scripted run). Of the 70 recorded screens, one differs:
+
+| Key | Before | After | Why |
+|---|---|---|---|
+| `screen:dist-opening@1366x650` | `2(x + 4) = 26` opens at 46 px, and drops to 32 px once the problem has four rows | it opens at the size its own worst case fits at 650 px tall (42 px) and keeps it to Balanced | Part 3: the text size never changes while the student works a problem |
+
+**Below the screen check (no recorded state shows them):** a fourth row no longer shrinks every row (the size is chosen once a
+problem); Flip everything's cross-off is a vertical stroke through each minus, one at a time (the recorded Flip screen is its opening);
+Add's two options preview their own form on hover (Variables on both sides only); the two new drop messages ("Only like terms
+combine…", "Drag the 3 onto its parenthesis…"). Every recorded screen that has its first-problem pop-up still shows it.
+
 <!-- history: nothing below this line is read by the harness -->
 
 ## History: screen changes accepted by the re-baseline of 2026-10-24 (Build O, Part 0)

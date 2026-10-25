@@ -26,12 +26,14 @@ export function bindGrab(root, dispatch, getSession) {
   function slotAt(e) {
     const row = live();
     if (!row || !drag) return null;
+    const box = row.getBoundingClientRect();
+    const away = e.clientY < box.top - REACH || e.clientY > box.bottom + REACH || e.clientX < box.left - SIDEWAYS || e.clientX > box.right + SIDEWAYS;
     if (drag.factor) {                                              // a factor goes onto its own parenthesis, or back (B6)
       const paren = row.querySelector(`[data-paren="${drag.factor}"]`)?.getBoundingClientRect();
-      return paren && e.clientX >= paren.left - 8 && e.clientX <= paren.right + 8 && e.clientY >= paren.top - 30 && e.clientY <= paren.bottom + 30 ? { paren: drag.factor } : null;
+      if (paren && e.clientX >= paren.left - 8 && e.clientX <= paren.right + 8 && e.clientY >= paren.top - 30 && e.clientY <= paren.bottom + 30) return { paren: drag.factor };
+      return away ? null : { factorMiss: true };                    // (on the equation but not its parenthesis: it goes back and says so, Build S)
     }
-    const box = row.getBoundingClientRect();
-    if (e.clientY < box.top - REACH || e.clientY > box.bottom + REACH || e.clientX < box.left - SIDEWAYS || e.clientX > box.right + SIDEWAYS) return null;
+    if (away) return null;
     const border = row.querySelector('.lb-border').getBoundingClientRect();
     const side = e.clientX < border.left + border.width / 2 ? 'left' : 'right';
     // over the shadow of the term (where the row already shows it landing): it stays there, so the row does not flicker as it reflows
@@ -41,11 +43,18 @@ export function bindGrab(root, dispatch, getSession) {
     const others = [...row.querySelectorAll(`.lb-side[data-side="${side}"] [data-tok]`)].filter((n) => n.dataset.tok !== drag.src.dataset.tok && !n.classList.contains('is-gap') && !n.dataset.factor);
     // across the line: before, between or after the terms there (Build D-2, Part 3)
     if (side !== drag.src.dataset.side) return { side, at: others.filter((n) => { const r = n.getBoundingClientRect(); return r.left + r.width / 2 < e.clientX; }).length };
+    let over = null;
     for (const n of others) {
       const r = n.getBoundingClientRect();
-      if (n.dataset.like === drag.src.dataset.like && e.clientX >= r.left - 4 && e.clientX <= r.right + 4 && e.clientY >= r.top - 24 && e.clientY <= r.bottom + 24) return { side, onto: n.dataset.tok };
+      const on = e.clientX >= r.left - 4 && e.clientX <= r.right + 4 && e.clientY >= r.top - 24 && e.clientY <= r.bottom + 24;
+      if (on && n.dataset.like === drag.src.dataset.like) return { side, onto: n.dataset.tok };
+      if (on) over = n;
     }
-    return { side, at: others.filter((n) => { const r = n.getBoundingClientRect(); return r.left + r.width / 2 < e.clientX; }).length };
+    const at = others.filter((n) => { const r = n.getBoundingClientRect(); return r.left + r.width / 2 < e.clientX; }).length;
+    // dropped on a term it cannot combine with, where it would not move either: the engine says why (Build S: never a silent drop)
+    const home = [...row.querySelectorAll(`.lb-side[data-side="${side}"] [data-tok]`)].filter((n) => !n.dataset.factor && !n.classList.contains('is-gap')).indexOf(drag.src);
+    if (over && at === home && !over.contains(drag.src) && !drag.src.contains(over)) return { side, onto: over.dataset.tok };
+    return { side, at };
   }
 
   function clearMarks() {
@@ -54,7 +63,7 @@ export function bindGrab(root, dispatch, getSession) {
   function mark(slot) {
     clearMarks();
     const row = live();
-    if (!row || !slot) { drag.ghost.classList.add('is-away'); return; }
+    if (!row || !slot || slot.factorMiss) { drag.ghost.classList.add('is-away'); return; }
     drag.ghost.classList.remove('is-away');
     drag.ghost.lastChild.hidden = true;
     if (slot.paren) { row.querySelector(`[data-paren="${slot.paren}"]`)?.classList.add('is-combine-target'); return; }
@@ -68,7 +77,11 @@ export function bindGrab(root, dispatch, getSession) {
     drag.ghost.classList.toggle('is-neg', shownV < 0);
     drag.ghost.lastChild.hidden = !crossing;
     if (crossing) { row.querySelector(`.lb-side[data-side="${slot.side}"]`)?.classList.add('is-drop-side'); return; }
-    if (slot.onto) { row.querySelector(`[data-tok="${slot.onto}"]`)?.classList.add('is-combine-target'); return; }
+    if (slot.onto) {                                                 // (only a like term is outlined: an unlike one says why on the drop)
+      const n = row.querySelector(`[data-tok="${slot.onto}"]`);
+      if (n?.dataset.like && n.dataset.like === drag.src.dataset.like) n.classList.add('is-combine-target');
+      return;
+    }
     if (drag.previewed) return;                                     // the grey preview row shows where it goes
     const others = [...row.querySelectorAll(`[data-side="${slot.side}"] [data-tok]`)].filter((n) => n.dataset.tok !== drag.src.dataset.tok);
     if (others[slot.at]) others[slot.at].classList.add('is-gap-before'); else others[others.length - 1]?.classList.add('is-gap-after');
@@ -131,7 +144,7 @@ export function bindGrab(root, dispatch, getSession) {
     const swallow = (ev) => { ev.stopPropagation(); ev.preventDefault(); };
     window.addEventListener('click', swallow, { capture: true, once: true });
     setTimeout(() => window.removeEventListener('click', swallow, { capture: true }), 0);
-    if (factor) dispatch(slot ? { type: 'lxDistribute', id, how: 'pointer' } : { type: 'lxDrop', id, slot: null, how: 'pointer' });
+    if (factor) dispatch(slot?.paren ? { type: 'lxDistribute', id, how: 'pointer' } : { type: 'lxDrop', id, slot: slot ?? null, how: 'pointer' });
     else dispatch({ type: 'lxDrop', id, slot, how: 'pointer' });
   };
   const onUp = (e) => finish(e, false);

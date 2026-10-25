@@ -3349,9 +3349,7 @@ body {
 .ui-grab .lx-box.is-wrong { border-color: #a3281b; color: #a3281b; background: #fbe9e7; }
 .ui-grab .lx-sumeq .lb-side .lb-x, .ui-grab .lx-sumeq .lb-side > .lb-num { color: #9a968a; }
 /* four rows or more (a combine adds one): the rows get a little smaller, so the pad stays on a 1366×650 screen */
-.ui-grab .lb-stack:has(> .lb-rowwrap:nth-child(4)) .lb-rowwrap .lb-eq { font-size: 32px; line-height: 1.1; }
-.ui-grab .lb-stack:has(> .lb-rowwrap:nth-child(4)) .lb-rowwrap.has-work .lb-eq { font-size: 24px; }
-.ui-grab .lb-stack:has(> .lb-rowwrap:nth-child(4)) .lb-side { padding: 2px 6px; }
+/* (a fourth row no longer makes every row smaller: the size is chosen once a problem, Build S, view/fitSize.js) */
 .ui-grab .lb-stack:has(> .lb-rowwrap:nth-child(4)) .lx-ghost { min-height: 52px; }
 /* B6: the products, one blank per term, each with its label above */
 .ui-grab .lx-prod { display: inline-flex; flex-direction: column; align-items: center; gap: 2px; margin-top: -26px; }
@@ -3489,8 +3487,9 @@ body[data-input='touch'] #play.is-light #controls .btn-pad { min-width: 48px; mi
 #play.is-light:not(.hdr-show) .topbar:not(:focus-within) > * { opacity: 0; visibility: hidden; transition: opacity 0.4s, visibility 0s 0.4s; }
 @media (prefers-reduced-motion: reduce) { #play.is-light .topbar, #play.is-light .topbar > * { transition: none; } }
 /* the freed space goes to the problem */
-.ui-light .lb-rowwrap .lb-eq, .ui-light .lx-ghosteq { font-size: 46px; }
-.ui-light .lb-rowwrap.has-work .lb-eq { font-size: 32px; }
+/* one size for the whole problem (Build S): --eq-size and --work-size are chosen when the problem starts (view/fitSize.js) */
+.ui-light .lb-rowwrap .lb-eq, .ui-light .lx-ghosteq { font-size: var(--eq-size, 46px); }
+.ui-light .lb-rowwrap.has-work .lb-eq { font-size: var(--work-size, 32px); }
 .ui-light .lb-stack { min-height: 300px; }
 /* Divide it in the light design: the same frame as Add */
 .dv-light { --accent: #7b3fb0; }
@@ -3499,9 +3498,9 @@ body[data-input='touch'] #play.is-light #controls .btn-pad { min-width: 48px; mi
 .ui-light .lx-corner:disabled { opacity: 0.4; }
 .ui-light .lx-answer { display: flex; align-items: center; gap: 10px; font-size: 26px; }
 .dv-light .lb-rows { display: flex; flex-direction: column; gap: 0; min-height: 300px; }
-.dv-light .lb-rowwrap .lb-eq { font-size: 46px; }
-.dv-light .lb-rowwrap.has-work .lb-eq { font-size: 32px; }
-.dv-light .lb-rowwrap.is-fold .lb-eq { font-size: 32px; }
+.dv-light .lb-rowwrap .lb-eq { font-size: var(--eq-size, 46px); }
+.dv-light .lb-rowwrap.has-work .lb-eq { font-size: var(--work-size, 32px); }
+.dv-light .lb-rowwrap.is-fold .lb-eq { font-size: var(--work-size, 32px); }
 .dv-light .lb-side { padding: 2px 6px; }
 .dv-light .lb-fractionrow { justify-content: center; font-size: 16px; min-height: 60px; gap: 6px; margin: 0; flex-wrap: nowrap; }
 .dv-light .lb-fractionrow.is-off { visibility: hidden; }
@@ -3540,7 +3539,7 @@ body[data-input='touch'] #play.is-light #controls .btn-pad { min-width: 48px; mi
 .dv-light .lx-ghost { min-height: 92px; visibility: hidden; display: flex; flex-direction: column; justify-content: center; }
 .dv-light .lx-ghost.is-preview, .dv-light .lx-ghost.is-chosen { visibility: visible; }
 .dv-light .lx-ghost.is-preview .lb-eq { color: #9a968a; }
-.dv-light .lx-ghosteq { font-size: 40px; }
+.dv-light .lx-ghosteq { font-size: calc(var(--eq-size, 46px) * 40 / 46); }
 .dv-fracblank { display: inline-flex; flex-direction: column; align-items: center; gap: 2px; margin: 0 4px; vertical-align: middle; }
 .dv-fracbar { width: 100%; min-width: 34px; border-top: 3px solid #0072b2; }
 .dv-light .dv-fracpart { min-width: 34px; min-height: 36px; padding: 0 6px; font: 800 24px 'Lexend', system-ui, sans-serif; color: #0072b2; border: 3px dashed #0072b2; border-radius: 8px; background: transparent; }
@@ -3811,3 +3810,26 @@ button.lb-divbar.is-calc:hover, button.lb-divbar.is-calc:focus-visible { backgro
 .lx-answer { position: relative; }
 .lx-answernote { position: absolute; left: 0; right: 0; top: calc(100% + 4px); margin: 0; text-align: center; font: 700 17px 'Lexend', system-ui, sans-serif; color: #5d5a52; white-space: nowrap; }
 .ao-flyout .ao-x { color: #0072b2; font-weight: 800; }
+
+/* ---------- Build S, Part 5: a flip's cross-off. Each minus that cancels gets a vertical stroke, so it reads as a plus (a shape, not
+   colour alone): one at a time, about 1.3 s each, then the two pluses fade a little and the row they make comes in. Reduced motion: both
+   strokes drawn, still. The cross-off of the numbers (the two 3s) is unchanged. ---------- */
+.xo.is-minus.is-struck { animation: xo-fade 0.4s 3.4s ease-in forwards; }
+.xo.is-minus.is-struck::after { left: 50%; right: auto; top: calc(52% - 0.27em); height: 0.54em; border-top: 0; border-left: 0.1em solid #a3281b; transform: translateX(-50%) scaleY(0); transform-origin: top; animation: xo-plus 1.3s 0.4s ease-in-out forwards; }
+.xo.is-minus.is-m2::after { animation-delay: 1.9s; }
+@keyframes xo-plus { to { transform: translateX(-50%) scaleY(1); } }
+.lb-rowwrap.has-work.is-flipwork + .lb-rowwrap:not(.is-settled) .lb-eq { animation: lb-fadein 0.5s 3.4s both; }
+.is-settled .xo.is-minus.is-struck, .lb-stack .lb-rowwrap.is-old .xo.is-minus.is-struck { animation: none; opacity: 0.55; }
+.is-settled .xo.is-minus.is-struck::after, .lb-stack .lb-rowwrap.is-old .xo.is-minus.is-struck::after { animation: none; transform: translateX(-50%) scaleY(1); }
+/* (a card whose rows are drawn settled, Divide it and Flip everything: only the newest flip's minus signs play; its numbers stay as drawn) */
+.dv-light .lb-rowwrap.is-flipwork:not(.is-settled) .xo.is-struck:not(.is-minus) { animation: none; opacity: 0.55; }
+.dv-light .lb-rowwrap.is-flipwork:not(.is-settled) .xo.is-struck:not(.is-minus)::after { animation: none; transform: rotate(-18deg) scaleX(1); }
+@media (prefers-reduced-motion: reduce) {
+  .xo.is-minus.is-struck { animation: none; opacity: 1; }
+  .xo.is-minus.is-struck::after { animation: none; transform: translateX(-50%) scaleY(1); }
+  .lb-rowwrap.has-work.is-flipwork + .lb-rowwrap:not(.is-settled) .lb-eq { animation: none; }
+}
+
+/* ---------- Build S, Part 6: Add's two options preview their own form on hover and focus (Variables on both sides): the ghost row in
+   grey, both blanks dashed, the x printed after each blank for the x-term option ---------- */
+.lx-ghost.is-optpreview .lx-ghosteq { color: #8d897d; }

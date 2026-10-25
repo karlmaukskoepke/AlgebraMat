@@ -2,6 +2,8 @@
 // them in whatever is open (a move's blank first, then x =), wherever the focus is. Before this, Divide it and Flip everything typed by
 // pressing the hidden keypad's buttons: a click on the Divide blank left the focus on it, and the page's keys skip a focused button on
 // the Mat, so nothing could be typed; and on the problem after a correct guess the keypad was off, so the blank took nothing.
+import { onRedraw } from './keepRows.js';
+
 
 // The action a key types, or null. (x types only in a sum of two x-terms or a distribute blank: Build M.)
 export function typedAction(e, s) {
@@ -36,7 +38,6 @@ export function bindTypingKeys(root, dispatch, getSession) {
     dispatch(typing);
   };
   window.addEventListener('keydown', onKey, true);
-  const obs = new MutationObserver(() => settleTypingFocus(root));
-  obs.observe(root, { childList: true });
-  return () => { window.removeEventListener('keydown', onKey, true); obs.disconnect(); };
+  const unwatch = onRedraw(root, () => settleTypingFocus(root));
+  return () => { window.removeEventListener('keydown', onKey, true); unwatch(); };
 }

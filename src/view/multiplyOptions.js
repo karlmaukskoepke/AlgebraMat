@@ -48,21 +48,24 @@ export function multiplyMoves(s, option, { move = 'mult', ring = null } = {}) {
 // Hovering an option (or a keyboard focus on it) previews it: the kind under the pointer, or false.
 export function bindMultiplyHover(root, dispatch, getSession) {
   const set = (kind) => { if ((getSession()?.ui?.preview ?? false) !== kind) dispatch({ type: 'ui', patch: { preview: kind } }); };
-  const over = (e) => { const o = e.target.closest?.('[data-mopt]'); if (o) set(o.dataset.mopt); };
+  // (Add's two options on Variables on both sides preview the same way: `+ ▢` and `+ ▢x`, Build S)
+  const OPT = '[data-mopt], [data-aopt]';
+  const kindOf = (o) => o.dataset.mopt ?? (o.dataset.aopt === 'x' ? 'addX' : 'addNum');
+  const over = (e) => { const o = e.target.closest?.(OPT); if (o) set(kindOf(o)); };
   const out = (e) => {
-    const o = e.target.closest?.('[data-mopt]');
-    if (o && !(e.relatedTarget && e.relatedTarget.closest?.('[data-mopt]'))) set(false);
+    const o = e.target.closest?.(OPT);
+    if (o && !(e.relatedTarget && e.relatedTarget.closest?.(OPT))) set(false);
   };
-  const focus = (e) => { const o = e.target.closest?.('[data-mopt]'); if (o) set(o.dataset.mopt); };
+  const focus = (e) => { const o = e.target.closest?.(OPT); if (o) set(kindOf(o)); };
   // a keyboard focus leaving the move ends its preview too (Build O, Part 1). (A redraw takes the focused button away for a moment:
   // wait, then look where the focus and the pointer really are.)
   const blur = (e) => {
-    if (!e.target.closest?.('[data-mopt]')) return;
+    if (!e.target.closest?.(OPT)) return;
     setTimeout(() => {
       const a = document.activeElement;
-      if (a?.closest?.('[data-mopt]') || root.querySelector('[data-mopt]:hover')) return;
+      if (a?.closest?.(OPT) || root.querySelector('[data-mopt]:hover, [data-aopt]:hover')) return;
       const p = getSession()?.ui?.preview;
-      if (['whole', 'div', 'frac', 'flip'].includes(p)) dispatch({ type: 'ui', patch: { preview: false } });
+      if (['whole', 'div', 'frac', 'flip', 'addX', 'addNum'].includes(p)) dispatch({ type: 'ui', patch: { preview: false } });
     }, 0);
   };
   root.addEventListener('pointerover', over);

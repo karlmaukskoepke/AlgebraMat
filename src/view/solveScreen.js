@@ -34,13 +34,16 @@ export function cancelOf(t) {
   const both = t.sign < 0 && k < 0;
   return { outer: both ? 'all' : 'digits', inner: both ? 'all' : 'digits' };
 }
-// A number's text split into its minus and its digits, each struck as `mode` says ('all', 'digits', 'minus'; null: none)
-function struckText(text, mode, cls = '') {
+// A number's text split into its minus and its digits, each struck as `mode` says ('all', 'digits', 'minus'; null: none). A minus that
+// cancels another (a flip, dividing by a negative) is not struck through: a vertical stroke crosses it, so it reads as a plus, one minus
+// after the other (Build S, Part 5: `is-m1`, `is-m2`, counted along the row in o.mi)
+function struckText(text, mode, cls = '', o = null) {
   const minus = text.startsWith(MINUS) || text.startsWith('-') ? MINUS : '';
   const rest = minus ? text.slice(1) : text;
   const part = (t, on) => (t ? [on ? html('span', 'xo is-struck', [t]) : t] : []);
+  const sign = (on) => (minus && on ? [html('span', `xo is-struck is-minus is-m${o?.mi ? ++o.mi.n : 1}`, [minus])] : minus ? [minus] : []);
   if (!mode) return html('span', cls, [text]);
-  return html('span', cls, [...part(minus, mode === 'all' || mode === 'minus'), ...part(rest, mode === 'all' || mode === 'digits')]);
+  return html('span', cls, [...sign(mode === 'all' || mode === 'minus'), ...part(rest, mode === 'all' || mode === 'digits')]);
 }
 
 function termsOf(side, s, o) {
@@ -55,31 +58,31 @@ function termsOf(side, s, o) {
       // a factor times a parenthesis, written as it is: `3(x + 2)`, `−2(x − 4)` (Build M)
       const f = subGroup ? -t.factor : t.factor;
       const ft = f === 1 ? '' : f === -1 ? MINUS : String(f).replace('-', MINUS);
-      out.push(html('span', 'lb-frac lb-group', [o.strike && ft ? struckText(ft, o.strike, 'lb-factorstrike') : ft, '(', ...termsOf(t.inner, s, { ...o, live: false, strike: null }), ')']));
+      out.push(html('span', 'lb-frac lb-group', [o.strike && ft ? struckText(ft, o.strike, 'lb-factorstrike', o) : ft, '(', ...termsOf(t.inner, s, { ...o, live: false, strike: null }), ')']));
     } else if (t.kind === 'frac' && (o.div || s?.divIds?.includes(t.id))) {
       // a row made with the Divide button, in division form (Build O, display only): the side in parentheses over a bar, n beneath.
       // A product that can be worked out (Build P, Part 2): the bar is the button
       const calc = o.calc === t.id;
       const bar = calc ? calcButton(t, 'lb-divbar is-calc', 'Divide: work it out') : null;
       const bottom = `${t.sign < 0 ? MINUS : ''}${t.n}`;
-      const el = divisionEl(inner(), cancel ? struckText(bottom, cancel.outer, 'lb-divbot is-blue') : bottom, bar);
+      const el = divisionEl(inner(), cancel ? struckText(bottom, cancel.outer, 'lb-divbot is-blue', o) : bottom, bar);
       if (calc || o.calcOn === t.id) el.dataset.calc = t.id;
       out.push(el);
     } else if (t.kind === 'frac') {
       // a product that can be worked out (Build P, Part 2): a small × between the fraction and its number is the button
       const calc = o.calc === t.id;
       const dot = calc ? [calcButton(t, 'lb-calcdot', 'Multiply: work it out', '×')] : [];
-      const el = html('span', 'lb-frac', [struckText(`${t.sign < 0 ? MINUS : ''}${fractionText(t.n)}`, cancel?.outer ?? null, 'is-blue'), ...dot, '(', ...inner(), ')']);
+      const el = html('span', 'lb-frac', [struckText(`${t.sign < 0 ? MINUS : ''}${fractionText(t.n)}`, cancel?.outer ?? null, 'is-blue', o), ...dot, '(', ...inner(), ')']);
       if (calc || o.calcOn === t.id) el.dataset.calc = t.id;
       out.push(el);
     } else if (t.kind === 'times' && o.div) {
       // a flip made by dividing by −1 (Build P, Part 9): division form, `(−x)/(−1)`, the two minus signs and the 1 struck
-      out.push(divisionEl(inner(), struckText(`${MINUS}1`, cancel ? 'all' : null, 'lb-divbot is-blue')));
+      out.push(divisionEl(inner(), struckText(`${MINUS}1`, cancel ? 'all' : null, 'lb-divbot is-blue', o)));
     } else if (t.kind === 'neg' && s?.divIds?.includes(t.id)) {
       out.push(divisionEl(termsOf(t.inner, s, { ...o, live: false, plug: false, work: false }), `${MINUS}1`));         // `x = (12)/(−1)`
     } else if (t.kind === 'times') {
       // both sides times a number, written out: `−1 × (−x)` (Flip everything's work row, Build J); the number in blue (loop §3D)
-      out.push(html('span', 'lb-frac', [html('span', 'is-blue', [struckText(signed(t.f), cancel?.outer ?? null), ' ×']), ' (', ...inner(), ')']));
+      out.push(html('span', 'lb-frac', [html('span', 'is-blue', [struckText(signed(t.f), cancel?.outer ?? null, '', o), ' ×']), ' (', ...inner(), ')']));
     } else if (t.kind === 'neg') {
       // the opposite of a number, left unsimplified at x alone: `x = −(12)` (Build J)
       out.push(html('span', 'lb-frac lb-neg', [html('span', 'is-blue', [MINUS]), '(', ...termsOf(t.inner, s, { ...o, live: false, plug: false }), ')']));
@@ -97,7 +100,7 @@ function termsOf(side, s, o) {
       // the number in front of x, with its sign (`−x`, `−3x`: Flip everything, Build J)
       const front = c > 1 || c < -1 ? String(c).replace('-', MINUS) : c === -1 ? MINUS : null;
       // (a negative one is its own piece, so a spotlight on it covers the minus too; Divide's positive ones are as before)
-      const piece = o.strike && front ? struckText(front, o.strike, c < 0 ? 'lb-num lb-front' : 'lb-frontnum') : c < 0 ? html('span', 'lb-num lb-front', [front]) : front;
+      const piece = o.strike && front ? struckText(front, o.strike, c < 0 ? 'lb-num lb-front' : 'lb-frontnum', o) : c < 0 ? html('span', 'lb-num lb-front', [front]) : front;
       if (front) out.push(html('span', 'lb-coef', [o.live && s.hint?.kind === 'coef' ? html('span', 'lb-hintbox', [front]) : piece, xel]));
       else out.push(xel);
     } else {
@@ -113,7 +116,7 @@ export const waitingGhost = (v) => html('span', 'lb-xwait', [signed(v)], { 'aria
 const charsOf = (list) => list.map((x) => (x.kind === 'frac' || x.kind === 'neg' || x.kind === 'group' ? 5 + charsOf(x.inner) : x.kind === 'times' ? 7 + charsOf(x.inner) : x.kind === 'x' ? ((x.coef ?? 1) > 1 ? 2 : (x.coef ?? 1) < 0 ? String(x.coef).length : 1) : String(signed(x.v)).length + 3)).reduce((a, b) => a + b, 0);
 const eqClass = (chars) => (chars > 30 ? ' is-xlong' : chars > 20 ? ' is-long' : '');
 
-const sideEls = (board, s, o) => { const oo = { ...o, xi: { n: 0 } }; return [termsOf(board.left, s, oo), termsOf(board.right, s, oo)]; };
+const sideEls = (board, s, o) => { const oo = { ...o, xi: { n: 0 }, mi: { n: 0 } }; return [termsOf(board.left, s, oo), termsOf(board.right, s, oo)]; };
 const isDiv = (row) => row.shown === 'div';
 // A side as written, inert (the move's preview row). `div`: its fractions in division form (a row made with the Divide button, Build O).
 export const sideTerms = (terms, s, o = {}) => termsOf(terms, s, { live: false, plug: false, ...o });
@@ -147,12 +150,36 @@ export function foldTag(label) {
   return html('span', 'lb-foldtag', [html('span', 'is-blue', [`${label.sign < 0 ? MINUS : ''}${fractionText(label.n)}`]), ' of both sides']);
 }
 
-// The work stack. Every row stays settled (no entrance animation: a re-render never replays one).
+// A row's key (Build S): its place, its kind and what it says. The Mat is redrawn keeping the rows already on screen by this key
+// (view/keepRows.js), so a row that is still there is the same element and plays nothing again.
+export function rowKey(row, i) {
+  const text = JSON.stringify(row);
+  let h = 5381;
+  for (let k = 0; k < text.length; k++) h = ((h * 33) ^ text.charCodeAt(k)) >>> 0;
+  return `${i}.${row.type}.${h.toString(36)}`;
+}
+
+// A move whose signs cancel (a flip, dividing by a negative: Build S, Part 5) draws its two minus signs turning into pluses one after the
+// other, slowly, then the next row comes in: its work row is marked, and both rows take longer to settle (view/keepRows.js).
+export const FLIP_SETTLE_MS = 4400;
+export function markFlips(rows, { newest = false } = {}) {
+  rows.forEach((el, i) => {
+    if (!el.querySelector('.lb-work .xo.is-minus')) return;
+    el.classList.add('is-flipwork');
+    const next = rows[i + 1];
+    for (const r of [el, next]) if (r) r.dataset.settleMs = String(FLIP_SETTLE_MS);
+    // (on a card whose rows are otherwise drawn settled, the newest flip plays once: its row and the row it makes)
+    if (newest && i === rows.length - 2) for (const r of [el, next]) r?.classList.remove('is-settled');
+  });
+  return rows;
+}
+
+// The work stack. Every row stays settled (no entrance animation: a re-render never replays one), except a newest flip's (markFlips).
 export function stackRows(s) {
   const boardRows = s.rows.map((r, i) => (r.type === 'eq' || r.type === 'fold' ? i : -1)).filter((i) => i >= 0);
   const last = boardRows.at(-1);
   const plugIdx = s.sub ? (s.sub.target === 'current' ? last : 0) : -1;
-  return s.rows.map((row, i) => {
+  const rows = s.rows.map((row, i) => {
     if (row.type === 'work') {
       // a move written as an equation: the fraction of both whole sides (a failed try is marked)
       const [l, r] = sideEls(row.board, s, { live: false, plug: false, div: isDiv(row), work: !row.failed });
@@ -171,7 +198,8 @@ export function stackRows(s) {
     if (row.type === 'fold') kids.push(foldTag(row.label));
     kids.push(eq);
     return html('div', `lb-rowwrap is-settled${row.type === 'fold' ? ' is-fold' : ''}${plug ? ' is-plugrow' : ''}`, kids);
-  });
+  }).map((el, i) => { el.dataset.rk = rowKey(s.rows[i], i); return el; });
+  return markFlips(rows, { newest: true });
 }
 
 // ---------- the answer row, Check, Next, the substitution ----------

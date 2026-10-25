@@ -22,6 +22,8 @@ export function makeSolvePlay(card) {
     noAuto: true,         // nothing advances on a timer: every pause ends with a green button
     lineInMat: true,      // the line is on the Mat (for screen readers: what the card says is a pop-up)
     lightDesign: true,    // no pad on a keyboard, a pop-up keypad on touch, the header fades (Build D)
+    keepRows: true,       // a redraw keeps the rows already on screen: no animation plays twice (Build S)
+    grab: card.grab ?? true,   // the terms can be picked up (the honest path carries a number across by a drag; else by Add)
     padOpen: (s) => card.padOpen(s) && spotOf(s, card.spot)?.kind !== 'error',   // an error waits for Undo: no keypad (Build N)
     owesMove: card.loop.owesMove,                                   // a correct guess at the first state makes the next problem a move
     steps: () => [],
