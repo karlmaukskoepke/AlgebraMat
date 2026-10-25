@@ -17,7 +17,8 @@ describe('Build S, Part 4: a number dragged across works while the move before i
     let s = P.newSession(problem('variables-both-sides', 3), {});                       // 4x + 11 = 8x − 1
     const run = (a) => { s = P.reduce(s, a); };
     run({ type: 'lxDrop', id: s.board.left[0].id, slot: { side: 'right', at: 2 }, how: 'pointer' });
-    run({ type: 'lxDrop', id: s.board.right[2].id, slot: { side: 'right', onto: s.board.right[0].id }, how: 'pointer' });
+    const [big, small] = s.board.right.filter((t) => t.kind === 'x');                // (the −4x sits beside the 8x: Build T)
+    run({ type: 'lxDrop', id: small.id, slot: { side: 'right', onto: big.id }, how: 'pointer' });
     run({ type: 'digit', digit: 4 }); run({ type: 'typeChar', ch: 'x' }); run({ type: 'lxApply' });
     expect(s.unfolded).toBe(true);                                                      // (the move before it is not folded yet)
     const before = JSON.stringify(s.board);

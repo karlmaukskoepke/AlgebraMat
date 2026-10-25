@@ -308,6 +308,11 @@ class Walk {
       if (Math.abs(r.off) > 2.5 || r.above < 3 || r.below < 3) throw new Error(`the stroke through minus ${i + 1} should stick out as far above as below (off by ${r.off} px; ${r.above} above, ${r.below} below) after step "${this.step}"`);
     }
   }
+  // Build T: the newest stacked work row holds `under` written under the term `term`, the two struck
+  async stackedUnder(term, under) {
+    const cols = await this.page.locator('.lb-rowwrap.is-stackwork').last().locator('.lx-col').evaluateAll((cs) => cs.map((c) => [c.firstElementChild.innerText.replace(/\s+/g, ''), c.querySelector('.lx-under').innerText.replace(/\s+/g, ''), c.querySelectorAll('.is-struck').length]));
+    if (!cols.some(([t, u, n]) => t === term && u === under && n === 2)) throw new Error(`${under} should be written under the struck ${term} after step "${this.step}": ${JSON.stringify(cols)}`);
+  }
   async rows() { return (await this.page.evaluate(() => [...document.querySelectorAll('.lb-stack .lb-rowwrap')].map((r) => r.innerText.replace(/\s+/g, '')))); }
   async row(text) { const rs = await this.rows(); const want = text.replace(/\s+/g, ''); if (!rs.some((r) => r.endsWith(want) || r === want)) throw new Error(`expected a row ${text} after step "${this.step}": ${rs.join(' | ')}`); }
   async box(selector) { return this.page.evaluate((s) => { const r = document.querySelector(s)?.getBoundingClientRect(); return r ? [r.left, r.top, r.right, r.bottom].map(Math.round) : null; }, selector); }
@@ -397,6 +402,34 @@ const WALKS = {
     await w.both('t-zero-side-hint');
     w.at('Go'); await w.click(act('go')); await wait(w.page, 600); await w.row('7x − 4x = 15');
   },
+  async 't-stack-add'(w) {
+    await w.start(); await w.see('5x + 5 = 2x + 14');
+    w.at('Add, + ▢x, pointer away'); await w.click(`${act('choose')}[data-move="add"]`); await w.click(`${act('addPick')}[data-kind="x"]`); await w.page.mouse.move(600, 700); await wait(w.page, 300);
+    const cols = await w.page.locator('.lx-ghost.is-stacked .lx-col > :first-child').allInnerTexts();
+    if (cols.map((t) => t.replace(/\s+/g, '')).join('|') !== '5x|2x') throw new Error(`the boxes should sit under the 5x and the 2x: ${cols}`);
+    await w.both('t-stack-ghost');
+    w.at('click the box under 2x, type −2'); await w.click('[data-fk="blank:right"]'); await w.type(-2);
+    await w.typedIn('[data-fk="blank:right"]', '−2');
+    if ((await w.page.locator('[data-fk="blank"]').innerText()).trim() !== '−2') throw new Error('the left box should show the same −2');
+    await w.both('t-stack-typed');
+    w.at('Tab, Tab'); await w.page.keyboard.press('Tab'); await wait(w.page, 200); await w.typedIn('[data-fk="blank"]', '−2');
+    await w.page.keyboard.press('Tab'); await wait(w.page, 200); await w.typedIn('[data-fk="blank:right"]', '−2');
+    w.at('Enter, wait'); await w.enter(); await wait(w.page, 3000);
+    const work = w.page.locator('.lb-rowwrap.is-stackwork').last();
+    const under = await work.locator('.lx-col').evaluateAll((cs) => cs.map((c) => [c.firstElementChild.innerText.replace(/\s+/g, ''), c.querySelector('.lx-under').innerText.replace(/\s+/g, ''), c.querySelectorAll('.is-struck').length]));
+    if (JSON.stringify(under) !== JSON.stringify([['5x', '+−2x', 0], ['2x', '+−2x', 2]])) throw new Error(`the −2x should sit under the 5x and the 2x, the 2x pair struck: ${JSON.stringify(under)}`);
+    await w.row('5x − 2x + 5 = 14'); await w.both('t-stack-result');
+  },
+  async 't-stack-nocancel'(w) {
+    await w.start(); await w.see('5x + 5 = 2x + 14');
+    w.at('Add, + ▢x, −4, Enter'); await w.click(`${act('choose')}[data-move="add"]`); await w.click(`${act('addPick')}[data-kind="x"]`); await w.type(-4); await w.enter(); await w.lateLayer();
+    await w.see('Add so that one x-term cancels. To cancel 2x, add −2x. Press Undo.', 'nothing cancels');
+    if (await w.page.locator('.lb-rowwrap.is-stackwork .is-struck').count()) throw new Error('nothing should be crossed out');
+    await w.both('t-stack-nocancel');
+    w.at('Undo'); await w.click(act('undo')); await wait(w.page, 900);
+    await w.see('Add −2x to both sides: the 2x cancels, and the x-term that is left keeps a plus. Press Go.');
+    w.at('Go'); await w.click(act('go')); await wait(w.page, 600); await w.row('5x − 2x + 5 = 14');
+  },
   async 't-flip-plus'(w) {
     await w.start(); await w.see('−3x = 12');
     w.at('Flip, Go, watch'); await w.flip(); await wait(w.page, 4000); await w.strokesCentred(2); await w.shot('t-flip-plus-1-768');
@@ -417,7 +450,7 @@ const WALKS = {
     w.at('drag the 4x across, wait'); await w.crossTerm('4x', 'left'); await w.row('7x − 4x = 15'); await wait(w.page, 3000);
     w.at('lift the 7x and hold it');
     await w.liftBack('7x', async () => {
-      await w.row('7x = 4x + 15'); await w.row('7x − 4x = 4x + 15 − 4x');
+      await w.row('7x = 4x + 15'); await w.stackedUnder('4x', '+−4x');
       if ((await w.rows()).length !== 3) throw new Error('every row should still be on the screen while the 7x is held');
       await w.both('s-pickup');
     });
@@ -457,7 +490,7 @@ const WALKS = {
   async 's-first-drag'(w) {
     await w.start(); await w.see('4(x − 3) = 2x − 6');
     w.at('distribute 4, −12'); await w.distribute(4, -12); await w.row('4x + −12 = 2x − 6');
-    w.at('drag the 2x across, first try'); await w.crossTerm('2x', 'left'); await w.row('4x − 12 − 2x = 2x − 6 − 2x'); await w.row('4x + −12 − 2x = −6');
+    w.at('drag the 2x across, first try'); await w.crossTerm('2x', 'left'); await w.stackedUnder('2x', '+−2x'); await w.row('4x − 2x + −12 = −6');
     await w.both('s-first-drag');
   },
   async 's-first-drag-distribute'(w) {
@@ -485,6 +518,8 @@ const WALKS = {
     w.at('Add'); await w.click(`${act('choose')}[data-move="add"]`);
     w.at('point at + ▢x'); await w.page.locator('[data-aopt="x"]').hover(); await wait(w.page, 300);
     if ((await w.page.locator('.lx-ghost.is-optpreview .lx-addx').count()) !== 2) throw new Error('the preview should print an x after each box');
+    const cols = await w.page.locator('.lx-ghost.is-optpreview .lx-col > :first-child').allInnerTexts();
+    if (cols.map((t) => t.replace(/\s+/g, '')).join('|') !== '8x|5x') throw new Error(`the boxes should sit under the 8x and the 5x: ${cols}`);
     await w.both('s-add-options-x');
     w.at('point at + ▢'); await w.page.locator('[data-aopt="num"]').hover(); await wait(w.page, 300);
     if (!(await w.page.locator('.lx-ghost.is-optpreview').count()) || (await w.page.locator('.lx-ghost .lx-addx').count())) throw new Error('the preview should show the number form, with no x');
@@ -502,14 +537,14 @@ const WALKS = {
   },
   async 'r-level-2'(w) {
     await w.start(); await w.see('5x + 5 = 2x + 14'); await w.both('r-level-2');
-    w.at('drag the 2x across'); await w.crossTerm('2x', 'left'); await w.row('5x + 5 − 2x = 14');
+    w.at('drag the 2x across'); await w.crossTerm('2x', 'left'); await w.row('5x − 2x + 5 = 14');
     w.at('combine to 3x'); await w.combineTerms('−2x', '5x', '3x'); await w.row('3x + 5 = 14');
     w.at('Add −5, combine'); await w.addEnter(-5); await w.row('3x = 14 − 5'); await w.combine(9); await w.row('3x = 9');
     w.at('Divide 3, type 3'); await w.divEnter(3); await w.row('x = (9) 3'); await w.answer(3, 5); await w.see('20 = 20', '✓ Balanced');
   },
   async 'r-level-3'(w) {
     await w.start(); await w.see('4x + 11 = 8x − 1'); await w.both('r-level-3');
-    w.at('drag the 4x across'); await w.crossTerm('4x', 'right'); await w.row('11 = 8x − 1 − 4x');
+    w.at('drag the 4x across'); await w.crossTerm('4x', 'right'); await w.row('11 = 8x − 4x − 1');
     w.at('combine to 4x'); await w.combineTerms('−4x', '8x', '4x'); await w.row('11 = 4x − 1');
     w.at('Trade places'); await w.click(`${act('choose')}[data-move="trade"]`); await w.row('4x − 1 = 11');
     w.at('Add 1, combine, Divide 4'); await w.addEnter(1); await w.combine(12); await w.row('4x = 12'); await w.divEnter(4); await w.row('x = (12) 4');
@@ -517,7 +552,7 @@ const WALKS = {
   async 'r-level-4'(w) {
     await w.start(); await w.see('2x − 5 = −2x + 11'); await w.both('r-level-4');
     w.at('Add, + ▢x, 2'); await w.click(`${act('choose')}[data-move="add"]`); await w.click(`${act('addPick')}[data-kind="x"]`); await w.type(2); await w.enter(); await wait(w.page, 300);
-    await w.row('2x − 5 + 2x = 11');
+    await w.row('2x + 2x − 5 = 11');
     w.at('combine to 4x'); await w.combineTerms('2x', '2x', '4x'); await w.row('4x − 5 = 11');
     w.at('Add 5, combine'); await w.addEnter(5); await w.combine(16); await w.row('4x = 16');
     w.at('Divide 4, type 4'); await w.divEnter(4); await w.answer(4, 5); await w.see('2(4) − 5 = −2(4) + 11', '3 = 3', '✓ Balanced');
@@ -526,7 +561,7 @@ const WALKS = {
     await w.start(); await w.see('4(x − 3) = 2x − 6'); await w.both('r-level-5');
     w.at('distribute: 4, −12'); await w.distribute(4, -12); await w.row('4x + −12 = 2x − 6');
     w.at('Next'); await w.click(act('foldNext')); await wait(w.page, 300);
-    w.at('drag the 2x across'); await w.crossTerm('2x', 'left'); await w.row('4x + −12 − 2x = −6');
+    w.at('drag the 2x across'); await w.crossTerm('2x', 'left'); await w.row('4x − 2x + −12 = −6');
     w.at('combine to 2x'); await w.combineTerms('−2x', '4x', '2x'); await w.row('2x + −12 = −6');
     w.at('Add 12, combine, Divide 2'); await w.addEnter(12); await w.combine(6); await w.row('2x = 6'); await w.divEnter(2); await w.row('x = (6) 2');
   },
@@ -541,7 +576,9 @@ const WALKS = {
     await w.see('−5x');
     if (!(await w.page.locator('.lx-tok.is-crossing, .lx-tok.is-fresh, .is-crossing').count())) throw new Error('the term should turn red and read −5x over the left side');
     await w.both('r-cross-drag');
-    w.at('let go'); await m.up(); await wait(w.page, 600); await w.row('8x − 14 − 5x = 10');
+    const preview = (await w.rows()).at(-1);
+    if (preview !== '8x+−5x−14=10') throw new Error(`the preview should read 8x + −5x − 14 = 10: ${preview}`);
+    w.at('let go'); await m.up(); await wait(w.page, 600); await w.stackedUnder('5x', '+−5x'); await w.row('8x − 5x − 14 = 10');
     if (!(await w.page.locator('[data-light="xone"].is-green').count())) throw new Error('x on one side should be green');
   },
   async 'r-add-xterm'(w) {
@@ -551,7 +588,7 @@ const WALKS = {
     w.at('+ ▢x, −5'); await w.click(`${act('addPick')}[data-kind="x"]`); await w.type(-5);
     if ((await w.page.locator('.lx-ghost .lx-addx').count()) !== 2) throw new Error('an x should be printed after each box');
     await w.both('r-add-menu');
-    await w.enter(); await wait(w.page, 400); await w.row('8x − 14 − 5x = 10');
+    await w.enter(); await wait(w.page, 400); await w.row('8x − 5x − 14 = 10');
   },
   async 'r-x-greyed'(w) {
     await w.start(); await w.see('8x − 14 = 5x + 10', 'Get x on one side first.');
@@ -584,8 +621,9 @@ const WALKS = {
   async 'student-both'(w) {
     await w.start(); await w.see('5x + 5 = 2x + 14');
     w.at('mistake 1: Add 2x'); await w.click(`${act('choose')}[data-move="add"]`); await w.click(`${act('addPick')}[data-kind="x"]`); await w.type(2); await w.enter(); await w.lateLayer();
-    await w.see('did not eliminate the term', 'got bigger'); await w.shot('student-both-sign-lost');
-    w.at('mistake 1: Undo'); await w.click(act('undo')); await wait(w.page, 800); await w.see('Move this x-term to the other side. Drag it across the =, or use Add.');
+    await w.see('Add so that one x-term cancels. To cancel 2x, add −2x. Press Undo.', 'nothing cancels'); await w.shot('student-both-sign-lost');
+    w.at('mistake 1: Undo'); await w.click(act('undo')); await wait(w.page, 800); await w.see('Add −2x to both sides: the 2x cancels, and the x-term that is left keeps a plus. Press Go.');
+    if ((await w.page.locator('.lx-ghost.is-stacked .lx-box.is-stackbox').allInnerTexts()).join('|') !== '−2|−2') throw new Error('Add’s two boxes should hold −2 after Undo');
     await w.both('r-stuck');
     w.at('mistake 2: type 3 in x ='); await w.click(act('spotDismiss')).catch(() => {}); await w.click('[data-fk="answer"]').catch(() => {}); await w.type(3); await w.enter();
     await w.see('Get x on one side first.');
@@ -596,6 +634,8 @@ const WALKS = {
     await w.see('Try again: what is 5x − 2x? Type the number in front of x.'); await w.lit('.lx-live .lx-tok.is-pair'); await w.shot('student-both-hint');
     w.at('mistake 3: type 3x, Enter'); await w.type('3x'); await w.enter(); await wait(w.page, 400); await w.row('3x + 5 = 14');
     w.at('last: pick up the 5 and drop it back'); await w.liftBack('5');
+    w.at('mistake 4: Add −5, combine, divide, I’m stuck'); await w.addEnter(-5); await w.combine(9); await w.row('3x = 9'); await w.divEnter(3);
+    await w.stuck(); await w.see('x is 9 divided by 3. Work it out, then type x.'); await w.popupNot('⅓'); await w.shot('student-both-fracbar');
   },
 
   // ---- Build P: nudges, calculate a product, cross-off, moving between blanks, Distribute polish, full checks, one drop per x ----
@@ -1020,8 +1060,8 @@ const WALKS = {
     await w.lit('.lx-prod.is-wrong .lx-box');
     await w.both('m-wrong-product');
     w.at('Undo'); await w.click(act('undo')); await wait(w.page, 900);
-    await w.see('Drag the 3 onto the parenthesis to multiply it by each piece.');
-    if (!(await w.page.locator('.lx-live .lx-factor.is-hint').count())) throw new Error('the 3 should be outlined');
+    await w.see('Try again: type what 3 · x and 3 · 2 make, one in each box. Enter goes to the next.');
+    await w.typedIn('[data-fk="prod:0"]', '');
     await w.both('m-wrong-product-hint');
   },
   async 'm-divide-first'(w) {
@@ -1087,6 +1127,8 @@ const WALKS = {
     await w.click(act('foldNext')); await wait(w.page, 400); await w.row('2x = 17 − 11'); await w.shot('student-distribute-typed-after-undo');
     w.at('wait 3 seconds and watch the nudge'); await w.idle(5000); await w.nudged(2, 'Drag one onto the other to combine them.'); await w.shot('student-distribute-nudge');
     w.at('last: pick up the 17 and drop it back'); await w.liftBack('17');
+    w.at('mistake 7: combine, divide, I’m stuck'); await w.combineTerms('17', '−11', 6); await w.row('2x = 6'); await w.divEnter(2);
+    await w.stuck(); await w.see('x is 6 divided by 2. Work it out, then type x.'); await w.popupNot('½'); await w.shot('student-distribute-fracbar');
   },
   // ---- Build M, Part 1: the placement quiz ----
   async 'm-placement-old'(w) {
@@ -1294,6 +1336,8 @@ const WALKS = {
     await w.click(act('foldNext')); await wait(w.page, 400); await w.row('3x = 19 − 4'); await w.shot('student-two-step-typed-after-undo');
     w.at('wait 3 seconds and watch the nudge'); await w.idle(5000); await w.nudged(2, 'Drag one onto the other to combine them.'); await w.shot('student-two-step-nudge');
     w.at('last: pick up the 19 and drop it back'); await w.liftBack('19');
+    w.at('mistake 7: combine, divide, I’m stuck'); await w.combine(15); await w.row('3x = 15'); await w.divEnter(3);
+    await w.stuck(); await w.see('x is 15 divided by 3. Work it out, then type x.'); await w.popupNot('⅓'); await w.shot('student-two-step-fracbar');
   },
   async 'f-no-0-1-minus1'(w) {
     await w.start();
@@ -1636,6 +1680,7 @@ const WALKS = {
     w.at('mistake 7: Go'); await w.click(act('go')); await wait(w.page, 400); await w.see('(5x) 5 = (−15) 5'); await w.shot('student-divide-typed-after-undo');
     w.at('wait 3 seconds and watch the nudge'); await w.idle(3500); await w.noNudge();
     w.at('last: type 1 into x = and take it back'); await w.steady(async () => { await w.click(act('focus')); await w.type(1); await w.page.keyboard.press('Backspace'); });
+    w.at('mistake 8: I’m stuck on the fraction-bar row'); await w.stuck(); await w.see('What is −15 divided by 5?'); await w.popupNot('⅕'); await w.shot('student-divide-fracbar');
   },
 
   // ---- Build I ----
@@ -1871,6 +1916,7 @@ const WALKS = {
     w.at('mistake 6: Go'); await w.click(act('go')); await wait(w.page, 400); await w.see('(−3x) −3 = (12) −3'); await w.shot('student-flip-typed-after-undo');
     w.at('wait 3 seconds and watch the nudge'); await w.idle(3500); await w.noNudge();
     w.at('last: type 1 into x = and take it back'); await w.steady(async () => { await w.click(act('focus')); await w.type(1); await w.page.keyboard.press('Backspace'); });
+    w.at('mistake 7: I’m stuck on the fraction-bar row'); await w.stuck(); await w.see('x is 12 divided by −3. Work it out, then type x.'); await w.popupNot('⅓'); await w.shot('student-flip-fracbar');
   },
   // ---- Build N: typing after a mistake ----
   async 'n-type-after-mistake'(w) {

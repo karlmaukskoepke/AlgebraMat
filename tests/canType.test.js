@@ -32,6 +32,7 @@ const ACTIONS = [
   ...[2, 3, 4, 5].map((n) => ({ type: 'take', n })), { type: 'choose', move: 'add' }, { type: 'choose', move: 'distribute' }, { type: 'lxApply' },
   { type: 'ui', patch: { preview: 'div' } }, { type: 'ui', patch: { preview: 'whole' } },
   { type: 'addPick', kind: 'num' }, { type: 'addPick', kind: 'x' },                          // (Add's two options: Build R)
+  { type: 'focus', target: 'amount', side: 'right' }, { type: 'focus', target: 'amount', side: 'left' },   // (the x-term's two stacked boxes: Build T)
 ];
 // the moves that make progress (so the walks get past the first equation and reach every shape): Add the opposite of the number on
 // x's side, divide by x's number, flip, fold the move, answer x correctly; each as the steps a student takes
@@ -80,7 +81,7 @@ function reachable(play, pack, levels) {
   const keep = (s, path) => {
     // (the seesaw's Add boxes take a typed number too; and x = holding digits typed straight in, with no click: the keys go there)
     if (!play.padOpen(s) && !seesawAdd(s) && !(s.entry && s.stage !== 'done' && !s.sub)) return;
-    const k = JSON.stringify([shapeOf(s).id, s.problem?.logLevel, s.mopts?.kind ?? Boolean(s.mopts), s.menu, s.typing, s.ui?.focus, s.ui?.preview, Boolean(s.fb?.num), s.fb?.part,
+    const k = JSON.stringify([shapeOf(s).id, s.problem?.logLevel, s.mopts?.kind ?? Boolean(s.mopts), s.menu, s.addKind, s.amountSide, s.typing, s.ui?.focus, s.ui?.preview, Boolean(s.fb?.num), s.fb?.part,
       Boolean(s.lx?.distribute), Boolean(s.lx?.combine), s.lx?.distribute?.index, Boolean(s.spot), s.spot?.kind, s.mustMove && !s.movedOnce, Boolean(s.entry), Boolean(s.mopts?.entry)]);
     if (!seen.has(k)) seen.set(k, { s, path: [...path] });
   };
@@ -160,7 +161,8 @@ describe('Build N: can I type? On every card, in every state where it waits for 
           const after = texts();
           const landed = [...after].filter(([k, v]) => v !== before.get(k) && v.includes('3')).map(([k]) => k);
           if (!landed.length) { fails.push(`${where}: pressed 3 and no field changed (the focus was on ${focusBefore})`); continue; }
-          const k = landed[0];
+          // (Add's two stacked boxes show one amount: both change, and the key must have gone into the focused one: Build T)
+          const k = landed.includes(focusBefore) ? focusBefore : landed[0];
           const el = findField(root, k);
           if (!el || el.disabled || el.closest('[hidden]')) fails.push(`${where}: the 3 went into ${k}, which is greyed or hidden`);
           else if (focusBefore !== k) fails.push(`${where}: the 3 went into ${k}, but the focus was on ${focusBefore}`);

@@ -630,6 +630,21 @@ check:** on Variables on both sides, an Add that empties a side and leaves x-ter
 −7x) now waits for Undo with its spotlight, its slip tag `zeroed-side`, and a hint after Undo recorded as `hint` (it used to be taken as
 a helpful move).
 
+**Part 5.** Nothing recorded differs (the scripted runs and recorded screens have no Variables on both sides problem; the stored move is
+the same Add with an x-term amount). **Below the screen check**, on Variables on both sides only:
+
+| Where | Before | After |
+|---|---|---|
+| Add's x-term option (open, or previewed on hover) | grey row `5x + 5 + ▢x = 2x + 14 + ▢x` | grey copy of the row with a box under the 5x and under the 2x (`+ ▢x`), either one typed in, the other mirroring |
+| The work row of an x-term Add (button or drag) | `5x + 5 − 2x = 2x + 14 − 2x`, the 2x pair struck | `5x + 5 = 2x + 14` with `+ −2x` under the 5x and under the 2x, the 2x pair struck: one line taller |
+| The new row after an x-term Add (the button, or an x-term dragged across the =, and its drag preview) | `5x + 5 − 2x = 14` | `5x − 2x + 5 = 14` (the added x-term beside the x-term it was added to) |
+| An x-term amount that cancels no x-term | "+2x + +2x did not eliminate the term" (`vRed`) or "…only partially canceled…" (`vPartial`), then the move-across hint | "Add so that one x-term cancels. To cancel 2x, add −2x. Press Undo.", then the x-term option open with −2 |
+| x = after a move puts x back on both sides | kept what was typed in it, greyed | emptied |
+
+Also from the typing test's wider walk (existing bugs, now fixed): Start over while a distribute, a sum or a product was being typed, then
+Go, no longer stops the card with an error; after combining two x-terms with Add's box still open, the cursor stays in the box (it moved
+to x = while the keys still went to the box).
+
 <!-- history: nothing below this line is read by the harness -->
 
 ## History: screen changes accepted by the re-baseline of 2026-10-24 (Build O, Part 0)

@@ -125,6 +125,15 @@ export function withLights(reduce = reduceAddBoth, { alone = xAlone, menuPreview
       return ui(state).preview ? withUi(state, { preview: false }) : state;
     }
 
+    // ----- an x-term added in a column (Build T, Part 5): either box takes the keys; a click (or Tab) on one selects the amount to retype -----
+    if (action.type === 'focus' && action.target === 'amount' && action.side) {
+      const n = reduce(state, { type: 'focus', target: 'amount' });
+      const out = structuredClone(n === state ? state : n);
+      Object.assign(out, { typing: 'amount', amountSide: action.side === 'right' ? 'right' : 'left', amountSel: Boolean(out.amountEntry) });
+      out.ui = { ...ui(out), focus: 'blank', shake: false };
+      return out;
+    }
+
     // ----- choosing the move: preview first on touch, a second tap (or Esc) cancels -----
     if (action.type === 'choose' && action.move === 'add') {
       if (blankOpen(state)) return cancel(state);
@@ -172,7 +181,8 @@ export function withLights(reduce = reduceAddBoth, { alone = xAlone, menuPreview
     // help, a move (Multiply and Flip too: their blanks would take the keys of a sum still open under them, Build N) or a check closes a
     // sum being typed
     let input = state;
-    if ((state.lx.combine || state.lx.distribute || state.lx.calc) && ['stuck', 'teach', 'choose', 'check', 'multOpen', 'flipPick', 'divPick'].includes(action.type)) { input = structuredClone(state); input.lx.combine = null; input.lx.distribute = null; input.lx.calc = null; }
+    if ((state.lx.combine || state.lx.distribute || state.lx.calc) && ['stuck', 'teach', 'choose', 'check', 'multOpen', 'flipPick', 'divPick', 'startOver'].includes(action.type)) {   // (Start over too: its board has no such terms, Build T)
+      input = structuredClone(state); input.lx.combine = null; input.lx.distribute = null; input.lx.calc = null; }
 
     const s = reduce(input, action);
     if (s === input) return input;                                  // the engine did nothing (a closed sum still counts)
@@ -328,7 +338,7 @@ function grabAction(state, action, wrapped, alone, opts = {}) {
     s.lx.hand = { fewer: 'green' };                         // the by-hand part of Fewer terms (A3): one term fewer
     s.lx.combine = null;
     s.movedOnce = true;                                     // the student's own combining counts as the move
-    s.ui = { ...UI0, focus: 'answer' };
+    s.ui = { ...UI0, focus: blankOpen(s) && amountMode(s) ? 'blank' : 'answer' };   // (Add's box still open keeps the keys and the cursor: Build T)
     return say(s, alone(next) ? 'lxCombinedAlone' : 'lxCombined');
   }
 

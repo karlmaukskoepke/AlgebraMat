@@ -43,7 +43,7 @@ export function makeSolvePlay(card) {
     matAction(d) {
       const own = card.matAction?.(d);
       if (own) return own;
-      if (d.action === 'focus') return { type: 'focus', target: d.target };
+      if (d.action === 'focus') return { type: 'focus', target: d.target, ...(d.side ? { side: d.side } : {}) };   // (Add's stacked boxes: Build T)
       if (d.action === 'choose') return { type: 'choose', move: d.move };
       if (d.action === 'placeValue') return { type: 'placeValue', ...(d.xi !== undefined && d.xi !== '' ? { index: Number(d.xi) } : {}) };   // (the x it was dropped on, when there is more than one)
       if (d.action === 'greyMove') return { type: 'greyMove', move: d.move };

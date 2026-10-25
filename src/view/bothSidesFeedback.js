@@ -12,6 +12,7 @@ const M = {
     : `${p.added} did not eliminate any term. Press Undo and try again.`),
   // the wrong cancel (Build T, Part 4)
   vZeroSide: (p) => `We want the x-terms on one side and the numbers on the other. That Add took everything off one side. Undo, then ${p.x ? 'cancel just one x-term' : p.beside ? 'cancel just the number beside x' : 'try another move'}.`,
+  vNoCancelX: (p) => `Add so that one x-term cancels.${p.term ? ` To cancel ${p.term}, add ${p.amount}.` : ''} Press Undo.`,
   vZeroHint: (p) => `Add ${p.amount} to both sides: the ${p.term} cancels, and the x-term that is left keeps a plus. Press Go.`,
   vZeroHintNum: (p) => `Add ${p.opposite} to both sides to cancel the ${p.constant} beside x. Press Go.`,
   vPartial: (p) => `${p.before} was only partially canceled by the ${p.added} you added: ${p.left} is still here. What would have completely canceled the ${p.before}? Press Undo.`,

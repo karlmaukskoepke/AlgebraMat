@@ -24,6 +24,7 @@ import { narrowPanel } from './narrowPanel.js';
 import { optionSel } from './multiplyOptions.js';
 import { forwardButton, srLine, notePopup, substBlock as sharedSubstBlock, sideTerms, waitingGhost, foldTag, sameAsLine, divisorOf, rowKey, markFlips, FORCED_TEXT, FIRST_TEXT, placeText } from './solveScreen.js';
 import { liveOf, onMounted } from './keepRows.js';
+import { stackAt } from '../engine/cards/bothSides.js';
 import { firstOpen } from './visit.js';
 // Count it's counters Mat and its words, read-only, for the help at x alone (Build C, Part 3)
 import { renderMat as renderCountersMat } from './mat.js';
@@ -167,13 +168,22 @@ function groupInert(body) {
 
 // The line a move leaves above the new equation: the amount (blue) on both sides, x's numbers struck as they combine.
 const xText = (c) => (c === 1 ? 'x' : c === -1 ? `${MINUS}x` : `${String(c).replace('-', MINUS)}x`);
-const workEls = (items, negIds = []) => {
+const workEls = (items, negIds = [], judged = false) => {
   const out = [];
   // a cross-off only where the numbers really cancel (+8 and −8), never +8 and +8 (Build D-2)
   const struckSum = items.filter((t) => t.struck && !t.x && !(t.term && t.term.kind !== 'num')).reduce((a, t) => a + (t.term ? t.term.v : t.v), 0);
   const cancels = struckSum === 0;
   const xStruck = items.filter((t) => t.struck && t.x).reduce((a, t) => a + (t.coef ?? 1), 0) === 0;     // (x-terms cancel too: Build R)
-  items = items.map((t) => (t.struck && !(t.x ? xStruck : cancels) ? { ...t, struck: false } : t));
+  if (!judged) items = items.map((t) => (t.struck && !(t.x ? xStruck : cancels) ? { ...t, struck: false } : t));
+  // an x-term added in a column (Build T, Part 5): the amount is written under the side's first x-term, not after the terms
+  const under = items.find((t) => t.added && Number.isInteger(t.under));
+  if (under) {
+    const rest = items.filter((t) => t !== under);
+    const els = workEls(rest, negIds, true);                       // (the cancelling pair was judged with the amount in it)
+    const term = [...els].filter((e) => !e.classList.contains('lb-plus'))[under.under];
+    const amount = html('span', 'lx-under', [html('span', 'lb-plus is-added', ['+']), html('span', `lb-x is-added${under.struck ? ' is-struck' : ''}`, [xText(under.coef ?? 1)])]);
+    return term ? els.map((e) => (e === term ? stackCol(e, amount) : e)) : [...els, amount];
+  }
   items.forEach((t, i) => {
     if (t.term) {                                                   // (a term other than a number or x: a parenthesis, a fraction; Build M)
       const { op, body } = termText(t.term, i, negIds.includes(t.term.id));
@@ -188,6 +198,14 @@ const workEls = (items, negIds = []) => {
   });
   return out;
 };
+
+// A term with what is added to it written underneath, like adding in a column (Build T, Part 5): the x of the amount right under the x
+// of the term; the column is as wide as the wider of the two.
+function stackCol(term, under) {
+  const col = html('span', 'lx-col', []);
+  col.append(term, under);
+  return col;
+}
 
 function eqRow(leftEls, rightEls, cls = '', attrs = {}) {
   const eq = html('div', `lb-eq ${cls}`.trim(), [], attrs);
@@ -312,7 +330,8 @@ function rowsOf(s) {
       return html('div', `${cls} has-work`, [w, ...(d ? [sameAsLine(d.n, d.sign)] : [])]);
     }
     if (row.type === 'work') {
-      return html('div', cls, [eqRow(workEls(row.work.left, s.lx.negIds), workEls(row.work.right, s.lx.negIds), `lb-work${eqClass(charsOf([...row.work.left, ...row.work.right]))}`, { 'aria-hidden': 'true' })]);
+      const stack = row.work.stack ? ' is-stacked' : '';                // (an x-term added in a column, Build T, Part 5)
+      return html('div', `${cls}${stack ? ' is-stackwork' : ''}`, [eqRow(workEls(row.work.left, s.lx.negIds), workEls(row.work.right, s.lx.negIds), `lb-work${stack}${eqClass(charsOf([...row.work.left, ...row.work.right]))}`, { 'aria-hidden': 'true' })]);
     }
     // the equation the value goes back into: the original, or, for a wrong guess after a move, the current one (the loop's rule)
     const plug = Boolean(s.sub) && i === (s.sub.target === 'current' ? last : 0);
@@ -468,7 +487,32 @@ function ghostRow(s) {
   // an x-term (Variables on both sides, Build R): the x printed after each box, so the number in front of x is typed with its sign
   const xKind = optKind ? optKind === 'x' : open ? s.addKind === 'x' : s.ui?.preview === 'addX';
   const xAfter = () => (xKind ? [html('span', 'lb-x lx-addx', ['x'])] : []);
-  if (xKind) left.setAttribute('aria-label', 'The number in front of x, to add an x-term to both sides');
+  if (xKind) {
+    // an x-term is added in a column (Build T, Part 5): a box under the first x-term of each side (its first term, where it has none),
+    // the x printed after it. Either box takes the keys; the other shows the same amount (one amount, both sides). Tab goes between them.
+    slot.classList.add('is-stacked');
+    const side = s.amountSide === 'right' ? 'right' : 'left';
+    const boxOf = (k) => {
+      if (optKind || !open) return html('span', `lx-box is-mirror${text ? '' : ' is-empty'}`, [shown(text)], { 'aria-hidden': 'true' });
+      const on = typing && k === side;
+      const b = html('button', `lx-box is-stackbox${on ? ' is-focus' : ''}${on && s.ui?.shake ? ' is-shake' : ''}${text ? '' : ' is-empty'}${on && !text ? ' is-blink' : ''}`, [shown(text)], {
+        type: 'button', 'data-action': 'focus', 'data-target': 'amount', 'data-side': k, 'data-blank': '1', 'data-fk': k === 'left' ? 'blank' : 'blank:right', 'data-lx-field': '1',
+        'aria-label': `The number in front of x, to add an x-term to both sides (${k === 'left' ? 'left' : 'right'} side)`,
+      });
+      if (on && (s.ui?.focus === 'blank' || s.ui?.focus === `blank:${k}`)) b.dataset.lxFocus = '1';
+      return b;
+    };
+    const stacked = (k) => {
+      const els = sideEls(s.board[k], s.lx.negIds);
+      const at = stackAt(s.board[k]);
+      const terms = els.filter((e) => !e.classList.contains('lb-plus'));
+      const under = html('span', 'lx-under', [plus(), boxOf(k), ...xAfter()]);
+      return terms[at] ? els.map((e) => (e === terms[at] ? stackCol(e, under) : e)) : [...els, under];
+    };
+    slot.append(eqRow(stacked('left'), stacked('right'), 'lx-ghosteq is-stacked'));
+    if (!open) slot.setAttribute('aria-hidden', 'true');
+    return slot;
+  }
   slot.append(eqRow([...sideEls(s.board.left, s.lx.negIds), plus(), left, ...xAfter()], [...sideEls(s.board.right, s.lx.negIds), plus(), right, ...xAfter()], 'lx-ghosteq'));
   if (!open) slot.setAttribute('aria-hidden', 'true');
   return slot;

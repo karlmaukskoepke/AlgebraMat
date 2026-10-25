@@ -51,8 +51,11 @@ const plus = (text) => (text.startsWith('−') ? text : `+${text}`);
 export const boardLights = (prev, board, fewer = 'off') => ({ fewer, noparen: hasGroup(board) ? 'off' : 'green', xone: xBoth(board) ? 'off' : 'green', solved: xAlone(board) ? 'green' : 'off' });
 
 // ---------- the Add move, with a number or an x-term ----------
-// On each side the term the amount cancels (its opposite) goes; on a side with nothing to cancel the amount is written at the end. A side
-// left empty says 0. Returns the new board, the work row and which sides cancelled.
+// On each side the term the amount cancels (its opposite) goes; on a side with nothing to cancel the amount is written beside the terms (a
+// number at the end; an x-term right after the side's first x-term, so like terms sit together: `5x + −3x + 2 = 10`, Build T). A side
+// left empty says 0. Returns the new board, the work row and which sides cancelled. An x-term's work row is stacked (Build T, Part 5):
+// the amount sits under the side's first x-term (its first term, where it has none), `under`, like adding in a column.
+export const stackAt = (terms) => Math.max(0, terms.findIndex((t) => t.kind === 'x'));
 export function addToBoth(board, k, isX) {
   const cancels = (t) => (isX ? t.kind === 'x' && (t.coef ?? 1) === -k : t.kind === 'num' && t.v === -k);
   const out = {};
@@ -60,23 +63,34 @@ export function addToBoth(board, k, isX) {
   const hit = [];
   for (const side of ['left', 'right']) {
     const at = board[side].findIndex(cancels);
-    const added = isX ? { x: true, coef: k, added: true, struck: at >= 0 } : { v: k, added: true, struck: at >= 0 };
+    const under = stackAt(board[side]);
+    const added = isX ? { x: true, coef: k, added: true, struck: at >= 0, under } : { v: k, added: true, struck: at >= 0 };
     work[side] = [...board[side].map((t, i) => (t.kind === 'x' ? { x: true, coef: t.coef ?? 1, struck: i === at } : t.kind === 'num' ? { v: t.v, struck: i === at } : { term: t })), added];
     if (at >= 0) {
       hit.push(side);
       const rest = board[side].filter((_, i) => i !== at);
       out[side] = rest.length ? rest : [{ id: newId(), kind: 'num', v: 0 }];
+    } else if (isX) {
+      out[side] = [...board[side].slice(0, under + 1), { id: newId(), kind: 'x', coef: k }, ...board[side].slice(under + 1)];
     } else {
-      out[side] = [...board[side], isX ? { id: newId(), kind: 'x', coef: k } : { id: newId(), kind: 'num', v: k }];
+      out[side] = [...board[side], { id: newId(), kind: 'num', v: k }];
     }
   }
-  return { board: { left: out.left, right: out.right }, work: { ...work, amount: k, x: isX }, hit };
+  return { board: { left: out.left, right: out.right }, work: { ...work, amount: k, x: isX, ...(isX ? { stack: true } : {}) }, hit };
 }
 
 // An Add that emptied a side (it says 0) and left an x-term and a number together on the other: { side, beside } or null. An x-term Add
 // counts only when it left the x-term negative: cancelling the other x-term would have kept x-terms and numbers apart with a plus
 // (`2x = 3x + 6` + −2x makes `0 = x + 6`, the better of the two, and is not flagged). `beside`: a number was beside x before (its
 // opposite is the Add to make instead).
+// The x-term with the smaller number in front (cancelling it leaves the other with a plus), or the only one
+export function smallerX(board) {
+  const l = board.left.find((t) => t.kind === 'x');
+  const r = board.right.find((t) => t.kind === 'x');
+  if (!l || !r) return l ?? r ?? null;
+  return (l.coef ?? 1) <= (r.coef ?? 1) ? l : r;
+}
+
 export function zeroedSide(before, board, isX) {
   const side = ['left', 'right'].find((k) => board[k].length === 1 && board[k][0].kind === 'num' && board[k][0].v === 0 && !(before[k].length === 1 && before[k][0].kind === 'num' && before[k][0].v === 0));
   if (!side) return null;
@@ -121,6 +135,12 @@ function addMove(s, api) {
     return say(s, 'vZeroSide', { x: isX, beside: zeroed.beside }, true);
   }
   if (helpful) return say(s, xAlone(board) ? 'aSolvedBoard' : 'aFindX');
+  // an x-term that cancels no x-term (Build T, Part 5): said with the real numbers, the x-term to cancel being the one that keeps the
+  // x-term left with a plus (the smaller)
+  if (isX) {
+    const small = smallerX(before);
+    return say(s, 'vNoCancelX', small ? { term: coefText(small.coef ?? 1), amount: coefText(-(small.coef ?? 1)) } : {}, true);
+  }
   if (opposite) {
     const v = isX ? (opposite.coef ?? 1) : opposite.v;
     return say(s, 'vPartial', { before: plus(termShown(opposite)), added: plus(added), left: isX ? coefText(v + k) : signed(v + k) }, true);
@@ -172,7 +192,9 @@ const loop = createSolveLoop({
   reduce(s, action, api) {
     if (isTyping(action)) {
       if (s.sub || !amountKeys(s)) return undefined;
-      const entry = typeInto(s.amountEntry, action, 'integer');
+      // (a box clicked to retype: the first key replaces what is there, Build T)
+      const entry = typeInto(s.amountSel && action.type !== 'toggleSign' ? '' : s.amountEntry, action, 'integer');
+      s.amountSel = false;
       if (entry === s.amountEntry) return 'ignore';
       s.amountEntry = entry;
       s.hint = null;
@@ -191,7 +213,7 @@ const loop = createSolveLoop({
         const g = api.blockMove(s);
         if (g) return g;
         if (xAlone(s.board)) return say(s, 'aSolvedBoard');
-        Object.assign(s, { menu: 'add', typing: null, addKind: action.kind === 'x' ? 'x' : 'num', mopts: null });
+        Object.assign(s, { menu: 'add', typing: null, addKind: action.kind === 'x' ? 'x' : 'num', mopts: null, amountSide: 'left', amountSel: false });
         return say(s, action.kind === 'x' ? 'vPickX' : 'aPickAmount');
       }
       case 'choose': {
@@ -200,7 +222,7 @@ const loop = createSolveLoop({
           const g = api.blockMove(s);
           if (g) return g;
           if (xAlone(s.board)) return say(s, 'aSolvedBoard');
-          Object.assign(s, { menu: 'add', typing: null, addKind: s.addKind ?? 'num' });
+          Object.assign(s, { menu: 'add', typing: null, addKind: s.addKind ?? 'num', amountSide: 'left', amountSel: false });
           return say(s, 'aPickAmount');
         }
         if (action.move === 'trade') {
@@ -277,6 +299,7 @@ const BOTH_ERRORS = {
   vRed: { target: 'lastMove', label: 'got bigger', lit: ['newest'] },
   vPartial: { target: 'lastMove', label: 'still here', lit: ['newest'] },
   vZeroSide: { target: 'zeroSide', label: 'nothing left', lit: ['fullSide'] },        // (the wrong cancel, Build T, Part 4)
+  vNoCancelX: { target: 'lastMove', label: 'nothing cancels', lit: ['newest'] },        // (an x-term that cancels none: its stacked amounts and the x-terms above them)
   dxProductWrong: { target: 'prodbox', label: 'check this', lit: ['prodlabel', 'factor'] },
   fWorse: { target: 'coef', label: 'x has a minus', lit: ['newest'] },
   dFail: { target: 'failSide', label: 'doesn’t split' },
@@ -288,11 +311,9 @@ const BOTH_ERRORS = {
 // option with the opposite of the number beside x.
 function zeroSideHint(s, before) {
   const b = s.board;
-  if (before.zeroSide?.x) {
-    const l = b.left.find((t) => t.kind === 'x');
-    const r = b.right.find((t) => t.kind === 'x');
-    if (!l || !r) return null;
-    const small = (l.coef ?? 1) <= (r.coef ?? 1) ? l : r;
+  if (before.zeroSide?.x || before.feedback?.key === 'vNoCancelX') {
+    const small = smallerX(b);
+    if (!small) return null;
     const k = -(small.coef ?? 1);
     Object.assign(s, { menu: 'add', addKind: 'x', typing: null, amountEntry: String(k), hint: { kind: 'cancel', id: small.id } });
     if (!s.supportsShown.includes('hint')) s.supportsShown.push('hint');
@@ -308,10 +329,10 @@ function zeroSideHint(s, before) {
 
 export const BOTH_SPOT = {
   error: (s) => BOTH_ERRORS[s.feedback?.key] ?? null,
-  keepsReds: (s) => ['vRed', 'vPartial', 'vZeroSide', 'dFail', 'dFail3', 'fWorse'].includes(s.feedback?.key),
+  keepsReds: (s) => ['vRed', 'vPartial', 'vZeroSide', 'vNoCancelX', 'dFail', 'dFail3', 'fWorse'].includes(s.feedback?.key),
   startOverAt: 3,
   clear: (s) => { s.entry = ''; s.sub = null; },
-  hint: (s, before = null) => (before?.feedback?.key === 'vZeroSide' ? zeroSideHint(s, before) ?? hintAfterUndo(s, before) : hintAfterUndo(s, before)),
+  hint: (s, before = null) => (['vZeroSide', 'vNoCancelX'].includes(before?.feedback?.key) ? zeroSideHint(s, before) ?? hintAfterUndo(s, before) : hintAfterUndo(s, before)),
   prompt: () => 'aFindX',
 };
 
@@ -332,6 +353,8 @@ export function BOTH_LAYER(s, action) {
   if (out === s || !out.board) return out;
   if (out.lx?.combine && out.feedback?.key === 'lxCombineWrong' && s.feedback?.key !== 'lxCombineWrong') sizesSlip(out);
   const moved = JSON.stringify(out.board) !== JSON.stringify(s.board);
+  // x back on both sides: x = is greyed again, so what was typed in it goes (it could not be changed while greyed: Build T)
+  if (moved && xBoth(out.board) && out.entry && !out.sub) out.entry = '';
   const combined = Boolean(s.lx?.combine) && !out.lx?.combine && moved;
   const added = out.history.length > s.history.length && out.rows.at(-2)?.type === 'work' && Boolean(out.rows.at(-2)?.work);
   // (an Add, by the button or by dragging across the =, judged itself; a combine is one term fewer; Undo puts back what was; any other move

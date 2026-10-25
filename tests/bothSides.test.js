@@ -88,7 +88,7 @@ describe('the worked example, 5x + 2 = 3x + 10', () => {
     expect(solve.answerLive(s)).toBe(false);                                         // x on both sides: x = waits
     expect(run(s, [{ type: 'focus', target: 'answer' }, ...digits(4)]).entry).toBe('');
     s = run(s, [{ type: 'lxDrop', id: s.board.right[0].id, slot: { side: 'left', at: 2 } }]);
-    expect(boardText(s.board)).toBe('5x + 2 + −3x = 10');
+    expect(boardText(s.board)).toBe('5x + −3x + 2 = 10');
     expect(s.rows.at(-2).work).toMatchObject({ amount: -3, x: true });
     expect(s.lights).toMatchObject({ xone: 'green', fewer: 'green' });
     expect(solve.answerLive(s)).toBe(true);
@@ -112,12 +112,12 @@ describe('the worked example, 5x + 2 = 3x + 10', () => {
   it('the Add button\'s x-term option does the same as the drag', () => {
     let s = start(worked());
     s = run(s, [{ type: 'choose', move: 'add' }, { type: 'addPick', kind: 'x' }, ...digits(-3), { type: 'go' }]);
-    expect(boardText(s.board)).toBe('5x + 2 + −3x = 10');
+    expect(boardText(s.board)).toBe('5x + −3x + 2 = 10');
     expect(s.needUndo).toBe(false);
     // moving the left x-term instead is helpful too: x ends on the right
     let t = start(worked());
     t = run(t, [{ type: 'addPick', kind: 'x' }, ...digits(-5), { type: 'go' }]);
-    expect(boardText(t.board)).toBe('2 = 3x + 10 + −5x');
+    expect(boardText(t.board)).toBe('2 = 3x + −5x + 10');
     expect(t.lights.fewer).toBe('green');
   });
   it('a number may be moved first: helpful when it cancels, x = still waits', () => {
@@ -135,21 +135,23 @@ describe('the worked example, 5x + 2 = 3x + 10', () => {
 });
 
 describe('the slips: the spotlight, Undo, then the hint', () => {
-  it('adding 3x instead of −3x: "+3x + +3x did not eliminate the term", Undo, then the reminder lights the 3x', () => {
+  it('adding 3x instead of −3x cancels no x-term (Build T): "Add so that one x-term cancels. To cancel 3x, add −3x.", Undo, then Add −3x ready', () => {
     let s = run(start(worked()), [{ type: 'addPick', kind: 'x' }, ...digits(3), { type: 'go' }]);
-    expect(s.feedback).toMatchObject({ key: 'vRed', bad: true, params: { before: '+3x', added: '+3x' } });
-    expect(BOTH_SPOT.error(s)).toMatchObject({ target: 'lastMove', label: 'got bigger' });
+    expect(s.feedback).toMatchObject({ key: 'vNoCancelX', bad: true, params: { term: '3x', amount: '−3x' } });
+    expect(bothSidesFeedbackText(s.feedback)).toBe('Add so that one x-term cancels. To cancel 3x, add −3x. Press Undo.');
+    expect(BOTH_SPOT.error(s)).toMatchObject({ target: 'lastMove', label: 'nothing cancels' });
     expect(s.lights.fewer).toBe('red');
     s = run(s, [{ type: 'undo' }]);
     expect(boardText(s.board)).toBe('5x + 2 = 3x + 10');
-    expect(s.feedback.key).toBe('vMoveXHint');
+    expect(s.feedback).toMatchObject({ key: 'vZeroHint', params: { amount: '−3x', term: '3x' } });
     expect(s.spot).toMatchObject({ kind: 'hint', target: 'hinted' });
-    expect(s.hint).toMatchObject({ kind: 'cross', id: s.board.right[0].id });
+    expect([s.menu, s.addKind, s.amountEntry]).toEqual(['add', 'x', '-3']);
+    expect(s.hint).toMatchObject({ kind: 'cancel', id: s.board.right[0].id });
   });
-  it('an x-term that only partly cancels: "still here", naming what is left', () => {
+  it('an x-term that only partly cancels is the same: it cancels no x-term (Build T)', () => {
     const s = run(start(worked()), [{ type: 'addPick', kind: 'x' }, ...digits(-2), { type: 'go' }]);
-    expect(s.feedback).toMatchObject({ key: 'vPartial', params: { before: '+5x', added: '−2x', left: '3x' } });
-    expect(bothSidesFeedbackText(s.feedback)).toContain('3x is still here');
+    expect(s.feedback).toMatchObject({ key: 'vNoCancelX', params: { term: '3x', amount: '−3x' } });
+    expect(s.lights.fewer).toBe('neutral');
   });
   it('a bare number for two x-terms is sent back with the picture; adding the sizes is tagged', () => {
     let s = run(start(worked()), [{ type: 'lxDrop', id: start(worked()).board.right[0].id, slot: { side: 'left', at: 2 } }]);
@@ -183,7 +185,7 @@ describe('Trade places, Level 5 and the shapes', () => {
     let s = run(start(p), [{ type: 'lxDrop', id: start(p).board.left[0].id, slot: { side: 'right', at: 2 } }]);
     s = start(p);
     s = run(s, [{ type: 'lxDrop', id: s.board.left[0].id, slot: { side: 'right', at: 2 } }]);
-    expect(boardText(s.board)).toBe('5 = 5x − 9 + −3x');
+    expect(boardText(s.board)).toBe('5 = 5x + −3x − 9');
     s = combineFirst(s, 'right', 'x', '2x');
     s = run(s, [{ type: 'choose', move: 'trade' }]);
     expect(boardText(s.board)).toBe('2x − 9 = 5');

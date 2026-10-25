@@ -8,6 +8,17 @@ const OPEN = '.lx-ghost.is-products .lx-box.is-focus, .dv-fracblank:not(.is-mirr
 export function bindBlankKeys(root, dispatch) {
   const onKey = (e) => {
     if (e.ctrlKey || e.metaKey || e.altKey || !root.isConnected || root.closest('[hidden]') || document.querySelector('dialog[open], .spot-layer.is-error')) return;
+    // Add's two stacked boxes (Build T, Part 5): Tab and the arrows go to the other side's box, which then has the amount selected
+    const stacked = root.querySelector('.lx-ghost.is-stacked .lx-box.is-stackbox.is-focus');
+    if (stacked && (e.key === 'Tab' || e.key === 'ArrowRight' || e.key === 'ArrowLeft')) {
+      const side = stacked.dataset.side;
+      const to = e.key === 'Tab' ? (side === 'left' ? 'right' : 'left') : e.key === 'ArrowRight' ? 'right' : 'left';   // (Tab: the other box)
+      if (to === side) { e.preventDefault(); return; }
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      dispatch({ type: 'focus', target: 'amount', side: to });
+      return;
+    }
     const box = root.querySelector(OPEN);
     if (!box) return;
     const next = e.key === 'ArrowRight' || (e.key === 'Tab' && !e.shiftKey);

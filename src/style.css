@@ -3835,3 +3835,15 @@ button.lb-divbar.is-calc:hover, button.lb-divbar.is-calc:focus-visible { backgro
 /* ---------- Build S, Part 6: Add's two options preview their own form on hover and focus (Variables on both sides): the ghost row in
    grey, both blanks dashed, the x printed after each blank for the x-term option ---------- */
 .lx-ghost.is-optpreview .lx-ghosteq { color: #8d897d; }
+
+/* ---------- Build T, Part 5: an x-term added in a column. The amount (a box while it is typed, then the added x-term) sits under the
+   first x-term of each side, its x right under that term's x; the column is as wide as the wider of the two, and the row one line
+   taller. Everything else on the row stays on its first line. ---------- */
+.lb-eq.is-stacked { align-items: start; }
+.lb-eq.is-stacked .lb-side { align-items: flex-start; }
+.lx-col { display: inline-flex; flex-direction: column; align-items: flex-end; }
+.lx-under { display: inline-flex; align-items: center; gap: 0 4px; white-space: nowrap; line-height: 1.2; }
+.lx-under .lb-plus { color: #0072b2; }
+.lb-work.is-stacked .lx-under { font-size: 1em; }
+.lx-ghost.is-stacked .lx-under .lx-box { min-height: 0.95em; font-size: 0.8em; }
+.lx-ghost.is-stacked .lx-under .lx-addx { color: #0072b2; }

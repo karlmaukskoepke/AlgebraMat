@@ -23,6 +23,11 @@ function worstStates(path) {
   [...path].sort((a, b) => widthOf(b) - widthOf(a)).slice(0, 2).forEach((s) => pick.add(s));
   path.filter((s) => s.sub?.placing).slice(0, 1).forEach((s) => pick.add(s));      // (the value waiting to be dragged, its pop-up under x =)
   path.filter((s) => s.sub).slice(-2).forEach((s) => pick.add(s));
+  // Add's x-term option open, its boxes stacked under the x-terms (Build T, Part 5: a row one line taller), on the fullest state with an
+  // x-term on each side
+  const xs = (side) => (side ?? []).some((t) => t.kind === 'x');
+  const both = [...path].filter((s) => s.stage === 'moves' && !s.sub && xs(s.board?.left) && xs(s.board?.right)).sort((a, b) => rowsOf(b) - rowsOf(a))[0];
+  if (both) pick.add({ ...both, menu: 'add', addKind: 'x', typing: null, amountEntry: '', spot: null });
   return [...pick];
 }
 

@@ -49,7 +49,8 @@ export function outcomeOf(board, id, slot) {
   const f = findTerm(board, id);
   if (!f || !slot) return { kind: 'none' };
   if (slot.side !== f.side) {
-    if (f.term.kind === 'x') return board[slot.side].some((t) => t.kind === 'x') ? { kind: 'crossX', side: slot.side, at: slot.at ?? board[slot.side].length } : { kind: 'snapX' };
+    // (an x-term lands right after the first x-term there, beside its like term, as Add's x-term option writes it: Build T)
+    if (f.term.kind === 'x') return board[slot.side].some((t) => t.kind === 'x') ? { kind: 'crossX', side: slot.side, at: board[slot.side].findIndex((t) => t.kind === 'x') + 1 } : { kind: 'snapX' };
     if (f.term.kind !== 'num') return { kind: 'snapX' };
     return { kind: 'cross', amount: -f.term.v, at: slot.at ?? board[slot.side].length };
   }

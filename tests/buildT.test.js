@@ -73,7 +73,7 @@ describe('Part 4: the wrong cancel', () => {
   it('5x = 3x + 10, Add −5x: written, then the spotlight with Undo; the slip is tagged; Undo gives the hint with Add −3x ready, recorded as hint', () => {
     let s = start([x(5)], [x(3), n(10)]);
     s = run(s, addX(-5));
-    expect(boardText(s.board)).toBe('0 = 3x + 10 + −5x');
+    expect(boardText(s.board)).toBe('0 = 3x + −5x + 10');
     expect(s.feedback).toMatchObject({ key: 'vZeroSide', bad: true });
     expect(s.needUndo).toBe(true);
     expect(s.tags).toContain('zeroed-side');
@@ -99,6 +99,6 @@ describe('Part 4: the wrong cancel', () => {
   });
   it('2x = 3x + 6, Add −2x is a good move (0 = x + 6), not flagged', () => {
     const s = run(start([x(2)], [x(3), n(6)]), addX(-2));
-    expect([boardText(s.board), s.needUndo, s.feedback.bad]).toEqual(['0 = 3x + 6 + −2x', false, false]);
+    expect([boardText(s.board), s.needUndo, s.feedback.bad]).toEqual(['0 = 3x + −2x + 6', false, false]);
   });
 });
