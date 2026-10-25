@@ -175,6 +175,17 @@ async function playCard(browser, base, [name, pack, levels], report) {
     await watched(lv, 'type x', () => dispatch([{ type: 'focus', target: 'answer' }, ...digits]));
     await record();
     await watched(lv, 'Check', () => dispatch([{ type: 'check' }]));
+    // (the value to drag into x is not covered by the check's pop-up: Build S, the size chosen leaves it room)
+    await page.waitForTimeout(450);
+    const covered = await page.evaluate(() => {
+      const chip = document.querySelector('[data-chip]');
+      if (!chip) return null;
+      const r = chip.getBoundingClientRect();
+      const top = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
+      const sb = document.querySelector('.spot-box')?.getBoundingClientRect();
+      return chip.contains(top) ? null : `${top?.className || top?.tagName || 'something'} (value at ${Math.round(r.top)}, pop-up ${Math.round(sb?.top)}-${Math.round(sb?.bottom)}, text ${getComputedStyle(document.getElementById('mat')).getPropertyValue('--eq-size')}, window ${innerHeight}, rows ${[...document.querySelectorAll('.lb-stack .lb-rowwrap')].map((x) => x.textContent.replace(/\s+/g, '')).join(' | ')})`;
+    });
+    if (covered) fail(lv, `the value to drag into x is covered by ${covered}`);
     for (let k = 0; k < 6 && (await state()).sub && (await state()).stage !== 'done'; k++) {
       await watched(lv, `the check, step ${k + 1}`, () => dispatch([{ type: 'placeValue', index: k }, { type: 'nextLine' }]));
       await record();

@@ -556,16 +556,36 @@ states has); the note under `x =`, Add's two options and the x-term blank are on
 ## Build S (2026-10-24): redraws keep the rows, one text size a problem, every drag works or says why, Flip's slower cross-off
 
 Problems, save codes, class-sheet records and the 25 scripted runs are unchanged (the drag that used to do nothing, and the new
-messages for a drop that cannot work, are not in any scripted run). Of the 70 recorded screens, one differs:
+messages for a drop that cannot work, are not in any scripted run). 16 of the 70 recorded screens differ, each for one reason: the
+problem's text size is now chosen once, when it starts, from its worst case (every move kept as a row of its own, and the check's pop-up
+"Drag the 4 onto an x above." kept off `x =`, where the value is dragged from), and kept to Balanced. Add to both sides keeps 46 px at
+both sizes, and Divide it and Flip everything at 768 px. Two-step (34 px) and Distribute (32 px) at 768 px, and Divide it, Flip
+everything, Two-step and Distribute at 650 px (32 px), open smaller than before: before, they opened at 46 px and dropped to 32 px at
+their fourth row. (On the old Divide it screen at 650 px the pop-up covered the value, so it could not be picked up.)
 
 | Key | Before | After | Why |
 |---|---|---|---|
-| `screen:dist-opening@1366x650` | `2(x + 4) = 26` opens at 46 px, and drops to 32 px once the problem has four rows | it opens at the size its own worst case fits at 650 px tall (42 px) and keeps it to Balanced | Part 3: the text size never changes while the student works a problem |
+| `screen:two-opening@1366x768` | `2x + 4 = 16` at 46 px, dropping to 32 px at the fourth row | 34 px from the start | Part 3: one text size a problem, the largest at which its worst case fits at 768 px tall, with room for the check’s pop-up away from `x =` (1.20% of pixels) |
+| `screen:dist-opening@1366x768` | `2(x + 4) = 26` at 46 px, dropping to 32 px at the fourth row | 32 px from the start | the same (1.32% of pixels) |
+| `screen:div-opening@1366x650` | `5x = −15` at 46 px | 32 px, kept to Balanced | Part 3: one text size a problem, the largest at which its worst case fits at 650 px tall, with room for the check’s pop-up away from `x =` (1.37% of pixels) |
+| `screen:div-helpful-move@1366x650` | the move’s rows at 46 px (32 px work row) | 32 px (24 px work row) | Part 3: one text size a problem, the largest at which its worst case fits at 650 px tall, with room for the check’s pop-up away from `x =` (2.85% of pixels) |
+| `screen:div-failed@1366x650` | the failed fraction at 46/32 px | 32/24 px; the pop-up and Undo are where they were | Part 3: one text size a problem, the largest at which its worst case fits at 650 px tall, with room for the check’s pop-up away from `x =` (6.53% of pixels) |
+| `screen:div-stuck-1@1366x650` | 46 px | 32 px | Part 3: one text size a problem, the largest at which its worst case fits at 650 px tall, with room for the check’s pop-up away from `x =` (1.40% of pixels) |
+| `screen:div-stuck-2@1366x650` | 46 px | 32 px | Part 3: one text size a problem, the largest at which its worst case fits at 650 px tall, with room for the check’s pop-up away from `x =` (1.24% of pixels) |
+| `screen:div-teach@1366x650` | 46 px | 32 px | Part 3: one text size a problem, the largest at which its worst case fits at 650 px tall, with room for the check’s pop-up away from `x =` (1.37% of pixels) |
+| `screen:div-wrong-guess@1366x650` | 46 px rows beside the check | 32 px rows; the check is unchanged | Part 3: one text size a problem, the largest at which its worst case fits at 650 px tall, with room for the check’s pop-up away from `x =` (0.23% of pixels) |
+| `screen:div-end@1366x650` | 46 px | 32 px | Part 3: one text size a problem, the largest at which its worst case fits at 650 px tall, with room for the check’s pop-up away from `x =` (4.16% of pixels) |
+| `screen:div-failed-stuck@1366x650` | 46 px | 32 px | Part 3: one text size a problem, the largest at which its worst case fits at 650 px tall, with room for the check’s pop-up away from `x =` (6.53% of pixels) |
+| `screen:div-alone-stuck-1@1366x650` | 46 px | 32 px | Part 3: one text size a problem, the largest at which its worst case fits at 650 px tall, with room for the check’s pop-up away from `x =` (5.46% of pixels) |
+| `screen:div-menu@1366x650` | 46 px | 32 px (the Multiply menu is unchanged) | Part 3: one text size a problem, the largest at which its worst case fits at 650 px tall, with room for the check’s pop-up away from `x =` |
+| `screen:flip-opening@1366x650` | `−6x = −12`… at 46 px | 32 px | Part 3: one text size a problem, the largest at which its worst case fits at 650 px tall, with room for the check’s pop-up away from `x =` (1.40% of pixels) |
+| `screen:two-opening@1366x650` | `2x + 4 = 16` at 46 px, dropping to 32 px at the fourth row | 32 px from the start | Part 3: one text size a problem, the largest at which its worst case fits at 650 px tall, with room for the check’s pop-up away from `x =` (1.43% of pixels) |
+| `screen:dist-opening@1366x650` | `2(x + 4) = 26` at 46 px, dropping to 32 px at the fourth row | 32 px from the start | Part 3: one text size a problem, the largest at which its worst case fits at 650 px tall, with room for the check’s pop-up away from `x =` (1.25% of pixels) |
 
-**Below the screen check (no recorded state shows them):** a fourth row no longer shrinks every row (the size is chosen once a
-problem); Flip everything's cross-off is a vertical stroke through each minus, one at a time (the recorded Flip screen is its opening);
-Add's two options preview their own form on hover (Variables on both sides only); the two new drop messages ("Only like terms
-combine…", "Drag the 3 onto its parenthesis…"). Every recorded screen that has its first-problem pop-up still shows it.
+**Below the screen check (no recorded state shows them):** a fourth row no longer shrinks every row; Flip everything's cross-off is a
+vertical stroke through each minus, one at a time (the recorded Flip screen is its opening); Add's two options preview their own form
+on hover (Variables on both sides only); the two new drop messages ("Only like terms combine…", "Drag the 3 onto its parenthesis…").
+Every recorded screen with its first-problem pop-up still shows it.
 
 <!-- history: nothing below this line is read by the harness -->
 

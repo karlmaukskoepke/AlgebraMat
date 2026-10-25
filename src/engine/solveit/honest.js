@@ -1,7 +1,8 @@
 // The honest path of a Solve it problem (Build S): the moves a student who knows the card makes, one at a time, as the card's own actions,
 // from the state it is given to Balanced. Read from the board alone, so it works on every card: distribute a parenthesis, carry the smaller
 // x-term across the =, combine like terms on a side, carry the number beside x across, flip a minus, divide by the number in front of x,
-// then type x, drop it into each x and press Next to Balanced. Pure: it only calls the card's reducer.
+// then type x, drop it into each x and press Next to Balanced. Next is pressed after every move, so each move keeps a row of its own
+// (the most rows a student can have on screen). Pure: it only calls the card's reducer.
 //
 //   honestPath(reduce, s, { grab })   every state on the way, the first one included ([] when the card refuses a step: the path stops)
 //     grab   the card's terms can be picked up (Add's term layer): a number crosses by a drag; otherwise by the Add move
@@ -101,6 +102,8 @@ export function honestPath(reduce, s0, { grab = true, answer = true } = {}) {
     const before = JSON.stringify(s.board);
     s = apply(reduce, s, m, out);
     if (JSON.stringify(s.board) === before || s.needUndo) return out;          // refused, or a move that waits for Undo: stop here
+    // Next after every move (each move folds to a row of its own: the most rows a student can have on screen)
+    if (s.unfolded && !xAlone(s.board)) { const f = reduce(s, { type: 'foldNext' }); if (f !== s) { s = f; out.push(s); } }
   }
   if (!answer || !xAlone(s.board ?? { left: [], right: [] })) return out;
   const x = s.problem?.x;

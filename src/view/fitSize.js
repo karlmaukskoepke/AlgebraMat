@@ -11,6 +11,7 @@ import { asItWas } from './visit.js';
 
 // the sizes, largest first: the equation's rows, and the move's work rows (and folded rows) under them
 export const SIZES = [[46, 32], [42, 30], [38, 28], [34, 25], [32, 24]];
+const POPUP_ROOM = 168;                // a pop-up of four lines under the Mat, its gap above and its margin below (view/spotlight.js)
 
 const rowsOf = (s) => s.rows?.length ?? 0;
 const widthOf = (s) => Math.max(0, ...(s.rows ?? []).map((r) => JSON.stringify(r.board ?? r.work ?? '').length));
@@ -20,6 +21,7 @@ function worstStates(path) {
   const pick = new Set([path[0]]);
   [...path].sort((a, b) => rowsOf(b) - rowsOf(a)).slice(0, 3).forEach((s) => pick.add(s));
   [...path].sort((a, b) => widthOf(b) - widthOf(a)).slice(0, 2).forEach((s) => pick.add(s));
+  path.filter((s) => s.sub?.placing).slice(0, 1).forEach((s) => pick.add(s));      // (the value waiting to be dragged, its pop-up under x =)
   path.filter((s) => s.sub).slice(-2).forEach((s) => pick.add(s));
   return [...pick];
 }
@@ -42,6 +44,15 @@ function fitsAcross(root) {
     const inside = (r) => !r || (r.left >= area.left - 1 && r.right <= area.right + 1);
     return inside(left) && inside(right) && (!border || ((!left || left.right <= border.left + 1) && (!right || right.left >= border.right - 1)));
   });
+}
+
+// While the value waits to be dragged into x, its pop-up must not cover x = (the value is dragged from there): it goes in the empty space
+// under the rows (beside the checking space), or under the Mat, using the page's margin down to the window's edge (view/spotlight.js).
+function popupRoom(probe, top) {
+  const work = probe.querySelector('.sv-work')?.getBoundingClientRect();
+  const last = Math.max(0, ...[...probe.querySelectorAll('.lb-stack .lb-rowwrap')].map((r) => r.getBoundingClientRect().bottom));
+  if (work && last && work.bottom - last >= POPUP_ROOM) return true;
+  return top + probe.scrollHeight + POPUP_ROOM <= window.innerHeight + 1;
 }
 
 function setSize(el, [eq, work]) {
@@ -89,7 +100,7 @@ export function chooseSize(matRoot, adapter, session) {
         tree.querySelectorAll('.spot-layer').forEach((n) => n.remove());           // (pop-ups float over the page: no room of their own)
         probe.replaceChildren(tree);
         place();
-        const tall = probe.scrollHeight <= room + 1;
+        const tall = probe.scrollHeight <= room + 1 && (!s.sub?.placing || popupRoom(probe, box.top));
         const wide = probe.scrollWidth <= probe.clientWidth + 1 && fitsAcross(probe);
         return tall && wide;
       });

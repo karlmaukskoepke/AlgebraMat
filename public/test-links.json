@@ -3,6 +3,156 @@
   "updated": "2026-10-24",
   "checks": [
     {
+      "id": "s-pickup",
+      "name": "Pick up an x-term: nothing else disappears",
+      "build": "Build S",
+      "link": {
+        "label": "Open Variables on both sides · Level 1",
+        "query": "?pack=variables-both-sides&level=1&seed=21&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Variables on both sides, Level 1, on 7x = 4x + 15.",
+        "Drag the 4x across the = onto the left side and let go. Watch the two 4x’s get struck through and the new row come in, then wait 3 seconds.",
+        "Press on the 7x in the newest row and lift it a little above the row. Hold it there and look at the rows above it.",
+        "Let go where it was."
+      ],
+      "see": "While you hold the 7x, a copy of it rides above the pointer and a dashed gap stays where it was. Nothing else changes: 7x = 4x + 15, the struck-through row and the rest of 7x − 4x = 15 stay exactly as they were; nothing vanishes and nothing plays again. When you let go, the 7x is back in its place."
+    },
+    {
+      "id": "s-type-after-divide",
+      "name": "Type x after dividing: the last line stays still",
+      "build": "Build S",
+      "link": {
+        "label": "Open Variables on both sides · Level 1",
+        "query": "?pack=variables-both-sides&level=1&seed=21&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Variables on both sides, Level 1, on 7x = 4x + 15.",
+        "Drag the 4x across the = onto the left side. Drag the −4x onto the 7x, type 3x and press Enter.",
+        "Click Divide (÷), type 3 and press Enter. Watch the two 3s cross off, then wait 3 seconds.",
+        "Click the box after x = and type 5."
+      ],
+      "see": "The two 3s are crossed off once, when you divide. Typing 5 puts it in x = and nothing else moves: the row x = (15) over 3 stays where it is, and the cross-off does not play again."
+    },
+    {
+      "id": "s-fraction-bar",
+      "name": "Click the fraction bar: nothing replays",
+      "build": "Build S",
+      "link": {
+        "label": "Open Distribute, combine, solve · Level 1",
+        "query": "?pack=distribute-solve&level=1&seed=37&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Distribute, combine, solve, Level 1, on 3(x + 2) = 15.",
+        "Click Divide (÷), type 3 and press Enter. Watch the two 3s cross off, then wait 3 seconds.",
+        "Click the fraction bar under (15).",
+        "Type 5 and press Enter."
+      ],
+      "see": "Clicking the bar opens a box for the answer, x + 2 = [ ], and the rows above stay where they are (greyed behind it): nothing erases and the cross-off of the 3s does not play again. With 5 the new row reads x + 2 = 5."
+    },
+    {
+      "id": "s-same-size",
+      "name": "The equation stays the same size through a whole problem",
+      "build": "Build S",
+      "link": {
+        "label": "Open Variables on both sides · Level 2",
+        "query": "?pack=variables-both-sides&level=2&seed=21&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Level 2 on 5x + 5 = 2x + 14. Look at how big 5x + 5 = 2x + 14 is.",
+        "Drag the 2x across the = onto the left side. Then drag the −2x onto the 5x, type 3x and press Enter.",
+        "Press Undo, then combine again: drag the −2x onto the 5x, type 3x and press Enter.",
+        "Click Add, type −5 and press Enter. Drag the 14 onto the −5, type 9 and press Enter.",
+        "Click Divide (÷), type 3 and press Enter. Type 3 in x =, press Enter, drag the 3 onto each x and press Enter for each line until Balanced."
+      ],
+      "see": "5x + 5 = 2x + 14 and every new equation under it are written in the same size from the first screen to Balanced: after each move, after Undo, when the rows fill up and during the check. (Before, everything shrank when a fourth row appeared and grew again after Undo.)"
+    },
+    {
+      "id": "s-drag-right",
+      "name": "Drag a number across with x on the right",
+      "build": "Build S",
+      "link": {
+        "label": "Open Variables on both sides · Level 3",
+        "query": "?pack=variables-both-sides&level=3&seed=7&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Level 3 on 4x + 11 = 8x − 1.",
+        "Drag the 4x across the = onto the right side. Drag the −4x onto the 8x, type 4x and press Enter. The newest row reads 11 = 4x − 1.",
+        "Straight away (without pressing anything else), drag the −1 across the = onto the left side and let go."
+      ],
+      "see": "The −1 crosses on the first try, turning into +1 as it goes: the next rows read 11 + 1 = 4x − 1 + 1 (the −1 and +1 on the right struck through), then 11 + 1 = 4x. Before, this drag did nothing whenever the move before it still showed its work, which is what happened on 8 = 5x + 3."
+    },
+    {
+      "id": "s-first-drag",
+      "name": "The first drag after distributing moves the term",
+      "build": "Build S",
+      "link": {
+        "label": "Open Variables on both sides · Level 5",
+        "query": "?pack=variables-both-sides&level=5&seed=11&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Level 5 on 4(x − 3) = 2x − 6.",
+        "Drag the 4 onto the parenthesis. Type 4, press Enter, type −12, press Enter. The row reads 4x + −12 = 2x − 6.",
+        "Without pressing Next, drag the 2x across the = onto the left side and let go."
+      ],
+      "see": "The 2x crosses on the first drag (before, the first drag only cleared “Distributed”): the rows read 4x − 12 − 2x = 2x − 6 − 2x with the two 2x’s on the right struck through, then 4x + −12 − 2x = −6."
+    },
+    {
+      "id": "s-first-drag-distribute",
+      "name": "Distribute: the first drag after distributing moves the term",
+      "build": "Build S",
+      "link": {
+        "label": "Open Distribute, combine, solve · Level 1",
+        "query": "?pack=distribute-solve&level=1&seed=37&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Distribute, combine, solve, Level 1, on 3(x + 2) = 15.",
+        "Drag the 3 onto the parenthesis. Type 3, press Enter, type 6, press Enter. The row reads 3x + 6 = 15.",
+        "Without pressing Next, drag the 6 across the = onto the right side and let go."
+      ],
+      "see": "The 6 crosses on the first drag and turns into −6: the rows read 3x + 6 − 6 = 15 − 6 with the two 6s on the left struck through, then 3x = 15 − 6."
+    },
+    {
+      "id": "s-flip-crossoff",
+      "name": "Flip everything: each minus turns into a plus, slowly",
+      "build": "Build S",
+      "link": {
+        "label": "Open Flip everything · Level 1",
+        "query": "?pack=flip-everything&level=2&seed=7&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Flip everything, Level 1, on −x = 8.",
+        "Click Flip everything (the fourth button), then the green Go.",
+        "Watch the row −1 × (−x) = −1 × (8) for 5 seconds."
+      ],
+      "see": "First the minus of −1 gets a red up-and-down stroke, drawn over about a second, so it reads as a plus; then the minus in (−x) does the same. Only then does x = −(8) come in under it. The minus signs on the other side are not marked."
+    },
+    {
+      "id": "s-add-options",
+      "name": "Add’s two options preview themselves",
+      "build": "Build S",
+      "link": {
+        "label": "Open Variables on both sides · Level 2",
+        "query": "?pack=variables-both-sides&level=2&seed=7&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Level 2 on 8x − 14 = 5x + 10.",
+        "Click Add (the top box in the panel). Its two options open beside it.",
+        "Point at the second option, + ▢x, without clicking.",
+        "Point at the first option, + ▢, without clicking."
+      ],
+      "see": "Pointing at + ▢x draws the grey preview row 8x − 14 + ▢x = 5x + 10 + ▢x, with dashed boxes and an x after each box. Pointing at + ▢ draws the same row without the x. Nothing is added until you type a number and press Enter."
+    },
+    {
       "id": "r-level-1",
       "name": "Variables on both sides, Level 1: ax = bx + c",
       "build": "Build R",
@@ -189,9 +339,10 @@
         "Click the button. It opens Level 2 on 5x + 5 = 2x + 14. You are going to play a student who gets things wrong.",
         "Mistake 1, the sign lost when moving an x-term: click Add, then its second option (+ ▢x), type 2 and press Enter. Wait two seconds. A good response lights the move as “got bigger”, says +2x + +2x did not eliminate the term, and leaves only Undo. Press Undo: the hint lights the 2x with a ghost of it gliding across the = and says “Move this x-term to the other side. Drag it across the =, or use Add.”",
         "Mistake 2, checking before x is on one side: click the box after x =, type 3 and press Enter. A good response: x = stays greyed with “Get x on one side first.” and nothing is checked.",
-        "Mistake 3, combining by adding the sizes: drag the 2x across the = onto the left side, then drag the −2x onto the 5x, type 7x and press Enter. A good response says “5x + −2x is not 7x. Press Undo and try again.” with both terms lit. Press Undo: the 5x and the −2x are outlined and a pop-up says “5x and −2x are like terms. Drag one onto the other to combine them.”"
+        "Mistake 3, combining by adding the sizes: drag the 2x across the = onto the left side, then drag the −2x onto the 5x, type 7x and press Enter. A good response says “5x + −2x is not 7x. Press Undo and try again.” with both terms lit. Press Undo: the 5x and the −2x are outlined and a pop-up says “5x and −2x are like terms. Drag one onto the other to combine them.”",
+        "Last, pick a term up and drop it back, watching for anything redrawing: press on the 5 in the newest row, lift it a little, and let go where it was."
       ],
-      "see": "Each mistake gets a calm answer in the student’s own numbers, Undo is the way out of each error, and the hint after Undo points at the next move. x = never takes a value while x is on both sides. Nothing is worked out for you."
+      "see": "Each mistake gets a calm answer in the student’s own numbers, Undo is the way out of each error, and the hint after Undo points at the next move. x = never takes a value while x is on both sides. Nothing is worked out for you. Picking the term up leaves a dashed gap where it was and nothing else moves; letting go puts it back. Through the whole item no row you have already seen vanishes, fades in again, plays its cross-off again or changes size."
     },
     {
       "id": "p-combine-nudge",
@@ -278,7 +429,7 @@
         "Click Flip everything (the fourth button), then the green Go.",
         "Watch the row −1 × (−x) = −1 × (8) for two seconds."
       ],
-      "see": "On the x side the minus of −1 and the minus of −x are each struck through with a short red line; the other side is not struck. The next row reads x = −(8)."
+      "see": "On the x side the minus of −1 and the minus of −x each get a red up-and-down stroke, one after the other, so each reads as a plus (since Build S; before, each was struck through with a short line); the other side is not marked. The next row reads x = −(8)."
     },
     {
       "id": "p-tab-blanks",
@@ -887,9 +1038,10 @@
         "Mistake 4: add the wrong number: click Add, type 5, press Enter. Then click Undo.",
         "Mistake 5: a wrong sum: drag the 5 onto the 6, type 12, press Enter. Then click Undo.",
         "Mistake 6, a mistake, Undo, then type in the blank: click the button at the top of this item again (it starts the same problem fresh). Drag the 2 onto the parenthesis, type 2, Enter, 6, Enter. Drag the 5 onto the 6, type 11 and press Enter. Click Add, type 11 and press Enter. Wait two seconds and press Undo. Without clicking anything, type −11 and press Enter, then click Next.",
-        "Wait 3 seconds and watch the nudge: the 17 and the −11 glow and pulse, then a small pop-up says “Drag one onto the other to combine them.” with a faint copy gliding from one to the other."
+        "Wait 3 seconds and watch the nudge: the 17 and the −11 glow and pulse, then a small pop-up says “Drag one onto the other to combine them.” with a faint copy gliding from one to the other.",
+        "Last, pick a term up and drop it back, watching for anything redrawing: press on the 17 in the newest row, lift it a little, and let go where it was."
       ],
-      "see": "I’m stuck flashes after 10 seconds, and then lights the 2 and the parenthesis (“Drag the 2 onto the parenthesis…”). The half-multiplied product is lit with “2 · 3 is not 3. Multiply this piece too.”; Undo brings the same hint back. Divide says “That move works once each side is one term.” Adding 5 is lit as “did not eliminate the term”. The wrong sum says “5 + 6 is not 12.”, and after Undo the 5 and the 6 are outlined with “5 and 6 are like terms. Drag one onto the other to combine them.” Mistake 6: after Undo the Add box is open again; the −11 you type goes straight into it, Enter writes 11 + 2x − 11 = 17 − 11, and Next writes 2x = 17 − 11. Waiting at 2x = 17 − 11 nudges the 17 and the −11."
+      "see": "I’m stuck flashes after 10 seconds, and then lights the 2 and the parenthesis (“Drag the 2 onto the parenthesis…”). The half-multiplied product is lit with “2 · 3 is not 3. Multiply this piece too.”; Undo brings the same hint back. Divide says “That move works once each side is one term.” Adding 5 is lit as “did not eliminate the term”. The wrong sum says “5 + 6 is not 12.”, and after Undo the 5 and the 6 are outlined with “5 and 6 are like terms. Drag one onto the other to combine them.” Mistake 6: after Undo the Add box is open again; the −11 you type goes straight into it, Enter writes 11 + 2x − 11 = 17 − 11, and Next writes 2x = 17 − 11. Waiting at 2x = 17 − 11 nudges the 17 and the −11. Picking the term up leaves a dashed gap where it was and nothing else moves; letting go puts it back. Through the whole item no row you have already seen vanishes, fades in again, plays its cross-off again or changes size."
     },
     {
       "id": "m-placement-old",
@@ -1218,9 +1370,10 @@
         "Mistake 4, a move at the wrong moment: click Divide (÷, greyed). A good response is a small note, “That move works once each side is one term.”, and nothing locked.",
         "Mistake 5, a wrong sum: the Add box is open again, so type −4 and press Enter. Drag the 19 onto the 4, type 23 and press Enter. A good response says “19 − 4 is not 23. Press Undo and try again.” with the two numbers still readable. Press Undo: the hint lights 19 and −4 and says to drag one onto the other.",
         "Mistake 6, a mistake, Undo, then type in the blank: click the button at the top of this item again (it starts the same problem fresh). Click Add (the first box in the panel on the right), type 4 and press Enter. Wait two seconds and press Undo. Without clicking anything, type −4 and press Enter, then click Next.",
-        "Wait 3 seconds and watch the nudge: the 19 and the −4 glow and pulse, then a small pop-up under them says “Drag one onto the other to combine them.” and a faint 19 glides onto the −4. Putting two numbers together is a step with only one thing to do, so it is nudged; choosing a move never is."
+        "Wait 3 seconds and watch the nudge: the 19 and the −4 glow and pulse, then a small pop-up under them says “Drag one onto the other to combine them.” and a faint 19 glides onto the −4. Putting two numbers together is a step with only one thing to do, so it is nudged; choosing a move never is.",
+        "Last, pick a term up and drop it back, watching for anything redrawing: press on the 19 in the newest row, lift it a little, and let go where it was."
       ],
-      "see": "Every mistake gets a calm answer in the real numbers, Undo is the way out of each error, and the hint after Undo points at the next move. Nothing is ever worked out for you. Mistake 6: after Undo the Add box is open again; the −4 you type goes straight into it, Enter writes 3x + 4 − 4 = 19 − 4, and Next writes 3x = 19 − 4. Waiting at 3x = 19 − 4 nudges the 19 and the −4 (it never chooses a move for you)."
+      "see": "Every mistake gets a calm answer in the real numbers, Undo is the way out of each error, and the hint after Undo points at the next move. Nothing is ever worked out for you. Mistake 6: after Undo the Add box is open again; the −4 you type goes straight into it, Enter writes 3x + 4 − 4 = 19 − 4, and Next writes 3x = 19 − 4. Waiting at 3x = 19 − 4 nudges the 19 and the −4 (it never chooses a move for you). Picking the term up leaves a dashed gap where it was and nothing else moves; letting go puts it back. Through the whole item no row you have already seen vanishes, fades in again, plays its cross-off again or changes size."
     },
     {
       "id": "j-level-1",
@@ -1436,9 +1589,10 @@
         "Mistake 4, forgetting the sign at the end: the equation is now −x = 4. Type 4, press Enter, drag it onto the x, press Next twice and wait. Press Undo. A good response says −x = 4 means the opposite of x is 4, so x is not 4, and lights Flip everything.",
         "Mistake 5, pressing I’m stuck again and again: press it twice. A good response repeats the reminder with the real numbers (this card has no pictures yet) and still leaves the move to you.",
         "Mistake 6, a mistake, Undo, then type in the blank: click the button at the top of this item again (it starts the same problem fresh). Click the box after x =, type 12 and press Enter. Drag it onto the x, press Next twice and wait two seconds. Press Undo, then Got it. Click Divide (÷), click the box under the bar, press the minus key and type 3. Click Go.",
-        "Wait 3 seconds and watch the nudge: x is alone now, so a good response nudges nothing. The other side is yours to work out."
+        "Wait 3 seconds and watch the nudge: x is alone now, so a good response nudges nothing. The other side is yours to work out.",
+        "Last, watch for anything redrawing: click the box after x =, type 1, then press Backspace."
       ],
-      "see": "Every mistake gets a short message built from the student’s own numbers, and there is always one clear thing to press next. Nothing gives the answer away. Mistake 6: the −3 goes into the box you clicked (under both bars), and Go writes (−3x) over −3 = (12) over −3. Waiting at the end nudges nothing: x is alone."
+      "see": "Every mistake gets a short message built from the student’s own numbers, and there is always one clear thing to press next. Nothing gives the answer away. Mistake 6: the −3 goes into the box you clicked (under both bars), and Go writes (−3x) over −3 = (12) over −3. Waiting at the end nudges nothing: x is alone. Typing into x = and taking it back changes nothing above it. Through the whole item no row you have already seen vanishes, fades in again, plays its cross-off again or changes size."
     },
     {
       "id": "i-check-shadow",
@@ -1823,9 +1977,10 @@
         "Mistake 4, a move that only half cancels: type −5 and click Go. Wait two seconds. A good response marks the leftover 3 “still here” and says +8 was only partially canceled by the −5 you added. Press Undo, then Got it.",
         "Mistake 5, pressing I’m stuck again and again: press it four times. A good response gives a bigger clue each time (look at the +8, then which number cancels it, then choose Add, then “−8 cancels the +8. Add it to both sides yourself.”) and still leaves the move to you.",
         "Mistake 6, a mistake, Undo, then type in the blank: click the button at the top of this item again (it starts the same problem fresh). Click Add (the first box in the panel on the right), type 8 and click the green Go. Wait two seconds and press Undo. Without clicking anything, type −8, then click Go.",
-        "Wait 3 seconds and watch the nudge: x is alone now, so a good response nudges nothing. Working out −4 − 8 and typing x is yours to do."
+        "Wait 3 seconds and watch the nudge: x is alone now, so a good response nudges nothing. Working out −4 − 8 and typing x is yours to do.",
+        "Last, watch for anything redrawing: click the box after x =, type 1, then press Backspace."
       ],
-      "see": "Every mistake gets a short message built from the student’s own numbers, and there is always one clear thing to press next. Nobody is left stuck, and nothing gives the answer away. Mistake 6: after Undo the Add box under the equation is open again; the −8 you type goes straight into it, and Go writes x = −4 − 8. Waiting at the end nudges nothing: x is alone."
+      "see": "Every mistake gets a short message built from the student’s own numbers, and there is always one clear thing to press next. Nobody is left stuck, and nothing gives the answer away. Mistake 6: after Undo the Add box under the equation is open again; the −8 you type goes straight into it, and Go writes x = −4 − 8. Waiting at the end nudges nothing: x is alone. Typing into x = and taking it back changes nothing above it. Through the whole item no row you have already seen vanishes, fades in again, plays its cross-off again or changes size."
     },
     {
       "id": "student-divide",
@@ -1845,9 +2000,10 @@
         "Mistake 5, dividing by a number that does not split: click Divide (÷), type 2 and click Go. Wait two seconds. A good response says it doesn’t split (5 boxes can’t make 2 equal groups, and −15 can’t be shared into 2 equal groups), and pulses Undo. Press Undo: it shows the five x boxes and the fractions to choose from. Press Got it.",
         "Mistake 6, pressing I’m stuck: press it twice. A good response gives a bigger clue the second time (first the 5 boxes and 15 counters, then “take ⅕ of both sides”) and still leaves the move to you.",
         "Mistake 7, a mistake, Undo, then type in the blank: click the button at the top of this item again (it starts the same problem fresh). Click the box after x =, type 3 and press Enter. Drag the 3 onto the x, press Next twice and wait two seconds. Press Undo. Without clicking anything, type 5, then click the green Go.",
-        "Wait 3 seconds and watch the nudge: x is alone now, so a good response nudges nothing (and on 5x = −15, choosing the move is the thinking: only I’m stuck flashes, after 10 seconds)."
+        "Wait 3 seconds and watch the nudge: x is alone now, so a good response nudges nothing (and on 5x = −15, choosing the move is the thinking: only I’m stuck flashes, after 10 seconds).",
+        "Last, watch for anything redrawing: click the box after x =, type 1, then press Backspace."
       ],
-      "see": "Every mistake gets a short message built from the student’s own numbers, and there is always one clear thing to press next. Nobody is left stuck, and nothing gives the answer away. Mistake 7: after Undo the hint lights the Divide button and shows its blank under each side; the 5 you type goes straight into it, on both sides, and Go writes (5x) over 5 = (−15) over 5. Waiting at the end nudges nothing: x is alone."
+      "see": "Every mistake gets a short message built from the student’s own numbers, and there is always one clear thing to press next. Nobody is left stuck, and nothing gives the answer away. Mistake 7: after Undo the hint lights the Divide button and shows its blank under each side; the 5 you type goes straight into it, on both sides, and Go writes (5x) over 5 = (−15) over 5. Waiting at the end nudges nothing: x is alone. Typing into x = and taking it back changes nothing above it. Through the whole item no row you have already seen vanishes, fades in again, plays its cross-off again or changes size."
     }
   ],
   "sections": [

@@ -62,6 +62,7 @@ export function bindGrab(root, dispatch, getSession) {
   }
   function mark(slot) {
     clearMarks();
+    drag.src.classList.add('is-lifted');                            // (a redraw keeps the term, but lays the new tree's classes on it: Build S)
     const row = live();
     if (!row || !slot || slot.factorMiss) { drag.ghost.classList.add('is-away'); return; }
     drag.ghost.classList.remove('is-away');

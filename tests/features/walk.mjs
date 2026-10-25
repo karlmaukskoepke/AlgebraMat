@@ -236,6 +236,49 @@ class Walk {
     const to = toSide === 'left' ? side.x + side.width - 10 : side.x + side.width + 20;
     await m.move(to, side.y + side.height / 2, { steps: 14 }); await wait(this.page, 200); await m.up(); await wait(this.page, 500);
   }
+  // Build S: while `act` runs, no row already on screen is taken off and put back, starts an animation again, or changes its text size
+  async steady(act) {
+    await this.page.evaluate(() => {
+      window.__pre = new Set(document.querySelectorAll('.lb-stack .lb-rowwrap'));
+      window.__preAnims = new Set(document.getAnimations());
+      window.__preSizes = new Map([...window.__pre].map((r) => [r, getComputedStyle(r.querySelector('.lb-eq') ?? r).fontSize]));
+    });
+    await act();
+    await wait(this.page, 150);
+    const problems = await this.page.evaluate(() => {
+      const out = [];
+      for (const r of window.__pre) {
+        const t = r.textContent.replace(/\s+/g, '');
+        if (!r.isConnected) { if (r.dataset.rk && document.querySelector(`.lb-stack .lb-rowwrap[data-rk="${r.dataset.rk}"]`)) out.push(`the row ${t} was drawn again`); continue; }
+        if (getComputedStyle(r.querySelector('.lb-eq') ?? r).fontSize !== window.__preSizes.get(r)) out.push(`the row ${t} changed size`);
+      }
+      for (const a of document.getAnimations()) {
+        if (window.__preAnims.has(a) || !a.animationName || a.effect?.getComputedTiming?.().iterations === Infinity) continue;
+        const row = a.effect?.target?.closest?.('.lb-rowwrap');
+        if (row && window.__pre.has(row)) out.push(`the row ${row.textContent.replace(/\s+/g, '')} played ${a.animationName} again`);
+      }
+      return out;
+    });
+    if (problems.length) throw new Error(`${problems.join('; ')} after step "${this.step}"`);
+  }
+  // Build S: press on a term of the newest row (by its text), lift it above the row and hold; `check` runs while it is held; then let go
+  // where it was
+  async liftBack(text, check = null) {
+    const tok = this.page.locator('.lx-live .lx-tok').filter({ hasText: new RegExp(`^\\s*[+−]?\\s*${text.replace(/[−-]/g, '[−-]?')}\\s*$`) }).first();
+    const b = await tok.boundingBox();
+    const m = this.page.mouse;
+    const x = b.x + b.width / 2;
+    const y = b.y + b.height / 2;
+    await this.steady(async () => {
+      await m.move(x, y); await m.down();
+      await m.move(x + 8, y - 6, { steps: 3 }); await m.move(x + 10, y - 70, { steps: 6 }); await wait(this.page, 400);
+    });
+    const held = await this.page.evaluate(() => ({ ghost: document.querySelector('.lx-dragghost')?.textContent ?? null, gap: Boolean(document.querySelector('.lx-live .is-lifted, .lx-live .lx-tok.is-gap')) }));
+    if (!held.ghost) throw new Error(`a copy of ${text} should ride above the pointer after step "${this.step}"`);
+    if (!held.gap) throw new Error(`a dashed gap should stay where ${text} was after step "${this.step}"`);
+    if (check) await check();
+    await this.steady(async () => { await m.move(x, y, { steps: 6 }); await m.up(); await wait(this.page, 300); });
+  }
   async rows() { return (await this.page.evaluate(() => [...document.querySelectorAll('.lb-stack .lb-rowwrap')].map((r) => r.innerText.replace(/\s+/g, '')))); }
   async row(text) { const rs = await this.rows(); const want = text.replace(/\s+/g, ''); if (!rs.some((r) => r.endsWith(want) || r === want)) throw new Error(`expected a row ${text} after step "${this.step}": ${rs.join(' | ')}`); }
   async box(selector) { return this.page.evaluate((s) => { const r = document.querySelector(s)?.getBoundingClientRect(); return r ? [r.left, r.top, r.right, r.bottom].map(Math.round) : null; }, selector); }
@@ -243,6 +286,86 @@ class Walk {
 
 // ---- one walk per item (same id as in the data file) ---------------------------------------------------------------------------------
 const WALKS = {
+  // ---- Build S: redraws keep what is on screen, one text size a problem, drags that work, Flip's cross-off, Add's previews ----
+  async 's-pickup'(w) {
+    await w.start(); await w.see('7x = 4x + 15');
+    w.at('drag the 4x across, wait'); await w.crossTerm('4x', 'left'); await w.row('7x − 4x = 15'); await wait(w.page, 3000);
+    w.at('lift the 7x and hold it');
+    await w.liftBack('7x', async () => {
+      await w.row('7x = 4x + 15'); await w.row('7x − 4x = 4x + 15 − 4x');
+      if ((await w.rows()).length !== 3) throw new Error('every row should still be on the screen while the 7x is held');
+      await w.both('s-pickup');
+    });
+    w.at('let go where it was'); await w.row('7x − 4x = 15');
+  },
+  async 's-type-after-divide'(w) {
+    await w.start(); await w.see('7x = 4x + 15');
+    w.at('drag across, combine'); await w.crossTerm('4x', 'left'); await w.combineTerms('−4x', '7x', '3x'); await w.row('3x = 15');
+    w.at('Divide 3, wait'); await w.divEnter(3); await w.row('x = (15) 3'); await wait(w.page, 3000);
+    w.at('click x =, type 5'); await w.steady(async () => { await w.click(act('focus')); await w.type(5); });
+    await w.row('x = (15) 3'); await w.both('s-type-after-divide');
+  },
+  async 's-fraction-bar'(w) {
+    await w.start(); await w.see('3(x + 2) = 15');
+    w.at('Divide 3, wait'); await w.divEnter(3); await w.row('x + 2 = (15) 3'); await wait(w.page, 3000);
+    w.at('click the fraction bar'); await w.steady(async () => { await w.click('[data-action="lxCalc"]'); });
+    if (!(await w.page.locator('[data-fk="calc"]').count())) throw new Error('a box for the answer should open');
+    await w.row('3(x + 2) = 15'); await w.both('s-fraction-bar');
+    w.at('type 5, Enter'); await w.type(5); await w.enter(); await wait(w.page, 300); await w.row('x + 2 = 5');
+  },
+  async 's-same-size'(w) {
+    const sizes = new Set();
+    const look = async () => { for (const z of await w.page.evaluate(() => [...document.querySelectorAll('.lb-stack .lb-rowwrap:not(.has-work):not(.is-fold) > .lb-eq')].map((e) => getComputedStyle(e).fontSize))) sizes.add(z); };
+    await w.start(); await w.see('5x + 5 = 2x + 14'); await look(); await w.shot('s-same-size-1');
+    w.at('drag the 2x across, combine'); await w.crossTerm('2x', 'left'); await look(); await w.combineTerms('−2x', '5x', '3x'); await look(); await w.row('3x + 5 = 14');
+    w.at('Undo, combine again'); await w.click(act('undo')); await wait(w.page, 500); await look(); await w.combineTerms('−2x', '5x', '3x'); await look();
+    w.at('Add −5, combine'); await w.addEnter(-5); await look(); await w.combine(9); await look(); await w.row('3x = 9'); await wait(w.page, 2500); await w.shot('s-same-size-2');
+    w.at('Divide 3, check'); await w.divEnter(3); await look(); await w.answer(3, 5); await look(); await w.see('20 = 20', '✓ Balanced'); await w.shot('s-same-size-3');
+    if (sizes.size !== 1) throw new Error(`the equation should keep one size, but it was ${[...sizes].join(', ')}`);
+  },
+  async 's-drag-right'(w) {
+    await w.start(); await w.see('4x + 11 = 8x − 1');
+    w.at('drag the 4x across, combine'); await w.crossTerm('4x', 'right'); await w.combineTerms('−4x', '8x', '4x'); await w.row('11 = 4x − 1');
+    w.at('drag the −1 across'); await w.crossTerm('1', 'left'); await w.row('11 + 1 = 4x − 1 + 1'); await w.row('11 + 1 = 4x');
+    await w.both('s-drag-right');
+  },
+  async 's-first-drag'(w) {
+    await w.start(); await w.see('4(x − 3) = 2x − 6');
+    w.at('distribute 4, −12'); await w.distribute(4, -12); await w.row('4x + −12 = 2x − 6');
+    w.at('drag the 2x across, first try'); await w.crossTerm('2x', 'left'); await w.row('4x − 12 − 2x = 2x − 6 − 2x'); await w.row('4x + −12 − 2x = −6');
+    await w.both('s-first-drag');
+  },
+  async 's-first-drag-distribute'(w) {
+    await w.start(); await w.see('3(x + 2) = 15');
+    w.at('distribute 3, 6'); await w.distribute(3, 6); await w.row('3x + 6 = 15');
+    w.at('drag the 6 across, first try'); await w.crossTerm('6', 'right'); await w.row('3x + 6 − 6 = 15 − 6'); await w.row('3x = 15 − 6');
+    await w.shot('s-first-drag-distribute');
+  },
+  async 's-flip-crossoff'(w) {
+    await w.start(); await w.see('−x = 8');
+    w.at('Flip, Go'); await w.flip();
+    const t0 = Date.now();
+    const frame = async (ms, name) => { await wait(w.page, Math.max(0, ms - (Date.now() - t0))); await w.shot(name); };
+    await frame(1100, 's-flip-1');
+    const marks = await w.page.locator('.lb-work .xo.is-minus').count();
+    if (marks !== 2) throw new Error(`the two minus signs on the x side should be marked, found ${marks}`);
+    await frame(2300, 's-flip-2');
+    await frame(4300, 's-flip-3');
+    await w.row('x = −(8)');
+    const strokes = await w.page.evaluate(() => [...document.querySelectorAll('.lb-work .xo.is-minus')].map((e) => { const a = getComputedStyle(e, '::after'); return [a.borderLeftWidth, a.borderTopWidth, a.transform]; }));
+    if (strokes.some(([l, t]) => l === '0px' || t !== '0px')) throw new Error(`each minus should get an up-and-down stroke: ${JSON.stringify(strokes)}`);
+  },
+  async 's-add-options'(w) {
+    await w.start(); await w.see('8x − 14 = 5x + 10');
+    w.at('Add'); await w.click(`${act('choose')}[data-move="add"]`);
+    w.at('point at + ▢x'); await w.page.locator('[data-aopt="x"]').hover(); await wait(w.page, 300);
+    if ((await w.page.locator('.lx-ghost.is-optpreview .lx-addx').count()) !== 2) throw new Error('the preview should print an x after each box');
+    await w.both('s-add-options-x');
+    w.at('point at + ▢'); await w.page.locator('[data-aopt="num"]').hover(); await wait(w.page, 300);
+    if (!(await w.page.locator('.lx-ghost.is-optpreview').count()) || (await w.page.locator('.lx-ghost .lx-addx').count())) throw new Error('the preview should show the number form, with no x');
+    await w.shot('s-add-options-num');
+    await w.row('8x − 14 = 5x + 10');
+  },
   // ---- Build R: Variables on both sides ----
   async 'r-level-1'(w) {
     await w.start(); await w.see('VARIABLES ON BOTH SIDES · Level 1', '7x = 4x + 15'); await w.both('r-level-1');
@@ -347,6 +470,7 @@ const WALKS = {
     w.at('mistake 3: Undo'); await w.click(act('undo')); await wait(w.page, 800);
     if ((await w.page.locator('.lx-live .lx-tok.is-hint').count()) !== 2) throw new Error('the 5x and the −2x should be outlined after Undo');
     await w.see('5x and −2x are like terms. Drag one onto the other to combine them.'); await w.shot('student-both-hint');
+    w.at('last: pick up the 5 and drop it back'); await w.liftBack('5');
   },
 
   // ---- Build P: nudges, calculate a product, cross-off, moving between blanks, Distribute polish, full checks, one drop per x ----
@@ -834,6 +958,7 @@ const WALKS = {
     await w.enter(); await wait(w.page, 400); await w.see('11 + 2x − 11 = 17 − 11');
     await w.click(act('foldNext')); await wait(w.page, 400); await w.row('2x = 17 − 11'); await w.shot('student-distribute-typed-after-undo');
     w.at('wait 3 seconds and watch the nudge'); await w.idle(5000); await w.nudged(2, 'Drag one onto the other to combine them.'); await w.shot('student-distribute-nudge');
+    w.at('last: pick up the 17 and drop it back'); await w.liftBack('17');
   },
   // ---- Build M, Part 1: the placement quiz ----
   async 'm-placement-old'(w) {
@@ -1040,6 +1165,7 @@ const WALKS = {
     await w.enter(); await wait(w.page, 400); await w.see('3x + 4 − 4 = 19 − 4');
     await w.click(act('foldNext')); await wait(w.page, 400); await w.row('3x = 19 − 4'); await w.shot('student-two-step-typed-after-undo');
     w.at('wait 3 seconds and watch the nudge'); await w.idle(5000); await w.nudged(2, 'Drag one onto the other to combine them.'); await w.shot('student-two-step-nudge');
+    w.at('last: pick up the 19 and drop it back'); await w.liftBack('19');
   },
   async 'f-no-0-1-minus1'(w) {
     await w.start();
@@ -1336,6 +1462,7 @@ const WALKS = {
     await w.typedIn('[data-fk="blank"]', '−8');
     w.at('mistake 6: Go'); await w.click(act('go')); await wait(w.page, 400); await w.see('x = −4 − 8'); await w.shot('student-add-typed-after-undo');
     w.at('wait 3 seconds and watch the nudge'); await w.idle(3500); await w.noNudge();
+    w.at('last: type 1 into x = and take it back'); await w.steady(async () => { await w.click(act('focus')); await w.type(1); await w.page.keyboard.press('Backspace'); });
   },
 
   async 'student-divide'(w) {
@@ -1380,6 +1507,7 @@ const WALKS = {
     await w.typedIn(DIV_BOX, '5'); await w.see('Same as multiplying by ⅕.');
     w.at('mistake 7: Go'); await w.click(act('go')); await wait(w.page, 400); await w.see('(5x) 5 = (−15) 5'); await w.shot('student-divide-typed-after-undo');
     w.at('wait 3 seconds and watch the nudge'); await w.idle(3500); await w.noNudge();
+    w.at('last: type 1 into x = and take it back'); await w.steady(async () => { await w.click(act('focus')); await w.type(1); await w.page.keyboard.press('Backspace'); });
   },
 
   // ---- Build I ----
@@ -1614,6 +1742,7 @@ const WALKS = {
     await w.click(DIV_BOX); await w.page.keyboard.press('-'); await w.type(3); await w.typedIn(DIV_BOX, '−3');
     w.at('mistake 6: Go'); await w.click(act('go')); await wait(w.page, 400); await w.see('(−3x) −3 = (12) −3'); await w.shot('student-flip-typed-after-undo');
     w.at('wait 3 seconds and watch the nudge'); await w.idle(3500); await w.noNudge();
+    w.at('last: type 1 into x = and take it back'); await w.steady(async () => { await w.click(act('focus')); await w.type(1); await w.page.keyboard.press('Backspace'); });
   },
   // ---- Build N: typing after a mistake ----
   async 'n-type-after-mistake'(w) {
