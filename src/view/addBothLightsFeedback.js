@@ -3,11 +3,25 @@
 
 import { addBothFeedbackText } from './addBothFeedback.js';
 
+const CROSS_TAIL = {
+  number: () => 'Try moving the number.',
+  numbers: () => 'Try moving a number.',
+  divide: (p) => (p.a === '−1' ? 'To get x from −x, divide both sides by −1.' : `To get one x from ${p.a}x, divide both sides by ${p.a}.`),
+  alone: () => 'x is already alone. Type its value.',
+  combine: () => 'Combine the x-terms first: drag one onto the other.',
+  distribute: (p) => `Drag the ${p.factor} onto its parenthesis to multiply it in.`,
+  work: () => 'Work out the numbers beside x first.',
+};
+
 const LX = {
   lxShowMove: () => 'Nice. Now show it with a move.',
   // round 2 (SPEC-LIGHTS-EXPERIMENT-ADD-rev02.md)
   lxMustMove: () => 'Show this one with a move first.',
-  lxXCross: (p) => `x is already on the ${p.side === 'right' ? 'right' : 'left'} side of the equation. Let’s keep x there. Try moving a number.`,
+  // (Build T: the last sentence fits the shape of x's side, never a move that does not apply)
+  lxXCross: (p) => `x is already on the ${p.side === 'right' ? 'right' : 'left'} side of the equation. Let’s keep x there. ${CROSS_TAIL[p.tail ?? 'numbers'](p)}`,
+  lxXInGroup: (p) => `The other side has an x too, inside the parenthesis. Drag the ${p.factor} onto its parenthesis first.`,
+  lxSayAlone: (p) => p.text,
+  lxWorkFirst: (p) => (p.what ? `Work out ${p.what} first: click the ${p.div ? 'fraction bar' : '×'}.` : 'Work this out first, then move it.'),
   // a drop that cannot work says why, and the term goes back (Build S: never a silent drop)
   lxUnlike: (p) => (p.group ? 'A parenthesis has to be distributed before anything joins it. Drag its number onto the parenthesis first.' : 'Only like terms combine: an x-term with an x-term, a number with a number.'),
   lxFactorParen: (p) => `Drag the ${p.factor} onto its parenthesis to multiply it in.`,

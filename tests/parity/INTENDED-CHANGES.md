@@ -587,6 +587,21 @@ vertical stroke through each minus, one at a time (the recorded Flip screen is i
 on hover (Variables on both sides only); the two new drop messages ("Only like terms combine…", "Drag the 3 onto its parenthesis…").
 Every recorded screen with its first-problem pop-up still shows it.
 
+## Build T (2026-10-25): products in the check with parentheses, Flip's stroke centred, refused drags that fit the shape
+
+**Part 1.** Problems, save codes, class-sheet records and the 25 scripted runs are unchanged. Two recorded screens differ at 1366×768
+(the same two at 1366×650 differ by less than the tolerance), each for one reason: the check writes a product with parentheses.
+
+| Key | Before | After | Why |
+|---|---|---|---|
+| `screen:div-wrong-guess@1366x768` | the check's line 2 reads `5 × 4 = −15` | `5(4) = −15` | Part 1.1: never a times sign beside the x's (0.21% of pixels) |
+| `screen:div-end@1366x768` | the check's line 2 reads `5 × (−3) = −15` | `5(−3) = −15` | Part 1.1 (0.44% of pixels) |
+
+**Below the screen check (no recorded state shows them):** the same parentheses on every card's check (Two-step `4 − 3(5) = −11`,
+Distribute `3(7 + 2) + 2(7) = 41`, Variables `7(5) = 4(5) + 15`, Flip `−3(−4) = 12`); Flip's red stroke now centred on its minus (about
+3 px higher at 32 px); the last sentence of "x is already on the left side…", which now fits the equation's shape, and three new
+refusal messages (an x inside the other side's parenthesis; a number still to work out; x alone on a fraction).
+
 <!-- history: nothing below this line is read by the harness -->
 
 ## History: screen changes accepted by the re-baseline of 2026-10-24 (Build O, Part 0)

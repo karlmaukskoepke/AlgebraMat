@@ -1,7 +1,90 @@
 {
   "_about": "The test-links page (test-links.html) reads this list: Karl's change list. `checks` is the Features to check section at the top: one item per new feature (id, name, build, one link, numbered steps, what you should see), written from the real code and walked through with tests/features/walk.mjs before a build is called finished; the ticks live only in Karl's browser, and an item stays here until Karl has ticked it. The rest of the page: Live = on the site for everyone. Testing = behind a flag, waiting for Karl to keep or retire it. Retired = deleted. Every build adds or updates its entries (CLAUDE.md, Working with Karl). Each entry is a name, one plain sentence (`about`) and, for Live and Testing, its buttons. A button's `query` is the part after the address: card, level, seed, flags, sign-in skipped. `level` in a link is the saved level number (Add to both sides and Divide it: link level 2 is shown as Level 1). `reset: true` clears this browser's progress first; `look` is one sentence on what to look for; `notLive` says plainly why a link won't work on the live site.",
-  "updated": "2026-10-24",
+  "updated": "2026-10-25",
   "checks": [
+    {
+      "id": "t-parens-divide",
+      "name": "The check writes 5(−3), never 5 × −3 (Divide it)",
+      "build": "Build T",
+      "link": {
+        "label": "Open Divide it · Level 2",
+        "query": "?pack=divide-it&level=3&seed=7&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Divide it, Level 2, on 5x = −15.",
+        "Click the box after x =, type −3 and press Enter. Drag the −3 onto the x.",
+        "Press Next twice."
+      ],
+      "see": "Under 5x = −15 the check writes 5(−3) = −15: the 5 and the −3 sit side by side in parentheses, with no × anywhere. Then −15 = −15 and ✓ Balanced."
+    },
+    {
+      "id": "t-parens-two-step",
+      "name": "The check writes 3(5), never 3 × 5 (Two-step equations)",
+      "build": "Build T",
+      "link": {
+        "label": "Open Two-step equations · Level 5",
+        "query": "?pack=two-step-equations&level=5&seed=1565&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Two-step equations, Level 5, on 4 − 3x = −11.",
+        "Click the box after x =, type 5 and press Enter. Drag the 5 onto the x.",
+        "Press Enter three times."
+      ],
+      "see": "The check writes 4 − 3(5) = −11 under the equation, then 4 − 15 = −11, −11 = −11 and ✓ Balanced. No line has a × in it."
+    },
+    {
+      "id": "t-parens-both-sides",
+      "name": "The check writes 7(5) = 4(5) + 15 (Variables on both sides)",
+      "build": "Build T",
+      "link": {
+        "label": "Open Variables on both sides · Level 1",
+        "query": "?pack=variables-both-sides&level=1&seed=21&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Variables on both sides, Level 1, on 7x = 4x + 15.",
+        "Drag the 4x across the = onto the left side. Then drag the −4x onto the 7x, type 3 and press Enter. The row reads 3x = 15.",
+        "Click Divide (the third button, with ÷ beside it), type 3 and press Enter.",
+        "Click the box after x =, type 5 and press Enter. Drag the 5 onto each x (one at a time), then press Enter for each line until Balanced."
+      ],
+      "see": "The check writes 7(5) = 4(5) + 15 with each blue 5 under its x, then 35 = 4(5) + 15, 35 = 20 + 15, 35 = 35 and ✓ Balanced. No × anywhere in the check."
+    },
+    {
+      "id": "t-flip-plus",
+      "name": "Flip’s red stroke crosses the middle of each minus, so it reads as a plus",
+      "build": "Build T",
+      "link": {
+        "label": "Open Flip everything · Level 3",
+        "query": "?pack=flip-everything&level=4&seed=213&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Flip everything, Level 3, on −3x = 12.",
+        "Click Flip everything (the fourth button), then the green Go. Watch the two minus signs for 4 seconds.",
+        "Press Undo. Click Divide (÷), press the minus key, type 1 and click Go. Watch for 4 seconds.",
+        "Press Undo. Click Divide (÷), press the minus key, type 3 and click Go. Watch for 4 seconds."
+      ],
+      "see": "Each time, a red up-and-down stroke is drawn through the middle of each minus that cancels, sticking out as far above the minus as below it, so the minus becomes a plus (not a T). The second minus follows the first."
+    },
+    {
+      "id": "t-drag-divide",
+      "name": "Dragging 3x at 3x = 15 says to divide, not to move a number",
+      "build": "Build T",
+      "link": {
+        "label": "Open Two-step equations · Level 1",
+        "query": "?pack=two-step-equations&level=1&seed=406&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Two-step equations, Level 1, on 3x + 4 = 19.",
+        "Drag the 3x across the = and let go on the right side.",
+        "Click Add (the top box), type −4 and press Enter. Drag the 19 onto the 4 beside it, type 15 and press Enter. The row reads 3x = 15.",
+        "Drag the 3x across the = again and let go on the right side."
+      ],
+      "see": "The first time the message ends “Let’s keep x there. Try moving the number.” (the 4 is beside x). At 3x = 15 it ends “Let’s keep x there. To get one x from 3x, divide both sides by 3.” The 3x goes back both times."
+    },
     {
       "id": "s-pickup",
       "name": "Pick up an x-term: nothing else disappears",
@@ -168,7 +251,7 @@
         "Click Divide (÷), type 3 and press Enter.",
         "Click the box after x =, type 5 and press Enter. Drag the 5 onto each x (one at a time), then press Enter for each line until Balanced."
       ],
-      "see": "The drag writes 7x − 4x = 4x + 15 − 4x with the two 4x struck on the right, then 7x − 4x = 15. Combining gives 3x = 15, dividing gives x = (15) over 3. The check reads 7 × 5 = 4 × 5 + 15, then 35 = 4 × 5 + 15, 35 = 20 + 15, 35 = 35, Balanced."
+      "see": "The drag writes 7x − 4x = 4x + 15 − 4x with the two 4x struck on the right, then 7x − 4x = 15. Combining gives 3x = 15, dividing gives x = (15) over 3. The check reads 7(5) = 4(5) + 15, then 35 = 4(5) + 15, 35 = 20 + 15, 35 = 35, Balanced."
     },
     {
       "id": "r-level-2",
@@ -222,7 +305,7 @@
         "Click Add, type 5 and press Enter. Drag the 11 onto the 5, type 16 and press Enter.",
         "Click Divide (÷), type 4 and press Enter. Type 4 in x =, press Enter, drag the 4 onto each x and press Enter for each line."
       ],
-      "see": "Adding 2x cancels the −2x on the right: 2x − 5 + 2x = 11. Then 4x − 5 = 11, 4x = 11 + 5, 4x = 16, x = (16) over 4. The check works one side at a time, from 2 × 4 − 5 = −2 × 4 + 11 to 3 = 3, then Balanced."
+      "see": "Adding 2x cancels the −2x on the right: 2x − 5 + 2x = 11. Then 4x − 5 = 11, 4x = 11 + 5, 4x = 16, x = (16) over 4. The check works one side at a time, from 2(4) − 5 = −2(4) + 11 to 3 = 3, then Balanced."
     },
     {
       "id": "r-level-5",
@@ -324,7 +407,7 @@
         "Drag the 5 onto the first x (in 7x).",
         "Press Enter four times, slowly."
       ],
-      "see": "After the first drop only the x in 4x has a green check, and a faint dashed 5 waits under the other x. After the second the check starts 7x = 4x + 15 with 7 × 5 = 4 × 5 + 15 under it, each blue 5 straight under its x. Then 35 = 4 × 5 + 15, 35 = 20 + 15, 35 = 35, Balanced."
+      "see": "After the first drop only the x in 4x has a green check, and a faint dashed 5 waits under the other x. After the second the check starts 7x = 4x + 15 with 7(5) = 4(5) + 15 under it, each blue 5 straight under its x. Then 35 = 4(5) + 15, 35 = 20 + 15, 35 = 35, Balanced."
     },
     {
       "id": "student-both",
@@ -518,7 +601,7 @@
         "Drag the 5 onto the x.",
         "Press Enter, and again, and again."
       ],
-      "see": "The check writes 4 − 3x = −11 with 4 − 3 × 5 = −11 under it, then one line for each Enter: 4 − 15 = −11, then −11 = −11, then ✓ Balanced. (From Level 3 it used to jump straight to Balanced.)"
+      "see": "The check writes 4 − 3x = −11 with 4 − 3(5) = −11 under it, then one line for each Enter: 4 − 15 = −11, then −11 = −11, then ✓ Balanced. (From Level 3 it used to jump straight to Balanced.)"
     },
     {
       "id": "p-full-check-distribute",
@@ -553,7 +636,7 @@
         "Drag the 7 onto the first x (the one inside the parenthesis).",
         "Press Enter five times, slowly."
       ],
-      "see": "While you hold the 7, both x’s glow as places to drop it. The drop fills only the x in 2x: a small green check appears above it and a faint dashed 7 waits under the other x; nothing else happens yet. The second drop fills that x too, and the check begins: 3(7 + 2) + 2 × 7 = 41, then 3(9) + 2 × 7 = 41, 27 + 2 × 7 = 41, 27 + 14 = 41, 41 = 41, Balanced."
+      "see": "While you hold the 7, both x’s glow as places to drop it. The drop fills only the x in 2x: a small green check appears above it and a faint dashed 7 waits under the other x; nothing else happens yet. The second drop fills that x too, and the check begins: 3(7 + 2) + 2(7) = 41, then 3(9) + 2(7) = 41, 27 + 2(7) = 41, 27 + 14 = 41, 41 = 41, Balanced."
     },
     {
       "id": "p-divide-neg-popup",
@@ -902,7 +985,7 @@
         "Click Add, type −6, Enter. Drag the 41 onto the −6, type 35, Enter.",
         "Click Divide (÷), type 5, Enter. Type 7 in x =, press Enter. Drag the 7 onto each x (one at a time), then press Enter for each line until Balanced."
       ],
-      "see": "The rows read 3x + 6 + 2x = 41, then 5x + 6 = 41, then 5x = 35, then x = (35) over 5. The check shows every step, one line for each press of Enter: 3(7 + 2) + 2 × 7 = 41, 3(9) + 2 × 7 = 41, 27 + 2 × 7 = 41, 27 + 14 = 41, 41 = 41, then Balanced and “Yes! x = 7”."
+      "see": "The rows read 3x + 6 + 2x = 41, then 5x + 6 = 41, then 5x = 35, then x = (35) over 5. The check shows every step, one line for each press of Enter: 3(7 + 2) + 2(7) = 41, 3(9) + 2(7) = 41, 27 + 2(7) = 41, 27 + 14 = 41, 41 = 41, then Balanced and “Yes! x = 7”."
     },
     {
       "id": "m-drag-labels",
@@ -1088,7 +1171,7 @@
         "Click the button. It opens Two-step equations, Level 1, on 3x + 4 = 19.",
         "Click Add (the top box in the panel on the right), type −4 and press Enter.",
         "Drag the 19 onto the 4 beside it. A box opens under them: type 15 and press Enter. The row reads 3x = 15.",
-        "Click the box after x =, type 15 and press Enter. Drag the 15 onto the x, press Enter twice and wait two seconds: the check works out 3 × 15 = 15 to 45 = 15 and says it is not balanced.",
+        "Click the box after x =, type 15 and press Enter. Drag the 15 onto the x, press Enter twice and wait two seconds: the check works out 3(15) = 15 to 45 = 15 and says it is not balanced.",
         "Press Undo."
       ],
       "see": "After Undo, the Divide button is lit, its grey preview (a bar under each side, a box beneath) is under 3x = 15, and the message reads “To get one x, divide both sides by 3 (that is, multiply by ⅓): one of the 3 x boxes is ⅓.”"
@@ -1127,7 +1210,7 @@
         "Click Divide (the third button in the panel on the right, with ÷ beside it), type 3 and press Enter. The rows read (3x) over 3 = (15) over 3, with “Same as multiplying by ⅓.” under it, then x = (15) over 3.",
         "Click the box after x =, type 5 and press Enter. Drag the 5 onto the x in 3x + 4 = 19, then press Enter three times."
       ],
-      "see": "After Add the right side stays 19 − 4 until you put it together: nothing is worked out for you. The check reads 3x + 4 = 19, then 3 × 5 + 4 = 19 under it, down to 19 = 19 and Balanced."
+      "see": "After Add the right side stays 19 − 4 until you put it together: nothing is worked out for you. The check reads 3x + 4 = 19, then 3(5) + 4 = 19 under it, down to 19 = 19 and Balanced."
     },
     {
       "id": "k-boxes",
@@ -1197,7 +1280,7 @@
         "Click Divide (the third button in the panel on the right, with ÷ beside it), type 3 and press Enter.",
         "Click the box after x =, type 5 and press Enter. Drag the 5 onto the x, then press Enter for each line until Balanced (every check shows every step)."
       ],
-      "see": "After the flip a pop-up says “Multiplying both sides by −1 flips every sign. −x becomes x.” and the row reads 3x = 15. The check starts 4 − 3x = −11, then one line for each Enter: 4 − 3 × 5 = −11, 4 − 15 = −11, −11 = −11, then Balanced."
+      "see": "After the flip a pop-up says “Multiplying both sides by −1 flips every sign. −x becomes x.” and the row reads 3x = 15. The check starts 4 − 3x = −11, then one line for each Enter: 4 − 3(5) = −11, 4 − 15 = −11, −11 = −11, then Balanced."
     },
     {
       "id": "k-flip-intro",
@@ -1264,7 +1347,7 @@
         "Click Divide (the third button in the panel on the right, with ÷ beside it), type 3 and press Enter.",
         "Click the box after x =, type 5 and press Enter. Drag the 5 onto the x, then press Enter three times."
       ],
-      "see": "Adding 4 gives 3x = 11 + 4, then 3x = 15 and x = (15) over 3. The check reads 3 × 5 − 4 = 11 down to 11 = 11 and Balanced."
+      "see": "Adding 4 gives 3x = 11 + 4, then 3x = 15 and x = (15) over 3. The check reads 3(5) − 4 = 11 down to 11 = 11 and Balanced."
     },
     {
       "id": "k-level-3",
@@ -1298,7 +1381,7 @@
         "Click Divide (the third button in the panel on the right, with ÷ beside it), type 3 and press Enter.",
         "Click the box after x =, type 5 and press Enter. Drag the 5 onto the x, then press Enter for each line until Balanced (every check shows every step)."
       ],
-      "see": "Adding −4 gives 3x = 19 − 4 (the x term stays second until the 4s cancel). The check shows every step: 4 + 3 × 5 = 19, 4 + 15 = 19, 19 = 19, then Balanced."
+      "see": "Adding −4 gives 3x = 19 − 4 (the x term stays second until the 4s cancel). The check shows every step: 4 + 3(5) = 19, 4 + 15 = 19, 19 = 19, then Balanced."
     },
     {
       "id": "k-level-5",
@@ -1332,7 +1415,7 @@
         "Click Divide (the third button in the panel on the right, with ÷ beside it), type 3 and press Enter.",
         "Click the box after x =, type −5 and press Enter. Drag the −5 onto the x, then press Enter for each line until Balanced (every check shows every step)."
       ],
-      "see": "The rows read 3x = −11 − 4, then 3x = −15 and x = (−15) over 3. The check reads 3 × (−5) + 4 = −11, −15 + 4 = −11, −11 = −11, then Balanced."
+      "see": "The rows read 3x = −11 − 4, then 3x = −15 and x = (−15) over 3. The check reads 3(−5) + 4 = −11, −15 + 4 = −11, −11 = −11, then Balanced."
     },
     {
       "id": "k-level-7",
@@ -1351,7 +1434,7 @@
         "Click Divide (the third button in the panel on the right, with ÷ beside it), type −3 (the minus key, then 3) and press Enter.",
         "Click the box after x =, type −5 and press Enter. Drag the −5 onto the x, then press Enter for each line until Balanced (every check shows every step)."
       ],
-      "see": "Dividing by −3 finishes in one move: x = (15) over −3, and the line says “Same as multiplying by −⅓.” The check reads 19 = 4 − 3 × (−5), 19 = 4 + 15, 19 = 19, then Balanced."
+      "see": "Dividing by −3 finishes in one move: x = (15) over −3, and the line says “Same as multiplying by −⅓.” The check reads 19 = 4 − 3(−5), 19 = 4 + 15, 19 = 19, then Balanced."
     },
     {
       "id": "student-two-step",
@@ -1365,7 +1448,7 @@
       "steps": [
         "Click the button. It opens Two-step equations, Level 1, on 3x + 4 = 19. You are going to play a student who gets things wrong.",
         "Mistake 1, ignoring the screen: touch nothing for 10 seconds. A good response is a gentle flashing of I’m stuck, with nothing else changing.",
-        "Mistake 2, skipping the fraction: click the box after x =, type 15 and press Enter. Drag the 15 onto the x, press Enter three times and wait two seconds. A good response works out 3 × 15 + 4 = 19 to 49 = 19, says the equation is not balanced, and leaves only Undo. Press Undo: the hint outlines the 4 and asks what to add to both sides. Click Got it.",
+        "Mistake 2, skipping the fraction: click the box after x =, type 15 and press Enter. Drag the 15 onto the x, press Enter three times and wait two seconds. A good response works out 3(15) + 4 = 19 to 49 = 19, says the equation is not balanced, and leaves only Undo. Press Undo: the hint outlines the 4 and asks what to add to both sides. Click Got it.",
         "Mistake 3, a move that makes it worse: the Add box is still open under the equation, so type 4 and press Enter. A good response lights the 4 and the 4 that was added, says they did not eliminate the term, and leaves only Undo. Press Undo, then Got it.",
         "Mistake 4, a move at the wrong moment: click Divide (÷, greyed). A good response is a small note, “That move works once each side is one term.”, and nothing locked.",
         "Mistake 5, a wrong sum: the Add box is open again, so type −4 and press Enter. Drag the 19 onto the 4, type 23 and press Enter. A good response says “19 − 4 is not 23. Press Undo and try again.” with the two numbers still readable. Press Undo: the hint lights 19 and −4 and says to drag one onto the other.",
@@ -1584,7 +1667,7 @@
       "steps": [
         "Click the button. It opens Flip everything, Level 3, on −3x = 12. You are going to play a student who gets things wrong.",
         "Mistake 1, ignoring the screen: touch nothing for 10 seconds. A good response is a gentle flashing of I’m stuck, and nothing else changing.",
-        "Mistake 2, dropping the signs: click the box after x =, type 12 and press Enter. Drag it onto the x, press Next twice and wait two seconds. A good response shows −3 × 12 = 12 turn into −36 = 12, says it is not balanced, and leaves only Undo. Press Undo: the hint says the minus belongs to x and lights the Flip button. Press Got it.",
+        "Mistake 2, dropping the signs: click the box after x =, type 12 and press Enter. Drag it onto the x, press Next twice and wait two seconds. A good response shows −3(12) = 12 turn into −36 = 12, says it is not balanced, and leaves only Undo. Press Undo: the hint says the minus belongs to x and lights the Flip button. Press Got it.",
         "Mistake 3, dividing by a number that does not split: click Divide (÷), type 2 and click Go. Wait two seconds. A good response says 3 boxes can’t make 2 equal groups and pulses Undo. Press Undo: the boxes, the counters and the fractions to choose from appear, ½ crossed off. Click ⅓.",
         "Mistake 4, forgetting the sign at the end: the equation is now −x = 4. Type 4, press Enter, drag it onto the x, press Next twice and wait. Press Undo. A good response says −x = 4 means the opposite of x is 4, so x is not 4, and lights Flip everything.",
         "Mistake 5, pressing I’m stuck again and again: press it twice. A good response repeats the reminder with the real numbers (this card has no pictures yet) and still leaves the move to you.",
@@ -1644,7 +1727,7 @@
         "Look at the first two lines on the right.",
         "Press Next twice."
       ],
-      "see": "The first line is 5x = −15 with a blue x; right under it is 5 × (−3) = −15, and the blue (−3) sits directly under the blue x (the first line moves a little to the right to make room). Next adds −15 = −15, then ✓ Balanced."
+      "see": "The first line is 5x = −15 with a blue x; right under it is 5(−3) = −15, and the blue −3 sits directly under the blue x (the first line moves a little to the right to make room). Next adds −15 = −15, then ✓ Balanced."
     },
     {
       "id": "i-big-battle",
@@ -1745,7 +1828,7 @@
       },
       "steps": [
         "Click the button. It opens Divide it, Level 2, on 5x = −15.",
-        "Click the box after x =, type 4 and press Enter. Drag the 4 onto the x in the equation. Two lines appear on the right: the equation itself, 5x = −15, and under it 5 × 4 = −15, with the 4 right under the x.",
+        "Click the box after x =, type 4 and press Enter. Drag the 4 onto the x in the equation. Two lines appear on the right: the equation itself, 5x = −15, and under it 5(4) = −15, with the 4 right under the x.",
         "Press Next twice, then wait two seconds. The screen goes grey and a box says the equation is not balanced.",
         "Look at the last line on the right, 20 = −15, and the words ✗ Not balanced under it."
       ],
@@ -1994,7 +2077,7 @@
       "steps": [
         "Click the button. It opens Divide it, Level 2, on 5x = −15. You are going to play a student who gets things wrong.",
         "Mistake 1, ignoring the screen: touch nothing for 10 seconds. A good response is a gentle flashing of I’m stuck, with nothing else changing and nothing taken away.",
-        "Mistake 2, a wrong answer from the start: click the box after x =, type −15 (copying the number on the right) and press Enter. Drag the −15 onto the x. Press Next twice and wait two seconds. A good response writes 5x = −15 with 5 × (−15) = −15 under it, turns that into −75 = −15, says the equation is not balanced, and leaves only Undo to press. Press Undo, then Got it.",
+        "Mistake 2, a wrong answer from the start: click the box after x =, type −15 (copying the number on the right) and press Enter. Drag the −15 onto the x. Press Next twice and wait two seconds. A good response writes 5x = −15 with 5(−15) = −15 under it, turns that into −75 = −15, says the equation is not balanced, and leaves only Undo to press. Press Undo, then Got it.",
         "Mistake 3, a move that does not get one x: click Multiply, then its first option (a single box), type 5 and click Go. A good response says “5 × (5x) makes 25x: still not one x. Try dividing both sides.” in a small note, and writes nothing.",
         "Mistake 4, flipping the sign: click Divide (÷), press the minus key, type 1 and click Go. A good response says the sign changes but there are still 5 x’s, and points to dividing.",
         "Mistake 5, dividing by a number that does not split: click Divide (÷), type 2 and click Go. Wait two seconds. A good response says it doesn’t split (5 boxes can’t make 2 equal groups, and −15 can’t be shared into 2 equal groups), and pulses Undo. Press Undo: it shows the five x boxes and the fractions to choose from. Press Got it.",
@@ -2566,7 +2649,7 @@
               "label": "Divide it · check x = −3",
               "query": "?pack=divide-it&level=3&seed=7&nosignin=1",
               "reset": true,
-              "look": "Type −3, Enter, drag it onto x: 5x = −15, and under it 5 × (−3) = −15 with the (−3) under the x."
+              "look": "Type −3, Enter, drag it onto x: 5x = −15, and under it 5(−3) = −15 with the (−3) under the x."
             }
           ]
         },
@@ -3092,7 +3175,7 @@
             {
               "label": "Divide it",
               "query": "?pack=divide-it&level=3&seed=7&nosignin=1",
-              "look": "Type 4, Check, drag the 4 into the x of 5x: 5 × 4 = −15 is written on the right, then 20 = −15, Not balanced."
+              "look": "Type 4, Check, drag the 4 into the x of 5x: 5(4) = −15 is written on the right, then 20 = −15, Not balanced."
             }
           ]
         },

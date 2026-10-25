@@ -17,9 +17,9 @@ describe('writing a state', () => {
 describe('substituting a value, one operation at a time', () => {
   it('a × (value) = b: two lines, the product underlined first, its result after', () => {
     const r = run([x(3)], [num(-12)], -4);
-    expect(r.texts).toEqual(['3 × (−4) = −12', '−12 = −12']);
+    expect(r.texts).toEqual(['3(−4) = −12', '−12 = −12']);
     expect(r.ok).toBe(true);
-    expect(r.lines[0].segs.filter((s) => s.cls.split(' ').includes('is-op')).map((s) => s.text).join('')).toBe('3 × (−4)');
+    expect(r.lines[0].segs.filter((s) => s.cls.split(' ').includes('is-op')).map((s) => s.text).join('')).toBe('3(−4)');
     expect(r.lines[1].segs.find((s) => s.cls === 'is-res').text).toBe('−12');
     expect(r.lines[1].op).toBe(false);
   });
@@ -42,32 +42,32 @@ describe('substituting a value, one operation at a time', () => {
     expect(r.texts).toEqual(['−4 = ⅓(−12)', '−4 = −4']);
     expect(r.ok).toBe(true);
     const r3 = run([x(2)], [frac(2, num(6), num(6))], 6);
-    expect(r3.texts).toEqual(['2 × 6 = ½(6 + 6)', '12 = ½(6 + 6)', '12 = ½(12)', '12 = 6']);
+    expect(r3.texts).toEqual(['2(6) = ½(6 + 6)', '12 = ½(6 + 6)', '12 = ½(12)', '12 = 6']);
     expect(r3.ok).toBe(false);
   });
   it('a wrong value ends not balanced', () => {
     const r = run([x(3)], [num(-12)], 5);
-    expect(r.texts).toEqual(['3 × 5 = −12', '15 = −12']);
+    expect(r.texts).toEqual(['3(5) = −12', '15 = −12']);
     expect(r.ok).toBe(false);
   });
 });
 
-describe('the renderer rule (loop §4): the equation as written, x replaced by the value, negatives in parentheses, the coefficient as ×', () => {
+describe('the renderer rule (loop §4): the equation as written, x replaced by the value, negatives in parentheses, the coefficient with the value in parentheses (Build T: never ×)', () => {
   const x = (c = 1) => ({ kind: 'x', coef: c });
   const n = (v) => ({ kind: 'num', v });
   const first = (board, v) => lineText(substitutionLines(board, v).lines[0]);
   it('passes every case of the brief', () => {
-    expect(first({ left: [x(3)], right: [n(-12)] }, -4)).toBe('3 × (−4) = −12');
+    expect(first({ left: [x(3)], right: [n(-12)] }, -4)).toBe('3(−4) = −12');
     expect(first({ left: [x(), n(-6)], right: [n(9)] }, 15)).toBe('15 − 6 = 9');
-    expect(first({ left: [x(-3)], right: [n(12)] }, -4)).toBe('−3 × (−4) = 12');
+    expect(first({ left: [x(-3)], right: [n(12)] }, -4)).toBe('−3(−4) = 12');
     expect(first({ left: [n(12)], right: [x(-1)] }, -12)).toBe('12 = −(−12)');
     expect(first({ left: [n(7)], right: [x(), n(3)] }, 4)).toBe('7 = 4 + 3');
   });
-  it('never drops the coefficient and never shows × −4 without parentheses, for every coefficient and sign', () => {
+  it('never drops the coefficient and never shows a times sign, for every coefficient and sign', () => {
     for (const a of [2, 3, 4, 5, 6, -2, -3, -6]) for (const v of [-9, -2, 3, 8]) {
       const line = first({ left: [x(a)], right: [n(a * v)] }, v);
-      expect(line.startsWith(`${a < 0 ? '−' : ''}${Math.abs(a)} × `)).toBe(true);
-      expect(line).not.toMatch(/× −/);
+      expect(line.startsWith(`${a < 0 ? '−' : ''}${Math.abs(a)}(`)).toBe(true);
+      expect(line).not.toMatch(/×/);
     }
   });
 });

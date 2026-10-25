@@ -70,7 +70,7 @@ describe('the check renders as the loop spec says (§4)', () => {
     expect(formatFlip(makeFlip(1, -12))).toBe('−x = 12');
     expect(lines(makeFlip(1, -12), -12)).toEqual(['−(−12) = 12', '12 = 12']);
     expect(lines(makeFlip(1, -12, true), -12)).toEqual(['12 = −(−12)', '12 = 12']);
-    expect(lines(makeFlip(3, -4), -4)).toEqual(['−3 × (−4) = 12', '12 = 12']);
+    expect(lines(makeFlip(3, -4), -4)).toEqual(['−3(−4) = 12', '12 = 12']);
   });
 });
 

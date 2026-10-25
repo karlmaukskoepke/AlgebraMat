@@ -73,12 +73,12 @@ describe('the generator: every level, 200 seeds', () => {
     expect(formatTwoStep(q)).toBe('4 − 3x = −11');
     expect(tagTwoStep(q, -15)).toBe('skipped-fraction');
   });
-  it('writes the check as the loop spec says: 3 × 5 + 4 = 19, and 4 − 3 × 5 = −11', () => {
+  it('writes the check as the loop spec says: 3(5) + 4 = 19, and 4 − 3(5) = −11', () => {
     const board = (p) => newTwoStep(p).board;
-    expect(substitutionLines(board(makeTwoStep('ax+b', 3, 4, 5)), 5).lines.map(lineText)).toEqual(['3 × 5 + 4 = 19', '15 + 4 = 19', '19 = 19']);
+    expect(substitutionLines(board(makeTwoStep('ax+b', 3, 4, 5)), 5).lines.map(lineText)).toEqual(['3(5) + 4 = 19', '15 + 4 = 19', '19 = 19']);
     const b = board(makeTwoStep('b-ax', 3, 4, 5));
     expect(equationSegs(b).map((x) => x.text).join('')).toBe('4 − 3x = −11');
-    expect(substitutionLines(b, 5).lines.map(lineText)).toEqual(['4 − 3 × 5 = −11', '4 − 15 = −11', '−11 = −11']);
+    expect(substitutionLines(b, 5).lines.map(lineText)).toEqual(['4 − 3(5) = −11', '4 − 15 = −11', '−11 = −11']);
   });
 });
 

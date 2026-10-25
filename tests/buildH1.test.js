@@ -20,7 +20,7 @@ describe('the substituted value is blue, even when it is the operation about to 
     const value = line.find((s) => s.text === '(−4)');
     expect(value.cls.split(' ')).toEqual(expect.arrayContaining(['is-blue', 'is-op']));
     const coef = substitutionLines({ left: [{ kind: 'x', coef: 3 }], right: [{ kind: 'num', v: -12 }] }, -4).lines[0].segs;
-    expect(coef.find((s) => s.text === '(−4)').cls.split(' ')).toContain('is-blue');
+    expect(coef.find((s) => s.text === '−4').cls.split(' ')).toContain('is-blue');
   });
 });
 

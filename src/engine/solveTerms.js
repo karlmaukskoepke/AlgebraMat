@@ -30,7 +30,7 @@ export const boardText = (board) => `${sideText(board.left)} = ${sideText(board.
 
 // ---------- the value in place of x, worked out one operation at a time ----------
 
-// An item of the working expression: { k: 'sub', v } (the value, in blue), { k: 'num', v }, { k: 'prod', a, v } (a × value),
+// An item of the working expression: { k: 'sub', v } (the value, in blue), { k: 'num', v }, { k: 'prod', a, v } (a times the value, written `a(v)`),
 // { k: 'frac', n, inner: [items] }. `sub`/`num` are finished numbers.
 const toItem = (t, value) => {
   if (t.kind === 'x') return (t.coef ?? 1) === 1 ? { k: 'sub', v: value } : (t.coef === -1 ? { k: 'neg', v: value } : { k: 'prod', a: t.coef, v: value });
@@ -47,7 +47,8 @@ function itemSegs(it, ctx, alone) {
   const blue = cls ? `${cls} is-blue` : 'is-blue';
   if (it.k === 'sub') return [{ text: !alone && it.v < 0 ? `(${signed(it.v)})` : signed(it.v), cls: blue }];
   if (it.k === 'num') return [{ text: signed(it.v), cls }];
-  if (it.k === 'prod') return [{ text: `${signed(it.a)} × `, cls }, { text: plugValue(it.v), cls: blue }];
+  // a product in parentheses, never a times sign next to the x's (Build T): `7(3)`, `−3(−4)`
+  if (it.k === 'prod') return [{ text: `${signed(it.a)}(`, cls }, { text: signed(it.v), cls: blue }, { text: ')', cls }];
   if (it.k === 'neg') return [{ text: `${MINUS}(`, cls }, { text: signed(it.v), cls: blue }, { text: ')', cls }];
   // a factor times a parenthesis (Build M): `3(3 + 2)`, `−2(−7 + 4)`; a negative value first inside the parenthesis needs no second pair
   // of parentheses, and the whole is the op once the parenthesis is one number (`3(5)`)
@@ -71,9 +72,9 @@ function sumSegs(items, ctx, inGroup = false) {
       out.push({ text: `${-it.v}`, cls: ctx.op === it || ctx.pair?.includes(it) ? 'is-op' : ctx.res === it ? 'is-res' : '' });
       return;
     }
-    if (i && it.k === 'prod' && it.a < 0) {                         // so is x with a minus after another term: 4 − 3 × 5 (Build K)
+    if (i && it.k === 'prod' && it.a < 0) {                         // so is x with a minus after another term: 4 − 3(5) (Build K, T)
       const cls = ctx.op === it ? 'is-op' : '';
-      out.push({ text: ' − ', cls }, { text: `${-it.a} × `, cls }, { text: plugValue(it.v), cls: cls ? `${cls} is-blue` : 'is-blue' });
+      out.push({ text: ' − ', cls }, { text: `${-it.a}(`, cls }, { text: signed(it.v), cls: cls ? `${cls} is-blue` : 'is-blue' }, { text: ')', cls });
       return;
     }
     if (i) out.push({ text: ' + ', cls: opCls });

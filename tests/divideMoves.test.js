@@ -107,9 +107,9 @@ describe('plugging a typed value back in (loop §4)', () => {
     expect([s.sub.kind, s.sub.ok, s.sub.placing, s.sub.target, s.feedback.key]).toEqual(['value', true, true, 'original', 'aPlace']);
     expect(shown(s)).toEqual([]);                                                            // nothing is written until the value is placed on x
     s = run(s, { type: 'placeValue' });
-    expect(shown(s)).toEqual(['3 × (−4) = −12']);                                           // the copy is written beside it at once (Build D)
+    expect(shown(s)).toEqual(['3(−4) = −12']);                                           // the copy is written beside it at once (Build D)
     s = run(s, { type: 'nextLine' });
-    expect(shown(s)).toEqual(['3 × (−4) = −12', '−12 = −12']);
+    expect(shown(s)).toEqual(['3(−4) = −12', '−12 = −12']);
     s = run(s, { type: 'nextLine' });
     expect([s.stage, s.finalText, s.clean, s.feedback.key, subView(s.sub).mark]).toEqual(['done', '−4', true, 'aCorrect', true]);
   });
@@ -117,16 +117,16 @@ describe('plugging a typed value back in (loop §4)', () => {
     for (const [a, x] of [[2, -5], [3, 4], [4, -6], [5, 3], [6, -3], [3, -4]]) {
       const p = P(a, x);
       const first = shown(run(start(p), ...typed(String(x)), { type: 'check' }, { type: 'placeValue' }))[0];
-      expect(first).toBe(`${a} × ${x < 0 ? `(−${-x})` : x} = ${p.b < 0 ? `−${-p.b}` : p.b}`);
+      expect(first).toBe(`${a}(${x < 0 ? `−${-x}` : x}) = ${p.b < 0 ? `−${-p.b}` : p.b}`);
     }
     // after a partial move: a correct guess is plugged into the ORIGINAL equation, not the simplified one
     const s = run(take(start(P(6, -3)), 2), ...typed('−3'), { type: 'check' }, { type: 'placeValue' });
-    expect([s.sub.target, shown(s)[0]]).toEqual(['original', '6 × (−3) = −18']);
+    expect([s.sub.target, shown(s)[0]]).toEqual(['original', '6(−3) = −18']);
   });
   it('a wrong guess is plugged into the CURRENT equation, ends red, asks for Undo, then points at the move', () => {
     let s = take(start(P(6, -3)), 2);                                                         // 3x = −9
     s = clickThrough(run(s, ...typed('5'), { type: 'check' }));
-    expect([s.sub.target, shown(s)[0], s.sub.ok, s.feedback.key]).toEqual(['current', '3 × 5 = −9', false, 'aUndoGuess']);
+    expect([s.sub.target, shown(s)[0], s.sub.ok, s.feedback.key]).toEqual(['current', '3(5) = −9', false, 'aUndoGuess']);
     s = run(s, { type: 'undo' });
     expect([s.sub, s.feedback.key]).toEqual([null, 'aSimplerFirst']);
   });

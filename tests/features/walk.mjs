@@ -279,6 +279,29 @@ class Walk {
     if (check) await check();
     await this.steady(async () => { await m.move(x, y, { steps: 6 }); await m.up(); await wait(this.page, 300); });
   }
+  // Build T: each red stroke of a flip's cross-off is centred on its minus's bar (as far above it as below), measured on the screen
+  async strokesCentred(n) {
+    const marks = this.page.locator('.lb-stack .lb-rowwrap.is-flipwork .xo.is-minus');
+    if ((await marks.count()) < n) throw new Error(`${n} minus signs should be crossed after step "${this.step}"`);
+    for (let i = 0; i < await marks.count(); i++) {
+      const bb = await marks.nth(i).boundingBox();
+      const png = await this.page.screenshot({ clip: { x: bb.x - 4, y: bb.y - 4, width: bb.width + 8, height: bb.height + 8 } });
+      const r = await this.page.evaluate(async (b64) => {
+        const img = await new Promise((ok) => { const im = new Image(); im.onload = () => ok(im); im.src = `data:image/png;base64,${b64}`; });
+        const c = new OffscreenCanvas(img.width, img.height); const g = c.getContext('2d'); g.drawImage(img, 0, 0);
+        const d = g.getImageData(0, 0, img.width, img.height).data; const red = []; const ink = [];
+        for (let y = 0; y < img.height; y++) {
+          let rr = 0; let ii = 0;
+          for (let x = 0; x < img.width; x++) { const k = (y * img.width + x) * 4; if (d[k] - d[k + 1] > 50 && d[k] - d[k + 2] > 50) rr++; else if (d[k] + d[k + 1] + d[k + 2] < 570) ii++; }
+          if (rr) red.push(y); if (ii > 0.3 * img.width) ink.push(y);
+        }
+        const mid = (a) => (a[0] + a[a.length - 1]) / 2;
+        return red.length && ink.length ? { off: mid(red) - mid(ink), above: ink[0] - red[0], below: red[red.length - 1] - ink[ink.length - 1] } : null;
+      }, png.toString('base64'));
+      if (!r) throw new Error(`no red stroke through minus ${i + 1} after step "${this.step}"`);
+      if (Math.abs(r.off) > 2.5 || r.above < 3 || r.below < 3) throw new Error(`the stroke through minus ${i + 1} should stick out as far above as below (off by ${r.off} px; ${r.above} above, ${r.below} below) after step "${this.step}"`);
+    }
+  }
   async rows() { return (await this.page.evaluate(() => [...document.querySelectorAll('.lb-stack .lb-rowwrap')].map((r) => r.innerText.replace(/\s+/g, '')))); }
   async row(text) { const rs = await this.rows(); const want = text.replace(/\s+/g, ''); if (!rs.some((r) => r.endsWith(want) || r === want)) throw new Error(`expected a row ${text} after step "${this.step}": ${rs.join(' | ')}`); }
   async box(selector) { return this.page.evaluate((s) => { const r = document.querySelector(s)?.getBoundingClientRect(); return r ? [r.left, r.top, r.right, r.bottom].map(Math.round) : null; }, selector); }
@@ -286,6 +309,45 @@ class Walk {
 
 // ---- one walk per item (same id as in the data file) ---------------------------------------------------------------------------------
 const WALKS = {
+  // ---- Build T: products with parentheses in the check, Flip's stroke centred, a refused drag that fits the shape ----
+  async 't-parens-divide'(w) {
+    await w.start(); await w.see('5x = −15');
+    w.at('type −3, drag it onto x'); await w.click(act('focus')); await w.type(-3); await w.enter(); await w.drag();
+    await w.pairs('5x=−15', '5(−3)=−15');
+    w.at('Next twice'); await w.click(act('nextLine')); await w.click(act('nextLine')); await w.see('−15 = −15', '✓ Balanced');
+    await w.notSee('×'); await w.both('t-parens-divide');
+  },
+  async 't-parens-two-step'(w) {
+    await w.start(); await w.see('4 − 3x = −11');
+    w.at('type 5, drag, Enter three times'); await w.answer(5, 3); await w.see('4 − 3(5) = −11', '4 − 15 = −11', '−11 = −11', '✓ Balanced');
+    if (await w.page.evaluate(() => [...document.querySelectorAll('.sv-checklist .sv-checkrow')].some((r) => r.innerText.includes('×')))) throw new Error('no line of the check should have a ×');
+    await w.both('t-parens-two-step');
+  },
+  async 't-parens-both-sides'(w) {
+    await w.start(); await w.see('7x = 4x + 15');
+    w.at('drag across, combine'); await w.crossTerm('4x', 'left'); await w.combineTerms('−4x', '7x', '3x'); await w.row('3x = 15');
+    w.at('Divide 3'); await w.divEnter(3);
+    w.at('type 5, drag, Enter'); await w.click(act('focus')); await w.type(5); await w.enter();
+    for (let k = 0; k < 4 && await w.page.locator('[data-x][data-action="placeValue"]').count(); k++) await w.drag();
+    await w.pairs('7x=4x+15', '7(5)=4(5)+15');
+    await w.enter(4); await wait(w.page, 300); await w.see('35 = 4(5) + 15', '35 = 20 + 15', '35 = 35', '✓ Balanced');
+    if (await w.page.evaluate(() => [...document.querySelectorAll('.sv-checklist .sv-checkrow')].some((r) => r.innerText.includes('×')))) throw new Error('no line of the check should have a ×');
+    await w.both('t-parens-both-sides');
+  },
+  async 't-flip-plus'(w) {
+    await w.start(); await w.see('−3x = 12');
+    w.at('Flip, Go, watch'); await w.flip(); await wait(w.page, 4000); await w.strokesCentred(2); await w.shot('t-flip-plus-1-768');
+    w.at('Undo, divide by −1, watch'); await w.click(act('undo')); await wait(w.page, 400); await w.divide(-1); await wait(w.page, 4000); await w.strokesCentred(2); await w.shot('t-flip-plus-2-768');
+    w.at('Undo, divide by −3, watch'); await w.click(act('undo')); await wait(w.page, 400); await w.divide(-3); await wait(w.page, 4000); await w.strokesCentred(2); await w.shot('t-flip-plus-3-768');
+    await w.page.setViewportSize({ width: 1366, height: 650 }); await wait(w.page, 800); await w.strokesCentred(2); await w.shot('t-flip-plus-3-650');
+  },
+  async 't-drag-divide'(w) {
+    await w.start(); await w.see('3x + 4 = 19');
+    w.at('drag 3x across'); await w.crossTerm('3x', 'right'); await w.see('Let’s keep x there. Try moving the number.'); await w.row('3x + 4 = 19');
+    w.at('Add −4, combine'); await w.addEnter(-4); await w.combine(15); await w.row('3x = 15');
+    w.at('drag 3x across again'); await w.crossTerm('3x', 'right'); await w.see('Let’s keep x there. To get one x from 3x, divide both sides by 3.'); await w.row('3x = 15');
+    await w.both('t-drag-divide');
+  },
   // ---- Build S: redraws keep what is on screen, one text size a problem, drags that work, Flip's cross-off, Add's previews ----
   async 's-pickup'(w) {
     await w.start(); await w.see('7x = 4x + 15');
@@ -373,7 +435,7 @@ const WALKS = {
     w.at('combine to 3x'); await w.combineTerms('−4x', '7x', '3x'); await w.row('3x = 15');
     w.at('Divide 3'); await w.divEnter(3); await w.row('x = (15) 3');
     w.at('type 5, drop in each x, Enter for each line'); await w.answer(5, 4);
-    await w.see('7 × 5 = 4 × 5 + 15', '35 = 4 × 5 + 15', '35 = 20 + 15', '35 = 35', '✓ Balanced');
+    await w.see('7(5) = 4(5) + 15', '35 = 4(5) + 15', '35 = 20 + 15', '35 = 35', '✓ Balanced');
   },
   async 'r-level-2'(w) {
     await w.start(); await w.see('5x + 5 = 2x + 14'); await w.both('r-level-2');
@@ -395,7 +457,7 @@ const WALKS = {
     await w.row('2x − 5 + 2x = 11');
     w.at('combine to 4x'); await w.combineTerms('2x', '2x', '4x'); await w.row('4x − 5 = 11');
     w.at('Add 5, combine'); await w.addEnter(5); await w.combine(16); await w.row('4x = 16');
-    w.at('Divide 4, type 4'); await w.divEnter(4); await w.answer(4, 5); await w.see('2 × 4 − 5 = −2 × 4 + 11', '3 = 3', '✓ Balanced');
+    w.at('Divide 4, type 4'); await w.divEnter(4); await w.answer(4, 5); await w.see('2(4) − 5 = −2(4) + 11', '3 = 3', '✓ Balanced');
   },
   async 'r-level-5'(w) {
     await w.start(); await w.see('4(x − 3) = 2x − 6'); await w.both('r-level-5');
@@ -452,9 +514,9 @@ const WALKS = {
     if ((await w.page.locator('[data-xi="0"] .lb-xwait').count()) !== 1) throw new Error('the other x should show a faint 5 waiting');
     await w.both('r-two-x-midway');
     w.at('drop on the first x'); await w.dragTo('[data-x][data-xi="0"]');
-    await w.pairs('7x=4x+15', '7×5=4×5+15');
+    await w.pairs('7x=4x+15', '7(5)=4(5)+15');
     await w.both('r-two-x-complete');
-    w.at('Enter four times'); await w.enter(4); await w.see('35 = 4 × 5 + 15', '35 = 20 + 15', '35 = 35', '✓ Balanced');
+    w.at('Enter four times'); await w.enter(4); await w.see('35 = 4(5) + 15', '35 = 20 + 15', '35 = 35', '✓ Balanced');
   },
   async 'student-both'(w) {
     await w.start(); await w.see('5x + 5 = 2x + 14');
@@ -605,7 +667,7 @@ const WALKS = {
   async 'p-full-check-two-step'(w) {
     await w.start(); await w.see('4 − 3x = −11');
     w.at('type 5, Enter, drag'); await w.click(act('focus')); await w.type(5); await w.enter(); await w.drag();
-    await w.pairs('4−3x=−11', '4−3×5=−11');
+    await w.pairs('4−3x=−11', '4−3(5)=−11');
     w.at('Enter, Enter'); await w.enter(2); await w.see('4 − 15 = −11', '−11 = −11'); await w.notSee('Balanced');
     w.at('Enter'); await w.enter(); await w.see('✓ Balanced');
   },
@@ -632,8 +694,8 @@ const WALKS = {
     if (await w.page.locator('.sv-checklist .sv-checkrow').count()) throw new Error('the check should wait for the other x');
     await w.both('p-two-x-midway');
     w.at('drag onto the first x'); await w.dragTo('[data-x][data-xi="0"]');
-    await w.see('3(7 + 2) + 2 × 7 = 41');
-    w.at('Enter five times'); await w.enter(5); await w.see('3(9) + 2 × 7 = 41', '27 + 2 × 7 = 41', '27 + 14 = 41', '41 = 41', '✓ Balanced');
+    await w.see('3(7 + 2) + 2(7) = 41');
+    w.at('Enter five times'); await w.enter(5); await w.see('3(9) + 2(7) = 41', '27 + 2(7) = 41', '27 + 14 = 41', '41 = 41', '✓ Balanced');
   },
   async 'p-divide-neg-popup'(w) {
     await w.start(); await w.see('−3x = 12');
@@ -859,7 +921,7 @@ const WALKS = {
     w.at('distribute: 3, 6'); await w.distribute(3, 6); await w.row('3x + 6 + 2x = 41');
     w.at('combine 2x onto 3x: 5x'); await w.combineTerms('2x', '3x', '5x'); await w.row('5x + 6 = 41');
     w.at('Add −6, combine, Divide'); await w.addEnter(-6); await w.combine(35); await w.row('5x = 35'); await w.divEnter(5); await w.row('x = (35) 5');
-    w.at('type 7, drag it into each x, Enter for each line'); await w.answer(7, 5); await w.see('3(7 + 2) + 2 × 7 = 41', '3(9) + 2 × 7 = 41', '27 + 14 = 41', '41 = 41', 'Yes! x = 7');
+    w.at('type 7, drag it into each x, Enter for each line'); await w.answer(7, 5); await w.see('3(7 + 2) + 2(7) = 41', '3(9) + 2(7) = 41', '27 + 14 = 41', '41 = 41', 'Yes! x = 7');
   },
   async 'm-drag-labels'(w) {
     await w.start(); await w.see('3(x + 2) = 15');
@@ -985,7 +1047,7 @@ const WALKS = {
     w.at('Add −4'); await w.addEnter(-4);
     w.at('combine, 15'); await w.combine(15); await w.see('3x = 15');
     w.at('type 15, drag, Enter twice'); await w.answer(15, 2); await w.lateLayer();
-    await w.see('3 × 15 = 15', '45 = 15', 'not balanced');
+    await w.see('3(15) = 15', '45 = 15', 'not balanced');
     w.at('Undo'); await w.click(act('undo')); await wait(w.page, 900);
     await w.see('To get one x, divide both sides by 3 (that is, multiply by ⅓): one of the 3 x boxes is ⅓.');
     if (!(await w.page.locator('.spot-move[data-mopt="div"]').count())) throw new Error('the Divide option should be lit');
@@ -1016,7 +1078,7 @@ const WALKS = {
     w.at('Multiply, Divide, 3'); await w.divEnter(3); await w.see('x = (15) 3');
     await w.both('k-worked');
     w.at('type 5, drag, Enter three times'); await w.answer(5, 3);
-    await w.see('3 × 5 + 4 = 19', '19 = 19', '✓ Balanced');
+    await w.see('3(5) + 4 = 19', '19 = 19', '✓ Balanced');
   },
   async 'k-boxes'(w) {
     await w.start();
@@ -1056,7 +1118,7 @@ const WALKS = {
     await w.both('k-bax-flip');
     w.at('⅓'); await w.divEnter(3); await w.see('x = (15) 3');
     w.at('type 5, drag, Enter for each line'); await w.answer(5, 3);
-    await w.see('4 − 3x = −11', '4 − 3 × 5 = −11', '4 − 15 = −11', '−11 = −11', '✓ Balanced');
+    await w.see('4 − 3x = −11', '4 − 3(5) = −11', '4 − 15 = −11', '−11 = −11', '✓ Balanced');
   },
   async 'k-flip-intro'(w) {
     await w.start(); await w.see('FLIP EVERYTHING · Level 1', '−x');
@@ -1093,7 +1155,7 @@ const WALKS = {
     w.at('Add 4'); await w.addEnter(4); await w.see('3x = 11 + 4');
     w.at('combine'); await w.combine(15); await w.see('3x = 15');
     w.at('⅓'); await w.divEnter(3); await w.see('x = (15) 3');
-    w.at('type 5'); await w.answer(5, 3); await w.see('3 × 5 − 4 = 11', '11 = 11', '✓ Balanced');
+    w.at('type 5'); await w.answer(5, 3); await w.see('3(5) − 4 = 11', '11 = 11', '✓ Balanced');
   },
   async 'k-level-3'(w) {
     await w.start(); await w.see('TWO-STEP EQUATIONS · Level 3', '19 = 4 + 3x');
@@ -1110,7 +1172,7 @@ const WALKS = {
     w.at('Add −4'); await w.addEnter(-4); await w.see('3x = 19 − 4');
     w.at('combine'); await w.combine(15);
     w.at('⅓'); await w.divEnter(3);
-    w.at('type 5, drag, Enter for each line'); await w.answer(5, 3); await w.see('4 + 3 × 5 = 19', '4 + 15 = 19', '19 = 19', '✓ Balanced');
+    w.at('type 5, drag, Enter for each line'); await w.answer(5, 3); await w.see('4 + 3(5) = 19', '4 + 15 = 19', '19 = 19', '✓ Balanced');
   },
   async 'k-level-5'(w) {
     await w.start(); await w.see('TWO-STEP EQUATIONS · Level 5', '4 − 3x = −11');
@@ -1128,7 +1190,7 @@ const WALKS = {
     w.at('Add −4'); await w.addEnter(-4); await w.see('3x = −11 − 4');
     w.at('combine'); await w.combine(-15); await w.see('3x = −15');
     w.at('⅓'); await w.divEnter(3); await w.see('x = (−15) 3');
-    w.at('type −5, drag, Enter for each line'); await w.answer(-5, 3); await w.see('3 × (−5) + 4 = −11', '−15 + 4 = −11', '−11 = −11', '✓ Balanced');
+    w.at('type −5, drag, Enter for each line'); await w.answer(-5, 3); await w.see('3(−5) + 4 = −11', '−15 + 4 = −11', '−11 = −11', '✓ Balanced');
   },
   async 'k-level-7'(w) {
     await w.start(); await w.see('TWO-STEP EQUATIONS · Level 7', '19 = 4 − 3x');
@@ -1136,14 +1198,14 @@ const WALKS = {
     w.at('Trade places'); await w.click(`${act('choose')}[data-move="trade"]`); await w.see('4 − 3x = 19');
     w.at('Add −4, combine'); await w.addEnter(-4); await w.combine(15); await w.see('−3x = 15');
     w.at('−⅓'); await w.divEnter(-3); await w.see('x = (15) −3');
-    w.at('type −5, drag, Enter for each line'); await w.answer(-5, 3); await w.see('19 = 4 − 3 × (−5)', '19 = 4 + 15', '19 = 19', '✓ Balanced');
+    w.at('type −5, drag, Enter for each line'); await w.answer(-5, 3); await w.see('19 = 4 − 3(−5)', '19 = 4 + 15', '19 = 19', '✓ Balanced');
   },
   async 'student-two-step'(w) {
     await w.start();
     w.at('mistake 1: touch nothing for 11 seconds'); await wait(w.page, 11000);
     if (!(await w.page.locator('.lx-help.is-idle').count())) throw new Error('I’m stuck should be flashing after 10 seconds');
     w.at('mistake 2: type 15, drag, Enter three times'); await w.answer(15, 3); await w.lateLayer();
-    await w.see('3 × 15 + 4 = 19', '49 = 19', 'not balanced');
+    await w.see('3(15) + 4 = 19', '49 = 19', 'not balanced');
     w.at('mistake 2: Undo'); await w.click(act('undo')); await wait(w.page, 800);
     await w.see('Look at the +4 next to x.'); await w.click(act('spotDismiss'));
     w.at('mistake 3: type 4 in the open Add box, Enter'); await w.type(4); await w.enter(); await w.lateLayer();
@@ -1285,7 +1347,7 @@ const WALKS = {
     await w.see('DIVIDE IT · Level 2', '5', '−15');
     w.at('type 4, Enter'); await w.click(act('focus')); await w.type(4); await w.enter();
     w.at('drag the 4 onto x'); await w.drag();
-    await w.see('5 × 4 = −15');
+    await w.see('5(4) = −15');
     const blue = await w.page.evaluate(() => ({ value: [...document.querySelectorAll('.sv-checklist .sv-line2 .is-blue')].map((e) => getComputedStyle(e).color), x: getComputedStyle(document.querySelector('.is-plugrow .lb-x')).color }));
     if (!blue.value.length || blue.value.some((c) => c !== blue.x)) throw new Error(`the dropped-in value should be the blue of the x (${blue.x}) but is ${blue.value}`);
     w.at('Next twice'); await w.click(act('nextLine')); await w.click(act('nextLine')); await w.lateLayer();
@@ -1475,7 +1537,7 @@ const WALKS = {
     w.at('mistake 2: drag the −15 onto x'); await w.drag();
     w.at('mistake 2: Next twice'); await w.click(act('nextLine')); await w.click(act('nextLine'));
     await w.lateLayer();
-    await w.see('5 × (−15) = −15', '−75 = −15', 'When x = −15, the equation is not balanced.');
+    await w.see('5(−15) = −15', '−75 = −15', 'When x = −15, the equation is not balanced.');
     await w.shot('student-divide-wrong-value');
     w.at('mistake 2: Undo, Got it'); await w.click(act('undo')); await wait(w.page, 800); await w.click(act('spotDismiss'));
     w.at('mistake 3: Multiply, the first option, 5, Go');
@@ -1539,7 +1601,7 @@ const WALKS = {
   async 'i-check-pairs-divide'(w) {
     await w.start(); await w.see('DIVIDE IT · Level 2', '5', '−15');
     w.at('type −3, Enter, drag it onto x'); await w.click(act('focus')); await w.type('-3'); await w.enter(); await w.drag(); await wait(w.page, 300);
-    await w.pairs('5x=−15', '5×(−3)=−15');
+    await w.pairs('5x=−15', '5(−3)=−15');
     await w.both('i-check-pairs-divide');
     w.at('Next twice'); await w.click(act('nextLine')); await w.click(act('nextLine'));
     await w.see('−15 = −15', '✓ Balanced');
@@ -1716,7 +1778,7 @@ const WALKS = {
     if (!(await w.page.locator('.lx-help.is-idle').count())) throw new Error('I’m stuck should be flashing after 10 seconds');
     w.at('mistake 2: type 12, check'); await w.click(act('focus')); await w.type(12); await w.enter(); await w.drag();
     await w.click(act('nextLine')); await w.click(act('nextLine')); await w.lateLayer();
-    await w.see('−3 × 12 = 12', '−36 = 12', 'When x = 12, the equation is not balanced.');
+    await w.see('−3(12) = 12', '−36 = 12', 'When x = 12, the equation is not balanced.');
     w.at('mistake 2: Undo'); await w.click(act('undo')); await wait(w.page, 800);
     await w.see('In −3x = 12 the minus belongs to x. Flip everything first: multiply both sides by −1.');
     await w.click(act('spotDismiss'));

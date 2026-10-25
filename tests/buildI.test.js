@@ -26,7 +26,7 @@ describe('Build I, Part 1: the check writes the equation itself, then the value 
       const line2 = substitutionLines(board, v).lines[0].segs;
       expect(blues(line2)).toHaveLength(blues(equationSegs(board)).length);
     }
-    expect(text(substitutionLines({ left: [{ kind: 'x', coef: 3 }], right: [{ kind: 'num', v: -12 }] }, -4).lines[0].segs)).toBe('3 × (−4) = −12');
+    expect(text(substitutionLines({ left: [{ kind: 'x', coef: 3 }], right: [{ kind: 'num', v: -12 }] }, -4).lines[0].segs)).toBe('3(−4) = −12');
   });
 });
 

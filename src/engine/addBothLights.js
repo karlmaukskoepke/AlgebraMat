@@ -22,6 +22,7 @@ import { MINUS } from './expr.js';
 import { signed, fractionText } from './solveTerms.js';
 import { newId } from './lightsGrab.js';
 import { productOf, calcParams } from './nudge.js';
+import { aloneWords, fracWords, divForm } from './formWords.js';
 export { calcParams };
 
 const slotSide = (board, id) => otherSide(findTerm(board, id).side);
@@ -359,7 +360,7 @@ function grabAction(state, action, wrapped, alone, opts = {}) {
   if (out.kind === 'none' || out.kind === 'snapX') {
     const s = logged(structuredClone(state));
     s.ui = { ...UI0, focus: `tok:${action.id}` };
-    if (out.kind === 'snapX') return say(s, 'lxXCross', { side: findTerm(state.board, action.id)?.side ?? 'left' });
+    if (out.kind === 'snapX') { const r = crossRefusal(state, action.id); return say(s, r.key, r.params); }
     // (Build S: every drop that does nothing says why. Dropped where it was, or away from the equation, it just goes back)
     const term = findTerm(state.board, action.id)?.term;
     if (action.slot?.onto && action.slot.onto !== action.id) return say(s, 'lxUnlike', { group: findTerm(state.board, action.slot.onto)?.term?.kind === 'group' || term?.kind === 'group' });
@@ -498,6 +499,35 @@ function typeX(entry, action) {
 }
 
 // ---------- the distribute move (Build M; the hidden Distribute drill's move, made shared; the drill is deleted) ----------
+// Why a term cannot cross the = (Build T, Part 1): the first words say x stays where it is, the last say what to do instead, fitted to
+// the shape of x's side: `x + 4 = 9` move the number; `3x = 9` divide by 3; `x = 9` type its value; `2x + 3x = 10` combine first;
+// `3(x + 2) = 15` multiply the 3 in. A number still to work out on the other side (`x = (15)/3`) is said in its own form (Part 2).
+export function crossRefusal(state, id) {
+  const b = state.board;
+  const f = findTerm(b, id);
+  const held = f?.term;
+  const side = f?.side ?? 'left';
+  const hasX = (t) => t.kind === 'x' || (t.kind === 'group' && t.inner.some(hasX));
+  const factorOf = (g) => signed(g.factor).replace('-', MINUS);
+  if (held && !hasX(held)) {
+    const xs = b[otherSide(side)];
+    if (xs.length === 1 && xs[0].kind === 'x' && (xs[0].coef ?? 1) === 1 && aloneWords(state, held)) return { key: 'lxSayAlone', params: { text: aloneWords(state, held) } };
+    return { key: 'lxWorkFirst', params: held.kind === 'frac' ? { what: fracWords(held, divForm(state, held)), div: divForm(state, held) } : {} };
+  }
+  const group = b[otherSide(side)].find((t) => t.kind === 'group' && hasX(t));
+  if (held?.kind === 'x' && group) return { key: 'lxXInGroup', params: { factor: factorOf(group) } };
+  const others = b[side].filter((t) => t.id !== id);
+  const nums = others.filter((t) => t.kind === 'num');
+  const params = { side };
+  if (nums.length) params.tail = nums.length === 1 ? 'number' : 'numbers';
+  else if (others.some((t) => t.kind === 'x')) params.tail = 'combine';
+  else if (others.some((t) => t.kind === 'group') || held?.kind === 'group') Object.assign(params, { tail: 'distribute', factor: factorOf(others.find((t) => t.kind === 'group') ?? held) });
+  else if (others.length) params.tail = 'work';
+  else if ((held?.coef ?? 1) === 1) params.tail = 'alone';
+  else Object.assign(params, { tail: 'divide', a: signed(held.coef).replace('-', MINUS) });
+  return { key: 'lxXCross', params };
+}
+
 // Its actions: a subtracted factor's minus tapped (shown as a negative number, needed before distributing), the factor dropped on its
 // parenthesis (the blanks open: one per piece, each labelled with its multiplication), a piece typed or a blank chosen, and Go (or
 // Enter): with every blank filled, the products are checked; right, the app writes the new row from them, bringing the other terms down.
