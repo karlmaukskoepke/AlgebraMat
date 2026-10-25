@@ -46,6 +46,9 @@ Karl is a middle school math teacher and designer, not a developer. He tests by 
    only checks what the builder meant; this one checks what a student might do.
 10. **No backfill.** The list holds only what has not been checked, plus the collapsed Checked group. Older builds are not added
     after the fact.
+11. **Before every push, run the real-browser sweeps locally (typing, drags, redraws, font size) and put their results in the report.**
+    `npm test` runs them when Playwright is found (the cloud sessions have it at `/opt/node-tools`); a line "screenSweep: SKIP" means
+    they did not run. GitHub's check runs them too, in its own job ("Real-browser sweeps"), which does not hold up publishing.
 
 Don't change Count it or Build it, what a save code means, the problems a seed generates, or the class-sheet event words, unless
 Karl asks for exactly that.

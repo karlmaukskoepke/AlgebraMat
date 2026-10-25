@@ -32,6 +32,22 @@ jobs:
         with:
           path: dist
 
+  # The real-browser sweeps (tests/screenSweep.test.js: typing, drags, redraws, the text size), which `npm test` skips without Playwright.
+  # A job of its own, so a sweep that fails is seen on the check but never holds up publishing (Build Q, Part 5).
+  browser-sweeps:
+    name: Real-browser sweeps
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm install --no-save playwright@1.63.0
+      - run: npx playwright install --with-deps chromium
+      - run: npx vitest run tests/screenSweep.test.js
+
   deploy:
     needs: build
     if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'

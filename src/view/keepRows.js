@@ -7,6 +7,7 @@
 //   liveOf(el)                   the element on screen that a node of a tree drawn this way stands for (itself if it went on screen)
 //   onMounted(tree, fn)          runs fn once the tree is on screen (a picture measured from the screen: the distribute arcs)
 //   onRedraw(root, fn)           calls fn after every redraw of root's Mat, kept or not (instead of watching its children)
+//   finishFlips(root)            a flip's cross-off still playing ends at once, drawn as it ends (Build Q: any key or click skips it)
 //
 // The rules for a row (data-rk is its index, its kind and what it says, so a row that says something else is a new row):
 //   - an animation plays once: a row on screen that is settled (is-settled) stays settled, and a row that is not is settled once its
@@ -24,6 +25,17 @@ const now = () => (typeof performance !== 'undefined' ? performance.now() : Date
 const first = (el) => el.classList?.[0] ?? '';
 
 export const liveOf = (el) => live.get(el) ?? el;
+
+// Flip's cross-off (about 3.4 s a flip, Build S) never makes a student wait (Build Q, Part 5): any key, click or Next finishes it at once,
+// and the key or click then does what it does. The rows are settled: the two pluses drawn, the row it makes in place (as under reduced
+// motion), and a redraw keeps them so.
+export function finishFlips(root) {
+  for (const row of root.querySelectorAll('.lb-rowwrap.is-flipwork:not(.is-settled)')) {
+    row.classList.add('is-settled');
+    const next = row.nextElementSibling;
+    if (next?.classList.contains('lb-rowwrap')) next.classList.add('is-settled');
+  }
+}
 
 export function onMounted(tree, fn) {
   const list = mounted.get(tree) ?? [];

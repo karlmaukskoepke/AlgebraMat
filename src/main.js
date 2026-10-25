@@ -51,7 +51,7 @@ import {
 } from './engine/diagnostic.js';
 import { createDiagnosticView } from './view/diagnostic.js';
 import { loadDiag, saveDiag, clearDiag, saveOldPlacement } from './diagStore.js';
-import { redrawMat } from './view/keepRows.js';
+import { redrawMat, finishFlips } from './view/keepRows.js';
 import { chooseSize } from './view/fitSize.js';
 import { nextMove } from './engine/solveit/honest.js';
 
@@ -590,6 +590,9 @@ function render(before) {
     nextTimer = setTimeout(nextProblem, 2500);
   }
 }
+
+// a key or a click first finishes a flip's cross-off still playing, then does what it does (Build Q, Part 5)
+for (const type of ['keydown', 'pointerdown']) document.addEventListener(type, () => finishFlips(matRoot), true);
 
 matRoot.addEventListener('click', (e) => {
   const t = e.target.closest('[data-action]');
