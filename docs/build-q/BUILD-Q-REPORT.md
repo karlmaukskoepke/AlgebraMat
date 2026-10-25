@@ -1,6 +1,8 @@
 # Build Q report: panel polish (2026-10-25)
 
 Everything is on `main` and live, with no flags, pushed a Part at a time after the unit tests and `npm run parity`. Loop spec: rev 2.9.
+Features to check: 9 new items, 8 earlier ones updated; all 137 items (and the page itself) walked on the live site, every one passes
+(`node tests/features/walk.mjs https://karlmaukskoepke.github.io/AlgebraMat/ docs/build-q`).
 
 ## Text size, before and after (first problem of seeds 1-6 a level; "+fold": older moves fold out of sight when needed)
 
