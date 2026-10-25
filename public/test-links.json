@@ -172,6 +172,23 @@
       "see": "After Undo the box under 19 − 4 is open again and empty, with the cursor in it; the 19 and the −4 stay lit and a hint says “Try again: what is 19 − 4? Type it in the box.” No dragging again: the 15 goes straight into the box and writes 3x = 15."
     },
     {
+      "id": "t-zero-side",
+      "name": "An Add that empties a side: the wrong cancel",
+      "build": "Build T",
+      "link": {
+        "label": "Open Variables on both sides · Level 1",
+        "query": "?pack=variables-both-sides&level=1&seed=21&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Variables on both sides, Level 1, on 7x = 4x + 15.",
+        "Click Add (the top box), then its second option (+ ▢x). Type −7 and press Enter. Wait two seconds.",
+        "Press Undo.",
+        "Press Go."
+      ],
+      "see": "Adding −7x is allowed, but it leaves 0 on the left and the x-terms and the 15 together on the right. The screen greys, the 0 is marked “nothing left”, the right side stays lit, and a pop-up says “We want the x-terms on one side and the numbers on the other. That Add took everything off one side. Undo, then cancel just one x-term.” Only Undo works. After Undo the 4x is outlined, Add’s x-term option is open with −4 in its boxes, and a hint says “Add −4x to both sides: the 4x cancels, and the x-term that is left keeps a plus. Press Go.” Go cancels the two 4x’s."
+    },
+    {
       "id": "s-pickup",
       "name": "Pick up an x-term: nothing else disappears",
       "build": "Build S",

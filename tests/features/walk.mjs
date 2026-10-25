@@ -386,6 +386,17 @@ const WALKS = {
     await w.both('t-combine-retry');
     w.at('type 15'); await w.type(15); await w.enter(); await wait(w.page, 400); await w.row('3x = 15');
   },
+  async 't-zero-side'(w) {
+    await w.start(); await w.see('7x = 4x + 15');
+    w.at('Add, the x-term option, −7, Enter'); await w.click(`${act('choose')}[data-move="add"]`); await w.click(`${act('addPick')}[data-kind="x"]`); await w.type(-7); await w.enter(); await w.lateLayer();
+    await w.see('We want the x-terms on one side and the numbers on the other. That Add took everything off one side. Undo, then cancel just one x-term.', 'nothing left');
+    await w.lit('.lx-live .lb-right');
+    await w.both('t-zero-side');
+    w.at('Undo'); await w.click(act('undo')); await wait(w.page, 900);
+    await w.see('Add −4x to both sides: the 4x cancels, and the x-term that is left keeps a plus. Press Go.');
+    await w.both('t-zero-side-hint');
+    w.at('Go'); await w.click(act('go')); await wait(w.page, 600); await w.row('7x − 4x = 15');
+  },
   async 't-flip-plus'(w) {
     await w.start(); await w.see('−3x = 12');
     w.at('Flip, Go, watch'); await w.flip(); await wait(w.page, 4000); await w.strokesCentred(2); await w.shot('t-flip-plus-1-768');

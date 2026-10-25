@@ -37,6 +37,7 @@ const UNDO_REASON = {
   zero: 'That move made the other side 0, but x isn’t alone.',
   fail: 'That fraction doesn’t split evenly.',
   failDiv: 'That division doesn’t come out even.',
+  zeroSide: 'That Add took everything off one side.',
   flip: 'That flip put a minus on x.',
   boxes: 'Adding a number does not take x boxes away.',
 };

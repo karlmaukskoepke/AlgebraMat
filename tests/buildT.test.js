@@ -51,3 +51,54 @@ describe('Part 1.3: a refused drag names a move that applies to the shape', () =
     expect(say({ board: { left: [x(), n(2)], right: [f] }, divIds: [] }, f.id)).toBe('Work out ⅓ of 15 first: click the ×.');
   });
 });
+
+// ---- Part 4: an Add that empties a side, with x-terms and numbers left together on the other ----
+import { bothSidesPlay as BP } from '../src/play/solveCards.js';
+import { zeroedSide } from '../src/engine/cards/bothSides.js';
+import { packById } from '../src/packs/index.js';
+import { boardText } from '../src/engine/solveTerms.js';
+
+describe('Part 4: the wrong cancel', () => {
+  const digits = (n) => [...String(Math.abs(n))].map((d) => ({ type: 'digit', digit: Number(d) })).concat(n < 0 ? [{ type: 'toggleSign' }] : []);
+  const addX = (k) => [{ type: 'choose', move: 'add' }, { type: 'addPick', kind: 'x' }, ...digits(k), { type: 'go' }];
+  const addN = (k) => [{ type: 'choose', move: 'add' }, { type: 'addPick', kind: 'num' }, ...digits(k), { type: 'go' }];
+  const run = (s, acts) => acts.reduce((st, a) => BP.reduce(st, a), s);
+  const start = (left, right) => { const s = BP.newSession({ ...packById('variables-both-sides').generate(1, 21)[0], logLevel: 1 }, {}); return { ...s, board: { left, right }, base: { left, right }, rows: [{ type: 'eq', board: { left, right } }], prevBoard: { left, right } }; };
+  it('which Adds count: 5x = 3x + 10 with −5x (0 = −2x + 10) yes; 2x = 3x + 6 with −2x (0 = x + 6) no; a lone number taken off its side yes', () => {
+    expect(zeroedSide({ left: [x(5)], right: [x(3), n(10)] }, { left: [n(0)], right: [x(-2), n(10)] }, true)).toMatchObject({ side: 'left' });
+    expect(zeroedSide({ left: [x(2)], right: [x(3), n(6)] }, { left: [n(0)], right: [x(1), n(6)] }, true)).toBeNull();
+    expect(zeroedSide({ left: [x(2), n(6)], right: [n(10)] }, { left: [x(2), n(6), n(-10)], right: [n(0)] }, false)).toMatchObject({ side: 'right', beside: true });
+    expect(zeroedSide({ left: [x(5)], right: [x(3), n(10)] }, { left: [x(2)], right: [n(10)] }, true)).toBeNull();
+  });
+  it('5x = 3x + 10, Add −5x: written, then the spotlight with Undo; the slip is tagged; Undo gives the hint with Add −3x ready, recorded as hint', () => {
+    let s = start([x(5)], [x(3), n(10)]);
+    s = run(s, addX(-5));
+    expect(boardText(s.board)).toBe('0 = 3x + 10 + −5x');
+    expect(s.feedback).toMatchObject({ key: 'vZeroSide', bad: true });
+    expect(s.needUndo).toBe(true);
+    expect(s.tags).toContain('zeroed-side');
+    s = run(s, [{ type: 'undo' }]);
+    expect(boardText(s.board)).toBe('5x = 3x + 10');
+    expect(s.feedback).toMatchObject({ key: 'vZeroHint', params: { amount: '−3x', term: '3x' } });
+    expect([s.menu, s.addKind, s.amountEntry]).toEqual(['add', 'x', '-3']);
+    expect(s.supportsShown).toContain('hint');
+    s = run(s, [{ type: 'go' }]);
+    expect(boardText(s.board)).toBe('5x + −3x = 10');
+  });
+  it('the same by dragging the 5x across the =', () => {
+    let s = start([x(5)], [x(3), n(10)]);
+    s = run(s, [{ type: 'lxDrop', id: s.board.left[0].id, slot: { side: 'right', at: 2 }, how: 'pointer' }]);
+    expect(s.feedback.key).toBe('vZeroSide');
+  });
+  it('2x + 6 = 10, Add −10: the spotlight; the hint after Undo is Add −6', () => {
+    let s = start([x(2), n(6)], [n(10)]);
+    s = run(s, addN(-10));
+    expect(s.feedback).toMatchObject({ key: 'vZeroSide', params: { x: false, beside: true } });
+    s = run(s, [{ type: 'undo' }]);
+    expect(s.feedback).toMatchObject({ key: 'vZeroHintNum', params: { opposite: '−6', constant: '+6' } });
+  });
+  it('2x = 3x + 6, Add −2x is a good move (0 = x + 6), not flagged', () => {
+    const s = run(start([x(2)], [x(3), n(6)]), addX(-2));
+    expect([boardText(s.board), s.needUndo, s.feedback.bad]).toEqual(['0 = 3x + 6 + −2x', false, false]);
+  });
+});

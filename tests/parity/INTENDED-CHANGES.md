@@ -625,6 +625,11 @@ drag one onto the other…") and after a wrong worked-out product ("Try again: w
 stays open, empty and focused, its terms lit. A second Undo closes the blank, as before. The class sheet is unchanged (none of these
 hints recorded anything before).
 
+**Part 4.** Nothing recorded differs (the scripted runs and recorded screens have no Variables on both sides problem). **Below the screen
+check:** on Variables on both sides, an Add that empties a side and leaves x-terms and numbers together on the other (`7x = 4x + 15` +
+−7x) now waits for Undo with its spotlight, its slip tag `zeroed-side`, and a hint after Undo recorded as `hint` (it used to be taken as
+a helpful move).
+
 <!-- history: nothing below this line is read by the harness -->
 
 ## History: screen changes accepted by the re-baseline of 2026-10-24 (Build O, Part 0)

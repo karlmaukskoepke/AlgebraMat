@@ -73,6 +73,21 @@ export function addToBoth(board, k, isX) {
   return { board: { left: out.left, right: out.right }, work: { ...work, amount: k, x: isX }, hit };
 }
 
+// An Add that emptied a side (it says 0) and left an x-term and a number together on the other: { side, beside } or null. An x-term Add
+// counts only when it left the x-term negative: cancelling the other x-term would have kept x-terms and numbers apart with a plus
+// (`2x = 3x + 6` + −2x makes `0 = x + 6`, the better of the two, and is not flagged). `beside`: a number was beside x before (its
+// opposite is the Add to make instead).
+export function zeroedSide(before, board, isX) {
+  const side = ['left', 'right'].find((k) => board[k].length === 1 && board[k][0].kind === 'num' && board[k][0].v === 0 && !(before[k].length === 1 && before[k][0].kind === 'num' && before[k][0].v === 0));
+  if (!side) return null;
+  const full = board[side === 'left' ? 'right' : 'left'];
+  const xs = full.filter((t) => t.kind === 'x');
+  if (!xs.length || !full.some((t) => t.kind === 'num')) return null;
+  if (isX && xs.reduce((n, t) => n + (t.coef ?? 1), 0) > 0) return null;
+  const xSideBefore = before.left.some((t) => t.kind === 'x') ? before.left : before.right;
+  return { side, beside: !isX && xSideBefore.some((t) => t.kind === 'num') };
+}
+
 // The Add, judged: helpful when it cancels a term on a side (moving an x-term either way, or a number); else it waits for Undo, said in
 // the student's numbers: a term of the same kind and the opposite sign only partly cancelled ("still here"), or nothing cancelled at all.
 function addMove(s, api) {
@@ -94,8 +109,17 @@ function addMove(s, api) {
   s.lastAmount = k;
   s.lastAddX = isX;
   Object.assign(s, { menu: null, typing: null, amountEntry: '', hint: null, addKind: null });
-  api.commit(s, { rows: [{ type: 'work', work }, { type: 'eq', board }], next: board, label: null, helpful, lights: boardLights(before, board, fewer) });
+  // the wrong cancel (Build T, Part 4): a legal Add that took everything off one side and left x-terms and numbers together on the other
+  // (`5x = 3x + 10` + −5x makes `0 = −2x + 10`) is a deliberate exception to "a legal move is never red": the spotlight, Undo, a hint
+  const zeroed = helpful ? zeroedSide(before, board, isX) : null;
+  api.commit(s, { rows: [{ type: 'work', work }, { type: 'eq', board }], next: board, label: null, helpful: helpful && !zeroed, lights: boardLights(before, board, zeroed ? 'neutral' : fewer) });
   s.prevBoard = board;
+  if (zeroed) {
+    s.zeroSide = { x: isX };
+    s.answers.push({ typed: `add ${added}`, tag: 'zeroed-side' });
+    s.tags.push('zeroed-side');
+    return say(s, 'vZeroSide', { x: isX, beside: zeroed.beside }, true);
+  }
   if (helpful) return say(s, xAlone(board) ? 'aSolvedBoard' : 'aFindX');
   if (opposite) {
     const v = isX ? (opposite.coef ?? 1) : opposite.v;
@@ -128,10 +152,10 @@ const loop = createSolveLoop({
   params: () => ({}),
   extra: () => ({
     fail: null, deal: null, diag: null, pic: null, tried: [], mopts: null, tradeCount: 0, flipCount: 0, addKind: null,
-    amountEntry: '', pending: null, combining: null, resolving: false, alone: null, prevBoard: null, zeroOther: false, work: null,
+    amountEntry: '', pending: null, combining: null, resolving: false, alone: null, prevBoard: null, zeroOther: false, zeroSide: null, work: null,
     lastAmount: null, lastAddX: false, forcedAmount: null, teachFlow: false, startOver: false, lastFlip: false,
   }),
-  snapshotExtra: (s) => ({ fail: null, deal: null, diag: null, pic: null, prevBoard: s.prevBoard, amountEntry: s.amountEntry, work: s.work, zeroOther: false, lastFlip: false, startOver: s.startOver, addKind: s.addKind }),
+  snapshotExtra: (s) => ({ fail: null, deal: null, diag: null, pic: null, prevBoard: s.prevBoard, amountEntry: s.amountEntry, work: s.work, zeroOther: false, zeroSide: null, lastFlip: false, startOver: s.startOver, addKind: s.addKind }),
   resetState(s) {
     Object.assign(s, { fail: null, deal: null, diag: null, pic: null, mopts: null, amountEntry: '', addKind: null, zeroOther: false, work: null, alone: null, prevBoard: s.board, lastFlip: false, startOver: false });
   },
@@ -140,8 +164,8 @@ const loop = createSolveLoop({
   // x on one side before checking (Karl's rule): x = is greyed while x is on both sides
   answerBlocked: (s) => xBoth(s.board),
   waitingForUndo: (s) => Boolean(s.fail),
-  undoReason: (s) => (s.fail ? 'fail' : s.lastFlip ? 'flip' : s.lights.fewer === 'red' ? 'red' : 'partial'),
-  afterUndo(s) { Object.assign(s, { zeroOther: false, alone: null, lastFlip: false }); },
+  undoReason: (s) => (s.fail ? 'fail' : s.zeroSide ? 'zeroSide' : s.lastFlip ? 'flip' : s.lights.fewer === 'red' ? 'red' : 'partial'),
+  afterUndo(s) { Object.assign(s, { zeroOther: false, zeroSide: null, alone: null, lastFlip: false }); },
   tag: (p, typed) => tagBoth(p, typed),
   slip: (s, typed, tag) => ({ key: 'wWrong', params: { typed: signed(typed), tag } }),
 
@@ -252,18 +276,42 @@ const BOTH_ERRORS = {
   ...ADD_ERRORS,
   vRed: { target: 'lastMove', label: 'got bigger', lit: ['newest'] },
   vPartial: { target: 'lastMove', label: 'still here', lit: ['newest'] },
+  vZeroSide: { target: 'zeroSide', label: 'nothing left', lit: ['fullSide'] },        // (the wrong cancel, Build T, Part 4)
   dxProductWrong: { target: 'prodbox', label: 'check this', lit: ['prodlabel', 'factor'] },
   fWorse: { target: 'coef', label: 'x has a minus', lit: ['newest'] },
   dFail: { target: 'failSide', label: 'doesn’t split' },
   dFail3: { target: 'failSide', label: 'doesn’t split' },
   wWrong: { target: 'subst', clear: true, lit: ['substLast'] },
 };
+// The hint after Undo of the wrong cancel (Build T, Part 4), recorded as `hint`: Add's x-term option lit with its preview and the x-term to
+// add, the one that keeps the x-term left with a plus (the smaller one cancelled); after a number that emptied its side, Add's number
+// option with the opposite of the number beside x.
+function zeroSideHint(s, before) {
+  const b = s.board;
+  if (before.zeroSide?.x) {
+    const l = b.left.find((t) => t.kind === 'x');
+    const r = b.right.find((t) => t.kind === 'x');
+    if (!l || !r) return null;
+    const small = (l.coef ?? 1) <= (r.coef ?? 1) ? l : r;
+    const k = -(small.coef ?? 1);
+    Object.assign(s, { menu: 'add', addKind: 'x', typing: null, amountEntry: String(k), hint: { kind: 'cancel', id: small.id } });
+    if (!s.supportsShown.includes('hint')) s.supportsShown.push('hint');
+    return { target: 'hinted', key: 'vZeroHint', params: { term: coefText(-k), amount: coefText(k) }, move: 'add' };
+  }
+  const xs = b.left.some((t) => t.kind === 'x') ? b.left : b.right;
+  const con = xs.find((t) => t.kind === 'num');
+  if (!con) return null;
+  Object.assign(s, { menu: 'add', addKind: 'num', typing: null, amountEntry: String(-con.v), hint: { kind: 'cancel', id: con.id } });
+  if (!s.supportsShown.includes('hint')) s.supportsShown.push('hint');
+  return { target: 'hinted', key: 'vZeroHintNum', params: { constant: plus(signed(con.v)), opposite: plus(signed(-con.v)) }, move: 'add' };
+}
+
 export const BOTH_SPOT = {
   error: (s) => BOTH_ERRORS[s.feedback?.key] ?? null,
-  keepsReds: (s) => ['vRed', 'vPartial', 'dFail', 'dFail3', 'fWorse'].includes(s.feedback?.key),
+  keepsReds: (s) => ['vRed', 'vPartial', 'vZeroSide', 'dFail', 'dFail3', 'fWorse'].includes(s.feedback?.key),
   startOverAt: 3,
   clear: (s) => { s.entry = ''; s.sub = null; },
-  hint: (s, before = null) => hintAfterUndo(s, before),
+  hint: (s, before = null) => (before?.feedback?.key === 'vZeroSide' ? zeroSideHint(s, before) ?? hintAfterUndo(s, before) : hintAfterUndo(s, before)),
   prompt: () => 'aFindX',
 };
 

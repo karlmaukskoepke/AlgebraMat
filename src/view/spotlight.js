@@ -315,6 +315,9 @@ export function findSolveTarget(root, target, s = null) {
       return side?.querySelector('.lx-tok[data-like="num"], .lb-num') ?? side ?? newest;
     }
     case 'otherSide': return sides(newest).find((sd) => !hasX(sd)) ?? newest;
+    // the wrong cancel (Build T, Part 4): the side left 0, and the side holding both kinds of term
+    case 'zeroSide': return sides(newest).find((sd) => !hasX(sd)) ?? newest;
+    case 'fullSide': return sides(newest).find(hasX) ?? newest;
     case 'lastMove': return rows.filter((r) => r.classList.contains('has-work')).at(-1) ?? newest;
     case 'newest': return newest?.querySelector('.lb-eq') ?? newest;
     case 'plugrow': return root.querySelector('.is-plugrow .lb-eq') ?? root.querySelector('.ab-boardwrap.is-plugrow');
