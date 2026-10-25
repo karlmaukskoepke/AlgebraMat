@@ -712,6 +712,23 @@ room). **Below the screen check (no recorded state shows them):** at 1366×768 T
 under the original equation; at 1366×650 Distribute (Levels 1-5) and Variables (Levels 2-5) keep 32 px and fold the same way; the nudge
 glow is drawn tighter (3 px instead of 9 px); Distribute's factor row keeps room under it for the arcs and "3 groups of".
 
+**Part 3, the lighter hint before dividing.** Problems and save codes are unchanged. Divide it's I'm stuck now starts with the reminder
+(Karl: "the same scaffold is I'm stuck's first click"; the model is second), so two scripted runs that press I'm stuck twice record the
+reminder and the model instead of the model and guided. The class-sheet words themselves (`hint`, `model`, `guided`) and the stuck count
+are unchanged; the 23 other runs are unchanged.
+
+| Key | Before | After | Why |
+|---|---|---|---|
+| `event:divide-it/stuck-x2-then-solve` | supports `model, guided`, stuck 2 | supports `hint, model`, stuck 2 | Part 3.2: I'm stuck's first rung is the reminder (recorded `hint`, as the hint after Undo is); the second is the model |
+| `event:divide-it/partial-composite` | supports `model, guided`, stuck 2 | supports `hint, model`, stuck 2 | the same |
+| `screen:div-stuck-1@1366x768` | the counters and boxes picture with the fractions live, the 5 boxed | `5 · x = −15` with a blue dot, the Divide button lit, its fraction bars and box under the row, "To get one x, divide both sides by 5…" | Part 3.1-3.2 (4.60% of pixels) |
+| `screen:div-stuck-2@1366x768` | guided: the ⅕ lit | the model: the counters and boxes picture with the fractions live (the old first rung) | Part 3.3 (1.60% of pixels) |
+
+**Also at 1366×650** (`screen:div-stuck-1@1366x650`, `screen:div-stuck-2@1366x650`, already listed above for Build S's text size): the same
+two changes. **Below the screen check:** the hint after Undo on every card when the next move is dividing (`5x = −15`, `2x = 12` after a
+combine, a group after Distribute, `3x = −12` after a flip) shows `5 · x` and no box (it boxed the 5, or the 2x, with a dashed frame);
+Flip everything's reminders before a flip (`−x = 12`, `−3x = 12`) no longer frame the number and the x (`−3 · x` shows the dot).
+
 <!-- history: nothing below this line is read by the harness -->
 
 ## History: screen changes accepted by the re-baseline of 2026-10-24 (Build O, Part 0)
