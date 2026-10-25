@@ -3,6 +3,156 @@
   "updated": "2026-10-25",
   "checks": [
     {
+      "id": "q-icons",
+      "name": "Two new symbols: Flip everything and Trade places",
+      "build": "Build Q",
+      "link": {
+        "label": "Open Flip everything · Level 2",
+        "query": "?pack=flip-everything&level=3&seed=7&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Flip everything, Level 2. Look at the panel on the right.",
+        "Look at the bigger symbols to the left of the fourth and fifth buttons.",
+        "Make the browser bigger (Ctrl and +) once, look again, then go back (Ctrl and 0)."
+      ],
+      "see": "Beside Flip everything: two rounded arrows chasing each other in a circle, a minus on the left and a plus on the right (one arrow goes over the top from the minus to the plus, the other under the bottom back to the minus). Beside Trade places: an equals sign with the same two arrows circling round it. Both stay clear when the page is bigger."
+    },
+    {
+      "id": "q-divide-room",
+      "name": "A Divide row has room: its “Same as” line never touches the next row",
+      "build": "Build Q",
+      "link": {
+        "label": "Open Divide it · Level 2",
+        "query": "?pack=divide-it&level=3&seed=7&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Divide it, Level 2, on 5x = −15.",
+        "Click Divide (÷), type 5 and click Go. Wait three seconds.",
+        "Look at the space above and below the line “Same as multiplying by ⅕.”"
+      ],
+      "see": "Under 5x = −15 the work row (5x) over 5 = (−15) over 5, then “Same as multiplying by ⅕.” on a line of its own, then x = (−15) over 5. There is clear space between the line and the (−15) below it, and between the rows: nothing touches."
+    },
+    {
+      "id": "q-lit-row",
+      "name": "A lit pair stays inside its own row",
+      "build": "Build Q",
+      "link": {
+        "label": "Open Two-step equations · Level 1",
+        "query": "?pack=two-step-equations&level=1&seed=7&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Two-step equations, Level 1, on 2x + 4 = 16.",
+        "Click Add (the top box), type −4 and press Enter. Wait three seconds.",
+        "Touch nothing for five seconds."
+      ],
+      "see": "The 16 and the − 4 on the newest row glow blue and pulse, with “Drag one onto the other to combine them.” under the rows. The glow sits close round the two numbers and stays inside their row: it does not reach the row above."
+    },
+    {
+      "id": "q-hint-dot",
+      "name": "The hint before dividing: a dot and the Divide preview, nothing boxed",
+      "build": "Build Q",
+      "link": {
+        "label": "Open Divide it · Level 2",
+        "query": "?pack=divide-it&level=3&seed=7&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Divide it, Level 2, on 5x = −15.",
+        "Click the box after x =, type −15 and press Enter. Drag the −15 onto the x. Press Next twice and wait two seconds.",
+        "Press Undo."
+      ],
+      "see": "After Undo the equation reads 5 · x = −15, with a small blue dot between the 5 and the x. Under it, faint fraction bars under each side with a dashed box beneath, and the Divide button ringed. Nothing is boxed round the 5 or the x. The note says “To get one x, divide both sides by 5 (that is, multiply by ⅕): one of the 5 x boxes is ⅕.”"
+    },
+    {
+      "id": "q-stuck-divide",
+      "name": "I’m stuck on Divide it: the reminder first, then the model",
+      "build": "Build Q",
+      "link": {
+        "label": "Open Divide it · Level 2",
+        "query": "?pack=divide-it&level=3&seed=7&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Divide it, Level 2, on 5x = −15.",
+        "Click I’m stuck.",
+        "Click I’m stuck again."
+      ],
+      "see": "First click: the same hint as after Undo: 5 · x = −15 with the blue dot, the fraction bars and box under it, the Divide button ringed, and “To get one x, divide both sides by 5…”. Second click: the model: five x boxes and 15 counters, “5 boxes and 15 counters. What fraction of both sides leaves one box?…”."
+    },
+    {
+      "id": "q-menu-three",
+      "name": "Multiply has three options again; the middle one divides",
+      "build": "Build Q",
+      "link": {
+        "label": "Open Divide it · Level 2",
+        "query": "?pack=divide-it&level=3&seed=7&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Divide it, Level 2, on 5x = −15.",
+        "Click Multiply (the second box).",
+        "Point at the middle option without clicking.",
+        "Click the middle option and type 5.",
+        "Press Enter. Wait three seconds."
+      ],
+      "see": "Three options, each with a bigger symbol on its left: × for a whole number, ÷ for 1 over a box, a small fraction picture for a fraction. Pointing at the middle one draws a faint 1/▢ × (5x) = 1/▢ × (−15). Typing 5 fills both boxes and shows “Dividing by 5 is multiplying by ⅕.” Enter writes ⅕(5x) = ⅕(−15) with that line under it, then x = ⅕(−15). The Divide button (÷) is still there too."
+    },
+    {
+      "id": "q-flip-skip",
+      "name": "Flip’s slow cross-off can be skipped",
+      "build": "Build Q",
+      "link": {
+        "label": "Open Flip everything · Level 2",
+        "query": "?pack=flip-everything&level=3&seed=7&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Flip everything.",
+        "Click Flip everything (the fourth box), then Go.",
+        "Straight away, click anywhere on the empty paper."
+      ],
+      "see": "Without the click, each minus is crossed by a slow red stroke, one after the other, before the new row comes in (about three seconds). With the click, both strokes and the new row appear at once."
+    },
+    {
+      "id": "q-wrong-cancel",
+      "name": "The wrong cancel, whatever the sign",
+      "build": "Build Q",
+      "link": {
+        "label": "Open Variables on both sides · Level 1",
+        "query": "?pack=variables-both-sides&level=1&seed=7&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Variables on both sides, Level 1, on 6x = 4x + 10.",
+        "Click Add (the top box), then its first option (+ ▢). Type −10 and press Enter. Wait two seconds.",
+        "Click Add, then its second option (+ ▢x). Type −4 and press Enter. Wait two seconds.",
+        "Press Undo.",
+        "Press Go."
+      ],
+      "see": "The first Add makes 6x − 10 = 4x. Adding −4x empties the right side: 6x − 4x − 10 = 0 (the x-term left is positive, and it is still flagged): the screen greys, the 0 is marked “nothing left”, and “We want the x-terms on one side and the numbers on the other. That Add took everything off one side. Undo, then cancel just one x-term.” After Undo, Add’s x-term option is open with −6 in its boxes and “Add −6x to both sides: the 6x cancels, and the number is left alone on its side. Press Go.” Go makes −10 = 4x − 6x."
+    },
+    {
+      "id": "q-fold",
+      "name": "Bigger text: older steps fold away instead of the text shrinking",
+      "build": "Build Q",
+      "link": {
+        "label": "Open Distribute, combine, solve · Level 1",
+        "query": "?pack=distribute-solve&level=1&seed=7&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Distribute, combine, solve, Level 1, on 2(x + 4) = 26.",
+        "Drag the 2 onto its parenthesis. Type 2, press Enter, type 8, press Enter. Click Next.",
+        "Click Add (the top box), type −8 and press Enter. Wait two seconds.",
+        "Drag the 26 onto the − 8, type 18 and press Enter. Click Next.",
+        "Click Divide (÷), type 2 and click Go. Wait three seconds."
+      ],
+      "see": "The equation is bigger than before (on a 768-pixel-tall screen). At the end the screen shows 2(x + 4) = 26, a small ⋮ under it, 2x = 18, the division row with “Same as multiplying by ½.”, and x = (18) over 2: the step 2x + 8 = 26 has folded out of sight so everything fits without making the text smaller."
+    },
+    {
       "id": "t-parens-divide",
       "name": "The check writes 5(−3), never 5 × −3 (Divide it)",
       "build": "Build T",
@@ -114,7 +264,7 @@
       "steps": [
         "Click the button. It opens Two-step equations, Level 1, on 3x + 4 = 19.",
         "Click Add (the top box), type −4 and press Enter. Drag the 19 onto the 4 beside it, type 15 and press Enter. The row reads 3x = 15.",
-        "Click Multiply (the second button), then its second option (a box over a box). Type 1, then 3, and click the green Go. The last row reads x = ⅓(15).",
+        "Click Multiply (the second button), then its third option (a box over a box). Type 1, then 3, and click the green Go. The last row reads x = ⅓(15).",
         "Click I’m stuck."
       ],
       "see": "The pop-up says “x is ⅓ of 15. Work it out, then type x.” It says nothing about dividing: the row was made with the fraction, so the help talks about a fraction of 15."
@@ -186,7 +336,7 @@
         "Press Undo.",
         "Press Go."
       ],
-      "see": "Adding −7x is allowed, but it leaves 0 on the left and the x-terms and the 15 together on the right. The screen greys, the 0 is marked “nothing left”, the right side stays lit, and a pop-up says “We want the x-terms on one side and the numbers on the other. That Add took everything off one side. Undo, then cancel just one x-term.” Only Undo works. After Undo the 4x is outlined, Add’s x-term option is open with −4 in its boxes, and a hint says “Add −4x to both sides: the 4x cancels, and the x-term that is left keeps a plus. Press Go.” Go cancels the two 4x’s."
+      "see": "Adding −7x is allowed, but it leaves 0 on the left and the x-terms and the 15 together on the right. The screen greys, the 0 is marked “nothing left”, the right side stays lit, and a pop-up says “We want the x-terms on one side and the numbers on the other. That Add took everything off one side. Undo, then cancel just one x-term.” Only Undo works. After Undo the 4x is outlined, Add’s x-term option is open with −4 in its boxes, and a hint says “Add −4x to both sides: the 4x cancels, and the number is left alone on its side. Press Go.” (Build Q: the x-term beside the number) Go cancels the two 4x’s."
     },
     {
       "id": "t-stack-add",
@@ -613,7 +763,7 @@
       },
       "steps": [
         "Click the button. It opens Distribute, combine, solve, Level 1, on 3(x + 2) = 15.",
-        "Click Multiply (the second button), then its second option (a box over a box). Type 1, then 3, and click the green Go. The new row reads x + 2 = ⅓ × (15).",
+        "Click Multiply (the second button), then its third option (a box over a box). Type 1, then 3, and click the green Go. The new row reads x + 2 = ⅓ × (15).",
         "Click the small × between ⅓ and (15). Type 45 and press Enter.",
         "Press Undo.",
         "The box is open again with the cursor in it: type 5 and press Enter."
@@ -683,7 +833,7 @@
       },
       "steps": [
         "Click the button. It opens Divide it, Level 2, on 5x = −15.",
-        "Click Multiply (the second button), then its second option (a box over a box). Type 1, then 4.",
+        "Click Multiply (the second button), then its third option (a box over a box). Type 1, then 4.",
         "Press the left arrow key.",
         "Press the right arrow key and type 5.",
         "Click the green Go."
@@ -858,7 +1008,7 @@
         "Click Add (the top button in the panel). It turns yellow and a box opens under the equation. Type 4.",
         "Click Multiply (the second button)."
       ],
-      "see": "After step 3 Add is white again and its box (with the 4) is gone from under the equation, as if Add had never been clicked. Only Multiply is yellow, with its two options beside it."
+      "see": "After step 3 Add is white again and its box (with the 4) is gone from under the equation, as if Add had never been clicked. Only Multiply is yellow, with its three options beside it."
     },
     {
       "id": "o-preview-ends",
@@ -956,12 +1106,12 @@
       },
       "steps": [
         "Click the button. It opens Divide it, Level 2, on 5x = −15.",
-        "Click Multiply (the second button). Two options open beside it.",
+        "Click Multiply (the second button). Three options open beside it.",
         "Click the first option (a single box). Type 5 and click the green Go.",
-        "Click Multiply again, then the second option (a box over a box). Type 1, then press the / key, then type 5.",
+        "Click Multiply again, then the third option (a box over a box). Type 1, then press the / key, then type 5.",
         "Click the green Go."
       ],
-      "see": "There are two options: a box ( ) = box ( ) and a box over a box ( ), with no small × or ÷ on them, neither greyed. The first, with 5, says “5 × (5x) makes 25x: still not one x. Try dividing both sides.” and writes nothing. The fraction takes 1 on top and 5 underneath on both sides, and Go writes ⅕(5x) = ⅕(−15), then x = ⅕(−15): written as multiplying, not dividing."
+      "see": "There are three options: a box ( ) = box ( ), 1 over a box ( ), and a box over a box ( ), each with a bigger symbol to its left (×, ÷, a small fraction; Build Q), none greyed. The first, with 5, says “5 × (5x) makes 25x: still not one x. Try dividing both sides.” and writes nothing. The fraction takes 1 on top and 5 underneath on both sides, and Go writes ⅕(5x) = ⅕(−15), then x = ⅕(−15): written as multiplying, not dividing."
     },
     {
       "id": "o-hint-divide",
@@ -991,7 +1141,7 @@
       },
       "steps": [
         "Click the button. It opens Divide it, Level 2, on 5x = −15.",
-        "Click Multiply (the second button). Click the second option, the one with a box over a box. Type 1, then 5. A small note under the fraction says “Tap a box to retype it.”",
+        "Click Multiply (the second button). Click the third option, the one with a box over a box. Type 1, then 5. A small note under the fraction says “Tap a box to retype it.”",
         "Click the top box of the fraction.",
         "Click the bottom box of the fraction."
       ],
@@ -2223,7 +2373,7 @@
         "Mistake 3, a move that does not get one x: click Multiply, then its first option (a single box), type 5 and click Go. A good response says “5 × (5x) makes 25x: still not one x. Try dividing both sides.” in a small note, and writes nothing.",
         "Mistake 4, flipping the sign: click Divide (÷), press the minus key, type 1 and click Go. A good response says the sign changes but there are still 5 x’s, and points to dividing.",
         "Mistake 5, dividing by a number that does not split: click Divide (÷), type 2 and click Go. Wait two seconds. A good response says it doesn’t split (5 boxes can’t make 2 equal groups, and −15 can’t be shared into 2 equal groups), and pulses Undo. Press Undo: it shows the five x boxes and asks “What should we divide both sides by?” with ÷ 2 (crossed off) to ÷ 6 to choose from: you divided, so it talks about dividing. Press Got it.",
-        "Mistake 6, pressing I’m stuck: press it twice. A good response gives a bigger clue the second time (first the 5 boxes and 15 counters, then “take ⅕ of both sides”) and still leaves the move to you.",
+        "Mistake 6, pressing I’m stuck: press it three times. A good response gives a bigger clue each time (first 5 · x with the Divide preview and “divide both sides by 5”, then the 5 boxes and 15 counters, then “take ⅕ of both sides”) and still leaves the move to you.",
         "Mistake 7, a mistake, Undo, then type in the blank: click the button at the top of this item again (it starts the same problem fresh). Click the box after x =, type 3 and press Enter. Drag the 3 onto the x, press Next twice and wait two seconds. Press Undo. Without clicking anything, type 5, then click the green Go.",
         "Wait 3 seconds and watch the nudge: x is alone now, so a good response nudges nothing (and on 5x = −15, choosing the move is the thinking: only I’m stuck flashes, after 10 seconds).",
         "Last, watch for anything redrawing: click the box after x =, type 1, then press Backspace.",
@@ -2249,6 +2399,30 @@
               "label": "Save codes (teacher only)",
               "query": "?codes=1&nosignin=1",
               "look": "With ?codes=1 the Save code and Enter code buttons come back, for moving a student by hand."
+            }
+          ]
+        },
+        {
+          "name": "Build Q: panel polish, room for the division bar, a lighter hint, Multiply’s three options (2026-10-25)",
+          "about": "New Flip everything and Trade places symbols, more room round division rows (older steps fold away instead of the text shrinking), a lighter hint before dividing (5 · x and the Divide preview), Multiply’s three options again, a skippable flip cross-off, and the wrong cancel flagged whatever the sign.",
+          "links": [
+            {
+              "label": "Divide it: the three-option menu",
+              "query": "?pack=divide-it&level=3&seed=7&nosignin=1",
+              "reset": true,
+              "look": "Click Multiply: × a whole number, ÷ one over a box, a fraction. The middle one, 5, Enter: ⅕(5x) = ⅕(−15) with “Dividing by 5 is multiplying by ⅕.”"
+            },
+            {
+              "label": "Divide it: I’m stuck",
+              "query": "?pack=divide-it&level=3&seed=7&nosignin=1",
+              "reset": true,
+              "look": "First click: 5 · x = −15 with the Divide preview. Second click: the boxes and counters."
+            },
+            {
+              "label": "Distribute: bigger text, older steps fold",
+              "query": "?pack=distribute-solve&level=1&seed=7&nosignin=1",
+              "reset": true,
+              "look": "On a 768-pixel-tall screen the equation is larger; after three moves the earliest folded step goes out of sight with a small ⋮."
             }
           ]
         },

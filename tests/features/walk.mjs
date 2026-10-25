@@ -320,6 +320,125 @@ class Walk {
 
 // ---- one walk per item (same id as in the data file) ---------------------------------------------------------------------------------
 const WALKS = {
+  // ---- Build Q ----
+  async 'q-icons'(w) {
+    await w.start(); await w.see('FLIP EVERYTHING · Level 2', 'MOVES');
+    const names = await w.page.evaluate(() => [...document.querySelectorAll('.lx-pgrid .lx-symbol')].map((e) => e.getAttribute('aria-label')));
+    if (names[3] !== 'Cycle between minus and plus' || names[4] !== 'Equals sign with two circling arrows') throw new Error(`the fourth and fifth symbols: ${names}`);
+    const flipPaths = await w.page.locator('.lx-pgrid .lx-symbol').nth(3).locator('path').count();
+    if (flipPaths !== 6) throw new Error(`Flip everything's symbol should be two arcs, two arrowheads, a minus and a plus (${flipPaths} paths)`);
+    await w.both('q-panel-flip');
+    // the two symbols large, for the report
+    await w.page.evaluate(() => {
+      const box = document.createElement('div'); box.id = 'q-big'; box.style.cssText = 'position:fixed;left:40px;top:120px;z-index:9999;background:#fff;padding:24px;display:flex;gap:40px;border:2px solid #2b2a26;border-radius:16px';
+      for (const i of [3, 4]) { const svg = document.querySelectorAll('.lx-pgrid .lx-symbol')[i].cloneNode(true); svg.setAttribute('width', 200); svg.setAttribute('height', 200); svg.style.cssText = 'width:200px;height:200px;opacity:1'; box.append(svg); }
+      document.body.append(box);
+    });
+    await w.shot('q-icons-large');
+    await w.page.evaluate(() => document.getElementById('q-big').remove());
+  },
+  async 'q-divide-room'(w) {
+    await w.start(); await w.see('5x = −15');
+    w.at('Divide, 5, Go'); await w.divide(5); await wait(w.page, 3000);
+    await w.see('Same as multiplying by ⅕.');
+    const gap = await w.page.evaluate(() => {
+      const line = document.querySelector('.lb-rowwrap > .mo-sameas'); const row = line.closest('.lb-rowwrap'); const next = row.nextElementSibling;
+      const r = (e) => e.getBoundingClientRect();
+      // the line's box sits below the work row's equation and above the next row, which keeps room of its own above its bars
+      return { underWork: Math.round(r(line).top - r(row.querySelector('.lb-eq')).bottom), toNext: Math.round(r(next.querySelector('.lb-eq')).top - r(line).bottom) };
+    });
+    if (gap.toNext < 6 || gap.underWork < 0) throw new Error(`the line should have room of its own: ${JSON.stringify(gap)}`);
+    await w.row('x = (−15)5');
+    await w.both('q-divide-room');
+  },
+  async 'q-lit-row'(w) {
+    await w.start(); await w.see('2x + 4 = 16');
+    w.at('Add, −4, Enter'); await w.addEnter(-4); await wait(w.page, 3000);
+    w.at('hands off'); await w.idle(5000);
+    await w.see('Drag one onto the other to combine them.');
+    const out = await w.page.evaluate(() => [...document.querySelectorAll('.nudge-glow, .nudge-still')].map((g) => {
+      const row = g.closest('.lb-rowwrap').getBoundingClientRect(); const b = g.getBoundingClientRect(); const st = getComputedStyle(g);
+      const e = parseFloat(st.outlineWidth) + parseFloat(st.outlineOffset);
+      return Math.max(row.top - (b.top - e), (b.bottom + e) - row.bottom);
+    }));
+    if (out.length !== 2 || out.some((o) => o > 1)) throw new Error(`the two glows should stay inside their row (px outside: ${out})`);
+    await w.both('q-lit-row');
+  },
+  async 'q-hint-dot'(w) {
+    await w.start(); await w.see('5x = −15');
+    w.at('−15, Enter, drag, Next twice'); await w.click(act('focus')); await w.type('-15'); await w.enter(); await w.drag(); await w.click(act('nextLine')); await w.click(act('nextLine')); await w.lateLayer();
+    w.at('Undo'); await w.click(act('undo')); await wait(w.page, 900);
+    await w.see('5·x', 'To get one x, divide both sides by 5 (that is, multiply by ⅕): one of the 5 x boxes is ⅕.');
+    const look = await w.page.evaluate(() => ({ box: document.querySelectorAll('.lb-hintbox').length, frame: [...document.querySelectorAll('.spot-frame')].filter((f) => getComputedStyle(f).display !== 'none').length,
+      bars: document.querySelectorAll('.lx-ghost .lx-ghosteq.is-division .mo-divpart').length, lit: document.querySelectorAll('.lx-move[data-action="divPick"].spot-move').length }));
+    if (look.box || look.frame || look.bars !== 2 || !look.lit) throw new Error(`a dot and the Divide preview, nothing boxed: ${JSON.stringify(look)}`);
+    await w.both('q-hint-dot');
+  },
+  async 'q-stuck-divide'(w) {
+    await w.start(); await w.see('5x = −15');
+    w.at('I’m stuck'); await w.stuck(); await wait(w.page, 600);
+    await w.see('5·x', 'To get one x, divide both sides by 5');
+    await w.both('q-stuck-1');
+    w.at('I’m stuck again'); await w.stuck(); await wait(w.page, 900);
+    await w.see('5 boxes and 15 counters. What fraction of both sides leaves one box?');
+    await w.both('q-stuck-2');
+  },
+  async 'q-menu-three'(w) {
+    await w.start(); await w.see('5x = −15');
+    w.at('Multiply'); await w.click(act('multOpen'));
+    const opts = await w.page.evaluate(() => [...document.querySelectorAll('.mo-flyout .mo-optrow')].map((r) => `${r.querySelector('.lx-symbol').getAttribute('aria-label')}:${r.querySelector('.mo-opt').dataset.kind}`));
+    if (opts.join(',') !== 'Times sign:whole,Division sign:unit,Fraction:frac') throw new Error(`three options with symbols: ${opts}`);
+    await w.both('q-menu-three');
+    w.at('point at the middle option'); await w.page.locator('.mo-opt[data-kind="unit"]').hover(); await wait(w.page, 400);
+    const ghost = (await w.page.locator('.lx-ghost.is-preview').innerText()).replace(/\s+/g, '');
+    if (ghost !== '1×(5x)=1×(−15)' || (await w.page.locator('.lx-ghost .mo-unitblank').count()) !== 2) throw new Error(`the faint 1/▢ × (5x) = 1/▢ × (−15) row: ${ghost}`);
+    await w.both('q-unit-ghost');
+    w.at('click it, type 5'); await w.click(`.mo-opt${act('multPick')}[data-kind="unit"]`); await w.type(5);
+    await w.see('Dividing by 5 is multiplying by ⅕.');
+    w.at('Enter'); await w.enter(); await wait(w.page, 3000);
+    await w.row('⅕(5x) = ⅕(−15) Dividing by 5 is multiplying by ⅕.'); await w.row('x = ⅕(−15)');
+    if (!(await w.page.locator(DIV).count())) throw new Error('the Divide button should still be there');
+    await w.both('q-unit-result');
+  },
+  async 'q-flip-skip'(w) {
+    await w.start(); await w.see('FLIP EVERYTHING · Level 2');
+    w.at('Flip everything, Go, click the paper'); await w.click(act('flipPick')); await w.page.locator(act('go')).first().click(); await wait(w.page, 200);
+    await w.page.mouse.click(600, 700); await wait(w.page, 200);
+    const done = await w.page.evaluate(() => { const row = document.querySelector('.lb-rowwrap.is-flipwork'); const eq = row?.nextElementSibling?.querySelector('.lb-eq');
+      return row && row.classList.contains('is-settled') && eq && getComputedStyle(eq).opacity === '1'; });
+    if (!done) throw new Error('a click should finish the cross-off at once and show the new row');
+    await w.both('q-flip-skip');
+  },
+  async 'q-wrong-cancel'(w) {
+    await w.start(); await w.see('6x = 4x + 10');
+    w.at('Add, + ▢, −10, Enter'); await w.click(`${act('choose')}[data-move="add"]`); await w.click(`${act('addPick')}[data-kind="num"]`); await w.type(-10); await w.enter(); await wait(w.page, 2000);
+    await w.row('6x − 10 = 4x');
+    w.at('Add, + ▢x, −4, Enter'); await w.click(`${act('choose')}[data-move="add"]`); await w.click(`${act('addPick')}[data-kind="x"]`); await w.type(-4); await w.enter(); await w.lateLayer();
+    await w.see('6x − 4x − 10 = 0', 'nothing left', 'We want the x-terms on one side and the numbers on the other. That Add took everything off one side. Undo, then cancel just one x-term.');
+    await w.both('q-wrong-cancel');
+    w.at('Undo'); await w.click(act('undo')); await wait(w.page, 900);
+    await w.see('Add −6x to both sides: the 6x cancels, and the number is left alone on its side. Press Go.');
+    await w.both('q-wrong-cancel-hint');
+    w.at('Go'); await w.click(act('go')); await wait(w.page, 1500); await w.row('−10 = 4x − 6x');
+  },
+  async 'q-fold'(w) {
+    await w.start(); await w.see('2(x + 4) = 26');
+    const size = await w.page.evaluate(() => document.getElementById('mat').style.getPropertyValue('--eq-size'));
+    if (size !== '38px') throw new Error(`the text should be 38 px at 1366×768 (was 32 before Build Q): ${size}`);
+    w.at('distribute 2, 8, Next'); await w.distribute(2, 8); await w.click(act('foldNext'));
+    w.at('Add −8'); await w.addEnter(-8); await wait(w.page, 2000);
+    w.at('combine to 18, Next'); await w.combine(18); await wait(w.page, 800); await w.click(act('foldNext'));
+    w.at('Divide 2, Go'); await w.divide(2); await wait(w.page, 3000);
+    const seen = await w.page.evaluate(() => [...document.querySelectorAll('.lb-stack > .lb-rowwrap')].filter((r) => getComputedStyle(r).display !== 'none').map((r) => r.textContent.replace(/\s+/g, '')));
+    if (seen.some((t) => t.includes('2x+8=26'))) throw new Error(`2x + 8 = 26 should be folded out of sight: ${seen}`);
+    const dots = await w.page.evaluate(() => getComputedStyle(document.querySelector('.lb-stack > .lb-rowwrap'), '::after').content);
+    if (!dots.includes('⋮')) throw new Error('a small ⋮ should sit under the original equation');
+    await w.see('2x = 18', 'Same as multiplying by ½.');
+    const scroll = await w.page.evaluate(() => document.documentElement.scrollHeight - window.innerHeight);
+    if (scroll > 1) throw new Error(`nothing should scroll (${scroll} px)`);
+    await w.shot('q-fold-768');
+    await w.page.setViewportSize({ width: 1366, height: 650 }); await wait(w.page, 900); await w.shot('q-worst-650');
+  },
   // ---- Build T: products with parentheses in the check, Flip's stroke centred, a refused drag that fits the shape ----
   async 't-parens-divide'(w) {
     await w.start(); await w.see('5x = −15');
@@ -398,7 +517,7 @@ const WALKS = {
     await w.lit('.lx-live .lb-right');
     await w.both('t-zero-side');
     w.at('Undo'); await w.click(act('undo')); await wait(w.page, 900);
-    await w.see('Add −4x to both sides: the 4x cancels, and the x-term that is left keeps a plus. Press Go.');
+    await w.see('Add −4x to both sides: the 4x cancels, and the number is left alone on its side. Press Go.');
     await w.both('t-zero-side-hint');
     w.at('Go'); await w.click(act('go')); await wait(w.page, 600); await w.row('7x − 4x = 15');
   },
@@ -872,7 +991,7 @@ const WALKS = {
     w.at('Multiply'); await w.click(act('multOpen'));
     if (await w.page.locator('.lb-move[data-move="add"].is-on').count()) throw new Error('Add should no longer be yellow');
     if (await w.page.locator('.lx-ghost.is-chosen').count()) throw new Error('Add’s box should be gone from under the equation');
-    if ((await w.page.locator('.mo-flyout .mo-opt').count()) !== 2) throw new Error('Multiply’s two options should be open');
+    if ((await w.page.locator('.mo-flyout .mo-opt').count()) !== 3) throw new Error('Multiply’s three options should be open');
     await w.both('o-add-not-stuck');
   },
   async 'o-preview-ends'(w) {
@@ -942,7 +1061,7 @@ const WALKS = {
   async 'o-fraction-back'(w) {
     await w.start(); await w.see('DIVIDE IT · Level 2', '5x = −15');
     w.at('Multiply'); await w.click(act('multOpen'));
-    if ((await w.page.locator('.mo-flyout .mo-opt').count()) !== 2) throw new Error('Multiply should open two options');
+    if ((await w.page.locator('.mo-flyout .mo-opt').count()) !== 3) throw new Error('Multiply should open three options');
     if (await w.page.locator('.mo-flyout .mo-sign').count()) throw new Error('the options should have no small × or ÷');
     await w.both('o-fraction-back-menu');
     w.at('the first option, 5, Go'); await w.click(`.mo-opt${act('multPick')}[data-kind="whole"]`); await w.type(5); await w.click(act('go'));
@@ -1665,11 +1784,13 @@ const WALKS = {
     w.at('mistake 5: Undo, Got it'); await w.click(act('undo')); await wait(w.page, 800);
     await w.see('We want only one of the five x boxes.', 'What should we divide both sides by?', '÷ 2', '÷ 3', '÷ 4', '÷ 5', '÷ 6');
     await w.click(act('spotDismiss'));
-    w.at('mistake 6: I’m stuck, twice');
+    w.at('mistake 6: I’m stuck, three times');
+    await w.stuck(); const zero = await w.text();
     await w.stuck(); const one = await w.text();
     await w.stuck(); const two = await w.text();
-    if (!one.includes('5 boxes and 15 counters.')) throw new Error(`press 1 of I’m stuck should talk about the 5 boxes and 15 counters. On screen: ${one.slice(0, 300)}`);
-    if (!two.includes('take ⅕ of both sides')) throw new Error(`press 2 of I’m stuck should say to take ⅕ of both sides. On screen: ${two.slice(0, 300)}`);
+    if (!zero.includes('divide both sides by 5') || !zero.replace(/\s+/g, '').includes('5·x')) throw new Error(`press 1 of I’m stuck should be the reminder (5 · x, divide both sides by 5). On screen: ${zero.slice(0, 300)}`);
+    if (!one.includes('5 boxes and 15 counters.')) throw new Error(`press 2 of I’m stuck should talk about the 5 boxes and 15 counters. On screen: ${one.slice(0, 300)}`);
+    if (!two.includes('take ⅕ of both sides')) throw new Error(`press 3 of I’m stuck should say to take ⅕ of both sides. On screen: ${two.slice(0, 300)}`);
     await w.shot('student-divide-stuck');
     // mistake 7 (Build N): a mistake, Undo, then type in the blank, from a fresh start
     w.at('mistake 7: start again'); await w.start();
