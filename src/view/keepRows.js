@@ -10,7 +10,8 @@
 //
 // The rules for a row (data-rk is its index, its kind and what it says, so a row that says something else is a new row):
 //   - an animation plays once: a row on screen that is settled (is-settled) stays settled, and a row that is not is settled once its
-//     animations are over (data-settle-ms after it first appeared, 2.4 s unless the row says otherwise), so no redraw starts one again;
+//     animations are over (data-settle-ms after it first appeared, 2.4 s unless the row says otherwise), or at once when a pop-up comes up
+//     over it (the pop-up is about the row as it ends up), so no redraw starts one again;
 //   - inside a row, elements are matched by data-tok or data-fk, else by place and tag, so a term held or typed into stays the same element.
 
 const live = new WeakMap();            // node of a drawn tree -> the element on screen it was laid onto
@@ -50,7 +51,7 @@ export function redrawMat(container, next) {
   const path = new Set();
   for (let n = holder; n && n !== next; n = n.parentElement) path.add(n);
   path.add(next);
-  layPath(old, next, path, holder);
+  layPath(old, next, path, holder, Boolean(next.querySelector('.spot-layer')));
   runMounted(next, old);
   container.dispatchEvent(new Event(REDRAW));
   return old;
@@ -70,23 +71,23 @@ function stamp(scope) {
 }
 
 // the elements that hold the rows, from the root down: kept, with the new tree's attributes; their other children are the new tree's
-function layPath(a, b, path, holder) {
+function layPath(a, b, path, holder, popup) {
   attrs(a, b);
   live.set(b, a);
-  if (b === holder) { layRows(a, b); return; }
+  if (b === holder) { layRows(a, b, popup); return; }
   const used = new Set();
   const want = [...b.childNodes].map((c) => {
     if (!path.has(c)) return c;
     const o = [...a.children].find((x) => !used.has(x) && x.tagName === c.tagName && first(x) === first(c));
     if (!o) return c;
     used.add(o);
-    layPath(o, c, path, holder);
+    layPath(o, c, path, holder, popup);
     return o;
   });
   place(a, want);
 }
 
-function layRows(a, b) {
+function layRows(a, b, popup) {
   const old = new Map();
   for (const r of a.children) if (r.dataset?.rk && !old.has(r.dataset.rk)) old.set(r.dataset.rk, r);
   const t = now();
@@ -95,7 +96,8 @@ function layRows(a, b) {
     if (!o || o.tagName !== c.tagName) return c;
     old.delete(c.dataset.rk);
     const settleAfter = Number(c.dataset.settleMs ?? SETTLE_MS);
-    if (o.classList.contains('is-settled') || t - (born.get(o) ?? t) >= settleAfter) c.classList.add('is-settled');
+    // (a pop-up drawn over rows already on screen asks about them as they are: they finish their entrance at once)
+    if (popup || o.classList.contains('is-settled') || t - (born.get(o) ?? t) >= settleAfter) c.classList.add('is-settled');
     morph(o, c);
     return o;
   });
