@@ -11,7 +11,7 @@
 // The rules for a row (data-rk is its index, its kind and what it says, so a row that says something else is a new row):
 //   - an animation plays once: a row on screen that is settled (is-settled) stays settled, and a row that is not is settled once its
 //     animations are over (data-settle-ms after it first appeared, 2.4 s unless the row says otherwise), or at once when a pop-up comes up
-//     over it (the pop-up is about the row as it ends up), so no redraw starts one again;
+//     over it (one that has just come up, not one drawn with the row itself) (the pop-up is about the row as it ends up), so no redraw starts one again;
 //   - inside a row, elements are matched by data-tok or data-fk, else by place and tag, so a term held or typed into stays the same element.
 
 const live = new WeakMap();            // node of a drawn tree -> the element on screen it was laid onto
@@ -51,7 +51,9 @@ export function redrawMat(container, next) {
   const path = new Set();
   for (let n = holder; n && n !== next; n = n.parentElement) path.add(n);
   path.add(next);
-  layPath(old, next, path, holder, Boolean(next.querySelector('.spot-layer')));
+  // (a pop-up that has just come up: the rows it is drawn over finish their entrance at once)
+  const popup = Boolean(next.querySelector('.spot-layer')) && !old.querySelector('.spot-layer');
+  layPath(old, next, path, holder, popup);
   runMounted(next, old);
   container.dispatchEvent(new Event(REDRAW));
   return old;
