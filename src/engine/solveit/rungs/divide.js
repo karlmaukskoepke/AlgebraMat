@@ -19,8 +19,10 @@ export function fractionCycleHint(s, before) {
 
 // D1 `ax = b`
 const D1 = {
-  ladder: ['modelIt', 'guided'],                    // (rev 1.2: every rung gives something to do, so the picture-only rung is merged into the next)
-  // after Undo, the reminder (Build F, Part 3): the number in front of x outlined, the Divide button lit (Build O; Build L lit the Multiply menu's Divide option)
+  // (rev 1.2: every rung gives something to do, so the picture-only rung is merged into the next. Build Q, Part 3: the first click is the
+  // reminder, the same as the hint after Undo: the dot between the number and x, and the Divide button's preview; the model is second)
+  ladder: ['reminder', 'modelIt', 'guided'],
+  // after Undo, the reminder (Build F, Part 3; Build Q: a dot between the number and x, `5 · x`, instead of an outline), the Divide button lit (Build O; Build L lit the Multiply menu's Divide option)
   // and its preview on the equation, and one line with the real numbers ("divide both sides by 5"); recorded as a reminder (`hint`). After a fraction that did not
   // split (Build D, Part 4): the boxes and the counters, "We want only one of the five x boxes.", and the fractions to choose from, the
   // ones tried crossed off.
@@ -37,7 +39,15 @@ const D1 = {
       return { target: 'coef', key: 'dReminder', params: { boxes: a, frac: fractionText(a) }, move: 'divOption' };
     },
   },
-  // 1. Model it and deal it: the fractions are live; choose one, deal the counters, keep a group
+  // 1. The reminder (Build Q): what the hint after Undo shows, asked for; recorded as a reminder (`hint`)
+  reminder: {
+    word: 'hint',
+    open(s, { say }) {
+      const r = D1.hintPopup.after(s, null);
+      return say(s, r.key, r.params);
+    },
+  },
+  // 2. Model it and deal it: the fractions are live; choose one, deal the counters, keep a group
   modelIt: {
     word: 'model',
     open(s, { say }) {
@@ -47,7 +57,7 @@ const D1 = {
       return say(s, 'dModel', { boxes: coefOf(s.board), size: pileSize(s.board) });
     },
   },
-  // 2. Guided: the fraction that leaves one box is lit
+  // 3. Guided: the fraction that leaves one box is lit
   guided: {
     word: 'guided',
     open(s, { say }) {

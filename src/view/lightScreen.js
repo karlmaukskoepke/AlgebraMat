@@ -83,7 +83,7 @@ function termsOf(side, s, live, plug = false) {
       const xel = live && plug && s.sub?.kind === 'guess'
         ? html('span', 'lb-x lb-guess', [signed(s.sub.typed)], { 'data-x': '1' })              // the guess slides onto x
         : html('span', `lb-x${plug ? ' is-plugx' : ''}`, ['x'], { 'data-x': '1' });
-      if (t.coef > 1 && !(live && plug && s.sub?.kind === 'guess')) out.push(html('span', 'lb-coef', [live && s.hint?.kind === 'coef' ? html('span', 'lb-hintbox', [String(t.coef)]) : String(t.coef), xel]));
+      if (t.coef > 1 && !(live && plug && s.sub?.kind === 'guess')) out.push(html('span', 'lb-coef', live && s.hint?.kind === 'coef' ? [String(t.coef), html('span', 'lb-coefdot', ['·'], { 'aria-label': 'times' }), xel] : [String(t.coef), xel]));   // (the hint's dot, Build Q)
       else out.push(xel);
     } else {
       const hint = live && ((s.hint?.kind === 'cancel' && s.hint.id === t.id) || (s.hint?.kind === 'sum' && s.hint.ids.includes(t.id)));

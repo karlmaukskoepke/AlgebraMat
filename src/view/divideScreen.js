@@ -163,6 +163,8 @@ function popups(s, wrap) {
   const o = { root: wrap, find: (root, target) => findSolveTarget(root, target, s), undo: '.lx-undo', help: true, moveSel: optionSel, work: '.lb-main' };
   if (sp) { wrap.append(spotlightLayer(sp.choose ? { ...sp, place: 'beside' } : sp, { ...o, text: sp.choose ? '' : divideFeedbackText(s.feedback), extra: sp.choose ? fractionChoices(s) : null })); return; }
   if (introOpen(s)) { wrap.append(spotlightLayer({ kind: 'intro', lit: ['newest', 'panel', 'forward'] }, { ...o, text: FORCED_TEXT })); return; }
+  // I'm stuck's first rung (Build Q): the reminder, drawn as the hint after Undo is (the Divide button lit, its preview on the equation)
+  if (s.feedback?.key === 'dReminder' && s.stage === 'moves' && !s.sub) { wrap.append(spotlightLayer({ kind: 'hint', target: 'coef', move: 'divOption' }, { ...o, text: divideFeedbackText(s.feedback) })); return; }
   // checking a value: everything greys out but the equation being checked and the checking space
   if (s.sub && s.sub.step < solve.subTotal(s.sub)) {
     wrap.append(spotlightLayer({ kind: 'intro', lit: ['plugrow', 'check', s.sub.placing ? 'answer' : 'forward'] }, { ...o, text: s.sub.placing ? placeText(s.sub.typed) : null }));

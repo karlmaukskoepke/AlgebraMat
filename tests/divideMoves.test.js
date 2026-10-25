@@ -149,20 +149,22 @@ describe('plugging a typed value back in (loop §4)', () => {
 });
 
 describe('I’m stuck: rungs restart at each state; the diagram is on every rung, at x alone too (brief B2)', () => {
-  it('two rungs (D4): rung 1 is the counters with the fractions live and the number in front outlined, and typing allowed; rung 2 is guided', () => {
+  it('three rungs (D4, Build Q): rung 1 is the reminder (the dot, the Divide button lit and previewed); rung 2 is the counters with the fractions live and the number in front outlined, and typing allowed; rung 3 is guided', () => {
     let s = run(start(), { type: 'stuck' });
-    expect([s.scaffold, s.menu, s.hint, s.feedback.key, answerLive(s), s.stuck]).toEqual([true, 'fraction', { kind: 'coef' }, 'dModel', true, 1]);
+    expect([s.scaffold, s.hint, s.feedback.key, s.mopts, s.ui?.preview, s.stuck, s.supportsShown]).toEqual([false, { kind: 'coef' }, 'dReminder', { kind: null, entry: '', lit: 'div' }, 'div', 1, ['hint']]);
+    s = run(start(), { type: 'stuck' }, { type: 'stuck' });
+    expect([s.scaffold, s.menu, s.hint, s.feedback.key, answerLive(s), s.stuck]).toEqual([true, 'fraction', { kind: 'coef' }, 'dModel', true, 2]);
     s = run(s, { type: 'take', n: 3 });                                                      // the dealing starts at once, and typing stays allowed (Check works after any deal)
     expect([s.deal.n, answerLive(s)]).toEqual([3, true]);
     s = run(s, { type: 'deal', group: 0 }, ...typed('−4'));
     expect(run(s, { type: 'check' }).sub).toMatchObject({ kind: 'guess', ok: true });
-    s = run(start(), { type: 'stuck' }, { type: 'stuck' });
-    expect([s.hint, s.feedback.key, s.stuck]).toEqual([{ kind: 'fraction', n: 3 }, 'dStuckGuided', 2]);
+    s = run(start(), { type: 'stuck' }, { type: 'stuck' }, { type: 'stuck' });
+    expect([s.hint, s.feedback.key, s.stuck]).toEqual([{ kind: 'fraction', n: 3 }, 'dStuckGuided', 3]);
     s = run(s, { type: 'stuck' });                                                           // asking again stays at the guided rung
-    expect([s.feedback.key, s.stuck]).toEqual(['dStuckGuided', 3]);
+    expect([s.feedback.key, s.stuck]).toEqual(['dStuckGuided', 4]);
   });
   it('the counters are dealt by hand, one group kept, and that takes the fraction of both sides', () => {
-    let s = run(start(), { type: 'stuck' }, { type: 'take', n: 3 });
+    let s = run(start(), { type: 'stuck' }, { type: 'stuck' }, { type: 'take', n: 3 });
     expect(s.deal).toEqual({ n: 3, groups: [0, 0, 0] });
     expect(run(s, { type: 'keep', group: 0 }).feedback.key).toBe('dShareFirst');
     for (let i = 0; i < 12; i++) s = run(s, { type: 'deal', group: i % 3 });
@@ -170,9 +172,11 @@ describe('I’m stuck: rungs restart at each state; the diagram is on every rung
     s = run(s, { type: 'keep', group: 1 });
     expect([boardText(s.board), s.deal, s.scaffold]).toEqual(['x = ⅓(−12)', null, false]);          // the new state starts bare
   });
-  it('after a partial move the rungs start again at the model, drawn for the new state', () => {
+  it('after a partial move the rungs start again (the reminder, then the model drawn for the new state)', () => {
     let s = run(take(start(P(6, -3)), 2), { type: 'stuck' });
-    expect([boardText(s.board), s.feedback.key, s.hint, s.stuck]).toEqual(['3x = −9', 'dModel', { kind: 'coef' }, 1]);
+    expect([boardText(s.board), s.feedback.key, s.hint, s.stuck]).toEqual(['3x = −9', 'dReminder', { kind: 'coef' }, 1]);
+    s = run(s, { type: 'stuck' });
+    expect([boardText(s.board), s.feedback.key, s.hint, s.stuck]).toEqual(['3x = −9', 'dModel', { kind: 'coef' }, 2]);
   });
   it('at x = ⅓(6) (D3): two rungs, the diagram on both, the student can deal at once, no numeral is printed', () => {
     for (const [a, x] of [[3, 2], [5, 7], [6, -3], [3, -6]]) {
@@ -202,7 +206,7 @@ describe('I’m stuck: rungs restart at each state; the diagram is on every rung
 
 describe('the picture stays after the fraction is applied, until Next (D5)', () => {
   const dealt = (a, x) => {
-    let s = run(start(P(a, x)), { type: 'stuck' }, { type: 'take', n: a });
+    let s = run(start(P(a, x)), { type: 'stuck' }, { type: 'stuck' }, { type: 'take', n: a });
     for (let i = 0; i < Math.abs(a * x); i++) s = run(s, { type: 'deal', group: i % a });
     return s;
   };
@@ -216,7 +220,7 @@ describe('the picture stays after the fraction is applied, until Next (D5)', () 
   it('Next folds the move and clears the picture; so does going on; Undo takes the whole move back', () => {
     const partial = run(dealt(2, -3), { type: 'keep', group: 0 });                          
     expect(partial.pic).not.toBeNull();
-    let s = run(run(start(P(4, -4)), { type: 'stuck' }, { type: 'take', n: 2 }), ...Array.from({ length: 16 }, (_, i) => ({ type: 'deal', group: i % 2 })), { type: 'keep', group: 0 });
+    let s = run(run(start(P(4, -4)), { type: 'stuck' }, { type: 'stuck' }, { type: 'take', n: 2 }), ...Array.from({ length: 16 }, (_, i) => ({ type: 'deal', group: i % 2 })), { type: 'keep', group: 0 });
     expect([boardText(s.board), s.pic !== null, s.unfolded]).toEqual(['2x = −8', true, true]);
     expect(line(s)).toBe(FIND_X);
     const nxt = run(s, { type: 'foldNext' });

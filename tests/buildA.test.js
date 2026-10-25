@@ -97,6 +97,6 @@ describe('Undo first', () => {
     expect([s.feedback.key, s.scaffold, s.stuck, s.supportsShown]).toEqual(['aUndoFirstHelp', false, 1, ['hint']]);
     expect(divideFeedbackText(s.feedback)).toBe('That fraction doesn’t split evenly. Let’s undo it first: press Undo.');
     s = div(s, { type: 'undo' }, stuck);
-    expect([s.feedback.key, s.scaffold, s.stuck]).toEqual(['dModel', true, 2]);         // the ladder's first rung on the restored state
+    expect([s.feedback.key, s.scaffold, s.stuck]).toEqual(['dReminder', false, 2]);     // the ladder's first rung on the restored state (Build Q: the reminder)
   });
 });

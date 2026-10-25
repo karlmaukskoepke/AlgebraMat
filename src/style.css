@@ -3873,3 +3873,8 @@ button.lb-divbar.is-calc:hover, button.lb-divbar.is-calc:focus-visible { backgro
 [data-fold-older] :is(.lb-stack, .lb-rows):has(> .lb-rowwrap.is-fold ~ .lb-rowwrap.is-fold) > .lb-rowwrap:first-child::after {
   content: '⋮'; display: block; text-align: center; font: 800 0.8em/0.9 'Lexend', system-ui, sans-serif; color: #6f6b60;
 }
+
+/* ---------- Build Q, Part 3: the hint before dividing. A multiplication dot between the number and its x (`5 · x`), in blue, while the
+   hint shows; nothing round the number or the x (the hint's frame is not drawn on them) ---------- */
+.lb-coefdot { display: inline-block; margin: 0 0.14em; color: #0072b2; font-weight: 900; transform: scale(1.5); }
+.spot-layer.is-hint[data-spot="coef"] .spot-frame { display: none; }

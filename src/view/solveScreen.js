@@ -101,7 +101,10 @@ function termsOf(side, s, o) {
       const front = c > 1 || c < -1 ? String(c).replace('-', MINUS) : c === -1 ? MINUS : null;
       // (a negative one is its own piece, so a spotlight on it covers the minus too; Divide's positive ones are as before)
       const piece = o.strike && front ? struckText(front, o.strike, c < 0 ? 'lb-num lb-front' : 'lb-frontnum', o) : c < 0 ? html('span', 'lb-num lb-front', [front]) : front;
-      if (front) out.push(html('span', 'lb-coef', [o.live && s.hint?.kind === 'coef' ? html('span', 'lb-hintbox', [front]) : piece, xel]));
+      // the hint before dividing (Build Q, Part 3): a multiplication dot between the number and its x, `5 · x`, only while the hint
+      // shows; nothing is boxed
+      const dot = o.live && s.hint?.kind === 'coef' && (c > 1 || c < -1);
+      if (front) out.push(html('span', 'lb-coef', dot ? [piece, coefDot(), xel] : [piece, xel]));
       else out.push(xel);
     } else {
       out.push(html('span', 'lb-num', [i > 0 && t.v < 0 ? String(-t.v) : signed(t.v)]));
@@ -109,6 +112,9 @@ function termsOf(side, s, o) {
   });
   return out;
 }
+
+// The dot of the hint before dividing (Build Q): `5 · x`
+export const coefDot = () => html('span', 'lb-coefdot', ['·'], { 'aria-label': 'times' });
 
 // An x still waiting for the value once another x has it: a faint ghost of the value above it (Build P, Part 8)
 export const waitingGhost = (v) => html('span', 'lb-xwait', [signed(v)], { 'aria-hidden': 'true' });

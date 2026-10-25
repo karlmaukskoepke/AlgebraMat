@@ -225,7 +225,11 @@ function token(s, t, i, side, held) {
   const shownNeg = op === '+' && isNeg;                             // a negative shown on request: its minus taps back
   if (t.kind === 'group') kids.push(...groupEls(s, t, i, subtracted, shownNeg));
   else if (shownNeg) kids.push(html('span', 'lx-body lx-negnum', [html('span', 'lx-negsign', [MINUS], { 'data-minus': t.id }), body.slice(1)]));
-  else kids.push(html('span', `lx-body${t.kind === 'x' ? ' lb-x' : ' lb-num'}`, [body]));
+  else if (t.kind === 'x' && s.hint?.kind === 'coef' && Math.abs(t.coef ?? 1) > 1) {
+    // the hint before dividing (Build Q, Part 3): a multiplication dot between the number and its x, `2 · x`, only while it shows
+    const [, num] = body.match(/^(.*?)x$/) ?? [null, body];
+    kids.push(html('span', 'lx-body lb-x', [num, html('span', 'lb-coefdot', ['·'], { 'aria-label': 'times' }), 'x']));
+  } else kids.push(html('span', `lx-body${t.kind === 'x' ? ' lb-x' : ' lb-num'}`, [body]));
   const hint = (s.hint?.kind === 'cancel' && s.hint.id === t.id) || (s.hint?.kind === 'sum' && s.hint.ids.includes(t.id)) || (s.hint?.kind === 'cross' && s.hint.id === t.id);
   const crossHint = s.hint?.kind === 'cross' && s.hint.id === t.id;            // (moved across the =: Variables on both sides, Build R)
   const c = s.lx.combine;
