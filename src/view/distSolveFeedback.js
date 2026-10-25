@@ -11,6 +11,7 @@ const M = {
   mCombineHint: (p) => `${p.g1} and ${p.g2} are like terms. Drag one onto the other to combine them.`,
   mWorkOut: () => 'x is alone. Work out the other side, then type what x is.',
   // the distribute move's own words
+  dxProductsRetry: (p) => `Try again: type what ${p.labels} make, one in each box. Enter goes to the next.`,
   dxProducts: () => 'Multiply each piece in the parentheses. Type each product with its sign; Enter goes to the next.',
   dxTapMinusFirst: (p) => `Tap the minus first, so ${p.factor} is a negative number.`,
   dxNegFactor: (p) => `Subtracting is adding a negative: the factor is ${p.neg}. Now drag ${p.neg} onto the parenthesis.`,

@@ -137,6 +137,41 @@
       "see": "After Go: “5 boxes can’t make 2 equal groups, and −15 can’t be shared into 2 equal groups (1 left over). Press Undo and try another number to divide by.” After Undo: the five x boxes, “What should we divide both sides by?”, and ÷ 2 (crossed off), ÷ 3, ÷ 4, ÷ 5, ÷ 6; the Divide button is lit, not Multiply. ÷ 5 writes (5x) over 5 = (−15) over 5, then x = (−15) over 5."
     },
     {
+      "id": "t-distribute-retry",
+      "name": "A wrong product, then Undo: back to typing, not to dragging",
+      "build": "Build T",
+      "link": {
+        "label": "Open Distribute, combine, solve · Level 1",
+        "query": "?pack=distribute-solve&level=1&seed=37&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Distribute, combine, solve, Level 1, on 3(x + 2) = 15.",
+        "Drag the 3 onto the parenthesis and let go. Type 3, press Enter, type 5, press Enter (a wrong product on purpose). Wait two seconds.",
+        "Press Undo.",
+        "Without clicking anything, type 3, press Enter, type 6, press Enter."
+      ],
+      "see": "After Undo you are still in the middle of distributing: the 3 is blue with its two arcs and “3 groups of”, the labels 3 · x and 3 · 2 sit above the two boxes, both boxes are empty and the first has the cursor. A hint says “Try again: type what 3 · x and 3 · 2 make, one in each box. Enter goes to the next.” The 3 and the 6 go straight into the boxes and write 3x + 6 = 15."
+    },
+    {
+      "id": "t-combine-retry",
+      "name": "A wrong sum, then Undo: back in its box",
+      "build": "Build T",
+      "link": {
+        "label": "Open Two-step equations · Level 1",
+        "query": "?pack=two-step-equations&level=1&seed=406&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Two-step equations, Level 1, on 3x + 4 = 19.",
+        "Click Add (the top box), type −4 and press Enter. The row reads 3x = 19 − 4.",
+        "Drag the 19 onto the 4 beside it, type 23 and press Enter (a wrong sum on purpose). Wait two seconds.",
+        "Press Undo.",
+        "Without clicking anything, type 15 and press Enter."
+      ],
+      "see": "After Undo the box under 19 − 4 is open again and empty, with the cursor in it; the 19 and the −4 stay lit and a hint says “Try again: what is 19 − 4? Type it in the box.” No dragging again: the 15 goes straight into the box and writes 3x = 15."
+    },
+    {
       "id": "s-pickup",
       "name": "Pick up an x-term: nothing else disappears",
       "build": "Build S",
@@ -473,7 +508,7 @@
         "Click the button. It opens Level 2 on 5x + 5 = 2x + 14. You are going to play a student who gets things wrong.",
         "Mistake 1, the sign lost when moving an x-term: click Add, then its second option (+ ▢x), type 2 and press Enter. Wait two seconds. A good response lights the move as “got bigger”, says +2x + +2x did not eliminate the term, and leaves only Undo. Press Undo: the hint lights the 2x with a ghost of it gliding across the = and says “Move this x-term to the other side. Drag it across the =, or use Add.”",
         "Mistake 2, checking before x is on one side: click the box after x =, type 3 and press Enter. A good response: x = stays greyed with “Get x on one side first.” and nothing is checked.",
-        "Mistake 3, combining by adding the sizes: drag the 2x across the = onto the left side, then drag the −2x onto the 5x, type 7x and press Enter. A good response says “5x + −2x is not 7x. Press Undo and try again.” with both terms lit. Press Undo: the 5x and the −2x are outlined and a pop-up says “5x and −2x are like terms. Drag one onto the other to combine them.”",
+        "Mistake 3, combining by adding the sizes: drag the 2x across the = onto the left side, then drag the −2x onto the 5x, type 7x and press Enter. A good response says “5x + −2x is not 7x. Press Undo and try again.” with both terms lit. Press Undo: you are back in the box, empty, with the 5x and the −2x still lit and “Try again: what is 5x − 2x? Type the number in front of x.” Type 3x and press Enter.",
         "Last, pick a term up and drop it back, watching for anything redrawing: press on the 5 in the newest row, lift it a little, and let go where it was."
       ],
       "see": "Each mistake gets a calm answer in the student’s own numbers, Undo is the way out of each error, and the hint after Undo points at the next move. x = never takes a value while x is on both sides. Nothing is worked out for you. Picking the term up leaves a dashed gap where it was and nothing else moves; letting go puts it back. Through the whole item no row you have already seen vanishes, fades in again, plays its cross-off again or changes size."
@@ -528,9 +563,9 @@
         "Click Multiply (the second button), then its second option (a box over a box). Type 1, then 3, and click the green Go. The new row reads x + 2 = ⅓ × (15).",
         "Click the small × between ⅓ and (15). Type 45 and press Enter.",
         "Press Undo.",
-        "Click the × again, type 5 and press Enter."
+        "The box is open again with the cursor in it: type 5 and press Enter."
       ],
-      "see": "A wrong 45 is lit with “check this” and “⅓ × 15 is not 45. Press Undo and try again.”; the ⅓ and the 15 stay lit, not greyed. After Undo a hint lights them: “⅓ × 15 is ⅓ of 15: split 15 into 3 equal groups and take one. Click the × and type it.” (fraction words, since the row was made with the fraction) With 5 the row reads x + 2 = 5."
+      "see": "A wrong 45 is lit with “check this” and “⅓ × 15 is not 45. Press Undo and try again.”; the ⅓ and the 15 stay lit, not greyed. After Undo you are back in the box, empty, with the cursor in it, and the ⅓ and the 15 are lit with “Try again: what is ⅓ × 15? It is ⅓ of 15. Type it in the box.” (fraction words, since the row was made with the fraction). With 5 the row reads x + 2 = 5."
     },
     {
       "id": "p-cross-off",
@@ -616,9 +651,9 @@
         "Drag the 3 onto the parenthesis and let go. Look at the equation and the two blanks.",
         "Type 3, press Enter, type 5, press Enter.",
         "Press Undo.",
-        "Drag the 3 onto the parenthesis again."
+        "You are back in the two boxes: type 3, press Enter, type 6, press Enter."
       ],
-      "see": "The first time, the 3 turns blue, an arc with a small × runs from it to the x and another to the 2, “3 groups of” sits by the parenthesis, and the two blanks have no labels. The wrong 5 brings the labels “3 · x” and “3 · 2” above the blanks with “3 · 2 is not 5. Press Undo and try again.” After Undo the hint lights the 3 and the parenthesis, and the next drag shows the labels from the start (on this problem only: the next problem starts without them)."
+      "see": "The first time, the 3 turns blue, an arc with a small × runs from it to the x and another to the 2, “3 groups of” sits by the parenthesis, and the two blanks have no labels. The wrong 5 brings the labels “3 · x” and “3 · 2” above the blanks with “3 · 2 is not 5. Press Undo and try again.” After Undo you are back in the two boxes, both empty, with the cursor in the first: the 3 stays blue with its arcs and “3 groups of”, the labels stay, and a hint says “Try again: type what 3 · x and 3 · 2 make, one in each box. Enter goes to the next.” No dragging again. 3 and 6 write 3x + 6 = 15. (The labels stay for this problem only: the next problem starts without them.)"
     },
     {
       "id": "p-xboxes",
@@ -1167,7 +1202,7 @@
         "Click the button. It opens Level 3 on 5 + 2(x + 3) = 17.",
         "Mistake 1: touch nothing for 11 seconds. Then click I’m stuck.",
         "Mistake 2: drag the 2 onto the parenthesis and multiply only the first piece: type 2, Enter, 3, Enter. Then click Undo.",
-        "Drag the 2 onto the parenthesis again, type 2, Enter, 6, Enter.",
+        "You are back in the two boxes (no dragging again): type 2, Enter, 6, Enter.",
         "Mistake 3: Divide too early: click Divide (÷).",
         "Mistake 4: add the wrong number: click Add, type 5, press Enter. Then click Undo.",
         "Mistake 5: a wrong sum: drag the 5 onto the 6, type 12, press Enter. Then click Undo.",
@@ -1175,7 +1210,7 @@
         "Wait 3 seconds and watch the nudge: the 17 and the −11 glow and pulse, then a small pop-up says “Drag one onto the other to combine them.” with a faint copy gliding from one to the other.",
         "Last, pick a term up and drop it back, watching for anything redrawing: press on the 17 in the newest row, lift it a little, and let go where it was."
       ],
-      "see": "I’m stuck flashes after 10 seconds, and then lights the 2 and the parenthesis (“Drag the 2 onto the parenthesis…”). The half-multiplied product is lit with “2 · 3 is not 3. Multiply this piece too.”; Undo brings the same hint back. Divide says “That move works once each side is one term.” Adding 5 is lit as “did not eliminate the term”. The wrong sum says “5 + 6 is not 12.”, and after Undo the 5 and the 6 are outlined with “5 and 6 are like terms. Drag one onto the other to combine them.” Mistake 6: after Undo the Add box is open again; the −11 you type goes straight into it, Enter writes 11 + 2x − 11 = 17 − 11, and Next writes 2x = 17 − 11. Waiting at 2x = 17 − 11 nudges the 17 and the −11. Picking the term up leaves a dashed gap where it was and nothing else moves; letting go puts it back. Through the whole item no row you have already seen vanishes, fades in again, plays its cross-off again or changes size."
+      "see": "I’m stuck flashes after 10 seconds, and then lights the 2 and the parenthesis (“Drag the 2 onto the parenthesis…”). The half-multiplied product is lit with “2 · 3 is not 3. Multiply this piece too.”; After Undo you are back in the two empty boxes, the labels 2 · x and 2 · 3 showing, with “Try again: type what 2 · x and 2 · 3 make, one in each box.” Divide says “That move works once each side is one term.” Adding 5 is lit as “did not eliminate the term”. The wrong sum says “5 + 6 is not 12.”, and after Undo its box is open again and empty, the 5 and the 6 still lit, with “Try again: what is 5 + 6? Type it in the box.” Mistake 6: after Undo the Add box is open again; the −11 you type goes straight into it, Enter writes 11 + 2x − 11 = 17 − 11, and Next writes 2x = 17 − 11. Waiting at 2x = 17 − 11 nudges the 17 and the −11. Picking the term up leaves a dashed gap where it was and nothing else moves; letting go puts it back. Through the whole item no row you have already seen vanishes, fades in again, plays its cross-off again or changes size."
     },
     {
       "id": "m-placement-old",
@@ -1502,7 +1537,7 @@
         "Mistake 2, skipping the fraction: click the box after x =, type 15 and press Enter. Drag the 15 onto the x, press Enter three times and wait two seconds. A good response works out 3(15) + 4 = 19 to 49 = 19, says the equation is not balanced, and leaves only Undo. Press Undo: the hint outlines the 4 and asks what to add to both sides. Click Got it.",
         "Mistake 3, a move that makes it worse: the Add box is still open under the equation, so type 4 and press Enter. A good response lights the 4 and the 4 that was added, says they did not eliminate the term, and leaves only Undo. Press Undo, then Got it.",
         "Mistake 4, a move at the wrong moment: click Divide (÷, greyed). A good response is a small note, “That move works once each side is one term.”, and nothing locked.",
-        "Mistake 5, a wrong sum: the Add box is open again, so type −4 and press Enter. Drag the 19 onto the 4, type 23 and press Enter. A good response says “19 − 4 is not 23. Press Undo and try again.” with the two numbers still readable. Press Undo: the hint lights 19 and −4 and says to drag one onto the other.",
+        "Mistake 5, a wrong sum: the Add box is open again, so type −4 and press Enter. Drag the 19 onto the 4, type 23 and press Enter. A good response says “19 − 4 is not 23. Press Undo and try again.” with the two numbers still readable. Press Undo: you are back in the box, empty, with 19 and −4 still lit and “Try again: what is 19 − 4? Type it in the box.”",
         "Mistake 6, a mistake, Undo, then type in the blank: click the button at the top of this item again (it starts the same problem fresh). Click Add (the first box in the panel on the right), type 4 and press Enter. Wait two seconds and press Undo. Without clicking anything, type −4 and press Enter, then click Next.",
         "Wait 3 seconds and watch the nudge: the 19 and the −4 glow and pulse, then a small pop-up under them says “Drag one onto the other to combine them.” and a faint 19 glides onto the −4. Putting two numbers together is a step with only one thing to do, so it is nudged; choosing a move never is.",
         "Last, pick a term up and drop it back, watching for anything redrawing: press on the 19 in the newest row, lift it a little, and let go where it was."

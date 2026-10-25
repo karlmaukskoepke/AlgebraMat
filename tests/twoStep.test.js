@@ -166,10 +166,10 @@ describe('the worked example, 3x + 4 = 19', () => {
     s = run(s, combine(s, 23));
     expect(s.feedback.key).toBe('lxCombineWrong');
     expect(TWO_STEP_SPOT.error(s)).toMatchObject({ target: 'sumbox', lit: ['pair'] });
-    s = run(s, [{ type: 'undo' }]);
-    expect(s.feedback.key).toBe('wCombineHint');
-    expect(s.feedback.params).toMatchObject({ g1: '19', g2: '−4' });
-    expect(s.hint.kind).toBe('sum');
+    s = run(s, [{ type: 'undo' }]);                                                // (Build T, Part 3: back to the empty blank)
+    expect(s.feedback).toMatchObject({ key: 'lxCombineRetry', params: { sum: '19 − 4' } });
+    expect(s.lx.combine).toMatchObject({ entry: '', wrong: false });
+    expect(s.spot).toMatchObject({ kind: 'hint', target: 'sumbox', lit: ['pair'] });
   });
   it('the slips: 15 and 23 are tagged, and Undo lights the Add move', () => {
     let s = run(start(p, 1), A.check(15));

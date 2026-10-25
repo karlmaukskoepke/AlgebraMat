@@ -617,6 +617,14 @@ the product hint in fraction form ("⅓ × 15 is ⅓ of 15: split 15 into 3 equa
 added while x was already alone ("x was already alone: adding +2 put a number next to it. Press Undo.", was "+0 + +2 did not eliminate
 the term").
 
+**Part 3.** Nothing recorded differs (no scripted run or recorded screen has a wrong typed sum, product or distribute followed by Undo).
+**Below the screen check:** Undo after a wrong distribute keeps the distribute in progress (factor in colour, arcs, "3 groups of", the
+labels, the blanks empty, the cursor in the first: "Try again: type what 3 · x and 3 · 2 make…"; it used to go back to before the drag,
+with "Drag the 3 onto the parenthesis…"); after a wrong sum ("Try again: what is 19 − 4? Type it in the box.", was "Put them together:
+drag one onto the other…") and after a wrong worked-out product ("Try again: what is ⅓ × 15? It is ⅓ of 15.", was the × hint) the blank
+stays open, empty and focused, its terms lit. A second Undo closes the blank, as before. The class sheet is unchanged (none of these
+hints recorded anything before).
+
 <!-- history: nothing below this line is read by the harness -->
 
 ## History: screen changes accepted by the re-baseline of 2026-10-24 (Build O, Part 0)

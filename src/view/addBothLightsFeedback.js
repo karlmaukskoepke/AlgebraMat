@@ -28,6 +28,9 @@ const LX = {
   lxCombineAsk: (p) => (p.x ? `What is ${p.sum}? Type the number in front of x.` : `What is ${p.sum}? Type it in the box.`),
   lxCombineWrong: (p) => `${p.sum} is not ${String(p.typed).replace('-', '−')}. Press Undo and try again.`,
   lxCombined: () => 'Combined: one term instead of two.',
+  // Undo after a wrong typed amount: back in its blank (Build T, Part 3)
+  lxCombineRetry: (p) => (p.x ? `Try again: what is ${p.sum}? Type the number in front of x.` : `Try again: what is ${p.sum}? Type it in the box.`),
+  lxCalcRetry: (p) => (p.div ? `Try again: what is ${p.expr}? What times ${p.by} makes ${p.b}? Type it in the box.` : `Try again: what is ${p.expr}? It is ${p.of}. Type it in the box.`),
   // a product worked out (Build P, Part 2)
   lxCalcAsk: (p) => `What is ${p.expr}? Type it in the box.`,
   lxCalcWrong: (p) => `${p.expr} is not ${p.typed}. Press Undo and try again.`,

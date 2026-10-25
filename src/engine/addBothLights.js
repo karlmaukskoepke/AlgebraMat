@@ -247,6 +247,31 @@ const closeCombine = (state) => {
 };
 const sumParams = (s) => ({ sum: pairText(s.board, s.lx.combine.a, s.lx.combine.b) });
 
+// Undo after a wrong typed amount goes back to that blank, not to the gesture before it (Build T, Part 3): a wrong sum keeps its two terms
+// lit, a wrong product its factor and number, a wrong distribute the move in progress (the factor in colour, the arcs, the labels); the
+// blank is empty and has the cursor (a distribute's first blank). `s.retry` is the hint pop-up the spotlight shows for it after Undo.
+function retryBlank(state) {
+  const { combine, calc, distribute } = state.lx;
+  if (!combine?.wrong && !calc?.wrong && !(distribute && distribute.wrong !== null && distribute.wrong !== undefined)) return null;
+  const s = structuredClone(state);
+  if (combine?.wrong) {
+    s.lx.combine = { ...combine, entry: '', wrong: false, pic: null };
+    s.ui = { ...UI0, focus: 'sum' };
+    s.retry = { target: 'sumbox', lit: ['pair'], key: 'lxCombineRetry', params: { ...sumParams(s), x: combineIsX(s) } };
+  } else if (calc?.wrong) {
+    const t = findTerm(s.board, calc.id)?.term;
+    s.lx.calc = { ...calc, entry: '', wrong: false };
+    s.ui = { ...UI0, focus: 'calc' };
+    s.retry = { target: 'calcbox', lit: ['calc'], key: 'lxCalcRetry', params: t ? calcParams(s, t) : {} };
+  } else {
+    const g = findTerm(s.board, distribute.group)?.term;
+    s.lx.distribute = { ...distribute, entries: distribute.entries.map(() => ''), focus: 0, wrong: null, sel: false };
+    s.ui = { ...UI0, focus: 'prod:0' };
+    s.retry = { target: 'prodbox', lit: ['factor'], key: 'dxProductsRetry', params: { labels: g ? productLabels(g).map((l) => l.replace(/-/g, MINUS)).join(' and ') : '' } };
+  }
+  return say(s, s.retry.key, s.retry.params);
+}
+
 // The actions that are the wrapper's own: a drop (pointer or keyboard), a minus tap, the sum of a combine typed and applied, and the
 // Undo of a reorder, a minus tap or a combine. Returns null for anything else.
 // Did the engine make the move? Its board changed. (Not the history's length: a move made while the one before it still shows its work
@@ -309,6 +334,8 @@ function grabAction(state, action, wrapped, alone, opts = {}) {
 
   // ----- Undo: a combine being typed closes; a reorder, a minus tap or a combine is taken back here -----
   if (action.type === 'undo') {
+    const retry = retryBlank(state);
+    if (retry) return retry;
     if (lx.combine || lx.distribute || lx.calc) return closeCombine(state);
     const top = state.history[state.history.length - 1];
     if (state.sub || !top?.lxKind) return null;

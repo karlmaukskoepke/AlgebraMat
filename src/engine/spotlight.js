@@ -34,6 +34,14 @@ export function withSpotlight(reduce, card) {
         s.reds = before;
         if (card.startOverAt && before >= card.startOverAt) s.startOver = true;
       }
+      // a wrong typed amount goes back to its blank (Build T, Part 3): its own hint, nothing else opened
+      if (s.retry) {
+        const r = s.retry;
+        delete s.retry;
+        s.spot = { kind: 'hint', target: r.target, lit: r.lit, move: null };
+        s.feedback = { key: r.key, params: r.params, bad: false };
+        return s;
+      }
       const h = card.hint(s, state);                                              // (the state before Undo says what the slip was)
       s.spot = h && !h.ask ? { kind: 'hint', target: h.target, move: h.move ?? null, ...(h.choose ? { choose: true } : {}) } : null;   // an ask is the card's own (card.ask)
       if (h) s.feedback = { key: h.key, params: { ...(s.feedback?.params ?? {}), ...(h.params ?? {}) }, bad: false };

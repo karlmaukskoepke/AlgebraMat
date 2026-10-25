@@ -115,13 +115,16 @@ describe('combine like terms (B3)', () => {
     expect(canGrab(s)).toBe(false);
     expect(run(s, ...typed('3')).lx.combine.entry).toBe('3');
   });
-  it('a wrong sum is red and named, and counted; the next key starts again; Undo closes the blank', () => {
+  it('a wrong sum is red and named, and counted; the next key starts again; Undo goes back to the empty blank, a second Undo closes it', () => {
     const c = crossed();
     let s = run(drop(c, 'right', 1, { side: 'right', onto: id(c, 'right', 0) }), ...typed('5'), { type: 'lxApply' });
     expect(s.feedback).toMatchObject({ key: 'lxCombineWrong', bad: true, params: { sum: '11 − 8', typed: '5' } });
     expect(s.lx.combine.wrong).toBe(true);
     expect(lightsSummary(s).sumsWrong).toBe(1);
     expect(run(s, ...typed('3')).lx.combine).toMatchObject({ entry: '3', wrong: false });
+    s = run(s, { type: 'undo' });                                                   // (Build T, Part 3: back to the blank)
+    expect(s.lx.combine).toMatchObject({ entry: '', wrong: false });
+    expect([s.feedback.key, s.ui.focus]).toEqual(['lxCombineRetry', 'sum']);
     s = run(s, { type: 'undo' });
     expect([s.lx.combine, boardText(s.board)]).toEqual([null, 'x = 11 + −8']);
   });

@@ -140,10 +140,12 @@ describe('Part 2: calculate a product on the divide-first route', () => {
     expect(DIST_SPOT.error(s)).toMatchObject({ target: 'calcbox', lit: ['calc'] });
     expect(run(s, [{ type: 'lxApply' }, { type: 'stuck' }])).toBe(s);       // Undo is the only way out
     s = run(s, [{ type: 'undo' }]);
-    expect(s.lx.calc).toBeNull();
-    expect(s.spot).toMatchObject({ kind: 'hint', target: 'calc' });
-    expect(s.feedback.key).toBe('mCalcHint');
+    // (Build T, Part 3: Undo goes back to the product's blank, empty and focused, with the factor and number lit)
+    expect(s.lx.calc).toMatchObject({ entry: '', wrong: false });
+    expect(s.spot).toMatchObject({ kind: 'hint', target: 'calcbox', lit: ['calc'] });
+    expect(s.feedback.key).toBe('lxCalcRetry');
     expect(s.feedback.params).toMatchObject({ expr: '15 ÷ 3', div: true });
+    expect(s.ui.focus).toBe('calc');
     expect(s.supportsShown).not.toContain('model');
   });
   it('Undo after a product takes it back; at x alone there is nothing to work out', () => {

@@ -365,6 +365,27 @@ const WALKS = {
     await w.both('t-divide-again');
     w.at('÷ 5'); await w.click(`${act('take')}[data-n="5"]`); await wait(w.page, 600); await w.row('x = (−15) 5');
   },
+  async 't-distribute-retry'(w) {
+    await w.start(); await w.see('3(x + 2) = 15');
+    w.at('drag the 3, type 3 and 5'); await w.dragFactor(); await w.type(3); await w.enter(); await w.type(5); await w.enter(); await w.lateLayer();
+    await w.see('3 · 2 is not 5.');
+    w.at('Undo'); await w.click(act('undo')); await wait(w.page, 800);
+    await w.see('Try again: type what 3 · x and 3 · 2 make, one in each box. Enter goes to the next.', '3 groups of');
+    if ((await w.page.locator('.dx-arcs .dx-arc').count()) !== 2) throw new Error('the arcs should still show after Undo');
+    const labels = await w.page.locator('.lx-prodlabel:not(.is-hidden)').allInnerTexts();
+    if (labels.join('|') !== '3 · x|3 · 2') throw new Error(`the labels should still show after Undo: ${labels}`);
+    await w.typedIn('[data-fk="prod:0"]', ''); await w.both('t-distribute-retry');
+    w.at('type 3, 6'); await w.type(3); await w.enter(); await w.type(6); await w.enter(); await wait(w.page, 400); await w.row('3x + 6 = 15');
+  },
+  async 't-combine-retry'(w) {
+    await w.start(); await w.see('3x + 4 = 19');
+    w.at('Add −4'); await w.addEnter(-4); await w.row('3x = 19 − 4');
+    w.at('19 onto 4, type 23'); await w.combine(23); await w.lateLayer(); await w.see('19 − 4 is not 23.');
+    w.at('Undo'); await w.click(act('undo')); await wait(w.page, 800);
+    await w.see('Try again: what is 19 − 4? Type it in the box.'); await w.lit('.lx-live .lx-tok.is-pair'); await w.typedIn('.lx-box.is-sum', '');
+    await w.both('t-combine-retry');
+    w.at('type 15'); await w.type(15); await w.enter(); await wait(w.page, 400); await w.row('3x = 15');
+  },
   async 't-flip-plus'(w) {
     await w.start(); await w.see('−3x = 12');
     w.at('Flip, Go, watch'); await w.flip(); await wait(w.page, 4000); await w.strokesCentred(2); await w.shot('t-flip-plus-1-768');
@@ -561,8 +582,8 @@ const WALKS = {
     w.at('mistake 3: drag 2x across, combine as 7x'); await w.crossTerm('2x', 'left'); await w.combineTerms('−2x', '5x', '7x'); await w.lateLayer();
     await w.see('is not 7x'); await w.shot('student-both-sizes');
     w.at('mistake 3: Undo'); await w.click(act('undo')); await wait(w.page, 800);
-    if ((await w.page.locator('.lx-live .lx-tok.is-hint').count()) !== 2) throw new Error('the 5x and the −2x should be outlined after Undo');
-    await w.see('5x and −2x are like terms. Drag one onto the other to combine them.'); await w.shot('student-both-hint');
+    await w.see('Try again: what is 5x − 2x? Type the number in front of x.'); await w.lit('.lx-live .lx-tok.is-pair'); await w.shot('student-both-hint');
+    w.at('mistake 3: type 3x, Enter'); await w.type('3x'); await w.enter(); await wait(w.page, 400); await w.row('3x + 5 = 14');
     w.at('last: pick up the 5 and drop it back'); await w.liftBack('5');
   },
 
@@ -613,9 +634,9 @@ const WALKS = {
     await w.lit('.lb-stack [data-calc]');
     await w.both('p-calc-wrong');
     w.at('Undo'); await w.click(act('undo')); await wait(w.page, 1500);
-    await w.see('⅓ × 15 is ⅓ of 15: split 15 into 3 equal groups and take one. Click the × and type it.');
+    await w.see('Try again: what is ⅓ × 15? It is ⅓ of 15. Type it in the box.'); await w.typedIn('[data-fk="calc"]', '');
     await w.both('p-calc-hint');
-    w.at('the × again, 5, Enter'); await w.click('[data-action="lxCalc"]'); await w.type(5); await w.enter(); await wait(w.page, 300); await w.row('x + 2 = 5');
+    w.at('type 5, Enter'); await w.type(5); await w.enter(); await wait(w.page, 300); await w.row('x + 2 = 5');
   },
   async 'p-cross-off'(w) {
     await w.start(); await w.see('3x + 4 = 19');
@@ -681,8 +702,11 @@ const WALKS = {
     if (labels.join('|') !== '3 · x|3 · 2') throw new Error(`after a wrong product the labels should be 3 · x and 3 · 2: ${labels}`);
     await w.both('p-labels-after-wrong');
     w.at('Undo'); await w.click(act('undo')); await wait(w.page, 800);
-    w.at('drag the 3 again'); await w.dragFactor(); await wait(w.page, 300);
+    await w.see('Try again: type what 3 · x and 3 · 2 make, one in each box. Enter goes to the next.', '3 groups of');
     if ((await w.page.locator('.lx-prodlabel:not(.is-hidden)').count()) !== 2) throw new Error('the labels should stay for the rest of this problem');
+    if ((await w.page.locator('.dx-arcs .dx-arc').count()) !== 2) throw new Error('the arcs should stay after Undo');
+    await w.typedIn('[data-fk="prod:0"]', '');
+    w.at('3, Enter, 6, Enter'); await w.type(3); await w.enter(); await w.type(6); await w.enter(); await wait(w.page, 400); await w.row('3x + 6 = 15');
   },
   async 'p-xboxes'(w) {
     await w.start(); await w.see('3(x + 2) + 2x = 41');
@@ -1031,8 +1055,8 @@ const WALKS = {
     await w.stuck(); await w.see('Drag the 2 onto the parenthesis to multiply it by each piece.');
     w.at('mistake 2: multiply only the first piece'); await w.distribute(2, 3); await w.lateLayer();
     await w.see('2 · 3 is not 3. Multiply this piece too.');
-    w.at('mistake 2: Undo'); await w.click(act('undo')); await wait(w.page, 900); await w.see('Drag the 2 onto the parenthesis');
-    w.at('distribute: 2, 6'); await w.distribute(2, 6); await w.row('5 + 2x + 6 = 17');
+    w.at('mistake 2: Undo'); await w.click(act('undo')); await wait(w.page, 900); await w.see('Try again: type what 2 · x and 2 · 3 make');
+    w.at('back in the boxes: 2, 6'); await w.type(2); await w.enter(); await w.type(6); await w.enter(); await wait(w.page, 300); await w.row('5 + 2x + 6 = 17');
     w.at('mistake 3: Divide too early'); await w.click(DIV); await w.see('That move works once each side is one term.');
     w.at('mistake 4: Add 5'); await w.addEnter(5); await w.lateLayer(); await w.see('did not eliminate the term');
     w.at('mistake 4: Undo'); await w.click(act('undo')); await wait(w.page, 900);
@@ -1040,7 +1064,7 @@ const WALKS = {
     w.at('mistake 5: a wrong sum'); await w.combineTerms('5', '6', 12); await w.lateLayer(); await w.see('5 + 6 is not 12.');
     await w.both('student-distribute');
     w.at('mistake 5: Undo'); await w.click(act('undo')); await wait(w.page, 900);
-    await w.see('5 and 6 are like terms. Drag one onto the other to combine them.');
+    await w.see('Try again: what is 5 + 6? Type it in the box.'); await w.typedIn('.lx-box.is-sum', '');
     // mistake 6 (Build N): a mistake, Undo, then type in the blank, from a fresh start
     w.at('mistake 6: start again'); await w.start();
     w.at('mistake 6: distribute 2, 6'); await w.distribute(2, 6); await w.row('5 + 2x + 6 = 17');
@@ -1249,7 +1273,7 @@ const WALKS = {
     await w.lit('.lx-live .lx-tok.is-pair');
     await w.both('student-two-step');
     w.at('mistake 5: Undo'); await w.click(act('undo')); await wait(w.page, 800);
-    await w.see('19 and −4 are on the same side. Put them together: drag one onto the other and type what they make.');
+    await w.see('Try again: what is 19 − 4? Type it in the box.'); await w.lit('.lx-live .lx-tok.is-pair');
     // mistake 6 (Build N): a mistake, Undo, then type in the blank, from a fresh start
     w.at('mistake 6: start again'); await w.start();
     w.at('mistake 6: Add 4, Enter'); await w.addEnter(4); await w.lateLayer(); await w.see('did not eliminate the term');

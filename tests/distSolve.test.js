@@ -214,10 +214,12 @@ describe('the worked example, 3(x + 2) = 15', () => {
     expect(s.answers.at(-1)).toEqual({ typed: '3 · 2 = 2', tag: 'dist-unmultiplied' });
     expect(layer(s, { type: 'choose', move: 'add' })).toBe(s);                    // (only Undo gets out)
     s = run(s, A.undo());
-    expect(s.lx.distribute).toBe(null);
-    expect(s.spot).toMatchObject({ kind: 'hint', target: 'factor' });
-    expect(s.feedback.key).toBe('mDistributeHint');
-    expect(s.hint).toEqual({ kind: 'factor', id: groupOf(s).id });
+    // (Build T, Part 3: Undo goes back to the distribute in progress: the blanks empty, the cursor in the first, the labels shown)
+    expect(s.lx.distribute).toMatchObject({ entries: ['', ''], focus: 0, wrong: null });
+    expect(s.lx.labels).toBe(true);
+    expect(s.spot).toMatchObject({ kind: 'hint', target: 'prodbox', lit: ['factor'] });
+    expect(s.feedback).toMatchObject({ key: 'dxProductsRetry', params: { labels: '3 · x and 3 · 2' } });
+    expect(s.ui.focus).toBe('prod:0');
     expect(s.supportsShown).not.toContain('model');
   });
   it('dividing first is helpful: x + 2 = ⅓(15), never red; then Add −2 leaves x alone, and the student types 3', () => {
