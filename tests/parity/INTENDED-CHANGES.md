@@ -729,6 +729,19 @@ two changes. **Below the screen check:** the hint after Undo on every card when 
 combine, a group after Distribute, `3x = −12` after a flip) shows `5 · x` and no box (it boxed the 5, or the 2x, with a dashed frame);
 Flip everything's reminders before a flip (`−x = 12`, `−3x = 12`) no longer frame the number and the x (`−3 · x` shows the dot).
 
+**Part 4, the Multiply menu's three options.** Problems, save codes, class-sheet records and the 25 scripted runs are unchanged (the middle
+option is stored as the Fraction option with a top of 1; no scripted run uses it).
+
+| Key | Before | After | Why |
+|---|---|---|---|
+| `screen:div-menu@1366x768` | two options, `▢ ( ) = ▢ ( )` and `▢/▢ ( ) = ▢/▢ ( )`, no symbols | three options, each with a floating symbol: × `▢ ( ) = ▢ ( )`, ÷ `1/▢ ( ) = 1/▢ ( )`, a small fraction `▢/▢ ( ) = ▢/▢ ( )`; the box a little taller | Part 4 (the harness passed it under the Build S line for this key above; listed here on its own) |
+| `screen:div-menu@1366x650` | the same | the same | Part 4 |
+
+**Below the screen check:** the middle option's grey preview row `1/▢ × (5x) = 1/▢ × (−15)` on hover, its solid row with the box
+under the 1, the line "Dividing by 5 is multiplying by ⅕." once a digit is typed and under the work row `⅕(5x) = ⅕(−15)`; greyed with
+the Divide button's words where the Divide button is greyed (Two-step until each side is one term: "That move works once each side is
+one term.").
+
 <!-- history: nothing below this line is read by the harness -->
 
 ## History: screen changes accepted by the re-baseline of 2026-10-24 (Build O, Part 0)
