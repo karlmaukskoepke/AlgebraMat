@@ -290,7 +290,11 @@ function bothShape(board) {
     return { ...base, id: 'VP', group: true, params: { factorId: g.id, a: g.factor } };
   }
   const xs = [...xl.map((t) => ({ t, side: 'left' })), ...xr.map((t) => ({ t, side: 'right' }))];
-  const small = xs.reduce((m, q) => (Math.abs(coef(q.t)) < Math.abs(coef(m.t)) || (Math.abs(coef(q.t)) === Math.abs(coef(m.t)) && q.side === 'right' && m.side === 'left') ? q : m));
+  // (Build Q, Part 6, Karl's rule: where one side is a lone x-term, the x-term to move is the other side's, the one beside the number, so
+  // the number ends alone on its side: `2x = 3x + 6`, move the 3x. A negative number in front afterwards is fine: Flip handles it.)
+  const lone = ['left', 'right'].find((k) => board[k].length === 1 && hasX(board[k][0]));
+  const small = lone ? xs.find((q) => q.side !== lone)
+    : xs.reduce((m, q) => (Math.abs(coef(q.t)) < Math.abs(coef(m.t)) || (Math.abs(coef(q.t)) === Math.abs(coef(m.t)) && q.side === 'right' && m.side === 'left') ? q : m));
   return { ...base, id: 'V1', group: false, params: { xl: xl.map(coef), xr: xr.map(coef), small: small.t.id, from: small.side, c: coef(small.t) } };
 }
 

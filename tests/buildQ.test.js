@@ -140,3 +140,55 @@ describe('Build Q, Part 4: the Multiply menu has three options', () => {
     expect(w.feedback.key).toBe('dFlipNo');
   });
 });
+
+describe('Build Q, Part 5: Flip’s cross-off can be skipped', () => {
+  it('finishFlips settles a flip still playing and the row it makes, and nothing else', async () => {
+    const { finishFlips } = await import('../src/view/keepRows.js');
+    const root = document.createElement('div');
+    root.innerHTML = '<div class="lb-rowwrap is-settled">a</div><div class="lb-rowwrap has-work is-flipwork">b</div><div class="lb-rowwrap">c</div>';
+    finishFlips(root);
+    expect([...root.children].map((r) => r.classList.contains('is-settled'))).toEqual([true, true, true]);
+    root.innerHTML = '<div class="lb-rowwrap has-work">b</div><div class="lb-rowwrap">c</div>';
+    finishFlips(root);
+    expect([...root.children].map((r) => r.classList.contains('is-settled'))).toEqual([false, false]);
+  });
+});
+
+describe('Build Q, Part 6: the wrong cancel, any sign (Karl’s rule)', async () => {
+  const { bothSidesPlay: BP } = await import('../src/play/solveCards.js');
+  const { shapeOf } = await import('../src/engine/solveit/shape.js');
+  let k = 0;
+  const x = (coef = 1) => ({ id: `q${k++}`, kind: 'x', coef });
+  const n = (v) => ({ id: `q${k++}`, kind: 'num', v });
+  const digits = (v) => [...String(Math.abs(v))].map((d) => digit(Number(d))).concat(v < 0 ? [{ type: 'toggleSign' }] : []);
+  const addX = (c) => [{ type: 'choose', move: 'add' }, { type: 'addPick', kind: 'x' }, ...digits(c), { type: 'go' }];
+  const start = (left, right) => { const s = BP.newSession({ ...packById('variables-both-sides').generate(1, 21)[0], logLevel: 1 }, {}); return { ...s, board: { left, right }, base: { left, right }, rows: [{ type: 'eq', board: { left, right } }], prevBoard: { left, right } }; };
+  it('2x = 3x + 6 + −2x (x-term left positive) and 5x = 3x + 10 + −5x (negative): both flagged, tagged zeroed-side', () => {
+    for (const [l, r, add] of [[[x(2)], [x(3), n(6)], -2], [[x(5)], [x(3), n(10)], -5], [[x(3), n(4)], [x(2)], -2]]) {
+      const s = play(BP, start(l, r), ...addX(add));
+      expect([s.feedback.key, s.needUndo, s.tags.includes('zeroed-side')]).toEqual(['vZeroSide', true, true]);
+    }
+  });
+  it('the hint after Undo cancels the x-term beside the number, never the move undone: 2x = 3x + 6 → Add −3x → 2x + −3x = 6', () => {
+    let s = play(BP, start([x(2)], [x(3), n(6)]), ...addX(-2), { type: 'undo' });
+    expect([s.menu, s.addKind, s.amountEntry, s.feedback.key]).toEqual(['add', 'x', '-3', 'vZeroHint']);
+    s = play(BP, s, { type: 'go' });
+    expect([boardText(s.board), s.needUndo]).toEqual(['2x + −3x = 6', false]);
+    // the number on the left this time (3x + 4 = 2x, Add −2x empties the right): the x-term beside the 4 is the 3x
+    let t = play(BP, start([x(3), n(4)], [x(2)]), ...addX(-2), { type: 'undo' });
+    expect(t.amountEntry).toBe('-3');
+  });
+  it('the reminder (V1) outlines the x-term beside the number when the other side is a lone x-term, on every Level 1 problem', () => {
+    for (let seed = 1; seed <= 30; seed++) {
+      for (const p of packById('variables-both-sides').generate(1, seed)) {
+        const s = BP.newSession({ ...p, logLevel: 1 }, {});
+        const shape = shapeOf(s);
+        expect(shape.id).toBe('V1');
+        const lone = ['left', 'right'].find((side) => s.board[side].length === 1);
+        if (!lone) continue;
+        const other = lone === 'left' ? 'right' : 'left';
+        expect(s.board[other].find((t) => t.kind === 'x').id).toBe(shape.params.small);
+      }
+    }
+  });
+});

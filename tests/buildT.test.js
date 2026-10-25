@@ -64,9 +64,9 @@ describe('Part 4: the wrong cancel', () => {
   const addN = (k) => [{ type: 'choose', move: 'add' }, { type: 'addPick', kind: 'num' }, ...digits(k), { type: 'go' }];
   const run = (s, acts) => acts.reduce((st, a) => BP.reduce(st, a), s);
   const start = (left, right) => { const s = BP.newSession({ ...packById('variables-both-sides').generate(1, 21)[0], logLevel: 1 }, {}); return { ...s, board: { left, right }, base: { left, right }, rows: [{ type: 'eq', board: { left, right } }], prevBoard: { left, right } }; };
-  it('which Adds count: 5x = 3x + 10 with −5x (0 = −2x + 10) yes; 2x = 3x + 6 with −2x (0 = x + 6) no; a lone number taken off its side yes', () => {
+  it('which Adds count: 5x = 3x + 10 with −5x (0 = −2x + 10) yes; 2x = 3x + 6 with −2x (0 = x + 6) yes too (Build Q, Part 6: any sign); a lone number taken off its side yes', () => {
     expect(zeroedSide({ left: [x(5)], right: [x(3), n(10)] }, { left: [n(0)], right: [x(-2), n(10)] }, true)).toMatchObject({ side: 'left' });
-    expect(zeroedSide({ left: [x(2)], right: [x(3), n(6)] }, { left: [n(0)], right: [x(1), n(6)] }, true)).toBeNull();
+    expect(zeroedSide({ left: [x(2)], right: [x(3), n(6)] }, { left: [n(0)], right: [x(1), n(6)] }, true)).toMatchObject({ side: 'left' });
     expect(zeroedSide({ left: [x(2), n(6)], right: [n(10)] }, { left: [x(2), n(6), n(-10)], right: [n(0)] }, false)).toMatchObject({ side: 'right', beside: true });
     expect(zeroedSide({ left: [x(5)], right: [x(3), n(10)] }, { left: [x(2)], right: [n(10)] }, true)).toBeNull();
   });
@@ -97,8 +97,10 @@ describe('Part 4: the wrong cancel', () => {
     s = run(s, [{ type: 'undo' }]);
     expect(s.feedback).toMatchObject({ key: 'vZeroHintNum', params: { opposite: '−6', constant: '+6' } });
   });
-  it('2x = 3x + 6, Add −2x is a good move (0 = x + 6), not flagged', () => {
-    const s = run(start([x(2)], [x(3), n(6)]), addX(-2));
-    expect([boardText(s.board), s.needUndo, s.feedback.bad]).toEqual(['0 = 3x + −2x + 6', false, false]);
+  it('2x = 3x + 6, Add −2x (0 = x + 6) is flagged too (Build Q, Part 6, Karl: any sign); the hint after Undo is Add −3x', () => {
+    let s = run(start([x(2)], [x(3), n(6)]), addX(-2));
+    expect([boardText(s.board), s.needUndo, s.feedback.bad, s.feedback.key]).toEqual(['0 = 3x + −2x + 6', true, true, 'vZeroSide']);
+    s = run(s, [{ type: 'undo' }]);
+    expect(s.feedback).toMatchObject({ key: 'vZeroHint', params: { amount: '−3x', term: '3x', beside: true } });
   });
 });

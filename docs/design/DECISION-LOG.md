@@ -316,3 +316,17 @@ and taking the division option out of the Multiply menu removed a moment Karl wa
 5. Flip's cross-off (about 3.4 s a flip since Build S) can be skipped: any key, click or Next finishes it at once.
 6. The real-browser sweeps run before every push, and their results go in the report.
 7. **The loop spec goes to rev 2.9** (sections 1C, 2, 3B, 5 and 6).
+
+**Karl's answers to Build T's decisions (2026-10-25), recorded in Build Q:**
+
+1. The added x-term sits right after its like term (`5x + −2x + 5 = 14`), and an x-term dragged across the = gives the same row: kept.
+2. The × stays in the move rows that multiply both sides (`−1 × (−x)`, `⅓ × (15)`) and in Divide it's numbers-only walkthrough: kept for now.
+3. An x-term that only part-cancels gets the single "Add so that one x-term cancels." message: kept.
+4. **The wrong cancel, corrected (built in Build Q, Part 6).** Build T flagged an Add that leaves 0 on one side and an x-term and a number
+   together on the other only when the x-term left was negative (`0 = −2x + 10`). Karl's rule is broader: the error is not separating
+   the x-terms and the numbers onto opposite sides, whatever the sign. `2x = 3x + 6` plus −2x (`0 = x + 6`) is flagged too (spotlight,
+   Undo, `zeroed-side`, the message as built). The hint after Undo never sends the student back to the same move: it cancels the x-term on
+   the side that holds the number, so the number ends alone on its side (`2x = 3x + 6`: add −3x, giving `2x + −3x = 6`); where both
+   sides hold a number, the smaller x-term, as before. A negative number in front of x afterwards is fine (Flip handles it): negative
+   coefficients are not the concern. Build R's reminder (V1) follows the same rule: where one side is a lone x-term, it outlines the
+   x-term on the other side, the one sharing a side with the number.

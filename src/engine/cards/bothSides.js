@@ -79,10 +79,10 @@ export function addToBoth(board, k, isX) {
   return { board: { left: out.left, right: out.right }, work: { ...work, amount: k, x: isX, ...(isX ? { stack: true } : {}) }, hit };
 }
 
-// An Add that emptied a side (it says 0) and left an x-term and a number together on the other: { side, beside } or null. An x-term Add
-// counts only when it left the x-term negative: cancelling the other x-term would have kept x-terms and numbers apart with a plus
-// (`2x = 3x + 6` + −2x makes `0 = x + 6`, the better of the two, and is not flagged). `beside`: a number was beside x before (its
-// opposite is the Add to make instead).
+// An Add that emptied a side (it says 0) and left an x-term and a number together on the other: { side, beside } or null, whatever the
+// sign of the x-term left (Build Q, Part 6, Karl's rule: the error is not separating the x-terms and the numbers onto opposite sides;
+// `2x = 3x + 6` + −2x makes `0 = x + 6` and is flagged too). `beside`: a number was beside x before (its opposite is the Add to make
+// instead).
 // The x-term with the smaller number in front (cancelling it leaves the other with a plus), or the only one
 export function smallerX(board) {
   const l = board.left.find((t) => t.kind === 'x');
@@ -97,7 +97,6 @@ export function zeroedSide(before, board, isX) {
   const full = board[side === 'left' ? 'right' : 'left'];
   const xs = full.filter((t) => t.kind === 'x');
   if (!xs.length || !full.some((t) => t.kind === 'num')) return null;
-  if (isX && xs.reduce((n, t) => n + (t.coef ?? 1), 0) > 0) return null;
   const xSideBefore = before.left.some((t) => t.kind === 'x') ? before.left : before.right;
   return { side, beside: !isX && xSideBefore.some((t) => t.kind === 'num') };
 }
@@ -306,18 +305,26 @@ const BOTH_ERRORS = {
   dFail3: { target: 'failSide', label: 'doesn’t split' },
   wWrong: { target: 'subst', clear: true, lit: ['substLast'] },
 };
+// The x-term to cancel after the wrong cancel (Build Q, Part 6): the one on the side that holds the number, so the number ends alone on
+// its side (`2x = 3x + 6`: add −3x, `2x + −3x = 6`); never the move just undone. Where both sides (or neither) hold a number, the smaller.
+export function xBesideNumber(board) {
+  const holds = ['left', 'right'].filter((k) => board[k].some((t) => t.kind === 'num'));
+  if (holds.length !== 1) return smallerX(board);
+  return board[holds[0]].find((t) => t.kind === 'x') ?? smallerX(board);
+}
+
 // The hint after Undo of the wrong cancel (Build T, Part 4), recorded as `hint`: Add's x-term option lit with its preview and the x-term to
-// add, the one that keeps the x-term left with a plus (the smaller one cancelled); after a number that emptied its side, Add's number
-// option with the opposite of the number beside x.
+// add, the one beside the number (Build Q, Part 6; an x-term that cancelled none: the smaller, as its message says); after a number that
+// emptied its side, Add's number option with the opposite of the number beside x.
 function zeroSideHint(s, before) {
   const b = s.board;
   if (before.zeroSide?.x || before.feedback?.key === 'vNoCancelX') {
-    const small = smallerX(b);
+    const small = before.zeroSide?.x ? xBesideNumber(b) : smallerX(b);
     if (!small) return null;
     const k = -(small.coef ?? 1);
     Object.assign(s, { menu: 'add', addKind: 'x', typing: null, amountEntry: String(k), hint: { kind: 'cancel', id: small.id } });
     if (!s.supportsShown.includes('hint')) s.supportsShown.push('hint');
-    return { target: 'hinted', key: 'vZeroHint', params: { term: coefText(-k), amount: coefText(k) }, move: 'add' };
+    return { target: 'hinted', key: 'vZeroHint', params: { term: coefText(-k), amount: coefText(k), ...(before.zeroSide?.x ? { beside: true } : {}) }, move: 'add' };
   }
   const xs = b.left.some((t) => t.kind === 'x') ? b.left : b.right;
   const con = xs.find((t) => t.kind === 'num');
