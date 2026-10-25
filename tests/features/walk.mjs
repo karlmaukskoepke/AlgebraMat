@@ -851,7 +851,7 @@ const WALKS = {
       symbols: [...document.querySelectorAll('.lx-pgrid .lx-symbol')].map((e) => e.getAttribute('aria-label')),
       width: Math.round(document.querySelector('.lx-panel').getBoundingClientRect().width),
     }));
-    if (JSON.stringify(got.symbols) !== JSON.stringify(['Plus sign', 'Times sign', 'Division sign', 'Circle of two arrows', 'Double arrow'])) throw new Error(`the symbols should be + × ÷, two arrows in a circle, a double arrow: ${got.symbols}`);
+    if (JSON.stringify(got.symbols) !== JSON.stringify(['Plus sign', 'Times sign', 'Division sign', 'Cycle between minus and plus', 'Equals sign with two circling arrows'])) throw new Error(`the symbols should be + × ÷, arrows cycling between minus and plus, an equals sign with two circling arrows: ${got.symbols}`);
     const names = ['Addition property of equality: add the same number to both sides', 'Multiplication property of equality', 'Division property of equality',
       'Multiplication property of equality: multiply both sides by −1', 'Symmetric property of equality: if a = b, then b = a'];
     const buttons = w.page.locator('.lx-pgrid .lx-move');

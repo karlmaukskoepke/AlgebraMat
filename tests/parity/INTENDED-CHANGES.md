@@ -645,6 +645,17 @@ Also from the typing test's wider walk (existing bugs, now fixed): Start over wh
 Go, no longer stops the card with an error; after combining two x-terms with Add's box still open, the cursor stays in the box (it moved
 to x = while the keys still went to the box).
 
+## Build Q (2026-10-25): panel polish
+
+**Part 1, the two symbols.** Problems, save codes, class-sheet records and the 25 scripted runs are unchanged. Every recorded screen
+shows the panel, so every one has the two new symbols beside Flip everything and Trade places; only one goes over the tolerance:
+
+| Key | Before | After | Why |
+|---|---|---|---|
+| `screen:div-menu@1366x768` | Flip everything's symbol a small circle of two arrows; Trade places' a double arrow | two rounded arrows circling between a minus (left) and a plus (right); an equals sign with the same two arrows round it | Part 1: Karl's two symbols (0.21% of pixels) |
+
+**Below the tolerance (listed for the record):** the same two symbols on the other 69 recorded screens (about 0.1-0.2% of pixels each).
+
 <!-- history: nothing below this line is read by the harness -->
 
 ## History: screen changes accepted by the re-baseline of 2026-10-24 (Build O, Part 0)

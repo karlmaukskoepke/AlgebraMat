@@ -116,8 +116,8 @@ describe('Build O, Part 2: the panel', () => {
     expect(names).toContain('Multiplication property of equality: multiply both sides by −1');
     const symbols = [...m.root.querySelectorAll('.lx-pgrid .lx-symbol')].map((e) => e.getAttribute('aria-label'));
     expect(symbols.slice(0, 2)).toEqual(['Plus sign', 'Times sign']);
-    expect(symbols).toContain('Circle of two arrows');
-    expect(symbols).toContain('Double arrow');
+    expect(symbols).toContain('Cycle between minus and plus');
+    expect(symbols).toContain('Equals sign with two circling arrows');
     expect(m.root.textContent).not.toMatch(/[Ss]ubtract \S+ from both sides/);
   });
   it('the Multiply options have no small × or ÷ of their own', async () => {

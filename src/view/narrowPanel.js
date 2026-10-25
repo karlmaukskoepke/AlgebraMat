@@ -50,20 +50,29 @@ const MINI = {
     txt(42, 11, '( )', GREY, 10), svgEl('path', { d: 'M35 14 H49', stroke: BLUE, 'stroke-width': 1.6 }), txt(42, 24, 'n', BLUE, 10)],
   flip: () => [txt(9, 18, '−x', GREY, 12), svgEl('path', { d: 'M19 14 H31', stroke: BLUE, 'stroke-width': 1.8, 'marker-end': 'url(#lx-ah)' }), txt(42, 18, 'x', BLUE, 13)],
 };
-// The floating symbols (Build O): + × ÷, a small circle of two arrows (Flip everything), a double arrow (Trade places). 26 px, in ink.
+// The floating symbols (Build O): + × ÷ in ink, 26 px. Build Q redrew the two arrow symbols (Karl): Flip everything is two rounded arrows
+// making a circle, a minus at the left and a plus at the right, one arrow curving up from the minus to the plus and the other down from
+// the plus back to the minus ("cycling between negative and positive"); Trade places is an equals sign with the same two arrows round it.
+// The arrows are drawn on a 32 grid (`viewBox`), still 26 px on screen.
 const INK = '#2b2a26';
 const line = (d, w = 3) => svgEl('path', { d, stroke: INK, 'stroke-width': w, 'stroke-linecap': 'round', fill: 'none' });
 const head = (d) => svgEl('path', { d, fill: INK });
+const CIRCLING = {
+  flip: () => [line('M6.2 9.9 A11.5 11.5 0 0 1 23.0 6.9', 2.8), head('M26.0 10.2 L19.9 6.2 L25.5 3.0 Z'),
+    line('M25.8 22.1 A11.5 11.5 0 0 1 9.0 25.1', 2.8), head('M6.0 21.8 L12.1 25.8 L6.5 29.0 Z')],
+  trade: () => [line('M4.4 11.3 A12.5 12.5 0 0 1 25.7 8.2', 2.8), head('M27.9 12.1 L22.8 7.0 L29.0 5.0 Z'),
+    line('M27.6 20.7 A12.5 12.5 0 0 1 6.3 23.8', 2.8), head('M4.1 19.9 L9.2 25.0 L3.0 27.0 Z')],
+};
 const SYMBOLS = {
   plus: ['Plus sign', () => [line('M13 4 V22'), line('M4 13 H22')]],
   times: ['Times sign', () => [line('M6 6 L20 20'), line('M20 6 L6 20')]],
   divide: ['Division sign', () => [line('M4 13 H22'), svgEl('circle', { cx: 13, cy: 6, r: 2.4, fill: INK }), svgEl('circle', { cx: 13, cy: 20, r: 2.4, fill: INK })]],
-  flip: ['Circle of two arrows', () => [line('M5.5 10.5 A8 8 0 0 1 19.5 8', 2.6), head('M22.5 5.5 L21 12 L15.5 8.5 Z'), line('M20.5 15.5 A8 8 0 0 1 6.5 18', 2.6), head('M3.5 20.5 L5 14 L10.5 17.5 Z')]],
-  trade: ['Double arrow', () => [line('M7 13 H19', 2.6), head('M2 13 L9 7.5 V18.5 Z'), head('M24 13 L17 7.5 V18.5 Z')]],
+  flip: ['Cycle between minus and plus', () => [...CIRCLING.flip(), line('M2 16 H7.5', 2.8), line('M24.5 16 H30 M27.25 13.25 V18.75', 2.8)], 32],
+  trade: ['Equals sign with two circling arrows', () => [...CIRCLING.trade(), line('M10.5 13 H21.5 M10.5 19 H21.5', 2.8)], 32],
 };
 export function moveSymbol(name) {
-  const [said, draw] = SYMBOLS[name];
-  const svg = svgEl('svg', { class: 'lx-symbol', viewBox: '0 0 26 26', width: 26, height: 26, role: 'img', 'aria-label': said, focusable: 'false' }, draw());
+  const [said, draw, grid = 26] = SYMBOLS[name];
+  const svg = svgEl('svg', { class: 'lx-symbol', viewBox: `0 0 ${grid} ${grid}`, width: 26, height: 26, role: 'img', 'aria-label': said, focusable: 'false' }, draw());
   return html('span', 'lx-symcell', [svg]);
 }
 
