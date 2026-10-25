@@ -742,6 +742,16 @@ under the 1, the line "Dividing by 5 is multiplying by ⅕." once a digit is typ
 the Divide button's words where the Divide button is greyed (Two-step until each side is one term: "That move works once each side is
 one term.").
 
+**Part 5.** Nothing recorded differs (the recorded Flip screen is its opening). **Below the screen check:** a key or a click while
+Flip's cross-off plays (about 3.4 s a flip, or dividing by a negative) finishes it at once: the two pluses drawn, the new row in place.
+
+**Part 6.** Nothing recorded differs (the scripted runs and recorded screens have no Variables on both sides problem). **Below the screen
+check**, on Variables on both sides only: `2x = 3x + 6` plus −2x (`0 = x + 6`) now waits for Undo with its spotlight and the slip tag
+`zeroed-side` (it was taken as a helpful move); after the wrong cancel the hint opens Add with the x-term beside the number ("Add −3x to
+both sides: the 3x cancels, and the number is left alone on its side. Press Go."; for `5x = 3x + 10` it was and stays Add −3x); the
+reminder at `ax = bx + c` outlines the bx (it outlined the x-term with the smaller number in front: on `5x = 3x + 10` that was already the
+3x; on `2x = 3x + 6` it was the 2x).
+
 <!-- history: nothing below this line is read by the harness -->
 
 ## History: screen changes accepted by the re-baseline of 2026-10-24 (Build O, Part 0)
