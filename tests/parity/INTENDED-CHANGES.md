@@ -524,7 +524,6 @@ The screens were re-baselined from `main` at `b7c62f3` (Build O as finished) bef
 
 | Key | Before | After | Why |
 |---|---|---|---|
-| `screen:div-menu@1366x650` | Divide it's Multiply options open: the whole-number option greyed; three light dots beside Multiply, none beside Divide | the whole-number option live (no grey), as before Build L; one dot (No fractions) beside Multiply, two (Smaller numbers, One box) beside Divide | Part 9 (Build O's decisions 1 and 2, approved) |
 
 **Below the screen check (listed for the record; walked in Features to check):**
 - Part 3, the cross-off: `div-helpful-move` (and every Divide, Fraction or Flip work row) gains a strike line on the fraction and the number it cancels. The harness freezes animations at their first frame, where the line has not been drawn yet (it grows in after 0.7 s), so the pixels are the same.
@@ -565,22 +564,6 @@ their fourth row. (On the old Divide it screen at 650 px the pop-up covered the 
 
 | Key | Before | After | Why |
 |---|---|---|---|
-| `screen:two-opening@1366x768` | `2x + 4 = 16` at 46 px, dropping to 32 px at the fourth row | 34 px from the start | Part 3: one text size a problem, the largest at which its worst case fits at 768 px tall, with room for the check’s pop-up away from `x =` (1.20% of pixels) |
-| `screen:dist-opening@1366x768` | `2(x + 4) = 26` at 46 px, dropping to 32 px at the fourth row | 32 px from the start | the same (1.32% of pixels) |
-| `screen:div-opening@1366x650` | `5x = −15` at 46 px | 32 px, kept to Balanced | Part 3: one text size a problem, the largest at which its worst case fits at 650 px tall, with room for the check’s pop-up away from `x =` (1.37% of pixels) |
-| `screen:div-helpful-move@1366x650` | the move’s rows at 46 px (32 px work row) | 32 px (24 px work row) | Part 3: one text size a problem, the largest at which its worst case fits at 650 px tall, with room for the check’s pop-up away from `x =` (2.85% of pixels) |
-| `screen:div-failed@1366x650` | the failed fraction at 46/32 px | 32/24 px; the pop-up and Undo are where they were | Part 3: one text size a problem, the largest at which its worst case fits at 650 px tall, with room for the check’s pop-up away from `x =` (6.53% of pixels) |
-| `screen:div-stuck-1@1366x650` | 46 px | 32 px | Part 3: one text size a problem, the largest at which its worst case fits at 650 px tall, with room for the check’s pop-up away from `x =` (1.40% of pixels) |
-| `screen:div-stuck-2@1366x650` | 46 px | 32 px | Part 3: one text size a problem, the largest at which its worst case fits at 650 px tall, with room for the check’s pop-up away from `x =` (1.24% of pixels) |
-| `screen:div-teach@1366x650` | 46 px | 32 px | Part 3: one text size a problem, the largest at which its worst case fits at 650 px tall, with room for the check’s pop-up away from `x =` (1.37% of pixels) |
-| `screen:div-wrong-guess@1366x650` | 46 px rows beside the check | 32 px rows; the check is unchanged | Part 3: one text size a problem, the largest at which its worst case fits at 650 px tall, with room for the check’s pop-up away from `x =` (0.23% of pixels) |
-| `screen:div-end@1366x650` | 46 px | 32 px | Part 3: one text size a problem, the largest at which its worst case fits at 650 px tall, with room for the check’s pop-up away from `x =` (4.16% of pixels) |
-| `screen:div-failed-stuck@1366x650` | 46 px | 32 px | Part 3: one text size a problem, the largest at which its worst case fits at 650 px tall, with room for the check’s pop-up away from `x =` (6.53% of pixels) |
-| `screen:div-alone-stuck-1@1366x650` | 46 px | 32 px | Part 3: one text size a problem, the largest at which its worst case fits at 650 px tall, with room for the check’s pop-up away from `x =` (5.46% of pixels) |
-| `screen:div-menu@1366x650` | 46 px | 32 px (the Multiply menu is unchanged) | Part 3: one text size a problem, the largest at which its worst case fits at 650 px tall, with room for the check’s pop-up away from `x =` |
-| `screen:flip-opening@1366x650` | `−6x = −12`… at 46 px | 32 px | Part 3: one text size a problem, the largest at which its worst case fits at 650 px tall, with room for the check’s pop-up away from `x =` (1.40% of pixels) |
-| `screen:two-opening@1366x650` | `2x + 4 = 16` at 46 px, dropping to 32 px at the fourth row | 32 px from the start | Part 3: one text size a problem, the largest at which its worst case fits at 650 px tall, with room for the check’s pop-up away from `x =` (1.43% of pixels) |
-| `screen:dist-opening@1366x650` | `2(x + 4) = 26` at 46 px, dropping to 32 px at the fourth row | 32 px from the start | Part 3: one text size a problem, the largest at which its worst case fits at 650 px tall, with room for the check’s pop-up away from `x =` (1.25% of pixels) |
 
 **Below the screen check (no recorded state shows them):** a fourth row no longer shrinks every row; Flip everything's cross-off is a
 vertical stroke through each minus, one at a time (the recorded Flip screen is its opening); Add's two options preview their own form
@@ -594,8 +577,6 @@ Every recorded screen with its first-problem pop-up still shows it.
 
 | Key | Before | After | Why |
 |---|---|---|---|
-| `screen:div-wrong-guess@1366x768` | the check's line 2 reads `5 × 4 = −15` | `5(4) = −15` | Part 1.1: never a times sign beside the x's (0.21% of pixels) |
-| `screen:div-end@1366x768` | the check's line 2 reads `5 × (−3) = −15` | `5(−3) = −15` | Part 1.1 (0.44% of pixels) |
 
 **Below the screen check (no recorded state shows them):** the same parentheses on every card's check (Two-step `4 − 3(5) = −11`,
 Distribute `3(7 + 2) + 2(7) = 41`, Variables `7(5) = 4(5) + 15`, Flip `−3(−4) = 12`); Flip's red stroke now centred on its minus (about
@@ -607,7 +588,6 @@ words differ). One recorded screen differs at 1366×768 (at 1366×650 it differs
 
 | Key | Before | After | Why |
 |---|---|---|---|
-| `screen:div-alone-stuck-1@1366x768` | at `x = (−15)/5` (made with the Divide button), I'm stuck asks "What is ⅕ of −15? Share the counters…" | "What is −15 divided by 5? Share the counters…" | Part 2: help talks in the form on the screen (0.91% of pixels) |
 
 **Below the screen check (no recorded state shows them):** "x is 15 divided by 3. Work it out, then type x." / "x is ⅓ of 15. Work it out,
 then type x." at x alone on Flip everything, Two-step, Distribute and Variables (was "⅓(15) is 1 of 3 equal groups of 15"); Divide it's
@@ -652,7 +632,6 @@ shows the panel, so every one has the two new symbols beside Flip everything and
 
 | Key | Before | After | Why |
 |---|---|---|---|
-| `screen:div-menu@1366x768` | Flip everything's symbol a small circle of two arrows; Trade places' a double arrow | two rounded arrows circling between a minus (left) and a plus (right); an equals sign with the same two arrows round it | Part 1: Karl's two symbols (0.21% of pixels) |
 
 **Below the tolerance (listed for the record):** the same two symbols on the other 69 recorded screens (about 0.1-0.2% of pixels each).
 
@@ -661,48 +640,6 @@ recorded screens differ, each listed (Add to both sides draws its rows in the sh
 
 | Key | Before | After | Why |
 |---|---|---|---|
-| `screen:add-opening@1366x768` | rows touching (no room between them) | every row of the work a little lower: each row keeps a small room above and below (0.1 em) so a lit number, a nudge glow or an outline stays inside its own row | Part 2.1, 2.3 (0.71% of pixels) |
-| `screen:add-helpful-move@1366x768` | rows touching (no room between them) | every row of the work a little lower: each row keeps a small room above and below (0.1 em) so a lit number, a nudge glow or an outline stays inside its own row | Part 2.1, 2.3 (0.93% of pixels) |
-| `screen:add-red-move@1366x768` | rows touching (no room between them) | every row of the work a little lower: each row keeps a small room above and below (0.1 em) so a lit number, a nudge glow or an outline stays inside its own row | Part 2.1, 2.3 (2.95% of pixels) |
-| `screen:add-partial-move@1366x768` | rows touching (no room between them) | every row of the work a little lower: each row keeps a small room above and below (0.1 em) so a lit number, a nudge glow or an outline stays inside its own row | Part 2.1, 2.3 (2.82% of pixels) |
-| `screen:add-stuck-1@1366x768` | rows touching (no room between them) | every row of the work a little lower: each row keeps a small room above and below (0.1 em) so a lit number, a nudge glow or an outline stays inside its own row | Part 2.1, 2.3 (1.75% of pixels) |
-| `screen:add-stuck-2@1366x768` | rows touching (no room between them) | every row of the work a little lower: each row keeps a small room above and below (0.1 em) so a lit number, a nudge glow or an outline stays inside its own row | Part 2.1, 2.3 (0.26% of pixels) |
-| `screen:add-stuck-3@1366x768` | rows touching (no room between them) | every row of the work a little lower: each row keeps a small room above and below (0.1 em) so a lit number, a nudge glow or an outline stays inside its own row | Part 2.1, 2.3 (0.26% of pixels) |
-| `screen:add-teach@1366x768` | rows touching (no room between them) | every row of the work a little lower: each row keeps a small room above and below (0.1 em) so a lit number, a nudge glow or an outline stays inside its own row | Part 2.1, 2.3 (0.71% of pixels) |
-| `screen:add-wrong-guess-undone@1366x768` | rows touching (no room between them) | every row of the work a little lower: each row keeps a small room above and below (0.1 em) so a lit number, a nudge glow or an outline stays inside its own row | Part 2.1, 2.3 (1.41% of pixels) |
-| `screen:add-forced-move@1366x768` | rows touching (no room between them) | every row of the work a little lower: each row keeps a small room above and below (0.1 em) so a lit number, a nudge glow or an outline stays inside its own row | Part 2.1, 2.3 (1.35% of pixels) |
-| `screen:add-end@1366x768` | rows touching (no room between them) | every row of the work a little lower: each row keeps a small room above and below (0.1 em) so a lit number, a nudge glow or an outline stays inside its own row | Part 2.1, 2.3 (0.93% of pixels) |
-| `screen:add-partial-stuck-4@1366x768` | rows touching (no room between them) | every row of the work a little lower: each row keeps a small room above and below (0.1 em) so a lit number, a nudge glow or an outline stays inside its own row | Part 2.1, 2.3 (2.82% of pixels) |
-| `screen:add-partial-teach@1366x768` | rows touching (no room between them) | every row of the work a little lower: each row keeps a small room above and below (0.1 em) so a lit number, a nudge glow or an outline stays inside its own row | Part 2.1, 2.3 (2.82% of pixels) |
-| `screen:add-alone-stuck-1@1366x768` | rows touching (no room between them) | every row of the work a little lower: each row keeps a small room above and below (0.1 em) so a lit number, a nudge glow or an outline stays inside its own row | Part 2.1, 2.3 (2.33% of pixels) |
-| `screen:add-alone-stuck-2@1366x768` | rows touching (no room between them) | every row of the work a little lower: each row keeps a small room above and below (0.1 em) so a lit number, a nudge glow or an outline stays inside its own row | Part 2.1, 2.3 (1.11% of pixels) |
-| `screen:add-alone-stuck-3@1366x768` | rows touching (no room between them) | every row of the work a little lower: each row keeps a small room above and below (0.1 em) so a lit number, a nudge glow or an outline stays inside its own row | Part 2.1, 2.3 (1.11% of pixels) |
-| `screen:add-alone-teach@1366x768` | rows touching (no room between them) | every row of the work a little lower: each row keeps a small room above and below (0.1 em) so a lit number, a nudge glow or an outline stays inside its own row | Part 2.1, 2.3 (0.93% of pixels) |
-| `screen:add-red-stuck@1366x768` | rows touching (no room between them) | every row of the work a little lower: each row keeps a small room above and below (0.1 em) so a lit number, a nudge glow or an outline stays inside its own row | Part 2.1, 2.3 (2.95% of pixels) |
-| `screen:add-L2-stuck-2@1366x768` | rows touching (no room between them) | every row of the work a little lower: each row keeps a small room above and below (0.1 em) so a lit number, a nudge glow or an outline stays inside its own row | Part 2.1, 2.3 (0.25% of pixels) |
-| `screen:div-helpful-move@1366x768` | rows touching (no room between them) | the Divide row with more room above and below its bars (0.22 em), and "Same as multiplying by ⅕." on a reserved line of its own under it; the new row below it lower | Part 2.1, 2.2 (1.92% of pixels) |
-| `screen:div-failed@1366x768` | rows touching (no room between them) | the failed fraction row in division form with more room above and below its bars (0.22 em) | Part 2.1 (2.40% of pixels) |
-| `screen:div-failed-stuck@1366x768` | rows touching (no room between them) | the failed fraction row in division form with more room above and below its bars (0.22 em) | Part 2.1 (2.40% of pixels) |
-| `screen:add-opening@1366x650` | rows touching (no room between them) | every row of the work a little lower: each row keeps a small room above and below (0.1 em) so a lit number, a nudge glow or an outline stays inside its own row | Part 2.1, 2.3 (0.84% of pixels) |
-| `screen:add-helpful-move@1366x650` | rows touching (no room between them) | every row of the work a little lower: each row keeps a small room above and below (0.1 em) so a lit number, a nudge glow or an outline stays inside its own row | Part 2.1, 2.3 (1.09% of pixels) |
-| `screen:add-red-move@1366x650` | rows touching (no room between them) | every row of the work a little lower: each row keeps a small room above and below (0.1 em) so a lit number, a nudge glow or an outline stays inside its own row | Part 2.1, 2.3 (3.48% of pixels) |
-| `screen:add-partial-move@1366x650` | rows touching (no room between them) | every row of the work a little lower: each row keeps a small room above and below (0.1 em) so a lit number, a nudge glow or an outline stays inside its own row | Part 2.1, 2.3 (3.34% of pixels) |
-| `screen:add-stuck-1@1366x650` | rows touching (no room between them) | every row of the work a little lower: each row keeps a small room above and below (0.1 em) so a lit number, a nudge glow or an outline stays inside its own row | Part 2.1, 2.3 (2.07% of pixels) |
-| `screen:add-stuck-2@1366x650` | rows touching (no room between them) | every row of the work a little lower: each row keeps a small room above and below (0.1 em) so a lit number, a nudge glow or an outline stays inside its own row | Part 2.1, 2.3 (0.31% of pixels) |
-| `screen:add-stuck-3@1366x650` | rows touching (no room between them) | every row of the work a little lower: each row keeps a small room above and below (0.1 em) so a lit number, a nudge glow or an outline stays inside its own row | Part 2.1, 2.3 (0.31% of pixels) |
-| `screen:add-stuck-4@1366x650` | rows touching (no room between them) | every row of the work a little lower: each row keeps a small room above and below (0.1 em) so a lit number, a nudge glow or an outline stays inside its own row | Part 2.1, 2.3 (0.23% of pixels) |
-| `screen:add-teach@1366x650` | rows touching (no room between them) | every row of the work a little lower: each row keeps a small room above and below (0.1 em) so a lit number, a nudge glow or an outline stays inside its own row | Part 2.1, 2.3 (0.84% of pixels) |
-| `screen:add-wrong-guess-undone@1366x650` | rows touching (no room between them) | every row of the work a little lower: each row keeps a small room above and below (0.1 em) so a lit number, a nudge glow or an outline stays inside its own row | Part 2.1, 2.3 (1.66% of pixels) |
-| `screen:add-forced-move@1366x650` | rows touching (no room between them) | every row of the work a little lower: each row keeps a small room above and below (0.1 em) so a lit number, a nudge glow or an outline stays inside its own row | Part 2.1, 2.3 (1.59% of pixels) |
-| `screen:add-end@1366x650` | rows touching (no room between them) | every row of the work a little lower: each row keeps a small room above and below (0.1 em) so a lit number, a nudge glow or an outline stays inside its own row | Part 2.1, 2.3 (1.10% of pixels) |
-| `screen:add-partial-stuck-4@1366x650` | rows touching (no room between them) | every row of the work a little lower: each row keeps a small room above and below (0.1 em) so a lit number, a nudge glow or an outline stays inside its own row | Part 2.1, 2.3 (3.34% of pixels) |
-| `screen:add-partial-teach@1366x650` | rows touching (no room between them) | every row of the work a little lower: each row keeps a small room above and below (0.1 em) so a lit number, a nudge glow or an outline stays inside its own row | Part 2.1, 2.3 (3.34% of pixels) |
-| `screen:add-alone-stuck-1@1366x650` | rows touching (no room between them) | every row of the work a little lower: each row keeps a small room above and below (0.1 em) so a lit number, a nudge glow or an outline stays inside its own row | Part 2.1, 2.3 (2.75% of pixels) |
-| `screen:add-alone-stuck-2@1366x650` | rows touching (no room between them) | every row of the work a little lower: each row keeps a small room above and below (0.1 em) so a lit number, a nudge glow or an outline stays inside its own row | Part 2.1, 2.3 (1.31% of pixels) |
-| `screen:add-alone-stuck-3@1366x650` | rows touching (no room between them) | every row of the work a little lower: each row keeps a small room above and below (0.1 em) so a lit number, a nudge glow or an outline stays inside its own row | Part 2.1, 2.3 (1.31% of pixels) |
-| `screen:add-alone-teach@1366x650` | rows touching (no room between them) | every row of the work a little lower: each row keeps a small room above and below (0.1 em) so a lit number, a nudge glow or an outline stays inside its own row | Part 2.1, 2.3 (1.09% of pixels) |
-| `screen:add-red-stuck@1366x650` | rows touching (no room between them) | every row of the work a little lower: each row keeps a small room above and below (0.1 em) so a lit number, a nudge glow or an outline stays inside its own row | Part 2.1, 2.3 (3.48% of pixels) |
-| `screen:add-L2-stuck-2@1366x650` | rows touching (no room between them) | every row of the work a little lower: each row keeps a small room above and below (0.1 em) so a lit number, a nudge glow or an outline stays inside its own row | Part 2.1, 2.3 (1.79% of pixels) |
 
 **Below the tolerance (listed for the record):** `screen:two-opening@1366x768` and `screen:dist-opening@1366x768` (the text size goes
 from 34 px and 32 px to 38 px: the size chooser now folds older moves out of sight before it would lower the text, so the worst case of
@@ -721,8 +658,6 @@ are unchanged; the 23 other runs are unchanged.
 |---|---|---|---|
 | `event:divide-it/stuck-x2-then-solve` | supports `model, guided`, stuck 2 | supports `hint, model`, stuck 2 | Part 3.2: I'm stuck's first rung is the reminder (recorded `hint`, as the hint after Undo is); the second is the model |
 | `event:divide-it/partial-composite` | supports `model, guided`, stuck 2 | supports `hint, model`, stuck 2 | the same |
-| `screen:div-stuck-1@1366x768` | the counters and boxes picture with the fractions live, the 5 boxed | `5 · x = −15` with a blue dot, the Divide button lit, its fraction bars and box under the row, "To get one x, divide both sides by 5…" | Part 3.1-3.2 (4.60% of pixels) |
-| `screen:div-stuck-2@1366x768` | guided: the ⅕ lit | the model: the counters and boxes picture with the fractions live (the old first rung) | Part 3.3 (1.60% of pixels) |
 
 **Also at 1366×650** (`screen:div-stuck-1@1366x650`, `screen:div-stuck-2@1366x650`, already listed above for Build S's text size): the same
 two changes. **Below the screen check:** the hint after Undo on every card when the next move is dividing (`5x = −15`, `2x = 12` after a
@@ -734,8 +669,6 @@ option is stored as the Fraction option with a top of 1; no scripted run uses it
 
 | Key | Before | After | Why |
 |---|---|---|---|
-| `screen:div-menu@1366x768` | two options, `▢ ( ) = ▢ ( )` and `▢/▢ ( ) = ▢/▢ ( )`, no symbols | three options, each with a floating symbol: × `▢ ( ) = ▢ ( )`, ÷ `1/▢ ( ) = 1/▢ ( )`, a small fraction `▢/▢ ( ) = ▢/▢ ( )`; the box a little taller | Part 4 (the harness passed it under the Build S line for this key above; listed here on its own) |
-| `screen:div-menu@1366x650` | the same | the same | Part 4 |
 
 **Below the screen check:** the middle option's grey preview row `1/▢ × (5x) = 1/▢ × (−15)` on hover, its solid row with the box
 under the 1, the line "Dividing by 5 is multiplying by ⅕." once a digit is typed and under the work row `⅕(5x) = ⅕(−15)`; greyed with
@@ -1142,3 +1075,95 @@ property of equality) show only on hover, which no recorded state does. No subtr
 | `screen:flip-opening@1366x650` | the panel with four moves | a Divide button (`( )/n = ( )/n`, the ÷ symbol beside it) between Multiply and Flip everything; the panel one row taller | Build O, Part 3 |
 | `screen:two-opening@1366x650` | the panel with four moves | a Divide button (`( )/n = ( )/n`, the ÷ symbol beside it) between Multiply and Flip everything; the panel one row taller | Build O, Part 3 |
 | `screen:dist-opening@1366x650` | the panel with four moves | a Divide button (`( )/n = ( )/n`, the ÷ symbol beside it) between Multiply and Flip everything; the panel one row taller | Build O, Part 3 |
+
+
+## Screen rows moved below the line on 2026-10-25 (Build U, Part 1)
+
+Build Q found that the screen check silently accepted two screens, because older builds' rows for the same keys were still above the history line. On 2026-10-25 the screens were recorded again from `main` as it was then (the end of Build Q, `f31cc10`), and every screen row above the line (Builds P, S, T and Q) moved here, kept for the record. Above the line, only the screen differences the current build causes are listed, so the check fails on any unlisted difference on every key.
+
+From: Build P (2026-10-24): nudges, calculate a product, cross-off, moving between blanks, Distribute polish, full checks, one drop per x
+
+| Key | Before | After | Why |
+|---|---|---|---|
+| `screen:div-menu@1366x650` | Divide it's Multiply options open: the whole-number option greyed; three light dots beside Multiply, none beside Divide | the whole-number option live (no grey), as before Build L; one dot (No fractions) beside Multiply, two (Smaller numbers, One box) beside Divide | Part 9 (Build O's decisions 1 and 2, approved) |
+
+From: Build S (2026-10-24): redraws keep the rows, one text size a problem, every drag works or says why, Flip's slower cross-off
+
+| Key | Before | After | Why |
+|---|---|---|---|
+| `screen:two-opening@1366x768` | `2x + 4 = 16` at 46 px, dropping to 32 px at the fourth row | 34 px from the start | Part 3: one text size a problem, the largest at which its worst case fits at 768 px tall, with room for the check’s pop-up away from `x =` (1.20% of pixels) |
+| `screen:dist-opening@1366x768` | `2(x + 4) = 26` at 46 px, dropping to 32 px at the fourth row | 32 px from the start | the same (1.32% of pixels) |
+| `screen:div-opening@1366x650` | `5x = −15` at 46 px | 32 px, kept to Balanced | Part 3: one text size a problem, the largest at which its worst case fits at 650 px tall, with room for the check’s pop-up away from `x =` (1.37% of pixels) |
+| `screen:div-helpful-move@1366x650` | the move’s rows at 46 px (32 px work row) | 32 px (24 px work row) | Part 3: one text size a problem, the largest at which its worst case fits at 650 px tall, with room for the check’s pop-up away from `x =` (2.85% of pixels) |
+| `screen:div-failed@1366x650` | the failed fraction at 46/32 px | 32/24 px; the pop-up and Undo are where they were | Part 3: one text size a problem, the largest at which its worst case fits at 650 px tall, with room for the check’s pop-up away from `x =` (6.53% of pixels) |
+| `screen:div-stuck-1@1366x650` | 46 px | 32 px | Part 3: one text size a problem, the largest at which its worst case fits at 650 px tall, with room for the check’s pop-up away from `x =` (1.40% of pixels) |
+| `screen:div-stuck-2@1366x650` | 46 px | 32 px | Part 3: one text size a problem, the largest at which its worst case fits at 650 px tall, with room for the check’s pop-up away from `x =` (1.24% of pixels) |
+| `screen:div-teach@1366x650` | 46 px | 32 px | Part 3: one text size a problem, the largest at which its worst case fits at 650 px tall, with room for the check’s pop-up away from `x =` (1.37% of pixels) |
+| `screen:div-wrong-guess@1366x650` | 46 px rows beside the check | 32 px rows; the check is unchanged | Part 3: one text size a problem, the largest at which its worst case fits at 650 px tall, with room for the check’s pop-up away from `x =` (0.23% of pixels) |
+| `screen:div-end@1366x650` | 46 px | 32 px | Part 3: one text size a problem, the largest at which its worst case fits at 650 px tall, with room for the check’s pop-up away from `x =` (4.16% of pixels) |
+| `screen:div-failed-stuck@1366x650` | 46 px | 32 px | Part 3: one text size a problem, the largest at which its worst case fits at 650 px tall, with room for the check’s pop-up away from `x =` (6.53% of pixels) |
+| `screen:div-alone-stuck-1@1366x650` | 46 px | 32 px | Part 3: one text size a problem, the largest at which its worst case fits at 650 px tall, with room for the check’s pop-up away from `x =` (5.46% of pixels) |
+| `screen:div-menu@1366x650` | 46 px | 32 px (the Multiply menu is unchanged) | Part 3: one text size a problem, the largest at which its worst case fits at 650 px tall, with room for the check’s pop-up away from `x =` |
+| `screen:flip-opening@1366x650` | `−6x = −12`… at 46 px | 32 px | Part 3: one text size a problem, the largest at which its worst case fits at 650 px tall, with room for the check’s pop-up away from `x =` (1.40% of pixels) |
+| `screen:two-opening@1366x650` | `2x + 4 = 16` at 46 px, dropping to 32 px at the fourth row | 32 px from the start | Part 3: one text size a problem, the largest at which its worst case fits at 650 px tall, with room for the check’s pop-up away from `x =` (1.43% of pixels) |
+| `screen:dist-opening@1366x650` | `2(x + 4) = 26` at 46 px, dropping to 32 px at the fourth row | 32 px from the start | Part 3: one text size a problem, the largest at which its worst case fits at 650 px tall, with room for the check’s pop-up away from `x =` (1.25% of pixels) |
+
+From: Build T (2026-10-25): products in the check with parentheses, Flip's stroke centred, refused drags that fit the shape
+
+| Key | Before | After | Why |
+|---|---|---|---|
+| `screen:div-wrong-guess@1366x768` | the check's line 2 reads `5 × 4 = −15` | `5(4) = −15` | Part 1.1: never a times sign beside the x's (0.21% of pixels) |
+| `screen:div-end@1366x768` | the check's line 2 reads `5 × (−3) = −15` | `5(−3) = −15` | Part 1.1 (0.44% of pixels) |
+| `screen:div-alone-stuck-1@1366x768` | at `x = (−15)/5` (made with the Divide button), I'm stuck asks "What is ⅕ of −15? Share the counters…" | "What is −15 divided by 5? Share the counters…" | Part 2: help talks in the form on the screen (0.91% of pixels) |
+
+From: Build Q (2026-10-25): panel polish
+
+| Key | Before | After | Why |
+|---|---|---|---|
+| `screen:div-menu@1366x768` | Flip everything's symbol a small circle of two arrows; Trade places' a double arrow | two rounded arrows circling between a minus (left) and a plus (right); an equals sign with the same two arrows round it | Part 1: Karl's two symbols (0.21% of pixels) |
+| `screen:add-opening@1366x768` | rows touching (no room between them) | every row of the work a little lower: each row keeps a small room above and below (0.1 em) so a lit number, a nudge glow or an outline stays inside its own row | Part 2.1, 2.3 (0.71% of pixels) |
+| `screen:add-helpful-move@1366x768` | rows touching (no room between them) | every row of the work a little lower: each row keeps a small room above and below (0.1 em) so a lit number, a nudge glow or an outline stays inside its own row | Part 2.1, 2.3 (0.93% of pixels) |
+| `screen:add-red-move@1366x768` | rows touching (no room between them) | every row of the work a little lower: each row keeps a small room above and below (0.1 em) so a lit number, a nudge glow or an outline stays inside its own row | Part 2.1, 2.3 (2.95% of pixels) |
+| `screen:add-partial-move@1366x768` | rows touching (no room between them) | every row of the work a little lower: each row keeps a small room above and below (0.1 em) so a lit number, a nudge glow or an outline stays inside its own row | Part 2.1, 2.3 (2.82% of pixels) |
+| `screen:add-stuck-1@1366x768` | rows touching (no room between them) | every row of the work a little lower: each row keeps a small room above and below (0.1 em) so a lit number, a nudge glow or an outline stays inside its own row | Part 2.1, 2.3 (1.75% of pixels) |
+| `screen:add-stuck-2@1366x768` | rows touching (no room between them) | every row of the work a little lower: each row keeps a small room above and below (0.1 em) so a lit number, a nudge glow or an outline stays inside its own row | Part 2.1, 2.3 (0.26% of pixels) |
+| `screen:add-stuck-3@1366x768` | rows touching (no room between them) | every row of the work a little lower: each row keeps a small room above and below (0.1 em) so a lit number, a nudge glow or an outline stays inside its own row | Part 2.1, 2.3 (0.26% of pixels) |
+| `screen:add-teach@1366x768` | rows touching (no room between them) | every row of the work a little lower: each row keeps a small room above and below (0.1 em) so a lit number, a nudge glow or an outline stays inside its own row | Part 2.1, 2.3 (0.71% of pixels) |
+| `screen:add-wrong-guess-undone@1366x768` | rows touching (no room between them) | every row of the work a little lower: each row keeps a small room above and below (0.1 em) so a lit number, a nudge glow or an outline stays inside its own row | Part 2.1, 2.3 (1.41% of pixels) |
+| `screen:add-forced-move@1366x768` | rows touching (no room between them) | every row of the work a little lower: each row keeps a small room above and below (0.1 em) so a lit number, a nudge glow or an outline stays inside its own row | Part 2.1, 2.3 (1.35% of pixels) |
+| `screen:add-end@1366x768` | rows touching (no room between them) | every row of the work a little lower: each row keeps a small room above and below (0.1 em) so a lit number, a nudge glow or an outline stays inside its own row | Part 2.1, 2.3 (0.93% of pixels) |
+| `screen:add-partial-stuck-4@1366x768` | rows touching (no room between them) | every row of the work a little lower: each row keeps a small room above and below (0.1 em) so a lit number, a nudge glow or an outline stays inside its own row | Part 2.1, 2.3 (2.82% of pixels) |
+| `screen:add-partial-teach@1366x768` | rows touching (no room between them) | every row of the work a little lower: each row keeps a small room above and below (0.1 em) so a lit number, a nudge glow or an outline stays inside its own row | Part 2.1, 2.3 (2.82% of pixels) |
+| `screen:add-alone-stuck-1@1366x768` | rows touching (no room between them) | every row of the work a little lower: each row keeps a small room above and below (0.1 em) so a lit number, a nudge glow or an outline stays inside its own row | Part 2.1, 2.3 (2.33% of pixels) |
+| `screen:add-alone-stuck-2@1366x768` | rows touching (no room between them) | every row of the work a little lower: each row keeps a small room above and below (0.1 em) so a lit number, a nudge glow or an outline stays inside its own row | Part 2.1, 2.3 (1.11% of pixels) |
+| `screen:add-alone-stuck-3@1366x768` | rows touching (no room between them) | every row of the work a little lower: each row keeps a small room above and below (0.1 em) so a lit number, a nudge glow or an outline stays inside its own row | Part 2.1, 2.3 (1.11% of pixels) |
+| `screen:add-alone-teach@1366x768` | rows touching (no room between them) | every row of the work a little lower: each row keeps a small room above and below (0.1 em) so a lit number, a nudge glow or an outline stays inside its own row | Part 2.1, 2.3 (0.93% of pixels) |
+| `screen:add-red-stuck@1366x768` | rows touching (no room between them) | every row of the work a little lower: each row keeps a small room above and below (0.1 em) so a lit number, a nudge glow or an outline stays inside its own row | Part 2.1, 2.3 (2.95% of pixels) |
+| `screen:add-L2-stuck-2@1366x768` | rows touching (no room between them) | every row of the work a little lower: each row keeps a small room above and below (0.1 em) so a lit number, a nudge glow or an outline stays inside its own row | Part 2.1, 2.3 (0.25% of pixels) |
+| `screen:div-helpful-move@1366x768` | rows touching (no room between them) | the Divide row with more room above and below its bars (0.22 em), and "Same as multiplying by ⅕." on a reserved line of its own under it; the new row below it lower | Part 2.1, 2.2 (1.92% of pixels) |
+| `screen:div-failed@1366x768` | rows touching (no room between them) | the failed fraction row in division form with more room above and below its bars (0.22 em) | Part 2.1 (2.40% of pixels) |
+| `screen:div-failed-stuck@1366x768` | rows touching (no room between them) | the failed fraction row in division form with more room above and below its bars (0.22 em) | Part 2.1 (2.40% of pixels) |
+| `screen:add-opening@1366x650` | rows touching (no room between them) | every row of the work a little lower: each row keeps a small room above and below (0.1 em) so a lit number, a nudge glow or an outline stays inside its own row | Part 2.1, 2.3 (0.84% of pixels) |
+| `screen:add-helpful-move@1366x650` | rows touching (no room between them) | every row of the work a little lower: each row keeps a small room above and below (0.1 em) so a lit number, a nudge glow or an outline stays inside its own row | Part 2.1, 2.3 (1.09% of pixels) |
+| `screen:add-red-move@1366x650` | rows touching (no room between them) | every row of the work a little lower: each row keeps a small room above and below (0.1 em) so a lit number, a nudge glow or an outline stays inside its own row | Part 2.1, 2.3 (3.48% of pixels) |
+| `screen:add-partial-move@1366x650` | rows touching (no room between them) | every row of the work a little lower: each row keeps a small room above and below (0.1 em) so a lit number, a nudge glow or an outline stays inside its own row | Part 2.1, 2.3 (3.34% of pixels) |
+| `screen:add-stuck-1@1366x650` | rows touching (no room between them) | every row of the work a little lower: each row keeps a small room above and below (0.1 em) so a lit number, a nudge glow or an outline stays inside its own row | Part 2.1, 2.3 (2.07% of pixels) |
+| `screen:add-stuck-2@1366x650` | rows touching (no room between them) | every row of the work a little lower: each row keeps a small room above and below (0.1 em) so a lit number, a nudge glow or an outline stays inside its own row | Part 2.1, 2.3 (0.31% of pixels) |
+| `screen:add-stuck-3@1366x650` | rows touching (no room between them) | every row of the work a little lower: each row keeps a small room above and below (0.1 em) so a lit number, a nudge glow or an outline stays inside its own row | Part 2.1, 2.3 (0.31% of pixels) |
+| `screen:add-stuck-4@1366x650` | rows touching (no room between them) | every row of the work a little lower: each row keeps a small room above and below (0.1 em) so a lit number, a nudge glow or an outline stays inside its own row | Part 2.1, 2.3 (0.23% of pixels) |
+| `screen:add-teach@1366x650` | rows touching (no room between them) | every row of the work a little lower: each row keeps a small room above and below (0.1 em) so a lit number, a nudge glow or an outline stays inside its own row | Part 2.1, 2.3 (0.84% of pixels) |
+| `screen:add-wrong-guess-undone@1366x650` | rows touching (no room between them) | every row of the work a little lower: each row keeps a small room above and below (0.1 em) so a lit number, a nudge glow or an outline stays inside its own row | Part 2.1, 2.3 (1.66% of pixels) |
+| `screen:add-forced-move@1366x650` | rows touching (no room between them) | every row of the work a little lower: each row keeps a small room above and below (0.1 em) so a lit number, a nudge glow or an outline stays inside its own row | Part 2.1, 2.3 (1.59% of pixels) |
+| `screen:add-end@1366x650` | rows touching (no room between them) | every row of the work a little lower: each row keeps a small room above and below (0.1 em) so a lit number, a nudge glow or an outline stays inside its own row | Part 2.1, 2.3 (1.10% of pixels) |
+| `screen:add-partial-stuck-4@1366x650` | rows touching (no room between them) | every row of the work a little lower: each row keeps a small room above and below (0.1 em) so a lit number, a nudge glow or an outline stays inside its own row | Part 2.1, 2.3 (3.34% of pixels) |
+| `screen:add-partial-teach@1366x650` | rows touching (no room between them) | every row of the work a little lower: each row keeps a small room above and below (0.1 em) so a lit number, a nudge glow or an outline stays inside its own row | Part 2.1, 2.3 (3.34% of pixels) |
+| `screen:add-alone-stuck-1@1366x650` | rows touching (no room between them) | every row of the work a little lower: each row keeps a small room above and below (0.1 em) so a lit number, a nudge glow or an outline stays inside its own row | Part 2.1, 2.3 (2.75% of pixels) |
+| `screen:add-alone-stuck-2@1366x650` | rows touching (no room between them) | every row of the work a little lower: each row keeps a small room above and below (0.1 em) so a lit number, a nudge glow or an outline stays inside its own row | Part 2.1, 2.3 (1.31% of pixels) |
+| `screen:add-alone-stuck-3@1366x650` | rows touching (no room between them) | every row of the work a little lower: each row keeps a small room above and below (0.1 em) so a lit number, a nudge glow or an outline stays inside its own row | Part 2.1, 2.3 (1.31% of pixels) |
+| `screen:add-alone-teach@1366x650` | rows touching (no room between them) | every row of the work a little lower: each row keeps a small room above and below (0.1 em) so a lit number, a nudge glow or an outline stays inside its own row | Part 2.1, 2.3 (1.09% of pixels) |
+| `screen:add-red-stuck@1366x650` | rows touching (no room between them) | every row of the work a little lower: each row keeps a small room above and below (0.1 em) so a lit number, a nudge glow or an outline stays inside its own row | Part 2.1, 2.3 (3.48% of pixels) |
+| `screen:add-L2-stuck-2@1366x650` | rows touching (no room between them) | every row of the work a little lower: each row keeps a small room above and below (0.1 em) so a lit number, a nudge glow or an outline stays inside its own row | Part 2.1, 2.3 (1.79% of pixels) |
+| `screen:div-stuck-1@1366x768` | the counters and boxes picture with the fractions live, the 5 boxed | `5 · x = −15` with a blue dot, the Divide button lit, its fraction bars and box under the row, "To get one x, divide both sides by 5…" | Part 3.1-3.2 (4.60% of pixels) |
+| `screen:div-stuck-2@1366x768` | guided: the ⅕ lit | the model: the counters and boxes picture with the fractions live (the old first rung) | Part 3.3 (1.60% of pixels) |
+| `screen:div-menu@1366x768` | two options, `▢ ( ) = ▢ ( )` and `▢/▢ ( ) = ▢/▢ ( )`, no symbols | three options, each with a floating symbol: × `▢ ( ) = ▢ ( )`, ÷ `1/▢ ( ) = 1/▢ ( )`, a small fraction `▢/▢ ( ) = ▢/▢ ( )`; the box a little taller | Part 4 (the harness passed it under the Build S line for this key above; listed here on its own) |
+| `screen:div-menu@1366x650` | the same | the same | Part 4 |
