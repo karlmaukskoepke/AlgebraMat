@@ -6,7 +6,7 @@
 import { html, actionRow } from './addBothMat.js';
 import { equationRow } from './lightScreen.js';
 import { MINUS } from '../engine/expr.js';
-import { signed, fractionText, boardText, equationSegs } from '../engine/solveTerms.js';
+import { signed, fractionText, factorText, boardText, equationSegs } from '../engine/solveTerms.js';
 
 // ---------- the line: actions only, one sentence ----------
 
@@ -58,7 +58,10 @@ function termsOf(side, s, o) {
       // a factor times a parenthesis, written as it is: `3(x + 2)`, `−2(x − 4)` (Build M)
       const f = subGroup ? -t.factor : t.factor;
       const ft = f === 1 ? '' : f === -1 ? MINUS : String(f).replace('-', MINUS);
-      out.push(html('span', 'lb-frac lb-group', [o.strike && ft ? struckText(ft, o.strike, 'lb-factorstrike', o) : ft, '(', ...termsOf(t.inner, s, { ...o, live: false, strike: null }), ')']));
+      // (a fraction factor drawn stacked, its sign before it: Build U)
+      const front = t.den > 1 ? [...(f < 0 ? [MINUS] : []), html('span', 'lx-sfrac', [html('span', 'lx-sfrac-top', [String(Math.abs(f))]), html('span', 'lx-sfrac-bar'), html('span', 'lx-sfrac-bot', [String(t.den)])], { 'aria-label': factorText(f, t.den) })]
+        : [o.strike && ft ? struckText(ft, o.strike, 'lb-factorstrike', o) : ft];
+      out.push(html('span', 'lb-frac lb-group', [...front, '(', ...termsOf(t.inner, s, { ...o, live: false, strike: null }), ')']));
     } else if (t.kind === 'frac' && (o.div || s?.divIds?.includes(t.id))) {
       // a row made with the Divide button, in division form (Build O, display only): the side in parentheses over a bar, n beneath.
       // A product that can be worked out (Build P, Part 2): the bar is the button
@@ -165,7 +168,7 @@ export function rowLine(row) {
 // What a folded move says it did, above its equation: `⅓ of both sides`, `−⅓ of both sides`, `−1 × both sides` (Build J).
 export function foldTag(label) {
   if (label.shown === 'div') return html('span', 'lb-foldtag', ['both sides ', html('span', 'is-blue', [`÷ ${label.sign < 0 ? MINUS : ''}${label.n}`])]);   // (made with Divide, Build O)
-  if (label.dist !== undefined) return html('span', 'lb-foldtag', [html('span', 'is-blue', [`${signed(label.dist)} ·`]), ' each piece']);   // a distribute (Build M)
+  if (label.dist !== undefined) return html('span', 'lb-foldtag', [html('span', 'is-blue', [`${factorText(label.dist, label.den)} ·`]), ' each piece']);   // a distribute (Build M; a fraction, Build U)
   if (label.flip) return html('span', 'lb-foldtag', [html('span', 'is-blue', [`${MINUS}1 ·`]), ' both sides']);
   return html('span', 'lb-foldtag', [html('span', 'is-blue', [`${label.sign < 0 ? MINUS : ''}${fractionText(label.n)}`]), ' of both sides']);
 }

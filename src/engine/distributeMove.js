@@ -5,26 +5,33 @@
 // itself (its blanks, Undo, judging) is Add's term layer's (engine/addBothLights.js), turned on by a card with `distribute: true`.
 // Also here: the Add move's board for a card whose x side can hold several numbers or a parenthesis (`addBoardKeep`). Pure: no DOM.
 
-import { signed } from './solveTerms.js';
+import { signed, factorText } from './solveTerms.js';
 import { newId } from './lightsGrab.js';
 import { hasX, sumNums, num } from './addBothMoves.js';
 
-// The labels over the blanks: "3 · x", "3 · 2", "−2 · x", "−2 · −2" (a negative piece keeps its sign).
-export const productLabels = (g) => g.inner.map((t) => `${signed(g.factor)} · ${t.kind === 'x' ? 'x' : signed(t.v)}`);
-// What each blank should hold: the number in front of x, or the number.
-export const rightProducts = (g) => g.inner.map((t) => g.factor * (t.kind === 'x' ? (t.coef ?? 1) : t.v));
+// The labels over the blanks: "3 · x", "3 · 2", "−2 · x", "−2 · −2" (a negative piece keeps its sign); "−1 · x" for the invisible 1, and
+// "⅔ · 6x", "⅔ · 9" for a fraction factor (Build U).
+const pieceText = (t) => (t.kind === 'x' ? `${(t.coef ?? 1) === 1 ? '' : (t.coef ?? 1) === -1 ? '−' : signed(t.coef)}x` : signed(t.v));
+export const productLabels = (g) => g.inner.map((t) => `${factorText(g.factor, g.den)} · ${pieceText(t)}`);
+// What each blank should hold: the number in front of x, or the number (a fraction factor's products are whole: the generator sees to it).
+const times = (g, v) => (g.factor * v) / (g.den ?? 1);
+export const rightProducts = (g) => g.inner.map((t) => times(g, t.kind === 'x' ? (t.coef ?? 1) : t.v));
 // A typed piece: a whole number with its sign (`3`, `−4`); in the x blank the x is printed, so it is the number in front of x. NaN if not.
 export const pieceOf = (entry) => (/^-?\d+$/.test(entry ?? '') ? Number(entry) : NaN);
 export const pieceTyped = (entry) => /\d/.test(entry ?? '');
 
 // What a wrong piece looks like (the slips declared for the card): the piece not multiplied (`2` for 3 · 2), or the right size with the
-// sign lost (`4` for −2 · 2). Recorded as the answer's tag.
+// sign lost (`4` for −2 · 2). Recorded as the answer's tag. Build U adds the invisible 1 lost (`1` for −1 · x, `6` for −1 · 6: the piece
+// copied as it was, `dist-one-lost`) and a fraction's: only the top multiplied (`12` for ⅔ · 6x, `dist-frac-top`) or only the bottom
+// divided (`2` for ⅔ · 6x, `dist-frac-bottom`).
 export function productSlip(g, k, typed) {
   const t = g.inner[k];
   const v = t.kind === 'x' ? (t.coef ?? 1) : t.v;
-  const right = g.factor * v;
-  if (typed === v && right !== v) return 'dist-unmultiplied';
-  if (typed === -right) return 'dist-sign-lost';
+  const right = times(g, v);
+  if (typed === v && right !== v) return g.hidden ? 'dist-one-lost' : 'dist-unmultiplied';
+  if (typed === -right) return g.hidden ? 'dist-one-lost' : 'dist-sign-lost';
+  if (g.den > 1 && typed === g.factor * v) return 'dist-frac-top';
+  if (g.den > 1 && typed === v / g.den * Math.sign(g.factor)) return 'dist-frac-bottom';
   return 'dist-product';
 }
 
@@ -33,7 +40,7 @@ export function distributeBoard(board, groupId) {
   const side = board.left.some((t) => t.id === groupId) ? 'left' : 'right';
   const at = board[side].findIndex((t) => t.id === groupId);
   const g = board[side][at];
-  const made = g.inner.map((t) => (t.kind === 'x' ? { id: newId(), kind: 'x', coef: g.factor * (t.coef ?? 1) } : { id: newId(), kind: 'num', v: g.factor * t.v }));
+  const made = g.inner.map((t) => (t.kind === 'x' ? { id: newId(), kind: 'x', coef: times(g, t.coef ?? 1) } : { id: newId(), kind: 'num', v: times(g, t.v) }));
   const terms = [...board[side]];
   terms.splice(at, 1, ...made);
   return { board: { ...board, [side]: terms }, made };

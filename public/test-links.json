@@ -3,6 +3,215 @@
   "updated": "2026-10-25",
   "checks": [
     {
+      "id": "u-level-1",
+      "name": "Distribute more, Level 1: a group plus a number",
+      "build": "Build U",
+      "link": {
+        "label": "Open Distribute more · Level 1",
+        "query": "?pack=distribute-more&level=1&seed=21&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Distribute more, Level 1, on 2(x + 7) + 9 = 5x + 2.",
+        "Drag the 2 onto the parenthesis and let go. Type 2, press Enter, type 14, press Enter.",
+        "Drag the 9 onto the 14, type 23 and press Enter.",
+        "Drag the 2x across the = onto the right side and let go. Drag the −2x onto the 5x, type 3x and press Enter.",
+        "Click Add, type −2 and press Enter. Drag the −2 onto the 23, type 21 and press Enter.",
+        "Click Divide (÷), type 3 and press Enter. Click the box after x =, type 7 and press Enter. Drag the 7 onto each x, then press Enter for each line."
+      ],
+      "see": "The rows read 2x + 14 + 9 = 5x + 2, then 2x + 23 = 5x + 2, 23 = 5x − 2x + 2, 23 = 3x + 2, 23 − 2 = 3x, 21 = 3x and (21) over 3 = x. The check starts 2(7 + 7) + 9 = 5(7) + 2 and ends 37 = 37 and ✓ Balanced."
+    },
+    {
+      "id": "u-level-2",
+      "name": "Distribute more, Level 2: a negative factor",
+      "build": "Build U",
+      "link": {
+        "label": "Open Distribute more · Level 2",
+        "query": "?pack=distribute-more&level=2&seed=3&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Level 2 on −2(x + 4) = 3x + 2.",
+        "Drag the −2 onto the parenthesis. Type −2, press Enter, type −8, press Enter.",
+        "Drag the −2x across the = onto the right side. Drag the 2x onto the 3x, type 5x and press Enter.",
+        "Click Add, type −2 and press Enter. Drag the −8 onto the −2, type −10 and press Enter.",
+        "Click Divide (÷), type 5 and press Enter. Type −2 in x =, press Enter, drag it onto each x and press Enter for each line."
+      ],
+      "see": "The rows read −2x + −8 = 3x + 2 (a negative piece after the first is written as a negative number, as in Distribute, combine, solve), then −8 = 3x + 2x + 2, −8 = 5x + 2, −8 − 2 = 5x, −10 = 5x and (−10) over 5 = x. The check starts −2(−2 + 4) = 3(−2) + 2 and ends −4 = −4 and ✓ Balanced."
+    },
+    {
+      "id": "u-level-3",
+      "name": "Distribute more, Level 3: the invisible −1",
+      "build": "Build U",
+      "link": {
+        "label": "Open Distribute more · Level 3",
+        "query": "?pack=distribute-more&level=3&seed=2&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Level 3 on 9x − (x − 8) = 5x − 7.",
+        "Tap the minus in front of the parenthesis.",
+        "Drag the −1 onto the parenthesis. Type −1, press Enter, type 8, press Enter.",
+        "Drag the −x onto the 9x, type 8x and press Enter.",
+        "Drag the 5x across the = onto the left side. Drag the −5x onto the 8x, type 3x and press Enter.",
+        "Click Add, type −8 and press Enter. Drag the −8 onto the −7, type −15 and press Enter. Click Divide (÷), type 3 and press Enter."
+      ],
+      "see": "Tapping writes 9x + −1(x − 8), the −1 in colour, with “The minus means −1 times everything inside. Now drag the −1 onto the parenthesis.” Then 9x + −x + 8 = 5x − 7, 8x + 8 = 5x − 7, 8x − 5x + 8 = −7, 3x + 8 = −7, 3x = −7 − 8, 3x = −15 and x = (−15) over 3."
+    },
+    {
+      "id": "u-level-4",
+      "name": "Distribute more, Level 4: a fraction in front",
+      "build": "Build U",
+      "link": {
+        "label": "Open Distribute more · Level 4",
+        "query": "?pack=distribute-more&level=4&seed=37&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Level 4 on ⅔(9x − 3) = 3x + 10 (the ⅔ drawn as 2 over 3).",
+        "Drag the 2 over 3 onto the parenthesis. Type 6, press Enter, type −2, press Enter.",
+        "Drag the 3x across the = onto the left side. Drag the −3x onto the 6x, type 3x and press Enter.",
+        "Click Add, type 2 and press Enter. Drag the 10 onto the 2, type 12 and press Enter.",
+        "Click Divide (÷), type 3 and press Enter. Type 4 in x =, press Enter, drag the 4 onto each x and press Enter for each line."
+      ],
+      "see": "The rows read 6x + −2 = 3x + 10, then 6x − 3x + −2 = 10, 3x + −2 = 10, 3x = 10 + 2, 3x = 12 and x = (12) over 3. The check starts ⅔(9(4) − 3) = 3(4) + 10, then ⅔(36 − 3), ⅔(33), 22, and ends 22 = 22 and ✓ Balanced."
+    },
+    {
+      "id": "u-level-5",
+      "name": "Distribute more, Level 5: a negative fraction",
+      "build": "Build U",
+      "link": {
+        "label": "Open Distribute more · Level 5",
+        "query": "?pack=distribute-more&level=5&seed=33&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Level 5 on −⅔(3x − 6) = 13 − 5x.",
+        "Drag the −2 over 3 onto the parenthesis. Type −2, press Enter, type 4, press Enter.",
+        "Drag the −5x across the = onto the left side. Drag the 5x onto the −2x, type 3x and press Enter.",
+        "Click Add, type −4 and press Enter. Drag the −4 onto the 13, type 9 and press Enter.",
+        "Click Divide (÷), type 3 and press Enter. Type 3 in x =, press Enter, drag the 3 onto each x and press Enter for each line."
+      ],
+      "see": "One drag does the whole share with its signs: −2x + 4 = 13 − 5x. Then −2x + 5x + 4 = 13, 3x + 4 = 13, 3x = 13 − 4, 3x = 9 and x = (9) over 3. The check ends −2 = −2 and ✓ Balanced."
+    },
+    {
+      "id": "u-tap-minus",
+      "name": "The invisible −1: tap the minus first",
+      "build": "Build U",
+      "link": {
+        "label": "Open Distribute more · Level 3",
+        "query": "?pack=distribute-more&level=3&seed=2&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Level 3 on 9x − (x − 8) = 5x − 7.",
+        "Drag the minus in front of the parenthesis onto the parenthesis and let go.",
+        "Tap the same minus. Then tap it again, and once more.",
+        "Drag the −1 onto the parenthesis. Type − (just the minus) in the first box and press Enter twice."
+      ],
+      "see": "The drag goes back with “Tap the minus first: it means −1 times everything inside.” The first tap writes 9x + −1(x − 8); the second puts back the bare minus; the third shows the −1 again. A box holding only − shakes with “Type every piece, including the 1.”"
+    },
+    {
+      "id": "u-fraction",
+      "name": "A fraction factor: “⅔ of” each piece",
+      "build": "Build U",
+      "link": {
+        "label": "Open Distribute more · Level 4",
+        "query": "?pack=distribute-more&level=4&seed=37&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Level 4 on ⅔(9x − 3) = 3x + 10.",
+        "Drag the 2 over 3 onto the parenthesis and let go. Look at the row before typing.",
+        "Type 6, press Enter, type −2, press Enter."
+      ],
+      "see": "The 2 over 3 turns blue with an arc to the 9x and another to the 3, “⅔ of” sits by the parenthesis, and the two boxes have no labels (an x printed after the first). Then the row reads 6x + −2 = 3x + 10."
+    },
+    {
+      "id": "u-fraction-wrong",
+      "name": "A wrong fraction product",
+      "build": "Build U",
+      "link": {
+        "label": "Open Distribute more · Level 4",
+        "query": "?pack=distribute-more&level=4&seed=37&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Level 4 on ⅔(9x − 3) = 3x + 10.",
+        "Drag the 2 over 3 onto the parenthesis and let go.",
+        "Type 18, press Enter, type −2, press Enter (18 multiplies by the top only)."
+      ],
+      "see": "The 18 is lit with “check this” and “⅔ · 9x is not 18x. Divide by the bottom number too. Press Undo and try again.” The labels ⅔ · 9x and ⅔ · −3 appear above the boxes."
+    },
+    {
+      "id": "u-retry",
+      "name": "Undo after a wrong product goes back to the boxes",
+      "build": "Build U",
+      "link": {
+        "label": "Open Distribute more · Level 4",
+        "query": "?pack=distribute-more&level=4&seed=37&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Level 4 on ⅔(9x − 3) = 3x + 10.",
+        "Drag the 2 over 3 onto the parenthesis. Type 18, press Enter, type −2, press Enter.",
+        "Click Undo.",
+        "Type 6, press Enter, type −2, press Enter."
+      ],
+      "see": "After Undo you are back in the two boxes, both empty, the cursor in the first: the ⅔ stays blue with its arcs and “⅔ of”, the labels stay, and “Try again: type what ⅔ · 9x and ⅔ · −3 make, one in each box.” No dragging again. Then the row reads 6x + −2 = 3x + 10."
+    },
+    {
+      "id": "student-dist-more",
+      "name": "Play it like a student: Distribute more",
+      "build": "Build U",
+      "link": {
+        "label": "Open Distribute more · Level 3",
+        "query": "?pack=distribute-more&level=3&seed=2&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Level 3 on 9x − (x − 8) = 5x − 7.",
+        "Mistake 1, forget the invisible 1: drag the minus in front of the parenthesis onto the parenthesis. A good response puts it back with “Tap the minus first: it means −1 times everything inside.”",
+        "Mistake 2, lose a sign on a product: tap the minus, drag the −1 onto the parenthesis, type 1, press Enter, type 8, press Enter. A good response lights the first box with “−1 · x is not x. The minus is −1: multiply this piece by −1 too.”",
+        "Click Undo. A good response puts you back in the two boxes, empty, with the cursor in the first.",
+        "Mistake 3, multiply only the first piece: type −1, press Enter, type −8 (the second piece copied as it was), press Enter. A good response says “−1 · −8 is not −8. The minus is −1: multiply this piece by −1 too.” Click Undo, type −1, press Enter, type 8, press Enter.",
+        "Mistake 4, do nothing for 11 seconds, then click I’m stuck. A good response: I’m stuck flashes after 10 seconds, and the hint says “9x and −x are like terms. Drag one onto the other to combine them.” with the two x-terms lit."
+      ],
+      "see": "Every mistake is caught where it happens, in the student’s own numbers: the bare minus goes back until it is tapped, a lost −1 gets its own words, Undo goes back to the boxes, and I’m stuck gives the reminder for the screen as it is (combine the x-terms). Nothing is worked out for you."
+    },
+    {
+      "id": "u-no-times",
+      "name": "No × in the work: the flip row and the product’s dot",
+      "build": "Build U",
+      "link": {
+        "label": "Open Flip everything · Level 1",
+        "query": "?pack=flip-everything&level=2&seed=7&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Flip everything, Level 1.",
+        "Point at Flip everything (the fourth button) and look at the faint row. Click it and click the green Go.",
+        "Look at the rows and the small words above the folded move, then solve it."
+      ],
+      "see": "The preview and the written row put the −1 right next to its parentheses, −1(−x) = −1(…), with no × anywhere in the work; once folded the move says “−1 · both sides”. The × is still on the Moves panel’s symbol."
+    },
+    {
+      "id": "u-flip-first",
+      "name": "Dividing by a negative: “Many people flip first”",
+      "build": "Build U",
+      "link": {
+        "label": "Open Flip everything · Level 3",
+        "query": "?pack=flip-everything&level=4&seed=7&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Flip everything, Level 3, on −6x = −12.",
+        "Click Divide (÷).",
+        "Type −6 and press Enter."
+      ],
+      "see": "Dividing by −6 is written and accepted (nothing is red), and a pop-up says “Dividing by −6 flips every sign, just like multiplying by a negative does, and then divides by 6. Many people flip first (· −1), then divide: two simpler steps.”"
+    },
+    {
       "id": "q-icons",
       "name": "Two new symbols: Flip everything and Trade places",
       "build": "Build Q",
@@ -2399,6 +2608,42 @@
               "label": "Save codes (teacher only)",
               "query": "?codes=1&nosignin=1",
               "look": "With ?codes=1 the Save code and Enter code buttons come back, for moving a student by hand."
+            }
+          ]
+        },
+        {
+          "name": "Build U: Distribute more, and no × in the work (2026-10-25)",
+          "about": "A new card in Solve it, after Variables on both sides: distribute (a group beside other terms, a negative factor, the invisible −1 you tap into view, a fraction in front), combine, then get x on one side and solve. Whole-number answers only. Everywhere the work is written out a product is now a dot or a number next to its parentheses (−1(−x), ⅓ · 15); the × stays on the Moves panel. Dividing by a negative adds “Many people flip first (· −1), then divide: two simpler steps.”",
+          "links": [
+            {
+              "label": "Distribute more · Level 1",
+              "query": "?pack=distribute-more&level=1&seed=21&nosignin=1",
+              "reset": true,
+              "look": "2(x + 7) + 9 = 5x + 2"
+            },
+            {
+              "label": "Distribute more · Level 2",
+              "query": "?pack=distribute-more&level=2&seed=3&nosignin=1",
+              "reset": true,
+              "look": "−2(x + 4) = 3x + 2"
+            },
+            {
+              "label": "Distribute more · Level 3",
+              "query": "?pack=distribute-more&level=3&seed=2&nosignin=1",
+              "reset": true,
+              "look": "9x − (x − 8) = 5x − 7: tap the minus first"
+            },
+            {
+              "label": "Distribute more · Level 4",
+              "query": "?pack=distribute-more&level=4&seed=37&nosignin=1",
+              "reset": true,
+              "look": "⅔(9x − 3) = 3x + 10"
+            },
+            {
+              "label": "Distribute more · Level 5",
+              "query": "?pack=distribute-more&level=5&seed=33&nosignin=1",
+              "reset": true,
+              "look": "−⅔(3x − 6) = 13 − 5x"
             }
           ]
         },

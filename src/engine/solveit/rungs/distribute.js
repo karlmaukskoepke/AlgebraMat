@@ -4,7 +4,7 @@
 // ghost hand); for terms not yet put together, the two like terms ("Drag one onto the other to combine them."). No Teach me, seesaw,
 // counters or area pictures yet. A shape another card already has keeps that card's entry (W1, W2, D1, F1, F2, F4, F5).
 
-import { signed } from '../../solveTerms.js';
+import { signed, factorText } from '../../solveTerms.js';
 import { MINUS } from '../../expr.js';
 import { termText } from '../../lightsGrab.js';
 import { ADD_RUNGS } from './add.js';
@@ -25,7 +25,11 @@ function distributeHint(s) {
   if (!g) return null;
   s.hint = { kind: 'factor', id: g.id };
   const side = s.board.left.includes(g) ? s.board.left : s.board.right;
-  const subtracted = g.factor < 0 && side.indexOf(g) > 0 && !(s.lx?.negIds ?? []).includes(g.id);
+  const shown = (s.lx?.negIds ?? []).includes(g.id);
+  // the invisible 1 (Build U): its minus tapped first; a fraction factor: each piece is that fraction of its term
+  if (g.hidden && !shown) return { target: 'factor', key: 'mTapOneHint' };
+  if (g.den > 1) return { target: 'factor', key: 'mFracHint', params: { factor: factorText(g.factor, g.den) } };
+  const subtracted = g.factor < 0 && side.indexOf(g) > 0 && !shown;
   if (subtracted) return { target: 'factor', key: 'mTapMinusHint', params: { factor: signed(g.factor), size: String(-g.factor) } };
   return { target: 'factor', key: 'mDistributeHint', params: { factor: signed(g.factor) } };
 }

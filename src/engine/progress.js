@@ -332,8 +332,19 @@ const LAYOUTS = {
       { id: 'distribute-solve', levels: 5 }, { id: 'variables-both-sides', levels: 5 },
     ],
   },
+  // Distribute more, 5 levels (Build U), appended at the end: 103 bits, in 21 symbols (about 104.1). v1-v18 codes read as before.
+  19: {
+    data: 21,
+    packs: [
+      { id: 'flipit', levels: 5 }, { id: 'lasso', levels: 7 }, { id: 'boxes', levels: 6 },
+      { id: 'groups-of-terms', levels: 8 }, { id: 'combineit', levels: 5 }, { id: 'distribute-combine', levels: 5 },
+      { id: 'value', levels: 5 }, { id: 'one-step', levels: 8 }, { id: 'two-step', levels: 8 }, { id: 'switch', levels: 6 },
+      { id: 'add-both', levels: 6 }, { id: 'divide-it', levels: 6 }, { id: 'flip-everything', levels: 6 }, { id: 'two-step-equations', levels: 7 },
+      { id: 'distribute-solve', levels: 5 }, { id: 'variables-both-sides', levels: 5 }, { id: 'distribute-more', levels: 5 },
+    ],
+  },
 };
-export const CODE_VERSION = 18;
+export const CODE_VERSION = 19;
 
 // Weighted sum mod 31. Weights 2, 3, 4, … are all nonzero mod 31 and differ
 // by 1 between neighbors, so any single typo or neighbor swap is caught.

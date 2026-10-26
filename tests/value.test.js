@@ -177,7 +177,7 @@ describe('save code v12', () => {
     const progress = newProgress(PACKS);
     progress.packs.value.levels = [true, false, true, true];
     const code = encodeProgress(progress);
-    expect(code).toMatch(/^MAT-M/);                                   // (the newest layout: v18, Build R)
+    expect(code).toMatch(/^MAT-N/);                                   // (the newest layout: v19, Build U)
     expect(decodeProgress(code, PACKS).packs.value.levels).toEqual([true, false, true, true]);
     expect(decodeProgress(encodeProgress(newProgress(PACKS), 8), PACKS).packs.value.levels).toEqual([false, false, false, false]);
   });

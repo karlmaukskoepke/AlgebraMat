@@ -6,6 +6,8 @@
 // the other to combine them."; W1, W2, D1 …), with their entries. No Teach me, seesaw, counters or box pictures yet.
 
 import { DISTRIBUTE_RUNGS } from './distribute.js';
+import { termText } from '../../lightsGrab.js';
+import { MINUS } from '../../expr.js';
 
 const entry = (after) => {
   const e = { ladder: ['hintPopup'], hintPopup: { word: 'hint', after } };
@@ -22,7 +24,22 @@ function moveXHint(s, before, shape) {
   return { target: 'hinted', key: 'vMoveXHint', params: { term: coefText(p.c) } };
 }
 
+// VE (Build U): the two like terms not yet put together lit, on the side that has them: "6 and −4 are like terms. Drag one onto the other
+// to combine them."
+function likeHint(s, before, shape) {
+  const p = shape?.params;
+  const pair = (p?.ids ?? []).map((id) => [...s.board.left, ...s.board.right].find((t) => t.id === id)).filter(Boolean);
+  if (pair.length < 2) return null;
+  s.hint = { kind: 'sum', ids: pair.map((t) => t.id) };
+  const said = (t) => termText(t, 0).body.replace('-', MINUS);
+  return { target: 'hinted', key: 'mCombineHint', params: { g1: said(pair[0]), g2: said(pair[1]) } };
+}
+
+// VG, VH, VF (Build U): a parenthesis to distribute, said for its factor (Build M's reminder; the invisible 1 tapped first; a fraction's
+// own words)
+const DISTRIBUTE = { ladder: ['hintPopup'], hintPopup: DISTRIBUTE_RUNGS.P1.hintPopup };
 export const BOTH_RUNGS = {
   V1: entry(moveXHint),
-  VP: { ladder: ['hintPopup'], hintPopup: DISTRIBUTE_RUNGS.P1.hintPopup },
+  VP: DISTRIBUTE, VG: DISTRIBUTE, VH: DISTRIBUTE, VF: DISTRIBUTE,
+  VE: entry(likeHint),
 };

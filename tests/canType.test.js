@@ -7,7 +7,7 @@
 // No later build can break typing on any card without failing here.
 
 import { describe, it, expect, afterEach } from 'vitest';
-import { addBothPlay, divideMovesPlay, flipPlay, twoStepPlay, distSolvePlay, bothSidesPlay } from '../src/play/solveCards.js';
+import { addBothPlay, divideMovesPlay, flipPlay, twoStepPlay, distSolvePlay, bothSidesPlay, distMorePlay } from '../src/play/solveCards.js';
 import { packById } from '../src/packs/index.js';
 import { shapeOf } from '../src/engine/solveit/shape.js';
 import { seesawAdd } from '../src/engine/addBothLights.js';
@@ -19,6 +19,7 @@ const CARDS = [
   ['Two-step equations', 'two-step-equations', twoStepPlay, [1, 2, 3, 4, 5, 6, 7]],
   ['Distribute, combine, solve', 'distribute-solve', distSolvePlay, [1, 2, 3, 4, 5]],
   ['Variables on both sides', 'variables-both-sides', bothSidesPlay, [1, 2, 3, 4, 5]],             // (Build R)
+  ['Distribute more', 'distribute-more', distMorePlay, [1, 2, 3, 4, 5]],                           // (Build U)
 ];
 
 // what a student can do (an action a card does not have leaves its state alone)
@@ -55,7 +56,7 @@ function moves(s) {
   const g = terms.find((x) => x.kind === 'group');
   if (g) {
     out.push([{ type: 'lxMinus', id: g.id }]);
-    const ps = g.inner.map((x) => g.factor * (x.kind === 'x' ? 1 : x.v));
+    const ps = g.inner.map((x) => (g.factor * (x.kind === 'x' ? (x.coef ?? 1) : x.v)) / (g.den ?? 1));
     out.push([{ type: 'lxDistribute', id: g.id }, ...ps.flatMap((v, k) => [{ type: 'focus', target: 'dist', index: k }, ...digits(v)]), { type: 'lxApply' }]);
     out.push([{ type: 'lxDistribute', id: g.id }]);
   }

@@ -33,6 +33,7 @@ const CARDS = [
   ['Two-step equations', 'two-step-equations', [1, 2, 3, 4, 5, 6, 7]],
   ['Distribute, combine, solve', 'distribute-solve', [1, 2, 3, 4, 5]],
   ['Variables on both sides', 'variables-both-sides', [1, 2, 3, 4, 5]],
+  ['Distribute more', 'distribute-more', [1, 2, 3, 4, 5]],                                       // (Build U)
 ];
 const SEED = 7;
 
@@ -186,7 +187,7 @@ async function playCard(browser, base, [name, pack, levels], report) {
       return chip.contains(top) ? null : `${top?.className || top?.tagName || 'something'} (value at ${Math.round(r.top)}, pop-up ${Math.round(sb?.top)}-${Math.round(sb?.bottom)}, text ${getComputedStyle(document.getElementById('mat')).getPropertyValue('--eq-size')}, window ${innerHeight}, rows ${[...document.querySelectorAll('.lb-stack .lb-rowwrap')].map((x) => x.textContent.replace(/\s+/g, '')).join(' | ')})`;
     });
     if (covered) fail(lv, `the value to drag into x is covered by ${covered}`);
-    for (let k = 0; k < 6 && (await state()).sub && (await state()).stage !== 'done'; k++) {
+    for (let k = 0; k < 14 && (await state()).sub && (await state()).stage !== 'done'; k++) {          // (a longer check: Build U)
       await watched(lv, `the check, step ${k + 1}`, () => dispatch([{ type: 'placeValue', index: k }, { type: 'nextLine' }]));
       await record();
     }
@@ -220,7 +221,8 @@ async function sweepDrags(page, lv, fail, state, restore) {
       }
       // (a parenthesis's own factor is part of it: dropped there, it is dropped where it was)
       mine.forEach((u) => { if (u !== t) dests.push({ kind: `onto ${u.textContent.trim()}`, ...box(u), back: u.contains(t) || t.contains(u) }); });
-      for (let k = 0; k + 1 < mine.length; k++) if (mine[k] !== t && mine[k + 1] !== t) dests.push({ kind: 'between terms', x: (box(mine[k]).r + box(mine[k + 1]).l) / 2, y: rb.top + rb.height / 2 });
+      // (the gap right after a parenthesis's own factor is the parenthesis's own place: Build U, a parenthesis with a term after it)
+      for (let k = 0; k + 1 < mine.length; k++) if (mine[k] !== t && mine[k + 1] !== t && !t.contains(mine[k]) && !t.contains(mine[k + 1])) dests.push({ kind: 'between terms', x: (box(mine[k]).r + box(mine[k + 1]).l) / 2, y: rb.top + rb.height / 2 });
       row.querySelectorAll('[data-paren]').forEach((p) => { if (!t.contains(p)) dests.push({ kind: 'onto a parenthesis', ...box(p) }); });
       dests.push({ kind: 'away from the equation', x: rb.left + rb.width / 2, y: rb.bottom + 320, back: true });
       return { i, text: t.textContent.trim(), from: box(t), dests };

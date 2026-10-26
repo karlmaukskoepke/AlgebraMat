@@ -11,6 +11,7 @@
 
 import { MINUS } from '../engine/expr.js';
 import { signed } from '../engine/addBoth.js';
+import { factorText } from '../engine/solveTerms.js';
 import { xAlone } from '../engine/addBothMoves.js';
 import { solve, tradeAvailable, tradePending } from '../engine/cards/add.js';
 import { lightsAnswerLive, blankOpen, canChoose, moveOwed, amountMode, canGrab, calcTerm, ADD_SPOT } from '../engine/addBothLights.js';
@@ -60,6 +61,7 @@ export const NUDGE = {
   aAmountBig: 'blank', aAmountZero: 'blank', aGoNotYet: 'forward', aOtherSide: 'forward',
   aTradeFirst: 'panel', aTradeNot: 'panel', aTradeIntro: 'panel', aLater: 'panel', aNotNeeded: 'panel', aChooseMoveFirst: 'panel',
   lxXCross: 'newest', dxTapMinusFirst: 'newest', lxUnlike: 'newest', lxFactorParen: 'newest',
+  dxTapMinusOne: 'newest', dxOneShown: 'newest', dxOneHidden: 'newest', dxTypeOne: 'sumbox',            // (the invisible 1: Build U)
 };
 
 // A wrong seesaw move's words, from its picture's numbers (Build F, Part 3).
@@ -221,7 +223,8 @@ function token(s, t, i, side, held) {
   const neg = s.lx.negIds.includes(t.id) || Boolean(t.fresh);
   const { op, body, subtracted, neg: isNeg } = termText(t, i, neg);
   const kids = [];
-  if (op) kids.push(html('span', 'lx-op', [op], subtracted ? { 'data-minus': t.id } : {}));
+  // (the invisible 1's minus is its factor, drawn by groupEls: Build U)
+  if (op && !(t.kind === 'group' && t.hidden && subtracted)) kids.push(html('span', 'lx-op', [op], subtracted ? { 'data-minus': t.id } : {}));
   const shownNeg = op === '+' && isNeg;                             // a negative shown on request: its minus taps back
   if (t.kind === 'group') kids.push(...groupEls(s, t, i, subtracted, shownNeg));
   else if (shownNeg) kids.push(html('span', 'lx-body lx-negnum', [html('span', 'lx-negsign', [MINUS], { 'data-minus': t.id }), body.slice(1)]));
@@ -246,6 +249,8 @@ function token(s, t, i, side, held) {
 }
 
 const valueOfTerm = (t) => (t.kind === 'num' ? t.v : t.kind === 'x' ? (t.coef ?? 1) : t.factor);
+// A fraction factor drawn stacked, its top over its bottom (Build U)
+const stacked = (n, d) => html('span', 'lx-sfrac', [html('span', 'lx-sfrac-top', [String(n)]), html('span', 'lx-sfrac-bar'), html('span', 'lx-sfrac-bot', [String(d)])], { 'aria-hidden': 'true' });
 
 // A factor times a parenthesis (Build M): the factor is its own grab handle (dragged onto the parenthesis to distribute), the
 // parenthesis is where it is dropped.
@@ -253,13 +258,18 @@ function groupEls(s, t, i, subtracted, shownNeg) {
   const carry = s.ui?.carry;
   const holding = carry?.id === `${t.id}:f`;
   const f = t.factor;
-  const text = subtracted ? [String(-f)] : f < 0 ? [html('span', 'lx-negsign', [MINUS], i > 0 ? { 'data-minus': t.id } : {}), String(-f)] : [String(f)];
+  const size = t.den > 1 ? stacked(Math.abs(f), t.den) : String(Math.abs(f));
+  // the invisible 1 (Build U): the factor is the minus itself, tapped to show its −1 (at the start of a side too), dragged once it shows
+  const one = t.hidden && s.lx.negIds.includes(t.id);
+  const text = t.hidden ? [html('span', 'lx-negsign', [MINUS], { 'data-minus': t.id }), ...(one ? ['1'] : [])]
+    : subtracted ? [size] : f < 0 ? [html('span', 'lx-negsign', [MINUS], i > 0 ? { 'data-minus': t.id } : {}), size] : [size];
   const hinted = s.hint?.kind === 'factor' && s.hint.id === t.id;
   const owed = moveOwed(s) && !s.lx.distribute;                     // the forced move: the factor to drag is ringed and pulses (Build M)
   const dist = s.lx.distribute?.group === t.id;                    // being distributed: the factor in colour, arcs to each piece (Build P)
   const factor = html('span', `lx-factor${shownNeg ? ' lx-negnum' : ''}${holding ? ' is-held' : ''}${hinted ? ' is-hint' : ''}${owed ? ' is-ring' : ''}${dist ? ' is-distributing' : ''}`, text, {
     'data-tok': `${t.id}:f`, 'data-factor': t.id, 'data-side': findTerm(s.board, t.id)?.side, 'data-fk': `tok:${t.id}:f`, tabindex: canGrab(s) ? '0' : undefined, role: 'button',
-    'aria-label': `The factor ${signed(f).replace(MINUS, 'negative ')}. Enter picks it up; drop it on the parenthesis to distribute.`,
+    'aria-label': t.hidden && !one ? 'A minus with no number: it means negative 1 times everything inside. The minus key shows its 1.'
+      : `The factor ${factorText(f, t.den).replace(MINUS, 'negative ')}. Enter picks it up; drop it on the parenthesis to distribute.`,
   });
   if (holding || s.ui?.focus === `tok:${t.id}:f`) factor.dataset.lxFocus = '1';
   // (each piece inside is its own span, for the arcs drawn to it while the factor is distributed: Build P, Part 5)
@@ -768,8 +778,9 @@ function distributeArcs(wrap, s) {
       mk('text', { x: m.x, y: m.y + 6, class: 'dx-times', 'text-anchor': 'middle' }, '×');
     });
     const pr = paren.getBoundingClientRect();
-    const factorText = signed(g.factor).replace('-', MINUS);
-    mk('text', { x: pr.right - box.left + 10, y: pr.bottom - box.top + 22, class: 'dx-groups' }, `${factorText} groups of`);
+    // "3 groups of"; "−1 group of" for the invisible 1; "⅔ of" for a fraction (Build U)
+    const ft = factorText(g.factor, g.den);
+    mk('text', { x: pr.right - box.left + 10, y: pr.bottom - box.top + 22, class: 'dx-groups' }, g.den > 1 ? `${ft} of` : Math.abs(g.factor) === 1 ? `${ft} group of` : `${ft} groups of`);
     row.append(svg);
   };
   onMounted(wrap, draw);                                             // at once, so a redraw never shows the row without them

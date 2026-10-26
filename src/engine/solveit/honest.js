@@ -32,9 +32,9 @@ export function nextMove(s, { grab = true } = {}) {
   for (const k of sides) {
     const g = b[k].find((t) => t.kind === 'group');
     if (g) {
-      const ps = g.inner.map((x) => g.factor * (x.kind === 'x' ? (x.coef ?? 1) : x.v));
-      // (a subtracted factor, `5 − 2(x + 1)`, is shown as a negative first: its minus tapped)
-      const tap = g.factor < 0 && b[k].indexOf(g) > 0 && !s.lx?.negIds?.includes(g.id) ? [{ type: 'lxMinus', id: g.id }] : [];
+      const ps = g.inner.map((x) => (g.factor * (x.kind === 'x' ? (x.coef ?? 1) : x.v)) / (g.den ?? 1));
+      // (a subtracted factor, `5 − 2(x + 1)`, is shown as a negative first: its minus tapped; so is the invisible 1, anywhere: Build U)
+      const tap = g.factor < 0 && (b[k].indexOf(g) > 0 || g.hidden) && !s.lx?.negIds?.includes(g.id) ? [{ type: 'lxMinus', id: g.id }] : [];
       return [...tap, { type: 'lxDistribute', id: g.id }, ...ps.flatMap((v, i) => [{ type: 'focus', target: 'dist', index: i }, ...digitsOf(v)]), { type: 'lxApply' }];
     }
   }

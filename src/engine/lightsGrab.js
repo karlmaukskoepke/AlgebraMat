@@ -5,7 +5,7 @@
 
 import { signed } from './addBoth.js';
 import { MINUS } from './expr.js';
-import { fractionText } from './solveTerms.js';
+import { fractionText, factorText } from './solveTerms.js';
 
 // Combining like terms automatically (no blank to type) starts at this level. Never, in this round (B3).
 export const AUTO_COMBINE_FROM_LEVEL = Infinity;
@@ -111,19 +111,22 @@ export function combineBoard(board, a, b, total) {
 // its minus was tapped to show it as a negative, "+ −2". `op` is the sign before the term (null for the first), `body` the term.
 export const valueOf = (t) => (t.kind === 'num' ? t.v : t.kind === 'x' ? (t.coef ?? 1) : t.kind === 'group' ? t.factor : 1);
 const coefText = (c) => (c === 1 ? '' : c === -1 ? MINUS : signed(c));
-function bodyOf(t, v) {
+function bodyOf(t, v, one = false) {
   if (t.kind === 'num') return signed(v);
   if (t.kind === 'x') return `${coefText(v)}x`;
   if (t.kind === 'frac') return `${t.sign < 0 ? MINUS : ''}${fractionText(t.n)}(${sideText(t.inner)})`;     // `⅓(15)` (Build M: divided first)
   if (t.kind === 'neg') return `${MINUS}(${sideText(t.inner)})`;
-  return `${coefText(v)}(${sideText(t.inner)})`;
+  // a fraction factor (Build U): `⅔(6x + 9)`; the invisible 1 once its minus is tapped: `−1(x − 6)`
+  if (t.den > 1) return `${factorText(v, t.den)}(${sideText(t.inner)})`;
+  return `${t.hidden && one ? signed(v) : coefText(v)}(${sideText(t.inner)})`;
 }
 export function termText(t, i, negShown = false) {
   const v = valueOf(t);
   const neg = v < 0;
-  if (i === 0) return { op: null, body: bodyOf(t, v), neg };
+  const one = t.kind === 'group' && t.hidden && negShown;            // (the invisible 1, shown)
+  if (i === 0) return { op: null, body: bodyOf(t, v, one), neg };
   if (neg && !negShown) return { op: MINUS, body: bodyOf(t, -v), subtracted: true };
-  return { op: '+', body: bodyOf(t, v), neg };
+  return { op: '+', body: bodyOf(t, v, one), neg };
 }
 // A side as it reads, "11 − 8".
 export const sideText = (terms, negIds = []) => terms.map((t, i) => {

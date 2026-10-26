@@ -210,6 +210,15 @@ class Walk {
     for (let k = 0; k < 4 && await this.page.locator('[data-x][data-action="placeValue"]').count(); k++) await this.drag();
     await this.enter(nexts); await wait(this.page, 300);
   }
+  // (Build U) a distribute box (by its place) holds nothing
+  async emptyBox(k) { const t = (await this.page.locator(`[data-fk="prod:${k}"]`).first().innerText()).trim(); if (t) throw new Error(`box ${k + 1} should be empty after step "${this.step}": ${t}`); }
+  // (Build U) the same, pressing Enter a line at a time until the check ends Balanced (never once more: that would be Next)
+  async answerBalanced(v) {
+    await this.click(act('focus')); await this.type(v); await this.enter();
+    for (let k = 0; k < 4 && await this.page.locator('[data-x][data-action="placeValue"]').count(); k++) await this.drag();
+    for (let k = 0; k < 14 && !(await this.text()).includes('Balanced'); k++) await this.enter();
+    await wait(this.page, 300);
+  }
   // Distribute, combine, solve (Build M): the factor dragged onto its parenthesis, then each product typed (Enter goes to the next)
   async dragFactor(onParen = true) {
     const f = await this.page.locator('.lx-live .lx-factor').first().boundingBox();
@@ -320,6 +329,121 @@ class Walk {
 
 // ---- one walk per item (same id as in the data file) ---------------------------------------------------------------------------------
 const WALKS = {
+  // ---- Build U: Distribute more, and no × in the work ----
+  async 'u-level-1'(w) {
+    await w.start(); await w.see('2(x + 7) + 9 = 5x + 2'); await w.both('u-level-1');
+    w.at('distribute 2, 14'); await w.distribute(2, 14); await w.row('2x + 14 + 9 = 5x + 2');
+    w.at('9 onto 14, 23'); await w.combineTerms('9', '14', 23); await w.row('2x + 23 = 5x + 2');
+    w.at('drag the 2x across, combine 3x'); await w.crossTerm('2x', 'right'); await w.row('23 = 5x − 2x + 2'); await w.combineTerms('−2x', '5x', '3x'); await w.row('23 = 3x + 2');
+    w.at('Add −2, combine 21'); await w.addEnter(-2); await w.row('23 − 2 = 3x'); await w.combineTerms('−2', '23', 21); await w.row('21 = 3x');
+    w.at('Divide 3, type 7'); await w.divEnter(3); await w.row('(21) 3 = x'); await w.answerBalanced(7);
+    await w.see('2(7 + 7) + 9 = 5(7) + 2', '37 = 37', '✓ Balanced');
+  },
+  async 'u-level-2'(w) {
+    await w.start(); await w.see('−2(x + 4) = 3x + 2'); await w.both('u-level-2');
+    w.at('distribute −2, −8'); await w.distribute(-2, -8); await w.row('−2x + −8 = 3x + 2');
+    w.at('drag the −2x across, combine 5x'); await w.crossTerm('−2x', 'right'); await w.row('−8 = 3x + 2x + 2'); await w.combineTerms('2x', '3x', '5x'); await w.row('−8 = 5x + 2');
+    w.at('Add −2, combine −10'); await w.addEnter(-2); await w.row('−8 − 2 = 5x'); await w.combineTerms('−8', '−2', -10); await w.row('−10 = 5x');
+    w.at('Divide 5, type −2'); await w.divEnter(5); await w.row('(−10) 5 = x'); await w.answerBalanced(-2);
+    await w.see('−2(−2 + 4) = 3(−2) + 2', '−4 = −4', '✓ Balanced');
+  },
+  async 'u-level-3'(w) {
+    await w.start(); await w.see('9x − (x − 8) = 5x − 7'); await w.both('u-level-3');
+    w.at('tap the minus'); await w.click('.lx-live .lx-factor .lx-negsign'); await wait(w.page, 300);
+    await w.see('9x + −1(x − 8)', 'The minus means −1 times everything inside. Now drag the −1 onto the parenthesis.');
+    w.at('distribute −1, 8'); await w.distribute(-1, 8); await w.row('9x + −x + 8 = 5x − 7');
+    w.at('−x onto 9x, 8x'); await w.combineTerms('−x', '9x', '8x'); await w.row('8x + 8 = 5x − 7');
+    w.at('drag the 5x across, combine 3x'); await w.crossTerm('5x', 'left'); await w.row('8x − 5x + 8 = −7'); await w.combineTerms('−5x', '8x', '3x'); await w.row('3x + 8 = −7');
+    w.at('Add −8, combine −15, Divide 3'); await w.addEnter(-8); await w.row('3x = −7 − 8'); await w.combineTerms('−8', '−7', -15); await w.row('3x = −15');
+    await w.divEnter(3); await w.row('x = (−15) 3');
+  },
+  async 'u-level-4'(w) {
+    await w.start(); await w.see('(9x − 3) = 3x + 10'); await w.both('u-level-4');
+    if (!(await w.page.locator('.lx-live .lx-factor .lx-sfrac').count())) throw new Error('the ⅔ should be drawn as 2 over 3');
+    w.at('distribute 6, −2'); await w.distribute(6, -2); await w.row('6x + −2 = 3x + 10');
+    w.at('drag the 3x across, combine 3x'); await w.crossTerm('3x', 'left'); await w.row('6x − 3x + −2 = 10'); await w.combineTerms('−3x', '6x', '3x'); await w.row('3x + −2 = 10');
+    w.at('Add 2, combine 12'); await w.addEnter(2); await w.row('3x = 10 + 2'); await w.combineTerms('2', '10', 12); await w.row('3x = 12');
+    w.at('Divide 3, type 4'); await w.divEnter(3); await w.row('x = (12) 3'); await w.answerBalanced(4);
+    await w.see('⅔(9(4) − 3) = 3(4) + 10', '⅔(36 − 3)', '⅔(33)', '22 = 22', '✓ Balanced');
+  },
+  async 'u-level-5'(w) {
+    await w.start(); await w.see('(3x − 6) = 13 − 5x'); await w.both('u-level-5');
+    w.at('distribute −2, 4'); await w.distribute(-2, 4); await w.row('−2x + 4 = 13 − 5x');
+    w.at('drag the −5x across, combine 3x'); await w.crossTerm('−5x', 'left'); await w.row('−2x + 5x + 4 = 13'); await w.combineTerms('5x', '−2x', '3x'); await w.row('3x + 4 = 13');
+    w.at('Add −4, combine 9'); await w.addEnter(-4); await w.row('3x = 13 − 4'); await w.combineTerms('−4', '13', 9); await w.row('3x = 9');
+    w.at('Divide 3, type 3'); await w.divEnter(3); await w.row('x = (9) 3'); await w.answerBalanced(3);
+    await w.see('−2 = −2', '✓ Balanced');
+  },
+  async 'u-tap-minus'(w) {
+    await w.start(); await w.see('9x − (x − 8) = 5x − 7');
+    w.at('drag the bare minus onto the parenthesis'); await w.dragFactor();
+    await w.see('Tap the minus first: it means −1 times everything inside.');
+    if (await w.page.locator('.lx-prod').count()) throw new Error('the bare minus should go back: no boxes');
+    w.at('tap the minus'); await w.click('.lx-live .lx-factor .lx-negsign'); await wait(w.page, 300); await w.see('9x + −1(x − 8)');
+    w.at('tap it again'); await w.click('.lx-live .lx-factor .lx-negsign'); await wait(w.page, 300); await w.see('9x − (x − 8)'); await w.notSee('−1(x');
+    w.at('and once more'); await w.click('.lx-live .lx-factor .lx-negsign'); await wait(w.page, 300); await w.see('9x + −1(x − 8)');
+    w.at('drag the −1, type −, Enter twice'); await w.dragFactor(); await w.type('-'); await w.enter(2); await wait(w.page, 300);
+    await w.see('Type every piece, including the 1.'); await w.both('u-tap-minus');
+  },
+  async 'u-fraction'(w) {
+    await w.start(); await w.see('(9x − 3) = 3x + 10');
+    w.at('drag the ⅔ onto the parenthesis'); await w.dragFactor(); await wait(w.page, 300);
+    if ((await w.page.locator('.dx-arcs .dx-arc').count()) !== 2) throw new Error('an arc should run to each of the two pieces');
+    if (await w.page.locator('.lx-prodlabel:not(.is-hidden)').count()) throw new Error('the boxes should have no labels the first time');
+    if (!(await w.page.locator('.lx-factor.is-distributing').count())) throw new Error('the ⅔ should be shown in colour');
+    if (!(await w.page.locator('.lx-prod .lx-prodx').count())) throw new Error('the x should be printed after the first box');
+    await w.see('⅔ of'); await w.both('u-fraction');
+    w.at('type 6, −2'); await w.type(6); await w.enter(); await w.type(-2); await w.enter(); await wait(w.page, 300); await w.row('6x + −2 = 3x + 10');
+  },
+  async 'u-fraction-wrong'(w) {
+    await w.start(); await w.see('(9x − 3) = 3x + 10');
+    w.at('distribute 18, −2'); await w.distribute(18, -2); await w.lateLayer();
+    await w.see('⅔ · 9x is not 18x. Divide by the bottom number too. Press Undo and try again.', 'check this');
+    const labels = await w.page.locator('.lx-prodlabel:not(.is-hidden)').allInnerTexts();
+    if (labels.join('|') !== '⅔ · 9x|⅔ · −3') throw new Error(`the labels should be ⅔ · 9x and ⅔ · −3: ${labels}`);
+    await w.both('u-fraction-wrong');
+  },
+  async 'u-retry'(w) {
+    await w.start(); await w.see('(9x − 3) = 3x + 10');
+    w.at('distribute 18, −2'); await w.distribute(18, -2); await w.lateLayer(); await w.see('is not 18x');
+    w.at('Undo'); await w.click(act('undo')); await wait(w.page, 900);
+    await w.see('Try again: type what ⅔ · 9x and ⅔ · −3 make, one in each box.', '⅔ of');
+    await w.typedIn('[data-fk="prod:0"]', ''); await w.emptyBox(1);
+    if ((await w.page.locator('.lx-prodlabel:not(.is-hidden)').count()) !== 2) throw new Error('the labels should stay');
+    await w.both('u-retry');
+    w.at('type 6, −2'); await w.type(6); await w.enter(); await w.type(-2); await w.enter(); await wait(w.page, 300); await w.row('6x + −2 = 3x + 10');
+  },
+  async 'student-dist-more'(w) {
+    await w.start(); await w.see('9x − (x − 8) = 5x − 7');
+    w.at('mistake 1: drag the bare minus'); await w.dragFactor(); await w.see('Tap the minus first: it means −1 times everything inside.');
+    w.at('mistake 2: tap, drag, 1, 8'); await w.click('.lx-live .lx-factor .lx-negsign'); await wait(w.page, 300); await w.distribute(1, 8); await w.lateLayer();
+    await w.see('−1 · x is not x. The minus is −1: multiply this piece by −1 too.'); await w.shot('student-dist-more-one');
+    w.at('Undo'); await w.click(act('undo')); await wait(w.page, 900); await w.typedIn('[data-fk="prod:0"]', ''); await w.emptyBox(1);
+    w.at('mistake 3: −1, −8'); await w.type(-1); await w.enter(); await w.type(-8); await w.enter(); await w.lateLayer();
+    await w.see('−1 · −8 is not −8. The minus is −1: multiply this piece by −1 too.'); await w.both('student-dist-more');
+    w.at('Undo, −1, 8'); await w.click(act('undo')); await wait(w.page, 900); await w.type(-1); await w.enter(); await w.type(8); await w.enter(); await wait(w.page, 300);
+    await w.row('9x + −x + 8 = 5x − 7');
+    w.at('mistake 4: 11 seconds, I’m stuck'); await wait(w.page, 11000);
+    if (!(await w.page.locator('.lx-help.is-idle').count())) throw new Error('I’m stuck should be flashing after 10 seconds');
+    await w.stuck(); await w.see('9x and −x are like terms. Drag one onto the other to combine them.'); await w.shot('student-dist-more-stuck');
+  },
+  async 'u-no-times'(w) {
+    await w.start();
+    w.at('point at Flip everything'); await w.page.locator('.lx-move[data-action="flipPick"]').first().hover(); await wait(w.page, 500);
+    const ghost = (await w.page.locator('.lx-ghost').first().innerText()).replace(/\s+/g, '');
+    if (!/^−1\(/.test(ghost) || ghost.includes('×')) throw new Error(`the faint row should start −1( with no ×: ${ghost}`);
+    w.at('Flip, Go'); await w.flip();
+    const rows = await w.rows();
+    if (rows.some((r) => r.includes('×'))) throw new Error(`no row should have a ×: ${rows.join(' | ')}`);
+    if (!rows.some((r) => r.startsWith('−1('))) throw new Error(`the written row should start −1(: ${rows.join(' | ')}`);
+    await w.both('u-no-times');
+  },
+  async 'u-flip-first'(w) {
+    await w.start(); await w.see('−6x = −12');
+    w.at('Divide −6'); await w.divEnter(-6); await wait(w.page, 4500);
+    await w.see('Dividing by −6 flips every sign, just like multiplying by a negative does, and then divides by 6. Many people flip first (· −1), then divide: two simpler steps.');
+    await w.both('u-flip-first');
+  },
   // ---- Build Q ----
   async 'q-icons'(w) {
     await w.start(); await w.see('FLIP EVERYTHING · Level 2', 'MOVES');

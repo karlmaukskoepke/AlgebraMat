@@ -254,13 +254,13 @@ describe('the Add move\'s board', () => {
 
 describe('the pack, save codes and the class sheet', () => {
   it('sits in Solve it after Distribute, combine, solve; replaces the "Multi-step equations (soon)" placeholder; five levels', () => {
-    expect(SECTIONS.find((s) => s.id === 'solve').packs.at(-1)).toBe('variables-both-sides');
+    expect(SECTIONS.find((s) => s.id === 'solve').packs.at(-2)).toBe('variables-both-sides');   // (Distribute more follows it: Build U)
     expect(PACKS.some((p) => p.id === 'multi-step')).toBe(false);
     expect(variablesBothSides).toMatchObject({ title: 'Variables on both sides', levels: 5 });
-    expect(PACKS.filter((p) => !p.comingSoon && p.levels).length).toBe(16);            // the class sheet takes up to 30
+    expect(PACKS.filter((p) => !p.comingSoon && p.levels).length).toBe(17);            // the class sheet takes up to 30 (Build U: 17)
   });
   it('v18 codes carry its five levels; every older code decodes as before and round-trips', () => {
-    expect(CODE_VERSION).toBe(18);
+    expect(CODE_VERSION).toBe(19);
     const prog = newProgress(PACKS);
     prog.packs['variables-both-sides'].levels = [true, false, true, true, false];
     prog.packs['distribute-solve'].levels = [true, true, false, false, true];

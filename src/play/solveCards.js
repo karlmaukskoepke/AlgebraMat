@@ -268,45 +268,51 @@ export const distSolvePlay = makeSolvePlay({
   },
 });
 
-// ---------- Variables on both sides (Build R) ----------
+// ---------- Variables on both sides (Build R), and Distribute more (Build U) on the same card ----------
+// Distribute more is Variables on both sides' card with its own problems (a fuller parenthesis: the invisible −1, a fraction factor) and
+// its own pack: the loop, the layers, the screen and the help are the same.
 
-let bothTaught = null;  // dividing by a negative is pointed out once a level (Build P)
+const bothPlay = (pack) => {
+  let bothTaught = null;  // dividing by a negative is pointed out once a level (Build P)
 
-export const bothSidesPlay = makeSolvePlay({
-  pack: 'variables-both-sides',
-  loop: bothLoop,
-  layer: BOTH_LAYER,
-  spot: BOTH_SPOT,
-  introOpen: bothIntroOpen,
-  format: formatBoth,
-  newSession: (problem, { flags = null } = {}) => {
-    bothTaught = flags ?? bothTaught ?? {};
-    return { ...startLights(newBothSides(problem, { level: problem.logLevel ?? 1 })), divNegIntro: !bothTaught.divneg };
-  },
-  effects(before, s) {
-    if (s.divNegCount > 0 && bothTaught) bothTaught.divneg = true;
-  },
-  feedbackText: bothSidesFeedbackText,
-  buildControls: makeAddBothControls((s) => lightsAnswerLive(s, bothLoop) || combineOpen(s) || calcOpen(s) || Boolean(s.lx?.distribute) || BOTH_MENU.typingOpen(s), xKey),
-  bindMat: (root, dispatch, getSession) => {
-    const off = [bindLightsMat(root, dispatch, getSession), bindFractionKeys(root, dispatch, getSession, BOTH_MENU), bindFactorHint(root), bindCrossHint(root)];
-    return () => off.forEach((f) => f?.());
-  },
-  renderMat: (s) => renderBothSidesScreen(s),
-  padOpen: (s) => s.stage !== 'done' && !s.sub && (((blankOpen(s) || seesawAdd(s)) && amountMode(s)) || combineOpen(s) || calcOpen(s) || Boolean(s.lx?.distribute) || BOTH_MENU.typingOpen(s)
-    || (lightsAnswerLive(s, bothLoop) && (s.typing === 'answer' || s.ui?.focus === 'answer' || bothAlone(s.board)))),
-  matAction(d) {
-    if (ADD_MAT.has(d.action)) return { type: d.action };
-    if (calcAction(d)) return calcAction(d);
-    switch (d.action) {
-      case 'addPick': return { type: 'addPick', kind: d.kind };
-      case 'multOpen': return { type: 'multOpen' };
-      case 'divPick': return { type: 'divPick' };
-      case 'multPick': return { type: 'multPick', kind: d.kind };
-      case 'flipPick': return { type: 'flipPick' };
-      case 'take': return { type: 'take', n: Number(d.n), ...(d.from === 'list' ? { fromList: true } : {}) };
-      case 'focus': return d.target === 'dist' ? { type: 'focus', target: 'dist', index: Number(d.index) } : null;
-      default: return null;
-    }
-  },
-});
+  return makeSolvePlay({
+    pack,
+    loop: bothLoop,
+    layer: BOTH_LAYER,
+    spot: BOTH_SPOT,
+    introOpen: bothIntroOpen,
+    format: formatBoth,
+    newSession: (problem, { flags = null } = {}) => {
+      bothTaught = flags ?? bothTaught ?? {};
+      return { ...startLights(newBothSides(problem, { level: problem.logLevel ?? 1 })), divNegIntro: !bothTaught.divneg };
+    },
+    effects(before, s) {
+      if (s.divNegCount > 0 && bothTaught) bothTaught.divneg = true;
+    },
+    feedbackText: bothSidesFeedbackText,
+    buildControls: makeAddBothControls((s) => lightsAnswerLive(s, bothLoop) || combineOpen(s) || calcOpen(s) || Boolean(s.lx?.distribute) || BOTH_MENU.typingOpen(s), xKey),
+    bindMat: (root, dispatch, getSession) => {
+      const off = [bindLightsMat(root, dispatch, getSession), bindFractionKeys(root, dispatch, getSession, BOTH_MENU), bindFactorHint(root), bindCrossHint(root)];
+      return () => off.forEach((f) => f?.());
+    },
+    renderMat: (s) => renderBothSidesScreen(s),
+    padOpen: (s) => s.stage !== 'done' && !s.sub && (((blankOpen(s) || seesawAdd(s)) && amountMode(s)) || combineOpen(s) || calcOpen(s) || Boolean(s.lx?.distribute) || BOTH_MENU.typingOpen(s)
+      || (lightsAnswerLive(s, bothLoop) && (s.typing === 'answer' || s.ui?.focus === 'answer' || bothAlone(s.board)))),
+    matAction(d) {
+      if (ADD_MAT.has(d.action)) return { type: d.action };
+      if (calcAction(d)) return calcAction(d);
+      switch (d.action) {
+        case 'addPick': return { type: 'addPick', kind: d.kind };
+        case 'multOpen': return { type: 'multOpen' };
+        case 'divPick': return { type: 'divPick' };
+        case 'multPick': return { type: 'multPick', kind: d.kind };
+        case 'flipPick': return { type: 'flipPick' };
+        case 'take': return { type: 'take', n: Number(d.n), ...(d.from === 'list' ? { fromList: true } : {}) };
+        case 'focus': return d.target === 'dist' ? { type: 'focus', target: 'dist', index: Number(d.index) } : null;
+        default: return null;
+      }
+    },
+  });
+};
+export const bothSidesPlay = bothPlay('variables-both-sides');
+export const distMorePlay = bothPlay('distribute-more');

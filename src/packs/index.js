@@ -17,6 +17,7 @@ import { generateFlipLevel } from '../engine/generateFlip.js';
 import { generateDivideLevel } from '../engine/generateDivide.js';
 import { generateDistSolveLevel } from '../engine/generateDistSolve.js';
 import { generateBothLevel } from '../engine/generateBoth.js';
+import { generateDistMoreLevel } from '../engine/generateDistMore.js';
 
 // Group It (built as "Lasso"; its id stays 'lasso' so saved progress and
 // save codes from before the rename still work).
@@ -214,6 +215,19 @@ export const variablesBothSides = {
   generate: (level, seed) => generateBothLevel(level, seed),
 };
 
+// Distribute more (Build U, basic form): `7x − (x − 6) = 4x + 14`: distribute (a group beside other terms, a negative factor, the invisible
+// −1 tapped into view, a fraction factor), combine, then get x on one side and finish as on Variables on both sides. Five levels, shown as
+// saved (no walkthrough), whole-number answers only (fraction answers, x = 0, no solution and infinitely many are Strange solutions').
+export const distributeMore = {
+  id: 'distribute-more',
+  title: 'Distribute more',
+  subtitle: 'The invisible −1 and fractions',
+  blurb: 'Distribute (even a hidden −1 or a fraction), combine, then get x on one side and solve.',
+  levels: 5,
+  levelNames: ['a(x + b) + c = dx + e', '−a(x − b) = cx + d', 'the invisible −1', 'a fraction in front', 'negative fractions, mixed'],
+  generate: (level, seed) => generateDistMoreLevel(level, seed),
+};
+
 // The rest of the equations are still to come: they show as cards under Solve it, with no levels (so they take no room in saves).
 const soon = (id, title, subtitle) => ({ id, title, subtitle, comingSoon: true, levels: 0, levelNames: [] });
 
@@ -234,13 +248,14 @@ export const PACKS = [
   twoStepEquations,
   distributeSolve,
   variablesBothSides,
+  distributeMore,
 ];
 
 // The home screen's three sections (Karl, 2026-10-04): which cards live under each, and its color (a pastel).
 export const SECTIONS = [
   { id: 'count', title: 'Count it', blurb: 'Adding, subtracting and multiplying numbers', packs: ['combineit', 'flipit', 'lasso'] },
   { id: 'build', title: 'Build it', blurb: 'Expressions, with boxes, circles and groups', packs: ['boxes', 'groups-of-terms', 'distribute-combine', 'value'] },
-  { id: 'solve', title: 'Solve it', blurb: 'Solving equations', packs: ['add-both', 'divide-it', 'flip-everything', 'one-step', 'two-step-equations', 'distribute-solve', 'variables-both-sides'] },
+  { id: 'solve', title: 'Solve it', blurb: 'Solving equations', packs: ['add-both', 'divide-it', 'flip-everything', 'one-step', 'two-step-equations', 'distribute-solve', 'variables-both-sides', 'distribute-more'] },
 ];
 export const sectionById = (id) => SECTIONS.find((s) => s.id === id);
 export const sectionOf = (packId) => SECTIONS.find((s) => s.packs.includes(packId));

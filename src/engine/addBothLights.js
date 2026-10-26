@@ -19,7 +19,7 @@ import { sizesOf } from './cards/addHelp.js';
 import { findTerm, outcomeOf, reorderBoard, combineBoard, pairText, valueOf, crossBoard, otherSide, termText } from './lightsGrab.js';
 import { productLabels, rightProducts, pieceOf, pieceTyped, productSlip, distributeBoard } from './distributeMove.js';
 import { MINUS } from './expr.js';
-import { signed, fractionText } from './solveTerms.js';
+import { signed, fractionText, factorText } from './solveTerms.js';
 import { newId } from './lightsGrab.js';
 import { productOf, calcParams } from './nudge.js';
 import { aloneWords, fracWords, divForm } from './formWords.js';
@@ -384,7 +384,7 @@ function grabAction(state, action, wrapped, alone, opts = {}) {
     s.lx.log.drags += 1;
     s.lx.log.outcomes.snapBack += 1;
     s.ui = { ...UI0 };
-    return g?.kind === 'group' ? say(s, 'lxFactorParen', { factor: signed(g.factor).replace('-', MINUS) }) : s;
+    return g?.kind === 'group' ? say(s, 'lxFactorParen', { factor: factorText(g.factor, g.den) }) : s;
   }
   const out = outcomeOf(state.board, action.id, action.slot);
   const logged = (s) => {
@@ -545,7 +545,7 @@ export function crossRefusal(state, id) {
   const held = f?.term;
   const side = f?.side ?? 'left';
   const hasX = (t) => t.kind === 'x' || (t.kind === 'group' && t.inner.some(hasX));
-  const factorOf = (g) => signed(g.factor).replace('-', MINUS);
+  const factorOf = (g) => factorText(g.factor, g.den);
   if (held && !hasX(held)) {
     const xs = b[otherSide(side)];
     if (xs.length === 1 && xs[0].kind === 'x' && (xs[0].coef ?? 1) === 1 && aloneWords(state, held)) return { key: 'lxSayAlone', params: { text: aloneWords(state, held) } };
@@ -600,17 +600,20 @@ function distributeAction(state, action, alone, opts) {
     s.ui = { ...UI0, focus: `prod:${s.lx.distribute.focus}` };
     return s;
   }
-  // a subtracted factor shown as a negative number (and back): `5 − 2(x + 2)` ⇄ `5 + −2(x + 2)`, display only
+  // a subtracted factor shown as a negative number (and back): `5 − 2(x + 2)` ⇄ `5 + −2(x + 2)`, display only. The invisible 1 (Build U):
+  // a minus with no number before a parenthesis shows its −1 when tapped, at the start of a side too: `7x − (x − 6)` ⇄ `7x + −1(x − 6)`,
+  // `−(2x + 8)` ⇄ `−1(2x + 8)`
   if (action.type === 'lxMinus') {
     const f = findTerm(state.board, action.id);
     if (f?.term.kind !== 'group') return null;
-    if (!canGrab(state) || f.at === 0 || f.term.factor >= 0) return state;
+    if (!canGrab(state) || (f.at === 0 && !f.term.hidden) || f.term.factor >= 0) return state;
     const s = structuredClone(state);
     const shown = s.lx.negIds.includes(action.id);
     s.lx.negIds = shown ? s.lx.negIds.filter((x) => x !== action.id) : [...s.lx.negIds, action.id];
     s.history.push({ lxKind: 'minus', id: action.id });
     s.lx.log.minusTaps += 1;
     s.ui = { ...UI0, focus: `tok:${action.id}:f` };
+    if (f.term.hidden) return shown ? say(s, 'dxOneHidden') : say(s, 'dxOneShown');
     return shown ? s : say(s, 'dxNegFactor', { neg: `${MINUS}${-f.term.factor}` });
   }
   if (action.type === 'lxDistribute') {
@@ -619,6 +622,12 @@ function distributeAction(state, action, alone, opts) {
     const s = structuredClone(state);
     s.lx.log.drags += 1;
     if (action.how === 'key') s.lx.log.outcomes.keyboard += 1;
+    // the invisible 1 is seen first (Build U): a bare minus dragged onto its parenthesis goes back
+    if (f.term.hidden && !s.lx.negIds.includes(f.term.id)) {
+      s.lx.log.outcomes.snapBack += 1;
+      s.ui = { ...UI0, focus: `tok:${f.term.id}:f` };
+      return say(s, 'dxTapMinusOne');
+    }
     // a subtracted factor is seen as a negative number first
     if (f.term.factor < 0 && f.at > 0 && !s.lx.negIds.includes(f.term.id)) {
       s.lx.log.outcomes.snapBack += 1;
@@ -634,6 +643,14 @@ function distributeAction(state, action, alone, opts) {
   if (!d || !(action.type === 'lxApply' || action.type === 'go')) return null;
   const g = findTerm(state.board, d.group).term;
   // Enter goes from a filled blank to the next empty one; Go with a blank still empty shakes it
+  // a piece typed as a bare minus (`−` for −1 · x): every piece is typed, including the 1 (Build U)
+  const bare = d.entries.findIndex((e) => e === '-');
+  if (bare >= 0) {
+    const s = structuredClone(state);
+    Object.assign(s.lx.distribute, { focus: bare, sel: false });
+    s.ui = { ...UI0, shake: true, focus: `prod:${bare}` };
+    return say(s, 'dxTypeOne');
+  }
   const empty = d.entries.findIndex((e) => !pieceTyped(e));
   if (empty >= 0) {
     const s = structuredClone(state);
@@ -655,7 +672,8 @@ function distributeAction(state, action, alone, opts) {
     s.answers.push({ typed: `${productLabels(g)[wrong]} = ${d.entries[wrong]}`, tag });
     s.tags.push(tag);
     s.ui = { ...UI0, focus: `prod:${wrong}` };
-    const shown = `${String(d.entries[wrong]).replace('-', MINUS)}${g.inner[wrong].kind === 'x' ? 'x' : ''}`;
+    // (an x-term as it is written: `x` for 1, `−x` for −1: Build U)
+    const shown = g.inner[wrong].kind === 'x' ? `${typed === 1 ? '' : typed === -1 ? MINUS : String(d.entries[wrong]).replace('-', MINUS)}x` : String(d.entries[wrong]).replace('-', MINUS);
     return say(s, 'dxProductWrong', { product: productLabels(g)[wrong].replace(/-/g, MINUS), typed: shown, tag }, true);
   }
   // right: the move before it is committed (folded) first; this one is the current move, until the student goes on
@@ -672,7 +690,7 @@ function distributeAction(state, action, alone, opts) {
   s.lx.moves += 1;
   s.movedOnce = true;                                     // a move: it unlocks x = on a forced problem
   s.unfolded = !alone(board);
-  s.foldLabel = { dist: g.factor };
+  s.foldLabel = { dist: g.factor, ...(g.den > 1 ? { den: g.den } : {}) };
   s.ui = { ...UI0 };
   return say(s, 'dxDistributed', { product: termText(made[0], 0).body });
 }

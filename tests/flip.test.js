@@ -199,7 +199,7 @@ describe('the pack, the home screen and the save codes', () => {
     expect(PACKS.find((p) => p.id === 'flipit').title).not.toBe('Flip everything');
   });
   it('v15 codes carry its six levels; v14 codes decode exactly as before', () => {
-    expect(CODE_VERSION).toBe(18);                                                          // (v18: Variables on both sides, Build R)                                                          // (v16 appends the Two-step card, Build K; v17 Distribute, Build M)
+    expect(CODE_VERSION).toBe(19);                                                          // (v18: Variables on both sides, Build R)                                                          // (v16 appends the Two-step card, Build K; v17 Distribute, Build M)
     const prog = newProgress(PACKS);
     prog.packs['flip-everything'].levels = [false, true, true, false, true, false];
     prog.packs['divide-it'].levels = [true, true, false, false, false, false];

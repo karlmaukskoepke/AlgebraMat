@@ -3,6 +3,11 @@
 
 import { twoStepFeedbackText } from './twoStepFeedback.js';
 
+// (a wrong product's second sentence, by what it looked like)
+const PRODUCT_TIP = {
+  'dist-sign-lost': ' Look at the signs.', 'dist-unmultiplied': ' Multiply this piece too.', 'dist-one-lost': ' The minus is −1: multiply this piece by −1 too.',
+  'dist-frac-top': ' Divide by the bottom number too.', 'dist-frac-bottom': ' Multiply by the top number too.',
+};
 const M = {
   // the reminder at a parenthesis: the factor and the parenthesis lit (with the ghost hand)
   mDistributeHint: (p) => `Drag the ${p.factor} onto the parenthesis to multiply it by each piece.`,
@@ -15,7 +20,14 @@ const M = {
   dxProducts: () => 'Multiply each piece in the parentheses. Type each product with its sign; Enter goes to the next.',
   dxTapMinusFirst: (p) => `Tap the minus first, so ${p.factor} is a negative number.`,
   dxNegFactor: (p) => `Subtracting is adding a negative: the factor is ${p.neg}. Now drag ${p.neg} onto the parenthesis.`,
-  dxProductWrong: (p) => `${p.product} is not ${p.typed}.${p.tag === 'dist-sign-lost' ? ' Look at the signs.' : p.tag === 'dist-unmultiplied' ? ' Multiply this piece too.' : ''} Press Undo and try again.`,
+  dxProductWrong: (p) => `${p.product} is not ${p.typed}.${PRODUCT_TIP[p.tag] ?? ''} Press Undo and try again.`,
+  // the invisible 1 and a fraction factor (Build U, Distribute more)
+  mTapOneHint: () => 'Tap the minus first: it means −1 times everything inside.',
+  mFracHint: (p) => `Drag the ${p.factor} onto the parenthesis. Each piece is ${p.factor} of that term.`,
+  dxTapMinusOne: () => 'Tap the minus first: it means −1 times everything inside.',
+  dxOneShown: () => 'The minus means −1 times everything inside. Now drag the −1 onto the parenthesis.',
+  dxOneHidden: () => 'Back to a minus with no number: it still means −1 times everything inside.',
+  dxTypeOne: () => 'Type every piece, including the 1.',
   dxDistributed: () => 'Distributed: every piece multiplied.',
   dxTypeX: () => 'Type every piece, including the x.',
   dxXBoxes: (p) => `${p.typed} of what?`,

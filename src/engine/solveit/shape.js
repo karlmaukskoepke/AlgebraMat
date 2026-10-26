@@ -57,6 +57,11 @@
 // once x is on one side the board is read as Distribute's (E2 `ax + bx + k = d`, then Two-step's W1, W2, D1, F2…; mirrored as r).
 //   V1  ax + b = cx + d       x-terms on both sides (any numbers, either order), no parenthesis
 //   VP  a(x + b) = cx + d     x on both sides with a parenthesis on either side (or both): distribute first
+// Distribute more (Build U; read with the same family) adds, before the shapes above:
+//   VG  a(x + b) + c = dx + e a parenthesis with other terms on its side (`3(x + 2) − 4 = 2x + 7`)
+//   VH  px − (x − 6) = qx + r the invisible 1: a minus with no number before the parenthesis (tap it first; then drag the −1)
+//   VF  ⅔(6x + 9) = x + 15    a fraction factor
+//   VE  3x + 6 − 4 = 2x + 7   x on both sides, no parenthesis, like terms on a side not yet put together (a distributed row)
 
 // The same Add shape with x on the right is the R twin: the same id, with `r: true` (and so on every Flip shape: `12 = −x` is F1, r).
 
@@ -100,6 +105,10 @@ export const SHAPES = {
   Q5: 'x = b + k (after Q4\'s Add)',
   V1: 'ax + b = cx + d (x on both sides)',
   VP: 'a(x + b) = cx + d (x on both sides, a parenthesis)',
+  VG: 'a(x + b) + c = dx + e (a parenthesis beside other terms, x on both sides)',
+  VH: 'px − (x − b) = qx + r (the invisible 1, x on both sides)',
+  VF: '⅔(ax + b) = cx + d (a fraction factor, x on both sides)',
+  VE: 'ax + b + k = cx + d (x on both sides, like terms not put together)',
 };
 
 export const UNKNOWN = 'unknown';
@@ -287,7 +296,17 @@ function bothShape(board) {
   const base = { family: 'both', r: false, xNums: nums(board.left).map((t) => t.v), xSum: sum(nums(board.left)), other: nums(board.right).map((t) => t.v) };
   if ([...xl, ...xr].some((t) => t.kind === 'group')) {
     const g = [...xl, ...xr].find((t) => t.kind === 'group');
-    return { ...base, id: 'VP', group: true, params: { factorId: g.id, a: g.factor } };
+    const params = { factorId: g.id, a: g.factor, den: g.den ?? 1, hidden: Boolean(g.hidden) };
+    // (Build U: the invisible 1, then a fraction, then a parenthesis beside other terms; a parenthesis alone on its side is VP, as before)
+    const id = g.hidden ? 'VH' : g.den > 1 ? 'VF' : (board.left.includes(g) ? board.left : board.right).length > 1 ? 'VG' : 'VP';
+    return { ...base, id, group: true, params };
+  }
+  // like terms on a side not yet put together (Build U: a distributed row, `3x + 6 + −4 = 2x + 7`, `7x + −x + 6 = 4x + 14`): combine first
+  for (const k of ['left', 'right']) {
+    for (const kind of ['num', 'x']) {
+      const like = board[k].filter((t) => t.kind === kind);
+      if (like.length >= 2) return { ...base, id: 'VE', group: false, params: { side: k, kind, ids: like.slice(0, 2).map((t) => t.id) } };
+    }
   }
   const xs = [...xl.map((t) => ({ t, side: 'left' })), ...xr.map((t) => ({ t, side: 'right' }))];
   // (Build Q, Part 6, Karl's rule: where one side is a lone x-term, the x-term to move is the other side's, the one beside the number, so
@@ -299,7 +318,7 @@ function bothShape(board) {
 }
 
 // (the cards whose boards are read with their own family)
-const FAMILY_OF = { flip: 'flip', 'two-step': 'two', 'distribute-solve': 'dist', 'variables-both-sides': 'both' };
+const FAMILY_OF = { flip: 'flip', 'two-step': 'two', 'distribute-solve': 'dist', 'variables-both-sides': 'both', 'distribute-more': 'both' };
 
 // The shape of a state: the board's, refined by the flags the board does not hold. `waiting` says a move (or a try) waits for Undo.
 export function shapeOf(s) {

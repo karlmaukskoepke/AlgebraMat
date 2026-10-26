@@ -3888,3 +3888,9 @@ button.lb-divbar.is-calc:hover, button.lb-divbar.is-calc:focus-visible { backgro
 .mo-optrow.is-grey .lx-symbol { opacity: 0.45; }
 .mo-unitblank .mo-unitone { line-height: 1; color: #0072b2; font-weight: 800; }
 .mo-unitblank.is-mirror .mo-unitone { opacity: 0.8; }
+
+/* ---------- Build U: Distribute more. A fraction factor drawn stacked (its top over its bottom, the bar between), one token with its
+   sign; the invisible 1's minus is its own factor token (tapped to show the 1). ---------- */
+.lx-sfrac { display: inline-flex; flex-direction: column; align-items: center; vertical-align: middle; font-size: 0.7em; line-height: 1.05; margin: 0 0.06em; }
+.lx-sfrac-bar { align-self: stretch; min-width: 0.9em; border-top: 0.12em solid currentColor; margin: 0.08em 0; }
+.lb-group .lx-sfrac, .lb-stack .lx-sfrac { font-weight: inherit; }

@@ -694,6 +694,18 @@ Problems, save codes, class-sheet records and the 25 scripted runs: unchanged (t
 | `screen:div-stuck-2@1366x768` | the Fraction option's faint row `▢/▢ × (5x) = ▢/▢ × (−15)` | `▢/▢(5x) = ▢/▢(−15)`: the fraction next to its parentheses, no × | Part 1.1 |
 | `screen:div-stuck-2@1366x650` | the same | the same | Part 1.1 |
 
+## Build U, the card (2026-10-25): Distribute more
+
+Problems, class-sheet records and the 25 scripted runs: unchanged. Every recorded save code decodes as before; the five new rows are the new card's levels, in the new layout (v19, the card appended at the end).
+
+| Key | Before | After | Why |
+|---|---|---|---|
+| `savecode:distribute-more-L1` | none (no such card) | a v19 code, round-trips | the new card's Level 1 done |
+| `savecode:distribute-more-L2` | none | a v19 code, round-trips | Level 2 |
+| `savecode:distribute-more-L3` | none | a v19 code, round-trips | Level 3 |
+| `savecode:distribute-more-L4` | none | a v19 code, round-trips | Level 4 |
+| `savecode:distribute-more-L5` | none | a v19 code, round-trips | Level 5 |
+
 <!-- history: nothing below this line is read by the harness -->
 
 ## History: screen changes accepted by the re-baseline of 2026-10-24 (Build O, Part 0)

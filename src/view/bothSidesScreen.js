@@ -21,6 +21,7 @@ export const introOpen = () => false;                    // (no forced move on t
 
 const REMINDER = {
   vMoveXHint: { target: 'hinted' }, mDistributeHint: { target: 'factor' }, mTapMinusHint: { target: 'factor' }, mCombineHint: { target: 'hinted' },
+  mTapOneHint: { target: 'factor' }, mFracHint: { target: 'factor' },                                 // (the invisible 1, a fraction: Build U)
   wCombineHint: { target: 'otherSide' }, aStuckHint: { target: 'xnum', move: 'add' }, dReminder: { target: 'coef', move: 'divOption' },
   mWorkOut: { target: 'answer' }, fFlipHint: { target: 'coef', move: 'flip' }, fSignHint: { target: 'coef', move: 'flip' }, fNegHint: { target: 'answer' }, fFracHint: { target: 'answer' },
 };
