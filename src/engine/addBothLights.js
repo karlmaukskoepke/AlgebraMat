@@ -294,7 +294,7 @@ function grabAction(state, action, wrapped, alone, opts = {}) {
     const d = distributeAction(state, action, alone, opts);
     if (d) return d;
   }
-  // ----- a product worked out (Build P, Part 2): the × (or the fraction bar) clicked, the signed product typed, Enter or Go -----
+  // ----- a product worked out (Build P, Part 2): the dot (or the fraction bar) clicked, the signed product typed, Enter or Go -----
   const calc = calcAction(state, action, alone);
   if (calc) return calc;
 
@@ -465,7 +465,7 @@ function grabAction(state, action, wrapped, alone, opts = {}) {
 
 // ---------- calculating a product (Build P, Part 2) ----------
 // After dividing first (or taking a fraction) a side can read `⅓(15)`, a factor times a number. While x is not alone the student can work
-// it out: the × between them (the fraction bar, in division form) opens a blank for the signed product; Enter or Go applies it and the
+// it out: the dot between them (the fraction bar, in division form) opens a blank for the signed product; Enter or Go applies it and the
 // side becomes that one number. A wrong product waits for Undo (the factor and the number stay lit), then the hint. Never at x alone
 // (`x = ⅓(15)`): there the student types x, and the solved value is never displayed.
 const calcValue = (t) => (t.sign < 0 ? -1 : 1) * t.inner[0].v / t.n;

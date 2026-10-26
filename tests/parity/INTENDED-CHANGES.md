@@ -685,6 +685,15 @@ both sides: the 3x cancels, and the number is left alone on its side. Press Go."
 reminder at `ax = bx + c` outlines the bx (it outlined the x-term with the smaller number in front: on `5x = 3x + 10` that was already the
 3x; on `2x = 3x + 6` it was the 2x).
 
+## Build U, Part 1 (2026-10-25): no times sign in written work
+
+Problems, save codes, class-sheet records and the 25 scripted runs: unchanged (the traces record message keys, not their words). The screens were re-baselined from `main` at `f31cc10` first (see the history section).
+
+| Key | Before | After | Why |
+|---|---|---|---|
+| `screen:div-stuck-2@1366x768` | the Fraction option's faint row `▢/▢ × (5x) = ▢/▢ × (−15)` | `▢/▢(5x) = ▢/▢(−15)`: the fraction next to its parentheses, no × | Part 1.1 |
+| `screen:div-stuck-2@1366x650` | the same | the same | Part 1.1 |
+
 <!-- history: nothing below this line is read by the harness -->
 
 ## History: screen changes accepted by the re-baseline of 2026-10-24 (Build O, Part 0)

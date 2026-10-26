@@ -48,7 +48,7 @@ describe('Part 1.3: a refused drag names a move that applies to the shape', () =
     expect(say({ board: { left: [x()], right: [f] }, divIds: [f.id] }, f.id)).toBe('x is 15 divided by 3. Work it out, then type x.');
     expect(say({ board: { left: [x()], right: [f] }, divIds: [] }, f.id)).toBe('x is ⅓ of 15. Work it out, then type x.');
     expect(say({ board: { left: [x(), n(2)], right: [f] }, divIds: [f.id] }, f.id)).toBe('Work out 15 divided by 3 first: click the fraction bar.');
-    expect(say({ board: { left: [x(), n(2)], right: [f] }, divIds: [] }, f.id)).toBe('Work out ⅓ of 15 first: click the ×.');
+    expect(say({ board: { left: [x(), n(2)], right: [f] }, divIds: [] }, f.id)).toBe('Work out ⅓ of 15 first: click the dot.');
   });
 });
 

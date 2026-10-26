@@ -21,9 +21,9 @@ const M = {
   dWhichFraction: (p) => `We want only one of the ${WORDS[p.boxes] ?? p.boxes} x boxes.\n${p.div ? 'What should we divide both sides by?' : 'What fraction of these boxes should we find?'}`,
   // the Multiply options (Build D-2, Part 4)
   dUnitFraction: () => 'Enter a unit fraction, like ⅕ or ½.',
-  dWholeNo: (p) => `${sg(p.n)} × (${p.a}x) makes ${sg(p.made)}x: still not one x. Try dividing both sides.`,
+  dWholeNo: (p) => `${sg(p.n)}(${p.a}x) makes ${sg(p.made)}x: still not one x. Try dividing both sides.`,
   dZeroNo: () => 'Times 0 makes both sides 0, and x is gone. Try dividing both sides.',
-  dFlipNo: (p) => `−1 × (${p.a}x) makes −${p.a}x: the sign changes, but there are still ${p.a} x’s. Try dividing both sides.`,
+  dFlipNo: (p) => `−1(${p.a}x) makes −${p.a}x: the sign changes, but there are still ${p.a} x’s. Try dividing both sides.`,
   // the Divide option (Build L): one digit, a minus allowed
   dDivOneDigit: () => 'Enter a one-digit number to divide by.',
   dDivZero: () => 'You can’t divide by 0. Pick a number to divide both sides by.',

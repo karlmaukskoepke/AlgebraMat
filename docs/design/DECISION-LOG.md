@@ -330,3 +330,23 @@ and taking the division option out of the Multiply menu removed a moment Karl wa
    sides hold a number, the smaller x-term, as before. A negative number in front of x afterwards is fine (Flip handles it): negative
    coefficients are not the concern. Build R's reminder (V1) follows the same rule: where one side is a lone x-term, it outlines the
    x-term on the other side, the one sharing a side with the number.
+
+## 2026-10-25: Distribute more and Strange solutions (Karl; built in Builds U and V)
+
+**Why:** Karl's quiz review sheet (sections 4 and 5: "Distribute, then solve" and "Distribute a fraction") asks for distributing with an
+invisible −1 and with a fraction factor, then solving with x on both sides. His quiz is Friday; the review is Thursday.
+
+1. **Two cards, in this order.** **Distribute more** (Build U): distributing (an invisible −1, a fraction factor), combining, then x on
+   both sides, whole-number answers only. Then **Strange solutions** (Build V): fraction answers, x = 0, no solution, infinitely many.
+   Build V uses Distribute more's moves.
+2. **Dividing by a negative stays accepted** (a legal move is never red). Karl teaches flipping first, because more small steps that
+   simplify are better than one confusing step, so the pop-up for dividing by a negative gets one more sentence: "Many people flip
+   first (· −1), then divide: two simpler steps."
+3. **Colour (parked, a colour-pass item; nothing built).** Karl asked for the most consistent choice. His paper convention: **red** = a
+   move on both sides, **blue** = a rewrite (swap, commute, distribute, combine), **pink** = constants. The app uses blue for the
+   operation and red for errors. The conflict to settle in the colour pass: red means "a move" on paper but "an error" on screen. (Errors
+   on screen already carry a cross and an outline, never colour alone, so red could be freed for moves if Karl wants it.)
+4. **No times sign in written work (reverses Build T decision 3, "kept for now").** Wherever the problem is written out, a product is a
+   dot between two bare numbers or a number and a bare x-term (`3 · 4`, `5 · x`), or the number next to its parentheses when the second
+   factor is a parenthesised value or term (`−1(−x) = −1(12)`, `⅓(15)`). The × stays only on the Moves panel (the floating symbol and
+   the menu's option drawings).

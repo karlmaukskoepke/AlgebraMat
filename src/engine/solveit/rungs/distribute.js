@@ -46,7 +46,7 @@ function likeHint(kind) {
 // P6 and E4: the other side still two numbers (an Add cancelled the number beside x): Two-step's W2 reminder, "Put them together".
 const OTHER = { ladder: ['hintPopup'], hintPopup: TWO_STEP_RUNGS.W2.hintPopup };
 
-// Q1 `x + 2 = ⅓(15)`: the product lit, to be worked out (Build P, Part 2: "⅓ × 15 is the same as 15 ÷ 3. Click the × and type it.");
+// Q1 `x + 2 = ⅓(15)`: the product lit, to be worked out (Build P, Part 2: "⅓ · 15 is ⅓ of 15. Click the dot and type it.");
 // after an Add that did not cancel was undone, Add to both sides' reminder for the number beside x, as before.
 function calcHint(s) {
   const f = productOf(s.board);

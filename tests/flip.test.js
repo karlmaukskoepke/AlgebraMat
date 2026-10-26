@@ -75,9 +75,9 @@ describe('the check renders as the loop spec says (§4)', () => {
 });
 
 describe('the moves', () => {
-  it('a flip on −x = 12 writes −1 × (−x) = −1 × (12), then x = −(12) (never evaluated); the student types −12', () => {
+  it('a flip on −x = 12 writes −1(−x) = −1(12), then x = −(12) (never evaluated); the student types −12', () => {
     let s = go(newFlip(makeFlip(1, -12), { level: 2 }), ...flip);
-    expect(s.rows.map((row) => boardText(row.board))).toEqual(['−x = 12', '−1 × (−x) = −1 × (12)', 'x = −(12)']);
+    expect(s.rows.map((row) => boardText(row.board))).toEqual(['−x = 12', '−1(−x) = −1(12)', 'x = −(12)']);
     expect(s.lights).toEqual({ noopp: 'green', solved: 'green' });
     expect(spotOf(s, FLIP_SPOT)).toBe(null);
     s = go(s, ...check(-12));

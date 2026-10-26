@@ -21,7 +21,7 @@ const LX = {
   lxXCross: (p) => `x is already on the ${p.side === 'right' ? 'right' : 'left'} side of the equation. Let’s keep x there. ${CROSS_TAIL[p.tail ?? 'numbers'](p)}`,
   lxXInGroup: (p) => `The other side has an x too, inside the parenthesis. Drag the ${p.factor} onto its parenthesis first.`,
   lxSayAlone: (p) => p.text,
-  lxWorkFirst: (p) => (p.what ? `Work out ${p.what} first: click the ${p.div ? 'fraction bar' : '×'}.` : 'Work this out first, then move it.'),
+  lxWorkFirst: (p) => (p.what ? `Work out ${p.what} first: click the ${p.div ? 'fraction bar' : 'dot'}.` : 'Work this out first, then move it.'),
   // a drop that cannot work says why, and the term goes back (Build S: never a silent drop)
   lxUnlike: (p) => (p.group ? 'A parenthesis has to be distributed before anything joins it. Drag its number onto the parenthesis first.' : 'Only like terms combine: an x-term with an x-term, a number with a number.'),
   lxFactorParen: (p) => `Drag the ${p.factor} onto its parenthesis to multiply it in.`,
@@ -35,7 +35,7 @@ const LX = {
   lxCalcAsk: (p) => `What is ${p.expr}? Type it in the box.`,
   lxCalcWrong: (p) => `${p.expr} is not ${p.typed}. Press Undo and try again.`,
   lxCalculated: () => 'Worked out: one number.',
-  mCalcHint: (p) => (p.div ? `${p.expr}: what times ${p.by} makes ${p.b}? Click the fraction bar and type it.` : `${p.expr} is ${p.of}: split ${p.b} into ${p.n} equal groups and take ${p.neg ? 'the opposite of ' : ''}one. Click the × and type it.`),
+  mCalcHint: (p) => (p.div ? `${p.expr}: what times ${p.by} makes ${p.b}? Click the fraction bar and type it.` : `${p.expr} is ${p.of}: split ${p.b} into ${p.n} equal groups and take ${p.neg ? 'the opposite of ' : ''}one. Click the dot and type it.`),
   lxCombinedAlone: () => 'Combined. Now type what x is.',
   lxNegShown: (p) => `Subtracting is adding a negative: this is ${p.neg}, a negative number. Tap its minus again to go back.`,
   lxUndone: () => 'Undone.',

@@ -87,7 +87,7 @@ export function moveRow(s, menu, { blueFlip = false } = {}) {
   // Divide (Build O): each whole side in parentheses over a big fraction bar, the blank beneath it
   const side = kind === 'div'
     ? (terms, mirror) => [divisionEl(sideTerms(terms, s), divBox(s, mirror, typeable))]
-    : (terms, mirror) => [front(mirror), html('span', 'lb-plus dv-times', ['×']), html('span', 'lb-plus', ['(']), ...sideTerms(terms, s), html('span', 'lb-plus', [')'])];
+    : (terms, mirror) => [front(mirror), html('span', 'lb-plus', ['(']), ...sideTerms(terms, s), html('span', 'lb-plus', [')'])];
   slot.append(equationRow(side(s.board.left, typedOn !== 'left'), side(s.board.right, typedOn !== 'right'), `lx-ghosteq${kind === 'div' ? ' is-division' : ''}`));
   const label = kind === 'div' ? divLabel(s) : kind === 'unit' ? unitLabel(s) : null;
   if (label) slot.append(label);

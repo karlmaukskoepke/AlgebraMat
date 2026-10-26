@@ -1,5 +1,5 @@
 // Flip everything and the fraction that follows it, the moves themselves (lifted out of the Flip everything card in Build K so the
-// Two-step card uses the same ones): both sides times −1, written out as `−1 × (−x) = −1 × (12)`, and a fraction of both sides that
+// Two-step card uses the same ones): both sides times −1, written out as `−1(−x) = −1(12)`, and a fraction of both sides that
 // splits, each committed through the loop with the lights from the shapes before and after. The board is one x term (with its number in
 // front) and one number on the other side. A flip is helpful when x had a minus; a flip of x with no minus is legal but waits for Undo,
 // and says what happened in the real numbers. A card says how its boards are read (`shape`), what x alone is, and how it talks. No DOM.
@@ -15,7 +15,7 @@ const timesTerm = (f, inner) => ({ id: id(), kind: 'times', f, inner });
 const negTerm = (inner) => ({ id: id(), kind: 'neg', inner });
 const coefText = (c) => (c === 1 ? 'x' : c === -1 ? '−x' : `${signed(c)}x`);
 
-// Flip everything: the work row `−1 × (−x) = −1 × (12)` and the board after it. The flip that finishes (x alone) leaves the other side
+// Flip everything: the work row `−1(−x) = −1(12)` and the board after it. The flip that finishes (x alone) leaves the other side
 // as `−(12)`; a flip that does not finish (`−3x = 12` → `3x = −12`, or the unhelpful `3x = −12` → `−3x = 12`) shows the new numbers.
 export function applyFlip(board) {
   const a = coefOn(board);

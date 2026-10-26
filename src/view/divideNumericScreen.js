@@ -109,7 +109,7 @@ function walkBlock(s) {
   if (at >= 4) rows.push(equationRow([el('x')], [el('2')]));
   const stack = html('div', 'lb-stack lb-walkstack');
   rows.forEach((r, i) => stack.append(html('div', `lb-rowwrap${i < rows.length - 1 ? ' is-settled' : ''}${r.classList.contains('lb-work') ? ' has-work' : ''}`, [r])));
-  stack.append(html('ol', 'lb-subst', at >= 5 ? [html('li', 'is-good', ['3 × 2 = 6   ✓ Balanced'])] : []));
+  stack.append(html('ol', 'lb-subst', at >= 5 ? [html('li', 'is-good', ['3(2) = 6   ✓ Balanced'])] : []));
   block.append(stack);
   if (step === 'b') {
     const row = html('div', 'lb-fractionrow');
@@ -128,7 +128,7 @@ function walkDiagram(s) {
   const at = WALK_STEPS.indexOf(s.walk.step);
   const o = { n: 3, boxes: 3, size: 6, neg: false, groups: [2, 2, 2], pile: 0, kept: null, only: false };
   let caption = '';
-  if (at === 2) { o.kept = 0; caption = 'take 1 of the 3 groups: that is what × ⅓ does'; }                 // the stack has just added ⅓(3x) = ⅓(6)
+  if (at === 2) { o.kept = 0; caption = 'take 1 of the 3 groups: that is what multiplying by ⅓ does'; }                 // the stack has just added ⅓(3x) = ⅓(6)
   if (at >= 3) { o.kept = 0; o.only = true; caption = 'the kept group alone: one box, and what is in it'; }       // x = ⅓(6): the kept group
   return groupDiagram({ ...o, caption });
 }

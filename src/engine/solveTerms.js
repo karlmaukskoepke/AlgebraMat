@@ -20,7 +20,7 @@ export const termText = (t) => {
   if (t.kind === 'x') return (t.coef ?? 1) > 1 ? `${t.coef}x` : (t.coef ?? 1) < -1 ? `${MINUS}${-t.coef}x` : (t.coef ?? 1) === -1 ? `${MINUS}x` : 'x';
   if (t.kind === 'frac') return `${t.sign < 0 ? MINUS : ''}${fractionText(t.n)}(${t.inner.map(termText).join(' + ')})`;
   if (t.kind === 'neg') return `${MINUS}(${t.inner.map(termText).join(' + ')})`;                       // `−(12)` (Build J)
-  if (t.kind === 'times') return `${signed(t.f)} × (${t.inner.map(termText).join(' + ')})`;          // `−1 × (−x)` (Build J)
+  if (t.kind === 'times') return `${signed(t.f)}(${t.inner.map(termText).join(' + ')})`;          // `−1(−x)` (Build J; no times sign, Build U)
   if (t.kind === 'group') return `${t.factor === 1 ? '' : t.factor === -1 ? MINUS : signed(t.factor)}(${sideText(t.inner)})`;   // `3(x + 2)` (Build M)
   return signed(t.v);
 };

@@ -274,7 +274,7 @@ describe('Part 9: dividing by a negative keeps its division look; its own pop-up
   it('÷ −3: "Dividing by −3 flips every sign … and then divides by 3"; once a level only', () => {
     const p = makeFlip(3, -4);                                                  // −3x = 12
     const s = go({ ...newFlip(p, { level: 4 }), divNegIntro: true }, ...divideBy(-3));
-    expect(flipFeedbackText(s.feedback)).toBe('Dividing by −3 flips every sign, just like multiplying by a negative does, and then divides by 3.');
+    expect(flipFeedbackText(s.feedback)).toBe('Dividing by −3 flips every sign, just like multiplying by a negative does, and then divides by 3. Many people flip first (· −1), then divide: two simpler steps.');
     expect(s.divNegCount).toBe(1);
     expect(go({ ...newFlip(p, { level: 4 }), divNegIntro: false }, ...divideBy(-3)).feedback.key).not.toBe('dDivNegIntro');
   });

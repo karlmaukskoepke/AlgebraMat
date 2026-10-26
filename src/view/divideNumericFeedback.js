@@ -16,7 +16,7 @@ const M = {
   dnQuizWrong: (p) => `You said ${p.said}. Look: it ${p.correct === 'keeps' ? 'keeps' : 'upsets'} the balance.`,
   dwA: () => 'We don’t know x yet, but the = sign tells us both sides are balanced. Tap “Take a fraction of both sides”.',
   dwB: () => '3 boxes: take ⅓ of both sides to leave one box. Tap ⅓.',
-  dwC: () => 'Take 1 of the 3 groups on each side: that is what × ⅓ does. Press Next.',
+  dwC: () => 'Take 1 of the 3 groups on each side: that is what multiplying by ⅓ does. Press Next.',
   dwD: () => 'Only the kept group is left: one box, x, and ⅓ of the 6. Press Next.',
   dwE: () => 'Now we have x = 2. Press Next.',
   dwF: () => '2 is the amount that makes it balance. Press Next.',

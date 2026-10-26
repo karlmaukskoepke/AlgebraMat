@@ -50,14 +50,14 @@ export function productOf(board) {
   return null;
 }
 
-// A product's words (Build P, Part 2): `⅓ × 15` (or `15 ÷ 3`, in division form: a fraction the Divide button made), the number, the divisor
+// A product's words (Build P, Part 2): `⅓ · 15`, `⅓(−15)` (Build U: no times sign) (or `15 ÷ 3`, in division form: a fraction the Divide button made), the number, the divisor
 export function calcParams(s, t) {
   const div = Boolean(s.divIds?.includes(t.id));
   const b = t.inner[0].v;
   const neg = t.sign < 0;
   return {
     div,
-    expr: div ? `${signed(b)} ÷ ${neg ? `(${MINUS}${t.n})` : t.n}` : `${neg ? MINUS : ''}${fractionText(t.n)} × ${signed(b)}`,
+    expr: div ? `${signed(b)} ÷ ${neg ? `(${MINUS}${t.n})` : t.n}` : `${neg ? MINUS : ''}${fractionText(t.n)}${b < 0 ? `(${signed(b)})` : ` · ${b}`}`,
     b: signed(b),
     by: `${neg ? MINUS : ''}${t.n}`,
     of: `${neg ? MINUS : ''}${fractionText(t.n)} of ${signed(b)}`,   // (Build T: fraction words for a fraction, no division words)

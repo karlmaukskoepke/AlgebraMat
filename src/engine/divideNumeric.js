@@ -7,7 +7,7 @@ import { MINUS } from './expr.js';
 import { fractionText } from './divide.js';
 
 const signed = (v) => (v < 0 ? `${MINUS}${-v}` : `${v}`);
-export const sideText = (pair, n) => (n ? `${fractionText(n)}(${pair[0]} × ${pair[1]})` : `${pair[0]} × ${pair[1]}`);
+export const sideText = (pair, n) => (n ? `${fractionText(n)}(${pair[0]} · ${pair[1]})` : `${pair[0]} · ${pair[1]}`);
 export const sideValue = (v, n) => (n ? v / n : v);
 export function readoutOf(p, nLeft, nRight) {
   const l = sideValue(p.v, nLeft);
@@ -17,7 +17,7 @@ export function readoutOf(p, nLeft, nRight) {
 export const equationText = (p, nLeft, nRight) => `${sideText(p.left, nLeft)} = ${sideText(p.right, nRight)}`;
 
 // A side as segments, the fraction applied in blue (loop §3D): `⅓(3 × 4)`, or `3 × 4` before anything is taken.
-export const segsOf = (pair, n) => (n ? [{ text: fractionText(n), blue: true }, { text: `(${pair[0]} × ${pair[1]})` }] : [{ text: `${pair[0]} × ${pair[1]}` }]);
+export const segsOf = (pair, n) => (n ? [{ text: fractionText(n), blue: true }, { text: `(${pair[0]} · ${pair[1]})` }] : [{ text: `${pair[0]} · ${pair[1]}` }]);
 const markOf = (r) => (r.balanced ? { text: '✓ Balanced', good: true } : { text: '✗ Unbalanced', good: false });
 
 // The work the level writes, a row at a time (loop §3E: every action writes what each side becomes, never just a readout):

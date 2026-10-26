@@ -347,7 +347,7 @@ function rowsOf(s) {
     const tag = row.type === 'fold' && row.label ? [foldTag(row.label)] : [];   // (what a folded fraction or flip did, above it)
     let eq;
     const div = { div: row.shown === 'div' };
-    // a product that can be worked out on the newest row (Build P, Part 2): its × (or its fraction bar) is a button; while its blank is
+    // a product that can be worked out on the newest row (Build P, Part 2): its dot (or its fraction bar) is a button; while its blank is
     // open, it is marked so it stays lit
     if (i === last && !plug && s.stage !== 'done') {
       if (s.lx.calc) div.calcOn = s.lx.calc.id;

@@ -98,7 +98,7 @@
         "Click the middle option and type 5.",
         "Press Enter. Wait three seconds."
       ],
-      "see": "Three options, each with a bigger symbol on its left: × for a whole number, ÷ for 1 over a box, a small fraction picture for a fraction. Pointing at the middle one draws a faint 1/▢ × (5x) = 1/▢ × (−15). Typing 5 fills both boxes and shows “Dividing by 5 is multiplying by ⅕.” Enter writes ⅕(5x) = ⅕(−15) with that line under it, then x = ⅕(−15). The Divide button (÷) is still there too."
+      "see": "Three options, each with a bigger symbol on its left: × for a whole number, ÷ for 1 over a box, a small fraction picture for a fraction. Pointing at the middle one draws a faint 1/▢(5x) = 1/▢(−15). Typing 5 fills both boxes and shows “Dividing by 5 is multiplying by ⅕.” Enter writes ⅕(5x) = ⅕(−15) with that line under it, then x = ⅕(−15). The Divide button (÷) is still there too."
     },
     {
       "id": "q-flip-skip",
@@ -502,7 +502,7 @@
       "steps": [
         "Click the button. It opens Flip everything, Level 1, on −x = 8.",
         "Click Flip everything (the fourth button), then the green Go.",
-        "Watch the row −1 × (−x) = −1 × (8) for 5 seconds."
+        "Watch the row −1(−x) = −1(8) for 5 seconds."
       ],
       "see": "First the minus of −1 gets a red up-and-down stroke, drawn over about a second, so it reads as a plus; then the minus in (−x) does the same. Only then does x = −(8) come in under it. The minus signs on the other side are not marked."
     },
@@ -754,7 +754,7 @@
     },
     {
       "id": "p-calc-wrong",
-      "name": "Work out a product: a wrong product, and the × in multiplication form",
+      "name": "Work out a product: a wrong product, and the dot in multiplication form",
       "build": "Build P",
       "link": {
         "label": "Open Distribute, combine, solve · Level 1",
@@ -763,12 +763,12 @@
       },
       "steps": [
         "Click the button. It opens Distribute, combine, solve, Level 1, on 3(x + 2) = 15.",
-        "Click Multiply (the second button), then its third option (a box over a box). Type 1, then 3, and click the green Go. The new row reads x + 2 = ⅓ × (15).",
-        "Click the small × between ⅓ and (15). Type 45 and press Enter.",
+        "Click Multiply (the second button), then its third option (a box over a box). Type 1, then 3, and click the green Go. The new row reads x + 2 = ⅓ · (15), with a small dot between ⅓ and (15).",
+        "Click the small dot between ⅓ and (15). Type 45 and press Enter.",
         "Press Undo.",
         "The box is open again with the cursor in it: type 5 and press Enter."
       ],
-      "see": "A wrong 45 is lit with “check this” and “⅓ × 15 is not 45. Press Undo and try again.”; the ⅓ and the 15 stay lit, not greyed. After Undo you are back in the box, empty, with the cursor in it, and the ⅓ and the 15 are lit with “Try again: what is ⅓ × 15? It is ⅓ of 15. Type it in the box.” (fraction words, since the row was made with the fraction). With 5 the row reads x + 2 = 5."
+      "see": "A wrong 45 is lit with “check this” and “⅓ · 15 is not 45. Press Undo and try again.”; the ⅓ and the 15 stay lit, not greyed. After Undo you are back in the box, empty, with the cursor in it, and the ⅓ and the 15 are lit with “Try again: what is ⅓ · 15? It is ⅓ of 15. Type it in the box.” (fraction words, since the row was made with the fraction). With 5 the row reads x + 2 = 5."
     },
     {
       "id": "p-cross-off",
@@ -799,7 +799,7 @@
       "steps": [
         "Click the button. It opens Flip everything, Level 1, on −x = 8.",
         "Click Flip everything (the fourth button), then the green Go.",
-        "Watch the row −1 × (−x) = −1 × (8) for two seconds."
+        "Watch the row −1(−x) = −1(8) for two seconds."
       ],
       "see": "On the x side the minus of −1 and the minus of −x each get a red up-and-down stroke, one after the other, so each reads as a plus (since Build S; before, each was struck through with a short line); the other side is not marked. The next row reads x = −(8)."
     },
@@ -959,7 +959,7 @@
         "Click Multiply again, then the first option. Type 1, then press the / key, then type 5.",
         "Click the green Go."
       ],
-      "see": "The first option is not greyed. With 5 it says “5 × (5x) makes 25x: still not one x. Try dividing both sides.” and writes nothing. Typing 1 then / turns it into the fraction 1 over 5 (the 1 on top, the cursor underneath), and Go writes ⅕(5x) = ⅕(−15)."
+      "see": "The first option is not greyed. With 5 it says “5(5x) makes 25x: still not one x. Try dividing both sides.” and writes nothing. Typing 1 then / turns it into the fraction 1 over 5 (the 1 on top, the cursor underneath), and Go writes ⅕(5x) = ⅕(−15)."
     },
     {
       "id": "p-lights-divide",
@@ -1043,7 +1043,7 @@
         "Move the pointer off the panel.",
         "Click Divide. Then point at Flip everything again."
       ],
-      "see": "Step 3 swaps the bars for the −1 × ( ) row at once; step 4 leaves a clean equation. After step 5 Divide stays yellow and keeps its own solid row (bars and boxes) while you point at Flip everything: a chosen move is not replaced by a preview."
+      "see": "Step 3 swaps the bars for the −1( ) row at once; step 4 leaves a clean equation. After step 5 Divide stays yellow and keeps its own solid row (bars and boxes) while you point at Flip everything: a chosen move is not replaced by a preview."
     },
     {
       "id": "o-divide-button",
@@ -1093,7 +1093,7 @@
         "Press Undo.",
         "Click Flip everything (the fourth button), then the green Go."
       ],
-      "see": "Dividing by −1 is written as dividing: (−3x) over −1 = (12) over −1, with the two minus signs and the 1 crossed off, “Same as multiplying by −1.” under it, then 3x = −12, and a pop-up: “Dividing by −1 does the same thing as multiplying by −1: every sign flips.” After Undo, the Flip button writes −1 × (−3x) = −1 × (12), then the same 3x = −12."
+      "see": "Dividing by −1 is written as dividing: (−3x) over −1 = (12) over −1, with the two minus signs and the 1 crossed off, “Same as multiplying by −1.” under it, then 3x = −12, and a pop-up: “Dividing by −1 does the same thing as multiplying by −1: every sign flips.” After Undo, the Flip button writes −1(−3x) = −1(12), then the same 3x = −12."
     },
     {
       "id": "o-fraction-back",
@@ -1111,7 +1111,7 @@
         "Click Multiply again, then the third option (a box over a box). Type 1, then press the / key, then type 5.",
         "Click the green Go."
       ],
-      "see": "There are three options: a box ( ) = box ( ), 1 over a box ( ), and a box over a box ( ), each with a bigger symbol to its left (×, ÷, a small fraction; Build Q), none greyed. The first, with 5, says “5 × (5x) makes 25x: still not one x. Try dividing both sides.” and writes nothing. The fraction takes 1 on top and 5 underneath on both sides, and Go writes ⅕(5x) = ⅕(−15), then x = ⅕(−15): written as multiplying, not dividing."
+      "see": "There are three options: a box ( ) = box ( ), 1 over a box ( ), and a box over a box ( ), each with a bigger symbol to its left (×, ÷, a small fraction; Build Q), none greyed. The first, with 5, says “5(5x) makes 25x: still not one x. Try dividing both sides.” and writes nothing. The fraction takes 1 on top and 5 underneath on both sides, and Go writes ⅕(5x) = ⅕(−15), then x = ⅕(−15): written as multiplying, not dividing."
     },
     {
       "id": "o-hint-divide",
@@ -1779,7 +1779,7 @@
         "Click Got it if a pop-up is open, then click the Flip button (the third box in the panel on the right, −x → x) and the green Go.",
         "Type −12 and press Enter. Drag the −12 onto the x and press Next twice."
       ],
-      "see": "The flip writes −1 × (12) = −1 × (−x), then −(12) = x, with x still on the right (that is fine). The check ends ✓ Balanced."
+      "see": "The flip writes −1(12) = −1(−x), then −(12) = x, with x still on the right (that is fine). The check ends ✓ Balanced."
     },
     {
       "id": "j-level-3",
@@ -1845,7 +1845,7 @@
         "Point at the Flip button (the third box in the panel on the right, −x → x) without clicking: a grey preview appears under the equation.",
         "Click it, then click the green Go."
       ],
-      "see": "The preview is −1 × (−x) = −1 × (12). After Go it is written in, then x = −(12): the 12 is not turned into −12 for you. No opposite box and Solved for x turn green."
+      "see": "The preview is −1(−x) = −1(12). After Go it is written in, then x = −(12): the 12 is not turned into −12 for you. No opposite box and Solved for x turn green."
     },
     {
       "id": "j-worse-flip",
@@ -2370,7 +2370,7 @@
         "Click the button. It opens Divide it, Level 2, on 5x = −15. You are going to play a student who gets things wrong.",
         "Mistake 1, ignoring the screen: touch nothing for 10 seconds. A good response is a gentle flashing of I’m stuck, with nothing else changing and nothing taken away.",
         "Mistake 2, a wrong answer from the start: click the box after x =, type −15 (copying the number on the right) and press Enter. Drag the −15 onto the x. Press Next twice and wait two seconds. A good response writes 5x = −15 with 5(−15) = −15 under it, turns that into −75 = −15, says the equation is not balanced, and leaves only Undo to press. Press Undo, then Got it.",
-        "Mistake 3, a move that does not get one x: click Multiply, then its first option (a single box), type 5 and click Go. A good response says “5 × (5x) makes 25x: still not one x. Try dividing both sides.” in a small note, and writes nothing.",
+        "Mistake 3, a move that does not get one x: click Multiply, then its first option (a single box), type 5 and click Go. A good response says “5(5x) makes 25x: still not one x. Try dividing both sides.” in a small note, and writes nothing.",
         "Mistake 4, flipping the sign: click Divide (÷), press the minus key, type 1 and click Go. A good response says the sign changes but there are still 5 x’s, and points to dividing.",
         "Mistake 5, dividing by a number that does not split: click Divide (÷), type 2 and click Go. Wait two seconds. A good response says it doesn’t split (5 boxes can’t make 2 equal groups, and −15 can’t be shared into 2 equal groups), and pulses Undo. Press Undo: it shows the five x boxes and asks “What should we divide both sides by?” with ÷ 2 (crossed off) to ÷ 6 to choose from: you divided, so it talks about dividing. Press Got it.",
         "Mistake 6, pressing I’m stuck: press it three times. A good response gives a bigger clue each time (first 5 · x with the Divide preview and “divide both sides by 5”, then the 5 boxes and 15 counters, then “take ⅕ of both sides”) and still leaves the move to you.",

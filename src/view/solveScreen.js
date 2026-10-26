@@ -23,7 +23,7 @@ export function lineBlock(s, textOf) {
 // ---------- terms: x with its number in front, numbers, and a fraction of a part (the fraction in blue) ----------
 
 // The cross-off on a move's work row (Build P, Part 3): a fraction (or a division) that cancels the number in front of x or a distributing
-// factor shows both struck through, `⅓(3x)`, `(3x)/3`, `⅓(3(x + 2))`; a flip shows the two minus signs struck, `−1 × (−x)`. What is struck
+// factor shows both struck through, `⅓(3x)`, `(3x)/3`, `⅓(3(x + 2))`; a flip shows the two minus signs struck, `−1(−x)`. What is struck
 // on each: 'all' (the minus and the digits), 'digits' (a minus stays: `⅓(−3x)` leaves −x) or 'minus'. null when nothing cancels.
 export function cancelOf(t) {
   const u = t.inner?.length === 1 ? t.inner[0] : null;
@@ -69,9 +69,9 @@ function termsOf(side, s, o) {
       if (calc || o.calcOn === t.id) el.dataset.calc = t.id;
       out.push(el);
     } else if (t.kind === 'frac') {
-      // a product that can be worked out (Build P, Part 2): a small × between the fraction and its number is the button
+      // a product that can be worked out (Build P, Part 2): a small dot between the fraction and its number is the button
       const calc = o.calc === t.id;
-      const dot = calc ? [calcButton(t, 'lb-calcdot', 'Multiply: work it out', '×')] : [];
+      const dot = calc ? [calcButton(t, 'lb-calcdot', 'Multiply: work it out', '·')] : [];
       const el = html('span', 'lb-frac', [struckText(`${t.sign < 0 ? MINUS : ''}${fractionText(t.n)}`, cancel?.outer ?? null, 'is-blue', o), ...dot, '(', ...inner(), ')']);
       if (calc || o.calcOn === t.id) el.dataset.calc = t.id;
       out.push(el);
@@ -81,8 +81,8 @@ function termsOf(side, s, o) {
     } else if (t.kind === 'neg' && s?.divIds?.includes(t.id)) {
       out.push(divisionEl(termsOf(t.inner, s, { ...o, live: false, plug: false, work: false }), `${MINUS}1`));         // `x = (12)/(−1)`
     } else if (t.kind === 'times') {
-      // both sides times a number, written out: `−1 × (−x)` (Flip everything's work row, Build J); the number in blue (loop §3D)
-      out.push(html('span', 'lb-frac', [html('span', 'is-blue', [struckText(signed(t.f), cancel?.outer ?? null, '', o), ' ×']), ' (', ...inner(), ')']));
+      // both sides times a number, written out: `−1(−x)` (no times sign: Build U) (Flip everything's work row, Build J); the number in blue (loop §3D)
+      out.push(html('span', 'lb-frac', [html('span', 'is-blue', [struckText(signed(t.f), cancel?.outer ?? null, '', o)]), '(', ...inner(), ')']));
     } else if (t.kind === 'neg') {
       // the opposite of a number, left unsimplified at x alone: `x = −(12)` (Build J)
       out.push(html('span', 'lb-frac lb-neg', [html('span', 'is-blue', [MINUS]), '(', ...termsOf(t.inner, s, { ...o, live: false, plug: false }), ')']));
@@ -132,7 +132,7 @@ export const sideTerms = (terms, s, o = {}) => termsOf(terms, s, { live: false, 
 export function divisionEl(top, bottom, bar = null) {
   return html('span', 'lb-frac lb-divfrac', [html('span', 'lb-divtop', ['(', ...top, ')']), bar ?? html('span', 'lb-divbar'), typeof bottom === 'string' ? html('span', 'lb-divbot is-blue', [bottom]) : bottom]);
 }
-// The × (or the fraction bar) of a product that can be worked out: a button (Build P, Part 2)
+// The dot (or the fraction bar) of a product that can be worked out: a button (Build P, Part 2)
 function calcButton(t, cls, label, text = '') {
   return html('button', cls, text ? [text] : [], { type: 'button', 'data-action': 'lxCalc', 'data-id': t.id, 'aria-label': label });
 }
@@ -166,7 +166,7 @@ export function rowLine(row) {
 export function foldTag(label) {
   if (label.shown === 'div') return html('span', 'lb-foldtag', ['both sides ', html('span', 'is-blue', [`÷ ${label.sign < 0 ? MINUS : ''}${label.n}`])]);   // (made with Divide, Build O)
   if (label.dist !== undefined) return html('span', 'lb-foldtag', [html('span', 'is-blue', [`${signed(label.dist)} ·`]), ' each piece']);   // a distribute (Build M)
-  if (label.flip) return html('span', 'lb-foldtag', [html('span', 'is-blue', [`${MINUS}1 ×`]), ' both sides']);
+  if (label.flip) return html('span', 'lb-foldtag', [html('span', 'is-blue', [`${MINUS}1 ·`]), ' both sides']);
   return html('span', 'lb-foldtag', [html('span', 'is-blue', [`${label.sign < 0 ? MINUS : ''}${fractionText(label.n)}`]), ' of both sides']);
 }
 
