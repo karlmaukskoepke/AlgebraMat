@@ -118,7 +118,7 @@ function popups(s, wrap) {
   if (introOpen(s)) { wrap.append(spotlightLayer({ kind: 'intro', lit: ['newest', 'panel', 'forward'] }, { ...o, text: FORCED_TEXT })); return; }
   // checking a value: everything greys out but the equation being checked and the checking space
   if (s.sub && s.sub.step < solve.subTotal(s.sub)) {
-    wrap.append(spotlightLayer({ kind: 'intro', lit: ['plugrow', 'check', s.sub.placing ? 'answer' : 'forward'] }, { ...o, text: s.sub.placing ? placeText(s.sub.typed) : null }));
+    wrap.append(spotlightLayer({ kind: 'intro', ...(s.sub.placing ? { place: 'checkspace' } : {}), lit: ['plugrow', 'check', s.sub.placing ? 'answer' : 'forward'] }, { ...o, text: s.sub.placing ? placeText(s.sub.typed) : null }));
     return;
   }
   // I'm stuck's reminder (basic form) lights the move it names, as the hint after Undo does

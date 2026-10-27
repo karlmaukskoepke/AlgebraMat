@@ -30,19 +30,19 @@ describe('substituting a value, one operation at a time', () => {
     expect(r.lines[0].segs.filter((s) => s.cls.split(' ').includes('is-op')).map((s) => s.text).join('')).toBe('(−9) + 3');
     expect(run([x(), num(3)], [num(-6)], -3).ok).toBe(false);
   });
-  it('a simplified state with an unsimplified side: the left is worked first, then the right, a step a line', () => {
+  it('a simplified state with an unsimplified side: both sides added up in the same step (Karl, after Build V)', () => {
     const r = run([x()], [num(-6), num(-3)], -9);
     expect(r.texts).toEqual(['−9 = −6 − 3', '−9 = −9']);
     const r2 = run([x(), num(-2)], [num(11), num(-8)], 5);
-    expect(r2.texts).toEqual(['5 − 2 = 11 − 8', '3 = 11 − 8', '3 = 3']);
+    expect(r2.texts).toEqual(['5 − 2 = 11 − 8', '3 = 3']);
     expect(r2.ok).toBe(true);
   });
-  it('a fraction of a part: the inner part first, then the fraction', () => {
+  it('a fraction of a part: the inner part first, then every product at once', () => {
     const r = run([x()], [frac(3, num(-12))], -4);
     expect(r.texts).toEqual(['−4 = ⅓(−12)', '−4 = −4']);
     expect(r.ok).toBe(true);
     const r3 = run([x(2)], [frac(2, num(6), num(6))], 6);
-    expect(r3.texts).toEqual(['2(6) = ½(6 + 6)', '12 = ½(6 + 6)', '12 = ½(12)', '12 = 6']);
+    expect(r3.texts).toEqual(['2(6) = ½(6 + 6)', '2(6) = ½(12)', '12 = 6']);
     expect(r3.ok).toBe(false);
   });
   it('a wrong value ends not balanced', () => {

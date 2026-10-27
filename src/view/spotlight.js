@@ -103,7 +103,8 @@ function workBottom(o) {
 function protectedRects(o, error, kind) {
   // (the seesaw is never covered, even by a question: it stands beside the work, Build F)
   const rows = kind === 'ask' ? '.ab-boardwrap svg, ' : '.lb-stack .lb-rowwrap .lb-eq, .lx-ghost.is-chosen .lb-eq, .lx-ghost.is-preview .lb-eq, .sv-check .sv-checkrow, .ab-boardwrap svg, ';
-  const sel = `${rows}${error ? '.lb-stack .lb-rowwrap .lb-eq' : '.lx-answer, .lx-panel, .lx-corners .btn:not(:disabled), .lb-fractionrow:not(.is-off), .ab-tray, .ab-sidebtns, .alone-tray'}`;
+  // (the value waiting to be dragged into x is never covered, whatever the pop-up: Karl, after Build V)
+  const sel = `${rows}[data-chip], ${error ? '.lb-stack .lb-rowwrap .lb-eq' : '.lx-answer, .lx-panel, .lx-corners .btn:not(:disabled), .lb-fractionrow:not(.is-off), .ab-tray, .ab-sidebtns, .alone-tray'}`;
   const out = [];
   for (const n of o.root.querySelectorAll(sel)) {
     const k = contentRect(n);
@@ -131,6 +132,9 @@ function candidates({ kind, spot, r, pad, labelBottom, bw, bh, area, side, workB
   const mid = (x) => x - bw / 2;
   const sideAt = (top) => side && side.width > 200 && { name: 'side', left: side.left + 12, top: Math.min(Math.max(8, top, side.floor ?? 0), vh - bh - 8) };
   const sideHigh = side && side.width > 200 && { name: 'sidehigh', left: side.left + 12, top: side.floor ?? 8 };
+  // (the note while the value waits to be dragged, `place: 'checkspace'`: low in the empty check space, clear of the value, of the way up
+  // to the equation and of the place the copy of the equation slides into; Karl, after Build V)
+  if (spot.place === 'checkspace' && side) out.push({ name: 'checkspace', left: side.left + Math.max(12, (side.width - bw) / 2), top: (side.bottom ?? vh) - bh - 12 });
   if (kind === 'error' || !r) {
     out.push({ name: 'below', left: mid(spot.alignTarget && r ? r.left + r.width / 2 : area.left + area.width / 2), top: Math.max(wb, labelBottom) + GAP });
     out.push(sideAt(r ? r.top - 4 : anchorTop));
@@ -277,7 +281,8 @@ export function spotlightLayer(spot, given) {
     const area = o.root.querySelector(o.work ?? '.lb-main')?.getBoundingClientRect() ?? { left: 0, right: vw, width: vw };
     // (the seesaw's check, Build D-2: while the value is placed, its checking space under the seesaw is still empty; the seesaw and the
     // walks at x alone fill the side, Build F)
-    const free = o.root.querySelector('.sv-work:not(.is-checking):not(.has-seesaw):not(.has-walk) .sv-check, .sv-work.is-checking.has-seesaw .sv-checkspace:not(:has(li, .sv-checkrow))')?.getBoundingClientRect();
+    // (and, while the value waits to be dragged in, the check space, still empty: Karl, after Build V)
+    const free = o.root.querySelector('.sv-work:not(.is-checking):not(.has-seesaw):not(.has-walk) .sv-check, .sv-work.is-checking.has-seesaw .sv-checkspace:not(:has(li, .sv-checkrow)), .sv-work.is-checking:not(.has-seesaw) .sv-check:not(:has(.sv-checkrow))')?.getBoundingClientRect();
     const under = o.root.querySelector('.sv-work.has-seesaw:not(.is-checking) .sv-solve, .sv-work.has-walk .sv-solve')?.getBoundingClientRect();
     const side = free ?? (under && { left: under.left, width: under.width, floor: workBottom(o) + GAP });   // (else the room under the work)
     const cands = candidates({ kind, spot, r, pad, labelBottom, bw, bh, area, side, workBottom: workBottom(o), vw, vh, anchorTop: lit[0]?.top ?? area.top });

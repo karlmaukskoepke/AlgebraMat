@@ -167,7 +167,7 @@ function popups(s, wrap) {
   if (s.feedback?.key === 'dReminder' && s.stage === 'moves' && !s.sub) { wrap.append(spotlightLayer({ kind: 'hint', target: 'coef', move: 'divOption' }, { ...o, text: divideFeedbackText(s.feedback) })); return; }
   // checking a value: everything greys out but the equation being checked and the checking space
   if (s.sub && s.sub.step < solve.subTotal(s.sub)) {
-    wrap.append(spotlightLayer({ kind: 'intro', lit: ['plugrow', 'check', s.sub.placing ? 'answer' : 'forward'] }, { ...o, text: s.sub.placing ? placeText(s.sub.typed) : null }));
+    wrap.append(spotlightLayer({ kind: 'intro', ...(s.sub.placing ? { place: 'checkspace' } : {}), lit: ['plugrow', 'check', s.sub.placing ? 'answer' : 'forward'] }, { ...o, text: s.sub.placing ? placeText(s.sub.typed) : null }));
     return;
   }
   const note = notePopup(s, { silent: SILENT, nudge: NUDGE, text: divideFeedbackText, scaffold: s.scaffold || s.pic ? 'board' : null });

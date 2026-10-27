@@ -3,6 +3,39 @@
   "updated": "2026-10-27",
   "checks": [
     {
+      "id": "v-fix-note",
+      "name": "The value to drag is never covered",
+      "build": "Build V, fixes",
+      "link": {
+        "label": "Open Distribute more · Level 1",
+        "query": "?pack=distribute-more&level=1&seed=21&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Make the browser window short (or zoom in so the page is about 650 px tall). Click the button. It opens Distribute more, Level 1, on 2(x + 7) + 9 = 5x + 2.",
+        "Drag the 2 onto the parenthesis; type 2, Enter, 14, Enter. Drag the 9 onto the 14, type 23, Enter. Drag the 2x across the =, drag the −2x onto the 5x, type 3x, Enter.",
+        "Click Add, type −2, Enter. Drag the −2 onto the 23, type 21, Enter. Click Divide (÷), type 3, Enter.",
+        "Click the box after x =, type 7 and press Enter."
+      ],
+      "see": "“Let’s check that x = 7 is the solution. Drag the 7 onto an x above.” sits low in the empty space on the right. The 7 in x = is not covered, and nothing is in its way up to the equation."
+    },
+    {
+      "id": "v-fix-steps",
+      "name": "A faster check: one kind of step at a time",
+      "build": "Build V, fixes",
+      "link": {
+        "label": "Open Variables on both sides · Level 1",
+        "query": "?pack=variables-both-sides&level=1&seed=21&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Variables on both sides, Level 1, on 7x = 4x + 15.",
+        "Drag the 4x across the = onto the left side. Drag the −4x onto the 7x, type 3x and press Enter. Click Divide (÷), type 3 and press Enter.",
+        "Click the box after x =, type 5 and press Enter. Drag the 5 onto each x, then press Enter once for each line until it says Balanced."
+      ],
+      "see": "Both x’s are multiplied in one step and both sides added in the next: 7(5) = 4(5) + 15, then 35 = 20 + 15, then 35 = 35 and ✓ Balanced. Three presses, not five."
+    },
+    {
       "id": "v-level-1",
       "name": "Strange solutions, Level 1: a fraction answer",
       "build": "Build V",
@@ -70,7 +103,7 @@
         "Click Divide (÷), type 2 and press Enter.",
         "Click the left box after x =, type 5/2 and press Enter. Drag the 5/2 (drawn as 5 over 2) onto each x, then press Enter for each line until it says Balanced."
       ],
-      "see": "The value you drag is one stacked fraction. The lines read 9(5/2) + 1 = 7(5/2) + 6, then 45/2 + 1, then 45/2 + 2/2 (the 1 written over 2), then 47/2; on the right 35/2 + 6, then 35/2 + 12/2; it ends 47/2 = 47/2 and ✓ Balanced. Every fraction is drawn top over bottom."
+      "see": "The value you drag is one stacked fraction. Each Enter does one kind of step on both sides at once: 9(5/2) + 1 = 7(5/2) + 6, then 45/2 + 1 = 35/2 + 6 (both products), then 45/2 + 2/2 = 35/2 + 12/2 (both whole numbers written over 2), then 47/2 = 47/2 and ✓ Balanced. Every fraction is drawn top over bottom."
     },
     {
       "id": "v-zero",
@@ -536,7 +569,7 @@
         "Click Divide (the third button, with ÷ beside it), type 3 and press Enter.",
         "Click the box after x =, type 5 and press Enter. Drag the 5 onto each x (one at a time), then press Enter for each line until Balanced."
       ],
-      "see": "The check writes 7(5) = 4(5) + 15 with each blue 5 under its x, then 35 = 4(5) + 15, 35 = 20 + 15, 35 = 35 and ✓ Balanced. No × anywhere in the check."
+      "see": "The check writes 7(5) = 4(5) + 15 with each blue 5 under its x, then 35 = 20 + 15 (both products in one step), 35 = 35 and ✓ Balanced. No × anywhere in the check."
     },
     {
       "id": "t-flip-plus",
@@ -876,7 +909,7 @@
         "Click Divide (÷), type 3 and press Enter.",
         "Click the box after x =, type 5 and press Enter. Drag the 5 onto each x (one at a time), then press Enter for each line until Balanced."
       ],
-      "see": "The drag writes 7x − 4x = 4x + 15 − 4x with the two 4x struck on the right, then 7x − 4x = 15. Combining gives 3x = 15, dividing gives x = (15) over 3. The check reads 7(5) = 4(5) + 15, then 35 = 4(5) + 15, 35 = 20 + 15, 35 = 35, Balanced."
+      "see": "The drag writes 7x − 4x = 4x + 15 − 4x with the two 4x struck on the right, then 7x − 4x = 15. Combining gives 3x = 15, dividing gives x = (15) over 3. The check reads 7(5) = 4(5) + 15, then 35 = 20 + 15 (both products in one step), 35 = 35, Balanced."
     },
     {
       "id": "r-level-2",
@@ -930,7 +963,7 @@
         "Click Add, type 5 and press Enter. Drag the 11 onto the 5, type 16 and press Enter.",
         "Click Divide (÷), type 4 and press Enter. Type 4 in x =, press Enter, drag the 4 onto each x and press Enter for each line."
       ],
-      "see": "Adding 2x is written under the 2x on each side, and cancels the −2x on the right: 2x + 2x − 5 = 11 (the new 2x sits next to the 2x). Then 4x − 5 = 11, 4x = 11 + 5, 4x = 16, x = (16) over 4. The check works one side at a time, from 2(4) − 5 = −2(4) + 11 to 3 = 3, then Balanced."
+      "see": "Adding 2x is written under the 2x on each side, and cancels the −2x on the right: 2x + 2x − 5 = 11 (the new 2x sits next to the 2x). Then 4x − 5 = 11, 4x = 11 + 5, 4x = 16, x = (16) over 4. The check does both sides at once: 2(4) − 5 = −2(4) + 11, 8 − 5 = −8 + 11, 3 = 3, then Balanced."
     },
     {
       "id": "r-level-5",
@@ -1030,9 +1063,9 @@
         "Drag the 4x across the = onto the left side. Drag the −4x onto the 7x, type 3x and press Enter. Click Divide (÷), type 3 and press Enter.",
         "Type 5 in x = and press Enter. Drag the 5 onto the second x (in 4x).",
         "Drag the 5 onto the first x (in 7x).",
-        "Press Enter four times, slowly."
+        "Press Enter slowly, once for each line, until it says Balanced."
       ],
-      "see": "After the first drop only the x in 4x has a green check, and a faint dashed 5 waits under the other x. After the second the check starts 7x = 4x + 15 with 7(5) = 4(5) + 15 under it, each blue 5 straight under its x. Then 35 = 4(5) + 15, 35 = 20 + 15, 35 = 35, Balanced."
+      "see": "After the first drop only the x in 4x has a green check, and a faint dashed 5 waits under the other x. After the second the check starts 7x = 4x + 15 with 7(5) = 4(5) + 15 under it, each blue 5 straight under its x. Then 35 = 20 + 15 (both products in one step), 35 = 35, Balanced."
     },
     {
       "id": "student-both",
@@ -1260,9 +1293,9 @@
         "Click the box after x =, type 7 and press Enter.",
         "Pick up the 7 and hold it over the equation without letting go. Then drop it on the second x (the one in 2x).",
         "Drag the 7 onto the first x (the one inside the parenthesis).",
-        "Press Enter five times, slowly."
+        "Press Enter slowly, once for each line, until it says Balanced."
       ],
-      "see": "While you hold the 7, both x’s glow as places to drop it. The drop fills only the x in 2x: a small green check appears above it and a faint dashed 7 waits under the other x; nothing else happens yet. The second drop fills that x too, and the check begins: 3(7 + 2) + 2(7) = 41, then 3(9) + 2(7) = 41, 27 + 2(7) = 41, 27 + 14 = 41, 41 = 41, Balanced."
+      "see": "While you hold the 7, both x’s glow as places to drop it. The drop fills only the x in 2x: a small green check appears above it and a faint dashed 7 waits under the other x; nothing else happens yet. The second drop fills that x too, and the check begins: 3(7 + 2) + 2(7) = 41, then 3(9) + 2(7) = 41, 27 + 14 = 41 (both products in one step), 41 = 41, Balanced."
     },
     {
       "id": "p-divide-neg-popup",
@@ -1611,7 +1644,7 @@
         "Click Add, type −6, Enter. Drag the 41 onto the −6, type 35, Enter.",
         "Click Divide (÷), type 5, Enter. Type 7 in x =, press Enter. Drag the 7 onto each x (one at a time), then press Enter for each line until Balanced."
       ],
-      "see": "The rows read 3x + 6 + 2x = 41, then 5x + 6 = 41, then 5x = 35, then x = (35) over 5. The check shows every step, one line for each press of Enter: 3(7 + 2) + 2(7) = 41, 3(9) + 2(7) = 41, 27 + 2(7) = 41, 27 + 14 = 41, 41 = 41, then Balanced and “Yes! x = 7”."
+      "see": "The rows read 3x + 6 + 2x = 41, then 5x + 6 = 41, then 5x = 35, then x = (35) over 5. The check shows every step, one line for each press of Enter: 3(7 + 2) + 2(7) = 41, 3(9) + 2(7) = 41, 27 + 14 = 41 (both products in one step), 41 = 41, then Balanced and “Yes! x = 7”."
     },
     {
       "id": "m-drag-labels",

@@ -228,9 +228,9 @@ describe('dividing never fails here', () => {
 
 describe('the check with a fraction (3x + 4 = x + 9 at 5/2)', () => {
   const board = { left: [{ kind: 'x', coef: 3 }, { kind: 'num', v: 4 }], right: [{ kind: 'x' }, { kind: 'num', v: 9 }] };
-  it('every step: the products, a whole number over the denominator, the sums, 23/2 = 23/2', () => {
+  it('one kind of operation a step, both sides at once: the products, every whole number over the denominator, the sums, 23/2 = 23/2', () => {
     const r = fractionLines(board, frac(5, 2));
-    expect(r.lines.map(lineText)).toEqual(['3(5/2) + 4 = 5/2 + 9', '15/2 + 4 = 5/2 + 9', '15/2 + 8/2 = 5/2 + 9', '23/2 = 5/2 + 9', '23/2 = 5/2 + 18/2', '23/2 = 23/2']);
+    expect(r.lines.map(lineText)).toEqual(['3(5/2) + 4 = 5/2 + 9', '15/2 + 4 = 5/2 + 9', '15/2 + 8/2 = 5/2 + 18/2', '23/2 = 23/2']);
     expect(r.ok).toBe(true);
   });
   it('a negative fraction in parentheses, its sign on the top: 3(−5/2) + 4 = (−5/2) + 9, Not balanced', () => {

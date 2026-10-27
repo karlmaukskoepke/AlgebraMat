@@ -104,8 +104,9 @@ describe('the worked example, 5x + 2 = 3x + 10', () => {
     s = run(s, [{ type: 'placeValue', index: 1 }]);
     expect(s.sub).toMatchObject({ placing: true, filled: [1] });
     s = run(s, [{ type: 'placeValue', index: 0 }]);
-    expect(s.sub.lines.map(lineText)).toEqual(['5(4) + 2 = 3(4) + 10', '20 + 2 = 3(4) + 10', '22 = 3(4) + 10', '22 = 12 + 10', '22 = 22']);
-    s = run(s, Array(5).fill({ type: 'nextLine' }));
+    // (both x's multiplied in one step, then both sums: Karl, after Build V)
+    expect(s.sub.lines.map(lineText)).toEqual(['5(4) + 2 = 3(4) + 10', '20 + 2 = 12 + 10', '22 = 22']);
+    s = run(s, Array(3).fill({ type: 'nextLine' }));
     expect(s.stage).toBe('done');
     expect(s.clean).toBe(true);
   });

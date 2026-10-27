@@ -129,3 +129,20 @@ No unknown shape; every shape has an entry (tested in `tests/strange.test.js`).
 
 Levels 4-5, "No solution" / "Infinitely many", "Try a number" (V2, after the panel, menu and cross-out build); pictures for simplifying;
 Teach me; mixed numbers; the colour pass.
+
+## Fixes after Build V (Karl, 2026-10-27)
+
+1. **The note while the value waits to be dragged** ("Let's check that x = 7 is the solution. Drag the 7 onto an x above.") covered the
+   value at 1366×650 on every card on Add's screen (Distribute more, Variables on both sides, Two-step equations, Add to both sides…):
+   the empty check space was not counted as free room, so the note fell back to "below the work", on top of the value. It now sits low in
+   the empty check space on every Solve it card (Divide it and Flip everything too), and no pop-up may cover the value waiting to be
+   dragged. Checked at 768 and 650 on eight cards: the value is never covered and nothing sits between it and the equation.
+2. **A faster check.** Each Enter now does every operation of one kind at once, on both sides, in the order of operations: inside the
+   parentheses, then every product (both x's multiplied together), then (with fractions) every whole number over the denominator, then
+   every run of numbers added up in one go. `7(5) = 4(5) + 15`, `35 = 20 + 15`, `35 = 35` (three presses, was five);
+   `9(5/2) + 1 = 7(5/2) + 6`, `45/2 + 1 = 35/2 + 6`, `45/2 + 2/2 = 35/2 + 12/2`, `47/2 = 47/2` (four, was seven). Every card. Loop spec
+   rev 2.12, section 4; decision log "2026-10-27: Two fixes after Build V".
+
+`npm run parity`: problems, save codes, class-sheet records, the 25 scripted runs and the 70 screens all unchanged (the recorded screens
+show neither the note nor a check with several steps). Features to check: 2 new items (the note, the faster check); 7 earlier items
+updated to the shorter checks (their words and walks).

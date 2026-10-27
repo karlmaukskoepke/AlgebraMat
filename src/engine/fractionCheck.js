@@ -26,7 +26,7 @@ const toItem = (t, value) => {
 const isNumber = (it) => it.k === 'sub' || it.k === 'num';
 
 function itemSegs(it, ctx, alone) {
-  const cls = ctx.op === it || ctx.pair?.includes(it) ? 'is-op' : ctx.res === it ? 'is-res' : '';
+  const cls = ctx.ops?.has(it) ? 'is-op' : ctx.res?.has(it) ? 'is-res' : '';
   const blue = cls ? `${cls} is-blue` : 'is-blue';
   // (a negative fraction put into x is in parentheses, its sign on the top: `(−5/2)`)
   if (it.k === 'sub') return [{ text: !alone && it.v.n < 0 ? `(${text(it.v)})` : text(it.v), cls: blue }];
@@ -40,14 +40,14 @@ function sumSegs(items, ctx, inGroup = false) {
   const out = [];
   items.forEach((it, i) => {
     if (i === 0 && inGroup && it.k === 'sub') { out.push(...itemSegs(it, ctx, true)); return; }
-    const opCls = i && ctx.pair?.includes(it) && ctx.pair.includes(items[i - 1]) ? 'is-op' : '';
+    const opCls = i && ctx.sums?.has(it) && ctx.sums.has(items[i - 1]) ? 'is-op' : '';
     if (i && it.k === 'num' && it.v.n < 0) {                         // a negative number after another term is a subtraction: 15/2 − 8/2
       out.push({ text: ` ${MINUS} `, cls: opCls });
-      out.push({ text: bare(it.v), cls: ctx.op === it || ctx.pair?.includes(it) ? 'is-op' : ctx.res === it ? 'is-res' : '' });
+      out.push({ text: bare(it.v), cls: ctx.ops?.has(it) ? 'is-op' : ctx.res?.has(it) ? 'is-res' : '' });
       return;
     }
     if (i && it.k === 'prod' && it.a < 0) {
-      const cls = ctx.op === it ? 'is-op' : '';
+      const cls = ctx.ops?.has(it) ? 'is-op' : '';
       out.push({ text: ` ${MINUS} `, cls }, { text: `${-it.a}(`, cls }, { text: text(it.v), cls: cls ? `${cls} is-blue` : 'is-blue' }, { text: ')', cls });
       return;
     }
@@ -57,39 +57,62 @@ function sumSegs(items, ctx, inGroup = false) {
   return out;
 }
 
-const done = (r, it, list) => list.map((x) => (x === it ? r : x));
-// The next operation: { apply, op | pair, res } or null. Parentheses, then products, then a whole number over the fraction's denominator
-// where it meets one (its own line), then sums, left to right.
-function nextOp(items) {
+// One step (Karl, after Build V): every operation of the same kind, on both sides at once: first inside the parentheses, then every
+// product (and the opposite of a number), then every run of numbers written over one denominator where they differ, then every run added
+// together in one go.
+const KINDS = ['inner', 'mul', 'den', 'sum'];
+const single = (it) => it.inner.length === 1 && isNumber(it.inner[0]);
+const runs = (items) => {                                          // the runs of two or more numbers side by side: [start, end)
+  const out = [];
+  for (let i = 0; i < items.length;) {
+    let j = i;
+    while (j < items.length && isNumber(items[j])) j++;
+    if (j - i >= 2) out.push([i, j]);
+    i = Math.max(j, i + 1);
+  }
+  return out;
+};
+function kindOf(items) {
+  let mul = false;
   for (const it of items) {
-    if (it.k !== 'grp') continue;
-    const inner = nextOp(it.inner);
-    if (inner) return { ...inner, apply: (list) => list.map((x) => (x === it ? { ...it, inner: inner.apply(it.inner) } : x)) };
-    if (it.inner.length === 1 && isNumber(it.inner[0])) {
-      const v = it.inner[0].v;
-      const r = { k: 'num', v: it.d > 1 ? { n: it.f * v.n, d: it.d * v.d } : times(it.f, v) };
-      return { op: it, res: r, apply: (list) => done(r, it, list) };
+    if (it.k === 'grp') { if (!single(it)) return 'inner'; mul = true; }
+    if (it.k === 'prod' || it.k === 'neg' || it.k === 'negnum') mul = true;
+  }
+  if (mul) return 'mul';
+  const rs = runs(items);
+  if (rs.some(([i, j]) => new Set(items.slice(i, j).map((it) => it.v.d)).size > 1)) return 'den';
+  return rs.length ? 'sum' : null;
+}
+const earliest = (...kinds) => KINDS.find((k) => kinds.includes(k)) ?? null;
+function stepOf(items, kind, ctx) {
+  if (kind === 'inner') return items.map((it) => (it.k === 'grp' && !single(it) ? { ...it, inner: stepOf(it.inner, kindOf(it.inner), ctx) } : it));
+  if (kind === 'mul') {
+    return items.map((it) => {
+      let v = null;
+      if (it.k === 'grp' && single(it)) { const u = it.inner[0].v; v = it.d > 1 ? { n: it.f * u.n, d: it.d * u.d } : times(it.f, u); }
+      else if (it.k === 'neg' || it.k === 'negnum') v = neg(it.v);
+      else if (it.k === 'prod') v = times(it.a, it.v);
+      if (v === null) return it;
+      const r = { k: 'num', v };
+      ctx.ops.add(it); ctx.res.add(r);
+      return r;
+    });
+  }
+  const out = [...items];
+  for (const [i, j] of runs(items)) {
+    const run = items.slice(i, j);
+    if (kind === 'den') {
+      // (a whole number meeting a fraction is written over its denominator: `15/2 + 4` → `15/2 + 8/2`)
+      const d = run.reduce((m, it) => lcm(m, it.v.d), 1);
+      run.forEach((it, k) => { if (it.v.d !== d) { const r = { k: 'num', v: over(it.v, d) }; ctx.ops.add(it); ctx.res.add(r); out[i + k] = r; } });
+    } else if (kind === 'sum') {
+      const r = { k: 'num', v: run.slice(1).reduce((a, it) => add(a, it.v), run[0].v) };
+      run.forEach((it) => { ctx.ops.add(it); ctx.sums.add(it); });
+      ctx.res.add(r);
+      out.splice(i, j - i, r, ...Array(j - i - 1).fill(null));
     }
   }
-  for (const it of items) {
-    if (it.k === 'neg' || it.k === 'negnum') { const r = { k: 'num', v: neg(it.v) }; return { op: it, res: r, apply: (list) => done(r, it, list) }; }
-    if (it.k === 'prod') { const r = { k: 'num', v: times(it.a, it.v) }; return { op: it, res: r, apply: (list) => done(r, it, list) }; }
-  }
-  for (let i = 0; i + 1 < items.length; i++) {
-    const [a, b] = [items[i], items[i + 1]];
-    if (!isNumber(a) || !isNumber(b)) continue;
-    if (a.v.d !== b.v.d) {
-      // a common denominator first, on a line of its own (`15/2 + 4` → `15/2 + 8/2`)
-      const d = lcm(a.v.d, b.v.d);
-      const na = a.v.d === d ? a : { k: 'num', v: over(a.v, d) };
-      const nb = b.v.d === d ? b : { k: 'num', v: over(b.v, d) };
-      const changed = [a !== na ? a : null, b !== nb ? b : null].filter(Boolean);
-      return { pair: changed, res: nb !== b ? nb : na, apply: (list) => [...list.slice(0, i), na, nb, ...list.slice(i + 2)] };
-    }
-    const r = { k: 'num', v: add(a.v, b.v) };
-    return { pair: [a, b], res: r, apply: (list) => [...list.slice(0, i), r, ...list.slice(i + 2)] };
-  }
-  return null;
+  return out.filter(Boolean);
 }
 
 const lineOf = (left, right, ctx) => [...sumSegs(left, ctx), { text: ' = ', cls: '' }, ...sumSegs(right, ctx)];
@@ -99,31 +122,34 @@ export function fractionLines(board, value) {
   let left = board.left.map((t) => toItem(t, value));
   let right = board.right.map((t) => toItem(t, value));
   const lines = [];
-  let prevRes = null;
+  let prevRes = new Set();
   for (let guard = 0; guard < 40; guard++) {
-    const onLeft = nextOp(left);
-    const found = onLeft ?? nextOp(right);
-    // both sides one number over different denominators: written over the same one, so the two can be compared (`12/2 = 6` → `12/2 = 12/2`)
-    if (!found) {
+    const kind = earliest(kindOf(left), kindOf(right));
+    const ctx = { ops: new Set(), sums: new Set(), res: new Set() };
+    if (!kind) {
+      // both sides one number over different denominators: written over the same one, so the two can be compared (`12/2 = 6` → `12/2 = 12/2`)
       const l = valueOf(left);
       const r = valueOf(right);
       if (l && r && l.d !== r.d) {
         const d = lcm(l.d, r.d);
         const nl = l.d === d ? left[0] : { k: 'num', v: over(l, d) };
         const nr = r.d === d ? right[0] : { k: 'num', v: over(r, d) };
-        const ops = [nl !== left[0] ? left[0] : null, nr !== right[0] ? right[0] : null].filter(Boolean);
-        lines.push({ segs: lineOf(left, right, { op: null, pair: ops, res: prevRes }), op: true, res: Boolean(prevRes) });
-        prevRes = nr !== right[0] ? nr : nl;
+        if (nl !== left[0]) { ctx.ops.add(left[0]); ctx.res.add(nl); }
+        if (nr !== right[0]) { ctx.ops.add(right[0]); ctx.res.add(nr); }
+        lines.push({ segs: lineOf(left, right, { ops: ctx.ops, sums: ctx.sums, res: prevRes }), op: true, res: prevRes.size > 0 });
         left = [nl];
         right = [nr];
+        prevRes = ctx.res;
         continue;
       }
     }
-    const ctx = { op: found?.op ?? null, pair: found?.pair ?? null, res: prevRes };
-    lines.push({ segs: lineOf(left, right, ctx), op: Boolean(found), res: Boolean(prevRes) });
-    if (!found) break;
-    if (onLeft) left = found.apply(left); else right = found.apply(right);
-    prevRes = found.res;
+    const nextLeft = kind ? stepOf(left, kind, ctx) : left;
+    const nextRight = kind ? stepOf(right, kind, ctx) : right;
+    lines.push({ segs: lineOf(left, right, { ops: ctx.ops, sums: ctx.sums, res: prevRes }), op: Boolean(kind), res: prevRes.size > 0 });
+    if (!kind) break;
+    left = nextLeft;
+    right = nextRight;
+    prevRes = ctx.res;
   }
   const l = valueOf(left);
   const r = valueOf(right);

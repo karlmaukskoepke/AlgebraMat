@@ -50,7 +50,7 @@ const isNumber = (it) => it.k === 'sub' || it.k === 'num';
 
 // Text of an item as a list of segments ({ text, cls }); `mark` says which item (by reference) is the op, and which the result.
 function itemSegs(it, ctx, alone) {
-  const cls = ctx.op === it || ctx.pair?.includes(it) ? 'is-op' : ctx.res === it ? 'is-res' : '';
+  const cls = ctx.ops?.has(it) ? 'is-op' : ctx.res?.has(it) ? 'is-res' : '';
   // the value dropped into x is always the blue of the x it replaced (Build H, Part 1), even when it is the operation about to happen
   const blue = cls ? `${cls} is-blue` : 'is-blue';
   if (it.k === 'sub') return [{ text: !alone && it.v < 0 ? `(${signed(it.v)})` : signed(it.v), cls: blue }];
@@ -70,18 +70,18 @@ function sumSegs(items, ctx, inGroup = false) {
   items.forEach((it, i) => {
     if (i === 0 && inGroup && it.k === 'sub') { out.push(...itemSegs(it, ctx, true)); return; }   // `(−7 + 4)`, not `((−7) + 4)`
     if (i && it.k === 'grp' && it.f < 0) {                          // a group subtracted after another term: 5 − 2(−3 + 2) (Build M)
-      const cls = ctx.op === it ? 'is-op' : '';
+      const cls = ctx.ops?.has(it) ? 'is-op' : '';
       out.push({ text: ' − ', cls }, { text: `${frontText(-it.f, it.d)}(`, cls }, ...sumSegs(it.inner, ctx, true), { text: ')', cls });
       return;
     }
-    const opCls = i && ctx.pair?.includes(it) && ctx.pair.includes(items[i - 1]) ? 'is-op' : '';
+    const opCls = i && ctx.sums?.has(it) && ctx.sums.has(items[i - 1]) ? 'is-op' : '';
     if (i && it.k === 'num' && it.v < 0) {                          // a negative number after another term is written as a subtraction: 15 − 6
       out.push({ text: ' − ', cls: opCls });
-      out.push({ text: `${-it.v}`, cls: ctx.op === it || ctx.pair?.includes(it) ? 'is-op' : ctx.res === it ? 'is-res' : '' });
+      out.push({ text: `${-it.v}`, cls: ctx.ops?.has(it) ? 'is-op' : ctx.res?.has(it) ? 'is-res' : '' });
       return;
     }
     if (i && it.k === 'prod' && it.a < 0) {                         // so is x with a minus after another term: 4 − 3(5) (Build K, T)
-      const cls = ctx.op === it ? 'is-op' : '';
+      const cls = ctx.ops?.has(it) ? 'is-op' : '';
       out.push({ text: ' − ', cls }, { text: `${-it.a}(`, cls }, { text: signed(it.v), cls: cls ? `${cls} is-blue` : 'is-blue' }, { text: ')', cls });
       return;
     }
@@ -91,68 +91,79 @@ function sumSegs(items, ctx, inGroup = false) {
   return out;
 }
 
-// The next operation on a list of items (left to right, products and fractions first, then sums): { apply, op, pair }, or null.
-function nextOp(items) {
+// One step of the work (Karl, after Build V: the check was too slow, one operation a press): every operation of the same kind, on both
+// sides at once, in the order of operations: first inside the parentheses, then every product (each x's number times the value, a factor
+// or a fraction times its parenthesis worked out, the opposite of a number), then every run of numbers added together in one go
+// (`12 + 4 = 4 + 9` → `16 = 13`). `kindOf(items)` is the first kind a list still holds.
+const KINDS = ['inner', 'mul', 'sum'];
+const single = (it) => it.inner.length === 1 && isNumber(it.inner[0]);
+function kindOf(items) {
+  let mul = false;
   for (const it of items) {
-    if (it.k === 'grp') {                                           // a parenthesis is worked out first, then multiplied (Build M)
-      const inner = nextOp(it.inner);
-      if (inner) return { ...inner, apply: (list) => list.map((x) => (x === it ? { ...it, inner: inner.apply(it.inner) } : x)) };
-      if (it.inner.length === 1 && isNumber(it.inner[0])) {
-        const r = { k: 'num', v: (it.f * it.inner[0].v) / (it.d ?? 1) };
-        return { op: it, res: r, apply: (list) => list.map((x) => (x === it ? r : x)) };
-      }
-    }
+    if (it.k === 'grp' || it.k === 'frac') { if (!single(it)) return 'inner'; mul = true; }
+    if (it.k === 'prod' || it.k === 'neg') mul = true;
   }
-  for (const it of items) {
-    if (it.k === 'frac') {
-      const inner = nextOp(it.inner);
-      if (inner) return { ...inner, apply: (list) => list.map((x) => (x === it ? { ...it, inner: inner.apply(it.inner) } : x)) };
-      if (it.inner.length === 1 && isNumber(it.inner[0])) {
-        const r = { k: 'num', v: it.inner[0].v / it.n };
-        return { op: it, res: r, apply: (list) => list.map((x) => (x === it ? r : x)) };
-      }
-    }
-  }
-  for (const it of items) {
-    if (it.k === 'neg') {
-      const r = { k: 'num', v: -it.v };
-      return { op: it, res: r, apply: (list) => list.map((x) => (x === it ? r : x)) };
-    }
-    if (it.k === 'prod') {
-      const r = { k: 'num', v: it.a * it.v };
-      return { op: it, res: r, apply: (list) => list.map((x) => (x === it ? r : x)) };
-    }
-  }
-  for (let i = 0; i + 1 < items.length; i++) {
-    if (isNumber(items[i]) && isNumber(items[i + 1])) {
-      const r = { k: 'num', v: items[i].v + items[i + 1].v };
-      return { pair: [items[i], items[i + 1]], res: r, apply: (list) => [...list.slice(0, i), r, ...list.slice(i + 2)] };
-    }
-  }
-  return null;
+  if (mul) return 'mul';
+  return items.some((it, i) => isNumber(it) && isNumber(items[i + 1] ?? {})) ? 'sum' : null;
 }
-const applyOp = (items, found) => found.apply(items);
+const earliest = (...kinds) => KINDS.find((k) => kinds.includes(k)) ?? null;
+// The list after one step of `kind`; the items worked on go into `ops`, their results into `res` (and summed runs into `sums`).
+function stepOf(items, kind, ctx) {
+  if (kind === 'inner') return items.map((it) => ((it.k === 'grp' || it.k === 'frac') && !single(it) ? { ...it, inner: stepOf(it.inner, kindOf(it.inner), ctx) } : it));
+  if (kind === 'mul') {
+    return items.map((it) => {
+      let v = null;
+      if ((it.k === 'grp') && single(it)) v = (it.f * it.inner[0].v) / (it.d ?? 1);
+      else if (it.k === 'frac' && single(it)) v = it.inner[0].v / it.n;
+      else if (it.k === 'neg') v = -it.v;
+      else if (it.k === 'prod') v = it.a * it.v;
+      if (v === null) return it;
+      const r = { k: 'num', v };
+      ctx.ops.add(it); ctx.res.add(r);
+      return r;
+    });
+  }
+  if (kind === 'sum') {
+    const out = [];
+    for (let i = 0; i < items.length;) {
+      let j = i;
+      while (j < items.length && isNumber(items[j])) j++;
+      if (j - i >= 2) {
+        const run = items.slice(i, j);
+        const r = { k: 'num', v: run.reduce((a, it) => a + it.v, 0) };
+        run.forEach((it) => { ctx.ops.add(it); ctx.sums.add(it); });
+        ctx.res.add(r);
+        out.push(r);
+        i = j;
+      } else { out.push(items[i]); i += 1; }
+    }
+    return out;
+  }
+  return items;
+}
 
 const lineOf = (left, right, ctx) => [...sumSegs(left, ctx), { text: ' = ', cls: '' }, ...sumSegs(right, ctx)];
 const valueOf = (items) => (items.length === 1 && isNumber(items[0]) ? items[0].v : null);
 
-// The lines of the work: [{ segs }], and whether the two sides come out equal. Each line shows the operation about to happen
-// (`op`) and the result of the one before (`res`); a line may carry both.
+// The lines of the work: [{ segs }], and whether the two sides come out equal. Each line shows the operations about to happen
+// (`op`) and the results of the step before (`res`); a line may carry both.
 export function substitutionLines(board, value) {
   let left = board.left.map((t) => toItem(t, value));
   let right = board.right.map((t) => toItem(t, value));
   const lines = [];
   const states = [];                                                // the items of each line, for a picture of it (the seesaw's check, Build H)
-  let prevRes = null;
+  let prevRes = new Set();
   for (let guard = 0; guard < 40; guard++) {
-    const onLeft = nextOp(left);
-    const found = onLeft ?? nextOp(right);
-    const ctx = { op: found?.op ?? null, pair: found?.pair ?? null, res: prevRes };
-    lines.push({ segs: lineOf(left, right, ctx), op: Boolean(found), res: Boolean(prevRes) });
+    const kind = earliest(kindOf(left), kindOf(right));
+    const ctx = { ops: new Set(), sums: new Set(), res: new Set() };
+    const nextLeft = kind ? stepOf(left, kind, ctx) : left;
+    const nextRight = kind ? stepOf(right, kind, ctx) : right;
+    lines.push({ segs: lineOf(left, right, { ops: ctx.ops, sums: ctx.sums, res: prevRes }), op: Boolean(kind), res: prevRes.size > 0 });
     states.push({ left: left.map((it) => ({ ...it })), right: right.map((it) => ({ ...it })) });
-    if (!found) break;
-    if (onLeft) left = applyOp(left, found); else right = applyOp(right, found);
-    prevRes = found.res;
+    if (!kind) break;
+    left = nextLeft;
+    right = nextRight;
+    prevRes = ctx.res;
   }
   const l = valueOf(left);
   const r = valueOf(right);

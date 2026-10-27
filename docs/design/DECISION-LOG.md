@@ -376,3 +376,13 @@ Its notes: "Improper fractions are full credit, no mixed numbers" and "x can be 
 7. **Scope of Build V (Karl, 2026-10-26):** Levels 1-3 (a fraction answer already simple; one to simplify; x = 0 mixed in) and the
    fraction answers. Levels 4-5 are reserved in the pack and the save code now (so no second layout change), hidden from students until
    V2. Dividing never fails on this card: `6x = 15` divided by 6 writes `x = 15/6`.
+
+## 2026-10-27: Two fixes after Build V (Karl)
+
+1. **The note while the value waits to be dragged** ("Let's check that x = 7 is the solution. Drag the 7 onto an x above.") covered the
+   value on a shorter window (1366×650), so students could not drag it up (Enter still worked). It now sits low in the empty check space
+   on every Solve it card, and no pop-up may cover the value waiting to be dragged.
+2. **The check is faster.** "If there are multiple values of x, these should multiply their coefficients in the same step. Same with
+   combining values after. Not one at a time at all." Each press now does every operation of one kind at once, on both sides: inside the
+   parentheses, then every product, then (with fractions) every whole number over the denominator, then every sum. This replaces rev 2.5's
+   one operation a press, on every card. Loop spec rev 2.12, section 4.
