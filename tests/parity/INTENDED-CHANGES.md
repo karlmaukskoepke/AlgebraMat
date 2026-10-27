@@ -706,6 +706,20 @@ Problems, class-sheet records and the 25 scripted runs: unchanged. Every recorde
 | `savecode:distribute-more-L4` | none | a v19 code, round-trips | Level 4 |
 | `savecode:distribute-more-L5` | none | a v19 code, round-trips | Level 5 |
 
+## Build V (2026-10-27): Strange solutions, Levels 1-3
+
+Problems, class-sheet records, the 25 scripted runs and the 70 screens: unchanged. Every recorded save code decodes as before; the five new
+rows are the new card's five saved levels (Levels 4-5 are saved but hidden until V2), in the new layout (v20, the card appended at the
+end). (Codes are now written in v20, so the rows above that say "a v19 code" are v20 codes today; each still decodes to the same progress.)
+
+| Key | Before | After | Why |
+|---|---|---|---|
+| `savecode:strange-solutions-L1` | none (no such card) | a v20 code, round-trips | the new card's Level 1 done |
+| `savecode:strange-solutions-L2` | none | a v20 code, round-trips | Level 2 |
+| `savecode:strange-solutions-L3` | none | a v20 code, round-trips | Level 3 |
+| `savecode:strange-solutions-L4` | none | a v20 code, round-trips | Level 4 (saved, hidden until V2) |
+| `savecode:strange-solutions-L5` | none | a v20 code, round-trips | Level 5 (saved, hidden until V2) |
+
 <!-- history: nothing below this line is read by the harness -->
 
 ## History: screen changes accepted by the re-baseline of 2026-10-24 (Build O, Part 0)

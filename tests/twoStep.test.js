@@ -310,7 +310,7 @@ describe('shape coverage: every state on 200 problems a level, along every path'
 
 describe('the pack, old progress and save codes', () => {
   it('sits in the old Two-step card\'s slot; the old card is retired but kept with its levels', () => {
-    expect(SECTIONS.find((s) => s.id === 'solve').packs).toEqual(['add-both', 'divide-it', 'flip-everything', 'one-step', 'two-step-equations', 'distribute-solve', 'variables-both-sides', 'distribute-more']);
+    expect(SECTIONS.find((s) => s.id === 'solve').packs).toEqual(['add-both', 'divide-it', 'flip-everything', 'one-step', 'two-step-equations', 'distribute-solve', 'variables-both-sides', 'distribute-more', 'strange-solutions']);
     expect(twoStepEquations).toMatchObject({ id: 'two-step-equations', title: 'Two-step equations', levels: 7 });
     expect(twoStepEquations.firstLevel).toBeUndefined();
     expect(twoStepEquations.whyLevel).toBeUndefined();
@@ -319,7 +319,7 @@ describe('the pack, old progress and save codes', () => {
     expect(PACKS.length).toBeLessThanOrEqual(30);                             // the class sheet's limit
   });
   it('v16 codes carry its seven levels; every older code means what it did', () => {
-    expect(CODE_VERSION).toBe(19);                                             // (v18: Variables on both sides, Build R)                                             // (v17 appends Distribute, combine, solve: Build M)
+    expect(CODE_VERSION).toBe(20);                                             // (v18: Variables on both sides, Build R)                                             // (v17 appends Distribute, combine, solve: Build M)
     const prog = newProgress(PACKS);
     prog.packs['two-step-equations'].levels = [true, false, true, false, false, true, false];
     prog.packs['flip-everything'].levels = [false, true, true, false, true, false];

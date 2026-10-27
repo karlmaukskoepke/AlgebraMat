@@ -109,6 +109,9 @@ function termsOf(side, s, o) {
       const dot = o.live && s.hint?.kind === 'coef' && (c > 1 || c < -1);
       if (front) out.push(html('span', 'lb-coef', dot ? [piece, coefDot(), xel] : [piece, xel]));
       else out.push(xel);
+    } else if (t.kind === 'ratio') {
+      // a divide that does not split (Build V, Strange solutions): `x = 15/6`, stacked, the sign on the top; nothing worked out
+      out.push(html('span', 'lb-num lb-ratio', [stackedText(`${t.n < 0 ? MINUS : ''}${Math.abs(t.n)}`, String(t.d))], { 'aria-label': `${t.n < 0 ? 'negative ' : ''}${Math.abs(t.n)} over ${t.d}` }));
     } else {
       out.push(html('span', 'lb-num', [i > 0 && t.v < 0 ? String(-t.v) : signed(t.v)]));
     }
@@ -116,11 +119,21 @@ function termsOf(side, s, o) {
   return out;
 }
 
+// A fraction drawn stacked, its top over its bottom (Build U's fraction factor; Build V's answers and checks)
+export const stackedText = (top, bottom) => html('span', 'lx-sfrac', [html('span', 'lx-sfrac-top', [top]), html('span', 'lx-sfrac-bar'), html('span', 'lx-sfrac-bot', [bottom])]);
+// A piece of a check's line: a fraction (`5/2`, `(−5/2)`, `−15/2`) is drawn stacked, anything else as it is (Build V)
+const FRACTION_TEXT = /^(\(?)([−-]?\d+)\/(\d+)(\)?)$/;
+export function segKids(text) {
+  const m = FRACTION_TEXT.exec(text);
+  if (!m) return [text];
+  return [...(m[1] ? ['('] : []), stackedText(m[2], m[3]), ...(m[4] ? [')'] : [])];
+}
+
 // The dot of the hint before dividing (Build Q): `5 · x`
 export const coefDot = () => html('span', 'lb-coefdot', ['·'], { 'aria-label': 'times' });
 
 // An x still waiting for the value once another x has it: a faint ghost of the value above it (Build P, Part 8)
-export const waitingGhost = (v) => html('span', 'lb-xwait', [signed(v)], { 'aria-hidden': 'true' });
+export const waitingGhost = (v) => html('span', 'lb-xwait', segKids(signed(v)), { 'aria-hidden': 'true' });
 
 const charsOf = (list) => list.map((x) => (x.kind === 'frac' || x.kind === 'neg' || x.kind === 'group' ? 5 + charsOf(x.inner) : x.kind === 'times' ? 7 + charsOf(x.inner) : x.kind === 'x' ? ((x.coef ?? 1) > 1 ? 2 : (x.coef ?? 1) < 0 ? String(x.coef).length : 1) : String(signed(x.v)).length + 3)).reduce((a, b) => a + b, 0);
 const eqClass = (chars) => (chars > 30 ? ' is-xlong' : chars > 20 ? ' is-long' : '');
@@ -238,16 +251,16 @@ function substList(s, sub, view) {
   // with several x's, line 1 has a space kept before each x-term (its number in front, then the x), for the shared column grid (rev 2.6)
   const many = segs.filter((seg) => seg.xi !== undefined).length > 1;
   const head = segs.flatMap((seg, j) => {
-    const el = seg.xi !== undefined ? html('span', seg.cls, [seg.text], { 'data-pair': String(seg.xi) }) : seg.cls ? html('span', seg.cls, [seg.text]) : seg.text;
+    const el = seg.xi !== undefined ? html('span', seg.cls, [seg.text], { 'data-pair': String(seg.xi) }) : seg.cls ? html('span', seg.cls, segKids(seg.text)) : segKids(seg.text);
     const startsX = many && (seg.xi !== undefined ? !(j > 0 && segs[j - 1].front) : seg.front);
-    return startsX ? [html('span', 'sv-pad1'), el] : [el];
+    return startsX ? [html('span', 'sv-pad1'), ...[el].flat()] : [el].flat();
   });
   if (!view.lines.length) {
     const list = checkSpace([], view.mark ? sub.ok : null);
     if (sub.placing) list.append(html('div', 'sv-line1src', head, { hidden: '', 'aria-hidden': 'true' }));
     return list;
   }
-  const lines = view.lines.map((line, i) => (i === 0 ? pairedSegs(line.segs) : line.segs.map((seg) => (seg.cls ? html('span', seg.cls, [seg.text]) : seg.text))));
+  const lines = view.lines.map((line, i) => (i === 0 ? pairedSegs(line.segs) : line.segs.flatMap((seg) => (seg.cls ? [html('span', seg.cls, segKids(seg.text))] : segKids(seg.text)))));
   const list = checkSpace([head, ...lines], view.mark ? sub.ok : null, view.last + 1);
   list.children[0].classList.add('sv-line1');
   list.children[1].classList.add('sv-line2');
@@ -265,7 +278,7 @@ function pairedSegs(segs) {
     const value = seg.cls.split(' ').includes('is-blue');
     const prefix = !value && segs[j + 1]?.cls.split(' ').includes('is-blue') && /×\s$|\($/.test(seg.text);
     if (k > 0 && (prefix || (value && !/×\s$|\($/.test(segs[j - 1]?.text ?? '')))) out.push(html('span', 'sv-pad'));
-    out.push(value ? html('span', seg.cls, [seg.text], { 'data-pair': String(k++) }) : seg.cls ? html('span', seg.cls, [seg.text]) : seg.text);
+    out.push(...(value ? [html('span', seg.cls, segKids(seg.text), { 'data-pair': String(k++) })] : seg.cls ? [html('span', seg.cls, segKids(seg.text))] : segKids(seg.text)));
   });
   return out;
 }
@@ -424,7 +437,7 @@ export function bindValueDrag(root, dispatch) {
     const chip = e.target.closest('[data-chip]');
     if (!chip || e.button > 0) return;
     e.preventDefault();
-    ghost = html('div', 'sv-ghost', [chip.textContent]);
+    ghost = html('div', 'sv-ghost', [chip.querySelector('.lx-sfrac')?.cloneNode(true) ?? chip.textContent]);   // (a fraction travels stacked: Build V)
     document.body.append(ghost);
     root.classList.add('is-carrying-value');                              // every x still waiting for the value glows as a drop target
     shadow = slideShadow(root);

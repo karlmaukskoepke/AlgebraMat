@@ -18,6 +18,7 @@ import { generateDivideLevel } from '../engine/generateDivide.js';
 import { generateDistSolveLevel } from '../engine/generateDistSolve.js';
 import { generateBothLevel } from '../engine/generateBoth.js';
 import { generateDistMoreLevel } from '../engine/generateDistMore.js';
+import { generateStrangeLevel, STRANGE_SHOWN } from '../engine/generateStrange.js';
 
 // Group It (built as "Lasso"; its id stays 'lasso' so saved progress and
 // save codes from before the rename still work).
@@ -228,6 +229,20 @@ export const distributeMore = {
   generate: (level, seed) => generateDistMoreLevel(level, seed),
 };
 
+// Strange solutions (Build V, basic form): `10x − 4 = 4x + 5` solved as on Variables on both sides, the divide writing `x = 9/6`, the
+// student simplifying and typing `3/2`; x = 0 mixed in. Five saved levels, shown as saved; Build V builds Levels 1-3 and shows only those
+// (`lastLevel`: the later levels are saved but hidden, as the old "coming soon" cards were, until V2 builds no solution and infinitely many).
+export const strangeSolutions = {
+  id: 'strange-solutions',
+  title: 'Strange solutions',
+  subtitle: 'Fractions and zero',
+  blurb: 'Answers that are fractions or 0: divide, simplify, then type x.',
+  levels: 5,
+  lastLevel: STRANGE_SHOWN,
+  levelNames: ['a fraction answer', 'simplify the fraction', 'x = 0, mixed in', 'no solution, infinitely many', 'mixed, with distributing'],
+  generate: (level, seed) => generateStrangeLevel(level, seed),
+};
+
 // The rest of the equations are still to come: they show as cards under Solve it, with no levels (so they take no room in saves).
 const soon = (id, title, subtitle) => ({ id, title, subtitle, comingSoon: true, levels: 0, levelNames: [] });
 
@@ -249,13 +264,14 @@ export const PACKS = [
   distributeSolve,
   variablesBothSides,
   distributeMore,
+  strangeSolutions,
 ];
 
 // The home screen's three sections (Karl, 2026-10-04): which cards live under each, and its color (a pastel).
 export const SECTIONS = [
   { id: 'count', title: 'Count it', blurb: 'Adding, subtracting and multiplying numbers', packs: ['combineit', 'flipit', 'lasso'] },
   { id: 'build', title: 'Build it', blurb: 'Expressions, with boxes, circles and groups', packs: ['boxes', 'groups-of-terms', 'distribute-combine', 'value'] },
-  { id: 'solve', title: 'Solve it', blurb: 'Solving equations', packs: ['add-both', 'divide-it', 'flip-everything', 'one-step', 'two-step-equations', 'distribute-solve', 'variables-both-sides', 'distribute-more'] },
+  { id: 'solve', title: 'Solve it', blurb: 'Solving equations', packs: ['add-both', 'divide-it', 'flip-everything', 'one-step', 'two-step-equations', 'distribute-solve', 'variables-both-sides', 'distribute-more', 'strange-solutions'] },
 ];
 export const sectionById = (id) => SECTIONS.find((s) => s.id === id);
 export const sectionOf = (packId) => SECTIONS.find((s) => s.packs.includes(packId));
@@ -266,4 +282,7 @@ export const isWhyLevel = (pack, level) => Boolean(pack?.whyLevel) && level === 
 export const WHY_LABEL = 'See why it works';
 // The number a level is called on screen: a card that opens at a later level counts from 1.
 export const levelNumber = (pack, level) => level - ((pack?.firstLevel ?? 1) - 1);
+// The last level a card shows: its saved levels after it are kept (in progress, codes and on the class sheet) but hidden until they are
+// built (Strange solutions shows 3 of its 5, Build V).
+export const lastLevelOf = (pack) => pack?.lastLevel ?? pack?.levels ?? 0;
 export const packById = (id) => PACKS.find((p) => p.id === id) ?? HIDDEN_PACKS.find((p) => p.id === id);

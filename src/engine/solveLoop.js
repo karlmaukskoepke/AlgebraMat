@@ -132,7 +132,7 @@ export function createSolveLoop(card) {
     s.stage = 'done';
     s.step = 'done';
     s.clean = s.wrongs === 0 && s.stuck === 0 && s.taught === 0 && !s.helped;
-    s.finalText = signed(s.problem.x);
+    s.finalText = card.answerText?.(s.problem) ?? signed(s.problem.x);           // (a fraction or 0: Strange solutions, Build V)
     return say(s, key, { answer: s.finalText });
   }
 
@@ -152,7 +152,7 @@ export function createSolveLoop(card) {
     s.sub = null;
   }
 
-  const api = { say, commit, pushHistory, snapshot, restore, blockMove, finish, alone, bareState, tryStuck, fold };
+  const api = { say, commit, pushHistory, snapshot, restore, blockMove, finish, alone, bareState, tryStuck, fold, answerLive, subTotal };
 
   // ---------- the reducer ----------
   function reduce(state, action) {

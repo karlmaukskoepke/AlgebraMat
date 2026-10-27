@@ -22,8 +22,9 @@ import { FLIP_RUNGS } from './rungs/flip.js';
 import { TWO_STEP_RUNGS } from './rungs/twoStep.js';
 import { DISTRIBUTE_RUNGS } from './rungs/distribute.js';
 import { BOTH_RUNGS } from './rungs/bothSides.js';
+import { STRANGE_RUNGS } from './rungs/strange.js';
 
-export const REGISTRY = { ...ADD_RUNGS, ...DIVIDE_RUNGS, ...FLIP_RUNGS, ...TWO_STEP_RUNGS, ...DISTRIBUTE_RUNGS, ...BOTH_RUNGS };
+export const REGISTRY = { ...ADD_RUNGS, ...DIVIDE_RUNGS, ...FLIP_RUNGS, ...TWO_STEP_RUNGS, ...DISTRIBUTE_RUNGS, ...BOTH_RUNGS, ...STRANGE_RUNGS };
 // (a new card adds its own shapes' entries)
 export function registerRungs(entries) {
   for (const [id, entry] of Object.entries(entries)) {

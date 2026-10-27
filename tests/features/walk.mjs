@@ -322,13 +322,107 @@ class Walk {
     const cols = await this.page.locator('.lb-rowwrap.is-stackwork').last().locator('.lx-col').evaluateAll((cs) => cs.map((c) => [c.firstElementChild.innerText.replace(/\s+/g, ''), c.querySelector('.lx-under').innerText.replace(/\s+/g, ''), c.querySelectorAll('.is-struck').length]));
     if (!cols.some(([t, u, n]) => t === term && u === under && n === 2)) throw new Error(`${under} should be written under the struck ${term} after step "${this.step}": ${JSON.stringify(cols)}`);
   }
-  async rows() { return (await this.page.evaluate(() => [...document.querySelectorAll('.lb-stack .lb-rowwrap')].map((r) => r.innerText.replace(/\s+/g, '')))); }
+  // Strange solutions (Build V): x = [top] / [bottom]; the top box clicked, the fraction typed (`/` goes to the bottom), Enter
+  async fraction(text) { await this.click('[data-target="ansTop"]'); await this.type(text); await this.enter(); await wait(this.page, 300); }
+  // ... then dragged into each x and Enter a line at a time until the check ends (Balanced or Not balanced)
+  async checkFraction(text) {
+    await this.fraction(text);
+    for (let k = 0; k < 4 && await this.page.locator('[data-x][data-action="placeValue"]').count(); k++) await this.drag();
+    for (let k = 0; k < 16 && !/Balanced|Not balanced/.test(await this.text()); k++) await this.enter();
+    await wait(this.page, 300);
+  }
+  // the check's lines as read on the screen (a stacked fraction reads 5/2)
+  async checkLines() {
+    return this.page.evaluate(() => [...document.querySelectorAll('.sv-checklist .sv-checkrow')].map((r) => {
+      const c = r.cloneNode(true);
+      for (const f of c.querySelectorAll('.lx-sfrac')) f.replaceWith(`${f.querySelector('.lx-sfrac-top').textContent}/${f.querySelector('.lx-sfrac-bot').textContent}`);
+      return c.textContent.replace(/\s+/g, '');
+    }));
+  }
+  async lines(...want) {
+    const got = await this.checkLines();
+    for (const l of want) if (!got.includes(l.replace(/\s+/g, ''))) throw new Error(`the check should have the line ${l} after step "${this.step}": ${got.join(' | ')}`);
+  }
+  // (a stacked fraction reads 5/2: Build V)
+  async rows() {
+    return (await this.page.evaluate(() => [...document.querySelectorAll('.lb-stack .lb-rowwrap')].map((r) => {
+      const c = r.cloneNode(true);
+      for (const f of c.querySelectorAll('.lx-sfrac')) f.replaceWith(`${f.querySelector('.lx-sfrac-top').textContent}/${f.querySelector('.lx-sfrac-bot').textContent}`);
+      document.body.append(c); const t = c.innerText.replace(/\s+/g, ''); c.remove(); return t;
+    })));
+  }
   async row(text) { const rs = await this.rows(); const want = text.replace(/\s+/g, ''); if (!rs.some((r) => r.endsWith(want) || r === want)) throw new Error(`expected a row ${text} after step "${this.step}": ${rs.join(' | ')}`); }
   async box(selector) { return this.page.evaluate((s) => { const r = document.querySelector(s)?.getBoundingClientRect(); return r ? [r.left, r.top, r.right, r.bottom].map(Math.round) : null; }, selector); }
 }
 
 // ---- one walk per item (same id as in the data file) ---------------------------------------------------------------------------------
 const WALKS = {
+  // ---- Build V: Strange solutions (Levels 1-3, the fraction answers) ----
+  async 'v-level-1'(w) {
+    await w.start(); await w.see('9x + 1 = 7x + 6'); await w.both('v-level-1');
+    w.at('drag the 7x across, combine 2x'); await w.crossTerm('7x', 'left'); await w.row('9x − 7x + 1 = 6'); await w.combineTerms('−7x', '9x', '2x'); await w.row('2x + 1 = 6');
+    w.at('Add −1, combine 5'); await w.addEnter(-1); await w.row('2x = 6 − 1'); await w.combineTerms('−1', '6', 5); await w.row('2x = 5');
+    w.at('Divide 2'); await w.divEnter(2); await w.row('x = 5/2'); await w.notSee('doesn’t split');
+    w.at('type 5/2, check'); await w.checkFraction('5/2'); await w.see('✓ Balanced');
+  },
+  async 'v-divide'(w) {
+    await w.start(); await w.see('9x + 1 = 7x + 6');
+    w.at('to 2x = 5'); await w.crossTerm('7x', 'left'); await w.combineTerms('−7x', '9x', '2x'); await w.addEnter(-1); await w.combineTerms('−1', '6', 5); await w.row('2x = 5');
+    w.at('Divide 2'); await w.divEnter(2); await wait(w.page, 600);
+    await w.row('x = 5/2'); await w.see('Same as multiplying by ½.'); await w.notSee('doesn’t split', 'Press Undo');
+    if (await w.page.locator('.lb-failmark').count()) throw new Error('nothing should be marked ✗');
+    if (!(await w.page.locator('.lb-ratio .lx-sfrac').count())) throw new Error('5/2 should be drawn as 5 over 2');
+    await w.both('v-divide');
+  },
+  async 'v-simplify'(w) {
+    await w.start(); await w.see('2x + 10 = −4x − 5');
+    w.at('to 6x = −15'); await w.crossTerm('−4x', 'left'); await w.combineTerms('4x', '2x', '6x'); await w.row('6x + 10 = −5');
+    await w.addEnter(-10); await w.combineTerms('−10', '−5', -15); await w.row('6x = −15');
+    w.at('Divide 6'); await w.divEnter(6); await w.row('x = −15/6');
+    w.at('type −15/6'); await w.fraction('-15/6'); await w.see('Can you simplify this further?'); await w.notSee('Not balanced', 'Divide the top and the bottom');
+    if (await w.page.locator('.sv-checklist .sv-checkrow').count()) throw new Error('nothing should be checked');
+    await w.both('v-simplify');
+    w.at('type −15/6 again'); await w.fraction('-15/6'); await w.see('Can you simplify this further? Divide the top and the bottom by the same number.');
+    await w.shot('v-simplify-2');
+    w.at('type −5/2, check'); await w.checkFraction('-5/2'); await w.see('✓ Balanced');
+  },
+  async 'v-check'(w) {
+    await w.start(); await w.see('9x + 1 = 7x + 6');
+    w.at('to x = 5/2'); await w.crossTerm('7x', 'left'); await w.combineTerms('−7x', '9x', '2x'); await w.addEnter(-1); await w.combineTerms('−1', '6', 5); await w.divEnter(2); await w.row('x = 5/2');
+    w.at('type 5/2, drag'); await w.fraction('5/2');
+    if (!(await w.page.locator('[data-chip] .lx-sfrac').count())) throw new Error('the value to drag should be 5 over 2, stacked');
+    w.at('check'); for (let k = 0; k < 4 && await w.page.locator('[data-x][data-action="placeValue"]').count(); k++) await w.drag();
+    for (let k = 0; k < 16 && !/Balanced/.test(await w.text()); k++) await w.enter();
+    await w.lines('9(5/2) + 1 = 7(5/2) + 6', '45/2 + 1 = 7(5/2) + 6', '45/2 + 2/2 = 7(5/2) + 6', '47/2 = 7(5/2) + 6', '47/2 = 35/2 + 6', '47/2 = 35/2 + 12/2', '47/2 = 47/2');
+    await w.see('✓ Balanced'); await w.both('v-check');
+  },
+  async 'v-zero'(w) {
+    await w.start(); await w.see('2x − 7 = 8x − 7');
+    w.at('drag the 2x across, combine 6x'); await w.crossTerm('2x', 'right'); await w.row('−7 = 8x − 2x − 7'); await w.combineTerms('−2x', '8x', '6x'); await w.row('−7 = 6x − 7');
+    w.at('Add 7'); await w.addEnter(7); await w.row('0 = 6x');
+    w.at('Divide 6'); await w.divEnter(6); await w.row('(0) 6 = x');
+    w.at('type 0, check'); await w.checkFraction('0'); await w.see('2(0) − 7 = 8(0) − 7', '−7 = −7', '✓ Balanced'); await w.both('v-zero');
+  },
+  async 'v-keys'(w) {
+    await w.start(); await w.see('9x + 1 = 7x + 6');
+    w.at('to x = 5/2'); await w.crossTerm('7x', 'left'); await w.combineTerms('−7x', '9x', '2x'); await w.addEnter(-1); await w.combineTerms('−1', '6', 5); await w.divEnter(2);
+    w.at('click the top box, type 5, ↓, 2'); await w.click('[data-target="ansTop"]'); await w.type(5); await w.page.keyboard.press('ArrowDown'); await w.type(2);
+    await w.typedIn('[data-target="ansBottom"]', '2');
+    w.at('click the top box'); await w.click('[data-target="ansTop"]'); await w.typedIn('[data-target="ansTop"]', '');
+    w.at('type 2.5'); await w.type('2.5'); await w.see('Write it as a fraction, like 5/2.'); await w.both('v-keys');
+  },
+  async 'student-strange'(w) {
+    await w.start(); await w.see('2x + 10 = −4x − 5');
+    w.at('mistake 1: 11 seconds, I’m stuck'); await wait(w.page, 11000);
+    if (!(await w.page.locator('.lx-help.is-idle').count())) throw new Error('I’m stuck should be flashing after 10 seconds');
+    await w.stuck(); await w.see('Move this x-term to the other side.');
+    w.at('to x = −15/6'); await w.crossTerm('−4x', 'left'); await w.combineTerms('4x', '2x', '6x'); await w.addEnter(-10); await w.combineTerms('−10', '−5', -15); await w.divEnter(6); await w.row('x = −15/6');
+    w.at('mistake 2: 15/6 unsimplified'); await w.fraction('15/6'); await w.see('Can you simplify this further?'); await w.notSee('Not balanced');
+    w.at('mistake 3: 2.5'); await w.click('[data-target="ansTop"]'); await w.type('2.5'); await w.see('Write it as a fraction, like 5/2.');
+    w.at('mistake 4: 5/2, the wrong sign'); await w.checkFraction('5/2'); await w.see('Not balanced', 'When x = 5/2, the equation is not balanced.');
+    w.at('mistake 5: Undo, 2/5, upside down'); await w.click(act('undo')); await wait(w.page, 600); await w.checkFraction('-2/5'); await w.see('Not balanced', 'Check which number goes on top'); await w.both('student-strange');
+    w.at('mistake 6: Undo, I’m stuck at x = −15/6'); await w.click(act('undo')); await wait(w.page, 600); await w.stuck(); await w.see('Simplify −15/6: divide the top and bottom by the same number, then type x.');
+  },
   // ---- Build U: Distribute more, and no × in the work ----
   async 'u-level-1'(w) {
     await w.start(); await w.see('2(x + 7) + 9 = 5x + 2'); await w.both('u-level-1');

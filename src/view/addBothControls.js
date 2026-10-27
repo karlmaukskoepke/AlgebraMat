@@ -16,7 +16,8 @@ function button(label, action, extra = {}) {
 // `liveOf`: is the x = [ ] row live? (engine/addBothLights.js: from the first frame, unless a move is owed.)
 
 // `xKeyOf`: when the pad also has an x key, for typing a sum of two x-terms like 5x (Distribute, combine, solve: Build M).
-export const makeAddBothControls = (liveOf, xKeyOf = null) => (root, dispatch) => {
+// `slashKeyOf`: when the pad also has a / key, for a fraction answer's bottom (Strange solutions: Build V).
+export const makeAddBothControls = (liveOf, xKeyOf = null, slashKeyOf = null) => (root, dispatch) => {
   root.innerHTML = '';
   const keys = document.createElement('div');
   keys.className = 'pad';
@@ -24,6 +25,8 @@ export const makeAddBothControls = (liveOf, xKeyOf = null) => (root, dispatch) =
   keys.append(button('±', 'toggleSign', { cls: 'btn-pad', aria: 'Change sign' }), ...digits, button('⌫', 'backspace', { cls: 'btn-pad', aria: 'Delete' }));
   const xKey = xKeyOf ? button('x', 'typeChar', { cls: 'btn-pad', data: { ch: 'x', key: 'x' }, aria: 'x' }) : null;
   if (xKey) keys.append(xKey);
+  const slashKey = slashKeyOf ? button('/', 'typeChar', { cls: 'btn-pad', data: { ch: '/', key: '/' }, aria: 'Fraction bar: type the bottom' }) : null;
+  if (slashKey) keys.append(slashKey);
 
   root.append(keys);
 
@@ -42,6 +45,7 @@ export const makeAddBothControls = (liveOf, xKeyOf = null) => (root, dispatch) =
       const on = !done && s.step !== 'levelDone' && (amountMode || liveOf(s));
       for (const b of keys.querySelectorAll('button')) b.disabled = !on;
       if (xKey) { xKey.hidden = done || !xKeyOf(s); xKey.disabled = xKey.hidden; }
+      if (slashKey) { slashKey.hidden = done || !slashKeyOf(s); slashKey.disabled = slashKey.hidden; }
     },
   };
 };

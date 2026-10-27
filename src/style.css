@@ -3894,3 +3894,12 @@ button.lb-divbar.is-calc:hover, button.lb-divbar.is-calc:focus-visible { backgro
 .lx-sfrac { display: inline-flex; flex-direction: column; align-items: center; vertical-align: middle; font-size: 0.7em; line-height: 1.05; margin: 0 0.06em; }
 .lx-sfrac-bar { align-self: stretch; min-width: 0.9em; border-top: 0.12em solid currentColor; margin: 0.08em 0; }
 .lb-group .lx-sfrac, .lb-stack .lx-sfrac { font-weight: inherit; }
+
+/* Strange solutions (Build V): the answer in two boxes, x = [ ] / [ ], and the value carried into the check as one stacked fraction */
+.sv-fracans { display: inline-flex; align-items: center; gap: 4px; }
+.sv-fracans .sv-ansbox { min-width: 2.6ch; }
+.sv-fracslash { font: 800 30px 'Lexend', system-ui, sans-serif; color: var(--ink); padding: 0 2px; }
+.sv-fracans.is-off .sv-fracslash { opacity: 0.45; }
+.sv-fracchip .lx-sfrac, .sv-ghost .lx-sfrac, .sv-checklist .lx-sfrac, .lb-xwait .lx-sfrac { font-size: 0.72em; }
+.lb-ratio .lx-sfrac { font-size: 0.75em; }
+.sv-ansbox.is-selected { background: #0072b2 !important; color: #fff !important; }

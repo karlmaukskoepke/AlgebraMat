@@ -13,6 +13,9 @@ export function newProgress(packs) {
       // A card that shows only its later levels (One-step equations, while the new cards replace its first ones) opens at
       // `first`. The saved levels keep their own numbers, so nothing in a save code or on the class sheet is renumbered.
       if (p.firstLevel > 1) out.packs[p.id].first = p.firstLevel;
+      // A card that shows only its earlier levels (Strange solutions, Build V: 3 of its 5, the others not built yet) ends at `last`: the
+      // levels after it are saved (all false) but are never open, never offered and never needed to complete the card.
+      if (p.lastLevel && p.lastLevel < p.levels) out.packs[p.id].last = p.lastLevel;
     }
   }
   return out;
@@ -20,6 +23,7 @@ export function newProgress(packs) {
 
 const levelsOf = (progress, packId) => progress.packs[packId]?.levels ?? [];
 const firstOf = (progress, packId) => progress.packs[packId]?.first ?? 1;
+const lastOf = (progress, packId) => progress.packs[packId]?.last ?? levelsOf(progress, packId).length;
 
 export const isLevelDone = (progress, packId, level) => levelsOf(progress, packId)[level - 1] === true;
 
@@ -29,7 +33,7 @@ export function isLevelUnlocked(progress, packId, level) {
   const levels = levelsOf(progress, packId);
   if (level < 1 || level > levels.length) return false;
   const first = firstOf(progress, packId);
-  if (level < first) return false;
+  if (level < first || level > lastOf(progress, packId)) return false;
   return level === first || levels[level - 2] === true || level <= (progress.packs[packId]?.open ?? 0);
 }
 
@@ -47,7 +51,7 @@ export function openLevels(progress, packId, level) {
 export const doneCount = (progress) => Object.values(progress?.packs ?? {}).reduce((n, e) => n + (e.levels ?? []).filter((d) => d === true).length, 0);
 
 export function isPackComplete(progress, packId) {
-  const levels = levelsOf(progress, packId).slice(firstOf(progress, packId) - 1);
+  const levels = levelsOf(progress, packId).slice(firstOf(progress, packId) - 1, lastOf(progress, packId));
   return levels.length > 0 && levels.every(Boolean);
 }
 
@@ -63,7 +67,7 @@ export function completeLevel(progress, packId, level) {
 export function nextLevel(progress, packId) {
   const levels = levelsOf(progress, packId);
   const first = firstOf(progress, packId);
-  const i = levels.findIndex((done, k) => k >= first - 1 && !done);
+  const i = levels.findIndex((done, k) => k >= first - 1 && k < lastOf(progress, packId) && !done);
   return i === -1 ? null : i + 1;
 }
 
@@ -343,8 +347,20 @@ const LAYOUTS = {
       { id: 'distribute-solve', levels: 5 }, { id: 'variables-both-sides', levels: 5 }, { id: 'distribute-more', levels: 5 },
     ],
   },
+  // Strange solutions, 5 levels (Build V; 3 shown until V2), appended at the end: 108 bits, in 22 symbols (about 109.0). v1-v19 codes read
+  // as before.
+  20: {
+    data: 22,
+    packs: [
+      { id: 'flipit', levels: 5 }, { id: 'lasso', levels: 7 }, { id: 'boxes', levels: 6 },
+      { id: 'groups-of-terms', levels: 8 }, { id: 'combineit', levels: 5 }, { id: 'distribute-combine', levels: 5 },
+      { id: 'value', levels: 5 }, { id: 'one-step', levels: 8 }, { id: 'two-step', levels: 8 }, { id: 'switch', levels: 6 },
+      { id: 'add-both', levels: 6 }, { id: 'divide-it', levels: 6 }, { id: 'flip-everything', levels: 6 }, { id: 'two-step-equations', levels: 7 },
+      { id: 'distribute-solve', levels: 5 }, { id: 'variables-both-sides', levels: 5 }, { id: 'distribute-more', levels: 5 }, { id: 'strange-solutions', levels: 5 },
+    ],
+  },
 };
-export const CODE_VERSION = 19;
+export const CODE_VERSION = 20;
 
 // Weighted sum mod 31. Weights 2, 3, 4, … are all nonzero mod 31 and differ
 // by 1 between neighbors, so any single typo or neighbor swap is caught.

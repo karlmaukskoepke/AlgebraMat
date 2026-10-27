@@ -3,7 +3,7 @@ import { isLevelDone, isLevelUnlocked, isPackComplete } from '../engine/progress
 import { installBar } from './installPrompt.js';
 import { accountLabel } from './account.js';
 import { CARD_CHALLENGES, challengeById } from '../engine/fluency.js';
-import { levelNumber, isWhyLevel, WHY_LABEL } from '../packs/index.js';
+import { levelNumber, isWhyLevel, WHY_LABEL, lastLevelOf } from '../packs/index.js';
 
 const firstOf = (pack) => pack.firstLevel ?? 1;                       // a card that opens at a later level counts from 1 on screen
 
@@ -20,7 +20,7 @@ const h = (tag, attrs = {}, ...children) => {
 
 function levelDots(progress, pack) {
   const dots = h('div', { class: 'dots', 'aria-hidden': 'true' });
-  for (let l = firstOf(pack); l <= pack.levels; l++) {
+  for (let l = firstOf(pack); l <= lastLevelOf(pack); l++) {
     const state = isLevelDone(progress, pack.id, l) ? 'done'
       : isLevelUnlocked(progress, pack.id, l) ? '' : 'locked';
     dots.append(h('span', { class: `dot ${state}`.trim() }));
@@ -47,8 +47,8 @@ function fluencyRow(pack, bests) {
 
 function packCard(progress, pack, bests) {
   const complete = isPackComplete(progress, pack.id);
-  const levels = h('div', { class: `level-list${pack.levels > 4 ? ' many' : ''}` });
-  for (let l = firstOf(pack); l <= pack.levels; l++) {
+  const levels = h('div', { class: `level-list${lastLevelOf(pack) > 4 ? ' many' : ''}` });
+  for (let l = firstOf(pack); l <= lastLevelOf(pack); l++) {
     const done = isLevelDone(progress, pack.id, l);
     const open = isLevelUnlocked(progress, pack.id, l);
     levels.append(h('button', {
@@ -96,7 +96,7 @@ function landing(sections, packs, progress) {
       h('span', { class: 'section-blurb' }, sec.blurb),
       h('span', { class: 'mini-cards' }, ...sec.packs.map((id) => {
         const pack = packs.find((p) => p.id === id);
-        const shown = pack.levels - firstOf(pack) + 1;
+        const shown = lastLevelOf(pack) - firstOf(pack) + 1;          // (the levels it shows: Strange solutions 3 of 5, Build V)
         const done = pack.comingSoon ? 0 : Array.from({ length: shown }, (_, i) => isLevelDone(progress, pack.id, firstOf(pack) + i)).filter(Boolean).length;
         return h('span', { class: `mini-card${pack.comingSoon ? ' is-soon' : ''}` },
           h('span', { class: 'mini-name' }, pack.title),
@@ -198,7 +198,7 @@ export function renderPackMap(root, progress, packs, {
 
 // Shown in place of the Mat when the fifth problem of a level is solved.
 export function renderLevelDone(root, { pack, level, packComplete, nextPack, best = 0, onNext, onMap, onPractice }) {
-  const hasNext = level < pack.levels;
+  const hasNext = level < lastLevelOf(pack);
   const buttons = h('div', { class: 'level-done-actions' });
   if (hasNext) buttons.append(h('button', { type: 'button', class: 'btn btn-primary', 'data-go': 'next' }, `Level ${levelNumber(pack, level + 1)} →`));
   buttons.append(h('button', { type: 'button', class: hasNext ? 'btn' : 'btn btn-primary', 'data-go': 'practice' }, 'Keep practicing'));

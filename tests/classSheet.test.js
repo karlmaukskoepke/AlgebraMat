@@ -63,6 +63,19 @@ describe('the class sheet script', () => {
     expect(book.sheets.Fluency.rows[1].slice(0, 6)).toEqual(['3-12', new Date(3000).toISOString(), 'adding', 14, 2, '3-12|3000|adding']);
   });
 
+  it('takes Strange solutions by itself: its five saved levels, a fraction typed and a nudge recorded as hint (Build V)', () => {
+    const book = new FakeBook();
+    const res = send(book, {
+      progress: { packs: { 'strange-solutions': { levels: [true, true, false, false, false], last: 3 } } },
+      events: [ev(5000, { pack: 'strange-solutions', level: 2, problem: '2x + 10 = −4x − 5', answers: [{ typed: '-2/5', tag: 'frac-swapped' }], supports: ['hint'] })],
+    });
+    expect(res.progress.packs['strange-solutions'].levels).toEqual([true, true, false, false, false]);
+    expect(book.sheets.Progress.rows[0]).toContain('strange-solutions-1');
+    const row = book.sheets.Log.rows.at(-1);
+    expect(row).toContain('strange-solutions');
+    expect(row.join(' ')).toContain('-2/5 → frac-swapped');
+  });
+
   it('keeps anything that looks like a formula as text, and ignores junk', () => {
     expect(gs.safe('=1+1')).toBe("'=1+1");
     expect(gs.safe('−3x')).toBe('−3x');

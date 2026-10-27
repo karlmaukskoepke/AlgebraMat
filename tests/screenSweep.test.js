@@ -34,6 +34,7 @@ const CARDS = [
   ['Distribute, combine, solve', 'distribute-solve', [1, 2, 3, 4, 5]],
   ['Variables on both sides', 'variables-both-sides', [1, 2, 3, 4, 5]],
   ['Distribute more', 'distribute-more', [1, 2, 3, 4, 5]],                                       // (Build U)
+  ['Strange solutions', 'strange-solutions', [1, 2, 3]],                                         // (Build V)
 ];
 const SEED = 7;
 
@@ -107,7 +108,9 @@ async function playCard(browser, base, [name, pack, levels], report) {
       await dispatch([{ type: 'lxCancel' }, { type: 'spotDismiss' }]);
       let s = await state();
       for (let k = 0; k < 3 && (s.board !== want.board || s.rows !== want.rows); k++) { await dispatch([{ type: 'undo' }, { type: 'spotDismiss' }]); s = await state(); }
-      if (s.board === want.board) return;
+      // (the same rows too: a drag folds the move before it, and Undo then leaves the same board with one row fewer, so the terms sit
+      // higher than the places the sweep noted: Build V)
+      if (s.board === want.board && s.rows === want.rows) return;
       await page.goto(url);
       await page.waitForFunction(() => window.__mat?.session()?.board);
       await dispatch([{ type: 'introNext' }]);
@@ -139,7 +142,8 @@ async function playCard(browser, base, [name, pack, levels], report) {
         await mouse.move(600, 740);
       });
       // 1c. a digit typed into x = and taken back
-      const xField = page.locator('[data-action="focus"][data-target="answer"]:not([disabled])');
+      // (Strange solutions' answer is two boxes: the top takes the digit, Build V)
+      const xField = page.locator('[data-action="focus"][data-target="answer"]:not([disabled]), [data-action="focus"][data-target="ansTop"]:not([disabled])');
       if (await xField.count() && await xField.first().isVisible()) {
         await watched(lv, 'type a digit into x = and take it back', async () => { await xField.first().click(); await page.keyboard.press('5'); await page.keyboard.press('Backspace'); });
       }
@@ -172,7 +176,10 @@ async function playCard(browser, base, [name, pack, levels], report) {
     }
     // the check, one step at a time
     const x = await page.evaluate(() => window.__mat.session().problem.x);
-    const digits = [...String(Math.abs(x))].map((d) => ({ type: 'digit', digit: Number(d) })).concat(x < 0 ? [{ type: 'toggleSign' }] : []);
+    const f = await page.evaluate(() => window.__mat.session().problem.ans ?? null);
+    const digitsOf = (v) => [...String(Math.abs(v))].map((d) => ({ type: 'digit', digit: Number(d) })).concat(v < 0 ? [{ type: 'toggleSign' }] : []);
+    // (a fraction answer: the top, `/`, the bottom, Build V)
+    const digits = f ? [...digitsOf(f.n), ...(f.d > 1 ? [{ type: 'typeChar', ch: '/' }, ...digitsOf(f.d)] : [])] : digitsOf(x);
     await watched(lv, 'type x', () => dispatch([{ type: 'focus', target: 'answer' }, ...digits]));
     await record();
     await watched(lv, 'Check', () => dispatch([{ type: 'check' }]));

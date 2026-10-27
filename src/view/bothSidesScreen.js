@@ -38,7 +38,7 @@ function addOptions(s) {
   ], { role: 'group', 'aria-label': 'Add' });
 }
 
-const CARD = {
+export const BOTH_CARD = {
   loop: solve,
   spot: BOTH_SPOT,
   text: bothSidesFeedbackText,
@@ -71,4 +71,4 @@ const CARD = {
   },
 };
 
-export const renderBothSidesScreen = (s) => renderAddBothScreen(s, CARD);
+export const renderBothSidesScreen = (s) => renderAddBothScreen(s, BOTH_CARD);

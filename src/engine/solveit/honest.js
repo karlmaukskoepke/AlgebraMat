@@ -106,9 +106,12 @@ export function honestPath(reduce, s0, { grab = true, answer = true } = {}) {
     if (s.unfolded && !xAlone(s.board)) { const f = reduce(s, { type: 'foldNext' }); if (f !== s) { s = f; out.push(s); } }
   }
   if (!answer || !xAlone(s.board ?? { left: [], right: [] })) return out;
+  // (a fraction answer, Strange solutions: the top, `/`, the bottom; Build V)
+  const f = s.problem?.ans;
   const x = s.problem?.x;
-  if (!Number.isInteger(x)) return out;
-  s = apply(reduce, s, [{ type: 'focus', target: 'answer' }, ...digitsOf(x), { type: 'check' }], out);
+  if (!f && !Number.isInteger(x)) return out;
+  const typed = f ? [...digitsOf(f.n), ...(f.d > 1 ? [{ type: 'typeChar', ch: '/' }, ...digitsOf(f.d)] : [])] : digitsOf(x);
+  s = apply(reduce, s, [{ type: 'focus', target: 'answer' }, ...typed, { type: 'check' }], out);
   for (let k = 0; k < 6 && s.sub?.placing; k++) s = apply(reduce, s, [{ type: 'placeValue', index: k }], out);
   for (let k = 0; k < 12 && s.sub && s.stage !== 'done'; k++) {
     const n = reduce(s, { type: 'nextLine' });

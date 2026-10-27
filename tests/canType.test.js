@@ -7,7 +7,7 @@
 // No later build can break typing on any card without failing here.
 
 import { describe, it, expect, afterEach } from 'vitest';
-import { addBothPlay, divideMovesPlay, flipPlay, twoStepPlay, distSolvePlay, bothSidesPlay, distMorePlay } from '../src/play/solveCards.js';
+import { addBothPlay, divideMovesPlay, flipPlay, twoStepPlay, distSolvePlay, bothSidesPlay, distMorePlay, strangePlay } from '../src/play/solveCards.js';
 import { packById } from '../src/packs/index.js';
 import { shapeOf } from '../src/engine/solveit/shape.js';
 import { seesawAdd } from '../src/engine/addBothLights.js';
@@ -20,6 +20,7 @@ const CARDS = [
   ['Distribute, combine, solve', 'distribute-solve', distSolvePlay, [1, 2, 3, 4, 5]],
   ['Variables on both sides', 'variables-both-sides', bothSidesPlay, [1, 2, 3, 4, 5]],             // (Build R)
   ['Distribute more', 'distribute-more', distMorePlay, [1, 2, 3, 4, 5]],                           // (Build U)
+  ['Strange solutions', 'strange-solutions', strangePlay, [1, 2, 3]],                              // (Build V: Levels 4-5 are V2's)
 ];
 
 // what a student can do (an action a card does not have leaves its state alone)
@@ -34,6 +35,8 @@ const ACTIONS = [
   { type: 'ui', patch: { preview: 'div' } }, { type: 'ui', patch: { preview: 'whole' } },
   { type: 'addPick', kind: 'num' }, { type: 'addPick', kind: 'x' },                          // (Add's two options: Build R)
   { type: 'focus', target: 'amount', side: 'right' }, { type: 'focus', target: 'amount', side: 'left' },   // (the x-term's two stacked boxes: Build T)
+  { type: 'typeChar', ch: '/' }, { type: 'typeChar', ch: '.' }, { type: 'ansPart', part: 'den' }, { type: 'ansPart', part: 'num' },   // (a fraction answer's two boxes: Build V)
+  { type: 'focus', target: 'ansTop' }, { type: 'focus', target: 'ansBottom' },
 ];
 // the moves that make progress (so the walks get past the first equation and reach every shape): Add the opposite of the number on
 // x's side, divide by x's number, flip, fold the move, answer x correctly; each as the steps a student takes
@@ -69,7 +72,11 @@ function moves(s) {
       out.push([{ type: 'lxDrop', id: p1.id, slot: { side, onto: p2.id } }, ...digits(sum), ...(kind === 'x' ? [{ type: 'typeChar', ch: 'x' }] : []), { type: 'lxApply' }]);
     }
   }
-  if (s.problem?.x !== undefined) out.push([{ type: 'focus', target: 'answer' }, ...digits(s.problem.x), { type: 'check' }, { type: 'placeValue' }, { type: 'nextLine' }, { type: 'nextLine' }]);
+  // (a fraction answer: the top, `/`, the bottom, Build V; and the unsimplified one, which is nudged)
+  const f = s.problem?.ans;
+  const typed = f ? [...digits(f.n), ...(f.d > 1 ? [{ type: 'typeChar', ch: '/' }, ...digits(f.d)] : [])] : digits(s.problem?.x);
+  if (s.problem?.x !== undefined) out.push([{ type: 'focus', target: 'answer' }, ...typed, { type: 'check' }, { type: 'placeValue' }, { type: 'nextLine' }, { type: 'nextLine' }]);
+  if (f && f.d > 1) out.push([{ type: 'focus', target: 'ansTop' }, ...digits(f.n * 2), { type: 'typeChar', ch: '/' }, ...digits(f.d * 2), { type: 'check' }]);
   return out;
 }
 
@@ -83,7 +90,7 @@ function reachable(play, pack, levels) {
     // (the seesaw's Add boxes take a typed number too; and x = holding digits typed straight in, with no click: the keys go there)
     if (!play.padOpen(s) && !seesawAdd(s) && !(s.entry && s.stage !== 'done' && !s.sub)) return;
     const k = JSON.stringify([shapeOf(s).id, s.problem?.logLevel, s.mopts?.kind ?? Boolean(s.mopts), s.menu, s.addKind, s.amountSide, s.typing, s.ui?.focus, s.ui?.preview, Boolean(s.fb?.num), s.fb?.part,
-      Boolean(s.lx?.distribute), Boolean(s.lx?.combine), s.lx?.distribute?.index, Boolean(s.spot), s.spot?.kind, s.mustMove && !s.movedOnce, Boolean(s.entry), Boolean(s.mopts?.entry)]);
+      Boolean(s.lx?.distribute), Boolean(s.lx?.combine), s.lx?.distribute?.index, Boolean(s.spot), s.spot?.kind, s.mustMove && !s.movedOnce, Boolean(s.entry), Boolean(s.mopts?.entry), s.part, Boolean(s.den), s.feedback?.key === 'sSimplify']);
     if (!seen.has(k)) seen.set(k, { s, path: [...path] });
   };
   for (const level of levels) {

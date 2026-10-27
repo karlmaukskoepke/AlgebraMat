@@ -1,7 +1,135 @@
 {
   "_about": "The test-links page (test-links.html) reads this list: Karl's change list. `checks` is the Features to check section at the top: one item per new feature (id, name, build, one link, numbered steps, what you should see), written from the real code and walked through with tests/features/walk.mjs before a build is called finished; the ticks live only in Karl's browser, and an item stays here until Karl has ticked it. The rest of the page: Live = on the site for everyone. Testing = behind a flag, waiting for Karl to keep or retire it. Retired = deleted. Every build adds or updates its entries (CLAUDE.md, Working with Karl). Each entry is a name, one plain sentence (`about`) and, for Live and Testing, its buttons. A button's `query` is the part after the address: card, level, seed, flags, sign-in skipped. `level` in a link is the saved level number (Add to both sides and Divide it: link level 2 is shown as Level 1). `reset: true` clears this browser's progress first; `look` is one sentence on what to look for; `notLive` says plainly why a link won't work on the live site.",
-  "updated": "2026-10-25",
+  "updated": "2026-10-27",
   "checks": [
+    {
+      "id": "v-level-1",
+      "name": "Strange solutions, Level 1: a fraction answer",
+      "build": "Build V",
+      "link": {
+        "label": "Open Strange solutions · Level 1",
+        "query": "?pack=strange-solutions&level=1&seed=1&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Strange solutions, Level 1, on 9x + 1 = 7x + 6.",
+        "Drag the 7x across the = onto the left side and let go. Drag the −7x onto the 9x, type 2x and press Enter. Click Add, type −1 and press Enter. Drag the −1 onto the 6, type 5 and press Enter.",
+        "Click Divide (÷), type 2 and press Enter.",
+        "Click the left box after x =, type 5/2 (5, then /, then 2) and press Enter. Drag the 5/2 onto each x, then press Enter for each line."
+      ],
+      "see": "The rows read 2x + 1 = 6, then 2x = 5, then x = 5/2 written as 5 over 2, with no “doesn’t split” message. The check ends 47/2 = 47/2 and ✓ Balanced."
+    },
+    {
+      "id": "v-divide",
+      "name": "Dividing never fails here: 2x = 5 makes x = 5/2",
+      "build": "Build V",
+      "link": {
+        "label": "Open Strange solutions · Level 1",
+        "query": "?pack=strange-solutions&level=1&seed=1&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Level 1 on 9x + 1 = 7x + 6.",
+        "Drag the 7x across the = onto the left side and let go. Drag the −7x onto the 9x, type 2x and press Enter. Click Add, type −1 and press Enter. Drag the −1 onto the 6, type 5 and press Enter.",
+        "Click Divide (÷), type 2 and press Enter."
+      ],
+      "see": "The division is written (2x)/2 = (5)/2 with “Same as multiplying by ½.” under it, then x = 5/2 as 5 over 2. Nothing is crossed out in red, nothing says it doesn’t split, and Undo is not asked for."
+    },
+    {
+      "id": "v-simplify",
+      "name": "The simplify nudge: −15/6",
+      "build": "Build V",
+      "link": {
+        "label": "Open Strange solutions · Level 2",
+        "query": "?pack=strange-solutions&level=2&seed=27&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Strange solutions, Level 2, on 2x + 10 = −4x − 5.",
+        "Drag the −4x across the = onto the left side and let go. Drag the 4x onto the 2x, type 6x and press Enter.",
+        "Click Add, type −10 and press Enter. Drag the −10 onto the −5, type −15 and press Enter.",
+        "Click Divide (÷), type 6 and press Enter. The row reads x = −15/6.",
+        "Click the left box after x =, type −15/6 and press Enter.",
+        "Click the left box again, type −15/6 and press Enter.",
+        "Click the left box, type −5/2 and press Enter. Drag the −5/2 onto each x, then press Enter for each line."
+      ],
+      "see": "The first −15/6 gets a small note beside the boxes, “Can you simplify this further?”, nothing red and no check. The second adds “Divide the top and the bottom by the same number.” −5/2 is checked and ends ✓ Balanced."
+    },
+    {
+      "id": "v-check",
+      "name": "The check with a fraction, every step",
+      "build": "Build V",
+      "link": {
+        "label": "Open Strange solutions · Level 1",
+        "query": "?pack=strange-solutions&level=1&seed=1&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Level 1 on 9x + 1 = 7x + 6.",
+        "Drag the 7x across the = onto the left side and let go. Drag the −7x onto the 9x, type 2x and press Enter. Click Add, type −1 and press Enter. Drag the −1 onto the 6, type 5 and press Enter.",
+        "Click Divide (÷), type 2 and press Enter.",
+        "Click the left box after x =, type 5/2 and press Enter. Drag the 5/2 (drawn as 5 over 2) onto each x, then press Enter for each line until it says Balanced."
+      ],
+      "see": "The value you drag is one stacked fraction. The lines read 9(5/2) + 1 = 7(5/2) + 6, then 45/2 + 1, then 45/2 + 2/2 (the 1 written over 2), then 47/2; on the right 35/2 + 6, then 35/2 + 12/2; it ends 47/2 = 47/2 and ✓ Balanced. Every fraction is drawn top over bottom."
+    },
+    {
+      "id": "v-zero",
+      "name": "Strange solutions, Level 3: x = 0",
+      "build": "Build V",
+      "link": {
+        "label": "Open Strange solutions · Level 3",
+        "query": "?pack=strange-solutions&level=3&seed=1&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Strange solutions, Level 3, on 2x − 7 = 8x − 7.",
+        "Drag the 2x across the = onto the right side and let go. Drag the −2x onto the 8x, type 6x and press Enter.",
+        "Click Add, type 7 and press Enter. The −7 on each side is crossed out, and the row reads 0 = 6x.",
+        "Click Divide (÷), type 6 and press Enter.",
+        "Click the left box after x =, type 0 and press Enter. Drag the 0 onto each x, then press Enter for each line."
+      ],
+      "see": "0 is an answer like any other: the check reads 2(0) − 7 = 8(0) − 7, works down to −7 = −7 and ends ✓ Balanced."
+    },
+    {
+      "id": "v-keys",
+      "name": "Typing a fraction: the two boxes",
+      "build": "Build V",
+      "link": {
+        "label": "Open Strange solutions · Level 1",
+        "query": "?pack=strange-solutions&level=1&seed=1&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Level 1 on 9x + 1 = 7x + 6.",
+        "Drag the 7x across the = onto the left side and let go. Drag the −7x onto the 9x, type 2x and press Enter. Click Add, type −1 and press Enter. Drag the −1 onto the 6, type 5 and press Enter.",
+        "Click Divide (÷), type 2 and press Enter.",
+        "Click the left box after x =, type 5, press the down arrow, type 2.",
+        "Click the left box again.",
+        "Type 2.5."
+      ],
+      "see": "The down arrow moves the cursor to the right box (so do / and Tab), which shows 2. Clicking the left box empties it for retyping. Typing 2.5 gets “Write it as a fraction, like 5/2.” beside the boxes."
+    },
+    {
+      "id": "student-strange",
+      "name": "Play it like a student: Strange solutions",
+      "build": "Build V",
+      "link": {
+        "label": "Open Strange solutions · Level 2",
+        "query": "?pack=strange-solutions&level=2&seed=27&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Level 2 on 2x + 10 = −4x − 5.",
+        "Mistake 1, do nothing for 11 seconds, then click I’m stuck. A good response: I’m stuck flashes after 10 seconds, and the hint lights an x-term with “Move this x-term to the other side.” Click Got it.",
+        "Drag the −4x across the = onto the left side. Drag the 4x onto the 2x, type 6x, Enter. Click Add, type −10, Enter. Drag the −10 onto the −5, type −15, Enter. Click Divide (÷), type 6, Enter. The row reads x = −15/6.",
+        "Mistake 2, leave it unsimplified (and drop the sign): click the left box after x =, type 15/6 and press Enter. A good response is the gentle “Can you simplify this further?”, never red, and no check.",
+        "Mistake 3, a decimal: click the left box and type 2.5. A good response: “Write it as a fraction, like 5/2.”",
+        "Mistake 4, the wrong sign: click the left box, type 5/2, press Enter, drag the 5/2 onto each x and press Enter for each line. A good response ends Not balanced with “When x = 5/2, the equation is not balanced.”",
+        "Press Undo. Mistake 5, upside down: click the left box, type −2/5, press Enter, drag it onto each x and press Enter for each line. A good response ends Not balanced and adds “Check which number goes on top: x is the number divided by the number in front of x.”",
+        "Press Undo. Mistake 6, press I’m stuck now. A good response: “Simplify −15/6: divide the top and bottom by the same number, then type x.”"
+      ],
+      "see": "Every mistake gets an answer in its own numbers: the unsimplified fraction and the decimal are gentle notes (nothing red, nothing checked), a wrong value is checked and said plainly, an upside-down one gets one more sentence, and I’m stuck points at simplifying. The answer is never shown."
+    },
     {
       "id": "u-level-1",
       "name": "Distribute more, Level 1: a group plus a number",
@@ -2608,6 +2736,36 @@
               "label": "Save codes (teacher only)",
               "query": "?codes=1&nosignin=1",
               "look": "With ?codes=1 the Save code and Enter code buttons come back, for moving a student by hand."
+            }
+          ]
+        },
+        {
+          "name": "Build V: Strange solutions, Levels 1-3 (2026-10-27)",
+          "about": "A new card in Solve it, after Distribute more: answers that are fractions or 0. Dividing never fails here (2x = 5 makes x = 5/2); the student simplifies and types the answer in two boxes, x = [ ] / [ ]; an unsimplified answer gets a gentle “Can you simplify this further?”; the check works the fractions out step by step. Levels 4-5 (no solution, infinitely many) come in a later build and are hidden for now.",
+          "links": [
+            {
+              "label": "Strange solutions · Level 1",
+              "query": "?pack=strange-solutions&level=1&seed=1&nosignin=1",
+              "reset": true,
+              "look": "9x + 1 = 7x + 6 (answer 5/2)"
+            },
+            {
+              "label": "Strange solutions · Level 2",
+              "query": "?pack=strange-solutions&level=2&seed=27&nosignin=1",
+              "reset": true,
+              "look": "2x + 10 = −4x − 5 (the divide writes −15/6; answer −5/2)"
+            },
+            {
+              "label": "Strange solutions · Level 3 (x = 0)",
+              "query": "?pack=strange-solutions&level=3&seed=1&nosignin=1",
+              "reset": true,
+              "look": "2x − 7 = 8x − 7 (answer 0); the level mixes in fraction answers"
+            },
+            {
+              "label": "Home: the card shows 3 levels",
+              "query": "?nosignin=1",
+              "reset": true,
+              "look": "Solve it ends with Strange solutions, three levels (0/3)."
             }
           ]
         },

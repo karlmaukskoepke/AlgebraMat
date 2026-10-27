@@ -174,7 +174,10 @@ export function withLights(reduce = reduceAddBoth, { alone = xAlone, menuPreview
       return both.pending?.both ? wrapped(both, action) : both;
     }
 
-    const typingAnswer = isTyping(action) && !amountMode(state) && !state.mopts?.kind && state.menu !== 'fraction';   // (not the Multiply menu's blanks)
+    // (not the Multiply menu's blanks, nor its Divide or whole-number box shown on hover: a digit there picks that option. Build V found
+    // the problem after a correct guess swallowing it: I'm stuck, Multiply, Divide pointed at, 3 typed, nothing)
+    const previewBox = Boolean(state.mopts) && !state.mopts.kind && ['div', 'whole', 'unit'].includes(state.ui?.preview);
+    const typingAnswer = isTyping(action) && !amountMode(state) && !state.mopts?.kind && state.menu !== 'fraction' && !previewBox;
     // greyed while the move is owed
     if ((typingAnswer || (action.type === 'focus' && action.target === 'answer')) && moveOwed(state)) return state;
 

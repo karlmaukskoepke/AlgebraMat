@@ -192,6 +192,7 @@ describe('Build E, P2: unknown shapes fail loudly, never quietly', () => {
       if (id.startsWith('W')) continue;                         // (the Two-step card's shapes: tests/twoStep.test.js walks them)
       if (/^[PEQ]\d$/.test(id)) continue;                      // (Distribute, combine, solve's shapes: tests/distSolve.test.js walks them)
       if (/^V/.test(id)) continue;                              // (Variables on both sides' shapes: tests/bothSides.test.js walks them)
+      if (/^(S[DRQFM]|N[TF])$/.test(id)) continue;               // (Strange solutions' shapes: tests/strange.test.js walks them)
       if (unreachable.includes(id)) expect(counts[id] ?? 0, `shape ${id}`).toBe(0);
       else expect(counts[id] ?? 0, `shape ${id}`).toBeGreaterThan(0);
     }

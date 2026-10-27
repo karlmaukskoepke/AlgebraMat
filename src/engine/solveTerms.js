@@ -27,6 +27,7 @@ export const termText = (t) => {
   if (t.kind === 'x') return (t.coef ?? 1) > 1 ? `${t.coef}x` : (t.coef ?? 1) < -1 ? `${MINUS}${-t.coef}x` : (t.coef ?? 1) === -1 ? `${MINUS}x` : 'x';
   if (t.kind === 'frac') return `${t.sign < 0 ? MINUS : ''}${fractionText(t.n)}(${t.inner.map(termText).join(' + ')})`;
   if (t.kind === 'neg') return `${MINUS}(${t.inner.map(termText).join(' + ')})`;                       // `−(12)` (Build J)
+  if (t.kind === 'ratio') return `${t.n < 0 ? MINUS : ''}${Math.abs(t.n)}/${t.d}`;                  // `x = 15/6` (Build V: a divide that does not split)
   if (t.kind === 'times') return `${signed(t.f)}(${t.inner.map(termText).join(' + ')})`;          // `−1(−x)` (Build J; no times sign, Build U)
   if (t.kind === 'group') return `${frontText(t.factor, t.den)}(${sideText(t.inner)})`;   // `3(x + 2)` (Build M), `⅔(6x + 9)` (Build U)
   return signed(t.v);
@@ -172,6 +173,7 @@ export function equationSegs(board) {
     }
     if (t.kind === 'frac') return [{ text: `${fractionText(t.n)}(`, cls: '' }, ...sideSegs(t.inner), { text: ')', cls: '' }];
     if (t.kind === 'group') return [{ text: `${frontText(t.factor, t.den)}(`, cls: '' }, ...sideSegs(t.inner), { text: ')', cls: '' }];
+    if (t.kind === 'ratio') return [{ text: termText(t), cls: '' }];                                              // (Build V: `15/6`)
     return [{ text: signed(t.v), cls: '' }];
   };
   const sideSegs = (terms) => terms.flatMap((t, i) => {

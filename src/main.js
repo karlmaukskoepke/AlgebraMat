@@ -5,7 +5,7 @@ import {
   encodeProgress, decodeProgress, doneCount, nextLevel,
 } from './engine/progress.js';
 import { createStore } from './storage.js';
-import { PACKS, SECTIONS, HIDDEN_PACKS, packById, levelNumber, isWhyLevel, WHY_LABEL } from './packs/index.js';
+import { PACKS, SECTIONS, HIDDEN_PACKS, packById, levelNumber, isWhyLevel, WHY_LABEL, lastLevelOf } from './packs/index.js';
 import { flipitPlay } from './play/flipitPlay.js';
 import { combinePlay } from './play/combinePlay.js';
 import { lightPlay, flipLightPlay } from './play/lightPlay.js';
@@ -19,7 +19,7 @@ import { distributeLightPlay } from './play/distributeLightPlay.js';
 import { valueLightPlay } from './play/valueLightPlay.js';
 import { solveLightPlay } from './play/solveLightPlay.js';
 import { switchPlay } from './play/switchPlay.js';
-import { addBothPlay, divideMovesPlay, flipPlay, twoStepPlay, distSolvePlay, bothSidesPlay, distMorePlay } from './play/solveCards.js';
+import { addBothPlay, divideMovesPlay, flipPlay, twoStepPlay, distSolvePlay, bothSidesPlay, distMorePlay, strangePlay } from './play/solveCards.js';
 import { divideNumericPlay } from './play/divideNumericPlay.js';
 import { addBothNumericPlay } from './play/addBothNumericPlay.js';
 import { boxPlay } from './play/boxPlay.js';
@@ -82,6 +82,7 @@ const PLAY = {
   'distribute-solve': distSolvePlay,
   'variables-both-sides': bothSidesPlay,                                            // Variables on both sides (Build R)
   'distribute-more': distMorePlay,                                                  // Distribute more (Build U)
+  'strange-solutions': strangePlay,                                                 // Strange solutions (Build V)
   'distribute-combine': (level) => (level >= 4 ? distributeTypedPlay : LIGHT ? distributeLightPlay : distributePlay),
 };
 const adapterFor = (packId, level) => (typeof PLAY[packId] === 'function' ? PLAY[packId](level) : PLAY[packId]);
@@ -433,7 +434,7 @@ function renderStreak() {
     $('streak').setAttribute('aria-label', `Streak ${streak}, best ${Math.max(best, streak)}`);
   }
   $('dots').hidden = practicing;
-  $('next-level').hidden = !(practicing && level < pack.levels && isLevelUnlocked(progress, pack.id, level + 1));
+  $('next-level').hidden = !(practicing && level < lastLevelOf(pack) && isLevelUnlocked(progress, pack.id, level + 1));
 }
 
 // The step bar is the pack's (and, in Group It, the problem's) list of steps.
@@ -676,7 +677,7 @@ const urlPack = packById(params.get('pack') === 'groupit' ? 'lasso' : params.get
 const resume = savedCurrent();
 if (DIAGNOSTIC_SECTIONS.includes(params.get('diag'))) {
   startDiagnostic(params.get('diag'));                // ?diag=solve opens a section's diagnostic (a test link, Build L)
-} else if (urlPack && PLAY[urlPack.id] && Number.isInteger(urlLevel) && urlLevel >= 1 && urlLevel <= urlPack.levels) {
+} else if (urlPack && PLAY[urlPack.id] && Number.isInteger(urlLevel) && urlLevel >= 1 && urlLevel <= lastLevelOf(urlPack)) {
   startLevel(urlPack.id, urlLevel);
 } else if (resume) {
   startLevel(resume.pack, resume.level, resume);

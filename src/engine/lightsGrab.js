@@ -116,6 +116,7 @@ function bodyOf(t, v, one = false) {
   if (t.kind === 'x') return `${coefText(v)}x`;
   if (t.kind === 'frac') return `${t.sign < 0 ? MINUS : ''}${fractionText(t.n)}(${sideText(t.inner)})`;     // `⅓(15)` (Build M: divided first)
   if (t.kind === 'neg') return `${MINUS}(${sideText(t.inner)})`;
+  if (t.kind === 'ratio') return `${t.n < 0 ? MINUS : ''}${Math.abs(t.n)}/${t.d}`;     // `x = 15/6` (Build V)
   // a fraction factor (Build U): `⅔(6x + 9)`; the invisible 1 once its minus is tapped: `−1(x − 6)`
   if (t.den > 1) return `${factorText(v, t.den)}(${sideText(t.inner)})`;
   return `${t.hidden && one ? signed(v) : coefText(v)}(${sideText(t.inner)})`;

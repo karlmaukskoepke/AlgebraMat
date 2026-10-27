@@ -47,6 +47,11 @@ import { formatBoth } from '../engine/bothSides.js';
 import { renderBothSidesScreen, introOpen as bothIntroOpen } from '../view/bothSidesScreen.js';
 import { bothSidesFeedbackText } from '../view/bothSidesFeedback.js';
 import { bindCrossHint } from '../view/crossHint.js';
+// Strange solutions (Build V): Variables on both sides' card with fraction answers and 0
+import { newStrange, solve as strangeLoop, xAlone as strangeAlone, STRANGE_MENU, STRANGE_LAYER, answerTyping } from '../engine/cards/strange.js';
+import { renderStrangeScreen } from '../view/strangeScreen.js';
+import { strangeFeedbackText } from '../view/strangeFeedback.js';
+import { bindStrangeKeys } from '../view/strangeKeys.js';
 
 // ---------- Add to both sides ----------
 
@@ -316,3 +321,48 @@ const bothPlay = (pack) => {
 };
 export const bothSidesPlay = bothPlay('variables-both-sides');
 export const distMorePlay = bothPlay('distribute-more');
+
+// ---------- Strange solutions (Build V) ----------
+// Variables on both sides' card with its own answers (a fraction typed in two boxes, or 0), its own divide (it never fails: `x = 15/6`)
+// and its own words; the loop, the layers' rules and the help are the same.
+
+let strangeTaught = null;  // dividing by a negative is pointed out once a level (Build P)
+
+export const strangePlay = makeSolvePlay({
+  pack: 'strange-solutions',
+  loop: strangeLoop,
+  layer: STRANGE_LAYER,
+  spot: BOTH_SPOT,
+  introOpen: bothIntroOpen,
+  format: formatBoth,
+  newSession: (problem, { flags = null } = {}) => {
+    strangeTaught = flags ?? strangeTaught ?? {};
+    return { ...startLights(newStrange(problem, { level: problem.logLevel ?? 1 })), divNegIntro: !strangeTaught.divneg };
+  },
+  effects(before, s) {
+    if (s.divNegCount > 0 && strangeTaught) strangeTaught.divneg = true;
+  },
+  feedbackText: strangeFeedbackText,
+  buildControls: makeAddBothControls((s) => lightsAnswerLive(s, strangeLoop) || combineOpen(s) || calcOpen(s) || Boolean(s.lx?.distribute) || STRANGE_MENU.typingOpen(s), xKey, (s) => answerTyping(s, strangeLoop)),
+  bindMat: (root, dispatch, getSession) => {
+    const off = [bindStrangeKeys(root, dispatch, getSession, strangeLoop), bindLightsMat(root, dispatch, getSession), bindFractionKeys(root, dispatch, getSession, STRANGE_MENU), bindFactorHint(root), bindCrossHint(root)];
+    return () => off.forEach((f) => f?.());
+  },
+  renderMat: (s) => renderStrangeScreen(s),
+  padOpen: (s) => s.stage !== 'done' && !s.sub && (((blankOpen(s) || seesawAdd(s)) && amountMode(s)) || combineOpen(s) || calcOpen(s) || Boolean(s.lx?.distribute) || STRANGE_MENU.typingOpen(s)
+    || (lightsAnswerLive(s, strangeLoop) && (s.typing === 'answer' || s.ui?.focus === 'answer' || strangeAlone(s.board)))),
+  matAction(d) {
+    if (ADD_MAT.has(d.action)) return { type: d.action };
+    if (calcAction(d)) return calcAction(d);
+    switch (d.action) {
+      case 'addPick': return { type: 'addPick', kind: d.kind };
+      case 'multOpen': return { type: 'multOpen' };
+      case 'divPick': return { type: 'divPick' };
+      case 'multPick': return { type: 'multPick', kind: d.kind };
+      case 'flipPick': return { type: 'flipPick' };
+      case 'take': return { type: 'take', n: Number(d.n), ...(d.from === 'list' ? { fromList: true } : {}) };
+      case 'focus': return d.target === 'dist' ? { type: 'focus', target: 'dist', index: Number(d.index) } : null;
+      default: return null;
+    }
+  },
+});

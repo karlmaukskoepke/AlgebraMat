@@ -62,6 +62,14 @@
 //   VH  px − (x − 6) = qx + r the invisible 1: a minus with no number before the parenthesis (tap it first; then drag the −1)
 //   VF  ⅔(6x + 9) = x + 15    a fraction factor
 //   VE  3x + 6 − 4 = 2x + 7   x on both sides, no parenthesis, like terms on a side not yet put together (a distributed row)
+// Strange solutions (Build V; read with its own family, 'strange', which is 'both' plus these):
+//   SD  6x = 15               a divide that does not split (the number in front of x does not go into the other side): it writes a fraction
+//   SR  x = 15/6              x alone, a fraction not in lowest terms (simplify, then type x)
+//   SQ  x = 5/2               x alone, a fraction in lowest terms (type it)
+//   SF  −x = 15/6             x with a minus, a fraction on the other side (flip)
+//   SM  x = −(15/6)           x alone, the opposite of a fraction (simplify, then type x with its sign)
+//   NT  3 = 3                 no x left, a true statement (V2: "Infinitely many")
+//   NF  3 = 7                 no x left, a false statement (V2: "No solution")
 
 // The same Add shape with x on the right is the R twin: the same id, with `r: true` (and so on every Flip shape: `12 = −x` is F1, r).
 
@@ -109,6 +117,13 @@ export const SHAPES = {
   VH: 'px − (x − b) = qx + r (the invisible 1, x on both sides)',
   VF: '⅔(ax + b) = cx + d (a fraction factor, x on both sides)',
   VE: 'ax + b + k = cx + d (x on both sides, like terms not put together)',
+  SD: 'ax = b, a does not go into b (the divide writes a fraction)',
+  SR: 'x = p/q, not in lowest terms',
+  SQ: 'x = p/q, in lowest terms',
+  SF: '−x = p/q',
+  SM: 'x = −(p/q)',
+  NT: 'no x: a true statement',
+  NF: 'no x: a false statement',
 };
 
 export const UNKNOWN = 'unknown';
@@ -126,6 +141,7 @@ export function shapeOfBoard(board, family = null) {
   if (family === 'two') return twoShape(board);
   if (family === 'dist') return distShape(board);
   if (family === 'both') return bothShape(board);
+  if (family === 'strange') return strangeShape(board);
   const xl = board.left.filter((t) => t.kind === 'x').length;
   const xr = board.right.filter((t) => t.kind === 'x').length;
   if (xl + xr !== 1) return { id: UNKNOWN, why: xl + xr === 0 ? 'no x' : 'x on both sides' };
@@ -317,8 +333,42 @@ function bothShape(board) {
   return { ...base, id: 'V1', group: false, params: { xl: xl.map(coef), xr: xr.map(coef), small: small.t.id, from: small.side, c: coef(small.t) } };
 }
 
+// Strange solutions (Build V): its own boards first (a fraction beside x alone, a divide that does not split, no x left), then Variables on
+// both sides'. A fraction is `{ kind: 'ratio', n, d }` (`x = 15/6`), the opposite of one `{ kind: 'neg', inner: [ratio] }`.
+const sumOf = (side) => side.reduce((a, t) => a + (t.kind === 'num' ? t.v : NaN), 0);
+function strangeShape(board) {
+  const all = [...board.left, ...board.right];
+  if (!all.some(hasX)) {
+    if (all.some((t) => t.kind !== 'num')) return { id: UNKNOWN, why: 'no x and not numbers' };
+    const l = sumOf(board.left);
+    const r = sumOf(board.right);
+    return { id: l === r ? 'NT' : 'NF', family: 'strange', r: false, coef: 0, xNums: [], xSum: 0, other: [r], params: { left: l, right: r } };
+  }
+  const xr = board.right.some(hasX) && !board.left.some(hasX);
+  const mine = board[xr ? 'right' : 'left'];
+  const theirs = board[xr ? 'left' : 'right'];
+  if (mine.length === 1 && mine[0].kind === 'x' && theirs.length === 1) {
+    const coef = mine[0].coef ?? 1;
+    const t = theirs[0];
+    const base = { family: 'two', r: xr, coef, xNums: [], xSum: 0 };
+    if (t.kind === 'ratio') {
+      const p = { n: t.n, d: t.d, id: t.id };
+      if (coef === 1) return { ...base, id: gcdOf(t.n, t.d) === 1 ? 'SQ' : 'SR', other: { ratio: p }, params: p };
+      if (coef === -1) return { ...base, id: 'SF', other: { ratio: p }, params: p };
+      return { id: UNKNOWN, why: 'a fraction beside a number in front of x' };
+    }
+    if (t.kind === 'neg' && t.inner?.[0]?.kind === 'ratio') {
+      const p = { n: t.inner[0].n, d: t.inner[0].d };
+      return coef === 1 ? { ...base, id: 'SM', other: { neg: p }, params: p } : { id: UNKNOWN, why: 'the opposite of a fraction beside a number in front of x' };
+    }
+    if (t.kind === 'num' && Math.abs(coef) >= 2 && t.v % coef !== 0) return { ...base, id: 'SD', other: [t.v], params: { a: coef, b: t.v } };
+  }
+  return bothShape(board);
+}
+const gcdOf = (a, b) => { a = Math.abs(a); b = Math.abs(b); while (b) [a, b] = [b, a % b]; return a; };
+
 // (the cards whose boards are read with their own family)
-const FAMILY_OF = { flip: 'flip', 'two-step': 'two', 'distribute-solve': 'dist', 'variables-both-sides': 'both', 'distribute-more': 'both' };
+const FAMILY_OF = { flip: 'flip', 'two-step': 'two', 'distribute-solve': 'dist', 'variables-both-sides': 'both', 'distribute-more': 'both', 'strange-solutions': 'strange' };
 
 // The shape of a state: the board's, refined by the flags the board does not hold. `waiting` says a move (or a try) waits for Undo.
 export function shapeOf(s) {

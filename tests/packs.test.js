@@ -8,22 +8,23 @@ describe('pack list', () => {
   });
 
   it('opens Combine it, Flip It, Group It, Boxes & Circles, Groups of Terms and Distribute, then combine, Value it, Add to both sides, One-step equations, Switch sides (retired) and Two-step equations, in order', () => {
-    expect(PACKS.filter((p) => !p.comingSoon).map((p) => p.id)).toEqual(['combineit', 'flipit', 'lasso', 'boxes', 'groups-of-terms', 'distribute-combine', 'value', 'add-both', 'divide-it', 'flip-everything', 'one-step', 'switch', 'two-step', 'two-step-equations', 'distribute-solve', 'variables-both-sides', 'distribute-more']);
+    expect(PACKS.filter((p) => !p.comingSoon).map((p) => p.id)).toEqual(['combineit', 'flipit', 'lasso', 'boxes', 'groups-of-terms', 'distribute-combine', 'value', 'add-both', 'divide-it', 'flip-everything', 'one-step', 'switch', 'two-step', 'two-step-equations', 'distribute-solve', 'variables-both-sides', 'distribute-more', 'strange-solutions']);
     expect(PACKS.filter((p) => p.comingSoon).map((p) => p.id)).toEqual([]);                    // (Build R: Variables on both sides replaced the last placeholder)
     expect(packById('distribute-combine')).toMatchObject({ levels: 5 });
   });
 
-  it('gives each playable pack a name and a generator for every level', () => {
+  it('gives each playable pack a name and a generator for every level it shows', () => {
     for (const p of PACKS.filter((q) => !q.comingSoon)) {
       expect(p.levelNames).toHaveLength(p.levels);
-      for (let l = 1; l <= p.levels; l++) expect(p.generate(l, 7)).toHaveLength(5);
+      // (a card's saved levels after the last it shows are not built yet: Strange solutions' 4 and 5, Build V)
+      for (let l = 1; l <= (p.lastLevel ?? p.levels); l++) expect(p.generate(l, 7)).toHaveLength(5);
     }
-  });
+  }, 60000);                                            // (every level of every card is generated: Build V)
 
   it('keeps coming-soon packs out of progress and save codes', () => {
     const soon = { id: 'later', title: 'Later', subtitle: '', levels: 3, comingSoon: true };   // nothing is coming soon right now
     const fresh = newProgress([...PACKS, soon]);
-    expect(Object.keys(fresh.packs)).toEqual(['combineit', 'flipit', 'lasso', 'boxes', 'groups-of-terms', 'distribute-combine', 'value', 'add-both', 'divide-it', 'flip-everything', 'one-step', 'switch', 'two-step', 'two-step-equations', 'distribute-solve', 'variables-both-sides', 'distribute-more']);
+    expect(Object.keys(fresh.packs)).toEqual(['combineit', 'flipit', 'lasso', 'boxes', 'groups-of-terms', 'distribute-combine', 'value', 'add-both', 'divide-it', 'flip-everything', 'one-step', 'switch', 'two-step', 'two-step-equations', 'distribute-solve', 'variables-both-sides', 'distribute-more', 'strange-solutions']);
     expect(isLevelUnlocked(fresh, 'lasso', 1)).toBe(true);
     let p = fresh;
     for (let l = 1; l <= 4; l++) p = completeLevel(p, 'flipit', l);

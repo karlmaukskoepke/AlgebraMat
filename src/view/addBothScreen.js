@@ -585,11 +585,12 @@ function answerRow(s) {
   const free = !s.mopts?.kind && !(s.menu === 'fraction' && s.typing !== 'answer') && !s.lx?.combine && !s.lx?.distribute && !s.lx?.calc;
   const last = live && !amountMode(s) && free && (C.alone(s.board) || Boolean(s.ui?.fieldCursor) || s.typing === 'answer' || s.ui?.focus === 'answer');
   const placing = Boolean(s.sub?.placing);                 // the typed value is what is dragged into x
-  const typed = html('button', `ab-typed lb-typed lx-field${text ? '' : ' is-empty'}${last ? ' is-focus' : ''}${last && !text ? ' is-blink' : ''}${live || placing ? '' : ' is-off'}${placing ? ' is-chip' : ''}`, [shown(text)], placing
+  // (a card may draw its own field: Strange solutions' two boxes for a fraction, Build V)
+  const typed = C.answerField ? C.answerField(s, { live, last, placing }) : html('button', `ab-typed lb-typed lx-field${text ? '' : ' is-empty'}${last ? ' is-focus' : ''}${last && !text ? ' is-blink' : ''}${live || placing ? '' : ' is-off'}${placing ? ' is-chip' : ''}`, [shown(text)], placing
     ? { type: 'button', 'data-chip': '1', 'data-fk': 'answer', 'data-lx-field': '1', 'aria-label': `Your value ${shown(text)}: drag it into x` }
     : { type: 'button', 'data-action': 'focus', 'data-target': 'answer', 'aria-label': 'Your answer for x', 'data-fk': 'answer', 'data-lx-field': '1' });
-  typed.disabled = !live && !placing;
-  if (live && s.ui?.focus === 'answer') typed.dataset.lxFocus = '1';
+  if (!C.answerField) typed.disabled = !live && !placing;
+  if (!C.answerField && live && s.ui?.focus === 'answer') typed.dataset.lxFocus = '1';
   const f = forwardButton(forwardOf(s));
   if (!f.disabled && ['next', 'nextLine', 'foldNext', 'introNext'].includes(f.dataset.action)) f.dataset.lxFocus = '1';   // the one thing to do
   const row = html('div', 'lb-answerrow lx-answer', [html('strong', `lb-prompt${live || placing ? '' : ' is-off'}`, ['x =']), typed, f]);

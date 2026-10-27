@@ -350,3 +350,29 @@ invisible −1 and with a fraction factor, then solving with x on both sides. Hi
    dot between two bare numbers or a number and a bare x-term (`3 · 4`, `5 · x`), or the number next to its parentheses when the second
    factor is a parenthesised value or term (`−1(−x) = −1(12)`, `⅓(15)`). The × stays only on the Moves panel (the floating symbol and
    the menu's option drawings).
+
+## 2026-10-25: Strange solutions (Karl; Build V builds Levels 1-3 and the fraction answers, the rest is V2)
+
+**Why:** Karl's quiz review sheet and answer key (sections 3, 4 and 5) have fraction answers, x = 0, no solution and infinitely many.
+Its notes: "Improper fractions are full credit, no mixed numbers" and "x can be 0". The quiz is Friday; the review is Thursday.
+
+1. **An unsimplified fraction answer gets a gentle nudge, not red:** "Can you simplify this further?" beside the field, and the student
+   retypes. After a second unsimplified try it adds "Divide the top and the bottom by the same number." It is not a wrong answer (tag
+   `unsimplified`, recorded with `hint` only when the second line shows).
+2. **When x disappears** (`3 = 7`, `3 = 3`), `x =` greys with a note, and two buttons appear: "No solution" and "Infinitely many"
+   (Karl: "I love that"). V2.
+3. **Two deliberate overrides of the loop's rules, for this card only.** An answer may be **0** (`x = 0` is taught on purpose and must
+   never be confused with no solution); and an answer may be **a fraction** (the loop's "one whole number typed" rule, sections 4 and 8,
+   gets an exception). Improper fractions are full credit; mixed numbers are not taught and are not accepted; decimals are not accepted
+   ("Write it as a fraction, like 5/2."). ±1 stays banned.
+4. **Checking a no-solution or infinitely-many answer** (Claude's design, Karl's question), two layers: the final statement is the check
+   (a false statement can never become true, a true one is always true); then an optional "Try a number" that runs the usual check on the
+   original equation with any number, never graded, never red, recording nothing. V2. The loop spec (rev 2.11) has the new answer kinds.
+5. **Karl's answer to Build U:** the small multiplication sign on the distribute arcs stays. The Moves panel and the arcs are the only
+   places the times sign remains.
+6. **Queued after this build, before V2 (record only; nothing built here):** a panel, menu and cross-out build: a bigger, simpler Moves
+   panel (square buttons, large plain symbols, no floating symbols, no goal lights on screen), a diagonal Add cross-out, and a main menu
+   where each card is clickable with metallic progress colours.
+7. **Scope of Build V (Karl, 2026-10-26):** Levels 1-3 (a fraction answer already simple; one to simplify; x = 0 mixed in) and the
+   fraction answers. Levels 4-5 are reserved in the pack and the save code now (so no second layout change), hidden from students until
+   V2. Dividing never fails on this card: `6x = 15` divided by 6 writes `x = 15/6`.

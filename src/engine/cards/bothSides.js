@@ -159,12 +159,13 @@ export const greyKey = (kind, s) => (kind === 'whole' ? 'aLater' : s && xBoth(s.
 
 export const tradeAvailable = (s) => s.stage === 'moves' && !s.sub && !s.needUndo && !s.fail && !s.lx?.combine && !xBoth(s.board) && xOnRight(s.board);
 const amountKeys = (s) => s.menu === 'add' && s.typing !== 'answer';
-const MOVE = { shape, alone: xAlone, say, rebase: true };
-
 // ---------- the card ----------
-
-const loop = createSolveLoop({
-  id: 'variables-both-sides',
+// (a factory, Build V: Strange solutions is this card with its own answers, its own divide and its shapes' family; `own` is its config:
+// `reduce` (tried first), and the loop's hooks it replaces)
+function makeLoop({ id, family = 'both', own = null }) {
+  const MOVE = { shape: (board) => shapeOfBoard(board, family), alone: xAlone, say, rebase: true };
+  return createSolveLoop({
+  id,
   startBoard,
   alone: xAlone,
   noLights: () => ({ fewer: 'off', noparen: 'off', xone: 'off', solved: 'off' }),
@@ -172,7 +173,7 @@ const loop = createSolveLoop({
   extra: () => ({
     fail: null, deal: null, diag: null, pic: null, tried: [], mopts: null, tradeCount: 0, flipCount: 0, addKind: null,
     amountEntry: '', pending: null, combining: null, resolving: false, alone: null, prevBoard: null, zeroOther: false, zeroSide: null, work: null,
-    lastAmount: null, lastAddX: false, forcedAmount: null, teachFlow: false, startOver: false, lastFlip: false,
+    lastAmount: null, lastAddX: false, forcedAmount: null, teachFlow: false, startOver: false, lastFlip: false, ...(own?.extra ?? {}),
   }),
   snapshotExtra: (s) => ({ fail: null, deal: null, diag: null, pic: null, prevBoard: s.prevBoard, amountEntry: s.amountEntry, work: s.work, zeroOther: false, zeroSide: null, lastFlip: false, startOver: s.startOver, addKind: s.addKind }),
   resetState(s) {
@@ -189,6 +190,8 @@ const loop = createSolveLoop({
   slip: (s, typed, tag) => ({ key: 'wWrong', params: { typed: signed(typed), tag } }),
 
   reduce(s, action, api) {
+    const mine = own?.reduce?.(s, action, api, MOVE);
+    if (mine !== undefined) return mine;
     if (isTyping(action)) {
       if (s.sub || !amountKeys(s)) return undefined;
       // (a box clicked to retype: the first key replaces what is there, Build T)
@@ -273,22 +276,10 @@ const loop = createSolveLoop({
         return undefined;
     }
   },
-});
-
-// ---------- the card's entry points ----------
-
-export function newBothSides(problem, { level = 1 } = {}) {
-  const s = loop.newSession(problem, { level, forceMove: false });              // (no forced move: there is no guess at the first state)
-  s.prevBoard = s.board;
-  s.lights = boardLights(s.board, s.board);
-  return s;
+  ...(own?.loop ?? {}),
+  });
 }
-export const reduceBothSides = loop.reduce;
-export const solve = loop;
 export { coefOn, sumNums };
-
-// Multiply on this card (the shared menu): Divide, Fraction and Flip everything once each side is one term; the whole number greyed.
-export const BOTH_MENU = makeMultiplyMenu({ xAlone, coefOf: coefOn, option: OPTION_LIVE, greyKey, probe: 'mult', negTop: true });
 
 // The spotlight on this card: an Add that did not cancel (the work row and the new equation lit, never greyed), a wrong sum (Add's), a wrong
 // product (Build M's), the shared fraction and flip errors, a wrong value; and the hint after Undo (the registry's, for the shape Undo
@@ -343,32 +334,54 @@ export const BOTH_SPOT = {
   prompt: () => 'aFindX',
 };
 
-// The card's layers: Add's term layer (dragging, crossing the =, combining, the distribute move, the Add blank) round the Multiply menu
-// round the card. An x-term dragged across the = is the Add of its opposite (`xAdd`).
-const layered = withLights(BOTH_MENU.withMenu(reduceBothSides), {
-  alone: xAlone,
-  menuPreview: (s, kind) => OPTION_LIVE(kind, s) === 'live',
-  distribute: true,
-  xAdd: true,
-  lights: (s, board) => boardLights(s.prevBoard ?? board, board),
-  fold: loop.api.fold,
-});
-// The lights follow the board: x on one side, Solved for x and No parentheses; Fewer terms only for an Add or a combine (it goes off after a
-// distribute, a divide or a flip). A term picked up closes Multiply's options.
-export function BOTH_LAYER(s, action) {
-  const out = layered((action.type === 'lxDrop' || action.type === 'lxDistribute') && s.mopts ? { ...s, mopts: null } : s, action);
-  if (out === s || !out.board) return out;
-  if (out.lx?.combine && out.feedback?.key === 'lxCombineWrong' && s.feedback?.key !== 'lxCombineWrong') sizesSlip(out);
-  const moved = JSON.stringify(out.board) !== JSON.stringify(s.board);
-  // x back on both sides: x = is greyed again, so what was typed in it goes (it could not be changed while greyed: Build T)
-  if (moved && xBoth(out.board) && out.entry && !out.sub) out.entry = '';
-  const combined = Boolean(s.lx?.combine) && !out.lx?.combine && moved;
-  const added = out.history.length > s.history.length && out.rows.at(-2)?.type === 'work' && Boolean(out.rows.at(-2)?.work);
-  // (an Add, by the button or by dragging across the =, judged itself; a combine is one term fewer; Undo puts back what was; any other move
-  // that changes the board is not judged for Fewer terms)
-  const fewer = added ? out.lights.fewer : combined ? 'green' : action.type === 'undo' || action.type === 'startOver' || !moved ? out.lights?.fewer ?? 'off' : 'off';
-  return { ...out, lights: boardLights(out.board, out.board, fewer) };
+// A card made on this one (Variables on both sides; Distribute more shares it; Strange solutions, Build V, makes its own): its loop, its
+// first state, its Multiply menu and its layers. Add's term layer (dragging, crossing the =, combining, the distribute move, the Add blank)
+// round the Multiply menu round the card. An x-term dragged across the = is the Add of its opposite (`xAdd`).
+export function makeBothCard({ id, family = 'both', own = null }) {
+  const loop = makeLoop({ id, family, own });
+  function newSession(problem, { level = 1 } = {}) {
+    const s = loop.newSession(problem, { level, forceMove: false });              // (no forced move: there is no guess at the first state)
+    s.prevBoard = s.board;
+    s.lights = boardLights(s.board, s.board);
+    return s;
+  }
+  // Multiply on this card (the shared menu): Divide, Fraction and Flip everything once each side is one term; the whole number greyed.
+  const MENU = makeMultiplyMenu({ xAlone, coefOf: coefOn, option: OPTION_LIVE, greyKey, probe: 'mult', negTop: true });
+  const layered = withLights(MENU.withMenu(loop.reduce), {
+    alone: xAlone,
+    menuPreview: (s, kind) => OPTION_LIVE(kind, s) === 'live',
+    distribute: true,
+    xAdd: true,
+    lights: (s, board) => boardLights(s.prevBoard ?? board, board),
+    fold: loop.api.fold,
+  });
+  // The lights follow the board: x on one side, Solved for x and No parentheses; Fewer terms only for an Add or a combine (it goes off after
+  // a distribute, a divide or a flip). A term picked up closes Multiply's options.
+  function LAYER(s, action) {
+    const pre = own?.layer?.(s, action);                                         // (the card's own, before the term layer: Build V)
+    if (pre !== undefined) return pre;
+    const out = layered((action.type === 'lxDrop' || action.type === 'lxDistribute') && s.mopts ? { ...s, mopts: null } : s, action);
+    if (out === s || !out.board) return out;
+    if (out.lx?.combine && out.feedback?.key === 'lxCombineWrong' && s.feedback?.key !== 'lxCombineWrong') sizesSlip(out);
+    const moved = JSON.stringify(out.board) !== JSON.stringify(s.board);
+    // x back on both sides: x = is greyed again, so what was typed in it goes (it could not be changed while greyed: Build T)
+    if (moved && xBoth(out.board) && out.entry && !out.sub) { out.entry = ''; if (out.den !== undefined) out.den = ''; }
+    const combined = Boolean(s.lx?.combine) && !out.lx?.combine && moved;
+    const added = out.history.length > s.history.length && out.rows.at(-2)?.type === 'work' && Boolean(out.rows.at(-2)?.work);
+    // (an Add, by the button or by dragging across the =, judged itself; a combine is one term fewer; Undo puts back what was; any other
+    // move that changes the board is not judged for Fewer terms)
+    const fewer = added ? out.lights.fewer : combined ? 'green' : action.type === 'undo' || action.type === 'startOver' || !moved ? out.lights?.fewer ?? 'off' : 'off';
+    return { ...out, lights: boardLights(out.board, out.board, fewer) };
+  }
+  return { loop, newSession, MENU, LAYER };
 }
+
+const BOTH = makeBothCard({ id: 'variables-both-sides' });
+export const newBothSides = BOTH.newSession;
+export const reduceBothSides = BOTH.loop.reduce;
+export const solve = BOTH.loop;
+export const BOTH_MENU = BOTH.MENU;
+export const BOTH_LAYER = BOTH.LAYER;
 // A wrong sum of two x-terms that added the sizes (`5x + −3x` typed 8x) is recorded with its tag.
 function sizesSlip(s) {
   const c = s.lx.combine;
