@@ -75,7 +75,11 @@ tries on the class sheet queued for V2).
 
 ## Tests and parity
 
-- `npm test`: see the summary in the commit message and below; the real-browser sweeps ran (no "screenSweep: SKIP").
+- `npm test`: **1,964 tests pass**, including the real-browser sweeps (typing, drags, redraws, text size, no times sign, form words, and
+  the new panel-room and cross-out sweeps); no "screenSweep: SKIP".
+- **Walked on the live site:** all 172 Features to check items pass (`node tests/features/walk.mjs https://karlmaukskoepke.github.io/AlgebraMat/ docs/build-w`).
+  The first live run failed the 8 new panel items only because their walk used a developer shortcut the live site does not have; the walk
+  now clicks as a person would, and those 8 pass on the live site.
 - `npm run parity`: problems, save codes, class-sheet records and the 25 scripted runs unchanged; **all 70 screens differ**, each listed
   individually in `tests/parity/INTENDED-CHANGES.md` (the panel on every screen; the cross-out on the six with a helpful Add's work row;
   the Multiply menu without its floating symbols). Build U's two stale `div-stuck-2` rows moved below the history line so each key is

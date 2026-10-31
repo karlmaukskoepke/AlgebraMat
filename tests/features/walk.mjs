@@ -397,7 +397,7 @@ const WALKS = {
     w.at('point at the top button, then the bottom one'); await w.tip('.lx-pgrid .lx-move[data-move="add"]', 'Addition property of equality: add the same number to both sides');
     await w.tip('.lx-pgrid .lx-move[data-move="trade"]', 'Symmetric property of equality: if a = b, then b = a');
     w.at('click the greyed button'); await w.click('.lx-pgrid .lx-move.is-grey[data-move="multiply"]'); await w.see('That move unlocks on a later card.');
-    w.at('click the live button'); await w.page.evaluate(() => window.__mat.dispatch({ type: 'spotDismiss' })); await w.click('.lx-pgrid .lx-move:not(.is-grey)[data-move="add"]');
+    w.at('click the live button'); await await w.click('.lx-pgrid .lx-move:not(.is-grey)[data-move="add"]');
     if (!(await w.page.locator('.lx-pgrid .lx-move.is-on[data-move="add"]').count())) throw new Error('the clicked button should be selected (yellow, thicker edge)');
   },
   async 'w-panel-divide-it'(w) {
@@ -407,7 +407,7 @@ const WALKS = {
     w.at('point at the top button, then the bottom one'); await w.tip('.lx-pgrid .lx-move[data-move="add"]', 'Addition property of equality: add the same number to both sides');
     await w.tip('.lx-pgrid .lx-move[data-move="trade"]', 'Symmetric property of equality: if a = b, then b = a');
     w.at('click the greyed button'); await w.click('.lx-pgrid .lx-move.is-grey[data-move="add"]'); await w.see('You don’t need that move here.');
-    w.at('click the live button'); await w.page.evaluate(() => window.__mat.dispatch({ type: 'spotDismiss' })); await w.click('.lx-pgrid .lx-move:not(.is-grey)[data-move="div"]');
+    w.at('click the live button'); await await w.click('.lx-pgrid .lx-move:not(.is-grey)[data-move="div"]');
     if (!(await w.page.locator('.lx-pgrid .lx-move.is-on[data-move="div"]').count())) throw new Error('the clicked button should be selected (yellow, thicker edge)');
   },
   async 'w-panel-flip-everything'(w) {
@@ -417,7 +417,7 @@ const WALKS = {
     w.at('point at the top button, then the bottom one'); await w.tip('.lx-pgrid .lx-move[data-move="add"]', 'Addition property of equality: add the same number to both sides');
     await w.tip('.lx-pgrid .lx-move[data-move="trade"]', 'Symmetric property of equality: if a = b, then b = a');
     w.at('click the greyed button'); await w.click('.lx-pgrid .lx-move.is-grey[data-move="add"]'); await w.see('That move unlocks on a later card.');
-    w.at('click the live button'); await w.page.evaluate(() => window.__mat.dispatch({ type: 'spotDismiss' })); await w.click('.lx-pgrid .lx-move:not(.is-grey)[data-move="flip"]');
+    w.at('click the live button'); await await w.click('.lx-pgrid .lx-move:not(.is-grey)[data-move="flip"]');
     if (!(await w.page.locator('.lx-pgrid .lx-move.is-on[data-move="flip"]').count())) throw new Error('the clicked button should be selected (yellow, thicker edge)');
   },
   async 'w-panel-two-step-equations'(w) {
@@ -427,7 +427,7 @@ const WALKS = {
     w.at('point at the top button, then the bottom one'); await w.tip('.lx-pgrid .lx-move[data-move="add"]', 'Addition property of equality: add the same number to both sides');
     await w.tip('.lx-pgrid .lx-move[data-move="trade"]', 'Symmetric property of equality: if a = b, then b = a');
     w.at('click the greyed button'); await w.click('.lx-pgrid .lx-move.is-grey[data-move="div"]'); await w.see('That move works once each side is one term.');
-    w.at('click the live button'); await w.page.evaluate(() => window.__mat.dispatch({ type: 'spotDismiss' })); await w.click('.lx-pgrid .lx-move:not(.is-grey)[data-move="add"]');
+    w.at('click the live button'); await await w.click('.lx-pgrid .lx-move:not(.is-grey)[data-move="add"]');
     if (!(await w.page.locator('.lx-pgrid .lx-move.is-on[data-move="add"]').count())) throw new Error('the clicked button should be selected (yellow, thicker edge)');
   },
   async 'w-panel-distribute-solve'(w) {
@@ -437,7 +437,7 @@ const WALKS = {
     w.at('point at the top button, then the bottom one'); await w.tip('.lx-pgrid .lx-move[data-move="add"]', 'Addition property of equality: add the same number to both sides');
     await w.tip('.lx-pgrid .lx-move[data-move="trade"]', 'Symmetric property of equality: if a = b, then b = a');
     w.at('click the greyed button'); await w.click('.lx-pgrid .lx-move.is-grey[data-move="trade"]'); await w.see('That move unlocks on a later card.');
-    w.at('click the live button'); await w.page.evaluate(() => window.__mat.dispatch({ type: 'spotDismiss' })); await w.click('.lx-pgrid .lx-move:not(.is-grey)[data-move="add"]');
+    w.at('click the live button'); await await w.click('.lx-pgrid .lx-move:not(.is-grey)[data-move="add"]');
     if (!(await w.page.locator('.lx-pgrid .lx-move.is-on[data-move="add"]').count())) throw new Error('the clicked button should be selected (yellow, thicker edge)');
   },
   async 'w-panel-variables-both-sides'(w) {
@@ -447,7 +447,7 @@ const WALKS = {
     w.at('point at the top button, then the bottom one'); await w.tip('.lx-pgrid .lx-move[data-move="add"]', 'Addition property of equality: add the same number to both sides');
     await w.tip('.lx-pgrid .lx-move[data-move="trade"]', 'Symmetric property of equality: if a = b, then b = a');
     w.at('click the greyed button'); await w.click('.lx-pgrid .lx-move.is-grey[data-move="div"]'); await w.see('Get x on one side first.');
-    w.at('click the live button'); await w.page.evaluate(() => window.__mat.dispatch({ type: 'spotDismiss' })); await w.click('.lx-pgrid .lx-move:not(.is-grey)[data-move="add"]');
+    w.at('click the live button'); await await w.click('.lx-pgrid .lx-move:not(.is-grey)[data-move="add"]');
     if (!(await w.page.locator('.lx-pgrid .lx-move.is-on[data-move="add"]').count())) throw new Error('the clicked button should be selected (yellow, thicker edge)');
   },
   async 'w-panel-distribute-more'(w) {
@@ -457,7 +457,7 @@ const WALKS = {
     w.at('point at the top button, then the bottom one'); await w.tip('.lx-pgrid .lx-move[data-move="add"]', 'Addition property of equality: add the same number to both sides');
     await w.tip('.lx-pgrid .lx-move[data-move="trade"]', 'Symmetric property of equality: if a = b, then b = a');
     w.at('click the greyed button'); await w.click('.lx-pgrid .lx-move.is-grey[data-move="div"]'); await w.see('Get x on one side first.');
-    w.at('click the live button'); await w.page.evaluate(() => window.__mat.dispatch({ type: 'spotDismiss' })); await w.click('.lx-pgrid .lx-move:not(.is-grey)[data-move="add"]');
+    w.at('click the live button'); await await w.click('.lx-pgrid .lx-move:not(.is-grey)[data-move="add"]');
     if (!(await w.page.locator('.lx-pgrid .lx-move.is-on[data-move="add"]').count())) throw new Error('the clicked button should be selected (yellow, thicker edge)');
   },
   async 'w-panel-strange-solutions'(w) {
@@ -467,7 +467,7 @@ const WALKS = {
     w.at('point at the top button, then the bottom one'); await w.tip('.lx-pgrid .lx-move[data-move="add"]', 'Addition property of equality: add the same number to both sides');
     await w.tip('.lx-pgrid .lx-move[data-move="trade"]', 'Symmetric property of equality: if a = b, then b = a');
     w.at('click the greyed button'); await w.click('.lx-pgrid .lx-move.is-grey[data-move="div"]'); await w.see('Get x on one side first.');
-    w.at('click the live button'); await w.page.evaluate(() => window.__mat.dispatch({ type: 'spotDismiss' })); await w.click('.lx-pgrid .lx-move:not(.is-grey)[data-move="add"]');
+    w.at('click the live button'); await await w.click('.lx-pgrid .lx-move:not(.is-grey)[data-move="add"]');
     if (!(await w.page.locator('.lx-pgrid .lx-move.is-on[data-move="add"]').count())) throw new Error('the clicked button should be selected (yellow, thicker edge)');
   },
   async 'w-menu'(w) {
