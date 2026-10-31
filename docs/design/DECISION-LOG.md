@@ -386,3 +386,22 @@ Its notes: "Improper fractions are full credit, no mixed numbers" and "x can be 
    combining values after. Not one at a time at all." Each press now does every operation of one kind at once, on both sides: inside the
    parentheses, then every product, then (with fractions) every whole number over the denominator, then every sum. This replaces rev 2.5's
    one operation a press, on every card. Loop spec rev 2.12, section 4.
+
+## 2026-10-26: panel simplification (Karl; Build W)
+
+1. **The top five Moves work well; the buttons are too small and their symbols too small to read.** The buttons become larger and
+   square, each with one large plain symbol: Add `+`, Multiply `×`, Divide `÷`, Flip everything `×(−1)`, Trade places two curved arrows
+   making a circle (the recycling look, no equals sign and no plus or minus; this replaces Build Q's two arrow icons). The preview on the
+   equation already shows the work on both sides, so the buttons no longer draw the equation form (`( )/n = ( )/n` and the like).
+2. **No floating symbols anywhere,** on the panel or beside the Multiply menu's options. The options keep their own equation-form
+   drawings (`n( ) = n( )`, `1/▢( ) = 1/▢( )`, `▢/▢( ) = ▢/▢( )`).
+3. **The goal lights are gone for students** (Karl: "an extra detail students do not pay attention to"). The logic stays (the helpful /
+   unhelpful judgement, the class-sheet records and the nudges depend on it); `?lights=1` shows them as before, for a teacher or for
+   debugging. A teacher view comes later with the class views.
+4. **The Add cancel mark reads as a diagonal cross-out,** not an underline: a stroke from the lower left to the upper right at about
+   45°, across the whole term, heavier than before.
+5. **Queued after this build:** Build X (a clickable main menu with metallic progress colours), then Build V2 (Strange solutions
+   Levels 4-5).
+6. **Karl's answers to Build V's decisions (all kept):** Level 3 keeps two x = 0 problems; the two answer boxes stay side by side;
+   dividing by a number that would leave a fraction beside x is not made (with its message). Also approved, queued for V2: list
+   unsimplified tries in the class sheet's answers column (`15/6 → unsimplified`, clearly not a wrong answer).

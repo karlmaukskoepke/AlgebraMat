@@ -153,6 +153,32 @@ class Walk {
     await this.page.setViewportSize({ width: 1366, height: 650 }); await wait(this.page, 700); await this.shot(`${name}-650`);
     await this.page.setViewportSize({ width: 1366, height: 768 }); await wait(this.page, 300);
   }
+  // Build W: the panel is five square buttons, one plain symbol each, nothing beside them and no lights
+  async simplePanel() {
+    const got = await this.page.evaluate(() => {
+      const grid = document.querySelector('.lx-panel .lx-pgrid');
+      const btns = [...grid.querySelectorAll('.lx-move')];
+      const r = btns.map((b) => b.getBoundingClientRect());
+      return { kids: [...grid.children].every((c) => c.matches('.lx-move, .lx-movewrap')), glyphs: btns.map((b) => b.querySelector('.lx-glyph')?.getAttribute('aria-label')),
+        square: r.every((x) => Math.abs(x.width - x.height) < 1 && x.width >= 56), dots: document.querySelectorAll('.lx-dot, .lx-symbol').length };
+    });
+    if (!got.kids || got.dots || !got.square || got.glyphs.join(',') !== 'Plus sign,Times sign,Division sign,Times negative one,Two curved arrows making a circle') throw new Error(`the panel should be five square buttons with one symbol each and nothing beside them: ${JSON.stringify(got)}`);
+  }
+  async tip(sel, words) {
+    await this.page.locator(sel).first().hover(); await wait(this.page, 250);
+    const tip = await this.page.locator(sel).first().evaluate((b) => getComputedStyle(b, '::after').content);
+    if (!tip.includes(words)) throw new Error(`pointing at ${sel} should show "${words}", not ${tip}`);
+  }
+  // Build W, Part 3: every cancelling term in the newest work row crossed by one 40-50° stroke, lower left to upper right, over all its ink
+  async diagonals(n) {
+    const xs = await this.page.evaluate(() => [...document.querySelectorAll('.lb-work .lx-xo')].map((e) => {
+      const r = document.createRange(); r.selectNodeContents(e); const ink = r.getBoundingClientRect(); const a = getComputedStyle(e, '::after');
+      const w = parseFloat(a.width); const h = parseFloat(a.height); const b = e.getBoundingClientRect(); const cx = b.left + b.width / 2;
+      return { text: e.textContent.replace(/\s+/g, ''), angle: (Math.atan2(h, w) * 180) / Math.PI, covers: cx - w / 2 < ink.left && cx + w / 2 > ink.right, dir: /to right bottom|to bottom right/.test(a.backgroundImage) };
+    }));
+    if (xs.length !== n || xs.some((x) => x.angle < 40 || x.angle > 50 || !x.covers || !x.dir)) throw new Error(`expected ${n} diagonal cross-outs after step "${this.step}": ${JSON.stringify(xs)}`);
+    return xs.map((x) => x.text);
+  }
   async text() { return (await this.page.evaluate(() => document.body.innerText)).replace(/\s+/g, ' '); }
   async see(...words) {                             // every piece of text must be on the screen
     const t = await this.text();
@@ -363,6 +389,141 @@ class Walk {
 
 // ---- one walk per item (same id as in the data file) ---------------------------------------------------------------------------------
 const WALKS = {
+  // ---- Build W ----
+  async 'w-panel-add-both'(w) {
+    await w.start(); await w.see('ADD TO BOTH SIDES · Level 1', 'x + 8 = 11', 'MOVES');
+    await w.simplePanel();
+    await w.both('w-panel-add-both');
+    w.at('point at the top button, then the bottom one'); await w.tip('.lx-pgrid .lx-move[data-move="add"]', 'Addition property of equality: add the same number to both sides');
+    await w.tip('.lx-pgrid .lx-move[data-move="trade"]', 'Symmetric property of equality: if a = b, then b = a');
+    w.at('click the greyed button'); await w.click('.lx-pgrid .lx-move.is-grey[data-move="multiply"]'); await w.see('That move unlocks on a later card.');
+    w.at('click the live button'); await w.page.evaluate(() => window.__mat.dispatch({ type: 'spotDismiss' })); await w.click('.lx-pgrid .lx-move:not(.is-grey)[data-move="add"]');
+    if (!(await w.page.locator('.lx-pgrid .lx-move.is-on[data-move="add"]').count())) throw new Error('the clicked button should be selected (yellow, thicker edge)');
+  },
+  async 'w-panel-divide-it'(w) {
+    await w.start(); await w.see('DIVIDE IT · Level 1', '3x = 12', 'MOVES');
+    await w.simplePanel();
+    await w.both('w-panel-divide-it');
+    w.at('point at the top button, then the bottom one'); await w.tip('.lx-pgrid .lx-move[data-move="add"]', 'Addition property of equality: add the same number to both sides');
+    await w.tip('.lx-pgrid .lx-move[data-move="trade"]', 'Symmetric property of equality: if a = b, then b = a');
+    w.at('click the greyed button'); await w.click('.lx-pgrid .lx-move.is-grey[data-move="add"]'); await w.see('You don’t need that move here.');
+    w.at('click the live button'); await w.page.evaluate(() => window.__mat.dispatch({ type: 'spotDismiss' })); await w.click('.lx-pgrid .lx-move:not(.is-grey)[data-move="div"]');
+    if (!(await w.page.locator('.lx-pgrid .lx-move.is-on[data-move="div"]').count())) throw new Error('the clicked button should be selected (yellow, thicker edge)');
+  },
+  async 'w-panel-flip-everything'(w) {
+    await w.start(); await w.see('FLIP EVERYTHING · Level 1', '−x = 8', 'MOVES');
+    await w.simplePanel();
+    await w.both('w-panel-flip-everything');
+    w.at('point at the top button, then the bottom one'); await w.tip('.lx-pgrid .lx-move[data-move="add"]', 'Addition property of equality: add the same number to both sides');
+    await w.tip('.lx-pgrid .lx-move[data-move="trade"]', 'Symmetric property of equality: if a = b, then b = a');
+    w.at('click the greyed button'); await w.click('.lx-pgrid .lx-move.is-grey[data-move="add"]'); await w.see('That move unlocks on a later card.');
+    w.at('click the live button'); await w.page.evaluate(() => window.__mat.dispatch({ type: 'spotDismiss' })); await w.click('.lx-pgrid .lx-move:not(.is-grey)[data-move="flip"]');
+    if (!(await w.page.locator('.lx-pgrid .lx-move.is-on[data-move="flip"]').count())) throw new Error('the clicked button should be selected (yellow, thicker edge)');
+  },
+  async 'w-panel-two-step-equations'(w) {
+    await w.start(); await w.see('TWO-STEP EQUATIONS · Level 1', '2x + 4 = 16', 'MOVES');
+    await w.simplePanel();
+    await w.both('w-panel-two-step-equations');
+    w.at('point at the top button, then the bottom one'); await w.tip('.lx-pgrid .lx-move[data-move="add"]', 'Addition property of equality: add the same number to both sides');
+    await w.tip('.lx-pgrid .lx-move[data-move="trade"]', 'Symmetric property of equality: if a = b, then b = a');
+    w.at('click the greyed button'); await w.click('.lx-pgrid .lx-move.is-grey[data-move="div"]'); await w.see('That move works once each side is one term.');
+    w.at('click the live button'); await w.page.evaluate(() => window.__mat.dispatch({ type: 'spotDismiss' })); await w.click('.lx-pgrid .lx-move:not(.is-grey)[data-move="add"]');
+    if (!(await w.page.locator('.lx-pgrid .lx-move.is-on[data-move="add"]').count())) throw new Error('the clicked button should be selected (yellow, thicker edge)');
+  },
+  async 'w-panel-distribute-solve'(w) {
+    await w.start(); await w.see('DISTRIBUTE, COMBINE, SOLVE · Level 1', '2(x + 4) = 26', 'MOVES');
+    await w.simplePanel();
+    await w.both('w-panel-distribute-solve');
+    w.at('point at the top button, then the bottom one'); await w.tip('.lx-pgrid .lx-move[data-move="add"]', 'Addition property of equality: add the same number to both sides');
+    await w.tip('.lx-pgrid .lx-move[data-move="trade"]', 'Symmetric property of equality: if a = b, then b = a');
+    w.at('click the greyed button'); await w.click('.lx-pgrid .lx-move.is-grey[data-move="trade"]'); await w.see('That move unlocks on a later card.');
+    w.at('click the live button'); await w.page.evaluate(() => window.__mat.dispatch({ type: 'spotDismiss' })); await w.click('.lx-pgrid .lx-move:not(.is-grey)[data-move="add"]');
+    if (!(await w.page.locator('.lx-pgrid .lx-move.is-on[data-move="add"]').count())) throw new Error('the clicked button should be selected (yellow, thicker edge)');
+  },
+  async 'w-panel-variables-both-sides'(w) {
+    await w.start(); await w.see('VARIABLES ON BOTH SIDES · Level 1', '6x = 4x + 10', 'MOVES');
+    await w.simplePanel();
+    await w.both('w-panel-variables-both-sides');
+    w.at('point at the top button, then the bottom one'); await w.tip('.lx-pgrid .lx-move[data-move="add"]', 'Addition property of equality: add the same number to both sides');
+    await w.tip('.lx-pgrid .lx-move[data-move="trade"]', 'Symmetric property of equality: if a = b, then b = a');
+    w.at('click the greyed button'); await w.click('.lx-pgrid .lx-move.is-grey[data-move="div"]'); await w.see('Get x on one side first.');
+    w.at('click the live button'); await w.page.evaluate(() => window.__mat.dispatch({ type: 'spotDismiss' })); await w.click('.lx-pgrid .lx-move:not(.is-grey)[data-move="add"]');
+    if (!(await w.page.locator('.lx-pgrid .lx-move.is-on[data-move="add"]').count())) throw new Error('the clicked button should be selected (yellow, thicker edge)');
+  },
+  async 'w-panel-distribute-more'(w) {
+    await w.start(); await w.see('DISTRIBUTE MORE · Level 1', '6(x − 2) − 10 = 4x − 8', 'MOVES');
+    await w.simplePanel();
+    await w.both('w-panel-distribute-more');
+    w.at('point at the top button, then the bottom one'); await w.tip('.lx-pgrid .lx-move[data-move="add"]', 'Addition property of equality: add the same number to both sides');
+    await w.tip('.lx-pgrid .lx-move[data-move="trade"]', 'Symmetric property of equality: if a = b, then b = a');
+    w.at('click the greyed button'); await w.click('.lx-pgrid .lx-move.is-grey[data-move="div"]'); await w.see('Get x on one side first.');
+    w.at('click the live button'); await w.page.evaluate(() => window.__mat.dispatch({ type: 'spotDismiss' })); await w.click('.lx-pgrid .lx-move:not(.is-grey)[data-move="add"]');
+    if (!(await w.page.locator('.lx-pgrid .lx-move.is-on[data-move="add"]').count())) throw new Error('the clicked button should be selected (yellow, thicker edge)');
+  },
+  async 'w-panel-strange-solutions'(w) {
+    await w.start(); await w.see('STRANGE SOLUTIONS · Level 1', '3x − 15 = −3x − 4', 'MOVES');
+    await w.simplePanel();
+    await w.both('w-panel-strange-solutions');
+    w.at('point at the top button, then the bottom one'); await w.tip('.lx-pgrid .lx-move[data-move="add"]', 'Addition property of equality: add the same number to both sides');
+    await w.tip('.lx-pgrid .lx-move[data-move="trade"]', 'Symmetric property of equality: if a = b, then b = a');
+    w.at('click the greyed button'); await w.click('.lx-pgrid .lx-move.is-grey[data-move="div"]'); await w.see('Get x on one side first.');
+    w.at('click the live button'); await w.page.evaluate(() => window.__mat.dispatch({ type: 'spotDismiss' })); await w.click('.lx-pgrid .lx-move:not(.is-grey)[data-move="add"]');
+    if (!(await w.page.locator('.lx-pgrid .lx-move.is-on[data-move="add"]').count())) throw new Error('the clicked button should be selected (yellow, thicker edge)');
+  },
+  async 'w-menu'(w) {
+    await w.start(); await w.see('DIVIDE IT · Level 1', '3x = 12');
+    w.at('Multiply'); await w.click(act('multOpen'));
+    const rows = await w.page.evaluate(() => [...document.querySelectorAll('.mo-flyout .mo-optrow')].map((r) => `${r.children.length}:${r.querySelector('.mo-opt').textContent.replace(/\s+/g, '')}`));
+    if (rows.join(',') !== '1:()=(),1:1()=1(),1:()=()' || (await w.page.locator('.mo-flyout svg, .mo-flyout .lx-symbol').count())) throw new Error(`three options, nothing beside them: ${rows}`);
+    w.at('point at the middle option'); await w.page.locator('.mo-opt[data-kind="unit"]').hover(); await wait(w.page, 400);
+    const ghost = (await w.page.locator('.lx-ghost.is-preview').innerText()).replace(/\s+/g, '');
+    if (ghost !== '1(3x)=1(12)') throw new Error(`the faint 1/▢(3x) = 1/▢(12) row: ${ghost}`);
+    await w.both('w-menu');
+  },
+  async 'w-no-lights'(w) {
+    await w.start(); await w.see('6x = 4x + 10');
+    w.at('Add, + ▢x, −4, Enter'); await w.click(`${act('choose')}[data-move="add"]`); await w.click(`${act('addPick')}[data-kind="x"]`); await w.type(-4); await w.enter(); await wait(w.page, 2500);
+    await w.row('6x − 4x = 10');
+    if (await w.page.locator('.lx-dot, [data-light], .lx-solvedrow, .lx-hand').count()) throw new Error('no lights should be on screen');
+    await w.notSee('x on one side', 'Solved for x', 'Fewer terms');
+    await w.simplePanel();
+    await w.both('w-no-lights');
+  },
+  async 'w-lights-on'(w) {
+    await w.start(); await w.see('6x = 4x + 10', 'Solved for x');
+    if ((await w.page.locator('.lx-pgrid > .lx-dots').count()) !== 5) throw new Error('the dots should sit beside the five buttons');
+    w.at('Add, + ▢x, −4, Enter'); await w.click(`${act('choose')}[data-move="add"]`); await w.click(`${act('addPick')}[data-kind="x"]`); await w.type(-4); await w.enter(); await wait(w.page, 2500);
+    if (!(await w.page.locator('[data-light="xone"].is-green').count())) throw new Error('x on one side should be green');
+    w.at('point at the dots'); await w.page.locator('[data-light="xone"]').hover(); await wait(w.page, 300); await w.see('x on one side');
+    await w.both('w-lights-on');
+  },
+  async 'w-xo-add'(w) {
+    await w.start(); await w.see('x + 8 = 11');
+    w.at('Add −8, Enter'); await w.addEnter(-8); await wait(w.page, 1000);
+    await w.shot('w-xo-add-1-drawing');
+    const texts = await w.diagonals(2);
+    if (texts.join(',') !== '+8,−8') throw new Error(`the +8 and the −8 should be crossed out, sign and all: ${texts}`);
+    await wait(w.page, 300); await w.shot('w-xo-add-2-drawn');
+    await wait(w.page, 1500); await w.row('x = 11 − 8');
+    await w.both('w-xo-add');
+  },
+  async 'w-xo-drag'(w) {
+    await w.start(); await w.see('2x + 4 = 16');
+    w.at('drag the 4 across'); await w.crossTerm('4', 'right'); await wait(w.page, 2000);
+    await w.row('2x = 16 − 4');
+    const texts = await w.diagonals(2);
+    if (texts.join(',') !== '+4,−4') throw new Error(`the +4 and the −4 should be crossed out: ${texts}`);
+    await w.both('w-xo-drag');
+  },
+  async 'w-xo-stacked'(w) {
+    await w.start(); await w.see('6x = 4x + 10');
+    w.at('Add, + ▢x, −4, Enter'); await w.click(`${act('choose')}[data-move="add"]`); await w.click(`${act('addPick')}[data-kind="x"]`); await w.type(-4); await w.enter(); await wait(w.page, 2500);
+    await w.row('6x − 4x = 10');
+    const texts = await w.diagonals(2);
+    if (texts.join(',') !== '4x,−4x') throw new Error(`the 4x and the −4x under it should be crossed out: ${texts}`);
+    if (!(await w.page.locator('.lx-under .lx-xo').count())) throw new Error('the −4x under the 4x should be crossed out');
+    await w.both('w-xo-stacked');
+  },
   // ---- After Build V (Karl): the note while the value waits, and a faster check ----
   async 'v-fix-note'(w) {
     await w.start(650); await w.see('2(x + 7) + 9 = 5x + 2');
@@ -582,15 +743,17 @@ const WALKS = {
   // ---- Build Q ----
   async 'q-icons'(w) {
     await w.start(); await w.see('FLIP EVERYTHING · Level 2', 'MOVES');
-    const names = await w.page.evaluate(() => [...document.querySelectorAll('.lx-pgrid .lx-symbol')].map((e) => e.getAttribute('aria-label')));
-    if (names[3] !== 'Cycle between minus and plus' || names[4] !== 'Equals sign with two circling arrows') throw new Error(`the fourth and fifth symbols: ${names}`);
-    const flipPaths = await w.page.locator('.lx-pgrid .lx-symbol').nth(3).locator('path').count();
-    if (flipPaths !== 6) throw new Error(`Flip everything's symbol should be two arcs, two arrowheads, a minus and a plus (${flipPaths} paths)`);
+    // (Build W: the symbols are on the buttons: ×(−1), and two curved arrows with nothing else)
+    const names = await w.page.evaluate(() => [...document.querySelectorAll('.lx-pgrid .lx-glyph')].map((e) => e.getAttribute('aria-label')));
+    if (names[3] !== 'Times negative one' || names[4] !== 'Two curved arrows making a circle') throw new Error(`the fourth and fifth symbols: ${names}`);
+    const tradePaths = await w.page.locator('.lx-pgrid .lx-glyph').nth(4).locator('path').count();
+    if (tradePaths !== 4) throw new Error(`Trade places' symbol should be two arcs and two arrowheads only (${tradePaths} paths)`);
+    await w.simplePanel();
     await w.both('q-panel-flip');
     // the two symbols large, for the report
     await w.page.evaluate(() => {
       const box = document.createElement('div'); box.id = 'q-big'; box.style.cssText = 'position:fixed;left:40px;top:120px;z-index:9999;background:#fff;padding:24px;display:flex;gap:40px;border:2px solid #2b2a26;border-radius:16px';
-      for (const i of [3, 4]) { const svg = document.querySelectorAll('.lx-pgrid .lx-symbol')[i].cloneNode(true); svg.setAttribute('width', 200); svg.setAttribute('height', 200); svg.style.cssText = 'width:200px;height:200px;opacity:1'; box.append(svg); }
+      for (const i of [3, 4]) { const svg = document.querySelectorAll('.lx-pgrid .lx-glyph')[i].cloneNode(true); svg.style.cssText = `width:${i === 3 ? 400 : 200}px;height:200px;opacity:1`; box.append(svg); }
       document.body.append(box);
     });
     await w.shot('q-icons-large');
@@ -645,8 +808,8 @@ const WALKS = {
   async 'q-menu-three'(w) {
     await w.start(); await w.see('5x = −15');
     w.at('Multiply'); await w.click(act('multOpen'));
-    const opts = await w.page.evaluate(() => [...document.querySelectorAll('.mo-flyout .mo-optrow')].map((r) => `${r.querySelector('.lx-symbol').getAttribute('aria-label')}:${r.querySelector('.mo-opt').dataset.kind}`));
-    if (opts.join(',') !== 'Times sign:whole,Division sign:unit,Fraction:frac') throw new Error(`three options with symbols: ${opts}`);
+    const opts = await w.page.evaluate(() => [...document.querySelectorAll('.mo-flyout .mo-optrow')].map((r) => `${r.children.length}:${r.querySelector('.mo-opt').dataset.kind}`));
+    if (opts.join(',') !== '1:whole,1:unit,1:frac' || (await w.page.locator('.mo-flyout svg').count())) throw new Error(`three options, nothing beside them (Build W): ${opts}`);
     await w.both('q-menu-three');
     w.at('point at the middle option'); await w.page.locator('.mo-opt[data-kind="unit"]').hover(); await wait(w.page, 400);
     const ghost = (await w.page.locator('.lx-ghost.is-preview').innerText()).replace(/\s+/g, '');
@@ -957,7 +1120,6 @@ const WALKS = {
     const preview = (await w.rows()).at(-1);
     if (preview !== '8x+−5x−14=10') throw new Error(`the preview should read 8x + −5x − 14 = 10: ${preview}`);
     w.at('let go'); await m.up(); await wait(w.page, 600); await w.stackedUnder('5x', '+−5x'); await w.row('8x − 5x − 14 = 10');
-    if (!(await w.page.locator('[data-light="xone"].is-green').count())) throw new Error('x on one side should be green');
   },
   async 'r-add-xterm'(w) {
     await w.start(); await w.see('8x − 14 = 5x + 10');
@@ -1226,10 +1388,11 @@ const WALKS = {
     await w.start(); await w.see('TWO-STEP EQUATIONS · Level 1', '3x + 4 = 19', 'MOVES');
     const got = await w.page.evaluate(() => ({
       head: document.querySelector('.lx-panel .lx-head')?.textContent,
-      symbols: [...document.querySelectorAll('.lx-pgrid .lx-symbol')].map((e) => e.getAttribute('aria-label')),
+      symbols: [...document.querySelectorAll('.lx-pgrid .lx-glyph')].map((e) => e.getAttribute('aria-label')),
       width: Math.round(document.querySelector('.lx-panel').getBoundingClientRect().width),
     }));
-    if (JSON.stringify(got.symbols) !== JSON.stringify(['Plus sign', 'Times sign', 'Division sign', 'Cycle between minus and plus', 'Equals sign with two circling arrows'])) throw new Error(`the symbols should be + × ÷, arrows cycling between minus and plus, an equals sign with two circling arrows: ${got.symbols}`);
+    if (JSON.stringify(got.symbols) !== JSON.stringify(['Plus sign', 'Times sign', 'Division sign', 'Times negative one', 'Two curved arrows making a circle'])) throw new Error(`the symbols should be + × ÷ ×(−1) and two curved arrows (Build W): ${got.symbols}`);
+    await w.simplePanel();
     const names = ['Addition property of equality: add the same number to both sides', 'Multiplication property of equality', 'Division property of equality',
       'Multiplication property of equality: multiply both sides by −1', 'Symmetric property of equality: if a = b, then b = a'];
     const buttons = w.page.locator('.lx-pgrid .lx-move');
@@ -1304,7 +1467,7 @@ const WALKS = {
     await w.see('Same as multiplying by −⅓.');
     w.at('Go'); await w.click(act('go')); await wait(w.page, 400);
     await w.see('(−3x) −3 = (12) −3', 'x = (12) −3');
-    if (await w.page.locator('.lx-dot.is-red').count()) throw new Error('nothing should turn red');
+    if (await w.page.locator('.spot-layer.is-error').count()) throw new Error('nothing should turn red');
     await w.both('o-divide-negative');
   },
   async 'o-divide-minus-one'(w) {
@@ -1419,7 +1582,6 @@ const WALKS = {
     if (!(await w.page.locator('.lx-prod .lx-prodx').count())) throw new Error('the x should be printed after the first blank');
     await w.both('m-drag-labels');
     w.at('type 3, 6'); await w.type(3); await w.enter(); await w.type(6); await w.enter(); await w.row('3x + 6 = 15');
-    if (!(await w.page.locator('[data-light="noparen"].is-green').count())) throw new Error('No parentheses should be green');
   },
   async 'm-tap-minus'(w) {
     await w.start(); await w.see('5 − 2(x + 2) = −7');
@@ -1445,7 +1607,7 @@ const WALKS = {
   async 'm-divide-first'(w) {
     await w.start(); await w.see('3(x + 2) = 15');
     w.at('Divide by 3'); await w.divEnter(3); await w.see('(3(x + 2)) 3 = (15) 3'); await w.row('x + 2 = (15) 3');
-    if (await w.page.locator('.lx-dot.is-red').count()) throw new Error('dividing first should light nothing red');
+    if (await w.page.locator('.spot-layer.is-error').count()) throw new Error('dividing first should light nothing red');
     await w.both('m-divide-first');
     w.at('Add −2'); await w.addEnter(-2); await w.row('x = (15) 3 − 2');
     w.at('type 3, check'); await w.answer(3, 3); await w.see('3(3 + 2) = 15', '✓ Balanced');
@@ -2191,7 +2353,7 @@ const WALKS = {
     await w.start(); await w.see('FLIP EVERYTHING · Level 4', '12', '−3x');
     await w.both('j-level-4');
     w.at('⅓ first'); await w.divide(3); await w.see('4 = −x');
-    if (await w.page.locator('.lx-dot.is-red').count()) throw new Error('dividing first should not light anything red');
+    if (await w.page.locator('.spot-layer.is-error').count()) throw new Error('dividing first should not show anything red');
     w.at('Next, flip'); await w.click(act('foldNext')); await w.flip(); await w.see('−(4) = x');
     w.at('type −4, check'); await w.solve(-4); await w.see('✓ Balanced');
   },
@@ -2207,8 +2369,6 @@ const WALKS = {
     await w.see('−1(−x) = −1(12)');
     w.at('click it, Go'); await w.flip();
     await w.see('x = −(12)'); await w.notSee('x = −12 ');
-    const lights = await w.page.evaluate(() => ['noopp', 'solved'].map((k) => document.querySelector(`[data-light="${k}"]`)?.className));
-    if (!lights.every((c) => /is-green/.test(c ?? ''))) throw new Error(`No opposite box and Solved for x should be green: ${lights}`);
     await w.both('j-helpful-flip');
   },
   async 'j-worse-flip'(w) {
@@ -2226,7 +2386,7 @@ const WALKS = {
     await w.start();
     w.at('Multiply, Divide, −3, Go'); await w.divide(-3);
     await w.see('(−3x) −3 = (12) −3', 'x = (12) −3');
-    if (await w.page.locator('.lx-dot.is-red').count()) throw new Error('−⅓ in one move should not light anything red');
+    if (await w.page.locator('.spot-layer.is-error').count()) throw new Error('−⅓ in one move should not show anything red');
     await w.both('j-one-move');
     w.at('type −4, check'); await w.solve(-4); await w.see('✓ Balanced');
   },

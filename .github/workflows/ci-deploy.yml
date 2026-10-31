@@ -32,7 +32,8 @@ jobs:
         with:
           path: dist
 
-  # The real-browser sweeps (tests/screenSweep.test.js: typing, drags, redraws, the text size), which `npm test` skips without Playwright.
+  # The real-browser sweeps (tests/screenSweep.test.js: typing, drags, redraws, the text size; tests/panelRoom.test.js, Build W: nothing
+  # collides with the Moves panel at 1366×650 with touch, and the Add cross-out measured on screen), which `npm test` skips without Playwright.
   # A job of its own, so a sweep that fails is seen on the check but never holds up publishing (Build Q, Part 5).
   browser-sweeps:
     name: Real-browser sweeps
@@ -46,7 +47,7 @@ jobs:
       - run: npm ci
       - run: npm install --no-save playwright@1.63.0
       - run: npx playwright install --with-deps chromium
-      - run: npx vitest run tests/screenSweep.test.js
+      - run: npx vitest run tests/screenSweep.test.js tests/panelRoom.test.js
 
   deploy:
     needs: build

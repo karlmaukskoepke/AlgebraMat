@@ -107,17 +107,16 @@ describe('Build O, Part 1: a preview lasts only as long as the hover', () => {
 });
 
 describe('Build O, Part 2: the panel', () => {
-  it('is headed "Moves"; each move’s name is its property of equality; each has a drawn symbol with a name', async () => {
+  it('is headed "Moves"; each move’s name is its property of equality; each has a drawn symbol with a name (on the button: Build W)', async () => {
     m = await mat(twoStepPlay, twoStepPlay.newSession(problem('two-step-equations', 1), {}));
     expect(m.q('.lx-panel .lx-head').textContent).toBe('Moves');
     const names = [...m.root.querySelectorAll('.lx-pgrid .lx-move')].map((b) => b.getAttribute('aria-label'));
     expect(names.slice(0, 2)).toEqual(['Addition property of equality: add the same number to both sides', 'Multiplication property of equality']);
     expect(names).toContain('Symmetric property of equality: if a = b, then b = a');
     expect(names).toContain('Multiplication property of equality: multiply both sides by −1');
-    const symbols = [...m.root.querySelectorAll('.lx-pgrid .lx-symbol')].map((e) => e.getAttribute('aria-label'));
-    expect(symbols.slice(0, 2)).toEqual(['Plus sign', 'Times sign']);
-    expect(symbols).toContain('Cycle between minus and plus');
-    expect(symbols).toContain('Equals sign with two circling arrows');
+    // (Build W: the symbol is drawn on the button itself, one each, with its own name)
+    const symbols = [...m.root.querySelectorAll('.lx-pgrid .lx-move .lx-glyph')].map((e) => e.getAttribute('aria-label'));
+    expect(symbols).toEqual(['Plus sign', 'Times sign', 'Division sign', 'Times negative one', 'Two curved arrows making a circle']);
     expect(m.root.textContent).not.toMatch(/[Ss]ubtract \S+ from both sides/);
   });
   it('the Multiply options have no small × or ÷ of their own', async () => {

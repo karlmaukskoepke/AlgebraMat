@@ -98,7 +98,7 @@ const M = {
   aAbandoned: () => 'Never mind. Tap two groups when you are ready.',
   aCombined: () => 'Combined. Keep going: tap two more groups.',
   // judging the move
-  aGreen: () => 'Fewer terms: that move helped. Keep going, or type your guess for x.',
+  aGreen: () => 'That move helped: the equation has fewer terms now. Keep going, or type your guess for x.',     // (Build W)
   // an addition that did not cancel, and one that only partly did, in the student's own numbers (Build D-2)
   aRed: (p) => (p.before ? `Adding to both sides is used to eliminate terms by adding the opposite. ${p.before} + ${p.added} did not eliminate the term. Let’s try again.`
     : p.wasAlone ? `x was already alone: adding ${p.added} put a number next to it. Press Undo.`

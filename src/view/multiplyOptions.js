@@ -4,7 +4,6 @@
 
 import { html } from './addBothMat.js';
 import { optionsOpen, MULT_KINDS, asCardKind } from '../engine/multiplyMenu.js';
-import { moveSymbol } from './narrowPanel.js';
 
 const box = () => html('span', 'mo-box');
 const unit = () => html('span', 'mo-frac', [html('span', 'mo-one', ['1']), html('span', 'mo-bar'), box()]);
@@ -18,13 +17,12 @@ const LOOK = {
 };
 const SAID = { whole: 'Multiply both sides by a whole number', div: 'Divide both sides by a number', unit: 'Multiply both sides by one over a number', frac: 'Multiply both sides by a fraction', flip: 'Multiply both sides by −1' };
 LOOK.unit = LOOK.div;                                       // (Build Q: Build L's one over a blank, back as the middle option)
-// the larger symbol floating left of each option (Build Q: the panel's style): × a whole number, ÷ one over a blank, a small fraction
-const SYMBOL = { whole: 'times', unit: 'divide', frac: 'fraction' };
+// (Build Q's symbols floating left of each option went in Build W, Karl: no floating symbols anywhere. Each option is its own form.)
 
 // kinds: which options, in order; preview: the kind hovered now; grey: options greyed on this card (a tap says why; Build J). A greyed
 // option is not previewed.
 export function multiplyOptions(kinds, preview, grey = []) {
-  return html('div', 'mo-flyout', kinds.map((k) => html('div', `mo-optrow${grey.includes(k) ? ' is-grey' : ''}`, [moveSymbol(SYMBOL[k]), html('button', `btn mo-opt${preview === k ? ' is-preview' : ''}${grey.includes(k) ? ' is-grey' : ''}`, LOOK[k](), {
+  return html('div', 'mo-flyout', kinds.map((k) => html('div', `mo-optrow${grey.includes(k) ? ' is-grey' : ''}`, [html('button', `btn mo-opt${preview === k ? ' is-preview' : ''}${grey.includes(k) ? ' is-grey' : ''}`, LOOK[k](), {
     type: 'button', 'data-action': 'multPick', 'data-kind': k, ...(grey.includes(k) ? { 'aria-disabled': 'true' } : { 'data-mopt': k }), 'aria-label': SAID[k],
   })])), { role: 'group', 'aria-label': 'Multiply by' });
 }

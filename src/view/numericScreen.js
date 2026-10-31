@@ -2,6 +2,7 @@
 // numbers standing on it as groups of counters and a big readout, the equation, Undo and Go; or, for a quiz item, the
 // problem, the question in bold and its two answers right under it, and the before / after after a miss.
 
+import { crossOut } from './crossOut.js';
 import { numericFeedbackText } from './numericFeedback.js';
 import { signed } from '../engine/addBoth.js';
 import { html, drawBalance, equationSvg, sideButtons, actionRow, groupShape, angleFor } from './addBothMat.js';
@@ -71,7 +72,7 @@ function walkBlock(s) {
   const rows = [equationRow([x(), plus(), num(3)], [num(5)])];
   if (at >= 2 && at < 3) rows.push(equationRow([x(), plus(), num(3), plus(), added()], [num(5), plus(), added()], 'lb-work'));
   if (at >= 3) {
-    rows.push(equationRow([x(), plus(), num(3, 'is-struck'), plus(), added('is-struck')], [num(5), plus(), added()], 'lb-work'));
+    rows.push(equationRow([x(), crossOut([plus(), num(3, 'is-struck')]), crossOut([plus(), added('is-struck')])], [num(5), plus(), added()], 'lb-work'));     // (crossed out sign and all: Build W)
     rows.push(equationRow([x()], [num(5), plus(), num(-3)]));
   }
   if (at >= 4) rows.push(equationRow([x()], [num(2)]));

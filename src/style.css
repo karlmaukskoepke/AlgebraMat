@@ -3903,3 +3903,37 @@ button.lb-divbar.is-calc:hover, button.lb-divbar.is-calc:focus-visible { backgro
 .sv-fracchip .lx-sfrac, .sv-ghost .lx-sfrac, .sv-checklist .lx-sfrac, .lb-xwait .lx-sfrac { font-size: 0.72em; }
 .lb-ratio .lx-sfrac { font-size: 0.75em; }
 .sv-ansbox.is-selected { background: #0072b2 !important; color: #fff !important; }
+
+/* ---------- Build W (Karl, 2026-10-26): the Moves panel simplified. Five square buttons, as large as fit at 1366×650 without lowering any
+   card's text size; one large plain symbol on each (nothing else drawn on the button); no floating symbols; no lights on screen (they come
+   back with ?lights=1, the panel then has the dots beside the buttons as before). --mv is the button's side. ---------- */
+.ui-light .lx-panel { --mv: 76px; width: max-content; max-width: none; padding: 8px; gap: 8px; }
+@media (min-height: 740px) { .ui-light .lx-panel { --mv: 88px; } }
+.ui-light .lx-panel .lx-pgrid { grid-template-columns: var(--mv); grid-auto-rows: var(--mv); gap: 10px; justify-content: center; }
+.ui-light .lx-panel.has-lights .lx-pgrid { grid-template-columns: var(--mv) auto; gap: 10px 8px; }
+.ui-light .lx-panel .lx-move, .ui-light .lx-panel .lx-movewrap { width: var(--mv); height: var(--mv); }
+.ui-light .lx-panel .lx-move { min-width: 56px; min-height: 56px; padding: 0; border-radius: 14px; display: grid; place-items: center; }
+.ui-light .lx-panel .lx-move .lx-glyph { width: calc(var(--mv) * 0.6); height: calc(var(--mv) * 0.6); max-height: none; display: block; }
+.ui-light .lx-panel .lx-move .lx-glyph.is-wide { width: calc(var(--mv) * 0.84); height: calc(var(--mv) * 0.42); }
+.ui-light .lx-panel .lx-move.is-grey .lx-glyph { opacity: 0.55; }
+/* the hover name sits just left of the button now (no symbol column between), and so do the Multiply options */
+.ui-light .lx-panel .lx-move[data-tip]:hover::after, .ui-light .lx-panel .lx-move[data-tip]:focus-visible::after { right: calc(100% + 12px); }
+.ui-light .lx-panel .mo-flyout { right: calc(100% + 12px); }
+
+/* ---------- Build W, Part 3 (Karl, 2026-10-26): the Add cancel mark is a true diagonal cross-out, not an underline. A cancelling term,
+   sign and all, sits in .lx-xo; its ::after is a square centred on the term's ink (a little above the box's middle in the hand font), the term's width plus 0.2em, and a gradient `to bottom right`
+   draws a stripe along its lower-left to upper-right diagonal: 45° in any square. Heavier than the old 4 px line (0.16em, at least 6 px),
+   in the cancel red; it draws itself from the lower left (a clip opening left to right) once, when its row first appears, and is still
+   under reduced motion. The term's ink fades as before; the stroke keeps its full strength. (view/crossOut.js has the same rule in numbers.)
+   The old horizontal line on the number or x-term inside is gone. ---------- */
+.lx-xo { --xo-w: max(6px, 0.16em); position: relative; display: inline-flex; align-items: center; gap: 0 4px; white-space: nowrap; }
+.lx-xo > .is-struck::after { content: none; display: none; }
+.lx-xo::after { content: ''; position: absolute; left: 50%; top: 45%; width: calc(100% + 0.2em); height: auto; aspect-ratio: 1 / 1; transform: translate(-50%, -50%); pointer-events: none;
+  background: linear-gradient(to bottom right, transparent calc(50% - var(--xo-w) / 2), #a3281b calc(50% - var(--xo-w) / 2), #a3281b calc(50% + var(--xo-w) / 2), transparent calc(50% + var(--xo-w) / 2));
+  animation: xo-diag 0.5s 0.8s ease-out both; }
+@keyframes xo-diag { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0 0 0); } }
+.lb-work .lx-xo > * { animation: lb-drop 0.5s 1.5s ease-in forwards; }
+.is-settled .lx-xo::after, .lb-stack .lb-rowwrap.is-old .lx-xo::after { animation: none; }
+.is-settled .lb-work .lx-xo > *, .lb-stack .lb-rowwrap.is-old .lb-work .lx-xo > * { animation: none; opacity: 0.25; }
+.lx-under .lx-xo .lb-plus { color: #0072b2; }
+@media (prefers-reduced-motion: reduce) { .lx-xo::after { animation: none; } .lb-work .lx-xo > * { animation: none; } }

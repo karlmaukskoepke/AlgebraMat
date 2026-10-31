@@ -9,6 +9,7 @@
 // Every row is written the way it is said: a negative number after the first term is subtraction, "x − 2" (its minus can be tapped
 // to show "x + −2"). The terms of the newest row are tokens that can be grabbed (view/lightsGrabPointer.js).
 
+import { crossOut } from './crossOut.js';
 import { MINUS } from '../engine/expr.js';
 import { signed } from '../engine/addBoth.js';
 import { factorText } from '../engine/solveTerms.js';
@@ -182,21 +183,26 @@ const workEls = (items, negIds = [], judged = false) => {
   if (under) {
     const rest = items.filter((t) => t !== under);
     const els = workEls(rest, negIds, true);                       // (the cancelling pair was judged with the amount in it)
-    const term = [...els].filter((e) => !e.classList.contains('lb-plus'))[under.under];
-    const amount = html('span', 'lx-under', [html('span', 'lb-plus is-added', ['+']), html('span', `lb-x is-added${under.struck ? ' is-struck' : ''}`, [xText(under.coef ?? 1)])]);
+    const term = [...els].filter((e) => !e.classList.contains('lb-plus'))[under.under];     // (a crossed-out term carries its sign inside)
+    // (a cancelling amount is crossed out as its partner above it is, the term itself: the + in front is the column's adding sign; Build W)
+    const xEl = html('span', `lb-x is-added${under.struck ? ' is-struck' : ''}`, [xText(under.coef ?? 1)]);
+    const amount = html('span', 'lx-under', [html('span', 'lb-plus is-added', ['+']), under.struck ? crossOut([xEl]) : xEl]);
     return term ? els.map((e) => (e === term ? stackCol(e, amount) : e)) : [...els, amount];
   }
   items.forEach((t, i) => {
     if (t.term) {                                                   // (a term other than a number or x: a parenthesis, a fraction; Build M)
       const { op, body } = termText(t.term, i, negIds.includes(t.term.id));
       const cls = `${t.added ? ' is-added' : ''}${t.struck ? ' is-struck' : ''}`;
-      if (op) out.push(html('span', `lb-plus${t.added ? ' is-added' : ''}`, [op]));
-      out.push(html('span', `${t.term.kind === 'num' ? 'lb-num' : 'lb-x'}${cls}`, [body]));
+      const els = [...(op ? [html('span', `lb-plus${t.added ? ' is-added' : ''}`, [op])] : []), html('span', `${t.term.kind === 'num' ? 'lb-num' : 'lb-x'}${cls}`, [body])];
+      out.push(...(t.struck ? [crossOut(els)] : els));
       return;
     }
     const sub = i > 0 && (t.x ? (t.coef ?? 1) < 0 : t.v < 0);
-    if (i > 0) out.push(html('span', `lb-plus${t.added ? ' is-added' : ''}`, [sub ? MINUS : '+']));
-    out.push(t.x ? html('span', `lb-x${t.added ? ' is-added' : ''}${t.struck ? ' is-struck' : ''}`, [xText(sub ? -(t.coef ?? 1) : t.coef ?? 1)]) : html('span', `lb-num${t.added ? ' is-added' : ''}${t.struck ? ' is-struck' : ''}`, [sub ? String(-t.v) : signed(t.v)]));
+    const els = [];
+    if (i > 0) els.push(html('span', `lb-plus${t.added ? ' is-added' : ''}`, [sub ? MINUS : '+']));
+    els.push(t.x ? html('span', `lb-x${t.added ? ' is-added' : ''}${t.struck ? ' is-struck' : ''}`, [xText(sub ? -(t.coef ?? 1) : t.coef ?? 1)]) : html('span', `lb-num${t.added ? ' is-added' : ''}${t.struck ? ' is-struck' : ''}`, [sub ? String(-t.v) : signed(t.v)]));
+    // a cancelling term is crossed out whole, its sign too, by one diagonal stroke (Build W, Part 3)
+    out.push(...(t.struck ? [crossOut(els)] : els));
   });
   return out;
 };

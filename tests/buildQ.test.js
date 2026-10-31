@@ -44,13 +44,15 @@ const clean = (s) => JSON.stringify({ rows: s.rows.map(({ shown, ...r }) => r), 
 const solveTo = (p, s, v) => [{ type: 'foldNext' }, ...String(Math.abs(v)).split('').map((d) => digit(Number(d))), ...(v < 0 ? [{ type: 'toggleSign' }] : []), { type: 'check' }, { type: 'placeValue' },
   { type: 'nextLine' }, { type: 'nextLine' }, { type: 'nextLine' }, { type: 'nextLine' }].reduce(p.reduce, s);
 
-describe('Build Q, Part 1: the two symbols', () => {
-  it('Flip everything and Trade places have their new drawings and names', async () => {
+describe('Build Q, Part 1: the two symbols (redrawn in Build W)', () => {
+  it('Flip everything and Trade places: ×(−1) and two curved arrows making a circle, with no minus, plus or equals sign', async () => {
     m = await mat(flipPlay, flipPlay.newSession(problem('flip-everything', 3), {}));
-    const names = [...m.root.querySelectorAll('.lx-panel .lx-symbol')].map((e) => e.getAttribute('aria-label'));
-    expect(names).toEqual(['Plus sign', 'Times sign', 'Division sign', 'Cycle between minus and plus', 'Equals sign with two circling arrows']);
-    const flip = m.root.querySelectorAll('.lx-panel .lx-symbol')[3];
-    expect(flip.querySelectorAll('path').length).toBe(6);                    // two arcs, two arrowheads, a minus, a plus
+    const names = [...m.root.querySelectorAll('.lx-panel .lx-glyph')].map((e) => e.getAttribute('aria-label'));
+    expect(names).toEqual(['Plus sign', 'Times sign', 'Division sign', 'Times negative one', 'Two curved arrows making a circle']);
+    const [flip, trade] = [...m.root.querySelectorAll('.lx-panel .lx-glyph')].slice(3);
+    expect(flip.textContent).toBe('(−1)');                                   // (a drawn ×, then (−1))
+    expect(trade.querySelectorAll('path').length).toBe(4);                   // two arcs, two arrowheads: nothing else
+    expect(trade.textContent).toBe('');
   });
 });
 
@@ -86,12 +88,12 @@ describe('Build Q, Part 3: the hint before dividing', () => {
 });
 
 describe('Build Q, Part 4: the Multiply menu has three options', () => {
-  it('whole number, one over a blank, fraction, in that order, each with a floating symbol', async () => {
+  it('whole number, one over a blank, fraction, in that order, with no floating symbol (Build W)', async () => {
     expect(MULT_KINDS).toEqual(['whole', 'unit', 'frac']);
     m = await mat(divideMovesPlay, divideMovesPlay.newSession(problem('divide-it', 3), {}));
     await m.run({ type: 'multOpen' });
     expect([...m.root.querySelectorAll('.mo-flyout .mo-opt')].map((e) => e.dataset.kind)).toEqual(['whole', 'unit', 'frac']);
-    expect([...m.root.querySelectorAll('.mo-flyout .lx-symbol')].map((e) => e.getAttribute('aria-label'))).toEqual(['Times sign', 'Division sign', 'Fraction']);
+    expect(m.root.querySelectorAll('.mo-flyout svg, .mo-flyout .lx-symbol, .mo-flyout .lx-glyph').length).toBe(0);
   });
   it('one over a blank: 5, Go writes ⅕(5x) = ⅕(−15) with "Dividing by 5 is multiplying by ⅕."; stored exactly as the fraction option', async () => {
     m = await mat(divideMovesPlay, divideMovesPlay.newSession(problem('divide-it', 3), {}));

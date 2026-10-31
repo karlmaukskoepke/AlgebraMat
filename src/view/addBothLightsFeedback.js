@@ -45,7 +45,7 @@ const LX = {
   aOppHint: (p) => `Add ${p.opposite} to both sides to cancel the ${p.constant}. Press Go.`,
   aStuckHint: (p) => `Look at the ${p.constant} next to x. What would we add to both sides to eliminate it? Type it in the box.`,
   aUndone: () => 'Undone. Try a different number in the box.',
-  aGreen: () => 'Fewer terms: that move helped. Press Next.',
+  aGreen: () => 'That move helped: the equation has fewer terms now. Press Next.',     // (no goal named: the lights are not on screen, Build W)
 };
 
 export function lightsFeedbackText(fb) {

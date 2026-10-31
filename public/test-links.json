@@ -1,7 +1,239 @@
 {
   "_about": "The test-links page (test-links.html) reads this list: Karl's change list. `checks` is the Features to check section at the top: one item per new feature (id, name, build, one link, numbered steps, what you should see), written from the real code and walked through with tests/features/walk.mjs before a build is called finished; the ticks live only in Karl's browser, and an item stays here until Karl has ticked it. The rest of the page: Live = on the site for everyone. Testing = behind a flag, waiting for Karl to keep or retire it. Retired = deleted. Every build adds or updates its entries (CLAUDE.md, Working with Karl). Each entry is a name, one plain sentence (`about`) and, for Live and Testing, its buttons. A button's `query` is the part after the address: card, level, seed, flags, sign-in skipped. `level` in a link is the saved level number (Add to both sides and Divide it: link level 2 is shown as Level 1). `reset: true` clears this browser's progress first; `look` is one sentence on what to look for; `notLive` says plainly why a link won't work on the live site.",
-  "updated": "2026-10-27",
+  "updated": "2026-10-31",
   "checks": [
+    {
+      "id": "w-panel-add-both",
+      "name": "The new Moves panel: Add to both sides",
+      "build": "Build W",
+      "link": {
+        "label": "Open Add to both sides · Level 1",
+        "query": "?pack=add-both&level=2&seed=7&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Add to both sides, Level 1, on x + 8 = 11. Look at the Moves panel on the right.",
+        "Point at the top button without clicking, then at the bottom one.",
+        "Click Multiply (×): it is greyed, with a dashed edge.",
+        "Click Add (+) once."
+      ],
+      "see": "Five large square buttons, each with one big symbol you can read from your seat and nothing else: +, ×, ÷, ×(−1), and two curved arrows making a circle. No dots and no small symbols beside them. Pointing shows “Addition property of equality: add the same number to both sides”, then “Symmetric property of equality: if a = b, then b = a”. The greyed button says “That move unlocks on a later card.” The button you click turns yellow with a thicker edge."
+    },
+    {
+      "id": "w-panel-divide-it",
+      "name": "The new Moves panel: Divide it",
+      "build": "Build W",
+      "link": {
+        "label": "Open Divide it · Level 1",
+        "query": "?pack=divide-it&level=2&seed=7&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Divide it, Level 1, on 3x = 12. Look at the Moves panel on the right.",
+        "Point at the top button without clicking, then at the bottom one.",
+        "Click Add (+): it is greyed, with a dashed edge.",
+        "Click Divide (÷) once."
+      ],
+      "see": "Five large square buttons, each with one big symbol you can read from your seat and nothing else: +, ×, ÷, ×(−1), and two curved arrows making a circle. No dots and no small symbols beside them. Pointing shows “Addition property of equality: add the same number to both sides”, then “Symmetric property of equality: if a = b, then b = a”. The greyed button says “You don’t need that move here.” The button you click turns yellow with a thicker edge."
+    },
+    {
+      "id": "w-panel-flip-everything",
+      "name": "The new Moves panel: Flip everything",
+      "build": "Build W",
+      "link": {
+        "label": "Open Flip everything · Level 1",
+        "query": "?pack=flip-everything&level=2&seed=7&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Flip everything, Level 1, on −x = 8. Look at the Moves panel on the right.",
+        "Point at the top button without clicking, then at the bottom one.",
+        "Click Add (+): it is greyed, with a dashed edge.",
+        "Click Flip everything (×(−1)) once."
+      ],
+      "see": "Five large square buttons, each with one big symbol you can read from your seat and nothing else: +, ×, ÷, ×(−1), and two curved arrows making a circle. No dots and no small symbols beside them. Pointing shows “Addition property of equality: add the same number to both sides”, then “Symmetric property of equality: if a = b, then b = a”. The greyed button says “That move unlocks on a later card.” The button you click turns yellow with a thicker edge."
+    },
+    {
+      "id": "w-panel-two-step-equations",
+      "name": "The new Moves panel: Two-step equations",
+      "build": "Build W",
+      "link": {
+        "label": "Open Two-step equations · Level 1",
+        "query": "?pack=two-step-equations&level=1&seed=7&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Two-step equations, Level 1, on 2x + 4 = 16. Look at the Moves panel on the right.",
+        "Point at the top button without clicking, then at the bottom one.",
+        "Click Divide (÷): it is greyed, with a dashed edge.",
+        "Click Add (+) once."
+      ],
+      "see": "Five large square buttons, each with one big symbol you can read from your seat and nothing else: +, ×, ÷, ×(−1), and two curved arrows making a circle. No dots and no small symbols beside them. Pointing shows “Addition property of equality: add the same number to both sides”, then “Symmetric property of equality: if a = b, then b = a”. The greyed button says “That move works once each side is one term.” The button you click turns yellow with a thicker edge."
+    },
+    {
+      "id": "w-panel-distribute-solve",
+      "name": "The new Moves panel: Distribute, combine, solve",
+      "build": "Build W",
+      "link": {
+        "label": "Open Distribute, combine, solve · Level 1",
+        "query": "?pack=distribute-solve&level=1&seed=7&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Distribute, combine, solve, Level 1, on 2(x + 4) = 26. Look at the Moves panel on the right.",
+        "Point at the top button without clicking, then at the bottom one.",
+        "Click Trade places (the two curved arrows): it is greyed, with a dashed edge.",
+        "Click Add (+) once."
+      ],
+      "see": "Five large square buttons, each with one big symbol you can read from your seat and nothing else: +, ×, ÷, ×(−1), and two curved arrows making a circle. No dots and no small symbols beside them. Pointing shows “Addition property of equality: add the same number to both sides”, then “Symmetric property of equality: if a = b, then b = a”. The greyed button says “That move unlocks on a later card.” The button you click turns yellow with a thicker edge."
+    },
+    {
+      "id": "w-panel-variables-both-sides",
+      "name": "The new Moves panel: Variables on both sides",
+      "build": "Build W",
+      "link": {
+        "label": "Open Variables on both sides · Level 1",
+        "query": "?pack=variables-both-sides&level=1&seed=7&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Variables on both sides, Level 1, on 6x = 4x + 10. Look at the Moves panel on the right.",
+        "Point at the top button without clicking, then at the bottom one.",
+        "Click Divide (÷): it is greyed, with a dashed edge.",
+        "Click Add (+) once."
+      ],
+      "see": "Five large square buttons, each with one big symbol you can read from your seat and nothing else: +, ×, ÷, ×(−1), and two curved arrows making a circle. No dots and no small symbols beside them. Pointing shows “Addition property of equality: add the same number to both sides”, then “Symmetric property of equality: if a = b, then b = a”. The greyed button says “Get x on one side first.” The button you click turns yellow with a thicker edge."
+    },
+    {
+      "id": "w-panel-distribute-more",
+      "name": "The new Moves panel: Distribute more",
+      "build": "Build W",
+      "link": {
+        "label": "Open Distribute more · Level 1",
+        "query": "?pack=distribute-more&level=1&seed=7&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Distribute more, Level 1, on 6(x − 2) − 10 = 4x − 8. Look at the Moves panel on the right.",
+        "Point at the top button without clicking, then at the bottom one.",
+        "Click Divide (÷): it is greyed, with a dashed edge.",
+        "Click Add (+) once."
+      ],
+      "see": "Five large square buttons, each with one big symbol you can read from your seat and nothing else: +, ×, ÷, ×(−1), and two curved arrows making a circle. No dots and no small symbols beside them. Pointing shows “Addition property of equality: add the same number to both sides”, then “Symmetric property of equality: if a = b, then b = a”. The greyed button says “Get x on one side first.” The button you click turns yellow with a thicker edge."
+    },
+    {
+      "id": "w-panel-strange-solutions",
+      "name": "The new Moves panel: Strange solutions",
+      "build": "Build W",
+      "link": {
+        "label": "Open Strange solutions · Level 1",
+        "query": "?pack=strange-solutions&level=1&seed=7&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Strange solutions, Level 1, on 3x − 15 = −3x − 4. Look at the Moves panel on the right.",
+        "Point at the top button without clicking, then at the bottom one.",
+        "Click Divide (÷): it is greyed, with a dashed edge.",
+        "Click Add (+) once."
+      ],
+      "see": "Five large square buttons, each with one big symbol you can read from your seat and nothing else: +, ×, ÷, ×(−1), and two curved arrows making a circle. No dots and no small symbols beside them. Pointing shows “Addition property of equality: add the same number to both sides”, then “Symmetric property of equality: if a = b, then b = a”. The greyed button says “Get x on one side first.” The button you click turns yellow with a thicker edge."
+    },
+    {
+      "id": "w-menu",
+      "name": "The Multiply menu: no symbols beside the options",
+      "build": "Build W",
+      "link": {
+        "label": "Open Divide it · Level 1",
+        "query": "?pack=divide-it&level=2&seed=7&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Divide it, Level 1, on 3x = 12.",
+        "Click Multiply (the second button, ×).",
+        "Point at the middle option without clicking."
+      ],
+      "see": "Three options open to the left of Multiply, each drawn as its own equation with nothing beside it: a box ( ) = a box ( ), 1 over a box ( ) = 1 over a box ( ), a box over a box ( ). Pointing at the middle one draws a faint 1/▢(3x) = 1/▢(12) under the equation."
+    },
+    {
+      "id": "w-no-lights",
+      "name": "No goal lights on screen",
+      "build": "Build W",
+      "link": {
+        "label": "Open Variables on both sides · Level 1",
+        "query": "?pack=variables-both-sides&level=1&seed=7&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Variables on both sides, Level 1, on 6x = 4x + 10.",
+        "Click Add (+), then its second option (+ ▢x). Type −4 and press Enter.",
+        "Look at the panel and around it while the rows come in."
+      ],
+      "see": "No dots, ticks or goal names anywhere (no “x on one side”, no “Solved for x”); the panel is only the five buttons. The rows read 6x − 4x = 10 as before, with no message about a goal."
+    },
+    {
+      "id": "w-lights-on",
+      "name": "The lights for a teacher: the special link still shows them",
+      "build": "Build W",
+      "link": {
+        "label": "Open Variables on both sides · Level 1 (with the lights)",
+        "query": "?pack=variables-both-sides&level=1&seed=7&lights=1&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Variables on both sides, Level 1, on 6x = 4x + 10, with the goal lights showing (a teacher view; students never see it).",
+        "Click Add (+), then its second option (+ ▢x). Type −4 and press Enter.",
+        "Point at the dots in the row under the five buttons, one at a time."
+      ],
+      "see": "Small dots sit beside the buttons and in two rows under them, with “Solved for x” at the bottom, as before Build W. After the Add, the “x on one side” dot turns green; pointing at a dot shows its goal."
+    },
+    {
+      "id": "w-xo-add",
+      "name": "The Add cross-out: a diagonal through the whole term",
+      "build": "Build W",
+      "link": {
+        "label": "Open Add to both sides · Level 1",
+        "query": "?pack=add-both&level=2&seed=7&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Add to both sides, Level 1, on x + 8 = 11.",
+        "Click Add (+), type −8 and press Enter.",
+        "Watch the row x + 8 − 8 = 11 − 8 for two seconds."
+      ],
+      "see": "The +8 and the −8 are each crossed out by one heavy red stroke drawn from the lower left to the upper right (a steep diagonal, not a line underneath), through the sign and the 8. Then the two 8s fade; the strokes stay. The next row reads x = 11 − 8."
+    },
+    {
+      "id": "w-xo-drag",
+      "name": "The Add cross-out after a drag across the =",
+      "build": "Build W",
+      "link": {
+        "label": "Open Two-step equations · Level 1",
+        "query": "?pack=two-step-equations&level=1&seed=7&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Two-step equations, Level 1, on 2x + 4 = 16.",
+        "Drag the 4 across the = to the right side and let go.",
+        "Watch the new row for two seconds."
+      ],
+      "see": "The row reads 2x + 4 − 4 = 16 − 4, with the +4 and the −4 on the left each crossed out by one red diagonal stroke (lower left to upper right) through the sign and the 4. Then 2x = 16 − 4."
+    },
+    {
+      "id": "w-xo-stacked",
+      "name": "The Add cross-out on a stacked x-term pair",
+      "build": "Build W",
+      "link": {
+        "label": "Open Variables on both sides · Level 1",
+        "query": "?pack=variables-both-sides&level=1&seed=7&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Variables on both sides, Level 1, on 6x = 4x + 10.",
+        "Click Add (+), then its second option (+ ▢x). Type −4 and press Enter.",
+        "Watch the work row for two seconds."
+      ],
+      "see": "−4x is written under the 6x and under the 4x. On the right, the 4x and the −4x under it are each crossed out the same way: one red diagonal stroke from the lower left to the upper right. The 6x side is not crossed. Then 6x − 4x = 10."
+    },
     {
       "id": "v-fix-note",
       "name": "The value to drag is never covered",
@@ -354,7 +586,7 @@
         "Point at Flip everything (the fourth button) and look at the faint row. Click it and click the green Go.",
         "Look at the rows and the small words above the folded move, then solve it."
       ],
-      "see": "The preview and the written row put the −1 right next to its parentheses, −1(−x) = −1(…), with no × anywhere in the work; once folded the move says “−1 · both sides”. The × is still on the Moves panel’s symbol."
+      "see": "The preview and the written row put the −1 right next to its parentheses, −1(−x) = −1(…), with no × anywhere in the work; once folded the move says “−1 · both sides”. The × is still on the Moves panel’s Multiply button."
     },
     {
       "id": "u-flip-first",
@@ -374,7 +606,7 @@
     },
     {
       "id": "q-icons",
-      "name": "Two new symbols: Flip everything and Trade places",
+      "name": "Two symbols: Flip everything and Trade places (redrawn in Build W)",
       "build": "Build Q",
       "link": {
         "label": "Open Flip everything · Level 2",
@@ -383,10 +615,10 @@
       },
       "steps": [
         "Click the button. It opens Flip everything, Level 2. Look at the panel on the right.",
-        "Look at the bigger symbols to the left of the fourth and fifth buttons.",
+        "Look at the fourth and fifth buttons.",
         "Make the browser bigger (Ctrl and +) once, look again, then go back (Ctrl and 0)."
       ],
-      "see": "Beside Flip everything: two rounded arrows chasing each other in a circle, a minus on the left and a plus on the right (one arrow goes over the top from the minus to the plus, the other under the bottom back to the minus). Beside Trade places: an equals sign with the same two arrows circling round it. Both stay clear when the page is bigger."
+      "see": "The fourth button (Flip everything) shows ×(−1). The fifth (Trade places) shows two curved arrows chasing each other round a circle, with no equals sign, plus or minus. Nothing sits beside either button. Both stay clear when the page is bigger."
     },
     {
       "id": "q-divide-room",
@@ -463,12 +695,12 @@
       },
       "steps": [
         "Click the button. It opens Divide it, Level 2, on 5x = −15.",
-        "Click Multiply (the second box).",
+        "Click Multiply (the second button, ×).",
         "Point at the middle option without clicking.",
         "Click the middle option and type 5.",
         "Press Enter. Wait three seconds."
       ],
-      "see": "Three options, each with a bigger symbol on its left: × for a whole number, ÷ for 1 over a box, a small fraction picture for a fraction. Pointing at the middle one draws a faint 1/▢(5x) = 1/▢(−15). Typing 5 fills both boxes and shows “Dividing by 5 is multiplying by ⅕.” Enter writes ⅕(5x) = ⅕(−15) with that line under it, then x = ⅕(−15). The Divide button (÷) is still there too."
+      "see": "Three options, each drawn as its own equation and nothing beside it: a box ( ) = a box ( ), 1 over a box ( ), a box over a box ( ). Pointing at the middle one draws a faint 1/▢(5x) = 1/▢(−15). Typing 5 fills both boxes and shows “Dividing by 5 is multiplying by ⅕.” Enter writes ⅕(5x) = ⅕(−15) with that line under it, then x = ⅕(−15). The Divide button (÷) is still there too."
     },
     {
       "id": "q-flip-skip",
@@ -566,7 +798,7 @@
       "steps": [
         "Click the button. It opens Variables on both sides, Level 1, on 7x = 4x + 15.",
         "Drag the 4x across the = onto the left side. Then drag the −4x onto the 7x, type 3 and press Enter. The row reads 3x = 15.",
-        "Click Divide (the third button, with ÷ beside it), type 3 and press Enter.",
+        "Click Divide (the third button, ÷), type 3 and press Enter.",
         "Click the box after x =, type 5 and press Enter. Drag the 5 onto each x (one at a time), then press Enter for each line until Balanced."
       ],
       "see": "The check writes 7(5) = 4(5) + 15 with each blue 5 under its x, then 35 = 20 + 15 (both products in one step), 35 = 35 and ✓ Balanced. No × anywhere in the check."
@@ -617,7 +849,7 @@
       "steps": [
         "Click the button. It opens Two-step equations, Level 1, on 3x + 4 = 19.",
         "Click Add (the top box), type −4 and press Enter. Drag the 19 onto the 4 beside it, type 15 and press Enter. The row reads 3x = 15.",
-        "Click Divide (the third button, with ÷ beside it), type 3 and press Enter. The last row reads x = (15) over 3.",
+        "Click Divide (the third button, ÷), type 3 and press Enter. The last row reads x = (15) over 3.",
         "Click I’m stuck."
       ],
       "see": "The pop-up says “x is 15 divided by 3. Work it out, then type x.” It says nothing about multiplying by ⅓ or taking a fraction: the row has a fraction bar, so the help talks about dividing."
@@ -997,7 +1229,7 @@
         "Pick up the 5x and hold it over the left side, without letting go.",
         "Let go there."
       ],
-      "see": "While you hold it over the left side the term turns red and reads −5x, with a preview 8x + −5x − 14 = 10 in the row (the −5x beside the 8x). Letting go writes −5x under the 8x and under the 5x, the two 5x struck, then 8x − 5x − 14 = 10. The dot “x on one side” turns green."
+      "see": "While you hold it over the left side the term turns red and reads −5x, with a preview 8x + −5x − 14 = 10 in the row (the −5x beside the 8x). Letting go writes −5x under the 8x and under the 5x, the two 5x struck, then 8x − 5x − 14 = 10."
     },
     {
       "id": "r-add-xterm",
@@ -1336,12 +1568,12 @@
       "name": "Smaller numbers and One box sit beside Divide",
       "build": "Build P",
       "link": {
-        "label": "Open Divide it · Level 2",
-        "query": "?pack=divide-it&level=3&seed=7&nosignin=1",
+        "label": "Open Divide it · Level 2 (with the lights)",
+        "query": "?pack=divide-it&level=3&seed=7&lights=1&nosignin=1",
         "reset": true
       },
       "steps": [
-        "Click the button. It opens Divide it, Level 2, on 5x = −15.",
+        "Click the button. It opens Divide it, Level 2, on 5x = −15, with the goal lights showing (a teacher view since Build W: students no longer see them).",
         "Look at the small dots to the right of each button in the panel.",
         "Click Divide (÷), type 5 and press Enter.",
         "Point at the two dots to the right of Divide, one at a time."
@@ -1362,7 +1594,7 @@
         "Look at the panel on the right.",
         "Point at each button in the panel in turn, from the top, without clicking."
       ],
-      "see": "The panel is headed MOVES in small grey capitals. Beside each button, on its left, is a bigger symbol: +, ×, ÷, a circle of two arrows, and a double arrow. Pointing shows each move’s property: “Addition property of equality: add the same number to both sides”, “Multiplication property of equality”, “Division property of equality”, “Multiplication property of equality: multiply both sides by −1”, “Symmetric property of equality: if a = b, then b = a”."
+      "see": "The panel is headed MOVES in small grey capitals. The buttons are large squares, each with one big symbol and nothing beside it: +, ×, ÷, ×(−1), and two curved arrows making a circle (since Build W). Pointing shows each move’s property: “Addition property of equality: add the same number to both sides”, “Multiplication property of equality”, “Division property of equality”, “Multiplication property of equality: multiply both sides by −1”, “Symmetric property of equality: if a = b, then b = a”."
     },
     {
       "id": "o-add-not-stuck",
@@ -1408,7 +1640,7 @@
       },
       "steps": [
         "Click the button. It opens Flip everything, Level 3, on −3x = 12.",
-        "Point at Divide (the third button, with ÷ beside it) without clicking. A bar appears under each side with a dashed box beneath it.",
+        "Point at Divide (the third button, ÷) without clicking. A bar appears under each side with a dashed box beneath it.",
         "Move the pointer straight down onto Flip everything (the fourth button).",
         "Move the pointer off the panel.",
         "Click Divide. Then point at Flip everything again."
@@ -1426,7 +1658,7 @@
       },
       "steps": [
         "Click the button. It opens Divide it, Level 2, on 5x = −15.",
-        "Point at Divide (the third button in the panel, with ÷ beside it) without clicking.",
+        "Point at Divide (the third button in the panel, ÷) without clicking.",
         "Click Divide and type 5.",
         "Click the green Go."
       ],
@@ -1443,7 +1675,7 @@
       },
       "steps": [
         "Click the button. It opens Flip everything, Level 3, on −3x = 12.",
-        "Click Divide (the third button, with ÷ beside it). Press the minus key, then type 3.",
+        "Click Divide (the third button, ÷). Press the minus key, then type 3.",
         "Click the green Go."
       ],
       "see": "Both boxes show −3 and the line says “Same as multiplying by −⅓.” Go writes (−3x) over −3 = (12) over −3, then x = (12) over −3, and nothing turns red."
@@ -1481,7 +1713,7 @@
         "Click Multiply again, then the third option (a box over a box). Type 1, then press the / key, then type 5.",
         "Click the green Go."
       ],
-      "see": "There are three options: a box ( ) = box ( ), 1 over a box ( ), and a box over a box ( ), each with a bigger symbol to its left (×, ÷, a small fraction; Build Q), none greyed. The first, with 5, says “5(5x) makes 25x: still not one x. Try dividing both sides.” and writes nothing. The fraction takes 1 on top and 5 underneath on both sides, and Go writes ⅕(5x) = ⅕(−15), then x = ⅕(−15): written as multiplying, not dividing."
+      "see": "There are three options: a box ( ) = box ( ), 1 over a box ( ), and a box over a box ( ) (nothing beside them, since Build W), none greyed. The first, with 5, says “5(5x) makes 25x: still not one x. Try dividing both sides.” and writes nothing. The fraction takes 1 on top and 5 underneath on both sides, and Go writes ⅕(5x) = ⅕(−15), then x = ⅕(−15): written as multiplying, not dividing."
     },
     {
       "id": "o-hint-divide",
@@ -1549,7 +1781,7 @@
         "Click the button. It opens Divide it, Level 3, on 3x = 6.",
         "Click the box after x =, type 2 and press Enter. Drag the 2 onto the x and press Next twice, then Next problem.",
         "The next problem is 2x = 30, with “Your mental math is very strong.” Click Next.",
-        "Click Divide (the third button in the panel on the right, with ÷ beside it). Type 2.",
+        "Click Divide (the third button in the panel on the right, ÷). Type 2.",
         "Click the green Go."
       ],
       "see": "The 2 goes into the box under each bar, on both sides, with “Same as multiplying by ½.” Go writes (2x) over 2 = (30) over 2, then x = (30) over 2."
@@ -1661,7 +1893,7 @@
         "Now drag the 3 onto the parenthesis and let go.",
         "Type 3, press Enter, type 6, press Enter."
       ],
-      "see": "Let go elsewhere, the 3 goes back and nothing changes. On the parenthesis, the 3 turns blue, an arc with a small × runs from it to the x and another to the 2, and “3 groups of” sits by the parenthesis. Two blue boxes appear under the equation with no labels above them (an x printed after the first). Go writes 3x + 6 = 15, and the panel’s third small dot at the bottom (No parentheses) turns green."
+      "see": "Let go elsewhere, the 3 goes back and nothing changes. On the parenthesis, the 3 turns blue, an arc with a small × runs from it to the x and another to the 2, and “3 groups of” sits by the parenthesis. Two blue boxes appear under the equation with no labels above them (an x printed after the first). Go writes 3x + 6 = 15."
     },
     {
       "id": "m-tap-minus",
@@ -1867,7 +2099,7 @@
         "Click the button. It opens the new Two-step equations card, Level 1, on 3x + 4 = 19.",
         "Click Add (the top box in the panel on the right), type −4 and press Enter. The 4s cross out and a new row reads 3x = 19 − 4.",
         "Drag the 19 onto the 4 beside it. A box opens under them: type 15 and press Enter. The row reads 3x = 15.",
-        "Click Divide (the third button in the panel on the right, with ÷ beside it), type 3 and press Enter. The rows read (3x) over 3 = (15) over 3, with “Same as multiplying by ⅓.” under it, then x = (15) over 3.",
+        "Click Divide (the third button in the panel on the right, ÷), type 3 and press Enter. The rows read (3x) over 3 = (15) over 3, with “Same as multiplying by ⅓.” under it, then x = (15) over 3.",
         "Click the box after x =, type 5 and press Enter. Drag the 5 onto the x in 3x + 4 = 19, then press Enter three times."
       ],
       "see": "After Add the right side stays 19 − 4 until you put it together: nothing is worked out for you. The check reads 3x + 4 = 19, then 3(5) + 4 = 19 under it, down to 19 = 19 and Balanced."
@@ -1901,7 +2133,7 @@
       },
       "steps": [
         "Click the button. It opens Two-step equations, Level 1, on 3x + 4 = 19.",
-        "Click Divide (the third button in the panel, with ÷ beside it; it is greyed).",
+        "Click Divide (the third button in the panel, ÷; it is greyed).",
         "Click Add (the top box in the panel on the right), type −4 and press Enter twice (the second Enter is Next). Click Divide again.",
         "Drag the 19 onto the 4 beside it. A box opens under them: type 15 and press Enter. Click Divide once more."
       ],
@@ -1936,8 +2168,8 @@
         "Click the button. It opens Two-step equations, Level 5, on 4 − 3x = −11.",
         "Click Add (the top box in the panel on the right), type −4 and press Enter.",
         "Drag the −11 onto the 4 beside it. A box opens under them: type −15 and press Enter. The row reads −3x = −15.",
-        "Click Flip everything (the third box in the panel), then the green Go.",
-        "Click Divide (the third button in the panel on the right, with ÷ beside it), type 3 and press Enter.",
+        "Click Flip everything (the fourth button in the panel, ×(−1)), then the green Go.",
+        "Click Divide (the third button in the panel on the right, ÷), type 3 and press Enter.",
         "Click the box after x =, type 5 and press Enter. Drag the 5 onto the x, then press Enter for each line until Balanced (every check shows every step)."
       ],
       "see": "After the flip a pop-up says “Multiplying both sides by −1 flips every sign. −x becomes x.” and the row reads 3x = 15. The check starts 4 − 3x = −11, then one line for each Enter: 4 − 3(5) = −11, 4 − 15 = −11, −11 = −11, then Balanced."
@@ -1953,7 +2185,7 @@
       },
       "steps": [
         "Click the button. It opens Flip everything, Level 1, on −x = 12.",
-        "Click Flip everything (the third box in the panel), then the green Go.",
+        "Click Flip everything (the fourth button in the panel, ×(−1)), then the green Go.",
         "Click the box after x =, type −12 and press Enter. Drag the −12 onto the x, press Enter twice, then click Next problem.",
         "On the next equation, click Flip everything, then Go."
       ],
@@ -2004,7 +2236,7 @@
         "Click the button. It opens Two-step equations, Level 2, on 3x − 4 = 11.",
         "Click Add (the top box in the panel on the right), type 4 and press Enter.",
         "Drag the −11 onto the 4 beside it. A box opens under them: type 15 and press Enter.",
-        "Click Divide (the third button in the panel on the right, with ÷ beside it), type 3 and press Enter.",
+        "Click Divide (the third button in the panel on the right, ÷), type 3 and press Enter.",
         "Click the box after x =, type 5 and press Enter. Drag the 5 onto the x, then press Enter three times."
       ],
       "see": "Adding 4 gives 3x = 11 + 4, then 3x = 15 and x = (15) over 3. The check reads 3(5) − 4 = 11 down to 11 = 11 and Balanced."
@@ -2014,12 +2246,12 @@
       "name": "Level 3 (x on the right): Add first is fine too",
       "build": "Build K",
       "link": {
-        "label": "Open Two-step equations · Level 3",
-        "query": "?pack=two-step-equations&level=3&seed=813&nosignin=1",
+        "label": "Open Two-step equations · Level 3 (with the lights)",
+        "query": "?pack=two-step-equations&level=3&seed=813&lights=1&nosignin=1",
         "reset": true
       },
       "steps": [
-        "Click the button. It opens Two-step equations, Level 3, on 19 = 4 + 3x.",
+        "Click the button. It opens Two-step equations, Level 3, on 19 = 4 + 3x, with the goal lights showing (a teacher view since Build W).",
         "Click Add (the top box in the panel on the right), type −4 and press Enter (instead of Trade places).",
         "Hover over the top dot beside Add in the panel."
       ],
@@ -2038,7 +2270,7 @@
         "Click the button. It opens Two-step equations, Level 4, on 4 + 3x = 19.",
         "Click Add (the top box in the panel on the right), type −4 and press Enter.",
         "Drag the 19 onto the 4 beside it. A box opens under them: type 15 and press Enter.",
-        "Click Divide (the third button in the panel on the right, with ÷ beside it), type 3 and press Enter.",
+        "Click Divide (the third button in the panel on the right, ÷), type 3 and press Enter.",
         "Click the box after x =, type 5 and press Enter. Drag the 5 onto the x, then press Enter for each line until Balanced (every check shows every step)."
       ],
       "see": "Adding −4 gives 3x = 19 − 4 (the x term stays second until the 4s cancel). The check shows every step: 4 + 3(5) = 19, 4 + 15 = 19, 19 = 19, then Balanced."
@@ -2072,7 +2304,7 @@
         "Click the button. It opens Two-step equations, Level 6, on 3x + 4 = −11.",
         "Click Add (the top box in the panel on the right), type −4 and press Enter.",
         "Drag the −11 onto the 4 beside it. A box opens under them: type −15 and press Enter.",
-        "Click Divide (the third button in the panel on the right, with ÷ beside it), type 3 and press Enter.",
+        "Click Divide (the third button in the panel on the right, ÷), type 3 and press Enter.",
         "Click the box after x =, type −5 and press Enter. Drag the −5 onto the x, then press Enter for each line until Balanced (every check shows every step)."
       ],
       "see": "The rows read 3x = −11 − 4, then 3x = −15 and x = (−15) over 3. The check reads 3(−5) + 4 = −11, −15 + 4 = −11, −11 = −11, then Balanced."
@@ -2088,10 +2320,10 @@
       },
       "steps": [
         "Click the button. It opens Two-step equations, Level 7, on 19 = 4 − 3x.",
-        "Click Trade places (the fourth box in the panel).",
+        "Click Trade places (the bottom button in the panel, two curved arrows).",
         "Click Add (the top box in the panel on the right), type −4 and press Enter.",
         "Drag the 19 onto the 4 beside it. A box opens under them: type 15 and press Enter. The row reads −3x = 15.",
-        "Click Divide (the third button in the panel on the right, with ÷ beside it), type −3 (the minus key, then 3) and press Enter.",
+        "Click Divide (the third button in the panel on the right, ÷), type −3 (the minus key, then 3) and press Enter.",
         "Click the box after x =, type −5 and press Enter. Drag the −5 onto the x, then press Enter for each line until Balanced (every check shows every step)."
       ],
       "see": "Dividing by −3 finishes in one move: x = (15) over −3, and the line says “Same as multiplying by −⅓.” The check reads 19 = 4 − 3(−5), 19 = 4 + 15, 19 = 19, then Balanced."
@@ -2131,7 +2363,7 @@
       "steps": [
         "Click the button. It opens Flip everything, Level 1, on −x = 12.",
         "Click Add (the top box in the panel on the right).",
-        "Click Multiply (the second box). Two options open beside it: click the first one (a single box), then the second (a box over a box). Then click Divide (the third box, with ÷ beside it)."
+        "Click Multiply (the second box). Two options open beside it: click the first one (a single box), then the second (a box over a box). Then click Divide (the third button, ÷)."
       ],
       "see": "Add says “That move unlocks on a later card.” In the Multiply options the first says the same and the fraction says “That move unlocks on a later level.”; Divide says “That move unlocks on a later level.” too. There is no −1 option: Flip everything is its own button in the panel."
     },
@@ -2146,7 +2378,7 @@
       },
       "steps": [
         "Click the button. It opens Flip everything, Level 2, on 12 = −x.",
-        "Click Got it if a pop-up is open, then click the Flip button (the third box in the panel on the right, −x → x) and the green Go.",
+        "Click Got it if a pop-up is open, then click the Flip button (the fourth button in the panel on the right, ×(−1)) and the green Go.",
         "Type −12 and press Enter. Drag the −12 onto the x and press Next twice."
       ],
       "see": "The flip writes −1(12) = −1(−x), then −(12) = x, with x still on the right (that is fine). The check ends ✓ Balanced."
@@ -2162,11 +2394,11 @@
       },
       "steps": [
         "Click the button. It opens Flip everything, Level 3, on −3x = 12.",
-        "Click the Flip button (the third box in the panel on the right, −x → x) and Go. Then click the green Next.",
-        "Click Divide (the third button in the panel on the right, with ÷ beside it). Type 3 and click Go.",
+        "Click the Flip button (the fourth button in the panel on the right, ×(−1)) and Go. Then click the green Next.",
+        "Click Divide (the third button in the panel on the right, ÷). Type 3 and click Go.",
         "Type −4, press Enter, drag it onto the x and press Next twice."
       ],
-      "see": "After the flip the equation is 3x = −12 (No opposite box turns green). Dividing by 3 writes x = (−12) over 3, which is not worked out for you. The check ends ✓ Balanced."
+      "see": "After the flip the equation is 3x = −12. Dividing by 3 writes x = (−12) over 3, which is not worked out for you. The check ends ✓ Balanced."
     },
     {
       "id": "j-level-4",
@@ -2179,11 +2411,11 @@
       },
       "steps": [
         "Click the button. It opens Flip everything, Level 4, on 12 = −3x.",
-        "Click Divide (the third button in the panel on the right, with ÷ beside it). Type 3 and click Go.",
-        "Click the green Next. Then click the Flip button (the third box in the panel on the right, −x → x) and Go.",
+        "Click Divide (the third button in the panel on the right, ÷). Type 3 and click Go.",
+        "Click the green Next. Then click the Flip button (the fourth button in the panel on the right, ×(−1)) and Go.",
         "Type −4, press Enter, drag it onto the x and press Next twice."
       ],
-      "see": "Dividing by 3 first gives 4 = −x, with no red light (either order is fine). The flip then gives −(4) = x. The check ends ✓ Balanced."
+      "see": "Dividing by 3 first gives 4 = −x, with no red message (either order is fine). The flip then gives −(4) = x. The check ends ✓ Balanced."
     },
     {
       "id": "j-level-5",
@@ -2196,7 +2428,7 @@
       },
       "steps": [
         "Click the button. It opens Flip everything, Level 5, on −3x = 36.",
-        "Click the Flip button (the third box in the panel on the right, −x → x) and Go, then Next. Click Divide (÷), type 3 and click Go.",
+        "Click the Flip button (the fourth button in the panel on the right, ×(−1)) and Go, then Next. Click Divide (÷), type 3 and click Go.",
         "Type −12, press Enter, drag it onto the x and press Next twice."
       ],
       "see": "3x = −36, then x = (−36) over 3. The check ends ✓ Balanced."
@@ -2212,10 +2444,10 @@
       },
       "steps": [
         "Click the button. It opens Flip everything, Level 1, on −x = 12.",
-        "Point at the Flip button (the third box in the panel on the right, −x → x) without clicking: a grey preview appears under the equation.",
+        "Point at the Flip button (the fourth button in the panel on the right, ×(−1)) without clicking: a grey preview appears under the equation.",
         "Click it, then click the green Go."
       ],
-      "see": "The preview is −1(−x) = −1(12). After Go it is written in, then x = −(12): the 12 is not turned into −12 for you. No opposite box and Solved for x turn green."
+      "see": "The preview is −1(−x) = −1(12). After Go it is written in, then x = −(12): the 12 is not turned into −12 for you."
     },
     {
       "id": "j-worse-flip",
@@ -2228,7 +2460,7 @@
       },
       "steps": [
         "Click the button. It opens Flip everything, Level 3, on −3x = 12.",
-        "Click the Flip button (the third box in the panel on the right, −x → x) and Go, then the green Next. The equation is 3x = −12.",
+        "Click the Flip button (the fourth button in the panel on the right, ×(−1)) and Go, then the green Next. The equation is 3x = −12.",
         "Click the Flip button and Go again, then wait two seconds.",
         "Press Undo."
       ],
@@ -2245,10 +2477,10 @@
       },
       "steps": [
         "Click the button. It opens Flip everything, Level 3, on −3x = 12.",
-        "Click Divide (the third button in the panel on the right, with ÷ beside it). Type −3 (the minus key, then 3) and click Go.",
+        "Click Divide (the third button in the panel on the right, ÷). Type −3 (the minus key, then 3) and click Go.",
         "Type −4, press Enter, drag it onto the x and press Next twice."
       ],
-      "see": "It writes (−3x) over −3 = (12) over −3, then x = (12) over −3, with No opposite box and Solved for x green and no red. The check ends ✓ Balanced."
+      "see": "It writes (−3x) over −3 = (12) over −3, then x = (12) over −3, with nothing red. The check ends ✓ Balanced."
     },
     {
       "id": "j-typed-12",
@@ -2278,7 +2510,7 @@
       "steps": [
         "Click the button. It opens Flip everything, Level 2, on 12 = −x.",
         "Read the pop-up beside the panel.",
-        "Click Trade places (the bottom box in the panel). Then click the Flip button (the third box in the panel on the right, −x → x) and Go.",
+        "Click Trade places (the bottom box in the panel). Then click the Flip button (the fourth button in the panel on the right, ×(−1)) and Go.",
         "Type −12, press Enter, drag it onto the x and press Next twice."
       ],
       "see": "The pop-up says x is on the right, to click Trade places, and “This is the symmetric property: if a = b, then b = a.” Trading writes −x = 12; the flip gives x = −(12); the check ends ✓ Balanced. (Flipping first also works.)"
@@ -2294,7 +2526,7 @@
       },
       "steps": [
         "Click the button. It opens Flip everything, Level 1, on −x = 12.",
-        "Click the Flip button (the third box in the panel on the right, −x → x) and Go.",
+        "Click the Flip button (the fourth button in the panel on the right, ×(−1)) and Go.",
         "Type −12, press Enter and drag it onto the x.",
         "Press Next twice."
       ],
@@ -2524,7 +2756,7 @@
       },
       "steps": [
         "Click the button. It opens Add to both sides, Level 2, on x + 5 = −3.",
-        "Click the top box in the panel on the right (+ ▢ = + ▢: that is Add). Type 5 and press Enter. The equation now has x alone: x = −3 + 5.",
+        "Click the top box in the panel on the right (+: that is Add). Type 5 and press Enter. The equation now has x alone: x = −3 + 5.",
         "Click I’m stuck. A question floats above −3 and +5: Party or Battle?",
         "Click Battle!"
       ],
@@ -2625,7 +2857,7 @@
       },
       "steps": [
         "Click the button. It opens Add to both sides, Level 2, on x − 3 = −1.",
-        "Click the top box in the panel on the right (the one that looks like + ▢ = + ▢: that is Add). Type 3 and press Enter.",
+        "Click the top box in the panel on the right (the one with +: that is Add). Type 3 and press Enter.",
         "Type 2 and press Enter five times. The next problem comes up.",
         "Do the other four problems the same way: work out the answer in your head, click Add, type the number that cancels the one beside x, press Enter, type the answer, press Enter five times."
       ],
@@ -2769,6 +3001,30 @@
               "label": "Save codes (teacher only)",
               "query": "?codes=1&nosignin=1",
               "look": "With ?codes=1 the Save code and Enter code buttons come back, for moving a student by hand."
+            }
+          ]
+        },
+        {
+          "name": "Build W: a bigger, simpler Moves panel, no goal lights, a diagonal Add cross-out (2026-10-31)",
+          "about": "On every Solve it card the Moves panel is five large square buttons, each with one big plain symbol (+, ×, ÷, ×(−1), two curved arrows); no symbols float beside the buttons or the Multiply options; the goal lights are gone for students (still worked out; the teacher link shows them); the Add cancel mark is a heavy red diagonal through the whole term.",
+          "links": [
+            {
+              "label": "The panel · Variables on both sides",
+              "query": "?pack=variables-both-sides&level=1&seed=7&nosignin=1",
+              "reset": true,
+              "look": "Five square buttons with big symbols and nothing beside them."
+            },
+            {
+              "label": "The cross-out · Add to both sides",
+              "query": "?pack=add-both&level=2&seed=7&nosignin=1",
+              "reset": true,
+              "look": "Click Add, type −8, Enter: the +8 and −8 are crossed out by red diagonals."
+            },
+            {
+              "label": "The lights (teacher view)",
+              "query": "?pack=variables-both-sides&level=1&seed=7&lights=1&nosignin=1",
+              "reset": true,
+              "look": "The goal lights beside the buttons, as before Build W. Students never see this."
             }
           ]
         },
