@@ -91,8 +91,9 @@ function diagnosticBar(section, diag) {
 // The three sections as big panels (the first screen): each shows its cards, small, with how far along you are.
 function landing(sections, packs, progress) {
   return h('nav', { class: 'landing', 'aria-label': 'Sections' },
-    ...sections.map((sec) => h('button', { type: 'button', class: `section-panel sec-${sec.id}`, 'data-section': sec.id, 'aria-label': `${sec.title}: ${sec.blurb}` },
+    ...sections.map((sec) => h('button', { type: 'button', class: `section-panel sec-${sec.id}`, 'data-section': sec.id, 'aria-label': `${sec.title}${sec.grade ? `, ${sec.grade}` : ''}: ${sec.blurb}` },
       h('span', { class: 'section-title' }, sec.title),
+      sec.grade ? h('span', { class: 'section-grade' }, sec.grade) : null,
       h('span', { class: 'section-blurb' }, sec.blurb),
       h('span', { class: 'mini-cards' }, ...sec.packs.map((id) => {
         const pack = packs.find((p) => p.id === id);
@@ -119,7 +120,8 @@ function sectionBar(sections, packs, progress, bests, diags) {
       return h('div', { class: `section-menu sec-${sec.id}` },
         h('button', { type: 'button', class: `section-tab sec-${sec.id}`, 'data-section': sec.id, 'aria-haspopup': 'true' }, sec.title),
         h('div', { class: 'dropdown', role: 'group', 'aria-label': `${sec.title} cards` },
-          diag ? diagnosticBar(sec, diag) : null,
+          // (a section with no placement quiz says so, in the bar's place: Solve it Plus, Build X)
+          diag ? diagnosticBar(sec, diag) : h('p', { class: 'diag-none' }, `${sec.title} has no placement quiz: start at Level 1 of any card.`),
           playable.length ? h('div', { class: `pack-grid packs-${Math.min(6, playable.length)} sec-${sec.id}` },
             ...playable.map((p) => packCard(progress, p, bests))) : null,
           soon.length ? h('div', { class: `soon-grid sec-${sec.id}` }, ...soon.map(soonCard)) : null));

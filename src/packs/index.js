@@ -267,11 +267,14 @@ export const PACKS = [
   strangeSolutions,
 ];
 
-// The home screen's three sections (Karl, 2026-10-04): which cards live under each, and its color (a pastel).
+// The home screen's sections (Karl, 2026-10-04): which cards live under each, and its color (a pastel). Solve it became two sections on
+// 2026-10-31 (Build X, Part 0b): Solve it (7th grade) and Solve it Plus (8th grade); `grade` is the small subtitle under the title. Only the
+// sections changed: pack ids, saved levels, save codes, the class sheet and every ?pack= link are as they were.
 export const SECTIONS = [
   { id: 'count', title: 'Count it', blurb: 'Adding, subtracting and multiplying numbers', packs: ['combineit', 'flipit', 'lasso'] },
   { id: 'build', title: 'Build it', blurb: 'Expressions, with boxes, circles and groups', packs: ['boxes', 'groups-of-terms', 'distribute-combine', 'value'] },
-  { id: 'solve', title: 'Solve it', blurb: 'Solving equations', packs: ['add-both', 'divide-it', 'flip-everything', 'one-step', 'two-step-equations', 'distribute-solve', 'variables-both-sides', 'distribute-more', 'strange-solutions'] },
+  { id: 'solve', title: 'Solve it', grade: '7th grade', blurb: 'Solving equations', packs: ['add-both', 'divide-it', 'flip-everything', 'one-step', 'two-step-equations', 'distribute-solve'] },
+  { id: 'solve-plus', title: 'Solve it Plus', grade: '8th grade', blurb: 'Equations with x on both sides', packs: ['variables-both-sides', 'distribute-more', 'strange-solutions'] },
 ];
 export const sectionById = (id) => SECTIONS.find((s) => s.id === id);
 export const sectionOf = (packId) => SECTIONS.find((s) => s.packs.includes(packId));

@@ -405,3 +405,39 @@ Its notes: "Improper fractions are full credit, no mixed numbers" and "x can be 
 6. **Karl's answers to Build V's decisions (all kept):** Level 3 keeps two x = 0 problems; the two answer boxes stay side by side;
    dividing by a number that would leave a fraction beside x is not made (with its message). Also approved, queued for V2: list
    unsimplified tries in the class sheet's answers column (`15/6 → unsimplified`, clearly not a wrong answer).
+
+## 2026-10-26: main menu and progress colours (Karl; built in Build X)
+
+1. **Clicking a card name opens that card's level set directly.** Pointing at or clicking a section title (for example "Solve it")
+   expands the whole section. Pointing is never the only way: a tap and keyboard focus (Tab, Enter) do the same.
+2. **Metallic progress, on each card and each section.** A card with nothing done is plain; begun and under 50% of its displayed levels
+   done is green (emerald); 50% or more is silver; every displayed level earned is gold. Exactly 50% is silver (Karl said "more than
+   50%": a choice, reported in Build X). A section is gold when every card in it is gold. Never colour alone: each status also has its own
+   shape and the "3 of 5" text.
+3. **Two kinds of done per level.** *Earned*: finished by doing it on this card. *Placed*: credited by the placement quiz, or by a finished
+   level on an older card (the legacy credit). A placed level shows silver; the student earns gold by opening it and doing one extra
+   problem. A card is gold only when every displayed level is earned.
+4. **Counting rules.** Only displayed levels count: not hidden levels (Strange solutions 4-5 until they ship), not the "See why it works"
+   saved level, not retired or coming-soon cards. Placed levels count toward green and silver. The pack flags the home screen already uses
+   (`firstLevel`, `whyLevel`, `lastLevel`) decide what is displayed, so the menu, the level dots and the "3 of 5" text always agree.
+5. **Eventually (not now): the support-aware progress rule.** Karl: "If a student gets a full walkthrough of a problem, it shouldn't count
+   as much toward progress; the more scaffolds used, the more practice is needed." Proposal, to evaluate against class data first: a level
+   needs 5 credits; a problem with no support, the first reminder or the model picture counts 1; a problem that needed the guided step or
+   Teach me counts half; a cap of about 12 problems per level, after which the level completes and the teacher sees a flag. Gold should
+   mean earned by that rule once it exists; Build X only decides what the colours mean now.
+6. **Eventually: the teacher class view** (and assignments).
+
+## 2026-10-31: two Solve it sections (Karl; built in Build X, Part 0b)
+
+1. **Solve it is too big: it becomes two sections.** "Solve it" (7th grade): Add to both sides; Divide it; Flip everything; One-step
+   equations; Two-step equations; Distribute, combine, solve. "Solve it Plus" (8th grade): Variables on both sides; Distribute more;
+   Strange solutions. Each section title carries a small subtitle ("7th grade", "8th grade").
+2. **Only the sections change.** Pack ids, saved levels, save codes, the class sheet and every `?pack=` link are unchanged; resuming lands
+   on the right card in either section. The placement quiz stays the Solve it (7th grade) quiz; Solve it Plus has no placement quiz.
+3. **The boundary:** no Solve it (7th grade) level has x on both sides (that starts Variables on both sides). Checked in Build X:
+   Distribute, combine, solve has x once inside a group (Levels 1-4) and, at Level 5, like x-terms on one side only.
+4. **Queued, build nothing yet:** a "Fractions of x" card in Solve it (Karl, 2026-11-01: six levels, from unit fractions `1/3 x = 4`
+   through `x/3 = 4`, non-unit fractions `2/3 x = 6`, negatives and x on the right, with a box cut into equal parts as its first
+   scaffold). It replaces One-step equations completely; One-step is then retired, with the placement quiz repointed first.
+5. **Queued, record only:** a later Solve it Plus card for fractions as coefficients, solved by rewriting `2/3 x` as `2x/3` and by
+   multiplying both sides by the reciprocal (the 7th grade card handles `2/3 x = 6` with the box model first).

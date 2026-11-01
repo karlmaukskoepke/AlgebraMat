@@ -1,4 +1,10 @@
-# The home screen: Count it, Build it, Solve it (Karl, 2026-10-04; built)
+# The home screen: Count it, Build it, Solve it, Solve it Plus (Karl, 2026-10-04; built)
+
+**Four sections since 2026-10-31 (Build X, Part 0b).** Solve it is split in two: **Solve it** (7th grade, coral): Add to both sides,
+Divide it, Flip everything, One-step equations, Two-step equations, Distribute, combine, solve. **Solve it Plus** (8th grade, lavender):
+Variables on both sides, Distribute more, Strange solutions. Each title carries its grade as a small subtitle. Solve it Plus has no
+placement quiz (its open section says so where the quiz would be). Where this spec says "three" panels or titles below, read four.
+Pack ids, saved levels, save codes, the class sheet and every `?pack=` link are unchanged.
 
 ## 1. Sections
 - **Count it** (blue): Combine it, Flip It, Group It. **Build it** (green): Boxes & Circles, Groups of Terms, Distribute then combine, Value it. **Solve it** (light red): one-step, two-step and multi-step equations (cards that say "soon" until they are built). More number cards (fractions, whole numbers) will join Count it later.

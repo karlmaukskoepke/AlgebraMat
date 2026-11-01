@@ -1,7 +1,23 @@
 {
   "_about": "The test-links page (test-links.html) reads this list: Karl's change list. `checks` is the Features to check section at the top: one item per new feature (id, name, build, one link, numbered steps, what you should see), written from the real code and walked through with tests/features/walk.mjs before a build is called finished; the ticks live only in Karl's browser, and an item stays here until Karl has ticked it. The rest of the page: Live = on the site for everyone. Testing = behind a flag, waiting for Karl to keep or retire it. Retired = deleted. Every build adds or updates its entries (CLAUDE.md, Working with Karl). Each entry is a name, one plain sentence (`about`) and, for Live and Testing, its buttons. A button's `query` is the part after the address: card, level, seed, flags, sign-in skipped. `level` in a link is the saved level number (Add to both sides and Divide it: link level 2 is shown as Level 1). `reset: true` clears this browser's progress first; `look` is one sentence on what to look for; `notLive` says plainly why a link won't work on the live site.",
-  "updated": "2026-10-31",
+  "updated": "2026-11-01",
   "checks": [
+    {
+      "id": "x-two-solve-sections",
+      "name": "Two Solve it sections: Solve it (7th grade) and Solve it Plus (8th grade)",
+      "build": "Build X",
+      "link": {
+        "label": "Open Variables on both sides · Level 1",
+        "query": "?pack=variables-both-sides&level=1&seed=7&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Variables on both sides, Level 1.",
+        "Click ← Packs at the top left.",
+        "Look at the panels across the screen, then click the Solve it Plus title."
+      ],
+      "see": "Four sections side by side: Count it, Build it, Solve it with “7th grade” under its title and six cards (Add to both sides down to Distribute, combine, solve), and Solve it Plus with “8th grade” under its title and three cards (Variables on both sides, Distribute more, Strange solutions). Solve it Plus opens its three cards with “Solve it Plus has no placement quiz: start at Level 1 of any card.” where the other sections offer their quiz."
+    },
     {
       "id": "w-panel-add-both",
       "name": "The new Moves panel: Add to both sides",
@@ -3001,6 +3017,23 @@
               "label": "Save codes (teacher only)",
               "query": "?codes=1&nosignin=1",
               "look": "With ?codes=1 the Save code and Enter code buttons come back, for moving a student by hand."
+            }
+          ]
+        },
+        {
+          "name": "Build X, Part 0b: two Solve it sections (2026-11-01)",
+          "about": "Solve it is split in two: Solve it (7th grade: Add to both sides, Divide it, Flip everything, One-step equations, Two-step equations, Distribute, combine, solve) and Solve it Plus (8th grade: Variables on both sides, Distribute more, Strange solutions). Progress, links and the class sheet are unchanged.",
+          "links": [
+            {
+              "label": "The home screen",
+              "query": "?nosignin=1",
+              "look": "Four sections; Solve it says 7th grade and Solve it Plus says 8th grade."
+            },
+            {
+              "label": "Variables on both sides · Level 1",
+              "query": "?pack=variables-both-sides&level=1&seed=7&nosignin=1",
+              "reset": true,
+              "look": "← Packs: it is under Solve it Plus now."
             }
           ]
         },

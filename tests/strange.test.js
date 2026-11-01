@@ -297,8 +297,8 @@ describe('shapes and their reminders', () => {
 });
 
 describe('the pack: 5 saved levels, 3 shown; save codes', () => {
-  it('sits in Solve it after Distribute more; five levels, the last two hidden', () => {
-    expect(SECTIONS.find((s) => s.id === 'solve').packs.at(-1)).toBe('strange-solutions');
+  it('sits in Solve it Plus after Distribute more; five levels, the last two hidden', () => {
+    expect(SECTIONS.find((s) => s.id === 'solve-plus').packs.at(-1)).toBe('strange-solutions');
     expect(strangeSolutions).toMatchObject({ id: 'strange-solutions', title: 'Strange solutions', levels: 5, lastLevel: 3 });
     expect(lastLevelOf(strangeSolutions)).toBe(3);
     expect(packById('strange-solutions')).toBe(strangeSolutions);

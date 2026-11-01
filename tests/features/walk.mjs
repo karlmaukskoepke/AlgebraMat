@@ -389,6 +389,21 @@ class Walk {
 
 // ---- one walk per item (same id as in the data file) ---------------------------------------------------------------------------------
 const WALKS = {
+  // ---- Build X ----
+  async 'x-two-solve-sections'(w) {
+    await w.start(); await w.see('VARIABLES ON BOTH SIDES · Level 1');
+    w.at('← Packs'); await w.click('text=← Packs'); await wait(w.page, 600);
+    const panels = await w.page.evaluate(() => [...document.querySelectorAll('.landing .section-panel')].map((p) => p.innerText.replace(/\s+/g, ' ')));
+    if (panels.length !== 4) throw new Error(`four sections should show, found ${panels.length}`);
+    const [, , solve, plus] = panels;
+    for (const name of ['Solve it', '7th grade', 'Add to both sides', 'Distribute, combine, solve']) if (!solve.includes(name)) throw new Error(`Solve it should show ${name}: ${solve}`);
+    for (const name of ['Variables on both sides', 'Distribute more', 'Strange solutions']) if (solve.includes(name)) throw new Error(`Solve it should not show ${name}`);
+    for (const name of ['Solve it Plus', '8th grade', 'Variables on both sides', 'Distribute more', 'Strange solutions']) if (!plus.includes(name)) throw new Error(`Solve it Plus should show ${name}: ${plus}`);
+    await w.both('x-two-solve-sections-home');
+    w.at('click the Solve it Plus title'); await w.click('.sec-solve-plus .section-title'); await wait(w.page, 700);
+    await w.see('Solve it Plus has no placement quiz: start at Level 1 of any card.');
+    await w.both('x-two-solve-sections-plus');
+  },
   // ---- Build W ----
   async 'w-panel-add-both'(w) {
     await w.start(); await w.see('ADD TO BOTH SIDES · Level 1', 'x + 8 = 11', 'MOVES');

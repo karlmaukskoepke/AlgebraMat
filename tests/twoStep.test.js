@@ -310,7 +310,8 @@ describe('shape coverage: every state on 200 problems a level, along every path'
 
 describe('the pack, old progress and save codes', () => {
   it('sits in the old Two-step card\'s slot; the old card is retired but kept with its levels', () => {
-    expect(SECTIONS.find((s) => s.id === 'solve').packs).toEqual(['add-both', 'divide-it', 'flip-everything', 'one-step', 'two-step-equations', 'distribute-solve', 'variables-both-sides', 'distribute-more', 'strange-solutions']);
+    expect(SECTIONS.find((s) => s.id === 'solve').packs).toEqual(['add-both', 'divide-it', 'flip-everything', 'one-step', 'two-step-equations', 'distribute-solve']);   // (the 8th grade cards are in Solve it Plus since Build X)
+    expect(SECTIONS.find((s) => s.id === 'solve-plus').packs).toEqual(['variables-both-sides', 'distribute-more', 'strange-solutions']);
     expect(twoStepEquations).toMatchObject({ id: 'two-step-equations', title: 'Two-step equations', levels: 7 });
     expect(twoStepEquations.firstLevel).toBeUndefined();
     expect(twoStepEquations.whyLevel).toBeUndefined();

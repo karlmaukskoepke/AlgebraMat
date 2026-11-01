@@ -40,9 +40,12 @@ describe('pack list', () => {
 });
 
 describe('the home screen\'s sections', () => {
-  it('put every card in exactly one of Count it, Build it and Solve it, in the pack map\'s order', async () => {
+  it('put every card in exactly one of Count it, Build it, Solve it and Solve it Plus, in the pack map\'s order', async () => {
     const { SECTIONS, sectionOf, sectionById } = await import('../src/packs/index.js');
-    expect(SECTIONS.map((s) => s.title)).toEqual(['Count it', 'Build it', 'Solve it']);
+    expect(SECTIONS.map((s) => s.title)).toEqual(['Count it', 'Build it', 'Solve it', 'Solve it Plus']);
+    expect(SECTIONS.map((s) => s.grade ?? null)).toEqual([null, null, '7th grade', '8th grade']);   // (Build X, Part 0b)
+    expect(sectionOf('variables-both-sides').id).toBe('solve-plus');
+    expect(sectionOf('distribute-solve').id).toBe('solve');
     const ids = SECTIONS.flatMap((s) => s.packs);
     expect(ids.sort()).toEqual(PACKS.filter((p) => !p.retired).map((p) => p.id).sort());      // Switch sides is retired: saved, not shown
     expect(new Set(ids).size).toBe(ids.length);
@@ -50,5 +53,24 @@ describe('the home screen\'s sections', () => {
     expect(sectionOf('value').id).toBe('build');
     expect(sectionById('solve').packs.filter((id) => packById(id).comingSoon)).toEqual([]);
     expect(sectionById('nope')).toBeUndefined();
+  });
+});
+
+// Build X, Part 0b (Karl, 2026-10-31): the split is a change of sections only. The placement quiz stays Solve it's, and none of its
+// problems is from a Solve it Plus card; no Solve it (7th grade) problem has x on both sides.
+describe('two Solve it sections', () => {
+  it('keeps the placement quiz in Solve it, with no Solve it Plus card in it', async () => {
+    const { DIAGNOSTIC_SECTIONS, PROBES } = await import('../src/engine/diagnostic.js');
+    const { sectionById } = await import('../src/packs/index.js');
+    expect(DIAGNOSTIC_SECTIONS).toEqual(['count', 'build', 'solve']);
+    const plus = sectionById('solve-plus').packs;
+    for (const p of PROBES) { expect(plus).not.toContain(p.pack); if (p.opens) expect(plus).not.toContain(p.opens.pack); }
+  });
+  it('has no Solve it (7th grade) problem with x on both sides (Distribute, combine, solve Level 5: like x-terms on one side)', async () => {
+    const { distributeSolve } = await import('../src/packs/index.js');
+    for (let seed = 1; seed <= 40; seed++) {
+      for (const p of distributeSolve.generate(5, seed)) { expect(p.bx).not.toBe(0); expect(typeof p.b).toBe('number'); }
+      for (let level = 1; level <= 4; level++) for (const p of distributeSolve.generate(level, seed)) expect(p.bx).toBe(0);
+    }
   });
 });

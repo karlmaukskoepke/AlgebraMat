@@ -254,8 +254,9 @@ describe('the Add move\'s board', () => {
 });
 
 describe('the pack, save codes and the class sheet', () => {
-  it('sits in Solve it after Distribute, combine, solve; replaces the "Multi-step equations (soon)" placeholder; five levels', () => {
-    expect(SECTIONS.find((s) => s.id === 'solve').packs.at(-3)).toBe('variables-both-sides');   // (Distribute more follows it: Build U; Strange solutions, Build V)
+  it('opens Solve it Plus (8th grade, Build X), followed by Distribute more and Strange solutions; replaces the "Multi-step equations (soon)" placeholder; five levels', () => {
+    expect(SECTIONS.find((s) => s.id === 'solve-plus').packs).toEqual(['variables-both-sides', 'distribute-more', 'strange-solutions']);
+    expect(SECTIONS.find((s) => s.id === 'solve').packs.at(-1)).toBe('distribute-solve');
     expect(PACKS.some((p) => p.id === 'multi-step')).toBe(false);
     expect(variablesBothSides).toMatchObject({ title: 'Variables on both sides', levels: 5 });
     expect(PACKS.filter((p) => !p.comingSoon && p.levels).length).toBe(18);            // the class sheet takes up to 30 (Build V: 18)

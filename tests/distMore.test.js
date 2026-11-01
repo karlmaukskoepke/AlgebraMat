@@ -242,8 +242,8 @@ describe('shapes and their reminders (every state the walks reach is known and r
 });
 
 describe('the pack, save codes and the class sheet', () => {
-  it('sits in Solve it after Variables on both sides; five levels; no walkthrough', () => {
-    expect(SECTIONS.find((s) => s.id === 'solve').packs.at(-2)).toBe('distribute-more');     // (Strange solutions after it: Build V)
+  it('sits in Solve it Plus after Variables on both sides; five levels; no walkthrough', () => {
+    expect(SECTIONS.find((s) => s.id === 'solve-plus').packs.at(-2)).toBe('distribute-more');     // (Strange solutions after it: Build V)
     expect(distributeMore).toMatchObject({ id: 'distribute-more', title: 'Distribute more', levels: 5 });
     expect(distributeMore.whyLevel).toBeUndefined();
     expect(distributeMore.firstLevel).toBeUndefined();
