@@ -146,25 +146,53 @@ async function playCard(browser, base, [name, pack, levels], [h, touch], report,
   }, 300000);
 });
 
-// The Add cross-out measured on screen (Build W, Part 3): at 1366×768, 1366×650 and at browser zoom 125% (1366×768 seen as 1093×614 CSS
-// pixels at 1.25 device pixels each), on a number pair (`+8`, `−8`) and a stacked x-term pair. Each stroke runs lower left to upper right at
-// 40-50°, crosses the term's whole ink with some overshoot on both ends, and is heavier than 4 px.
+// The Add cross-out measured on screen (Build W, Part 3; Build AB, Part 1): at 1366×768, 1366×650 and at browser zoom 125% (1366×768
+// seen as 1093×614 CSS pixels at 1.25 device pixels each), on number pairs (`+8` and `−8`, `−3` and `+3`, `−13` and `+13`), a stacked
+// x-term pair (`4x` over `−4x`) and Distribute more's x-terms. The term's ink box is worked out from the glyphs themselves (each text's
+// measured ink at its baseline). Each stroke runs lower left to upper right at 25-35°, its midpoint within 5% of the ink box's centre (so
+// it crosses sign and digits, never below them or between them), it runs past the ink at both ends by about 0.05em, it rises no more
+// than 15% above the ink unless it is already at its shallowest, it is about 0.075em heavy, and it lies behind the glyphs.
 const XO_VIEWS = [['1366×768', { width: 1366, height: 768 }, 1], ['1366×650', { width: 1366, height: 650 }, 1], ['zoom 125%', { width: 1093, height: 614 }, 1.25]];
-const XO_CASES = [['Add to both sides, x + 8 = 11', 'add-both', 2], ['Variables on both sides, a stacked x-term pair', 'variables-both-sides', 1], ['Distribute more', 'distribute-more', 1]];
+const XO_CASES = [['Add to both sides, x + 8 = 11', 'add-both', 2, 7], ['Add to both sides, x − 3 = −1', 'add-both', 3, 7], ['Add to both sides, two digits', 'add-both', 6, 2], ['Variables on both sides, a stacked x-term pair', 'variables-both-sides', 1, 7], ['Distribute more', 'distribute-more', 1, 7]];
 function measureXo() {
+  const cv = document.createElement('canvas').getContext('2d');
   return [...document.querySelectorAll('.lb-work .lx-xo')].map((e) => {
-    const r = document.createRange();
-    r.selectNodeContents(e);
-    const ink = r.getBoundingClientRect();
-    const a = getComputedStyle(e, '::after');
-    const w = parseFloat(a.width);
-    const h = parseFloat(a.height);
-    const box = e.getBoundingClientRect();
-    const cx = box.left + box.width / 2;
-    return { text: e.textContent.replace(/\s+/g, ''), angle: (Math.atan2(h, w) * 180) / Math.PI, length: Math.hypot(w, h), left: cx - w / 2, right: cx + w / 2, inkLeft: ink.left, inkRight: ink.right, weight: (() => { const probe = document.createElement('span'); probe.style.cssText = 'position:absolute;width:var(--xo-w);height:0'; e.append(probe); const v = probe.getBoundingClientRect().width; probe.remove(); return v; })(), bg: a.backgroundImage };
+    let L = Infinity, R = -Infinity, T = Infinity, B = -Infinity;
+    const walker = document.createTreeWalker(e, NodeFilter.SHOW_TEXT);
+    for (let n = walker.nextNode(); n; n = walker.nextNode()) {
+      if (!n.textContent.trim()) continue;
+      const el = n.parentElement;
+      const cs = getComputedStyle(el);
+      cv.font = `${cs.fontStyle} ${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`;
+      const m = cv.measureText(n.textContent);
+      const r = document.createRange();
+      r.selectNodeContents(n);
+      const x0 = r.getBoundingClientRect().left;
+      const probe = document.createElement('span');
+      probe.style.cssText = 'display:inline-block;width:0;height:0;vertical-align:baseline';
+      el.append(probe);
+      const base = probe.getBoundingClientRect().top;
+      probe.remove();
+      L = Math.min(L, x0 - m.actualBoundingBoxLeft); R = Math.max(R, x0 + m.actualBoundingBoxRight);
+      T = Math.min(T, base - m.actualBoundingBoxAscent); B = Math.max(B, base + m.actualBoundingBoxDescent);
+    }
+    const mk = e.querySelector('.lx-xo-mark');
+    const font = parseFloat(getComputedStyle(e).fontSize);
+    if (!mk) return { text: e.textContent.replace(/\s+/g, ''), font, missing: true };
+    const mr = mk.getBoundingClientRect();
+    const b = getComputedStyle(mk, '::before');
+    const w = mr.width;
+    const h = parseFloat(b.height);
+    const probe = document.createElement('span');
+    probe.style.cssText = 'position:absolute;width:var(--xo-w);height:0';
+    e.append(probe);
+    const weight = probe.getBoundingClientRect().width;
+    probe.remove();
+    return { text: e.textContent.replace(/\s+/g, ''), font, angle: (Math.atan2(h, w) * 180) / Math.PI, length: Math.hypot(w, h), rise: h, left: mr.left, right: mr.right, midX: mr.left + w / 2, midY: mr.top,
+      ink: { L, R, T, B }, weight, behind: getComputedStyle(mk).zIndex === '-1' && getComputedStyle(e).isolation === 'isolate', bg: b.backgroundImage };
   });
 }
-(pw ? describe : describe.skip)('Build W: the Add cross-out on screen (real browser)', () => {
+(pw ? describe : describe.skip)('Build W and AB: the Add cross-out on screen (real browser)', () => {
   let server = null;
   let browser = null;
   let base = '';
@@ -177,13 +205,13 @@ function measureXo() {
   }, 60000);
   afterAll(async () => { await browser?.close(); await server?.close(); });
 
-  it.each(XO_VIEWS)('at %s: every cancelling term crossed by one 45° stroke, lower left to upper right, across all its glyphs', async (label, viewport, scale) => {
+  it.each(XO_VIEWS)('at %s: every cancelling term crossed by one 25-35° stroke through the middle of its ink, lower left to upper right, behind its glyphs', async (label, viewport, scale) => {
     const report = [];
     const seen = [];
     const ctx = await browser.newContext({ viewport, deviceScaleFactor: scale });
     const page = await ctx.newPage();
-    for (const [name, pack, level] of XO_CASES) {
-      const url = `${base}?pack=${pack}&level=${level}&seed=7&nosignin=1`;
+    for (const [name, pack, level, seed] of XO_CASES) {
+      const url = `${base}?pack=${pack}&level=${level}&seed=${seed}&nosignin=1`;
       await page.goto(url);
       await page.evaluate(() => { try { localStorage.clear(); } catch { /* */ } });
       await page.goto(url);
@@ -200,10 +228,18 @@ function measureXo() {
       const xs = await page.evaluate(measureXo);
       if (!xs.length) report.push(`${name}: no cross-out found`);
       for (const x of xs) {
-        seen.push(`${name} ${x.text}: ${x.angle.toFixed(1)}°, ${Math.round(x.length)} px long, ${x.weight.toFixed(1)} px`);
-        if (x.angle < 40 || x.angle > 50) report.push(`${name} ${x.text}: angle ${x.angle.toFixed(1)}°`);
-        if (!(x.left < x.inkLeft - 1 && x.right > x.inkRight + 1)) report.push(`${name} ${x.text}: does not cross the whole term (${Math.round(x.left)}-${Math.round(x.right)} over ink ${Math.round(x.inkLeft)}-${Math.round(x.inkRight)})`);
-        if (!(x.weight > 4)) report.push(`${name} ${x.text}: weight ${x.weight}`);
+        if (x.missing) { report.push(`${name} ${x.text}: no stroke`); continue; }
+        const iw = x.ink.R - x.ink.L;
+        const ih = x.ink.B - x.ink.T;
+        const em = x.font;
+        seen.push(`${name} ${x.text}: ${x.angle.toFixed(1)}°, ${Math.round(x.length)} px long, ${x.weight.toFixed(1)} px, midpoint ${(x.midX - (x.ink.L + x.ink.R) / 2).toFixed(1)}, ${(x.midY - (x.ink.T + x.ink.B) / 2).toFixed(1)} px from the ink's centre, rise ${(x.rise / ih).toFixed(2)} × the ink`);
+        if (x.angle < 25 - 0.2 || x.angle > 35) report.push(`${name} ${x.text}: angle ${x.angle.toFixed(1)}°`);
+        if (Math.abs(x.midX - (x.ink.L + x.ink.R) / 2) > 0.05 * iw || Math.abs(x.midY - (x.ink.T + x.ink.B) / 2) > 0.05 * ih) report.push(`${name} ${x.text}: midpoint off the ink's centre`);
+        if (!(x.left < x.ink.L && x.right > x.ink.R)) report.push(`${name} ${x.text}: does not cross the whole term (${Math.round(x.left)}-${Math.round(x.right)} over ink ${Math.round(x.ink.L)}-${Math.round(x.ink.R)})`);
+        if (x.ink.L - x.left > 0.12 * em || x.right - x.ink.R > 0.12 * em) report.push(`${name} ${x.text}: overshoots too far (${(x.ink.L - x.left).toFixed(1)}, ${(x.right - x.ink.R).toFixed(1)} px)`);
+        if (x.angle > 25.2 && x.rise > 1.15 * ih + 1) report.push(`${name} ${x.text}: rises ${(x.rise / ih).toFixed(2)} × the term's height`);
+        if (!(x.weight >= 2 && x.weight <= 0.08 * em + 0.5)) report.push(`${name} ${x.text}: weight ${x.weight}`);
+        if (!x.behind) report.push(`${name} ${x.text}: not behind the glyphs`);
         if (!/to right bottom|to bottom right/.test(x.bg)) report.push(`${name} ${x.text}: not the lower-left to upper-right diagonal (${x.bg.slice(0, 60)})`);
       }
     }

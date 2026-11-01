@@ -10,7 +10,7 @@ import { fileURLToPath } from 'node:url';
 import { addBothPlay, divideMovesPlay, flipPlay, twoStepPlay, distSolvePlay, bothSidesPlay, distMorePlay, strangePlay } from '../src/play/solveCards.js';
 import { packById } from '../src/packs/index.js';
 import { setShowLights, showLights } from '../src/view/narrowPanel.js';
-import { crossGeometry, OVERSHOOT_EM, MIN_WEIGHT_PX } from '../src/view/crossOut.js';
+import { crossGeometry, OVERSHOOT_EM, MIN_WEIGHT_PX, RISE_MAX } from '../src/view/crossOut.js';
 import { lightsFeedbackText } from '../src/view/addBothLightsFeedback.js';
 
 const problem = (pack, level, i = 0, seed = 7) => ({ ...packById(pack).generate(level, seed)[i], logLevel: level });
@@ -119,25 +119,32 @@ describe('Build W, Part 2: the lights are not on screen; ?lights=1 shows them', 
 });
 
 describe('Build W, Part 3: the Add cross-out is a diagonal', () => {
-  it.each([[38, 27, 46], [60, 27, 46], [24, 18, 26], [80, 30, 32]])('a term %i × %i px at %i px: one stroke, lower left to upper right, 45°, across the whole term', (w, h, font) => {
+  // (Build AB, Part 1 changed the stroke: 25-30°, centred on the ink, half the weight, a smaller overshoot. These hold its new numbers.)
+  it.each([[47, 24, 32], [48, 24, 32], [28, 23, 28], [46, 23, 28], [56, 25, 32], [24, 18, 26], [90, 30, 40]])('a term %i × %i px at %i px: one stroke, lower left to upper right, 25-30°, centred, across the whole term', (w, h, font) => {
     const g = crossGeometry(w, h, font);
-    expect(g.angle).toBeGreaterThanOrEqual(40);
-    expect(g.angle).toBeLessThanOrEqual(50);
+    expect(g.angle).toBeGreaterThanOrEqual(25);
+    expect(g.angle).toBeLessThanOrEqual(30);
     expect(g.x1).toBeLessThan(0);                                          // starts left of the term's first glyph
     expect(g.x2).toBeGreaterThan(w);                                       // ends right of its last
     expect(g.y1).toBeGreaterThan(g.y2);                                    // lower left to upper right
-    expect(g.x2 - g.x1).toBeCloseTo(w + OVERSHOOT_EM * font, 6);
-    expect(g.weight).toBeGreaterThan(4);                                   // heavier than the old 4 px line
+    expect(g.x2 - g.x1).toBeCloseTo(w + 2 * OVERSHOOT_EM * font, 6);
+    expect(Math.abs(g.mid.x - w / 2)).toBeLessThanOrEqual(0.05 * w);      // the midpoint on the ink box's centre
+    expect(Math.abs(g.mid.y - h / 2)).toBeLessThanOrEqual(0.05 * h);
+    if (g.angle > 25) expect(g.rise).toBeLessThanOrEqual(RISE_MAX * h + 1e-9);   // rises at most 15% above the term (unless it is already at 25°)
     expect(g.weight).toBeGreaterThanOrEqual(MIN_WEIGHT_PX);
+    expect(g.weight).toBeLessThanOrEqual(Math.max(MIN_WEIGHT_PX, 3.01 * font / 40));   // about 3 px at the largest 40 px text
   });
-  it('the styles draw that square: the term’s width plus the overshoot, a stripe on the 45° diagonal, still under reduced motion', () => {
+  it('the styles draw that box: the term plus the overshoot, a stripe corner to corner, behind the glyphs, still under reduced motion', () => {
     const css = readFileSync(CSS_FILE, 'utf8');
     const block = css.slice(css.indexOf('Build W, Part 3 (Karl, 2026-10-26)'));
-    expect(block).toMatch(new RegExp(`width: calc\\(100% \\+ ${OVERSHOOT_EM}em\\); height: auto; aspect-ratio: 1 / 1;`));
+    expect(block).toMatch(new RegExp(`\\.lx-xo-mark \\{[^}]*left: -${OVERSHOOT_EM}em; right: -${OVERSHOOT_EM}em;`));
+    expect(block).toMatch(/clamp\(calc\(100cqw \* 0\.46631\), 0\.8625em, calc\(100cqw \* 0\.57735\)\)/);   // tan 25°, 0.75em × 1.15, tan 30°
     expect(block).toMatch(/linear-gradient\(to bottom right,/);
-    expect(block).toMatch(/max\(6px, 0\.16em\)/);
-    expect(block).toMatch(/prefers-reduced-motion: reduce\) \{ \.lx-xo::after \{ animation: none; \}/);
-    expect(block).not.toMatch(/\.lx-xo::after \{[^}]*clip-path/);                // (drawn whole whenever it does not animate)
+    expect(block).toMatch(/max\(2px, 0\.075em\)/);
+    expect(block).toMatch(/\.lx-xo \{[^}]*isolation: isolate;/);
+    expect(block).toMatch(/\.lx-xo-mark \{[^}]*z-index: -1;/);
+    expect(block).toMatch(/prefers-reduced-motion: reduce\) \{ \.lx-xo-mark::before \{ animation: none; \}/);
+    expect(block).not.toMatch(/\.lx-xo-mark::before \{[^}]*clip-path/);         // (drawn whole whenever it does not animate)
   });
   it('Add to both sides: the cancelling pair is crossed out sign and all (+8 and −8), one stroke each', async () => {
     const p = addBothPlay;

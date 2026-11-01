@@ -441,3 +441,22 @@ Its notes: "Improper fractions are full credit, no mixed numbers" and "x can be 
    scaffold). It replaces One-step equations completely; One-step is then retired, with the placement quiz repointed first.
 5. **Queued, record only:** a later Solve it Plus card for fractions as coefficients, solved by rewriting `2/3 x` as `2x/3` and by
    multiplying both sides by the reciprocal (the 7th grade card handles `2/3 x = 6` with the box model first).
+
+## 2026-11-01: level popups (Karl; built in Build AB)
+
+1. **The section title no longer expands on hover** (Karl, on Build X's expanding title: "not exactly what I want"). The four panels stay;
+   the title is a plain heading and nothing expands from it.
+2. **Pointing at a card name shows a small popup of that card's levels**, like a mega-menu: each level's name, its status (plain, placed
+   in silver, earned in gold, the current one ringed, locked greyed), "See why it works" where the card has it, and the card's "3 of 5".
+   Clicking a card name still opens the card; clicking a level in the popup opens that level. A small chevron beside each name opens the
+   same popup for touch and the keyboard, so pointing is never the only way. A locked level is greyed with a short note for now; each
+   row is built so Build Z's "Test out" can make a locked row tappable.
+3. **The placement quiz ("Find my level") and the timed challenges move to each section's footer.**
+4. **Solve it Plus shows no quiz button** until the chained test-outs exist (Karl: "b, yes"). The "Solve it Plus has no placement quiz"
+   line goes.
+5. **The Timed challenges button appears only where challenges exist** (today, Count it's). No challenges are added.
+6. **Separately: a gentler cross-out** (Karl, on Build W's 45° stroke: it is "too big and thick and sometimes hides the numbers; on a
+   negative number it lands between the minus and the digit and above the number instead of through the term"). The strike-through
+   cancel marks become about 30° (25-35°, shallower on a wide term so the stroke rises no more than about 15% above the term's height),
+   centred on the middle of the term's ink (sign included), about half as heavy (about 3 px at the largest text size), with a smaller
+   overshoot (about 0.05em at each end), drawn behind the glyphs. Flip's strokes through the minus signs are not changed.

@@ -820,6 +820,21 @@ exactly. Their codes are unchanged. Three new states record placed levels (not i
 | `savecode:x-placed-then-earned` | (new) | one of them earned: the code carries that one level | a level earned by one problem is |
 | `savecode:x-merged` | (new) | merged with a device that earned two levels: those two in the code | earned beats placed in a merge |
 
+## Build AB (2026-11-01): a gentler cross-out, level popups and section footers
+
+**Part 1 (a gentler cross-out):** problems, save codes, the class-sheet records and the traces of the 25 scripted runs are unchanged (PASS).
+On screen, every screen with an Add cancel mark changes, each under the 0.2% tolerance (so the harness passes; these keys are already listed
+above, under Build W). Measured by comparing this build's pictures with `main` before it, picture by picture: 12 of the 70 differ, and only these.
+
+| Where | How much | Before | After |
+|---|---|---|---|
+| add-helpful-move@1366x650, add-helpful-move@1366x768 | 0.117%, 0.099% of pixels | x + 8 − 8 = −4 − 8: the +8 and the −8: one 45° stroke, 6 px, its centre a little below the digits | the same terms crossed by one stroke of 25-30°, about 2.4 px at this size, through the middle of the term, behind the digits |
+| add-end@1366x650, add-end@1366x768 | 0.124%, 0.105% of pixels | the work stack at the end of the level: each crossed pair: one 45° stroke, 6 px, its centre a little below the digits | the same terms crossed by one stroke of 25-30°, about 2.4 px at this size, through the middle of the term, behind the digits |
+| add-alone-teach@1366x650, add-alone-teach@1366x768 | 0.117%, 0.099% of pixels | the crossed pair in the work above the Teach me step: one 45° stroke, 6 px, its centre a little below the digits | the same terms crossed by one stroke of 25-30°, about 2.4 px at this size, through the middle of the term, behind the digits |
+| add-alone-stuck-1@1366x650, add-alone-stuck-1@1366x768 | 0.099%, 0.083% of pixels | the crossed pair in the work above the first I’m stuck: one 45° stroke, 6 px, its centre a little below the digits | the same terms crossed by one stroke of 25-30°, about 2.4 px at this size, through the middle of the term, behind the digits |
+| add-alone-stuck-2@1366x650, add-alone-stuck-2@1366x768 | 0.124%, 0.105% of pixels | the same, second I’m stuck: one 45° stroke, 6 px, its centre a little below the digits | the same terms crossed by one stroke of 25-30°, about 2.4 px at this size, through the middle of the term, behind the digits |
+| add-alone-stuck-3@1366x650, add-alone-stuck-3@1366x768 | 0.124%, 0.105% of pixels | the same, third I’m stuck: one 45° stroke, 6 px, its centre a little below the digits | the same terms crossed by one stroke of 25-30°, about 2.4 px at this size, through the middle of the term, behind the digits |
+
 <!-- history: nothing below this line is read by the harness -->
 
 ## History: screen changes accepted by the re-baseline of 2026-10-24 (Build O, Part 0)

@@ -169,14 +169,18 @@ class Walk {
     const tip = await this.page.locator(sel).first().evaluate((b) => getComputedStyle(b, '::after').content);
     if (!tip.includes(words)) throw new Error(`pointing at ${sel} should show "${words}", not ${tip}`);
   }
-  // Build W, Part 3: every cancelling term in the newest work row crossed by one 40-50° stroke, lower left to upper right, over all its ink
+  // Build W, Part 3 and Build AB, Part 1: every cancelling term in the work row crossed by one stroke, lower left to upper right, at
+  // 25-35°, through the middle of the term (sign and digits), thin, a little past each end, behind the glyphs
   async diagonals(n) {
     const xs = await this.page.evaluate(() => [...document.querySelectorAll('.lb-work .lx-xo')].map((e) => {
-      const r = document.createRange(); r.selectNodeContents(e); const ink = r.getBoundingClientRect(); const a = getComputedStyle(e, '::after');
-      const w = parseFloat(a.width); const h = parseFloat(a.height); const b = e.getBoundingClientRect(); const cx = b.left + b.width / 2;
-      return { text: e.textContent.replace(/\s+/g, ''), angle: (Math.atan2(h, w) * 180) / Math.PI, covers: cx - w / 2 < ink.left && cx + w / 2 > ink.right, dir: /to right bottom|to bottom right/.test(a.backgroundImage) };
+      const r = document.createRange(); r.selectNodeContents(e); const ink = r.getBoundingClientRect();
+      const mk = e.querySelector('.lx-xo-mark'); const m = mk?.getBoundingClientRect(); const a = mk ? getComputedStyle(mk, '::before') : null;
+      const w = m?.width ?? 0; const h = a ? parseFloat(a.height) : 0;
+      const probe = document.createElement('span'); probe.style.cssText = 'position:absolute;width:var(--xo-w);height:0'; e.append(probe); const weight = probe.getBoundingClientRect().width; probe.remove();
+      return { text: e.textContent.replace(/\s+/g, ''), angle: (Math.atan2(h, w) * 180) / Math.PI, covers: Boolean(m) && m.left < ink.left + 2 && m.right > ink.right - 2,
+        middle: Boolean(m) && Math.abs(m.top - (ink.top + ink.bottom) / 2) < ink.height * 0.2, weight, behind: mk && getComputedStyle(mk).zIndex === '-1', dir: Boolean(a) && /to right bottom|to bottom right/.test(a.backgroundImage) };
     }));
-    if (xs.length !== n || xs.some((x) => x.angle < 40 || x.angle > 50 || !x.covers || !x.dir)) throw new Error(`expected ${n} diagonal cross-outs after step "${this.step}": ${JSON.stringify(xs)}`);
+    if (xs.length !== n || xs.some((x) => x.angle < 24.8 || x.angle > 35 || !x.covers || !x.middle || !x.dir || !x.behind || x.weight > 3.5)) throw new Error(`expected ${n} gentle cross-outs after step "${this.step}": ${JSON.stringify(xs)}`);
     return xs.map((x) => x.text);
   }
   async text() { return (await this.page.evaluate(() => document.body.innerText)).replace(/\s+/g, ' '); }
@@ -641,6 +645,15 @@ const WALKS = {
     if (!(await w.page.locator('[data-light="xone"].is-green').count())) throw new Error('x on one side should be green');
     w.at('point at the dots'); await w.page.locator('[data-light="xone"]').hover(); await wait(w.page, 300); await w.see('x on one side');
     await w.both('w-lights-on');
+  },
+  // ---- Build AB, Part 1: a gentler cross-out ----
+  async 'ab-xo-gentle'(w) {
+    await w.start(); await w.see('x − 13 = −5');
+    w.at('Add 13, Enter'); await w.addEnter(13); await wait(w.page, 2000);
+    const texts = await w.diagonals(2);
+    if (texts.join(',') !== '−13,+13') throw new Error(`the −13 and the +13 should be crossed out, sign and all: ${texts}`);
+    await w.row('x = −5 + 13');
+    await w.both('ab-xo-gentle');
   },
   async 'w-xo-add'(w) {
     await w.start(); await w.see('x + 8 = 11');

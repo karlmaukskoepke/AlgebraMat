@@ -3931,23 +3931,30 @@ button.lb-divbar.is-calc:hover, button.lb-divbar.is-calc:focus-visible { backgro
 .ui-light .lx-panel .lx-move[data-tip]:hover::after, .ui-light .lx-panel .lx-move[data-tip]:focus-visible::after { right: calc(100% + 12px); }
 .ui-light .lx-panel .mo-flyout { right: calc(100% + 12px); }
 
-/* ---------- Build W, Part 3 (Karl, 2026-10-26): the Add cancel mark is a true diagonal cross-out, not an underline. A cancelling term,
-   sign and all, sits in .lx-xo; its ::after is a square centred on the term's ink (a little above the box's middle in the hand font), the term's width plus 0.2em, and a gradient `to bottom right`
-   draws a stripe along its lower-left to upper-right diagonal: 45° in any square. Heavier than the old 4 px line (0.16em, at least 6 px),
-   in the cancel red; it draws itself from the lower left (a clip opening left to right) once, when its row first appears, and is still
-   under reduced motion. The term's ink fades as before; the stroke keeps its full strength. (view/crossOut.js has the same rule in numbers.)
-   The old horizontal line on the number or x-term inside is gone. ---------- */
-.lx-xo { --xo-w: max(6px, 0.16em); position: relative; display: inline-flex; align-items: center; gap: 0 4px; white-space: nowrap; }
+/* ---------- Build W, Part 3 (Karl, 2026-10-26): the Add cancel mark is a diagonal cross-out, not an underline. A cancelling term, sign
+   and all, sits in .lx-xo with one stroke, lower left to upper right, in the cancel red. The old horizontal line on the number or x-term
+   inside is gone. It draws itself from the lower left (a clip opening left to right) once, when its row first appears, and is still under
+   reduced motion. The term's ink fades as before; the stroke keeps its full strength.
+   Build AB, Part 1 (Karl, 2026-11-01: too big, too thick, hid the numbers, missed the middle of a negative number): about 30° (25° on a wide
+   term, so it rises no more than about 15% above the digits), its midpoint on the middle of the term's ink, 0.075em heavy (3 px at 40 px,
+   at least 2 px), 0.05em past each end, drawn behind the glyphs. The mark element (.lx-xo-mark) is as wide as the term plus the overshoot
+   and sits on the digits' middle (0.115em above the box's middle in the hand font); it is a size container, so its ::before's height
+   comes from its width: clamp(width × tan 25°, 0.75em × 1.15, width × tan 30°). A gradient `to bottom right` puts a stripe on that box's
+   lower-left to upper-right diagonal. (view/crossOut.js has the same rule in numbers.) ---------- */
+.lx-xo { --xo-w: max(2px, 0.075em); position: relative; isolation: isolate; display: inline-flex; align-items: center; gap: 0 4px; white-space: nowrap; }
+.lx-xo.has-sign { margin-left: 0.18em; }
+.lx-xo.has-sign > .lb-plus:first-child { margin-left: 0; }
 .lx-xo > .is-struck::after { content: none; display: none; }
-.lx-xo::after { content: ''; position: absolute; left: 50%; top: 45%; width: calc(100% + 0.2em); height: auto; aspect-ratio: 1 / 1; transform: translate(-50%, -50%); pointer-events: none;
+.lx-xo-mark { position: absolute; left: -0.05em; right: -0.05em; top: calc(50% - 0.115em); height: 0; z-index: -1; pointer-events: none; container-type: inline-size; }
+.lx-xo-mark::before { content: ''; position: absolute; left: 0; right: 0; top: 0; height: 0.8625em; height: clamp(calc(100cqw * 0.46631), 0.8625em, calc(100cqw * 0.57735)); transform: translateY(-50%);
   background: linear-gradient(to bottom right, transparent calc(50% - var(--xo-w) / 2), #a3281b calc(50% - var(--xo-w) / 2), #a3281b calc(50% + var(--xo-w) / 2), transparent calc(50% + var(--xo-w) / 2));
   animation: xo-diag 0.5s 0.8s ease-out both; }
 @keyframes xo-diag { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0 0 0); } }
-.lb-work .lx-xo > * { animation: lb-drop 0.5s 1.5s ease-in forwards; }
-.is-settled .lx-xo::after, .lb-stack .lb-rowwrap.is-old .lx-xo::after { animation: none; }
-.is-settled .lb-work .lx-xo > *, .lb-stack .lb-rowwrap.is-old .lb-work .lx-xo > * { animation: none; opacity: 0.25; }
+.lb-work .lx-xo > :not(.lx-xo-mark) { animation: lb-drop 0.5s 1.5s ease-in forwards; }
+.is-settled .lx-xo-mark::before, .lb-stack .lb-rowwrap.is-old .lx-xo-mark::before { animation: none; }
+.is-settled .lb-work .lx-xo > :not(.lx-xo-mark), .lb-stack .lb-rowwrap.is-old .lb-work .lx-xo > :not(.lx-xo-mark) { animation: none; opacity: 0.25; }
 .lx-under .lx-xo .lb-plus { color: #0072b2; }
-@media (prefers-reduced-motion: reduce) { .lx-xo::after { animation: none; } .lb-work .lx-xo > * { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .lx-xo-mark::before { animation: none; } .lb-work .lx-xo > :not(.lx-xo-mark) { animation: none; } }
 
 /* ---------- Build X: a placed level earned with one problem (a short note at the top of the play screen) ---------- */
 .earned-note {

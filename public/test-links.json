@@ -3,6 +3,22 @@
   "updated": "2026-11-01",
   "checks": [
     {
+      "id": "ab-xo-gentle",
+      "name": "A gentler cross-out: thin, through the middle of a negative number",
+      "build": "Build AB",
+      "link": {
+        "label": "Open Add to both sides · Level 5",
+        "query": "?pack=add-both&level=6&seed=2&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Add to both sides, Level 5, on x − 13 = −5.",
+        "Click Add (+), type 13 and press Enter.",
+        "Watch the row x − 13 + 13 = −5 + 13 for two seconds."
+      ],
+      "see": "The −13 and the +13 are each crossed out by one thin red stroke at a gentle slant, lower left to upper right, through the middle of the whole term: it starts just left of the sign and ends just right of the 3, never between the minus and the 1 and never below the number. The digits stay readable on top of the stroke. The next row reads x = −5 + 13."
+    },
+    {
       "id": "x-card-name",
       "name": "The main menu: a card name opens that card",
       "build": "Build X",
@@ -368,7 +384,7 @@
         "Click Add (+), type −8 and press Enter.",
         "Watch the row x + 8 − 8 = 11 − 8 for two seconds."
       ],
-      "see": "The +8 and the −8 are each crossed out by one heavy red stroke drawn from the lower left to the upper right (a steep diagonal, not a line underneath), through the sign and the 8. Then the two 8s fade; the strokes stay. The next row reads x = 11 − 8."
+      "see": "The +8 and the −8 are each crossed out by one thin red stroke from the lower left to the upper right (a gentle slant, since Build AB), through the middle of the sign and the 8. Then the two 8s fade; the strokes stay. The next row reads x = 11 − 8."
     },
     {
       "id": "w-xo-drag",
@@ -384,7 +400,7 @@
         "Drag the 4 across the = to the right side and let go.",
         "Watch the new row for two seconds."
       ],
-      "see": "The row reads 2x + 4 − 4 = 16 − 4, with the +4 and the −4 on the left each crossed out by one red diagonal stroke (lower left to upper right) through the sign and the 4. Then 2x = 16 − 4."
+      "see": "The row reads 2x + 4 − 4 = 16 − 4, with the +4 and the −4 on the left each crossed out by one thin red stroke (lower left to upper right, a gentle slant) through the middle of the sign and the 4. Then 2x = 16 − 4."
     },
     {
       "id": "w-xo-stacked",
@@ -400,7 +416,7 @@
         "Click Add (+), then its second option (+ ▢x). Type −4 and press Enter.",
         "Watch the work row for two seconds."
       ],
-      "see": "−4x is written under the 6x and under the 4x. On the right, the 4x and the −4x under it are each crossed out the same way: one red diagonal stroke from the lower left to the upper right. The 6x side is not crossed. Then 6x − 4x = 10."
+      "see": "−4x is written under the 6x and under the 4x. On the right, the 4x and the −4x under it are each crossed out the same way: one thin red stroke from the lower left to the upper right, through the middle of the term. The 6x side is not crossed. Then 6x − 4x = 10."
     },
     {
       "id": "v-fix-note",
@@ -3169,6 +3185,24 @@
               "label": "Save codes (teacher only)",
               "query": "?codes=1&nosignin=1",
               "look": "With ?codes=1 the Save code and Enter code buttons come back, for moving a student by hand."
+            }
+          ]
+        },
+        {
+          "name": "Build AB: a gentler cross-out (2026-11-01)",
+          "about": "Add’s cancel mark is a thin red stroke at a gentle slant (about 30°, a little flatter on a wide term), through the middle of the whole term, sign and digits, drawn behind the numbers so they stay readable.",
+          "links": [
+            {
+              "label": "x − 13 = −5 (Add 13)",
+              "query": "?pack=add-both&level=6&seed=2&nosignin=1",
+              "reset": true,
+              "look": "Add 13: the −13 and the +13 are each crossed through their middle."
+            },
+            {
+              "label": "A stacked x-term pair",
+              "query": "?pack=variables-both-sides&level=1&seed=7&nosignin=1",
+              "reset": true,
+              "look": "Add + ▢x with −4: the 4x and the −4x under it are crossed the same way."
             }
           ]
         },
