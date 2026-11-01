@@ -3,10 +3,37 @@
 **Four sections since 2026-10-31 (Build X, Part 0b).** Solve it is split in two: **Solve it** (7th grade, coral): Add to both sides,
 Divide it, Flip everything, One-step equations, Two-step equations, Distribute, combine, solve. **Solve it Plus** (8th grade, lavender):
 Variables on both sides, Distribute more, Strange solutions. Each title carries its grade as a small subtitle. Solve it Plus has no
-placement quiz (its open section says so where the quiz would be). Where this spec says "three" panels or titles below, read four.
+placement quiz (since Build AB it simply has no Find my level button). Where this spec says "three" panels or titles below, read four.
 Pack ids, saved levels, save codes, the class sheet and every `?pack=` link are unchanged.
 
-## 0. The main menu (Build X, 2026-11-01; built). This replaces §2's panels-as-buttons and §5's dropdown bar.
+## 0a. Level popups and section footers (Build AB, 2026-11-01; built). This replaces §0's expanding section title.
+- **The section title is a plain heading**; nothing expands from it (Karl, on the expanding title: "not exactly what I want"). The four panels
+  keep their title, grade, blurb, status line and card names with their statuses.
+- **Pointing at a card name** (resting a quarter of a second; a quick pass does nothing) **shows a small popup beside it** with the card's
+  levels: each level's number and name, its status (plain; placed, silver with "One problem earns it"; earned, gold with a star; the
+  current one ringed; locked, greyed with a lock and its name, and the note "Finish Level N to open this."), "See why it works" where the
+  card has it, and the card's "3 of 5". **A level in the popup opens that level; the name still opens the card.** The popup opens to the
+  right of the name, to its left when the right has no room (the last panel), under it (or above) on a narrow window; it stays inside the
+  window (a popup taller than the window scrolls inside itself), never covers the name or the names below it, and closes when the pointer
+  leaves both the name and the popup (after a fifth of a second, so the gap can be crossed), on Escape, and on a tap or click outside.
+- **Touch and keyboard:** a small chevron (›) joined to the right end of each name (finger-sized, 44 px, on a touch screen) opens the same
+  popup; a second tap closes it. Tab reaches the name, then its chevron; Enter, Space or the down arrow opens the popup with the current
+  level (or the first) focused; the arrows, Home and End move between rows; Enter opens a level; Escape closes it and goes back to the
+  chevron; Tab leaves it. Roles: the chevron has `aria-haspopup="menu"`, `aria-expanded` and an accessible name ("Combine it: show its
+  levels"); the popup is a `menu` of `menuitem` buttons, each named in words ("Level 3, ax = b, placed: one problem earns it").
+- **Every row is a button**, so a later build ("Test out", Build Z) can give a locked row an action: today a locked row carries
+  `data-locked` (its saved level) and `aria-disabled`, and a click, tap or Enter only shows its note.
+- **Each section's footer**, under a dashed line: **Find my level** (its placement quiz: "Find my level · 3 of 6 done" while one is under
+  way, "· see results" once done) on Count it, Build it and Solve it, **not on Solve it Plus** (until the chained test-outs exist); and
+  **⏱ Timed challenges** where a section has challenges, today Count it only, which opens a small list (Adding, Subtracting, Add &
+  subtract, Multiplying, Big multiplying, Everything, each with its best score). "Everything" sat under Build it's Distribute, then combine
+  card before; it is listed with Count it's now (a decision for Karl). The challenges and the quiz are no longer on the card pages.
+- The one-time shine and "New levels added!" work in the popup too (a level that went from placed to earned shines when its popup opens).
+- At 1366×650 the panels tighten (smaller title, card names at 16 px) so the tallest, Solve it with six cards and its footer, fits with no
+  scrolling.
+
+## 0. The main menu (Build X, 2026-11-01; built). This replaces §2's panels-as-buttons and §5's dropdown bar. (Its expanding section title
+was replaced by §0a.)
 - **Four panels**, each with its title (and grade), its blurb, its status line ("2 of 6 cards gold", or a gold "Every card gold") and its
   **card names** as a list. **A card name opens that card on its own** (its level set, big), with "← All sections" (or Escape) to go back.
 - **A section title expands the whole section** over the panels (every card with its levels, and the placement quiz, or "no placement quiz"

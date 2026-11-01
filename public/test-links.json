@@ -3,6 +3,140 @@
   "updated": "2026-11-01",
   "checks": [
     {
+      "id": "ab-pop-point",
+      "name": "Level popups: pointing at a card name shows its levels",
+      "build": "Build AB",
+      "link": {
+        "label": "Open a student with progress on every kind of card",
+        "query": "?menu=1&demo=menu&seed=7&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens the home screen for a test student who has done some of everything.",
+        "Move the pointer quickly down the Solve it names, from Add to both sides to Distribute, combine, solve, without stopping, then off the names.",
+        "Now rest the pointer on the name Divide it for a moment.",
+        "Move the pointer into the popup and onto Level 5, then off to the empty page below."
+      ],
+      "see": "A quick pass opens nothing. Resting on Divide it opens a small popup beside it (to its right, not over the names below): “Divide it” with “3 of 5”, Levels 1 and 2 gold with a star, Level 3 silver with “One problem earns it”, Level 4 ringed (the level to do next), Level 5 greyed with a lock, then See why it works. On Level 5 a note says “Finish Level 4 to open this.” The popup goes as soon as the pointer leaves both the name and the popup."
+    },
+    {
+      "id": "ab-pop-level",
+      "name": "Level popups: a level opens straight from the popup",
+      "build": "Build AB",
+      "link": {
+        "label": "Open a student with progress on every kind of card",
+        "query": "?menu=1&demo=menu&seed=7&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens the home screen for a test student who has done some of everything.",
+        "Rest the pointer on the name Add to both sides until its popup opens.",
+        "Click Level 3 in the popup."
+      ],
+      "see": "Add to both sides opens at Level 3 (the top says “ADD TO BOTH SIDES · Level 3”). Clicking the name itself still opens the card’s page, as before."
+    },
+    {
+      "id": "ab-pop-locked",
+      "name": "Level popups: a locked level",
+      "build": "Build AB",
+      "link": {
+        "label": "Open the home screen",
+        "query": "?menu=1&seed=7&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens the home screen for a fresh student.",
+        "Rest the pointer on the name Two-step equations until its popup opens.",
+        "Point at Level 2, then click it."
+      ],
+      "see": "Level 1 is ringed and open; Levels 2 to 7 are greyed, each with a small lock, and still show their names. Pointing at Level 2 shows “Finish Level 1 to open this.” Clicking it opens nothing."
+    },
+    {
+      "id": "ab-pop-keys",
+      "name": "Level popups: the keyboard",
+      "build": "Build AB",
+      "link": {
+        "label": "Open a student with progress on every kind of card",
+        "query": "?menu=1&demo=menu&seed=7&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens the home screen for a test student who has done some of everything.",
+        "Press Tab until the name Combine it has a dark outline, then press Tab once more.",
+        "Press Enter.",
+        "Press the down arrow, then the up arrow.",
+        "Press Escape.",
+        "Press Enter again, then the down arrow, then Enter."
+      ],
+      "see": "The second Tab outlines the small arrow (›) beside Combine it. Enter opens Combine it’s popup with Level 1 outlined; the arrows move the outline from level to level; Escape closes the popup and the outline is back on the small arrow. The last Enter opens Combine it at Level 2 (“COMBINE IT · Level 2”)."
+    },
+    {
+      "id": "ab-pop-tap",
+      "name": "Level popups: a touch screen",
+      "build": "Build AB",
+      "link": {
+        "label": "Open a student with progress on every kind of card",
+        "query": "?menu=1&demo=menu&seed=7&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "On a touch screen (a tablet, or a Chromebook with a touch screen), click the button. It opens the home screen.",
+        "Tap the small arrow (›) at the right end of Flip everything.",
+        "Tap Level 3 in the popup (greyed, with a lock).",
+        "Tap the small arrow beside Flip everything again.",
+        "Tap the name Distribute more."
+      ],
+      "see": "The arrow is finger-sized. The first tap opens Flip everything’s popup: Level 1 silver with “One problem earns it”, Level 2 ringed, Levels 3 to 5 greyed with a lock. Tapping Level 3 shows “Finish Level 2 to open this.” and keeps the popup. Tapping the arrow again closes it (so does a tap anywhere outside it). Tapping Distribute more opens that card’s page, as before. Nothing needs the pointer to rest anywhere."
+    },
+    {
+      "id": "ab-pop-edge",
+      "name": "Level popups: near the right edge",
+      "build": "Build AB",
+      "link": {
+        "label": "Open a student with progress on every kind of card",
+        "query": "?menu=1&demo=menu&seed=7&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens the home screen for a test student who has done some of everything.",
+        "Rest the pointer on the name Strange solutions (the last name under Solve it Plus).",
+        "Make the window short (or open it on a 1366×650 screen) and do it again."
+      ],
+      "see": "The popup opens to the left of Strange solutions, since there is no room on its right, and stays fully inside the window: “Strange solutions” with “3 of 3” and Levels 1 to 3 gold with a star. It never covers the name you are pointing at."
+    },
+    {
+      "id": "ab-foot-quiz",
+      "name": "Section footers: Find my level",
+      "build": "Build AB",
+      "link": {
+        "label": "Open the home screen",
+        "query": "?menu=1&seed=7&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens the home screen for a fresh student.",
+        "Look at the bottom of each of the four sections.",
+        "Click Find my level at the bottom of Build it."
+      ],
+      "see": "Count it, Build it and Solve it each end with a Find my level button under a dashed line; Solve it Plus has no button and no line, and nowhere says “no placement quiz”. Build it’s button opens the Build it placement quiz at “1 of 8”."
+    },
+    {
+      "id": "ab-foot-chal",
+      "name": "Section footers: Timed challenges (Count it only)",
+      "build": "Build AB",
+      "link": {
+        "label": "Open the home screen",
+        "query": "?menu=1&seed=7&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens the home screen for a fresh student.",
+        "Click ⏱ Timed challenges at the bottom of Count it.",
+        "Click Adding."
+      ],
+      "see": "Only Count it has a Timed challenges button. It opens a small list: Adding, Subtracting, Add & subtract, Multiplying, Big multiplying and Everything. Adding starts the one-minute adding challenge."
+    },
+    {
       "id": "ab-xo-gentle",
       "name": "A gentler cross-out: thin, through the middle of a negative number",
       "build": "Build AB",
@@ -34,58 +168,6 @@
         "Click the name Strange solutions, under Solve it Plus."
       ],
       "see": "Each name opens that card on its own, big: its levels (Divide it: Level 1 to Level 5, with See why it works), its dots and “0 of 5”, and “Solve it · 7th grade” beside ← All sections. ← All sections goes back to the four sections. Strange solutions shows Levels 1 to 3 and “0 of 3”."
-    },
-    {
-      "id": "x-expand-point",
-      "name": "The main menu: pointing at a section title shows the whole section",
-      "build": "Build X",
-      "link": {
-        "label": "Open the home screen",
-        "query": "?menu=1&seed=7&nosignin=1",
-        "reset": true
-      },
-      "steps": [
-        "Click the button. It opens the home screen.",
-        "Move the pointer quickly across the Solve it title and down to its card names, without stopping.",
-        "Now rest the pointer on the Solve it title for a moment.",
-        "Move the pointer around inside what opened, then move it off to the empty page below or beside it."
-      ],
-      "see": "A quick pass does nothing, so the card names stay easy to click. Resting on the title opens the whole of Solve it over the four sections: “Solve it · 7th grade ▴”, the placement quiz button, and every card with its level buttons. It stays while the pointer is inside it and goes as soon as the pointer leaves."
-    },
-    {
-      "id": "x-expand-keys",
-      "name": "The main menu: the keyboard",
-      "build": "Build X",
-      "link": {
-        "label": "Open the home screen",
-        "query": "?menu=1&seed=7&nosignin=1",
-        "reset": true
-      },
-      "steps": [
-        "Click the button. It opens the home screen.",
-        "Press Tab until the Count it title has a dark outline (two or three presses).",
-        "Press Tab once more.",
-        "Press Enter.",
-        "Press Escape."
-      ],
-      "see": "With the Count it title outlined, the whole of Count it opens. The next Tab goes to the name Combine it and the section closes again. Enter opens Combine it on its own, and Escape goes back to the four sections with Combine it still outlined. (Enter on an open title steps into it, to its first button.)"
-    },
-    {
-      "id": "x-expand-tap",
-      "name": "The main menu: a touch screen",
-      "build": "Build X",
-      "link": {
-        "label": "Open the home screen",
-        "query": "?menu=1&seed=7&nosignin=1",
-        "reset": true
-      },
-      "steps": [
-        "On a touch screen (a tablet, or a Chromebook with a touch screen), click the button. It opens the home screen.",
-        "Tap the Solve it Plus title.",
-        "Tap “Solve it Plus · 8th grade ▴” at the top of what opened.",
-        "Tap the name Distribute more."
-      ],
-      "see": "The first tap opens the whole of Solve it Plus, with “Solve it Plus has no placement quiz: start at Level 1 of any card.” and its three cards. Tapping its title again closes it (so does a tap outside it). Tapping Distribute more opens that card on its own. Nothing needs the pointer to rest anywhere."
     },
     {
       "id": "x-statuses",
@@ -182,9 +264,9 @@
       "steps": [
         "Click the button. It opens Variables on both sides, Level 1.",
         "Click ← Packs at the top left.",
-        "Look at the panels across the screen, then click the Solve it Plus title."
+        "Look at the panels across the screen, then at the bottom of each."
       ],
-      "see": "Four sections side by side: Count it, Build it, Solve it with “7th grade” under its title and six cards (Add to both sides down to Distribute, combine, solve), and Solve it Plus with “8th grade” under its title and three cards (Variables on both sides, Distribute more, Strange solutions). Solve it Plus opens its three cards with “Solve it Plus has no placement quiz: start at Level 1 of any card.” where the other sections offer their quiz."
+      "see": "Four sections side by side: Count it, Build it, Solve it with “7th grade” under its title and six cards (Add to both sides down to Distribute, combine, solve), and Solve it Plus with “8th grade” under its title and three cards (Variables on both sides, Distribute more, Strange solutions). Count it, Build it and Solve it end with Find my level; Solve it Plus has no placement quiz, so it has no button there (since Build AB)."
     },
     {
       "id": "w-panel-add-both",
@@ -2174,7 +2256,7 @@
       "steps": [
         "Click the button. It opens Distribute, combine, solve, Level 1.",
         "Click “Practice distributing first” at the top right, beside the level dots. Click Skip tour if a tour starts.",
-        "Click ← Packs, then the Solve it title."
+        "Click ← Packs."
       ],
       "see": "It opens Build it’s card Distribute, then combine, at its first unfinished level (Level 1 for a fresh student). ← Packs goes to the home screen, where Solve it lists Distribute, combine, solve after Two-step equations; there is no button straight back to the card."
     },
@@ -2213,10 +2295,10 @@
       },
       "steps": [
         "Click the button. It opens the home screen on a device whose Solve it placement quiz was finished before Build L, with both Two-step problems right.",
-        "Click the Solve it title.",
-        "Look at the Two-step equations card (scroll inside the card to see Levels 5 to 7)."
+        "Rest the pointer on the name Two-step equations, under Solve it, until its popup of levels opens.",
+        "Look at Levels 1 to 7 in the popup."
       ],
-      "see": "Two-step equations shows Levels 1 to 6 open (Level 7 locked), and none of them marked done. Before this build that device started the card at Level 1."
+      "see": "The popup shows Levels 1 to 6 open (Level 7 greyed with a lock), and none of them marked done (no gold or silver). Before Build M that device started the card at Level 1."
     },
     {
       "id": "m-placement-level1",
@@ -3189,9 +3271,21 @@
           ]
         },
         {
-          "name": "Build AB: a gentler cross-out (2026-11-01)",
-          "about": "Add’s cancel mark is a thin red stroke at a gentle slant (about 30°, a little flatter on a wide term), through the middle of the whole term, sign and digits, drawn behind the numbers so they stay readable.",
+          "name": "Build AB: level popups, section footers and a gentler cross-out (2026-11-01)",
+          "about": "Pointing at a card name (or its small › arrow, for a tap or the keyboard) shows a popup of its levels; a level in it opens that level. Each section ends with Find my level (not Solve it Plus) and, on Count it, Timed challenges. Add’s cancel mark is a thin red stroke at a gentle slant through the middle of the term.",
           "links": [
+            {
+              "label": "Every status at once (test student)",
+              "query": "?menu=1&demo=menu&nosignin=1",
+              "reset": true,
+              "look": "Rest the pointer on Divide it: gold, silver, the ringed level and a locked one."
+            },
+            {
+              "label": "The home screen, fresh",
+              "query": "?menu=1&nosignin=1",
+              "reset": true,
+              "look": "Find my level at the foot of three sections; Timed challenges on Count it."
+            },
             {
               "label": "x − 13 = −5 (Add 13)",
               "query": "?pack=add-both&level=6&seed=2&nosignin=1",
@@ -3208,7 +3302,7 @@
         },
         {
           "name": "Build X: the main menu and metallic progress (2026-11-01)",
-          "about": "Card names open their card; a section title shows the whole section (by pointing, Tab or a tap). Each card and section is plain, green, silver or gold, with its own shape and “3 of 5”; a level the placement quiz or an older card credits is silver until one problem on it makes it gold.",
+          "about": "Card names open their card. Each card and section is plain, green, silver or gold, with its own shape and “3 of 5”; a level the placement quiz or an older card credits is silver until one problem on it makes it gold. (Its section titles that showed the whole section were replaced by level popups in Build AB.)",
           "links": [
             {
               "label": "The home screen",
@@ -5207,6 +5301,10 @@
     {
       "title": "Retired",
       "items": [
+        {
+          "name": "Section titles that show the whole section (Build X, retired 2026-11-01)",
+          "about": "Resting on a section title, a click, Tab or a tap opened the whole section over the panels, with its placement quiz and every card’s levels. Karl: “not exactly what I want”. Replaced by the level popups and the section footers (Build AB)."
+        },
         {
           "name": "Multiply’s Divide option (Build L)",
           "about": "The Divide option inside the Multiply menu is gone: Divide is its own button in the panel (Build O), written as dividing. Multiply’s menu is a whole number and a fraction again."

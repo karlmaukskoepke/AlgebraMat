@@ -3976,12 +3976,8 @@ button.lb-divbar.is-calc:hover, button.lb-divbar.is-calc:focus-visible { backgro
 .landing { position: relative; }
 .section-panel { cursor: default; transition: none; }
 .section-panel:hover, .section-panel:focus-visible { transform: none; box-shadow: none; }
-.section-head {
-  appearance: none; display: flex; flex-direction: column; align-items: flex-start; gap: 8px; width: 100%;
-  margin: -6px; padding: 6px; color: inherit; font: inherit; text-align: left; background: none; border: 0; border-radius: 12px; cursor: pointer;
-}
-.section-head:hover .section-title, .section-panel.is-expanded .section-title { text-decoration: underline; text-decoration-thickness: 3px; text-underline-offset: 6px; }
-.section-head:focus-visible { outline: 3px solid var(--ink); outline-offset: 2px; }
+.section-head { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; width: 100%; }
+.section-head .section-title { margin: 0; }   /* (a plain heading since Build AB: nothing expands from it) */
 .section-status {
   display: inline-flex; align-items: center; gap: 6px; padding: 3px 12px; font-size: 16px; font-weight: 700;
   background: rgba(255, 255, 255, 0.7); border: 2px solid var(--sec-line); border-radius: 999px;
@@ -4038,26 +4034,6 @@ button.lb-divbar.is-calc:hover, button.lb-divbar.is-calc:focus-visible { backgro
 .card-title-btn:hover { text-decoration: underline; text-underline-offset: 5px; }
 .card-title-btn:focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; border-radius: 6px; }
 
-/* The expanded section: over the panels, from the top of the menu. */
-.section-sheet {
-  position: absolute; left: 0; right: 0; top: 0; z-index: 30; min-height: 100%; max-height: calc(100vh - 110px); overflow-y: auto;
-  padding: 14px 16px 12px; background: #fffdf2; border: 3px solid var(--sec-line); border-radius: 18px; box-shadow: 0 14px 28px rgba(0, 0, 0, 0.22);
-  visibility: hidden; opacity: 0; transform: translateY(-6px);
-  transition: opacity 0.12s ease, transform 0.12s ease, visibility 0s linear 0.12s;
-}
-.section-panel.is-expanded .section-sheet { visibility: visible; opacity: 1; transform: none; transition-delay: 0s; }
-.sheet-head { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; margin-bottom: 12px; }
-.sheet-title { margin: 0; font-size: 30px; font-weight: 800; }
-.sheet-title .section-grade { margin: 0; font-size: 18px; }
-.sheet-title-btn { appearance: none; padding: 0 4px; color: inherit; font: inherit; background: none; border: 0; border-radius: 8px; cursor: pointer; text-align: left; text-decoration: underline; text-decoration-thickness: 3px; text-underline-offset: 6px; }
-.sheet-title-btn:focus-visible { outline: 3px solid var(--ink); outline-offset: 2px; }
-.sheet-caret { font-size: 0.6em; }
-.sheet-close { margin-left: auto; min-height: 40px; }
-.section-sheet .diag-bar { border-color: var(--sec-line); margin-top: 0; }
-.section-sheet .diag-none { margin: 0 0 12px; padding: 10px 14px; font-size: 18px; border: 2px dashed var(--sec-line); border-radius: 12px; background: var(--sec-soft); }
-.section-sheet .pack-grid { margin: 0; }
-.section-sheet .soon-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin-top: 12px; }
-
 /* One card on its own (a card name's level set) */
 .card-view { margin-top: 12px; }
 .card-view-bar { display: flex; align-items: center; gap: 16px; margin-bottom: 12px; }
@@ -4089,7 +4065,105 @@ button.lb-divbar.is-calc:hover, button.lb-divbar.is-calc:focus-visible { backgro
 @keyframes panel-shine { 0%, 100% { box-shadow: inset 0 0 0 4px #f0c94a; } 40% { box-shadow: inset 0 0 0 4px #f0c94a, 0 0 0 6px rgba(240, 201, 74, 0.7); } }
 
 @media (max-width: 760px) {
-  .section-panel { position: relative; }          /* one column: a section opens over its own panel, where the student is looking */
-  .section-sheet { max-height: none; }
   .card-name { font-size: 16px; }
 }
+
+/* ---------- Build AB (Karl, 2026-11-01): a popup of each card's levels, and a footer in each section ---------- */
+/* A card's row: its name (opens the card) and, joined to its right, a small chevron (opens the popup: a tap and the keyboard) */
+.card-row { display: flex; align-items: stretch; width: 100%; }
+.card-row .card-name { flex: 1 1 auto; min-width: 0; border-top-right-radius: 0; border-bottom-right-radius: 0; }
+.card-chev {
+  appearance: none; flex: none; display: grid; place-items: center; width: 34px; min-height: 40px; padding: 0; margin-left: -2px; cursor: pointer;
+  color: var(--ink); background: rgba(255, 255, 255, 0.75); border: 2px solid var(--sec-line); border-radius: 0 10px 10px 0;
+}
+.card-chev.st-green { background: var(--metal-green); border-color: var(--edge-green); }
+.card-chev.st-silver { background: var(--metal-silver); border-color: var(--edge-silver); }
+.card-chev.st-gold { background: var(--metal-gold); border-color: var(--edge-gold); }
+.card-chev:hover, .card-chev[aria-expanded="true"] { border-color: var(--ink); }
+.card-chev:focus-visible { outline: 3px solid var(--ink); outline-offset: 2px; position: relative; z-index: 1; }
+.card-chev .chev-icon { width: 18px; height: 18px; transition: transform 0.12s ease; }
+.card-chev[aria-expanded="true"] .chev-icon { transform: translateX(2px); }
+@media (hover: none) { .card-chev { width: 44px; } }          /* a finger-sized chevron on a touch screen */
+.card-name, .card-chev { min-height: 40px; }
+.card-name { padding: 5px 10px; }
+.card-list { gap: 5px; }
+
+/* The popup: beside its name, kept inside the window (packmap.js places it); a light card with the section's edge */
+.lv-pop {
+  position: fixed; z-index: 40; width: min(340px, calc(100vw - 16px)); overflow-y: auto; overscroll-behavior: contain;
+  padding: 10px 10px 8px; color: var(--ink); background: #fffdf2; border: 3px solid var(--sec-line, #777); border-radius: 14px;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.2); text-align: left;
+}
+.lv-pop[hidden] { display: none; }
+@media (prefers-reduced-motion: no-preference) { .lv-pop:not([hidden]) { animation: pop-in 0.12s ease-out; } }
+@keyframes pop-in { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+.pop-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 2px 4px 8px; }
+.pop-title { font-size: 19px; font-weight: 800; line-height: 1.2; }
+.lv-pop .new-levels { margin: -4px 4px 6px; }
+.pop-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
+.pop-level {
+  position: relative; overflow: visible; appearance: none; display: grid; grid-template-columns: 26px auto 1fr; align-items: center; column-gap: 8px; width: 100%;
+  min-height: 40px; padding: 4px 10px 4px 8px; color: var(--ink); font: inherit; font-size: 16px; text-align: left; cursor: pointer;
+  background: #fff; border: 2px solid #c9c4b5; border-radius: 10px;
+}
+.pop-level:hover { border-color: var(--ink); }
+.pop-level:focus-visible { outline: 3px solid var(--ink); outline-offset: 1px; }
+.pop-mark { display: grid; place-items: center; width: 26px; height: 26px; font-weight: 800; }
+.pop-icon { width: 22px; height: 22px; }
+.pop-dot { width: 14px; height: 14px; border: 2px solid var(--ink); border-radius: 50%; background: #fff; }
+.pop-num { font-weight: 800; white-space: nowrap; }
+.pop-name { min-width: 0; }
+.pop-note { grid-column: 2 / -1; font-size: 13px; font-weight: 700; color: #3c4650; }
+/* each status, never colour alone: earned gold with a star, placed silver with a medal and its note, the current one ringed, locked greyed with a lock */
+.pop-level.is-earned { background: var(--metal-gold); border-color: var(--edge-gold); }
+.pop-level.is-earned .pop-icon { color: var(--icon-gold); }
+.pop-level.is-placed { background: var(--metal-silver); border-color: var(--edge-silver); }
+.pop-level.is-placed .pop-icon { color: var(--icon-silver); }
+.pop-level.is-current { box-shadow: 0 0 0 2px #fffdf2, 0 0 0 4px var(--ink); }
+.pop-level.is-current .pop-dot { background: var(--ink); box-shadow: inset 0 0 0 2px #fff; }
+.pop-level.is-locked { cursor: default; color: #6f6a5f; background: #efede6; border-style: dashed; }
+.pop-level.is-locked .pop-icon { color: #9a958a; width: 18px; height: 18px; }
+.pop-level.is-locked:hover { border-color: #9a958a; }
+/* a locked row's note: on pointing, on focus, or after a tap; under its row, so the open levels above stay in sight */
+.pop-tip {
+  position: absolute; z-index: 2; left: 34px; top: calc(100% + 4px); padding: 4px 10px; font-size: 14px; font-weight: 700; white-space: nowrap; color: #fff;
+  background: #2b2b2b; border-radius: 8px; pointer-events: none; opacity: 0; visibility: hidden; transition: opacity 0.1s ease;
+}
+.pop-level.is-locked:hover .pop-tip, .pop-level.is-locked:focus-visible .pop-tip, .pop-level.is-tipping .pop-tip { opacity: 1; visibility: visible; }
+.pop-list li:last-child .pop-tip, .pop-list li:nth-last-child(2):has(+ .pop-why-item) .pop-tip { top: auto; bottom: calc(100% + 4px); }   /* (under its row, over the locked rows after it; above the last one) */
+.pop-why-item { margin-top: 4px; padding-top: 6px; border-top: 2px dotted #c9c4b5; }
+.pop-why { grid-template-columns: 26px 1fr; font-weight: 700; }
+.pop-why .pop-mark { border: 2px solid var(--ink); border-radius: 50%; width: 22px; height: 22px; font-size: 13px; }
+.pop-why.is-seen .pop-mark { background: #e3f4ea; border-color: #1b6e3a; color: #1b6e3a; }
+.pop-chal { grid-template-columns: 26px 1fr auto; }
+.pop-best { font-size: 14px; font-weight: 700; color: var(--groups, #555); white-space: nowrap; }
+/* the one-time shine, in a popup too (when it opens: a closed popup keeps its shine until then) */
+.pop-level::after {
+  content: ''; position: absolute; top: 0; bottom: 0; left: 0; width: 40%; pointer-events: none; opacity: 0; border-radius: inherit;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.6), transparent); transform: translateX(-150%) skewX(-20deg);
+}
+@media (prefers-reduced-motion: no-preference) { .pop-level.is-shining::after { animation: metal-shine 1.5s ease-out 1 both; } }
+
+/* Each section's footer: Find my level and Timed challenges, where the section has them */
+.section-foot { display: flex; flex-wrap: wrap; gap: 6px; width: 100%; padding-top: 8px; border-top: 2px dashed var(--sec-line); }
+.foot-btn { min-height: 40px; padding: 0 12px; font-size: 16px; background: rgba(255, 255, 255, 0.85); border-color: var(--sec-line); }
+.foot-btn:hover, .foot-btn[aria-expanded="true"] { border-color: var(--ink); }
+.foot-btn:focus-visible { outline: 3px solid var(--ink); outline-offset: 2px; }
+.foot-more { font-weight: 500; }
+.foot-quiz.is-done { background: #e3f4ea; }
+.foot-chal { display: contents; }
+/* a short window (1366×650): the panels tighten so the tallest (Solve it: six cards and its footer) still fits without scrolling */
+@media (max-height: 720px) and (min-width: 1101px) {
+  .section-panel { gap: 8px; padding: 16px 18px 16px; min-height: 0; }
+  .section-title { font-size: 32px; }
+  .section-blurb { font-size: 18px; }
+  .section-grade { margin-top: -6px; }
+  .card-name { font-size: 16px; line-height: 1.15; gap: 6px; }
+  .card-name .st-icon { width: 20px; height: 20px; }
+  .card-name, .card-chev { min-height: 38px; }
+  .card-list { gap: 4px; }
+  .section-foot { padding-top: 6px; }
+  .foot-btn { min-height: 38px; font-size: 15px; padding: 0 10px; }
+}
+/* a touch screen: card names and their chevrons are at least 44 px tall (a finger), at every window size */
+@media (hover: none) { .card-name, .card-chev { min-height: 44px; } }

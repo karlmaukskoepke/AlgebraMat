@@ -34,6 +34,13 @@ export const CARD_CHALLENGES = {
   'distribute-combine': ['mixed'],
 };
 
+// Each section's challenges, for the Timed challenges button in its footer (Build AB, Part 4). Only Count it has them: its cards'
+// challenges, and "Everything" (adding, subtracting and multiplying mixed), which before Build AB sat under the Distribute, then combine
+// card in Build it. A section not listed here shows no Timed challenges button.
+export const SECTION_CHALLENGES = {
+  count: ['add', 'subtract', 'addsub', 'multiply-concept', 'multiply-large', 'mixed'],
+};
+
 const MAX_TIER = { add: 4, subtract: 4, addsub: 4, 'multiply-concept': 3, 'multiply-large': 3, mixed: 4 };
 export const tierOf = (id, correct) => Math.min(MAX_TIER[id] ?? 3, Math.floor(correct / PER_TIER));
 

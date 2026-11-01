@@ -183,6 +183,31 @@ class Walk {
     if (xs.length !== n || xs.some((x) => x.angle < 24.8 || x.angle > 35 || !x.covers || !x.middle || !x.dir || !x.behind || x.weight > 3.5)) throw new Error(`expected ${n} gentle cross-outs after step "${this.step}": ${JSON.stringify(xs)}`);
     return xs.map((x) => x.text);
   }
+  // Build AB: rest the pointer on a card name until its popup of levels opens (as a person does: the pointer arrives, then waits)
+  async restOn(card) {
+    await this.page.mouse.move(5, 5); await wait(this.page, 250);
+    await this.page.hover(`.card-name[data-card="${card}"]`); await wait(this.page, 500);
+    if (!(await this.page.locator(`#pop-${card}:not([hidden])`).count())) throw new Error(`resting on ${card} should open its popup after step "${this.step}"`);
+  }
+  // a popup's picture at both sizes: the pointer rests on the name again after each resize (the names move when the window changes)
+  async popBoth(card, name) {
+    for (const height of [768, 650]) { await this.page.setViewportSize({ width: 1366, height }); await wait(this.page, 500); await this.restOn(card); await this.shot(`${name}-${height}`); }
+  }
+  // the open popup's rows: each one's words, its state (earned, placed, none, locked, why) and whether it is the current level
+  async popRows() {
+    return this.page.evaluate(() => [...document.querySelectorAll('.lv-pop:not([hidden]) .pop-level')].map((e) => ({
+      text: e.innerText.replace(/\s+/g, ' ').trim(), state: e.className.match(/is-(earned|placed|none|locked)/)?.[1] ?? 'why', current: e.classList.contains('is-current'), level: e.dataset.level ?? null })));
+  }
+  // where the open popup sits: inside the window, its side, and whether it covers its own name or a name below it
+  async popPlace() {
+    return this.page.evaluate(() => {
+      const p = document.querySelector('.lv-pop:not([hidden])'); const r = p.getBoundingClientRect();
+      const row = document.querySelector(`.card-row[data-row="${p.dataset.pop}"]`)?.getBoundingClientRect();
+      const hit = (a, b) => a.left < b.right - 1 && b.left < a.right - 1 && a.top < b.bottom - 1 && b.top < a.bottom - 1;
+      const below = row ? [...document.querySelectorAll('.card-row')].map((e) => e.getBoundingClientRect()).filter((n) => Math.abs(n.left - row.left) < 2 && n.top > row.top) : [];
+      return { side: p.dataset.side, inside: r.left >= 0 && r.top >= 0 && r.right <= innerWidth && r.bottom <= innerHeight, own: row ? hit(r, row) : false, below: below.some((n) => hit(r, n)), head: p.querySelector('.pop-head')?.innerText.replace(/\s+/g, ' ').trim() };
+    });
+  }
   async text() { return (await this.page.evaluate(() => document.body.innerText)).replace(/\s+/g, ' '); }
   async see(...words) {                             // every piece of text must be on the screen
     const t = await this.text();
@@ -406,54 +431,6 @@ const WALKS = {
     await w.see('Strange solutions', 'Solve it Plus · 8th grade', '0 of 3', 'Level 3'); await w.notSee('Level 4');
     await w.both('x-card-name');
   },
-  async 'x-expand-point'(w) {
-    await w.start();
-    const t = await w.page.locator('.sec-solve .section-title').boundingBox();
-    const m = w.page.mouse;
-    w.at('a quick pass'); await m.move(t.x + 20, t.y + 10); await wait(w.page, 80); await m.move(t.x + 20, t.y + 420, { steps: 3 }); await wait(w.page, 400);
-    if (await w.page.locator('.section-panel.is-expanded').count()) throw new Error('a quick pass should not open the section');
-    w.at('rest on the title'); await m.move(t.x + 20, t.y + 10); await wait(w.page, 600);
-    await w.see('Solve it · 7th grade', 'Take the Solve it diagnostic', 'Add to both sides', 'Distribute, combine, solve');
-    if (!(await w.page.locator('.sec-solve.is-expanded').count())) throw new Error('resting on the title should open Solve it');
-    await w.both('x-expand');
-    w.at('move inside, then off'); await m.move(700, 420, { steps: 6 }); await wait(w.page, 300);
-    if (!(await w.page.locator('.sec-solve.is-expanded').count())) throw new Error('moving inside should keep it open');
-    await m.move(1360, 760, { steps: 6 }); await m.move(10, 760, { steps: 6 }); await wait(w.page, 400);
-    if (await w.page.locator('.section-panel.is-expanded').count()) throw new Error('leaving it should close it');
-  },
-  async 'x-expand-keys'(w) {
-    await w.start();
-    w.at('Tab to the Count it title'); let ok = false;
-    for (let i = 0; i < 10 && !ok; i++) { await w.page.keyboard.press('Tab'); ok = await w.page.evaluate(() => document.activeElement?.matches('.sec-count .section-head')); }
-    if (!ok) throw new Error('Tab should reach the Count it title');
-    await wait(w.page, 300);
-    if (!(await w.page.locator('.sec-count.is-expanded').count())) throw new Error('focusing the title should open Count it');
-    await w.shot('x-expand-keys-open');
-    w.at('Tab once more'); await w.page.keyboard.press('Tab'); await wait(w.page, 300);
-    if (await w.page.locator('.section-panel.is-expanded').count()) throw new Error('the section should close');
-    if (await w.page.evaluate(() => document.activeElement?.dataset.card) !== 'combineit') throw new Error('Combine it should be outlined');
-    w.at('Enter'); await w.page.keyboard.press('Enter'); await wait(w.page, 400); await w.see('Combine it', '← All sections');
-    w.at('Escape'); await w.page.keyboard.press('Escape'); await wait(w.page, 400);
-    if (await w.page.evaluate(() => document.activeElement?.dataset.card) !== 'combineit') throw new Error('back on the menu, Combine it should be outlined');
-    await w.both('x-expand-keys');
-  },
-  async 'x-expand-tap'(w) {
-    // (a touch screen: a new page that has touch and no hover, as a tablet)
-    const ctx = await w.page.context().browser().newContext({ viewport: { width: 1366, height: 768 }, hasTouch: true, isMobile: true });
-    const page = await ctx.newPage();
-    try {
-      const href = new URL(w.item.link.query, BASE).href;
-      await page.goto(href); await page.evaluate(() => localStorage.clear()); await page.goto(href); await wait(page, 600);
-      w.at('tap the Solve it Plus title'); await page.tap('.sec-solve-plus .section-title'); await wait(page, 400);
-      const t1 = (await page.evaluate(() => document.body.innerText)).replace(/\s+/g, ' ');
-      if (!t1.includes('Solve it Plus has no placement quiz: start at Level 1 of any card.') || !(await page.locator('.sec-solve-plus.is-expanded').count())) throw new Error('a tap should open Solve it Plus');
-      await page.screenshot({ path: path.join(OUT, 'x-expand-tap-768.png') });
-      w.at('tap its title again'); await page.tap('.sec-solve-plus .sheet-title-btn'); await wait(page, 400);
-      if (await page.locator('.section-panel.is-expanded').count()) throw new Error('a second tap should close it');
-      w.at('tap Distribute more'); await page.tap('.card-name[data-card="distribute-more"]'); await wait(page, 400);
-      if ((await page.locator('.card-view .pack-head h2').textContent()) !== 'Distribute more') throw new Error('the tap should open Distribute more');
-    } finally { await ctx.close(); }
-  },
   async 'x-statuses'(w) {
     await w.start();
     const st = await w.page.evaluate(() => Object.fromEntries([...document.querySelectorAll('.card-name[data-card]')].map((e) => [e.dataset.card, `${[...e.classList].find((c) => c.startsWith('st-'))} ${e.querySelector('.card-count').textContent}`])));
@@ -534,8 +511,10 @@ const WALKS = {
     for (const name of ['Variables on both sides', 'Distribute more', 'Strange solutions']) if (solve.includes(name)) throw new Error(`Solve it should not show ${name}`);
     for (const name of ['Solve it Plus', '8th grade', 'Variables on both sides', 'Distribute more', 'Strange solutions']) if (!plus.includes(name)) throw new Error(`Solve it Plus should show ${name}: ${plus}`);
     await w.both('x-two-solve-sections-home');
-    w.at('click the Solve it Plus title'); await w.click('.sec-solve-plus .section-title'); await wait(w.page, 700);
-    await w.see('Solve it Plus has no placement quiz: start at Level 1 of any card.');
+    w.at('the bottom of each section');
+    const feet = await w.page.evaluate(() => [...document.querySelectorAll('.section-panel')].map((p) => p.querySelector('.section-foot')?.innerText.replace(/\s+/g, ' ').trim() ?? ''));
+    if (!feet[0].includes('Find my level') || !feet[1].includes('Find my level') || !feet[2].includes('Find my level') || feet[3] !== '') throw new Error(`Find my level on the first three sections only: ${JSON.stringify(feet)}`);
+    await w.notSee('no placement quiz');
     await w.both('x-two-solve-sections-plus');
   },
   // ---- Build W ----
@@ -645,6 +624,123 @@ const WALKS = {
     if (!(await w.page.locator('[data-light="xone"].is-green').count())) throw new Error('x on one side should be green');
     w.at('point at the dots'); await w.page.locator('[data-light="xone"]').hover(); await wait(w.page, 300); await w.see('x on one side');
     await w.both('w-lights-on');
+  },
+  // ---- Build AB, Parts 3 and 4: level popups and section footers ----
+  async 'ab-pop-point'(w) {
+    await w.start();
+    const first = await w.page.locator('.card-name[data-card="add-both"]').boundingBox();
+    const last = await w.page.locator('.card-name[data-card="distribute-solve"]').boundingBox();
+    const m = w.page.mouse;
+    w.at('a quick pass down the Solve it names'); await m.move(first.x + 40, first.y + 10); await m.move(last.x + 40, last.y + last.height - 4, { steps: 5 }); await m.move(last.x + 40, last.y + last.height + 120, { steps: 3 });
+    await wait(w.page, 500);
+    if (await w.page.locator('.lv-pop:not([hidden])').count()) throw new Error('a quick pass should open nothing');
+    w.at('rest on Divide it'); await w.restOn('divide-it');
+    const place = await w.popPlace();
+    if (place.side !== 'right' || !place.inside || place.own || place.below || place.head !== 'Divide it 3 of 5') throw new Error(`the popup should sit to the right of Divide it, inside the window, over no name: ${JSON.stringify(place)}`);
+    const rows = await w.popRows();
+    const want = [['earned', 'Level 1'], ['earned', 'Level 2'], ['placed', 'Level 3'], ['none', 'Level 4'], ['locked', 'Level 5'], ['why', 'See why it works']];
+    if (rows.length !== 6 || want.some(([st, t], i) => rows[i].state !== st || !rows[i].text.includes(t)) || !rows[2].text.includes('One problem earns it') || !rows[3].current) throw new Error(`Divide it's popup: ${JSON.stringify(rows)}`);
+    await w.popBoth('divide-it', 'ab-pop-point');
+    await w.page.setViewportSize({ width: 1366, height: 768 }); await wait(w.page, 400); await w.restOn('divide-it');
+    w.at('onto Level 5'); await w.page.hover('.lv-pop:not([hidden]) .pop-level.is-locked'); await wait(w.page, 300);
+    const tip = await w.page.locator('.lv-pop:not([hidden]) .pop-level.is-locked .pop-tip').evaluate((e) => (getComputedStyle(e).visibility === 'visible' ? e.textContent : ''));
+    if (tip !== 'Finish Level 4 to open this.') throw new Error(`Level 5 should say “Finish Level 4 to open this.”: ${tip}`);
+    await w.shot('ab-pop-locked-note');
+    w.at('off to the empty page'); await m.move(700, 760, { steps: 6 }); await wait(w.page, 500);
+    if (await w.page.locator('.lv-pop:not([hidden])').count()) throw new Error('leaving should close the popup');
+  },
+  async 'ab-pop-level'(w) {
+    await w.start();
+    w.at('rest on Add to both sides'); await w.restOn('add-both');
+    w.at('click Level 3'); await w.page.click('.lv-pop:not([hidden]) .pop-level[data-level="4"]'); await wait(w.page, 800);
+    await w.see('ADD TO BOTH SIDES · Level 3');
+    await w.both('ab-pop-level');
+  },
+  async 'ab-pop-locked'(w) {
+    await w.start();
+    w.at('rest on Two-step equations'); await w.restOn('two-step-equations');
+    const rows = await w.popRows();
+    if (rows.length !== 7 || !rows[0].current || rows[0].state !== 'none' || rows.slice(1).some((r) => r.state !== 'locked') || !rows[1].text.includes('Level 2 ax − b = c')) throw new Error(`Two-step equations: Level 1 open and ringed, 2-7 locked with their names: ${JSON.stringify(rows)}`);
+    w.at('point at Level 2'); await w.page.hover('.lv-pop:not([hidden]) .pop-level.is-locked >> nth=0'); await wait(w.page, 300);
+    const tip = await w.page.locator('.lv-pop:not([hidden]) .pop-level.is-locked >> nth=0').locator('.pop-tip').evaluate((e) => (getComputedStyle(e).visibility === 'visible' ? e.textContent : ''));
+    if (tip !== 'Finish Level 1 to open this.') throw new Error(`Level 2 should say “Finish Level 1 to open this.”: ${tip}`);
+    await w.popBoth('two-step-equations', 'ab-pop-locked');
+    await w.page.hover('.lv-pop:not([hidden]) .pop-level.is-locked >> nth=0'); await wait(w.page, 300); await w.shot('ab-pop-locked-note-650');
+    w.at('click Level 2'); await w.page.locator('.lv-pop:not([hidden]) .pop-level.is-locked >> nth=0').click({ force: true }); await wait(w.page, 500);
+    if (!(await w.page.locator('#home').isVisible())) throw new Error('clicking a locked level should open nothing');
+  },
+  async 'ab-pop-keys'(w) {
+    await w.start();
+    let ok = false;
+    w.at('Tab to Combine it'); for (let i = 0; i < 20 && !ok; i++) { await w.page.keyboard.press('Tab'); ok = await w.page.evaluate(() => document.activeElement?.dataset.card === 'combineit'); }
+    if (!ok) throw new Error('Tab should reach the name Combine it');
+    w.at('Tab once more'); await w.page.keyboard.press('Tab');
+    if ((await w.page.evaluate(() => document.activeElement?.dataset.chev)) !== 'combineit') throw new Error('the next Tab should outline the arrow beside Combine it');
+    await w.shot('ab-pop-keys-arrow');
+    w.at('Enter'); await w.page.keyboard.press('Enter'); await wait(w.page, 200);
+    const lv = () => w.page.evaluate(() => (document.activeElement?.closest('.lv-pop') ? document.activeElement.querySelector('.pop-num')?.textContent : null));
+    if ((await lv()) !== 'Level 1') throw new Error(`Enter should open the popup with Level 1 outlined: ${await lv()}`);
+    w.at('down, up'); await w.page.keyboard.press('ArrowDown'); if ((await lv()) !== 'Level 2') throw new Error('down should move to Level 2');
+    await w.both('ab-pop-keys');
+    await w.page.keyboard.press('ArrowUp'); if ((await lv()) !== 'Level 1') throw new Error('up should move back to Level 1');
+    w.at('Escape'); await w.page.keyboard.press('Escape'); await wait(w.page, 200);
+    if (await w.page.locator('.lv-pop:not([hidden])').count()) throw new Error('Escape should close the popup');
+    if ((await w.page.evaluate(() => document.activeElement?.dataset.chev)) !== 'combineit') throw new Error('the outline should be back on the arrow');
+    w.at('Enter, down, Enter'); await w.page.keyboard.press('Enter'); await wait(w.page, 200); await w.page.keyboard.press('ArrowDown'); await w.page.keyboard.press('Enter'); await wait(w.page, 800);
+    await w.see('COMBINE IT · Level 2');
+  },
+  async 'ab-pop-tap'(w) {
+    const ctx = await w.page.context().browser().newContext({ viewport: { width: 1366, height: 768 }, hasTouch: true, isMobile: true });
+    const page = await ctx.newPage();
+    try {
+      const href = new URL(w.item.link.query, BASE).href;
+      await page.goto(href); await page.evaluate(() => { try { localStorage.clear(); } catch { /* */ } }); await page.goto(href); await wait(page, 600);
+      const chev = await page.locator('.card-chev[data-chev="flip-everything"]').boundingBox();
+      if (chev.width < 44) throw new Error(`the arrow should be finger-sized: ${chev.width} px`);
+      w.at('tap the arrow beside Flip everything'); await page.tap('.card-chev[data-chev="flip-everything"]'); await wait(page, 400);
+      const rows = await page.evaluate(() => [...document.querySelectorAll('.lv-pop:not([hidden]) .pop-level')].map((e) => ({ text: e.innerText.replace(/\s+/g, ' ').trim(), state: e.className.match(/is-(earned|placed|none|locked)/)?.[1], current: e.classList.contains('is-current') })));
+      if (rows.length !== 5 || rows[0].state !== 'placed' || !rows[0].text.includes('One problem earns it') || !rows[1].current || rows.slice(2).some((r) => r.state !== 'locked')) throw new Error(`Flip everything's popup: ${JSON.stringify(rows)}`);
+      w.at('tap Level 3'); await page.tap('.lv-pop:not([hidden]) .pop-level.is-locked >> nth=0', { force: true }); await wait(page, 300);
+      const tip = await page.locator('.lv-pop:not([hidden]) .pop-level.is-tipping .pop-tip').textContent().catch(() => '');
+      if (tip !== 'Finish Level 2 to open this.' || !(await page.locator('#pop-flip-everything:not([hidden])').count())) throw new Error(`the tap should show “Finish Level 2 to open this.” and keep the popup: ${tip}`);
+      await page.screenshot({ path: path.join(OUT, 'ab-pop-tap-768.png') });
+      w.at('tap the arrow again'); await page.tap('.card-chev[data-chev="flip-everything"]'); await wait(page, 300);
+      if (await page.locator('.lv-pop:not([hidden])').count()) throw new Error('a second tap should close the popup');
+      w.at('tap Distribute more'); await page.tap('.card-name[data-card="distribute-more"]'); await wait(page, 400);
+      if ((await page.locator('.card-view .pack-head h2').textContent()) !== 'Distribute more') throw new Error('the tap should open Distribute more');
+    } finally { await ctx.close(); }
+  },
+  async 'ab-pop-edge'(w) {
+    for (const height of [768, 650]) {
+      await w.start(height);
+      w.at(`rest on Strange solutions (1366×${height})`); await w.restOn('strange-solutions');
+      const place = await w.popPlace();
+      const rows = await w.popRows();
+      if (place.side !== 'left' || !place.inside || place.own || place.head !== 'Strange solutions 3 of 3') throw new Error(`the popup should open on the left, inside the window: ${JSON.stringify(place)}`);
+      if (rows.length !== 3 || rows.some((r) => r.state !== 'earned')) throw new Error(`Levels 1 to 3 gold: ${JSON.stringify(rows)}`);
+      await w.shot(`ab-pop-edge-${height}`);
+    }
+  },
+  async 'ab-foot-quiz'(w) {
+    await w.start();
+    const feet = await w.page.evaluate(() => Object.fromEntries([...document.querySelectorAll('.section-panel')].map((p) => [p.dataset.section, p.querySelector('.section-foot .foot-quiz')?.textContent ?? null])));
+    if (JSON.stringify(feet) !== JSON.stringify({ count: 'Find my level', build: 'Find my level', solve: 'Find my level', 'solve-plus': null })) throw new Error(`Find my level on Count it, Build it and Solve it only: ${JSON.stringify(feet)}`);
+    if (await w.page.locator('.sec-solve-plus .section-foot').count()) throw new Error('Solve it Plus should have no footer');
+    await w.notSee('no placement quiz');
+    await w.both('ab-foot-quiz');
+    w.at('Find my level, Build it'); await w.click('.sec-build .foot-quiz'); await wait(w.page, 600);
+    await w.see('1 of 8');
+  },
+  async 'ab-foot-chal'(w) {
+    await w.start();
+    if ((await w.page.locator('.foot-chal-btn').count()) !== 1 || !(await w.page.locator('.sec-count .foot-chal-btn').count())) throw new Error('only Count it should have Timed challenges');
+    w.at('Timed challenges'); await w.click('.sec-count .foot-chal-btn'); await wait(w.page, 300);
+    const names = await w.page.locator('#chal-count:not([hidden]) .pop-name').allTextContents();
+    if (names.join(', ') !== 'Adding, Subtracting, Add & subtract, Multiplying, Big multiplying, Everything') throw new Error(`the list: ${names}`);
+    await w.both('ab-foot-chal');
+    w.at('Adding'); await w.page.click('#chal-count [data-fluency="add"]'); await wait(w.page, 700);
+    if (!(await w.page.locator('#quiz').isVisible())) throw new Error('Adding should start its challenge');
+    await w.see('Adding');
   },
   // ---- Build AB, Part 1: a gentler cross-out ----
   async 'ab-xo-gentle'(w) {
@@ -1793,8 +1889,9 @@ const WALKS = {
     await w.see('DISTRIBUTE, THEN COMBINE · Level 1');
     if (await w.page.locator('text=Skip tour').count()) await w.click('text=Skip tour');
     await w.both('m-practice');
-    w.at('← Packs, Solve it'); await w.click('text=← Packs'); await wait(w.page, 500); await w.click('.sec-solve .section-title'); await wait(w.page, 600);
-    await w.see('Distribute, combine, solve', 'Multiply each piece, then solve');
+    w.at('← Packs'); await w.click('text=← Packs'); await wait(w.page, 500);
+    const solve = await w.page.evaluate(() => [...document.querySelectorAll('.sec-solve .card-label')].map((e) => e.textContent));
+    if (solve.indexOf('Distribute, combine, solve') !== solve.indexOf('Two-step equations') + 1) throw new Error(`Solve it should list Distribute, combine, solve after Two-step equations: ${solve}`);
     await w.both('m-home');
   },
   async 'student-distribute'(w) {
@@ -1831,12 +1928,10 @@ const WALKS = {
   // ---- Build M, Part 1: the placement quiz ----
   async 'm-placement-old'(w) {
     await w.start();
-    w.at('Solve it'); await w.click('.sec-solve .section-title'); await wait(w.page, 600);
-    const card = (await w.page.evaluate(() => [...document.querySelectorAll('.sec-solve .pack-card')].map((c) => c.innerText).find((x) => x.includes('Add, combine, then take a fraction')) ?? '')).replace(/\s+/g, ' ');
-    const locked = (n) => new RegExp(`Level ${n} Locked`).test(card);
-    for (const n of [1, 2, 3, 4, 5, 6]) if (locked(n)) throw new Error(`Level ${n} of Two-step equations should be open: ${card.slice(0, 300)}`);
-    if (!locked(7)) throw new Error(`Level 7 should still be locked: ${card.slice(0, 300)}`);
-    if (/done|✓/i.test(card)) throw new Error(`no level should be marked done: ${card.slice(0, 300)}`);
+    w.at('rest on Two-step equations'); await w.restOn('two-step-equations');
+    const rows = await w.popRows();
+    for (const n of [0, 1, 2, 3, 4, 5]) if (rows[n].state !== 'none') throw new Error(`Level ${n + 1} of Two-step equations should be open and not done: ${JSON.stringify(rows)}`);
+    if (rows[6].state !== 'locked') throw new Error(`Level 7 should still be locked: ${JSON.stringify(rows)}`);
     await w.both('m-placement-old');
   },
   async 'm-placement-level1'(w) {

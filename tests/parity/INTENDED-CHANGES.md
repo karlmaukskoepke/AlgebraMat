@@ -835,6 +835,22 @@ above, under Build W). Measured by comparing this build's pictures with `main` b
 | add-alone-stuck-2@1366x650, add-alone-stuck-2@1366x768 | 0.124%, 0.105% of pixels | the same, second I’m stuck: one 45° stroke, 6 px, its centre a little below the digits | the same terms crossed by one stroke of 25-30°, about 2.4 px at this size, through the middle of the term, behind the digits |
 | add-alone-stuck-3@1366x650, add-alone-stuck-3@1366x768 | 0.124%, 0.105% of pixels | the same, third I’m stuck: one 45° stroke, 6 px, its centre a little below the digits | the same terms crossed by one stroke of 25-30°, about 2.4 px at this size, through the middle of the term, behind the digits |
 
+**Parts 3 and 4 (level popups, section footers):** problems, save codes, the class-sheet records and the traces are unchanged (PASS), and so
+are all 70 play screens: compared picture by picture with `main` before Parts 3 and 4, the same 12 screens differ as after Part 1, and no
+other. No home screen is in the screen set; every home screen difference, one by one:
+
+| Where | Before | After |
+|---|---|---|
+| The first screen, every card name | the name alone, 44 px tall (7 px padding), 6 px apart | the name with a small chevron (›) joined to its right end, 40 px tall (5 px padding), 5 px apart; 44 px on a touch screen, where the chevron is 44 px wide |
+| The first screen, each section title | a button: underlined on pointing, expands the section | a plain heading: nothing happens on pointing or clicking |
+| The first screen, Count it, Build it and Solve it | nothing under the card names | a footer under a dashed line: Find my level (Count it also ⏱ Timed challenges) |
+| The first screen, Solve it Plus | no footer | no footer (unchanged), only the chevrons |
+| The first screen at 1366×650 | the panels as at 768 (Solve it filled the window exactly) | tighter panels: 16 px padding, 32 px titles, 18 px blurbs, 16 px card names; nothing scrolls |
+| The expanded section | the whole section over the panels: title, Close, the placement quiz bar (or "Solve it Plus has no placement quiz: start at Level 1 of any card."), every card with its level buttons and fluency buttons | gone |
+| A card's popup of levels | (none) | new: beside the name, its levels and their statuses, See why it works, "3 of 5" |
+| The Timed challenges list | (none) | new: Count it's six challenges, each with its best score |
+| The card page (a card name clicked) | Combine it, Flip It, Group It and Distribute, then combine ended with their ⏱ challenge buttons | no challenge buttons (they are in Count it's footer); everything else unchanged |
+
 <!-- history: nothing below this line is read by the harness -->
 
 ## History: screen changes accepted by the re-baseline of 2026-10-24 (Build O, Part 0)
