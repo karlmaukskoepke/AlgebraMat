@@ -477,7 +477,7 @@ const WALKS = {
     await w.see('Level 1 earned!');
     await w.shot('x-placed-earned-note');
     await wait(w.page, 2600);
-    w.at('← Packs, Add to both sides'); await w.click('text=← Packs'); await wait(w.page, 500);
+    w.at('← Packs, Add to both sides'); await w.page.mouse.move(400, 10, { steps: 4 }); await wait(w.page, 400); await w.click('text=← Packs'); await wait(w.page, 500);
     if (!(await w.page.locator('.card-name[data-card="add-both"].is-shining').count())) throw new Error('Add to both sides should shine once');
     await w.click('.card-name[data-card="add-both"]'); await wait(w.page, 400);
     const lv = await w.page.evaluate(() => [...document.querySelectorAll('.card-view .level-btn')].map((b) => (b.matches('.is-earned') ? 'E' : b.matches('.is-placed') ? 'P' : 'N')).join(''));
@@ -2649,7 +2649,7 @@ async function checkThePage(page) {
   if ((await count('#features details.checked-group')) !== 0) fail('the Checked group should not show while nothing is ticked');
   for (const c of checks) {
     const href = await page.locator(`#features .check:has(#tick-${c.id}) a.go`).getAttribute('href');
-    if (!/nosignin=1/.test(href) || !/(pack|diag)=/.test(href) || !/seed=/.test(href)) fail(`the button for ${c.id} should carry the card (or the quiz), seed and sign-in skip: ${href}`);
+    if (!/nosignin=1/.test(href) || !/(pack|diag|menu)=/.test(href) || !/seed=/.test(href)) fail(`the button for ${c.id} should carry the card (or the quiz), seed and sign-in skip: ${href}`);
     if (await count(`#features .check:has(#tick-${c.id}) ol.steps li`) !== c.steps.length) fail(`${c.id}: steps missing`);
   }
   // tick one: it drops into the collapsed Checked group
