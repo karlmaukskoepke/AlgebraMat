@@ -2503,7 +2503,7 @@ body {
 
 /* The sections open with a short slide, unless the student asked for less movement. */
 @media (prefers-reduced-motion: no-preference) {
-  .landing .section-panel { animation: section-in 0.35s ease both; }
+  .landing .section-panel { animation: section-in 0.35s ease backwards; }   /* (not `both`: a transform left on the panel would hold the expanded section inside it, Build X) */
   .landing .section-panel:nth-child(2) { animation-delay: 0.06s; }
   .landing .section-panel:nth-child(3) { animation-delay: 0.12s; }
   .landing .section-panel:nth-child(4) { animation-delay: 0.18s; }
@@ -3955,4 +3955,134 @@ button.lb-divbar.is-calc:hover, button.lb-divbar.is-calc:focus-visible { backgro
   padding: 10px 24px; font-size: 22px; font-weight: 800; color: #2b2100; pointer-events: none;
   background: linear-gradient(135deg, #fff6cf 0%, #f6d76b 45%, #fff2b8 60%, #e9bf3c 100%);
   border: 2px solid #9a7400; border-radius: 999px; box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18);
+}
+
+/* ---------- Build X: the main menu (card names that open a card, section titles that expand the section) ---------- */
+/* The metals: CSS gradients only (no images, no canvas), with a lighter band across them for a still sheen. Text stays dark ink. */
+:root {
+  --metal-green: linear-gradient(135deg, #e6f8ee 0%, #bdebd2 42%, #effbf4 58%, #a7e2c2 100%);
+  --metal-silver: linear-gradient(135deg, #f8fafc 0%, #d3dae2 42%, #f6f8fa 58%, #b9c3ce 100%);
+  --metal-gold: linear-gradient(135deg, #fff9dc 0%, #f4d465 42%, #fff4c0 58%, #e2b42c 100%);
+  --edge-green: #1d7f4b; --edge-silver: #5e6b78; --edge-gold: #8f6a00;
+  --icon-green: #1f9d5c; --icon-silver: #a9b4bf; --icon-gold: #f0bf22;
+}
+.landing { position: relative; }
+.section-panel { cursor: default; transition: none; }
+.section-panel:hover, .section-panel:focus-visible { transform: none; box-shadow: none; }
+.section-head {
+  appearance: none; display: flex; flex-direction: column; align-items: flex-start; gap: 8px; width: 100%;
+  margin: -6px; padding: 6px; color: inherit; font: inherit; text-align: left; background: none; border: 0; border-radius: 12px; cursor: pointer;
+}
+.section-head:hover .section-title, .section-panel.is-expanded .section-title { text-decoration: underline; text-decoration-thickness: 3px; text-underline-offset: 6px; }
+.section-head:focus-visible { outline: 3px solid var(--ink); outline-offset: 2px; }
+.section-status {
+  display: inline-flex; align-items: center; gap: 6px; padding: 3px 12px; font-size: 16px; font-weight: 700;
+  background: rgba(255, 255, 255, 0.7); border: 2px solid var(--sec-line); border-radius: 999px;
+}
+.section-status.st-gold { background: var(--metal-gold); border-color: var(--edge-gold); }
+.section-status .st-icon { width: 20px; height: 20px; }
+.section-panel.is-gold { box-shadow: inset 0 0 0 4px #f0c94a; }
+
+.card-list { list-style: none; margin: auto 0 0; padding: 0; display: flex; flex-direction: column; gap: 6px; width: 100%; }
+.card-item { display: flex; flex-direction: column; gap: 2px; }
+.card-name {
+  position: relative; overflow: hidden; appearance: none; display: flex; align-items: center; gap: 8px; width: 100%; min-height: 44px;
+  padding: 7px 10px; color: var(--ink); font: inherit; font-size: 18px; font-weight: 600; text-align: left; cursor: pointer;
+  background: rgba(255, 255, 255, 0.75); border: 2px solid var(--sec-line); border-radius: 10px;
+}
+.card-name:hover { border-color: var(--ink); }
+.card-name:focus-visible { outline: 3px solid var(--ink); outline-offset: 2px; }
+.card-name.is-soon { cursor: default; border-style: dashed; color: #555; font-weight: 400; }
+.card-label { flex: 1 1 auto; min-width: 0; }
+.card-count { flex: none; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.st-icon { width: 24px; height: 24px; flex: none; }
+.lv-icon { width: 0.8em; height: 0.8em; margin-right: 4px; vertical-align: -0.08em; }
+
+/* Each status: its metal, its edge and its own shape (the icon: a ring, a leaf, a medal, a star), never colour alone. */
+.st-plain .st-icon { color: var(--sec-line, #777); }
+.card-name.st-green, .status-badge.st-green { background: var(--metal-green); border-color: var(--edge-green); }
+.card-name.st-silver, .status-badge.st-silver { background: var(--metal-silver); border-color: var(--edge-silver); }
+.card-name.st-gold, .status-badge.st-gold { background: var(--metal-gold); border-color: var(--edge-gold); }
+.st-green .st-icon { color: var(--icon-green); }
+.st-silver .st-icon, .lv-icon.is-silver { color: var(--icon-silver); }
+.st-gold .st-icon { color: var(--icon-gold); }
+.status-badge {
+  display: inline-flex; align-items: center; gap: 6px; padding: 3px 12px 3px 8px; font-size: 16px; font-weight: 700; white-space: nowrap;
+  background: rgba(255, 255, 255, 0.75); border: 2px solid var(--sec-line, #777); border-radius: 999px; font-variant-numeric: tabular-nums;
+}
+.status-badge .st-icon { width: 20px; height: 20px; }
+.new-levels { margin: 2px 0 0; font-size: 15px; font-weight: 800; color: #6b2d9a; }
+
+/* The level dots: none plain, placed silver, earned gold (a star), the current one ringed. */
+.home .dot.is-placed { background: var(--metal-silver); border-color: var(--edge-silver); }
+.home .dot.is-earned {
+  width: 22px; height: 22px; margin: -3px; border: 0; background: linear-gradient(135deg, #ffe680 0%, #f0b90b 50%, #ffe27a 65%, #c99500 100%);
+  clip-path: polygon(50% 2%, 63% 35%, 98% 37%, 71% 59%, 81% 95%, 50% 75%, 19% 95%, 29% 59%, 2% 37%, 37% 35%);
+  filter: drop-shadow(0 0 0.5px #7a5600);
+}
+.home .dot.is-current { box-shadow: 0 0 0 2px var(--paper, #fffdf2), 0 0 0 4px var(--ink); }
+/* The level buttons: earned gold, placed silver (with "One problem earns it") */
+.home .btn.level-btn.is-earned { background: var(--metal-gold); border-color: var(--edge-gold); color: var(--ink); }
+.home .btn.level-btn.is-placed { background: var(--metal-silver); border-color: var(--edge-silver); color: var(--ink); }
+.level-btn .lv-icon { color: var(--icon-gold); }
+.level-btn.is-placed .lv-icon { color: var(--icon-silver); }
+.level-placed { display: block; font-size: 14px; font-weight: 700; color: #3c4650; }
+.card-title-btn { appearance: none; padding: 0; color: inherit; font: inherit; background: none; border: 0; cursor: pointer; text-align: left; }
+.card-title-btn:hover { text-decoration: underline; text-underline-offset: 5px; }
+.card-title-btn:focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; border-radius: 6px; }
+
+/* The expanded section: over the panels, from the top of the menu. */
+.section-sheet {
+  position: absolute; left: 0; right: 0; top: 0; z-index: 30; min-height: 100%; max-height: calc(100vh - 110px); overflow-y: auto;
+  padding: 14px 16px 12px; background: #fffdf2; border: 3px solid var(--sec-line); border-radius: 18px; box-shadow: 0 14px 28px rgba(0, 0, 0, 0.22);
+  visibility: hidden; opacity: 0; transform: translateY(-6px);
+  transition: opacity 0.12s ease, transform 0.12s ease, visibility 0s linear 0.12s;
+}
+.section-panel.is-expanded .section-sheet { visibility: visible; opacity: 1; transform: none; transition-delay: 0s; }
+.sheet-head { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; margin-bottom: 12px; }
+.sheet-title { margin: 0; font-size: 30px; font-weight: 800; }
+.sheet-title .section-grade { margin: 0; font-size: 18px; }
+.sheet-title-btn { appearance: none; padding: 0 4px; color: inherit; font: inherit; background: none; border: 0; border-radius: 8px; cursor: pointer; text-align: left; text-decoration: underline; text-decoration-thickness: 3px; text-underline-offset: 6px; }
+.sheet-title-btn:focus-visible { outline: 3px solid var(--ink); outline-offset: 2px; }
+.sheet-caret { font-size: 0.6em; }
+.sheet-close { margin-left: auto; min-height: 40px; }
+.section-sheet .diag-bar { border-color: var(--sec-line); margin-top: 0; }
+.section-sheet .diag-none { margin: 0 0 12px; padding: 10px 14px; font-size: 18px; border: 2px dashed var(--sec-line); border-radius: 12px; background: var(--sec-soft); }
+.section-sheet .pack-grid { margin: 0; }
+.section-sheet .soon-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin-top: 12px; }
+
+/* One card on its own (a card name's level set) */
+.card-view { margin-top: 12px; }
+.card-view-bar { display: flex; align-items: center; gap: 16px; margin-bottom: 12px; }
+.card-crumb { font-size: 18px; font-weight: 700; color: #4a4a4a; }
+.card-view .pack-grid.packs-1 { display: grid; grid-template-columns: minmax(0, 1fr); }
+.card-view .pack-card { background: var(--sec-soft); border-color: var(--sec-line); padding: 28px 32px 32px; }
+.card-view .pack-head h2 { font-size: 44px; }
+.card-view .blurb { font-size: 22px; }
+.home .card-view .pack-grid[class] .btn.level-btn { min-height: 110px; }
+.home .card-view .pack-grid[class] .level-num { font-size: 30px; }
+.home .card-view .pack-grid[class] .level-name { font-size: 19px; }
+.card-view .dot { width: 20px; height: 20px; }
+.home .card-view .dot.is-earned { width: 26px; height: 26px; }
+.home .card-view .pack-grid[class] .level-list[class] { grid-template-columns: repeat(auto-fill, minmax(min(100%, 220px), 1fr)); }
+
+/* The one-time shine when a status improves: a light band across the metal, once, about 1.5 s; any key or click stops it (packmap.js) */
+.card-name::after, .level-btn::after {
+  content: ''; position: absolute; top: -10%; bottom: -10%; left: 0; width: 40%; pointer-events: none; opacity: 0;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.6), transparent); transform: translateX(-150%) skewX(-20deg);
+}
+.home .btn.level-btn { position: relative; overflow: hidden; }
+@media (prefers-reduced-motion: no-preference) {
+  .card-name.is-shining::after, .level-btn.is-shining::after { animation: metal-shine 1.5s ease-out 1 both; }
+  .dot.is-shining { animation: dot-shine 1.5s ease-out 1; }
+  .section-panel.is-shining { animation: panel-shine 1.5s ease-out 1; }
+}
+@keyframes metal-shine { 0% { opacity: 1; transform: translateX(-150%) skewX(-20deg); } 90% { opacity: 1; } 100% { opacity: 0; transform: translateX(320%) skewX(-20deg); } }
+@keyframes dot-shine { 0%, 100% { transform: none; } 30% { transform: scale(1.5); } }
+@keyframes panel-shine { 0%, 100% { box-shadow: inset 0 0 0 4px #f0c94a; } 40% { box-shadow: inset 0 0 0 4px #f0c94a, 0 0 0 6px rgba(240, 201, 74, 0.7); } }
+
+@media (max-width: 760px) {
+  .section-panel { position: relative; }          /* one column: a section opens over its own panel, where the student is looking */
+  .section-sheet { max-height: none; }
+  .card-name { font-size: 16px; }
 }

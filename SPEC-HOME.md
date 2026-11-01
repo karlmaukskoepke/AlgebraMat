@@ -6,6 +6,20 @@ Variables on both sides, Distribute more, Strange solutions. Each title carries 
 placement quiz (its open section says so where the quiz would be). Where this spec says "three" panels or titles below, read four.
 Pack ids, saved levels, save codes, the class sheet and every `?pack=` link are unchanged.
 
+## 0. The main menu (Build X, 2026-11-01; built). This replaces §2's panels-as-buttons and §5's dropdown bar.
+- **Four panels**, each with its title (and grade), its blurb, its status line ("2 of 6 cards gold", or a gold "Every card gold") and its
+  **card names** as a list. **A card name opens that card on its own** (its level set, big), with "← All sections" (or Escape) to go back.
+- **A section title expands the whole section** over the panels (every card with its levels, and the placement quiz, or "no placement quiz"
+  for Solve it Plus): by resting the pointer on it for a quarter of a second (a quick pass does nothing), by a click, by Tab (focus), or by
+  a tap. It collapses when the pointer or the focus leaves it, on Escape, on a click or tap outside, on its Close button, or on a second
+  tap or click on its title (shown again at the top of the expanded section). Enter on an open title steps into it. The top bar of section
+  tabs is gone.
+- **Metallic progress** (engine/status.js): every card is plain (a ring), green (a leaf, begun, under half of its displayed levels placed or
+  earned), silver (a medal, half or more) or gold (a star, every displayed level earned), with "3 of 5". Level dots: plain, silver
+  (placed), a gold star (earned), the current one ringed. A placed level's button says "One problem earns it". Anything that improved
+  since the last look shines once (1.5 s; any key or click stops it; nothing moves under reduced motion). A card that shows more levels
+  than before says "New levels added!" once.
+
 ## 1. Sections
 - **Count it** (blue): Combine it, Flip It, Group It. **Build it** (green): Boxes & Circles, Groups of Terms, Distribute then combine, Value it. **Solve it** (light red): one-step, two-step and multi-step equations (cards that say "soon" until they are built). More number cards (fractions, whole numbers) will join Count it later.
 - Pastels on the section panels, the bar and the cards; the ink stays dark.

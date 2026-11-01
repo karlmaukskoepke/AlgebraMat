@@ -390,6 +390,136 @@ class Walk {
 // ---- one walk per item (same id as in the data file) ---------------------------------------------------------------------------------
 const WALKS = {
   // ---- Build X ----
+  async 'x-card-name'(w) {
+    await w.start(); await w.see('Count it', 'Build it', 'Solve it', 'Solve it Plus');
+    w.at('click Divide it'); await w.click('.card-name[data-card="divide-it"]'); await wait(w.page, 400);
+    await w.see('Divide it', '← All sections', 'Solve it · 7th grade', '0 of 5', 'See why it works', 'Level 1', 'Level 5');
+    if (await w.page.locator('.card-view .level-btn').count() !== 5) throw new Error('Divide it should show five level buttons');
+    await w.both('x-card-view');
+    w.at('← All sections'); await w.click('[data-back]'); await wait(w.page, 300);
+    if (await w.page.locator('.landing .section-panel').count() !== 4) throw new Error('the four sections should be back');
+    w.at('click Strange solutions'); await w.click('.card-name[data-card="strange-solutions"]'); await wait(w.page, 400);
+    await w.see('Strange solutions', 'Solve it Plus · 8th grade', '0 of 3', 'Level 3'); await w.notSee('Level 4');
+    await w.both('x-card-name');
+  },
+  async 'x-expand-point'(w) {
+    await w.start();
+    const t = await w.page.locator('.sec-solve .section-title').boundingBox();
+    const m = w.page.mouse;
+    w.at('a quick pass'); await m.move(t.x + 20, t.y + 10); await wait(w.page, 80); await m.move(t.x + 20, t.y + 420, { steps: 3 }); await wait(w.page, 400);
+    if (await w.page.locator('.section-panel.is-expanded').count()) throw new Error('a quick pass should not open the section');
+    w.at('rest on the title'); await m.move(t.x + 20, t.y + 10); await wait(w.page, 600);
+    await w.see('Solve it · 7th grade', 'Take the Solve it diagnostic', 'Add to both sides', 'Distribute, combine, solve');
+    if (!(await w.page.locator('.sec-solve.is-expanded').count())) throw new Error('resting on the title should open Solve it');
+    await w.both('x-expand');
+    w.at('move inside, then off'); await m.move(700, 420, { steps: 6 }); await wait(w.page, 300);
+    if (!(await w.page.locator('.sec-solve.is-expanded').count())) throw new Error('moving inside should keep it open');
+    await m.move(1360, 760, { steps: 6 }); await m.move(10, 760, { steps: 6 }); await wait(w.page, 400);
+    if (await w.page.locator('.section-panel.is-expanded').count()) throw new Error('leaving it should close it');
+  },
+  async 'x-expand-keys'(w) {
+    await w.start();
+    w.at('Tab to the Count it title'); let ok = false;
+    for (let i = 0; i < 10 && !ok; i++) { await w.page.keyboard.press('Tab'); ok = await w.page.evaluate(() => document.activeElement?.matches('.sec-count .section-head')); }
+    if (!ok) throw new Error('Tab should reach the Count it title');
+    await wait(w.page, 300);
+    if (!(await w.page.locator('.sec-count.is-expanded').count())) throw new Error('focusing the title should open Count it');
+    await w.shot('x-expand-keys-open');
+    w.at('Tab once more'); await w.page.keyboard.press('Tab'); await wait(w.page, 300);
+    if (await w.page.locator('.section-panel.is-expanded').count()) throw new Error('the section should close');
+    if (await w.page.evaluate(() => document.activeElement?.dataset.card) !== 'combineit') throw new Error('Combine it should be outlined');
+    w.at('Enter'); await w.page.keyboard.press('Enter'); await wait(w.page, 400); await w.see('Combine it', '← All sections');
+    w.at('Escape'); await w.page.keyboard.press('Escape'); await wait(w.page, 400);
+    if (await w.page.evaluate(() => document.activeElement?.dataset.card) !== 'combineit') throw new Error('back on the menu, Combine it should be outlined');
+    await w.both('x-expand-keys');
+  },
+  async 'x-expand-tap'(w) {
+    // (a touch screen: a new page that has touch and no hover, as a tablet)
+    const ctx = await w.page.context().browser().newContext({ viewport: { width: 1366, height: 768 }, hasTouch: true, isMobile: true });
+    const page = await ctx.newPage();
+    try {
+      const href = new URL(w.item.link.query, BASE).href;
+      await page.goto(href); await page.evaluate(() => localStorage.clear()); await page.goto(href); await wait(page, 600);
+      w.at('tap the Solve it Plus title'); await page.tap('.sec-solve-plus .section-title'); await wait(page, 400);
+      const t1 = (await page.evaluate(() => document.body.innerText)).replace(/\s+/g, ' ');
+      if (!t1.includes('Solve it Plus has no placement quiz: start at Level 1 of any card.') || !(await page.locator('.sec-solve-plus.is-expanded').count())) throw new Error('a tap should open Solve it Plus');
+      await page.screenshot({ path: path.join(OUT, 'x-expand-tap-768.png') });
+      w.at('tap its title again'); await page.tap('.sec-solve-plus .sheet-title-btn'); await wait(page, 400);
+      if (await page.locator('.section-panel.is-expanded').count()) throw new Error('a second tap should close it');
+      w.at('tap Distribute more'); await page.tap('.card-name[data-card="distribute-more"]'); await wait(page, 400);
+      if ((await page.locator('.card-view .pack-head h2').textContent()) !== 'Distribute more') throw new Error('the tap should open Distribute more');
+    } finally { await ctx.close(); }
+  },
+  async 'x-statuses'(w) {
+    await w.start();
+    const st = await w.page.evaluate(() => Object.fromEntries([...document.querySelectorAll('.card-name[data-card]')].map((e) => [e.dataset.card, `${[...e.classList].find((c) => c.startsWith('st-'))} ${e.querySelector('.card-count').textContent}`])));
+    const want = { 'groups-of-terms': 'st-plain 0 of 8', lasso: 'st-green 1 of 7', 'flip-everything': 'st-green 1 of 5', flipit: 'st-silver 3 of 5', boxes: 'st-silver 3 of 6', 'divide-it': 'st-silver 3 of 5', combineit: 'st-gold 5 of 5', 'add-both': 'st-gold 5 of 5', 'variables-both-sides': 'st-gold 5 of 5', 'distribute-more': 'st-gold 5 of 5', 'strange-solutions': 'st-gold 3 of 3' };
+    for (const [id, v] of Object.entries(want)) if (st[id] !== v) throw new Error(`${id} should be ${v}, is ${st[id]}`);
+    await w.see('Every card gold', '1 of 3 cards gold', '0 of 4 cards gold', '1 of 6 cards gold');
+    await w.both('x-statuses');
+    w.at('click Divide it'); await w.click('.card-name[data-card="divide-it"]'); await wait(w.page, 400);
+    const dots = await w.page.evaluate(() => [...document.querySelectorAll('.card-view .pack-head .dot')].map((d) => (d.matches('.is-earned') ? 'E' : d.matches('.is-placed') ? 'P' : d.matches('.is-current') ? 'C' : d.matches('.locked') ? 'L' : 'O')).join(''));
+    if (dots !== 'EEPCL') throw new Error(`Divide it's dots should be gold, gold, silver, ringed, locked: ${dots}`);
+    await w.see('One problem earns it');
+    await w.both('x-dots');
+  },
+  async 'x-placed-earned'(w) {
+    await w.start();
+    w.at('click Add to both sides'); await w.click('.card-name[data-card="add-both"]'); await wait(w.page, 400);
+    await w.see('3 of 5', 'One problem earns it');
+    await w.shot('x-placed-before');
+    w.at('click Level 1'); await w.click('.card-view .level-btn[data-level="2"]'); await wait(w.page, 800);
+    if (await w.page.locator('text=Skip tour').count()) await w.click('text=Skip tour');
+    await w.see('x + 8 = 11');
+    w.at('Add −8'); await w.addEnter(-8); await wait(w.page, 1500); await w.row('x = 11 − 8');
+    w.at('11 onto −8, 3'); await w.combineTerms('11', '−8', 3); await w.row('x = 3');
+    w.at('type 3, drag, Enter to Balanced'); await w.answerBalanced(3);
+    await w.see('Level 1 earned!');
+    await w.shot('x-placed-earned-note');
+    await wait(w.page, 2600);
+    w.at('← Packs, Add to both sides'); await w.click('text=← Packs'); await wait(w.page, 500);
+    if (!(await w.page.locator('.card-name[data-card="add-both"].is-shining').count())) throw new Error('Add to both sides should shine once');
+    await w.click('.card-name[data-card="add-both"]'); await wait(w.page, 400);
+    const lv = await w.page.evaluate(() => [...document.querySelectorAll('.card-view .level-btn')].map((b) => (b.matches('.is-earned') ? 'E' : b.matches('.is-placed') ? 'P' : 'N')).join(''));
+    if (lv !== 'EPPNN') throw new Error(`Level 1 should be gold and Levels 2-3 silver: ${lv}`);
+    await w.see('3 of 5');
+    await w.both('x-placed-earned');
+  },
+  async 'x-shine'(w) {
+    await w.start();
+    const shining = () => w.page.$$eval('.is-shining', (els) => els.map((e) => e.dataset.card ?? e.dataset.section ?? e.className));
+    const s1 = await shining();
+    for (const want of ['strange-solutions', 'divide-it', 'solve-plus']) if (!s1.includes(want)) throw new Error(`${want} should shine: ${s1}`);
+    await w.shot('x-shine-768');
+    await w.see('Every card gold');
+    w.at('reload'); await w.page.reload(); await wait(w.page, 600);
+    if ((await shining()).length) throw new Error('nothing should shine after the reload');
+    w.at('open again, press a key'); await w.start(); await w.page.keyboard.press('Shift');
+    if ((await shining()).length) throw new Error('a key should stop the shine');
+    await w.both('x-section-gold');
+  },
+  async 'x-reduced-motion'(w) {
+    const ctx = await w.page.context().browser().newContext({ viewport: { width: 1366, height: 768 }, reducedMotion: 'reduce' });
+    const page = await ctx.newPage();
+    try {
+      const href = new URL(w.item.link.query, BASE).href;
+      await page.goto(href); await page.evaluate(() => localStorage.clear()); await page.goto(href); await wait(page, 200);
+      const moving = await page.evaluate(() => document.getAnimations().filter((a) => a.effect?.target?.closest?.('.home')).length);
+      if (moving) throw new Error(`nothing should move under reduced motion: ${moving} animations`);
+      const t = (await page.evaluate(() => document.body.innerText)).replace(/\s+/g, ' ');
+      if (!t.includes('Every card gold') || !t.includes('3 of 3')) throw new Error('the words should be the same');
+      if (!(await page.locator('.card-name[data-card="strange-solutions"].st-gold').count())) throw new Error('Strange solutions should be gold');
+      await page.screenshot({ path: path.join(OUT, 'x-reduced-motion-768.png') });
+    } finally { await ctx.close(); }
+  },
+  async 'x-new-levels'(w) {
+    await w.start();
+    const item = await w.page.evaluate(() => { const li = document.querySelector('.card-name[data-card="strange-solutions"]').closest('.card-item'); return { t: li.innerText.replace(/\s+/g, ' '), s: [...li.querySelector('.card-name').classList].find((c) => c.startsWith('st-')) }; });
+    if (!item.t.includes('New levels added!') || !item.t.includes('2 of 3') || item.s !== 'st-silver') throw new Error(`Strange solutions should say New levels added! and be silver, 2 of 3: ${JSON.stringify(item)}`);
+    await w.both('x-new-levels');
+    w.at('reload'); await w.page.reload(); await wait(w.page, 600); await w.notSee('New levels added!');
+    if (!(await w.page.locator('.card-name[data-card="strange-solutions"].st-silver').count())) throw new Error('it should stay silver');
+  },
   async 'x-two-solve-sections'(w) {
     await w.start(); await w.see('VARIABLES ON BOTH SIDES · Level 1');
     w.at('← Packs'); await w.click('text=← Packs'); await wait(w.page, 600);
@@ -1650,7 +1780,7 @@ const WALKS = {
     await w.see('DISTRIBUTE, THEN COMBINE · Level 1');
     if (await w.page.locator('text=Skip tour').count()) await w.click('text=Skip tour');
     await w.both('m-practice');
-    w.at('← Packs, Solve it'); await w.click('text=← Packs'); await wait(w.page, 500); await w.click('text=Solve it'); await wait(w.page, 600);
+    w.at('← Packs, Solve it'); await w.click('text=← Packs'); await wait(w.page, 500); await w.click('.sec-solve .section-title'); await wait(w.page, 600);
     await w.see('Distribute, combine, solve', 'Multiply each piece, then solve');
     await w.both('m-home');
   },
@@ -1688,8 +1818,8 @@ const WALKS = {
   // ---- Build M, Part 1: the placement quiz ----
   async 'm-placement-old'(w) {
     await w.start();
-    w.at('Solve it'); await w.click('.section-panel.sec-solve'); await wait(w.page, 600);
-    const card = (await w.page.evaluate(() => [...document.querySelectorAll('.pack-card')].map((c) => c.innerText).find((x) => x.includes('Add, combine, then take a fraction')) ?? '')).replace(/\s+/g, ' ');
+    w.at('Solve it'); await w.click('.sec-solve .section-title'); await wait(w.page, 600);
+    const card = (await w.page.evaluate(() => [...document.querySelectorAll('.sec-solve .pack-card')].map((c) => c.innerText).find((x) => x.includes('Add, combine, then take a fraction')) ?? '')).replace(/\s+/g, ' ');
     const locked = (n) => new RegExp(`Level ${n} Locked`).test(card);
     for (const n of [1, 2, 3, 4, 5, 6]) if (locked(n)) throw new Error(`Level ${n} of Two-step equations should be open: ${card.slice(0, 300)}`);
     if (!locked(7)) throw new Error(`Level 7 should still be locked: ${card.slice(0, 300)}`);
@@ -1731,6 +1861,9 @@ const WALKS = {
     await w.see('TWO-STEP EQUATIONS · Level 4');
     const open = await w.page.evaluate(() => JSON.parse(localStorage.getItem('mat.v1'))?.progress?.packs?.['two-step-equations']?.open ?? JSON.parse(localStorage.getItem('mat.v1'))?.packs?.['two-step-equations']?.open);
     if (open !== 4) throw new Error(`Levels 1 to 4 of the new card should be open: ${open}`);
+    w.at('← Packs, Two-step equations'); await w.click('text=← Packs'); await wait(w.page, 500); await w.click('.card-name[data-card="two-step-equations"]'); await wait(w.page, 500);
+    const lv = await w.page.evaluate(() => [...document.querySelectorAll('.card-view .level-btn')].slice(0, 4).map((b) => (b.matches('.is-placed') ? 'P' : b.disabled ? 'L' : 'O')).join(''));
+    if (lv !== 'PPPO') throw new Error(`Levels 1 to 3 should be silver (placed) and Level 4 open: ${lv}`);
   },
 
   // ---- Build K: the new Two-step equations card ----
@@ -1798,10 +1931,10 @@ const WALKS = {
     if (await w.page.locator('text=Skip tour').count()) await w.click('text=Skip tour');
     for (const v of [6, 8, 1, 3, 2]) { w.at(`type ${v}, Enter, Enter`); await w.type(v); await w.enter(); await wait(w.page, 500); await w.enter(); await wait(w.page, 500); }
     await w.see('Level 1 complete');
-    w.at('← Packs, Solve it'); await w.click('text=← Packs'); await wait(w.page, 500); await w.click('.section-panel.sec-solve'); await wait(w.page, 600);
-    await w.see('Two-step equations', 'Add, combine, then take a fraction');
-    const card = await w.page.evaluate(() => [...document.querySelectorAll('.pack-card, [class*="card"]')].map((c) => c.innerText).find((x) => x.includes('Add, combine, then take a fraction')) ?? '');
-    if (!/Level 2(?!\s*Locked)/.test(card.replace(/\s+/g, ' ').replace('Level 2 Locked', 'Level 2Locked'))) throw new Error(`Level 2 of the new card should be open: ${card.replace(/\s+/g, ' ').slice(0, 200)}`);
+    w.at('← Packs, Two-step equations'); await w.click('text=← Packs'); await wait(w.page, 500); await w.click('.card-name[data-card="two-step-equations"]'); await wait(w.page, 600);
+    await w.see('Two-step equations', 'Add, combine, then take a fraction', 'One problem earns it');
+    const lv = await w.page.evaluate(() => [...document.querySelectorAll('.card-view .level-btn')].slice(0, 2).map((b) => ({ placed: b.matches('.is-placed'), open: !b.disabled })));
+    if (!lv[0].placed || !lv[1].open) throw new Error(`Level 1 should be silver (placed) and Level 2 open: ${JSON.stringify(lv)}`);
     await w.both('k-home');
   },
   async 'k-level-1'(w) {

@@ -28,7 +28,10 @@ describe('Features to check (test-links.json)', () => {
     const q = new URLSearchParams(c.link.query.replace(/^\?/, ''));
     if (q.get('diag')) expect(['count', 'build', 'solve']).toContain(q.get('diag'));     // a section's placement quiz (Build L)
     else if (q.get('olddiag')) expect(q.get('olddiag')).toBe('solve');                   // a device placed before Build L (Build M)
-    else {
+    else if (q.get('menu')) {                                                           // the home screen (Build X), maybe with a test progress state
+      expect(q.get('menu')).toBe('1');
+      if (q.get('demo')) expect(['menu', 'placed', 'shine', 'grew']).toContain(q.get('demo'));
+    } else {
       expect(packs).toContain(q.get('pack'));
       expect(Number(q.get('level'))).toBeGreaterThan(0);
     }

@@ -54,6 +54,8 @@ import { loadDiag, saveDiag, clearDiag, saveOldPlacement } from './diagStore.js'
 import { redrawMat, finishFlips } from './view/keepRows.js';
 import { chooseSize } from './view/fitSize.js';
 import { nextMove } from './engine/solveit/honest.js';
+import { snapshot, changesSince, SEEN_KEY } from './engine/status.js';
+import { demoProgress, demoSeen } from './engine/demo.js';
 
 const $ = (id) => document.getElementById(id);
 
@@ -137,7 +139,7 @@ function persist() {
 const sync = createSync({
   load: loadSync, save: saveSync, loadInfo, saveInfo,
   getProgress: () => progress,
-  setProgress: (p) => { progress = p; saveProgress(); if (!$('home').hidden) goHome(); },
+  setProgress: (p) => { progress = p; saveProgress(); if (!$('home').hidden) goHome({ keepView: true }); },
   getEvents: loadLog, getRuns: loadRuns, packs: PACKS,
   onChange: (status) => {
     const b = document.querySelector('[data-home="account"]');
@@ -209,7 +211,11 @@ function diagStatus(section) {
 // The home screen is always the three big panels (and the top menu): no section is remembered or left open (Karl, 2026-10-08).
 try { localStorage.removeItem('mat.section.v1'); } catch { /* storage blocked */ }
 
-function goHome() {
+// What the student saw on the menu last time (engine/status.js): anything that improved since shines once. Fails quietly.
+const loadSeen = () => { try { return JSON.parse(localStorage.getItem(SEEN_KEY)); } catch { return null; } };
+const saveSeen = (seen) => { try { localStorage.setItem(SEEN_KEY, JSON.stringify(seen)); } catch { /* storage blocked */ } };
+
+function goHome({ keepView = false } = {}) {
   endTour();
   endDragDemo();
   endQuiz();
@@ -218,7 +224,12 @@ function goHome() {
   persist();
   const runs = loadRuns();
   const now = Date.now();
+  const seenNow = snapshot(progress, PACKS, SECTIONS);
+  const shine = changesSince(loadSeen(), seenNow, PACKS);
+  saveSeen(seenNow);
   renderPackMap($('home'), progress, PACKS, {
+    shine,
+    keepView,
     sections: SECTIONS,
     diags: Object.fromEntries(DIAGNOSTIC_SECTIONS.map((id) => [id, diagStatus(id)])),
     bests: Object.fromEntries(CHALLENGES.map((c) => [c.id, bestScore(runs, c.id, 'all', now)])),
@@ -227,7 +238,7 @@ function goHome() {
     onPlay: startLevel,
     onSaveCode: CODES ? () => showSaveCode(encodeProgress(progress)) : null,
     onEnterCode: CODES ? () => askForCode(restoreFromCode) : null,
-    onAccount: () => showAccount(sync, () => { if (!$('home').hidden) goHome(); }),
+    onAccount: () => showAccount(sync, () => { if (!$('home').hidden) goHome({ keepView: true }); }),
     account: sync.status(),
     note: homeNote ?? (store.available ? null : STORAGE_NOTE),
   });
@@ -691,6 +702,17 @@ for (const section of DIAGNOSTIC_SECTIONS) {
   saveDiag({ ...d, legacy: false });
   persist();
 }
+// Testing only (Build X): ?demo=… puts this device in a fixed progress state for the test-links page (engine/demo.js). It is merged in,
+// so it never lowers what a device has; the test-links buttons start a fresh student first. ?menu=1 opens the home screen.
+// It is applied once per device (a reload of the same link does not put it back, so the shine and "New levels added!" can be seen to go).
+const demoApplied = () => { try { return localStorage.getItem('mat.demo.v1'); } catch { return null; } };
+if (params.get('demo') && demoProgress(params.get('demo'), PACKS) && demoApplied() !== params.get('demo')) {
+  const seen = demoSeen(params.get('demo'), PACKS, SECTIONS);
+  if (seen) saveSeen(seen);
+  progress = mergeProgress(progress, demoProgress(params.get('demo'), PACKS));
+  try { localStorage.setItem('mat.demo.v1', params.get('demo')); } catch { /* storage blocked: applied each load */ }
+  persist();
+}
 sync.request();   // signed in to a class sheet? catch up
 const urlLevel = Number(params.get('level'));
 const urlPack = packById(params.get('pack') === 'groupit' ? 'lasso' : params.get('pack') ?? 'flipit');
@@ -699,7 +721,7 @@ if (DIAGNOSTIC_SECTIONS.includes(params.get('diag'))) {
   startDiagnostic(params.get('diag'));                // ?diag=solve opens a section's diagnostic (a test link, Build L)
 } else if (urlPack && PLAY[urlPack.id] && Number.isInteger(urlLevel) && urlLevel >= 1 && urlLevel <= lastLevelOf(urlPack)) {
   startLevel(urlPack.id, urlLevel);
-} else if (resume) {
+} else if (resume && !params.get('menu')) {
   startLevel(resume.pack, resume.level, resume);
 } else {
   goHome();
@@ -711,5 +733,5 @@ if (DIAGNOSTIC_SECTIONS.includes(params.get('diag'))) {
 // (?nosignin=1 skips it for testing.) Offline, there is nothing to sign in to, so it stays quiet.
 if (!params.get('nosignin') && sync.status().state === 'signed-out' && navigator.onLine !== false) {
   if (loadInfo(sync.endpoint())?.google) loadGoogle().catch(() => {});
-  showAccount(sync, () => { if (!$('home').hidden) goHome(); }, { prompt: true });
+  showAccount(sync, () => { if (!$('home').hidden) goHome({ keepView: true }); }, { prompt: true });
 }

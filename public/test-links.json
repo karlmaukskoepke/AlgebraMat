@@ -3,6 +3,158 @@
   "updated": "2026-11-01",
   "checks": [
     {
+      "id": "x-card-name",
+      "name": "The main menu: a card name opens that card",
+      "build": "Build X",
+      "link": {
+        "label": "Open the home screen",
+        "query": "?menu=1&seed=7&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens the home screen: four sections side by side, each with its card names listed.",
+        "Click the name Divide it, under Solve it.",
+        "Click ← All sections at the top left.",
+        "Click the name Strange solutions, under Solve it Plus."
+      ],
+      "see": "Each name opens that card on its own, big: its levels (Divide it: Level 1 to Level 5, with See why it works), its dots and “0 of 5”, and “Solve it · 7th grade” beside ← All sections. ← All sections goes back to the four sections. Strange solutions shows Levels 1 to 3 and “0 of 3”."
+    },
+    {
+      "id": "x-expand-point",
+      "name": "The main menu: pointing at a section title shows the whole section",
+      "build": "Build X",
+      "link": {
+        "label": "Open the home screen",
+        "query": "?menu=1&seed=7&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens the home screen.",
+        "Move the pointer quickly across the Solve it title and down to its card names, without stopping.",
+        "Now rest the pointer on the Solve it title for a moment.",
+        "Move the pointer around inside what opened, then move it off to the empty page below or beside it."
+      ],
+      "see": "A quick pass does nothing, so the card names stay easy to click. Resting on the title opens the whole of Solve it over the four sections: “Solve it · 7th grade ▴”, the placement quiz button, and every card with its level buttons. It stays while the pointer is inside it and goes as soon as the pointer leaves."
+    },
+    {
+      "id": "x-expand-keys",
+      "name": "The main menu: the keyboard",
+      "build": "Build X",
+      "link": {
+        "label": "Open the home screen",
+        "query": "?menu=1&seed=7&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens the home screen.",
+        "Press Tab until the Count it title has a dark outline (two or three presses).",
+        "Press Tab once more.",
+        "Press Enter.",
+        "Press Escape."
+      ],
+      "see": "With the Count it title outlined, the whole of Count it opens. The next Tab goes to the name Combine it and the section closes again. Enter opens Combine it on its own, and Escape goes back to the four sections with Combine it still outlined. (Enter on an open title steps into it, to its first button.)"
+    },
+    {
+      "id": "x-expand-tap",
+      "name": "The main menu: a touch screen",
+      "build": "Build X",
+      "link": {
+        "label": "Open the home screen",
+        "query": "?menu=1&seed=7&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "On a touch screen (a tablet, or a Chromebook with a touch screen), click the button. It opens the home screen.",
+        "Tap the Solve it Plus title.",
+        "Tap “Solve it Plus · 8th grade ▴” at the top of what opened.",
+        "Tap the name Distribute more."
+      ],
+      "see": "The first tap opens the whole of Solve it Plus, with “Solve it Plus has no placement quiz: start at Level 1 of any card.” and its three cards. Tapping its title again closes it (so does a tap outside it). Tapping Distribute more opens that card on its own. Nothing needs the pointer to rest anywhere."
+    },
+    {
+      "id": "x-statuses",
+      "name": "Metallic progress: every status at once",
+      "build": "Build X",
+      "link": {
+        "label": "Open a student with progress on every kind of card",
+        "query": "?menu=1&demo=menu&seed=7&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens the home screen for a test student who has done some of everything.",
+        "Look at each card name and each section’s line under its title.",
+        "Click the name Divide it."
+      ],
+      "see": "Four looks, each with its own shape and “x of y”: plain with an empty ring (Groups of Terms, 0 of 8); green with a leaf (Group It, 1 of 7; Flip everything, 1 of 5); silver with a medal (Flip It, 3 of 5; Boxes & Circles, 3 of 6, exactly half; Divide it, 3 of 5); gold with a star (Combine it, Add to both sides, and all three Solve it Plus cards). Solve it Plus says “Every card gold” with a gold edge; the others say “1 of 3 cards gold” and so on. Divide it shows two gold stars, a silver dot, then a ringed dot (the level to do next): Levels 1 and 2 gold, Level 3 silver with “One problem earns it”."
+    },
+    {
+      "id": "x-placed-earned",
+      "name": "A placed level turns gold after one problem",
+      "build": "Build X",
+      "link": {
+        "label": "Open a student the placement quiz placed",
+        "query": "?menu=1&demo=placed&seed=7&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens the home screen for a test student whose placement quiz placed them at Add to both sides Level 4.",
+        "Click the name Add to both sides (silver, 3 of 5).",
+        "Click Level 1 (silver, “One problem earns it”). It opens x + 8 = 11.",
+        "Solve it: Add −8 (Enter), drag the 11 onto the −8 and type 3 (Enter), then type 3 for x, Enter, drag the 3 onto the x, and press Enter until it says Balanced.",
+        "Click ← Packs, then the name Add to both sides."
+      ],
+      "see": "When the problem is solved, “Level 1 earned!” shows at the top for a moment. Back on the card, Level 1 is gold with a star, Levels 2 and 3 are still silver, and the card still says 3 of 5 (silver: gold needs every level earned). Its name on the home screen shone once."
+    },
+    {
+      "id": "x-shine",
+      "name": "The one-time shine, and a section turning gold",
+      "build": "Build X",
+      "link": {
+        "label": "Open a student who just finished Strange solutions",
+        "query": "?menu=1&demo=shine&seed=7&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens the home screen for a test student who has just earned Strange solutions Level 3 (the last card of Solve it Plus) and Divide it Level 2.",
+        "Watch Strange solutions, Divide it and the Solve it Plus panel for two seconds.",
+        "Reload the page (the circular arrow at the top of the browser), and watch again.",
+        "Open the button again, and press any key (or click anywhere) as soon as the page shows."
+      ],
+      "see": "Strange solutions (now gold) and Divide it (a level turned from silver to gold) shine once: a light band sweeps across them in about a second and a half, and the Solve it Plus panel glows gold once (“Every card gold”). After the reload nothing shines: it only shines the first time. A key or a click stops the shine at once."
+    },
+    {
+      "id": "x-reduced-motion",
+      "name": "Reduced motion: no shine, the same colours",
+      "build": "Build X",
+      "link": {
+        "label": "Open a student who just finished Strange solutions",
+        "query": "?menu=1&demo=shine&seed=7&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Turn on reduced motion on your computer (on a Chromebook: Settings, Accessibility, Display and magnification; on a Mac: System Settings, Accessibility, Display, Reduce motion; on Windows: Settings, Accessibility, Visual effects, Animation effects off).",
+        "Click the button.",
+        "Watch Strange solutions and the Solve it Plus panel, then turn reduced motion off again."
+      ],
+      "see": "Nothing sweeps, glows or moves, and the menu opens without its slide-in. The colours, shapes and words are all the same as without reduced motion: Strange solutions gold with a star and 3 of 3, Solve it Plus “Every card gold”."
+    },
+    {
+      "id": "x-new-levels",
+      "name": "“New levels added!” when a card grows",
+      "build": "Build X",
+      "link": {
+        "label": "Open a student whose card just grew",
+        "query": "?menu=1&demo=grew&seed=7&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens the home screen for a test student who had finished the two levels Strange solutions used to show, and now it shows three (this is how Levels 4 and 5 will arrive).",
+        "Look at Strange solutions under Solve it Plus.",
+        "Reload the page."
+      ],
+      "see": "Strange solutions says “New levels added!” under its name and is silver with 2 of 3 (it was gold over two levels: it keeps both, and its colour is worked out over all three). After the reload the note is gone and it stays silver, 2 of 3."
+    },
+    {
       "id": "x-two-solve-sections",
       "name": "Two Solve it sections: Solve it (7th grade) and Solve it Plus (8th grade)",
       "build": "Build X",
@@ -2006,9 +2158,9 @@
       "steps": [
         "Click the button. It opens Distribute, combine, solve, Level 1.",
         "Click “Practice distributing first” at the top right, beside the level dots. Click Skip tour if a tour starts.",
-        "Click ← Packs, then Solve it."
+        "Click ← Packs, then the Solve it title."
       ],
-      "see": "It opens Build it’s card Distribute, then combine, at its first unfinished level (Level 1 for a fresh student). ← Packs goes to the home screen, where Solve it shows Distribute, combine, solve after Two-step equations; there is no button straight back to the card."
+      "see": "It opens Build it’s card Distribute, then combine, at its first unfinished level (Level 1 for a fresh student). ← Packs goes to the home screen, where Solve it lists Distribute, combine, solve after Two-step equations; there is no button straight back to the card."
     },
     {
       "id": "student-distribute",
@@ -2045,7 +2197,7 @@
       },
       "steps": [
         "Click the button. It opens the home screen on a device whose Solve it placement quiz was finished before Build L, with both Two-step problems right.",
-        "Click Solve it.",
+        "Click the Solve it title.",
         "Look at the Two-step equations card (scroll inside the card to see Levels 5 to 7)."
       ],
       "see": "Two-step equations shows Levels 1 to 6 open (Level 7 locked), and none of them marked done. Before this build that device started the card at Level 1."
@@ -2100,7 +2252,7 @@
         "Problem 4 is 2 − 3x = −16: click “I don’t know”. Then click “I don’t know” six more times, until the results show.",
         "Under Two-step equations, click the green button."
       ],
-      "see": "The results list Two-step equations as “Getting there”, with 5x − 2 = 18 right, and the button says “Start at Level 4”. It opens the new Two-step equations card at Level 4 (4 + 3x = 19 style), and Levels 1 to 4 are open on the card."
+      "see": "The results list Two-step equations as “Getting there”, with 5x − 2 = 18 right, and the button says “Start at Level 4”. It opens the new Two-step equations card at Level 4 (4 + 3x = 19 style). Back on the home screen (← Packs, then the name Two-step equations), Levels 1 to 3 are silver (placed by the quiz, since Build X) and Level 4 is open."
     },
     {
       "id": "k-worked",
@@ -2219,9 +2371,9 @@
       "steps": [
         "Click the button. It opens the old Two-step equations card (now off the home screen), Level 1. Click Skip tour if a tour starts.",
         "Type 6 and press Enter, then press Enter again for the next problem. Do the same with 8, 1, 3 and 2.",
-        "Click ← Packs at the top left, then Solve it."
+        "Click ← Packs at the top left, then the name Two-step equations under Solve it."
       ],
-      "see": "The old card says Level 1 is complete. On the home screen the new Two-step equations card shows Level 1 done and Level 2 open. (On a student’s own device, any old Two-step level they finished shows the same way, on the level of the same kind.)"
+      "see": "The old card says Level 1 is complete. On the home screen the new Two-step equations card shows Level 1 silver (placed: “One problem earns it”) and Level 2 open. (Since Build X a level an older card credits is placed, not earned: one problem on it makes it gold. Levels a student finished before Build X stay as they were.)"
     },
     {
       "id": "k-level-1",
@@ -3017,6 +3169,23 @@
               "label": "Save codes (teacher only)",
               "query": "?codes=1&nosignin=1",
               "look": "With ?codes=1 the Save code and Enter code buttons come back, for moving a student by hand."
+            }
+          ]
+        },
+        {
+          "name": "Build X: the main menu and metallic progress (2026-11-01)",
+          "about": "Card names open their card; a section title shows the whole section (by pointing, Tab or a tap). Each card and section is plain, green, silver or gold, with its own shape and “3 of 5”; a level the placement quiz or an older card credits is silver until one problem on it makes it gold.",
+          "links": [
+            {
+              "label": "The home screen",
+              "query": "?nosignin=1&menu=1",
+              "look": "Your own progress, in the new menu."
+            },
+            {
+              "label": "Every status at once (test student)",
+              "query": "?menu=1&demo=menu&nosignin=1",
+              "reset": true,
+              "look": "Plain, green, silver and gold cards; Solve it Plus all gold."
             }
           ]
         },
