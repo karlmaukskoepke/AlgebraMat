@@ -176,7 +176,7 @@ function measureXo() {
       L = Math.min(L, x0 - m.actualBoundingBoxLeft); R = Math.max(R, x0 + m.actualBoundingBoxRight);
       T = Math.min(T, base - m.actualBoundingBoxAscent); B = Math.max(B, base + m.actualBoundingBoxDescent);
     }
-    const mk = e.querySelector('.lx-xo-mark');
+    const mk = e.querySelector('.lx-xo-line');
     const font = parseFloat(getComputedStyle(e).fontSize);
     if (!mk) return { text: e.textContent.replace(/\s+/g, ''), font, missing: true };
     const mr = mk.getBoundingClientRect();

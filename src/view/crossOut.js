@@ -8,9 +8,11 @@
 // centre of the term's ink box (sign included), it is half as heavy (0.075em, 3 px at the largest 40 px text), overshoots each end by only
 // 0.05em, and it is drawn behind the glyphs.
 //
-// How it is drawn (style.css, "Build AB, Part 1"): the wrapper holds a mark element (`.lx-xo-mark`, no text, hidden from screen readers),
-// as wide as the term plus the overshoot, sitting on the vertical middle of the digits' ink. It is a size container, so its ::before can
-// take a height worked out from its own width: clamp(width × tan 25°, the term's height × 1.15, width × tan 30°). A linear gradient
+// How it is drawn (style.css, "Build AB, Part 1"): the wrapper's last item is a mark (`.lx-xo-mark`, no text, hidden from screen
+// readers): an empty box 0.375em tall standing on the text's baseline, so its top is the middle of the digits (their ink is 0.75em tall).
+// Inside it, the line (`.lx-xo-line`) is placed from there, as wide as the term plus the overshoot. Anchored to the baseline, not to the
+// box, it follows the digits whatever the font's rendering on a machine. The line is a size container, so its ::before can take a height
+// worked out from its own width: clamp(width × tan 25°, the term's height × 1.15, width × tan 30°). A linear gradient
 // `to bottom right` draws a stripe from that box's lower-left corner to its upper-right corner (the gradient's 50% line always runs
 // corner to corner), so the stroke's angle is atan(height ÷ width) and its weight is the stripe's. The wrapper isolates its layers and
 // the mark sits underneath, so the digits are painted over the stroke. `crossGeometry` is the same rule in numbers, for the tests and for
@@ -30,7 +32,7 @@ export const INK_EM = 0.75;             // the digits' ink height in the hand fo
 // sign element (`+`, `−`) is marked `has-sign`: the sign's outer margin moves to the wrapper, so the wrapper's box is the term's ink.
 export function crossOut(els, cls = '') {
   const signed = els[0]?.classList?.contains('lb-plus');
-  const mark = html('span', 'lx-xo-mark', []);
+  const mark = html('span', 'lx-xo-mark', [html('span', 'lx-xo-line', [])]);
   mark.setAttribute('aria-hidden', 'true');
   return html('span', `lx-xo${signed ? ' has-sign' : ''}${cls ? ` ${cls}` : ''}`, [...els, mark]);
 }

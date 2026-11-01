@@ -174,7 +174,7 @@ class Walk {
   async diagonals(n) {
     const xs = await this.page.evaluate(() => [...document.querySelectorAll('.lb-work .lx-xo')].map((e) => {
       const r = document.createRange(); r.selectNodeContents(e); const ink = r.getBoundingClientRect();
-      const mk = e.querySelector('.lx-xo-mark'); const m = mk?.getBoundingClientRect(); const a = mk ? getComputedStyle(mk, '::before') : null;
+      const mk = e.querySelector('.lx-xo-line'); const m = mk?.getBoundingClientRect(); const a = mk ? getComputedStyle(mk, '::before') : null;
       const w = m?.width ?? 0; const h = a ? parseFloat(a.height) : 0;
       const probe = document.createElement('span'); probe.style.cssText = 'position:absolute;width:var(--xo-w);height:0'; e.append(probe); const weight = probe.getBoundingClientRect().width; probe.remove();
       return { text: e.textContent.replace(/\s+/g, ''), angle: (Math.atan2(h, w) * 180) / Math.PI, covers: Boolean(m) && m.left < ink.left + 2 && m.right > ink.right - 2,

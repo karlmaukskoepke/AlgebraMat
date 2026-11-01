@@ -137,14 +137,15 @@ describe('Build W, Part 3: the Add cross-out is a diagonal', () => {
   it('the styles draw that box: the term plus the overshoot, a stripe corner to corner, behind the glyphs, still under reduced motion', () => {
     const css = readFileSync(CSS_FILE, 'utf8');
     const block = css.slice(css.indexOf('Build W, Part 3 (Karl, 2026-10-26)'));
-    expect(block).toMatch(new RegExp(`\\.lx-xo-mark \\{[^}]*left: -${OVERSHOOT_EM}em; right: -${OVERSHOOT_EM}em;`));
+    expect(block).toMatch(/\.lx-xo-line \{[^}]*left: -0\.025em; right: -0\.075em;/);          // (the term plus 2 × OVERSHOOT_EM, centred on the ink)
+    expect(block).toMatch(/\.lx-xo-mark \{[^}]*align-self: baseline; width: 0; height: 0\.375em;/);          // (standing on the baseline: its top is the digits' middle)
     expect(block).toMatch(/clamp\(calc\(100cqw \* 0\.46631\), 0\.8625em, calc\(100cqw \* 0\.57735\)\)/);   // tan 25°, 0.75em × 1.15, tan 30°
     expect(block).toMatch(/linear-gradient\(to bottom right,/);
     expect(block).toMatch(/max\(2px, 0\.075em\)/);
     expect(block).toMatch(/\.lx-xo \{[^}]*isolation: isolate;/);
-    expect(block).toMatch(/\.lx-xo-mark \{[^}]*z-index: -1;/);
-    expect(block).toMatch(/prefers-reduced-motion: reduce\) \{ \.lx-xo-mark::before \{ animation: none; \}/);
-    expect(block).not.toMatch(/\.lx-xo-mark::before \{[^}]*clip-path/);         // (drawn whole whenever it does not animate)
+    expect(block).toMatch(/\.lx-xo-line \{[^}]*z-index: -1;/);
+    expect(block).toMatch(/prefers-reduced-motion: reduce\) \{ \.lx-xo-line::before \{ animation: none; \}/);
+    expect(block).not.toMatch(/\.lx-xo-line::before \{[^}]*clip-path/);         // (drawn whole whenever it does not animate)
   });
   it('Add to both sides: the cancelling pair is crossed out sign and all (+8 and −8), one stroke each', async () => {
     const p = addBothPlay;

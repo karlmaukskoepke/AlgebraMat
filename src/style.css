@@ -3937,24 +3937,28 @@ button.lb-divbar.is-calc:hover, button.lb-divbar.is-calc:focus-visible { backgro
    reduced motion. The term's ink fades as before; the stroke keeps its full strength.
    Build AB, Part 1 (Karl, 2026-11-01: too big, too thick, hid the numbers, missed the middle of a negative number): about 30° (25° on a wide
    term, so it rises no more than about 15% above the digits), its midpoint on the middle of the term's ink, 0.075em heavy (3 px at 40 px,
-   at least 2 px), 0.05em past each end, drawn behind the glyphs. The mark element (.lx-xo-mark) is as wide as the term plus the overshoot
-   and sits on the digits' middle (0.115em above the box's middle in the hand font); it is a size container, so its ::before's height
-   comes from its width: clamp(width × tan 25°, 0.75em × 1.15, width × tan 30°). A gradient `to bottom right` puts a stripe on that box's
+   at least 2 px), 0.05em past each end, drawn behind the glyphs. The mark (.lx-xo-mark) is an empty box 0.375em tall on the text's
+   baseline, so its top is the digits' middle (anchored to the baseline, it follows the digits on any machine's font rendering); the line
+   inside it (.lx-xo-line) starts there, as wide as the term plus the overshoot; it is a size container, so its ::before's height comes
+   from its width: clamp(width × tan 25°, 0.75em × 1.15, width × tan 30°). A gradient `to bottom right` puts a stripe on that box's
    lower-left to upper-right diagonal. (view/crossOut.js has the same rule in numbers.) ---------- */
-.lx-xo { --xo-w: max(2px, 0.075em); position: relative; isolation: isolate; display: inline-flex; align-items: center; gap: 0 4px; white-space: nowrap; }
+.lx-xo { --xo-w: max(2px, 0.075em); position: relative; isolation: isolate; display: inline-flex; align-items: baseline; gap: 0 4px; white-space: nowrap; }
 .lx-xo.has-sign { margin-left: 0.18em; }
 .lx-xo.has-sign > .lb-plus:first-child { margin-left: 0; }
 .lx-xo > .is-struck::after { content: none; display: none; }
-.lx-xo-mark { position: absolute; left: -0.05em; right: -0.05em; top: calc(50% - 0.115em); height: 0; z-index: -1; pointer-events: none; container-type: inline-size; }
-.lx-xo-mark::before { content: ''; position: absolute; left: 0; right: 0; top: 0; height: 0.8625em; height: clamp(calc(100cqw * 0.46631), 0.8625em, calc(100cqw * 0.57735)); transform: translateY(-50%);
+/* the mark: an empty box on the baseline, its top at the digits' middle (no width, and it takes back the gap before it); the line is
+   0.1em wider than the term, a little more of it on the right (a glyph starts a little in from its box: this centres it on the ink) */
+.lx-xo-mark { flex: none; align-self: baseline; width: 0; height: 0.375em; margin-left: -4px; pointer-events: none; }
+.lx-xo-line { position: absolute; left: -0.025em; right: -0.075em; height: 0; z-index: -1; pointer-events: none; container-type: inline-size; }
+.lx-xo-line::before { content: ''; position: absolute; left: 0; right: 0; top: 0; height: 0.8625em; height: clamp(calc(100cqw * 0.46631), 0.8625em, calc(100cqw * 0.57735)); transform: translateY(-50%);
   background: linear-gradient(to bottom right, transparent calc(50% - var(--xo-w) / 2), #a3281b calc(50% - var(--xo-w) / 2), #a3281b calc(50% + var(--xo-w) / 2), transparent calc(50% + var(--xo-w) / 2));
   animation: xo-diag 0.5s 0.8s ease-out both; }
 @keyframes xo-diag { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0 0 0); } }
 .lb-work .lx-xo > :not(.lx-xo-mark) { animation: lb-drop 0.5s 1.5s ease-in forwards; }
-.is-settled .lx-xo-mark::before, .lb-stack .lb-rowwrap.is-old .lx-xo-mark::before { animation: none; }
+.is-settled .lx-xo-line::before, .lb-stack .lb-rowwrap.is-old .lx-xo-line::before { animation: none; }
 .is-settled .lb-work .lx-xo > :not(.lx-xo-mark), .lb-stack .lb-rowwrap.is-old .lb-work .lx-xo > :not(.lx-xo-mark) { animation: none; opacity: 0.25; }
 .lx-under .lx-xo .lb-plus { color: #0072b2; }
-@media (prefers-reduced-motion: reduce) { .lx-xo-mark::before { animation: none; } .lb-work .lx-xo > :not(.lx-xo-mark) { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .lx-xo-line::before { animation: none; } .lb-work .lx-xo > :not(.lx-xo-mark) { animation: none; } }
 
 /* ---------- Build X: a placed level earned with one problem (a short note at the top of the play screen) ---------- */
 .earned-note {
