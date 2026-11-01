@@ -6,8 +6,8 @@ sections".
 
 Features to check: 10 new items (two Solve it sections; a card name opens its card; pointing, the keyboard and a tap expand a section; every
 status at once; a placed level earned by one problem; the shine and a section turning gold; reduced motion; "New levels added!"), and 5
-earlier items updated for the new menu (`k-credit`, `l-placement`, `m-placement-old`, `m-practice`, and their walks). Every Build X item and
-every updated item passes on the live site. Pictures in `docs/build-x/`, at 1366×768 and 1366×650: the menu in each status
+earlier items updated for the new menu (`k-credit`, `l-placement`, `m-placement-old`, `m-practice`, and their walks). All 182 items (and the page's own
+checks) pass on the live site. Pictures in `docs/build-x/`, at 1366×768 and 1366×650: the menu in each status
 (`x-statuses-*`), a section expanded (`x-expand-*`, `x-expand-keys-open`, `x-expand-tap-768`), the card name list and a card opened
 (`x-card-name-*`, `x-card-view-*`), the level dots with placed and earned (`x-dots-*`, `x-placed-before`, `x-placed-earned-*`), the note
 (`x-placed-earned-note`), the gold section (`x-section-gold-*`, `x-shine-768` mid-shine), reduced motion, a grown card, the two sections.
