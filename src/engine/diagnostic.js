@@ -5,7 +5,7 @@
 import { PACKS, packById } from '../packs/index.js';
 import { CARDS, cardIdFor } from './lightCards.js';
 import { typeInto, isTyping } from './entry.js';
-import { openLevels, newTwoStepLevel } from './progress.js';
+import { openLevels, placeLevels, newTwoStepLevel } from './progress.js';
 import { isBattle } from './addBoth.js';
 
 // Adding and subtracting first, then groups, then the algebra cards (the pack map's order). Two levels each: one
@@ -110,8 +110,10 @@ export function readout(seed, answers, items = diagnosticItems(seed), section = 
 // A student whose Add to both sides diagnostic shows they apply the move correctly (the x − a Battle was right, so level 5 or 6
 // is recommended) skips Level 1, the numeric level: it is marked done. They can still play it.
 const SKIPS_NUMERIC_L1 = { 'add-both': 5, 'divide-it': 4 };      // the recommended level from which Level 1 (numbers only) is skipped
+// Since Build X the levels the card displays below the recommended one are PLACED (engine/progress.js): credited, silver on the home
+// screen, earned with one problem each. (Before, they were only opened.) The recommended level itself is open, not placed.
 export const applyReadout = (progress, results) => results.reduce((p, r) => {
-  const opened = openLevels(p, r.pack, r.rec);
+  const opened = placeLevels(openLevels(p, r.pack, r.rec), r.pack, r.rec);
   if (r.rec >= (SKIPS_NUMERIC_L1[r.pack] ?? Infinity) && opened.packs[r.pack]) opened.packs[r.pack].levels[0] = true;
   return opened;
 }, progress);

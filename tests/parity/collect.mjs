@@ -6,7 +6,7 @@
 // Pure: no DOM, no clock, no storage. Generated term ids (t12, d5) are removed, since they depend on how many runs came before.
 
 import { PACKS, addBoth, divideIt } from '../../src/packs/index.js';
-import { newProgress, completeLevel, encodeProgress, decodeProgress } from '../../src/engine/progress.js';
+import { newProgress, completeLevel, encodeProgress, decodeProgress, placeLevels, mergeProgress } from '../../src/engine/progress.js';
 import { makeRecord } from '../../src/engine/eventlog.js';
 import { boardText as addBoardText } from '../../src/engine/addBothMoves.js';
 import { reduceAddBoth } from '../../src/engine/cards/add.js';
@@ -50,6 +50,11 @@ function savecodes() {
     }
   }
   states.everything = all;
+  // Build X: placed levels are not in a code (a code carries earned levels); a placed level earned by one problem is; two devices merged
+  const placed = placeLevels(newProgress(PACKS), 'add-both', 5);
+  states['x-placed'] = placed;
+  states['x-placed-then-earned'] = completeLevel(placed, 'add-both', 3);
+  states['x-merged'] = mergeProgress(placed, completeLevel(completeLevel(newProgress(PACKS), 'add-both', 4), 'divide-it', 2));
   const out = {};
   for (const [name, p] of Object.entries(states)) {
     const code = encodeProgress(p);

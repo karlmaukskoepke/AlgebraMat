@@ -9,7 +9,7 @@ describe('progress', () => {
 
   it('starts with every level of every pack unfinished', () => {
     expect(fresh).toEqual({
-      v: 1,
+      v: 2,
       packs: { combineit: { levels: Array(5).fill(false) }, flipit: { levels: Array(5).fill(false) }, lasso: { levels: Array(7).fill(false) }, boxes: { levels: Array(6).fill(false) }, 'groups-of-terms': { levels: Array(8).fill(false) }, 'distribute-combine': { levels: Array(5).fill(false) }, value: { levels: Array(4).fill(false) }, 'add-both': { levels: Array(6).fill(false), first: 2 }, 'divide-it': { levels: Array(6).fill(false), first: 2 }, 'flip-everything': { levels: Array(6).fill(false), first: 2 }, 'one-step': { levels: Array(5).fill(false), first: 3 }, 'two-step': { levels: Array(7).fill(false) }, switch: { levels: Array(6).fill(false) }, 'two-step-equations': { levels: Array(7).fill(false) }, 'distribute-solve': { levels: Array(5).fill(false) }, 'variables-both-sides': { levels: Array(5).fill(false) }, 'distribute-more': { levels: Array(5).fill(false) }, 'strange-solutions': { levels: Array(5).fill(false), last: 3 } },
     });
   });
@@ -70,7 +70,8 @@ describe('Add to both sides takes over from One-step equations and Switch sides 
     sw.forEach((l) => { p.packs.switch.levels[l - 1] = true; });
     return normalizeProgress(p, PACKS);
   };
-  const done = (p) => p.packs['add-both'].levels.map((d, i) => d && i + 1).filter(Boolean);
+  // (since Build X the credit is placed, not earned: finished either way)
+  const done = (p) => p.packs['add-both'].levels.map((d, i) => (d || p.packs['add-both'].placed?.[i]) && i + 1).filter(Boolean);
 
   it('maps each old level the way the spec says, and never gives the numeric Level 1', () => {
     expect(done(withOld())).toEqual([]);
@@ -137,8 +138,10 @@ describe('doneCount', () => {
 describe('old One-step progress counts for Divide it', () => {
   const old = (levels) => { let p = newProgress(PACKS); for (const l of levels) p = completeLevel(p, 'one-step', l); return normalizeProgress(p, PACKS); };
   it('maps One-step ax = b (3) to Divide it L2 and mixed (5) to L3, never L1, and opens up to what was earned', () => {
-    expect(old([3]).packs['divide-it'].levels).toEqual([false, true, false, false, false, false]);
-    expect(old([3, 5]).packs['divide-it'].levels).toEqual([false, true, true, false, false, false]);
+    // (placed since Build X: credited, not earned)
+    expect(old([3]).packs['divide-it'].placed).toEqual([false, true, false, false, false, false]);
+    expect(old([3, 5]).packs['divide-it'].placed).toEqual([false, true, true, false, false, false]);
+    expect(old([3, 5]).packs['divide-it'].levels.some(Boolean)).toBe(false);
     expect(old([3, 5]).packs['divide-it'].open).toBe(3);
     expect(old([4]).packs['divide-it'].levels.some(Boolean)).toBe(false);
   });

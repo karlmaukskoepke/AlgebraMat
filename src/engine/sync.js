@@ -48,6 +48,8 @@ export function buildRequest({ auth, progress, events, runs, cursor = newCursor(
   for (const [id, p] of Object.entries(progress?.packs ?? {})) {
     packs[id] = { levels: [...(p.levels ?? [])].map((d) => d === true) };
     if (Number.isInteger(p.open) && p.open > 1) packs[id].open = p.open;
+    // placed levels (Build X), a list beside `levels`; a class sheet that has not been updated ignores it, and the levels stay placed here
+    if (Array.isArray(p.placed) && p.placed.some((x) => x === true)) packs[id].placed = p.placed.map((x) => x === true);
   }
   return { v: PROTOCOL, auth: authOf(auth), progress: { packs }, events: after(events ?? [], cursor.eventsT), runs: after(runs ?? [], cursor.runsT) };
 }

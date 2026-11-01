@@ -345,7 +345,8 @@ describe('the pack, old progress and save codes', () => {
     const credit = (pack, level) => {
       const prog = newProgress(PACKS);
       prog.packs[pack].levels[level - 1] = true;
-      return decodeProgress(encodeProgress(prog), PACKS).packs['two-step-equations'];
+      const e = decodeProgress(encodeProgress(prog), PACKS).packs['two-step-equations'];
+      return { ...e, levels: e.levels.map((d, i) => d || e.placed?.[i] === true) };      // finished, earned or placed (placed since Build X)
     };
     const table = { 1: [1], 2: [2], 3: [4], 4: [3], 5: [5], 6: [6], 7: [7] };
     for (const [old, news] of Object.entries(table)) {

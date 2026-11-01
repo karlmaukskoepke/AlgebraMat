@@ -2,7 +2,7 @@ import './style.css';
 import { PROBLEMS_PER_LEVEL } from './engine/generate.js';
 import {
   completeLevel, isPackComplete, isLevelUnlocked, normalizeProgress, mergeProgress, withLegacyCredit,
-  encodeProgress, decodeProgress, doneCount, nextLevel,
+  encodeProgress, decodeProgress, doneCount, nextLevel, isLevelPlaced, PROGRESS_VERSION,
 } from './engine/progress.js';
 import { createStore } from './storage.js';
 import { PACKS, SECTIONS, HIDDEN_PACKS, packById, levelNumber, isWhyLevel, WHY_LABEL, lastLevelOf } from './packs/index.js';
@@ -107,7 +107,8 @@ const store = createStore('mat.v1');
 // A safety net: if a save would ever lower the number of finished levels (it never should), the copy that was there is kept here.
 const backupStore = createStore('mat.v1.backup');
 const saved = store.load();
-let progress = normalizeProgress(saved, PACKS);
+// (a save from before Build X has no `v: 2`: any legacy credit in it showed as finished, so it stays earned; credit from now on is placed)
+let progress = normalizeProgress(saved, PACKS, { legacyEarned: Boolean(saved) && saved.v !== PROGRESS_VERSION });
 let homeNote = null;
 
 // Ask the browser not to clear this site's saved progress when it's short on space or the site hasn't been opened in a
@@ -588,9 +589,28 @@ function render(before) {
   if (session.feedback?.bad) feedback.classList.add('bad');
   if (session.step === 'done') feedback.classList.add('celebrate');
 
+  if (session.step === 'done' && before?.step !== 'done') earnPlaced(session);
   if (session.step === 'done' && before?.step !== 'done' && !adapter.noAuto) {
     nextTimer = setTimeout(nextProblem, 2500);
   }
+}
+
+// A placed level (credited by the placement quiz or an older card, Build X) is earned by one problem of it finished on the card with at
+// most a reminder: no Teach me, no picture, no guided step, no move offered (the class-sheet words `hint` and `crossoff` only). A short note
+// says so; the level goes on as usual.
+const MINIMAL_SUPPORT = ['hint', 'crossoff'];
+const minimalSupport = (s) => !(s.taught > 0) && (s.supportsShown ?? []).every((w) => MINIMAL_SUPPORT.includes(w));
+function earnPlaced(session) {
+  const { pack, level } = play;
+  if (pack.comingSoon || pack.hidden || !isLevelPlaced(progress, pack.id, level) || !minimalSupport(session)) return;
+  progress = completeLevel(progress, pack.id, level);
+  persist();
+  const note = $('earned-note');
+  if (!note) return;
+  note.textContent = `Level ${levelNumber(pack, level)} earned!`;
+  note.hidden = false;
+  clearTimeout(earnPlaced.timer);
+  earnPlaced.timer = setTimeout(() => { note.hidden = true; }, 3500);
 }
 
 // a key or a click first finishes a flip's cross-off still playing, then does what it does (Build Q, Part 5)

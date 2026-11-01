@@ -57,6 +57,13 @@ After changing the class sheet's **script** (not its properties), publish it aga
 3. Keep it awake, so the first student of the day doesn't wait: in Apps Script, the **clock icon (Triggers) > Add Trigger**: function `keepWarm`, event source **Time-driven**, **Minutes timer**, **Every 5 minutes**. Save (Google asks you to allow it once).
 The app works with the old script too, only slower, so students aren't locked out while you update.
 
+## Placed levels (Build X, 2026-11-01): optional update
+Since Build X a level is **earned** (done on the card) or **placed** (credited by the placement quiz, or by a level finished on an older
+card). On the **Progress** tab, a level column such as `add-both-3` shows **TRUE only when earned**, as before. Placed levels go in one
+column per card, named like **`add-both-placed`**, listing the level numbers placed but not yet earned (`2 3`, using the same saved level
+numbers as the columns). To get that column, paste in the new `Code.gs` and publish a new version, as above. Until you do, nothing breaks:
+the sheet keeps earned levels as always, and placed levels stay on each student's device.
+
 ## Part 6. Test it, then tell students
 1. Open **https://karlmaukskoepke.github.io/AlgebraMat/?class=** followed by your Web app URL, tap **Sign in**, and use your own school account. The button should show **✓ Test**. Play a problem; ten seconds later your class sheet's **Students**, **Progress** and **Log** tabs have a row.
 2. When `DEFAULT_CLASS` in `src/syncConfig.js` holds your Web app URL, you don't need the class link at all: students just open The Mat.

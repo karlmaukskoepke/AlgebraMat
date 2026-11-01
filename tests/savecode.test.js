@@ -8,7 +8,7 @@ const bitsOf = (n, count, shift = 0) => Array.from({ length: count }, (_, i) => 
 // Flip It has five levels, Combine it five and Boxes & Circles six now; shorter lists (older saves) are filled out with unfinished levels.
 const pad = (levels, n) => [...levels, ...Array(Math.max(0, n - levels.length)).fill(false)];
 const state = (flipit, lasso = Array(7).fill(false), boxes = Array(6).fill(false), terms = Array(8).fill(false), combine = Array(5).fill(false), distribute = Array(5).fill(false)) => ({
-  v: 1,
+  v: 2,                // (the progress version: 2 since Build X, earned and placed)
   packs: {
     combineit: { levels: pad(combine, 5) }, flipit: { levels: pad(flipit, 5) }, lasso: { levels: lasso }, boxes: { levels: pad(boxes, 6) },
     'groups-of-terms': { levels: terms }, 'distribute-combine': { levels: distribute }, value: { levels: [false, false, false, false] }, 'add-both': { levels: Array(6).fill(false), first: 2 }, 'divide-it': { levels: Array(6).fill(false), first: 2 }, 'flip-everything': { levels: Array(6).fill(false), first: 2 }, 'one-step': { levels: Array(5).fill(false), first: 3 }, 'two-step': { levels: Array(7).fill(false) }, switch: { levels: Array(6).fill(false) }, 'two-step-equations': { levels: Array(7).fill(false) }, 'distribute-solve': { levels: Array(5).fill(false) }, 'variables-both-sides': { levels: Array(5).fill(false) }, 'distribute-more': { levels: Array(5).fill(false) }, 'strange-solutions': { levels: Array(5).fill(false), last: 3 },
@@ -267,7 +267,8 @@ describe('save code v13 is exact (the data is a 69-bit number, so it is read and
     expect(old).toMatch(/^MAT-E[2-9A-HJKMNP-Z]{14}$/);
     const back = decodeProgress(old, PACKS);
     expect(back.packs.switch.levels).toEqual([true, true, false, true, false, false]);
-    expect(back.packs['add-both'].levels).toEqual([false, true, false, true, true, false]);
+    expect(back.packs['add-both'].placed).toEqual([false, true, false, true, true, false]);   // placed since Build X (a code carries earned only)
+    expect(back.packs['add-both'].levels.some(Boolean)).toBe(false);
     expect(back.packs['add-both'].open).toBe(5);
   });
 });

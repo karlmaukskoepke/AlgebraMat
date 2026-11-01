@@ -1,9 +1,16 @@
 // The progress object (SPEC §7): which levels of which packs are finished.
 // Pure logic, no DOM. Saving (localStorage, save code) comes in Step 6.
 //
-// { v: 1, packs: { flipit: { levels: [true, false, false, false] } } }
+// { v: 2, packs: { flipit: { levels: [true, false, false, false], placed: [false, true, false, false] } } }
+//
+// Since Build X a level is none, placed or earned (Karl, 2026-10-26). `levels[i]` true is EARNED: finished by doing it on this card (every
+// level saved as finished before Build X is earned: nobody is demoted). `placed[i]` true is PLACED: credited by the placement quiz or by a
+// finished level on an older card (the legacy credit), not yet earned; one problem on the level earns it. A level is never both: earned
+// beats placed beats none, in every merge. `placed` is left out when nothing is placed. A placed level counts as finished for opening the
+// next level, as the credit did before. Save codes and the class sheet's level columns carry earned only (the sheet has its own placed
+// column, Code.gs). v 2 marks a save made since Build X; a save without it is read with any legacy credit as earned, as it showed before.
 
-export const PROGRESS_VERSION = 1;
+export const PROGRESS_VERSION = 2;
 
 export function newProgress(packs) {
   const out = { v: PROGRESS_VERSION, packs: {} };
@@ -25,7 +32,21 @@ const levelsOf = (progress, packId) => progress.packs[packId]?.levels ?? [];
 const firstOf = (progress, packId) => progress.packs[packId]?.first ?? 1;
 const lastOf = (progress, packId) => progress.packs[packId]?.last ?? levelsOf(progress, packId).length;
 
-export const isLevelDone = (progress, packId, level) => levelsOf(progress, packId)[level - 1] === true;
+export const isLevelEarned = (progress, packId, level) => levelsOf(progress, packId)[level - 1] === true;
+export const isLevelPlaced = (progress, packId, level) => !isLevelEarned(progress, packId, level) && progress.packs[packId]?.placed?.[level - 1] === true;
+export const levelState = (progress, packId, level) => (isLevelEarned(progress, packId, level) ? 'earned' : isLevelPlaced(progress, packId, level) ? 'placed' : 'none');
+// Finished, earned or placed: what opens the next level, and what the old "done" meant.
+export const isLevelDone = (progress, packId, level) => isLevelEarned(progress, packId, level) || isLevelPlaced(progress, packId, level);
+
+// Keep an entry tidy: a placed level that is earned is just earned, and no `placed` at all when nothing is placed.
+function tidy(entry) {
+  if (!entry) return entry;
+  if (Array.isArray(entry.placed)) {
+    entry.placed = entry.levels.map((earned, i) => !earned && entry.placed[i] === true);
+    if (!entry.placed.some(Boolean)) delete entry.placed;
+  }
+  return entry;
+}
 
 // Level 1 is always open; each later level opens when the one before is done, or when the diagnostic opened it
 // (`open` is the highest level the diagnostic opened for that pack; the levels below it are open too).
@@ -34,7 +55,7 @@ export function isLevelUnlocked(progress, packId, level) {
   if (level < 1 || level > levels.length) return false;
   const first = firstOf(progress, packId);
   if (level < first || level > lastOf(progress, packId)) return false;
-  return level === first || levels[level - 2] === true || level <= (progress.packs[packId]?.open ?? 0);
+  return level === first || isLevelDone(progress, packId, level - 1) || level <= (progress.packs[packId]?.open ?? 0);
 }
 
 // The diagnostic opens levels up to `level` in a pack (never closing any that were already open).
@@ -47,19 +68,42 @@ export function openLevels(progress, packId, level) {
   return out;
 }
 
-// How many levels are finished in all (progress only ever grows, so a save that lowers it is a bug worth a backup).
-export const doneCount = (progress) => Object.values(progress?.packs ?? {}).reduce((n, e) => n + (e.levels ?? []).filter((d) => d === true).length, 0);
+// How many levels are finished in all, earned or placed (progress only ever grows, so a save that lowers it is a bug worth a backup;
+// a placed level turning earned keeps the count).
+export const doneCount = (progress) => Object.values(progress?.packs ?? {}).reduce((n, e) => n
+  + (e.levels ?? []).filter((d, i) => d === true || e.placed?.[i] === true).length, 0);
 
+// Every displayed level finished (earned or placed). (Gold, every displayed level earned, is engine/status.js.)
 export function isPackComplete(progress, packId) {
-  const levels = levelsOf(progress, packId).slice(firstOf(progress, packId) - 1, lastOf(progress, packId));
-  return levels.length > 0 && levels.every(Boolean);
+  const first = firstOf(progress, packId);
+  const last = lastOf(progress, packId);
+  return last >= first && levelsOf(progress, packId).length > 0
+    && Array.from({ length: last - first + 1 }, (_, i) => isLevelDone(progress, packId, first + i)).every(Boolean);
 }
 
+// Earned: the level was finished on this card (a placed level becomes earned; placed never overwrites earned).
 export function completeLevel(progress, packId, level) {
   const out = structuredClone(progress);
   const levels = out.packs[packId]?.levels;
   if (!levels || level < 1 || level > levels.length) throw new Error(`No level ${level} in ${packId}`);
   levels[level - 1] = true;
+  tidy(out.packs[packId]);
+  return out;
+}
+
+// Placed: the levels a card displays below `upTo` that are not earned (the placement quiz's levels below the one it starts the student
+// at, Build X). Only displayed levels: never a "See why it works" level, never a hidden one.
+export function placeLevels(progress, packId, upTo) {
+  const out = structuredClone(progress);
+  const entry = out.packs[packId];
+  if (!entry) return out;
+  const top = Math.min(upTo - 1, lastOf(out, packId));
+  for (let l = firstOf(out, packId); l <= top; l++) {
+    if (entry.levels[l - 1]) continue;
+    entry.placed = entry.placed ?? entry.levels.map(() => false);
+    entry.placed[l - 1] = true;
+  }
+  tidy(entry);
   return out;
 }
 
@@ -67,7 +111,7 @@ export function completeLevel(progress, packId, level) {
 export function nextLevel(progress, packId) {
   const levels = levelsOf(progress, packId);
   const first = firstOf(progress, packId);
-  const i = levels.findIndex((done, k) => k >= first - 1 && k < lastOf(progress, packId) && !done);
+  const i = levels.findIndex((_, k) => k >= first - 1 && k < lastOf(progress, packId) && !isLevelDone(progress, packId, k + 1));
   return i === -1 ? null : i + 1;
 }
 
@@ -75,7 +119,8 @@ export function nextLevel(progress, packId) {
 
 // Rebuild a progress object from anything read back (localStorage, a code):
 // keep only known packs and levels, fill the rest as unfinished.
-export function normalizeProgress(raw, packs) {
+// `legacyEarned`: a save from before Build X (no `v: 2`), whose legacy credit showed as finished, keeps it as earned.
+export function normalizeProgress(raw, packs, { legacyEarned = false } = {}) {
   const out = newProgress(packs);
   const src = raw && typeof raw === 'object' && raw.packs && typeof raw.packs === 'object' ? raw.packs : {};
   for (const [id, entry] of Object.entries(out.packs)) {
@@ -91,9 +136,12 @@ export function normalizeProgress(raw, packs) {
       if (Number.isInteger(open) && open >= 2) open += 1;
     }
     entry.levels = entry.levels.map((_, i) => levels[i] === true);
+    const placed = Array.isArray(src[id]?.placed) ? src[id].placed : [];
+    if (placed.some((x) => x === true)) entry.placed = entry.levels.map((_, i) => placed[i] === true);
+    tidy(entry);
     if (Number.isInteger(open) && open > 1) entry.open = Math.min(open, entry.levels.length);
   }
-  return withLegacyCredit(out);
+  return withLegacyCredit(out, { earned: legacyEarned });
 }
 
 // Add to both sides (revision 2.2) replaces One-step equations' first two levels and Switch sides' first four, so a student who
@@ -136,30 +184,40 @@ export function newTwoStepLevel(oldLevel) {
   return i + 1;
 }
 
-function creditPack(progress, id, rules) {
+// Since Build X the credit is PLACED (the student earns it with one problem on the level); before, it was written as finished, and those
+// levels stay earned. `earned` writes it as earned: a save from before Build X, whose credit showed as finished.
+function creditPack(progress, id, rules, earned) {
   const entry = progress.packs[id];
   if (!entry) return;
   let top = 0;
   rules.forEach((rule, i) => {
-    if (rule && rule(progress)) entry.levels[i] = true;
-    if (entry.levels[i]) top = i + 1;
+    if (rule && rule(progress) && !entry.levels[i]) {
+      if (earned) entry.levels[i] = true;
+      else { entry.placed = entry.placed ?? entry.levels.map(() => false); entry.placed[i] = true; }
+    }
+    if (entry.levels[i] || entry.placed?.[i]) top = i + 1;
   });
+  tidy(entry);
   if (top >= 2) entry.open = Math.max(entry.open ?? 0, top);
 }
 
-export function withLegacyCredit(progress) {
-  creditPack(progress, 'add-both', LEGACY_ADD_BOTH);
-  creditPack(progress, 'divide-it', LEGACY_DIVIDE);
-  creditPack(progress, 'two-step-equations', LEGACY_TWO_STEP);
+export function withLegacyCredit(progress, { earned = false } = {}) {
+  creditPack(progress, 'add-both', LEGACY_ADD_BOTH, earned);
+  creditPack(progress, 'divide-it', LEGACY_DIVIDE, earned);
+  creditPack(progress, 'two-step-equations', LEGACY_TWO_STEP, earned);
   return progress;
 }
 
-// Union of two progress objects: a level finished in either stays finished.
+// Union of two progress objects: a level finished in either stays finished, earned beats placed beats none.
 export function mergeProgress(a, b) {
   const out = structuredClone(a);
   for (const [id, entry] of Object.entries(out.packs)) {
     const other = b.packs[id]?.levels ?? [];
+    const otherPlaced = b.packs[id]?.placed ?? [];
+    const placed = entry.levels.map((_, i) => entry.placed?.[i] === true || otherPlaced[i] === true);
     entry.levels = entry.levels.map((done, i) => done || other[i] === true);
+    if (placed.some(Boolean)) entry.placed = placed;
+    tidy(entry);
     const open = Math.max(entry.open ?? 0, b.packs[id]?.open ?? 0);
     if (open > 1) entry.open = open;
   }
@@ -380,6 +438,9 @@ function toDigits(value, count) {
 
 const fromDigits = (digits) => digits.reduce((v, x) => v * BIG_BASE + BigInt(x), 0n);
 
+// A code carries EARNED levels only (Build X): a placed level is not in it, so a restored code gives back earned levels, and any legacy
+// credit is worked out again from the old cards' levels, as placed. What the placement quiz placed is not in a code (it is on the device
+// and in the class sheet's placed column); a teacher moving a student by code moves their earned levels.
 export function encodeProgress(progress, version = CODE_VERSION) {
   const layout = LAYOUTS[version];
   let bits = 0n;

@@ -3948,3 +3948,11 @@ button.lb-divbar.is-calc:hover, button.lb-divbar.is-calc:focus-visible { backgro
 .is-settled .lb-work .lx-xo > *, .lb-stack .lb-rowwrap.is-old .lb-work .lx-xo > * { animation: none; opacity: 0.25; }
 .lx-under .lx-xo .lb-plus { color: #0072b2; }
 @media (prefers-reduced-motion: reduce) { .lx-xo::after { animation: none; } .lb-work .lx-xo > * { animation: none; } }
+
+/* ---------- Build X: a placed level earned with one problem (a short note at the top of the play screen) ---------- */
+.earned-note {
+  position: fixed; top: 64px; left: 50%; transform: translateX(-50%); z-index: 60; margin: 0;
+  padding: 10px 24px; font-size: 22px; font-weight: 800; color: #2b2100; pointer-events: none;
+  background: linear-gradient(135deg, #fff6cf 0%, #f6d76b 45%, #fff2b8 60%, #e9bf3c 100%);
+  border: 2px solid #9a7400; border-radius: 999px; box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18);
+}

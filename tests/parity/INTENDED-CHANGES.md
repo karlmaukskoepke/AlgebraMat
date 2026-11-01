@@ -799,6 +799,27 @@ text size changed on any recorded screen (the font-size chooser was free to use 
 | `screen:dist-opening@1366x768` | the narrow panel: floating symbols left of five 58×46 buttons drawing the equation forms, the lights (dots) right of them, the by-hand and Solved for x rows | Five square buttons (76 px at 650, 88 px at 768), one plain symbol each, nothing beside them; no lights column, by-hand row or Solved for x row; the work column 44 px (650) / 32 px (768) wider | Part 1, 2 |
 | `screen:dist-opening@1366x650` | the narrow panel: floating symbols left of five 58×46 buttons drawing the equation forms, the lights (dots) right of them, the by-hand and Solved for x rows | Five square buttons (76 px at 650, 88 px at 768), one plain symbol each, nothing beside them; no lights column, by-hand row or Solved for x row; the work column 44 px (650) / 32 px (768) wider | Part 1, 2 |
 
+## Build X (2026-11-01): two Solve it sections, earned and placed levels, the main menu
+
+**Part 0b (two Solve it sections) and Part 3/4 (the main menu, metallic progress):** the home screen changes, and no home screen is in the
+screen set, so nothing here differs for the harness; the home screens are listed one by one in `docs/build-x/BUILD-X-REPORT.md`. Problems,
+the class-sheet records of the scripted runs and the play screens are unchanged (PASS).
+
+**Part 2 (earned and placed):** legacy credit made from now on is *placed*, not written as finished, so a code no longer carries it: the five
+states whose code did not read back the same before (the credit was added on reading, then written into the next code) now read back
+exactly. Their codes are unchanged. Three new states record placed levels (not in a code), one earned by a problem, and a merge.
+
+| Key | Before | After | Why |
+|---|---|---|---|
+| `savecode:one-step-L1` | reads back with Add to both sides Level 2 added (`roundTrip: false`) | reads back the same (`roundTrip: true`); the credit is placed, not in the code | Build X, Part 2 |
+| `savecode:one-step-L2` | the same, with Add to both sides Level 3 | the same | Build X, Part 2 |
+| `savecode:one-step-L3` | the same, with Divide it Level 2 | the same | Build X, Part 2 |
+| `savecode:one-step-L5` | the same, with Divide it Level 3 | the same | Build X, Part 2 |
+| `savecode:switch-L4` | the same, with Add to both sides Level 5 | the same | Build X, Part 2 |
+| `savecode:x-placed` | (new) | Add to both sides Levels 1-3 placed: the empty code, `MAT-P2222222222222222222222B` | a placed level is not in a code |
+| `savecode:x-placed-then-earned` | (new) | one of them earned: the code carries that one level | a level earned by one problem is |
+| `savecode:x-merged` | (new) | merged with a device that earned two levels: those two in the code | earned beats placed in a merge |
+
 <!-- history: nothing below this line is read by the harness -->
 
 ## History: screen changes accepted by the re-baseline of 2026-10-24 (Build O, Part 0)

@@ -362,13 +362,16 @@ function columnFor(sheet, key) {
   return head.length + 1;
 }
 
-// "groups-of-terms-3" is pack "groups-of-terms", level 3; "groups-of-terms-open" is how many levels the diagnostic opened.
+// "groups-of-terms-3" is pack "groups-of-terms", level 3; "groups-of-terms-open" is how many levels the diagnostic opened;
+// "add-both-placed" lists the levels the placement quiz (or a level finished on an older card) credited but the student has not yet
+// earned on the card, as level numbers ("2 3"). A level column TRUE means earned (Build X); it is never also listed as placed.
 function splitKey(key) {
   var at = String(key).lastIndexOf('-');
   if (at < 1) return null;
   var last = key.slice(at + 1);
   var pack = key.slice(0, at);
   if (last === 'open') return { pack: pack, open: true };
+  if (last === 'placed') return { pack: pack, placed: true };
   return /^\d+$/.test(last) ? { pack: pack, level: Number(last) } : null;
 }
 
@@ -382,16 +385,30 @@ function readProgress(sheet, row) {
     if (!part) return;
     var entry = packs[part.pack] || (packs[part.pack] = { levels: [] });
     if (part.open) { if (Number(values[i]) > 1) entry.open = Number(values[i]); return; }
+    if (part.placed) { entry.placedList = placedLevels(values[i]); return; }
     entry.levels[part.level - 1] = values[i] === true || values[i] === 'TRUE';
   });
   Object.keys(packs).forEach(function (p) {
     var levels = packs[p].levels;
     for (var i = 0; i < levels.length; i++) levels[i] = levels[i] === true;
+    var list = packs[p].placedList;
+    delete packs[p].placedList;
+    if (list && list.length) {
+      var placed = [];
+      for (var k = 0; k < Math.max(levels.length, Math.max.apply(null, list)); k++) placed.push(list.indexOf(k + 1) >= 0 && levels[k] !== true);
+      if (placed.some(function (x) { return x; })) packs[p].placed = placed;
+    }
   });
   return { packs: packs };
 }
 
-// Merge what the phone sent into the student's row: a level done on either side stays done.
+// The level numbers in a placed cell ("2 3", or a lone 2 that the sheet stored as a number).
+function placedLevels(value) {
+  return String(value === null || value === undefined ? '' : value).split(/[^0-9]+/).filter(function (x) { return x !== ''; })
+    .map(Number).filter(function (n) { return n >= 1 && n <= LIMITS.levels; });
+}
+
+// Merge what the phone sent into the student's row: a level done on either side stays done. Earned beats placed beats none.
 function syncProgress(ss, who, sent, now) {
   var sheet = tab(ss, TABS.progress);
   var row = findRow(sheet, who.id);
@@ -414,6 +431,21 @@ function syncProgress(ss, who, sent, now) {
       var ocell = sheet.getRange(row, ocol);
       if (!(Number(ocell.getValue()) >= entry.open)) ocell.setValue(entry.open);
     }
+    // placed levels (Build X): the union of what was there and what was sent, less any level now earned (its column TRUE)
+    var sentPlaced = Array.isArray(entry.placed) ? entry.placed.slice(0, LIMITS.levels) : [];
+    var head = headers(sheet);
+    var pat = head.indexOf(pack + '-placed');
+    if (!sentPlaced.some(function (x) { return x === true; }) && pat < 0) return;
+    var pcell = sheet.getRange(row, columnFor(sheet, pack + '-placed'));
+    var list = placedLevels(pcell.getValue());
+    sentPlaced.forEach(function (p, i) { if (p === true && list.indexOf(i + 1) < 0) list.push(i + 1); });
+    head = headers(sheet);
+    list = list.filter(function (n) {
+      var at = head.indexOf(pack + '-' + n);
+      return !(at >= 0 && sheet.getRange(row, at + 1).getValue() === true);
+    }).sort(function (a, b) { return a - b; });
+    var text = list.join(' ');
+    if (String(pcell.getValue()) !== text) pcell.setValue(text);
   });
   sheet.getRange(row, 4).setValue(now);
   return readProgress(sheet, row);
