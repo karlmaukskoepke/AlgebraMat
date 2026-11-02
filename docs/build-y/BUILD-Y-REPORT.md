@@ -127,6 +127,7 @@ nothing scrolls.
   `y-both-sides`) and their walks; 12 earlier items updated for the column (`ab-xo-gentle`, `w-xo-add`, `w-xo-drag`, `s-drag-right`,
   `s-first-drag-distribute`, `s-add-options`, `h-enter-go`, and the students' items for Add to both sides, Two-step equations, Variables
   on both sides, Distribute more, Distribute, combine, solve and Strange solutions). Walked on the live site: see the summary.
-- Pictures in `docs/build-y/` at 1366×768 and 1366×650: the preview on three equations (`y-preview-both`, `y-preview-one-side`,
+- Pictures in `docs/build-y/` at 1366×768 and 1366×650 (and each new item's end state, walked on the live site, `y-stack-*`, `y-no-number*`,
+  `y-either-box`, `y-partial`, `y-two-step`, `y-both-sides`): the preview on three equations (`y-preview-both`, `y-preview-one-side`,
   `y-preview-group`), the boxes typed in either box (`y-typed-right-box`, `y-typed-left-box`), the cross-out (`y-crossout`), a side with no
   number (`y-no-number-side`), the worst case (`y-worst-case`).
