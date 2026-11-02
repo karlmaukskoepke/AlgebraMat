@@ -468,7 +468,8 @@ const WALKS = {
   },
   async 'x-shine'(w) {
     await w.start();
-    const shining = () => w.page.$$eval('.is-shining', (els) => els.map((e) => e.dataset.card ?? e.dataset.section ?? e.className));
+    // (what shines on screen: a closed popup keeps its rows' shine until it opens, Build AB)
+    const shining = () => w.page.$$eval('.is-shining', (els) => els.filter((e) => !e.closest('.lv-pop[hidden]')).map((e) => e.dataset.card ?? e.dataset.section ?? e.className));
     const s1 = await shining();
     for (const want of ['strange-solutions', 'divide-it', 'solve-plus']) if (!s1.includes(want)) throw new Error(`${want} should shine: ${s1}`);
     await w.shot('x-shine-768');

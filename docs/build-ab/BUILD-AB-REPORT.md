@@ -8,6 +8,8 @@ Features to check: 9 new items (the gentler cross-out; the popup by pointing, by
 locked level; near the right edge; Find my level; Timed challenges). Updated: 3 cross-out items (`w-xo-add`, `w-xo-drag`, `w-xo-stacked`:
 their words), `x-two-solve-sections`, `m-placement-old` and `m-practice` (they clicked a section title). Removed: Build X's three
 expanding-title items (`x-expand-point`, `x-expand-keys`, `x-expand-tap`), since that feature is retired (its entry is under Retired).
+**All 188 items pass on the live site.** The first full walk failed one, `x-shine`: its walk counted the shine kept inside a closed popup
+(Divide it's Level 1 now shines when its popup first opens, on purpose). The walk now counts what is on screen, and the item says so.
 
 **What this build touched that Count it and Build it appear on:** the shared home screen only: their panels get the chevrons and a footer,
 their card names a popup, and their card pages lose the ⏱ challenge buttons (the challenges are in Count it's footer now). Nothing in how
@@ -103,3 +105,5 @@ their cards play changed. Class-sheet words, save codes' meaning, the stored for
   screens: 12 of the 70 differ from `main` before this build, each under the 0.2% tolerance, all Add cancel marks (listed one by one in
   `INTENDED-CHANGES.md`): `add-helpful-move`, `add-end`, `add-alone-teach`, `add-alone-stuck-1`, `-2`, `-3`, each at 1366×768 and
   1366×650. No home screen is in the screen set; the home screen differences are listed one by one there too.
+- **GitHub's checks:** the Part 1 and Parts 3-4 pushes went red on the real-browser sweeps job (the cross-out 1.4 px off on GitHub's
+  machine, see Part 1; publishing was not held up). After the baseline fix every job is green.

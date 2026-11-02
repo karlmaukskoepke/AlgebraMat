@@ -218,7 +218,7 @@
         "Reload the page (the circular arrow at the top of the browser), and watch again.",
         "Open the button again, and press any key (or click anywhere) as soon as the page shows."
       ],
-      "see": "Strange solutions (now gold) and Divide it (a level turned from silver to gold) shine once: a light band sweeps across them in about a second and a half, and the Solve it Plus panel glows gold once (“Every card gold”). After the reload nothing shines: it only shines the first time. A key or a click stops the shine at once."
+      "see": "Strange solutions (now gold) and Divide it (a level turned from silver to gold) shine once: a light band sweeps across them in about a second and a half, and the Solve it Plus panel glows gold once (“Every card gold”). After the reload nothing shines: it only shines the first time. A key or a click stops the shine at once. (Since Build AB, Divide it’s Level 1 also shines once inside its popup of levels, the first time you point at Divide it.)"
     },
     {
       "id": "x-reduced-motion",
