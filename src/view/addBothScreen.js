@@ -189,6 +189,17 @@ const workEls = (items, negIds = [], judged = false) => {
     const amount = html('span', 'lx-under', [html('span', 'lb-plus is-added', ['+']), under.struck ? crossOut([xEl]) : xEl]);
     return term ? els.map((e) => (e === term ? stackCol(e, amount) : e)) : [...els, amount];
   }
+  // a number added in a column (Build Y, Karl 2026-11-01): the amount is written under the side's first number, its sign beside it; a side
+  // with no number keeps it at the end of its line, as before. Worked out here, from the row as stored (the stored move is unchanged).
+  const num = numStack(items);
+  if (num) {
+    const rest = items.filter((t) => t !== num.amount);
+    const els = workEls(rest, negIds, true);                       // (the cancelling pair was judged with the amount in it)
+    const term = [...els].filter((e) => !e.classList.contains('lb-plus'))[num.at];
+    const nEl = html('span', `lb-num is-added${num.amount.struck ? ' is-struck' : ''}`, [signed(num.amount.v)]);
+    const amount = html('span', 'lx-under', [html('span', 'lb-plus is-added', ['+']), num.amount.struck ? crossOut([nEl]) : nEl]);
+    return stackNum(els, term, amount);
+  }
   items.forEach((t, i) => {
     if (t.term) {                                                   // (a term other than a number or x: a parenthesis, a fraction; Build M)
       const { op, body } = termText(t.term, i, negIds.includes(t.term.id));
@@ -207,12 +218,33 @@ const workEls = (items, negIds = [], judged = false) => {
   return out;
 };
 
+// A number added to a side of a work row (Build Y): the added amount and the place of the side's first number among the other terms, or
+// null when the amount is not a number or the side has no number (then it stays at the end of the line).
+const isNumItem = (t) => !t.added && !t.x && (t.term ? t.term.kind === 'num' : typeof t.v === 'number');
+function numStack(items) {
+  const amount = items.find((t) => t.added && !t.x && !t.term && typeof t.v === 'number' && !Number.isInteger(t.under));
+  if (!amount) return null;
+  const at = items.filter((t) => t !== amount).findIndex(isNumItem);
+  return at >= 0 ? { amount, at } : null;
+}
+export const workStacks = (work) => Boolean(work?.stack) || Boolean(numStack(work?.left ?? [])) || Boolean(numStack(work?.right ?? []));
+
 // A term with what is added to it written underneath, like adding in a column (Build T, Part 5): the x of the amount right under the x
 // of the term; the column is as wide as the wider of the two.
 function stackCol(term, under) {
   const col = html('span', 'lx-col', []);
   col.append(term, under);
   return col;
+}
+// A number's column (Build Y): the term with its own sign on top (`+ 8`, as it is written by hand), the amount under it, digits lined up
+// on the right. `els` is a side's elements; `term` the number's element; its sign, if it has one, is the element just before it.
+function stackNum(els, term, under) {
+  const at = els.indexOf(term);
+  const op = at > 0 && els[at - 1].classList.contains('lb-plus') ? els[at - 1] : null;
+  const top = op ? html('span', 'lx-signed', [op, term]) : term;
+  const col = stackCol(top, under);
+  col.classList.add('is-num');
+  return els.flatMap((e) => (e === op ? [] : e === term ? [col] : [e]));
 }
 
 function eqRow(leftEls, rightEls, cls = '', attrs = {}) {
@@ -350,7 +382,7 @@ function rowsOf(s) {
       return html('div', `${cls} has-work`, [w, ...(line ? [line] : [])]);
     }
     if (row.type === 'work') {
-      const stack = row.work.stack ? ' is-stacked' : '';                // (an x-term added in a column, Build T, Part 5)
+      const stack = workStacks(row.work) ? ' is-stacked' : '';          // (an x-term added in a column, Build T, Part 5; a number, Build Y)
       return html('div', `${cls}${stack ? ' is-stackwork' : ''}`, [eqRow(workEls(row.work.left, s.lx.negIds), workEls(row.work.right, s.lx.negIds), `lb-work${stack}${eqClass(charsOf([...row.work.left, ...row.work.right]))}`, { 'aria-hidden': 'true' })]);
     }
     // the equation the value goes back into: the original, or, for a wrong guess after a move, the current one (the loop's rule)
@@ -496,20 +528,15 @@ function ghostRow(s) {
   if (optKind) slot.classList.add('is-optpreview');
   const typing = open && amountMode(s) && !optKind;
   const text = open ? s.amountEntry : '';
-  // the left box is the input; the right box mirrors it as typed
-  const left = optKind ? html('span', `lx-box is-mirror${text ? '' : ' is-empty'}`, [shown(text)], { 'aria-hidden': 'true' }) : html('button', `lx-box${typing ? ' is-focus' : ''}${s.ui?.shake ? ' is-shake' : ''}${text ? '' : ' is-empty'}${typing && !text ? ' is-blink' : ''}`, [shown(text)], {
-    type: 'button', 'data-action': 'focus', 'data-target': 'amount', 'data-blank': '1', 'data-fk': 'blank', 'data-lx-field': '1',
-    'aria-label': 'The amount to add to both sides', ...(open ? {} : { tabindex: '-1' }),
-  });
-  if (typing && s.ui?.focus === 'blank') left.dataset.lxFocus = '1';      // (only while the keys go to it: Build N)
-  const right = html('span', `lx-box is-mirror${text ? '' : ' is-empty'}`, [shown(text)], { 'aria-hidden': 'true' });
   const plus = () => html('span', 'lb-plus lx-plus', ['+']);
   // an x-term (Variables on both sides, Build R): the x printed after each box, so the number in front of x is typed with its sign
   const xKind = optKind ? optKind === 'x' : open ? s.addKind === 'x' : s.ui?.preview === 'addX';
   const xAfter = () => (xKind ? [html('span', 'lb-x lx-addx', ['x'])] : []);
-  if (xKind) {
+  {
     // an x-term is added in a column (Build T, Part 5): a box under the first x-term of each side (its first term, where it has none),
     // the x printed after it. Either box takes the keys; the other shows the same amount (one amount, both sides). Tab goes between them.
+    // A number is added in a column too (Build Y, Karl 2026-11-01): its box under the first number of each side, or at the end of a side
+    // with no number, in line; the boxes behave as the x-term's do.
     slot.classList.add('is-stacked');
     const side = s.amountSide === 'right' ? 'right' : 'left';
     const boxOf = (k) => {
@@ -517,25 +544,24 @@ function ghostRow(s) {
       const on = typing && k === side;
       const b = html('button', `lx-box is-stackbox${on ? ' is-focus' : ''}${on && s.ui?.shake ? ' is-shake' : ''}${text ? '' : ' is-empty'}${on && !text ? ' is-blink' : ''}`, [shown(text)], {
         type: 'button', 'data-action': 'focus', 'data-target': 'amount', 'data-side': k, 'data-blank': '1', 'data-fk': k === 'left' ? 'blank' : 'blank:right', 'data-lx-field': '1',
-        'aria-label': `The number in front of x, to add an x-term to both sides (${k === 'left' ? 'left' : 'right'} side)`,
+        'aria-label': xKind ? `The number in front of x, to add an x-term to both sides (${k === 'left' ? 'left' : 'right'} side)` : `The amount to add to both sides (${k === 'left' ? 'left' : 'right'} side)`,
       });
       if (on && (s.ui?.focus === 'blank' || s.ui?.focus === `blank:${k}`)) b.dataset.lxFocus = '1';
       return b;
     };
     const stacked = (k) => {
       const els = sideEls(s.board[k], s.lx.negIds);
-      const at = stackAt(s.board[k]);
+      const at = xKind ? stackAt(s.board[k]) : s.board[k].findIndex((t) => t.kind === 'num');
       const terms = els.filter((e) => !e.classList.contains('lb-plus'));
+      if (!xKind && at < 0) return [...els, plus(), boxOf(k)];         // (no number on this side: at the end of its line, Build Y)
       const under = html('span', 'lx-under', [plus(), boxOf(k), ...xAfter()]);
+      if (!xKind) return stackNum(els, terms[at], under);
       return terms[at] ? els.map((e) => (e === terms[at] ? stackCol(e, under) : e)) : [...els, under];
     };
     slot.append(eqRow(stacked('left'), stacked('right'), 'lx-ghosteq is-stacked'));
     if (!open) slot.setAttribute('aria-hidden', 'true');
     return slot;
   }
-  slot.append(eqRow([...sideEls(s.board.left, s.lx.negIds), plus(), left, ...xAfter()], [...sideEls(s.board.right, s.lx.negIds), plus(), right, ...xAfter()], 'lx-ghosteq'));
-  if (!open) slot.setAttribute('aria-hidden', 'true');
-  return slot;
 }
 
 // ---------- the work stack, with the rule lines of the moves applied ----------

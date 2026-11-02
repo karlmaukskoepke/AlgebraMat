@@ -194,8 +194,8 @@ function makeLoop({ id, family = 'both', own = null }) {
     if (mine !== undefined) return mine;
     if (isTyping(action)) {
       if (s.sub || !amountKeys(s)) return undefined;
-      // (a box clicked to retype: the first key replaces what is there, Build T)
-      const entry = typeInto(s.amountSel && action.type !== 'toggleSign' ? '' : s.amountEntry, action, 'integer');
+      // (a box clicked to retype: the first key replaces what is there, a minus too: Build T; since Build Y the minus starts afresh)
+      const entry = typeInto(s.amountSel ? '' : s.amountEntry, action, 'integer');
       s.amountSel = false;
       if (entry === s.amountEntry) return 'ignore';
       s.amountEntry = entry;

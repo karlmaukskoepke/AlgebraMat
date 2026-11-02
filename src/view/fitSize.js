@@ -28,6 +28,10 @@ function worstStates(path) {
   const xs = (side) => (side ?? []).some((t) => t.kind === 'x');
   const both = [...path].filter((s) => s.stage === 'moves' && !s.sub && xs(s.board?.left) && xs(s.board?.right)).sort((a, b) => rowsOf(b) - rowsOf(a))[0];
   if (both) pick.add({ ...both, menu: 'add', addKind: 'x', typing: null, amountEntry: '', spot: null });
+  // Add's number option open, its boxes stacked under the numbers (Build Y: a row one line taller), on the fullest state with a number
+  const nums = (side) => (side ?? []).some((t) => t.kind === 'num');
+  const num = [...path].filter((s) => s.stage === 'moves' && !s.sub && !s.scaffold && (nums(s.board?.left) || nums(s.board?.right))).sort((a, b) => rowsOf(b) - rowsOf(a))[0];
+  if (num) pick.add({ ...num, menu: 'add', addKind: 'num', typing: null, amountEntry: '', spot: null });
   return [...pick];
 }
 
@@ -53,11 +57,17 @@ function fitsAcross(root) {
 
 // While the value waits to be dragged into x, its pop-up must not cover x = (the value is dragged from there): it goes in the empty space
 // under the rows (beside the checking space), or under the Mat, using the page's margin down to the window's edge (view/spotlight.js).
+// (Build Y: a number's column makes its row one line taller. That line is not counted here: since the fix after Build V the note sits low
+// in the empty check space beside the rows, never under them, so the column does not take its room; counted, it would shrink the text on
+// Add to both sides at 1366×650 for nothing. Every row without a number's column is measured exactly as before.)
+const columnExtra = (probe) => [...probe.querySelectorAll('.lb-stack .lb-rowwrap')].reduce((sum, row) => sum + Math.max(0, ...[...row.querySelectorAll('.lx-col.is-num')]
+  .map((col) => col.getBoundingClientRect().height - (col.firstElementChild?.getBoundingClientRect().height ?? 0))), 0);
 function popupRoom(probe, top) {
   const work = probe.querySelector('.sv-work')?.getBoundingClientRect();
-  const last = Math.max(0, ...[...probe.querySelectorAll('.lb-stack .lb-rowwrap')].map((r) => r.getBoundingClientRect().bottom));
+  const extra = columnExtra(probe);
+  const last = Math.max(0, ...[...probe.querySelectorAll('.lb-stack .lb-rowwrap')].map((r) => r.getBoundingClientRect().bottom)) - extra;
   if (work && last && work.bottom - last >= POPUP_ROOM) return true;
-  return top + probe.scrollHeight + POPUP_ROOM <= window.innerHeight + 1;
+  return top + probe.scrollHeight - extra + POPUP_ROOM <= window.innerHeight + 1;
 }
 
 function setSize(el, [eq, work]) {

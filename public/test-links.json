@@ -3,6 +3,122 @@
   "updated": "2026-11-01",
   "checks": [
     {
+      "id": "y-stack-add",
+      "name": "Stacked numbers: Add to both sides, x on the left",
+      "build": "Build Y",
+      "link": {
+        "label": "Open Add to both sides · Level 1",
+        "query": "?pack=add-both&level=2&seed=7&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Add to both sides, Level 1, on x + 8 = 11.",
+        "Point at Add (+) and look at the row under the equation.",
+        "Click Add (+), type −8 and press Enter.",
+        "Watch the row for two seconds."
+      ],
+      "see": "Pointing at Add shows a dashed box under the +8 and another under the 11, each with a + in front, like adding in a column. After Enter the row has + −8 written under the +8 and under the 11; the +8 and the −8 under it are each crossed out by one thin red stroke; the 11 and its −8 are left for you. The next row reads x = 11 − 8."
+    },
+    {
+      "id": "y-stack-right",
+      "name": "Stacked numbers: x on the right, then traded",
+      "build": "Build Y",
+      "link": {
+        "label": "Open Add to both sides · Level 4",
+        "query": "?pack=add-both&level=5&seed=1&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Add to both sides, Level 4, on −2 = x − 6.",
+        "Point at Add (+) and look at the row under the equation.",
+        "Click Trade places (the two curved arrows). Then click Add (+), type 6 and press Enter.",
+        "Watch the row for two seconds."
+      ],
+      "see": "Pointing at Add shows a dashed box under the −2 and another under the −6 (x stays where it is). This card asks you to put x on the left first, so Trade places writes x − 6 = −2. After Enter, 6 is written under the −6 and under the −2 (+ 6 each time); the −6 and the 6 under it are crossed out. The next row reads x = −2 + 6."
+    },
+    {
+      "id": "y-no-number",
+      "name": "Stacked numbers: a side with no number",
+      "build": "Build Y",
+      "link": {
+        "label": "Open Variables on both sides · Level 1",
+        "query": "?pack=variables-both-sides&level=1&seed=7&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Variables on both sides, Level 1, on 6x = 4x + 10.",
+        "Click Add (+), then point at the first option (+ ▢ = + ▢) without clicking.",
+        "Click that option, type −10 and press Enter.",
+        "Watch the row for two seconds."
+      ],
+      "see": "Pointing at the option shows where the number will go: a dashed box at the end of 6x (the left side has no number) and a dashed box under the 10. After Enter the row reads 6x − 10 on the left, in line, and on the right −10 under the 10, the 10 and the −10 crossed out. The next row reads 6x − 10 = 4x."
+    },
+    {
+      "id": "y-either-box",
+      "name": "Stacked numbers: type in either box",
+      "build": "Build Y",
+      "link": {
+        "label": "Open Add to both sides · Level 1",
+        "query": "?pack=add-both&level=2&seed=7&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Add to both sides, Level 1, on x + 8 = 11.",
+        "Click Add (+). Click the box under the 11 and type −8.",
+        "Click the box under the +8 and type −3.",
+        "Press Tab, then type −8 and press Enter."
+      ],
+      "see": "Whatever you type in one box shows in the other at once (−8 in both). Clicking a box lets you type over it: both boxes then say −3. Tab moves the outline to the box under the 11, where −8 replaces the −3 in both. Enter applies it: the row shows −8 under the +8 and under the 11, the +8 and −8 crossed out, then x = 11 − 8."
+    },
+    {
+      "id": "y-partial",
+      "name": "Stacked numbers: an amount that only partly cancels",
+      "build": "Build Y",
+      "link": {
+        "label": "Open Add to both sides · Level 1",
+        "query": "?pack=add-both&level=2&seed=7&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Add to both sides, Level 1, on x + 8 = 11.",
+        "Click Add (+), type −3 and press Enter.",
+        "Wait two seconds."
+      ],
+      "see": "The row shows −3 under the +8 and under the 11, with nothing crossed out. The +8 and the −3 under it stay lit, the 5 they make is outlined in red with “still here”, and a pop-up says “+8 was only partially canceled by the −3 you added. What value instead of −3 would have completely canceled the +8?” Undo is lit."
+    },
+    {
+      "id": "y-two-step",
+      "name": "Stacked numbers: Two-step equations",
+      "build": "Build Y",
+      "link": {
+        "label": "Open Two-step equations · Level 1",
+        "query": "?pack=two-step-equations&level=1&seed=7&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Two-step equations, Level 1, on 2x + 4 = 16.",
+        "Click Add (+), type −4 and press Enter.",
+        "Watch the row for two seconds."
+      ],
+      "see": "−4 is written under the +4 and under the 16. The +4 and the −4 under it are crossed out. The next row reads 2x = 16 − 4."
+    },
+    {
+      "id": "y-both-sides",
+      "name": "Stacked numbers: Variables on both sides, a number on each side",
+      "build": "Build Y",
+      "link": {
+        "label": "Open Variables on both sides · Level 2",
+        "query": "?pack=variables-both-sides&level=2&seed=7&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Variables on both sides, Level 2, on 8x − 14 = 5x + 10.",
+        "Click Add (+), then the first option (+ ▢ = + ▢). Type 14 and press Enter.",
+        "Watch the row for two seconds."
+      ],
+      "see": "14 is written under the −14 on the left and under the 10 on the right (+ 14 each time). The −14 and the 14 under it are crossed out; the 10 and its 14 are left for you. The next row reads 8x = 5x + 10 + 14."
+    },
+    {
       "id": "ab-pop-point",
       "name": "Level popups: pointing at a card name shows its levels",
       "build": "Build AB",
@@ -148,9 +264,9 @@
       "steps": [
         "Click the button. It opens Add to both sides, Level 5, on x − 13 = −5.",
         "Click Add (+), type 13 and press Enter.",
-        "Watch the row x − 13 + 13 = −5 + 13 for two seconds."
+        "Watch the row for two seconds."
       ],
-      "see": "The −13 and the +13 are each crossed out by one thin red stroke at a gentle slant, lower left to upper right, through the middle of the whole term: it starts just left of the sign and ends just right of the 3, never between the minus and the 1 and never below the number. The digits stay readable on top of the stroke. The next row reads x = −5 + 13."
+      "see": "+ 13 is written under the −13 and under the −5 (since Build Y, a number is added in a column). The −13 and the 13 under it are each crossed out by one thin red stroke at a gentle slant, lower left to upper right, through the middle of the whole term: through the minus and both digits of −13, never between the minus and the 1 and never below the number. The digits stay readable on top of the stroke. The next row reads x = −5 + 13."
     },
     {
       "id": "x-card-name",
@@ -466,7 +582,7 @@
         "Click Add (+), type −8 and press Enter.",
         "Watch the row x + 8 − 8 = 11 − 8 for two seconds."
       ],
-      "see": "The +8 and the −8 are each crossed out by one thin red stroke from the lower left to the upper right (a gentle slant, since Build AB), through the middle of the sign and the 8. Then the two 8s fade; the strokes stay. The next row reads x = 11 − 8."
+      "see": "−8 is written under the +8 and under the 11 (a number is added in a column since Build Y). The +8 and the −8 under it are each crossed out by one thin red stroke from the lower left to the upper right (a gentle slant, since Build AB), through the middle of the term. Then the two 8s fade; the strokes stay. The next row reads x = 11 − 8."
     },
     {
       "id": "w-xo-drag",
@@ -482,7 +598,7 @@
         "Drag the 4 across the = to the right side and let go.",
         "Watch the new row for two seconds."
       ],
-      "see": "The row reads 2x + 4 − 4 = 16 − 4, with the +4 and the −4 on the left each crossed out by one thin red stroke (lower left to upper right, a gentle slant) through the middle of the sign and the 4. Then 2x = 16 − 4."
+      "see": "The row has −4 written under the +4 and under the 16 (in a column, since Build Y), with the +4 and the −4 under it each crossed out by one thin red stroke (lower left to upper right, a gentle slant) through the middle of the term. Then 2x = 16 − 4."
     },
     {
       "id": "w-xo-stacked",
@@ -659,7 +775,7 @@
         "Press Undo. Mistake 5, upside down: click the left box, type −2/5, press Enter, drag it onto each x and press Enter for each line. A good response ends Not balanced and adds “Check which number goes on top: x is the number divided by the number in front of x.”",
         "Press Undo. Mistake 6, press I’m stuck now. A good response: “Simplify −15/6: divide the top and bottom by the same number, then type x.”"
       ],
-      "see": "Every mistake gets an answer in its own numbers: the unsimplified fraction and the decimal are gentle notes (nothing red, nothing checked), a wrong value is checked and said plainly, an upside-down one gets one more sentence, and I’m stuck points at simplifying. The answer is never shown."
+      "see": "Every mistake gets an answer in its own numbers: the unsimplified fraction and the decimal are gentle notes (nothing red, nothing checked), a wrong value is checked and said plainly, an upside-down one gets one more sentence, and I’m stuck points at simplifying. The answer is never shown. (Since Build Y every number added is written in a column: under the first number of each side, at the end of a side with none.)"
     },
     {
       "id": "u-level-1",
@@ -836,7 +952,7 @@
         "Mistake 3, multiply only the first piece: type −1, press Enter, type −8 (the second piece copied as it was), press Enter. A good response says “−1 · −8 is not −8. The minus is −1: multiply this piece by −1 too.” Click Undo, type −1, press Enter, type 8, press Enter.",
         "Mistake 4, do nothing for 11 seconds, then click I’m stuck. A good response: I’m stuck flashes after 10 seconds, and the hint says “9x and −x are like terms. Drag one onto the other to combine them.” with the two x-terms lit."
       ],
-      "see": "Every mistake is caught where it happens, in the student’s own numbers: the bare minus goes back until it is tapped, a lost −1 gets its own words, Undo goes back to the boxes, and I’m stuck gives the reminder for the screen as it is (combine the x-terms). Nothing is worked out for you."
+      "see": "Every mistake is caught where it happens, in the student’s own numbers: the bare minus goes back until it is tapped, a lost −1 gets its own words, Undo goes back to the boxes, and I’m stuck gives the reminder for the screen as it is (combine the x-terms). Nothing is worked out for you. (Since Build Y every number added is written in a column: under the first number of each side, at the end of a side with none.)"
     },
     {
       "id": "u-no-times",
@@ -1324,7 +1440,7 @@
         "Drag the 4x across the = onto the right side. Drag the −4x onto the 8x, type 4x and press Enter. The newest row reads 11 = 4x − 1.",
         "Straight away (without pressing anything else), drag the −1 across the = onto the left side and let go."
       ],
-      "see": "The −1 crosses on the first try, turning into +1 as it goes: the next rows read 11 + 1 = 4x − 1 + 1 (the −1 and +1 on the right struck through), then 11 + 1 = 4x. Before, this drag did nothing whenever the move before it still showed its work, which is what happened on 8 = 5x + 3."
+      "see": "The −1 crosses on the first try, turning into +1 as it goes: the next row writes 1 under the 11 and under the −1 (+ 1, in a column since Build Y), the −1 and the 1 under it struck through, then 11 + 1 = 4x. Before, this drag did nothing whenever the move before it still showed its work, which is what happened on 8 = 5x + 3."
     },
     {
       "id": "s-first-drag",
@@ -1356,7 +1472,7 @@
         "Drag the 3 onto the parenthesis. Type 3, press Enter, type 6, press Enter. The row reads 3x + 6 = 15.",
         "Without pressing Next, drag the 6 across the = onto the right side and let go."
       ],
-      "see": "The 6 crosses on the first drag and turns into −6: the rows read 3x + 6 − 6 = 15 − 6 with the two 6s on the left struck through, then 3x = 15 − 6."
+      "see": "The 6 crosses on the first drag and turns into −6: −6 is written under the +6 and under the 15 (in a column, since Build Y), the two 6s on the left struck through, then 3x = 15 − 6."
     },
     {
       "id": "s-flip-crossoff",
@@ -1389,7 +1505,7 @@
         "Point at the second option, + ▢x, without clicking.",
         "Point at the first option, + ▢, without clicking."
       ],
-      "see": "Pointing at + ▢x draws a grey copy of the row with a dashed box under the 8x on the left and under the 5x on the right, each with an x after it (like adding in a column). Pointing at + ▢ draws the row with a dashed box at the end of each side and no x. Nothing is added until you type a number and press Enter."
+      "see": "Pointing at + ▢x draws a grey copy of the row with a dashed box under the 8x on the left and under the 5x on the right, each with an x after it (like adding in a column). Pointing at + ▢ draws the row with a dashed box under the −14 and under the 10 and no x (numbers are added in a column too, since Build Y). Nothing is added until you type a number and press Enter."
     },
     {
       "id": "r-level-1",
@@ -1582,7 +1698,7 @@
         "Last, pick a term up and drop it back, watching for anything redrawing: press on the 5 in the newest row, lift it a little, and let go where it was.",
         "Mistake 4, pressing I’m stuck on a fraction-bar row: click Add, type −5 and press Enter. Drag the 14 onto the −5, type 9 and press Enter. Click Divide (÷), type 3 and press Enter. Press I’m stuck."
       ],
-      "see": "Each mistake gets a calm answer in the student’s own numbers, Undo is the way out of each error, and the hint after Undo points at the next move. x = never takes a value while x is on both sides. Nothing is worked out for you. Picking the term up leaves a dashed gap where it was and nothing else moves; letting go puts it back. Through the whole item no row you have already seen vanishes, fades in again, plays its cross-off again or changes size. Mistake 4: I’m stuck at x = (9) over 3 says “x is 9 divided by 3. Work it out, then type x.”, in division words, never “multiply by ⅓”."
+      "see": "Each mistake gets a calm answer in the student’s own numbers, Undo is the way out of each error, and the hint after Undo points at the next move. x = never takes a value while x is on both sides. Nothing is worked out for you. Picking the term up leaves a dashed gap where it was and nothing else moves; letting go puts it back. Through the whole item no row you have already seen vanishes, fades in again, plays its cross-off again or changes size. Mistake 4: I’m stuck at x = (9) over 3 says “x is 9 divided by 3. Work it out, then type x.”, in division words, never “multiply by ⅓”. (Since Build Y every number added is written in a column: under the first number of each side, at the end of a side with none.)"
     },
     {
       "id": "p-combine-nudge",
@@ -2282,7 +2398,7 @@
         "Last, pick a term up and drop it back, watching for anything redrawing: press on the 17 in the newest row, lift it a little, and let go where it was.",
         "Mistake 7, pressing I’m stuck on a fraction-bar row: drag the 17 onto the −11, type 6 and press Enter. Click Divide (÷), type 2 and press Enter. Press I’m stuck."
       ],
-      "see": "I’m stuck flashes after 10 seconds, and then lights the 2 and the parenthesis (“Drag the 2 onto the parenthesis…”). The half-multiplied product is lit with “2 · 3 is not 3. Multiply this piece too.”; After Undo you are back in the two empty boxes, the labels 2 · x and 2 · 3 showing, with “Try again: type what 2 · x and 2 · 3 make, one in each box.” Divide says “That move works once each side is one term.” Adding 5 is lit as “did not eliminate the term”. The wrong sum says “5 + 6 is not 12.”, and after Undo its box is open again and empty, the 5 and the 6 still lit, with “Try again: what is 5 + 6? Type it in the box.” Mistake 6: after Undo the Add box is open again; the −11 you type goes straight into it, Enter writes 11 + 2x − 11 = 17 − 11, and Next writes 2x = 17 − 11. Waiting at 2x = 17 − 11 nudges the 17 and the −11. Picking the term up leaves a dashed gap where it was and nothing else moves; letting go puts it back. Through the whole item no row you have already seen vanishes, fades in again, plays its cross-off again or changes size. Mistake 7: I’m stuck at x = (6) over 2 says “x is 6 divided by 2. Work it out, then type x.”, in division words, never “multiply by ½”."
+      "see": "I’m stuck flashes after 10 seconds, and then lights the 2 and the parenthesis (“Drag the 2 onto the parenthesis…”). The half-multiplied product is lit with “2 · 3 is not 3. Multiply this piece too.”; After Undo you are back in the two empty boxes, the labels 2 · x and 2 · 3 showing, with “Try again: type what 2 · x and 2 · 3 make, one in each box.” Divide says “That move works once each side is one term.” Adding 5 is lit as “did not eliminate the term”. The wrong sum says “5 + 6 is not 12.”, and after Undo its box is open again and empty, the 5 and the 6 still lit, with “Try again: what is 5 + 6? Type it in the box.” Mistake 6: after Undo the Add box is open again; the −11 you type goes straight into it, Enter writes 11 + 2x − 11 = 17 − 11, and Next writes 2x = 17 − 11. Waiting at 2x = 17 − 11 nudges the 17 and the −11. Picking the term up leaves a dashed gap where it was and nothing else moves; letting go puts it back. Through the whole item no row you have already seen vanishes, fades in again, plays its cross-off again or changes size. Mistake 7: I’m stuck at x = (6) over 2 says “x is 6 divided by 2. Work it out, then type x.”, in division words, never “multiply by ½”. (Since Build Y every number added is written in a column: under the first number of each side, at the end of a side with none.)"
     },
     {
       "id": "m-placement-old",
@@ -2615,7 +2731,7 @@
         "Last, pick a term up and drop it back, watching for anything redrawing: press on the 19 in the newest row, lift it a little, and let go where it was.",
         "Mistake 7, pressing I’m stuck on a fraction-bar row: drag the 19 onto the −4, type 15 and press Enter. Click Divide (÷), type 3 and press Enter. Press I’m stuck."
       ],
-      "see": "Every mistake gets a calm answer in the real numbers, Undo is the way out of each error, and the hint after Undo points at the next move. Nothing is ever worked out for you. Mistake 6: after Undo the Add box is open again; the −4 you type goes straight into it, Enter writes 3x + 4 − 4 = 19 − 4, and Next writes 3x = 19 − 4. Waiting at 3x = 19 − 4 nudges the 19 and the −4 (it never chooses a move for you). Picking the term up leaves a dashed gap where it was and nothing else moves; letting go puts it back. Through the whole item no row you have already seen vanishes, fades in again, plays its cross-off again or changes size. Mistake 7: I’m stuck at x = (15) over 3 says “x is 15 divided by 3. Work it out, then type x.”, in division words, never “multiply by ⅓”."
+      "see": "Every mistake gets a calm answer in the real numbers, Undo is the way out of each error, and the hint after Undo points at the next move. Nothing is ever worked out for you. Mistake 6: after Undo the Add box is open again; the −4 you type goes straight into it, Enter writes −4 under the +4 and under the 19 (in a column, since Build Y), and Next writes 3x = 19 − 4. Waiting at 3x = 19 − 4 nudges the 19 and the −4 (it never chooses a move for you). Picking the term up leaves a dashed gap where it was and nothing else moves; letting go puts it back. Through the whole item no row you have already seen vanishes, fades in again, plays its cross-off again or changes size. Mistake 7: I’m stuck at x = (15) over 3 says “x is 15 divided by 3. Work it out, then type x.”, in division words, never “multiply by ⅓”."
     },
     {
       "id": "j-level-1",
@@ -3060,7 +3176,7 @@
         "Type −8 and press Enter.",
         "Press Enter again."
       ],
-      "see": "The first Enter does the move: x + 8 − 8 = 11 − 8 appears, and x is alone. The second Enter does nothing. Before this change, Enter after I’m stuck gave the next clue and the second Enter wrote −8 over your own number."
+      "see": "The first Enter does the move: −8 is written under the +8 and under the 11, then x = 11 − 8, and x is alone. The second Enter does nothing. Before this change, Enter after I’m stuck gave the next clue and the second Enter wrote −8 over your own number."
     },
     {
       "id": "h-counters-words",
@@ -3223,7 +3339,7 @@
         "Wait 3 seconds and watch the nudge: x is alone now, so a good response nudges nothing. Working out −4 − 8 and typing x is yours to do.",
         "Last, watch for anything redrawing: click the box after x =, type 1, then press Backspace."
       ],
-      "see": "Every mistake gets a short message built from the student’s own numbers, and there is always one clear thing to press next. Nobody is left stuck, and nothing gives the answer away. Mistake 6: after Undo the Add box under the equation is open again; the −8 you type goes straight into it, and Go writes x = −4 − 8. Waiting at the end nudges nothing: x is alone. Typing into x = and taking it back changes nothing above it. Through the whole item no row you have already seen vanishes, fades in again, plays its cross-off again or changes size."
+      "see": "Every mistake gets a short message built from the student’s own numbers, and there is always one clear thing to press next. Nobody is left stuck, and nothing gives the answer away. Mistake 6: after Undo Add’s boxes are open again, under the +8 and under the −4; the −8 you type goes straight into them (both show it), and Go writes −8 under the +8 and under the −4, then x = −4 − 8. Waiting at the end nudges nothing: x is alone. Typing into x = and taking it back changes nothing above it. Through the whole item no row you have already seen vanishes, fades in again, plays its cross-off again or changes size."
     },
     {
       "id": "student-divide",
@@ -3267,6 +3383,24 @@
               "label": "Save codes (teacher only)",
               "query": "?codes=1&nosignin=1",
               "look": "With ?codes=1 the Save code and Enter code buttons come back, for moving a student by hand."
+            }
+          ]
+        },
+        {
+          "name": "Build Y: Add's number written in a column (2026-11-02)",
+          "about": "On every card with Add, the number is written under the first number of each side, like adding in a column (at the end of a side with no number). Either box can be typed in; the cancelling pair is crossed out.",
+          "links": [
+            {
+              "label": "x + 8 = 11",
+              "query": "?pack=add-both&level=2&seed=7&nosignin=1",
+              "reset": true,
+              "look": "Point at Add: a box under the +8 and under the 11."
+            },
+            {
+              "label": "6x = 4x + 10 (a side with no number)",
+              "query": "?pack=variables-both-sides&level=1&seed=7&nosignin=1",
+              "reset": true,
+              "look": "Add, first option: a box at the end of 6x and one under the 10."
             }
           ]
         },

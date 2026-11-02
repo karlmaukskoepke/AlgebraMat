@@ -208,6 +208,16 @@ class Walk {
       return { side: p.dataset.side, inside: r.left >= 0 && r.top >= 0 && r.right <= innerWidth && r.bottom <= innerHeight, own: row ? hit(r, row) : false, below: below.some((n) => hit(r, n)), head: p.querySelector('.pop-head')?.innerText.replace(/\s+/g, ' ').trim() };
     });
   }
+  // Build Y: a row's columns, side by side: for each side, [what is on top, what is under it] of each column, and the whole side as read
+  async columns(sel) {
+    return this.page.evaluate((q) => {
+      const row = [...document.querySelectorAll(q)].at(-1);
+      if (!row) return null;
+      const t = (e) => e.textContent.replace(/\s+/g, '');
+      const side = (k) => { const el = row.querySelector(`.lb-${k}`); return { cols: [...el.querySelectorAll(':scope > .lx-col')].map((c) => [t(c.firstElementChild), t(c.lastElementChild)]), all: t(el), boxEnd: Boolean(el.querySelector(':scope > .lx-box')) }; };
+      return { left: side('left'), right: side('right') };
+    }, sel);
+  }
   async text() { return (await this.page.evaluate(() => document.body.innerText)).replace(/\s+/g, ' '); }
   async see(...words) {                             // every piece of text must be on the screen
     const t = await this.text();
@@ -626,6 +636,96 @@ const WALKS = {
     w.at('point at the dots'); await w.page.locator('[data-light="xone"]').hover(); await wait(w.page, 300); await w.see('x on one side');
     await w.both('w-lights-on');
   },
+  // ---- Build Y: Add's number written in a column ----
+  async 'y-stack-add'(w) {
+    await w.start(); await w.see('x + 8 = 11');
+    w.at('point at Add'); await w.page.hover(`${act('choose')}[data-move="add"]`); await wait(w.page, 700);
+    const g = await w.columns('.lx-ghost .lx-ghosteq');
+    if (JSON.stringify(g?.left.cols) !== '[["+8","+"]]' || JSON.stringify(g?.right.cols) !== '[["11","+"]]') throw new Error(`pointing at Add should show a box under the +8 and under the 11: ${JSON.stringify(g)}`);
+    await w.both('y-stack-preview');
+    w.at('Add −8, Enter'); await w.addEnter(-8); await wait(w.page, 2000);
+    const r = await w.columns('.lb-work');
+    if (JSON.stringify(r.left.cols) !== '[["+8","+−8"]]' || JSON.stringify(r.right.cols) !== '[["11","+−8"]]') throw new Error(`−8 should be under the +8 and under the 11: ${JSON.stringify(r)}`);
+    const texts = await w.diagonals(2);
+    if (texts.join(',') !== '+8,−8') throw new Error(`the +8 and the −8 under it should be crossed out: ${texts}`);
+    await w.row('x = 11 − 8');
+    await w.both('y-stack-add');
+  },
+  async 'y-stack-right'(w) {
+    await w.start(); await w.see('−2 = x − 6');
+    w.at('point at Add'); await w.page.hover(`${act('choose')}[data-move="add"]`); await wait(w.page, 700);
+    const g = await w.columns('.lx-ghost .lx-ghosteq');
+    if (JSON.stringify(g?.left.cols) !== '[["−2","+"]]' || JSON.stringify(g?.right.cols) !== '[["−6","+"]]') throw new Error(`a box under the −2 and under the −6: ${JSON.stringify(g)}`);
+    await w.both('y-stack-right-preview');
+    w.at('Trade places'); await w.click('.lx-pgrid .lx-move[data-move="trade"]'); await wait(w.page, 900);
+    await w.row('x − 6 = −2');
+    w.at('Add 6, Enter'); await w.addEnter(6); await wait(w.page, 2000);
+    const r = await w.columns('.lb-work');
+    if (JSON.stringify(r.left.cols) !== '[["−6","+6"]]' || JSON.stringify(r.right.cols) !== '[["−2","+6"]]') throw new Error(`6 under the −6 and under the −2: ${JSON.stringify(r)}`);
+    const texts = await w.diagonals(2);
+    if (texts.join(',') !== '−6,6') throw new Error(`the −6 and the 6 under it should be crossed out: ${texts}`);
+    await w.row('x = −2 + 6');
+    await w.both('y-stack-right');
+  },
+  async 'y-no-number'(w) {
+    await w.start(); await w.see('6x = 4x + 10');
+    w.at('Add, point at the first option'); await w.click(`${act('choose')}[data-move="add"]`); await w.page.hover(`${act('addPick')}[data-kind="num"]`); await wait(w.page, 600);
+    const g = await w.columns('.lx-ghost .lx-ghosteq');
+    if (!g?.left.boxEnd || g.left.cols.length || JSON.stringify(g.right.cols) !== '[["+10","+"]]') throw new Error(`a box at the end of 6x and one under the 10: ${JSON.stringify(g)}`);
+    await w.both('y-no-number-preview');
+    w.at('the option, −10, Enter'); await w.click(`${act('addPick')}[data-kind="num"]`); await w.type(-10); await w.enter(); await wait(w.page, 2000);
+    const r = await w.columns('.lb-work');
+    if (r.left.cols.length || r.left.all !== '6x−10' || JSON.stringify(r.right.cols) !== '[["+10","+−10"]]') throw new Error(`6x − 10 in line on the left, −10 under the 10 on the right: ${JSON.stringify(r)}`);
+    await w.diagonals(2);
+    await w.row('6x − 10 = 4x');
+    await w.both('y-no-number');
+  },
+  async 'y-either-box'(w) {
+    await w.start(); await w.see('x + 8 = 11');
+    const boxes = () => w.page.evaluate(() => [...document.querySelectorAll('.lx-ghost .lx-box')].map((b) => b.textContent.trim()));
+    w.at('Add, the box under the 11, −8'); await w.click(`${act('choose')}[data-move="add"]`); await w.click('.lx-ghost .lx-box[data-side="right"]'); await w.type(-8);
+    if ((await boxes()).join(',') !== '−8,−8') throw new Error(`both boxes should say −8: ${await boxes()}`);
+    w.at('the box under the +8, −3'); await w.click('.lx-ghost .lx-box[data-side="left"]'); await w.type(-3);
+    if ((await boxes()).join(',') !== '−3,−3') throw new Error(`both boxes should say −3: ${await boxes()}`);
+    await w.both('y-either-box');
+    w.at('Tab, −8, Enter'); await w.page.keyboard.press('Tab'); await wait(w.page, 200);
+    if (!(await w.page.locator('.lx-ghost .lx-box[data-side="right"].is-focus').count())) throw new Error('Tab should move to the box under the 11');
+    await w.type(-8);
+    if ((await boxes()).join(',') !== '−8,−8') throw new Error(`−8 should replace the −3 in both: ${await boxes()}`);
+    await w.enter(); await wait(w.page, 2000);
+    const r = await w.columns('.lb-work');
+    if (JSON.stringify(r.left.cols) !== '[["+8","+−8"]]') throw new Error(`−8 under the +8: ${JSON.stringify(r)}`);
+    await w.row('x = 11 − 8');
+  },
+  async 'y-partial'(w) {
+    await w.start(); await w.see('x + 8 = 11');
+    w.at('Add −3, Enter'); await w.addEnter(-3); await w.lateLayer();
+    const r = await w.columns('.lb-work');
+    if (JSON.stringify(r.left.cols) !== '[["+8","+−3"]]' || JSON.stringify(r.right.cols) !== '[["11","+−3"]]') throw new Error(`−3 under the +8 and the 11: ${JSON.stringify(r)}`);
+    if (await w.page.locator('.lb-work .lx-xo').count()) throw new Error('nothing should be crossed out');
+    await w.see('still here', '+8 was only partially canceled by the −3 you added.');
+    await w.lit(act('undo'));
+    await w.both('y-partial');
+  },
+  async 'y-two-step'(w) {
+    await w.start(); await w.see('2x + 4 = 16');
+    w.at('Add −4, Enter'); await w.addEnter(-4); await wait(w.page, 2000);
+    const r = await w.columns('.lb-work');
+    if (JSON.stringify(r.left.cols) !== '[["+4","+−4"]]' || JSON.stringify(r.right.cols) !== '[["16","+−4"]]') throw new Error(`−4 under the +4 and the 16: ${JSON.stringify(r)}`);
+    await w.diagonals(2);
+    await w.row('2x = 16 − 4');
+    await w.both('y-two-step');
+  },
+  async 'y-both-sides'(w) {
+    await w.start(); await w.see('8x − 14 = 5x + 10');
+    w.at('Add, first option, 14, Enter'); await w.click(`${act('choose')}[data-move="add"]`); await w.click(`${act('addPick')}[data-kind="num"]`); await w.type(14); await w.enter(); await wait(w.page, 2000);
+    const r = await w.columns('.lb-work');
+    if (JSON.stringify(r.left.cols) !== '[["−14","+14"]]' || JSON.stringify(r.right.cols) !== '[["+10","+14"]]') throw new Error(`14 under the −14 and under the 10: ${JSON.stringify(r)}`);
+    const texts = await w.diagonals(2);
+    if (texts.join(',') !== '−14,14') throw new Error(`the −14 and the 14 under it should be crossed out: ${texts}`);
+    await w.row('8x = 5x + 10 + 14');
+    await w.both('y-both-sides');
+  },
   // ---- Build AB, Parts 3 and 4: level popups and section footers ----
   async 'ab-pop-point'(w) {
     await w.start();
@@ -748,7 +848,7 @@ const WALKS = {
     await w.start(); await w.see('x − 13 = −5');
     w.at('Add 13, Enter'); await w.addEnter(13); await wait(w.page, 2000);
     const texts = await w.diagonals(2);
-    if (texts.join(',') !== '−13,+13') throw new Error(`the −13 and the +13 should be crossed out, sign and all: ${texts}`);
+    if (texts.join(',') !== '−13,13') throw new Error(`the −13 and the 13 under it should be crossed out (the + beside the 13 is the column's adding sign, Build Y): ${texts}`);
     await w.row('x = −5 + 13');
     await w.both('ab-xo-gentle');
   },
@@ -1292,7 +1392,7 @@ const WALKS = {
   async 's-first-drag-distribute'(w) {
     await w.start(); await w.see('3(x + 2) = 15');
     w.at('distribute 3, 6'); await w.distribute(3, 6); await w.row('3x + 6 = 15');
-    w.at('drag the 6 across, first try'); await w.crossTerm('6', 'right'); await w.row('3x + 6 − 6 = 15 − 6'); await w.row('3x = 15 − 6');
+    w.at('drag the 6 across, first try'); await w.crossTerm('6', 'right'); await w.row('3x + 6 + −6 = 15 + −6'); await w.row('3x = 15 − 6');
     await w.shot('s-first-drag-distribute');
   },
   async 's-flip-crossoff'(w) {

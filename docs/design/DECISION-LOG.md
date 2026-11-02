@@ -460,3 +460,18 @@ Its notes: "Improper fractions are full credit, no mixed numbers" and "x can be 
    cancel marks become about 30° (25-35°, shallower on a wide term so the stroke rises no more than about 15% above the term's height),
    centred on the middle of the term's ink (sign included), about half as heavy (about 3 px at the largest text size), with a smaller
    overshoot (about 0.05em at each end), drawn behind the glyphs. Flip's strokes through the minus signs are not changed.
+
+## 2026-11-01: stacked numbers (Karl; built in Build Y)
+
+1. **Add's number is written in a column, like an added x-term (Build T), as the standard on every level of every card with Add:** it
+   previews where the number goes and matches how students write the work in class. The amount sits directly under the first number
+   (constant) on each side, digits lined up, its sign beside them. Either box takes the keys and the other mirrors it, exactly as the x-term
+   boxes behave (Tab between them, a click retypes, Go or Enter applies, 0 refused, the touch keypad for each box).
+2. **A side with no number gets the amount at the end of its line, in line** (Karl's variation): `2x + 1 = 5x`, adding −1, stacks `−1`
+   under the `1` on the left and writes `5x + −1` on the right. The same for a side that is a group or an x-term only. The hover preview
+   shows both placements before an amount is chosen.
+3. Two or more numbers on a side: under the first (the combine nudge handles the rest).
+4. The pair that cancels is crossed out with the diagonal stroke; the other side's amount stays for the student to combine. The new row
+   is written as before. Only the chosen option's boxes show (x-term under the x-term, number under the number).
+5. Unchanged: the stored Add move, the check, the shapes, the class-sheet words, save codes, problems; wrong and partial amounts get the
+   same spotlights, the stacked amounts lit. Text never shrinks for the extra line: older moves fold sooner instead.

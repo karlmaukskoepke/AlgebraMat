@@ -4171,3 +4171,17 @@ button.lb-divbar.is-calc:hover, button.lb-divbar.is-calc:focus-visible { backgro
 }
 /* a touch screen: card names and their chevrons are at least 44 px tall (a finger), at every window size */
 @media (hover: none) { .card-name, .card-chev { min-height: 44px; } }
+
+/* a term with no sign of its own (`3`, `4x`, a stacked amount whose + is the column's adding sign: Build Y): its glyphs sit centred in their
+   box, so the stroke runs as far past each end */
+.lx-xo:not(.has-sign) .lx-xo-line { left: -0.05em; right: -0.05em; }
+
+/* ---------- Build Y (Karl, 2026-11-01): a number added in a column. The number with its own sign on top (`+ 8`), the amount under it
+   (`+ −8`, a box while it is typed), right-aligned so the digits line up; a side with no number keeps its amount at the end of its line.
+   The x-term's column (Build T) is unchanged. ---------- */
+.lx-signed { display: inline-flex; align-items: center; white-space: nowrap; }
+/* the two lines of a number's column sit as close as digits in a written column (0.9 of the text size apart, a little more in a work row), so the row grows by as
+   little as it can and the text never has to shrink for it (Build S's chooser: the check's pop-up keeps its room at 1366×650) */
+.lx-col.is-num { line-height: 0.9; }
+.lx-col.is-num > .lx-signed, .lx-col.is-num > .lx-xo, .lx-col.is-num > .lb-num, .lx-col.is-num > .lx-under { line-height: 0.9; }
+.lb-work .lx-col.is-num > .lx-under { margin-top: 0.1em; }

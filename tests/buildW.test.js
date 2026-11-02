@@ -154,7 +154,9 @@ describe('Build W, Part 3: the Add cross-out is a diagonal', () => {
     await m.run({ type: 'lxDrop', id: t.id, slot: { side: 'right', at: m.s.board.right.length }, how: 'pointer' });
     const xo = [...m.root.querySelectorAll('.lb-work .lx-xo')];
     expect(xo.length).toBe(2);
-    expect(xo.map((e) => e.querySelector('.lb-plus')?.textContent ?? '')).toEqual(['+', '−']);
+    // (since Build Y the −8 is written under the +8, `+ −8`: its sign is in the number, the + beside it is the column's adding sign)
+    expect(xo.map((e) => e.textContent.replace(/\s+/g, ''))).toEqual(['+8', '−8']);
+    expect(xo[1].closest('.lx-under')).not.toBeNull();
     expect(xo.every((e) => e.querySelectorAll('.is-struck').length === 1)).toBe(true);
   });
   it('a stacked x-term Add (Build T): both partners crossed the same way', async () => {

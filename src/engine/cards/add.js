@@ -229,7 +229,9 @@ const loop = createSolveLoop({
       if (s.sub) return undefined;
       if (s.combining) return 'ignore';
       if (amountKeys(s)) {
-        const entry = typeInto(s.amountEntry, action, 'integer');
+        // (a box clicked to retype: the first key replaces what is there, a minus too, as Build T's boxes do; Build Y gives every card two boxes)
+        const entry = typeInto(s.amountSel ? '' : s.amountEntry, action, 'integer');
+        s.amountSel = false;
         if (entry === s.amountEntry) return 'ignore';
         s.amountEntry = entry;
         if (!s.scaffold) s.hint = null;

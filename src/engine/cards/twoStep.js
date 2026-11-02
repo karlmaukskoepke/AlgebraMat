@@ -97,7 +97,9 @@ const loop = createSolveLoop({
     // typing: the Add move's blank while it is open (the fraction's blank is the Multiply menu's); x = is the loop's
     if (isTyping(action)) {
       if (s.sub || !amountKeys(s)) return undefined;
-      const entry = typeInto(s.amountEntry, action, 'integer');
+      // (a box clicked to retype: the first key replaces what is there, a minus too, as Build T's boxes do; Build Y gives every card two boxes)
+      const entry = typeInto(s.amountSel ? '' : s.amountEntry, action, 'integer');
+      s.amountSel = false;
       if (entry === s.amountEntry) return 'ignore';
       s.amountEntry = entry;
       s.hint = null;

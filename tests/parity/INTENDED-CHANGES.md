@@ -851,6 +851,34 @@ other. No home screen is in the screen set; every home screen difference, one by
 | The Timed challenges list | (none) | new: Count it's six challenges, each with its best score |
 | The card page (a card name clicked) | Combine it, Flip It, Group It and Distribute, then combine ended with their ⏱ challenge buttons | no challenge buttons (they are in Count it's footer); everything else unchanged |
 
+## Build Y (2026-11-02): Add's number written in a column
+
+Problems, save codes, the class-sheet records and the traces of the 25 scripted runs are unchanged (PASS): the stored work row is the same,
+the column is worked out when it is drawn. The text size chosen for every Solve it card and level is unchanged (430 cases measured, see
+`docs/build-y/BUILD-Y-REPORT.md`). On screen, 26 of the 70 pictures differ from `main` before this build (13 states at both sizes), and only
+these. The keys are already listed above (Build W), so the harness passes; measured picture by picture against `main` with a stricter
+comparison than the harness's (any channel off by more than 8 of 255, so changes under the grey cover count too; the share in brackets is
+the harness's own measure, above its 0.2% tolerance in every case):
+
+| Where | How much (650, 768) | Before | After |
+|---|---|---|---|
+| add-helpful-move@1366x650, add-helpful-move@1366x768 | 1.222%, 1.031% | x + 8 − 8 = −4 − 8 in line, the +8 and −8 crossed | −8 under the +8 (both crossed) and under the −4: `+8` over `+ −8`, `−4` over `+ −8`; the row one line taller |
+| add-red-move@1366x650, add-red-move@1366x768 | 6.178%, 5.186% | x + 8 + 8 = −4 + 8 in line, greyed, the 16 “got bigger” | +8 under the +8 and under the −4, nothing crossed; the lit column is the +8 with the +8 under it |
+| add-partial-move@1366x650, add-partial-move@1366x768 | 6.010%, 5.053% | x + 8 − 5 = −4 − 5 in line, the 3 “still here” | −5 under the +8 and under the −4; the lit column is the +8 with the −5 under it |
+| add-partial-stuck-4@1366x650, add-partial-stuck-4@1366x768 | 6.010%, 5.053% | the same row, under the fourth I’m stuck | the same column |
+| add-partial-teach@1366x650, add-partial-teach@1366x768 | 6.010%, 5.053% | the same row, under Teach me | the same column |
+| add-red-stuck@1366x650, add-red-stuck@1366x768 | 6.178%, 5.186% | the +8 row, under I’m stuck | the +8 column |
+| add-stuck-1@1366x650, add-stuck-1@1366x768 | 5.079%, 4.268% | the first hint opens Add: its box at the end of each side, `x + 8 + ▢ = −4 + ▢` | its boxes under the +8 and under the −4 |
+| add-wrong-guess-undone@1366x650, add-wrong-guess-undone@1366x768 | 0.966%, 0.818% | after Undo the hint opens Add with its boxes at the end of each side | the boxes under the +8 and under the −4 |
+| add-end@1366x650, add-end@1366x768 | 1.212%, 1.023% | the work row in line in the stack at the end | the stacked work row |
+| add-alone-teach@1366x650, add-alone-teach@1366x768 | 1.222%, 1.031% | the work row in line above Teach me | the stacked work row |
+| add-alone-stuck-1@1366x650, add-alone-stuck-1@1366x768 | 5.764%, 4.876% | the work row in line above the first I’m stuck at x alone | the stacked work row |
+| add-alone-stuck-2@1366x650, add-alone-stuck-2@1366x768 | 1.479%, 1.249% | the same, second I’m stuck | the stacked work row |
+| add-alone-stuck-3@1366x650, add-alone-stuck-3@1366x768 | 1.479%, 1.249% | the same, third I’m stuck | the stacked work row |
+
+Unchanged: `add-opening`, `add-stuck-2` to `-4`, `add-teach`, `add-wrong-guess`, `add-forced-move`, `add-L2-stuck-2`, every Divide it picture,
+`div-menu`, and the openings of Flip everything, Two-step equations and Distribute, combine, solve (no Add row or box is on them).
+
 <!-- history: nothing below this line is read by the harness -->
 
 ## History: screen changes accepted by the re-baseline of 2026-10-24 (Build O, Part 0)

@@ -234,7 +234,8 @@ function measureXo() {
         const em = x.font;
         seen.push(`${name} ${x.text}: ${x.angle.toFixed(1)}°, ${Math.round(x.length)} px long, ${x.weight.toFixed(1)} px, midpoint ${(x.midX - (x.ink.L + x.ink.R) / 2).toFixed(1)}, ${(x.midY - (x.ink.T + x.ink.B) / 2).toFixed(1)} px from the ink's centre, rise ${(x.rise / ih).toFixed(2)} × the ink`);
         if (x.angle < 25 - 0.2 || x.angle > 35) report.push(`${name} ${x.text}: angle ${x.angle.toFixed(1)}°`);
-        if (Math.abs(x.midX - (x.ink.L + x.ink.R) / 2) > 0.05 * iw || Math.abs(x.midY - (x.ink.T + x.ink.B) / 2) > 0.05 * ih) report.push(`${name} ${x.text}: midpoint off the ink's centre`);
+        // (within 5% of the ink box, and never asked for less than a pixel: a lone digit, a stacked `3` since Build Y, is 12 px wide)
+        if (Math.abs(x.midX - (x.ink.L + x.ink.R) / 2) > Math.max(1, 0.05 * iw) || Math.abs(x.midY - (x.ink.T + x.ink.B) / 2) > Math.max(1, 0.05 * ih)) report.push(`${name} ${x.text}: midpoint off the ink's centre (${(x.midX - (x.ink.L + x.ink.R) / 2).toFixed(1)}, ${(x.midY - (x.ink.T + x.ink.B) / 2).toFixed(1)} px)`);
         if (!(x.left < x.ink.L && x.right > x.ink.R)) report.push(`${name} ${x.text}: does not cross the whole term (${Math.round(x.left)}-${Math.round(x.right)} over ink ${Math.round(x.ink.L)}-${Math.round(x.ink.R)})`);
         if (x.ink.L - x.left > 0.12 * em || x.right - x.ink.R > 0.12 * em) report.push(`${name} ${x.text}: overshoots too far (${(x.ink.L - x.left).toFixed(1)}, ${(x.right - x.ink.R).toFixed(1)} px)`);
         if (x.angle > 25.2 && x.rise > 1.15 * ih + 1) report.push(`${name} ${x.text}: rises ${(x.rise / ih).toFixed(2)} × the term's height`);
