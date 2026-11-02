@@ -2019,7 +2019,7 @@ const WALKS = {
     w.at('mistake 6: Add 11, Enter'); await w.addEnter(11); await w.lateLayer(); await w.see('did not eliminate the term');
     w.at('mistake 6: Undo, type −11, Enter'); await w.click(act('undo')); await wait(w.page, 800); await w.type('-11');
     await w.typedIn('[data-fk="blank"]', '−11');
-    await w.enter(); await wait(w.page, 400); await w.see('11 + 2x − 11 = 17 − 11');
+    await w.enter(); await wait(w.page, 400); await w.see('11 + −11 + 2x = 17 + −11');          // (since Build Y the −11 is written under the 11 and under the 17)
     await w.click(act('foldNext')); await wait(w.page, 400); await w.row('2x = 17 − 11'); await w.shot('student-distribute-typed-after-undo');
     w.at('wait 3 seconds and watch the nudge'); await w.idle(5000); await w.nudged(2, 'Drag one onto the other to combine them.'); await w.shot('student-distribute-nudge');
     w.at('last: pick up the 17 and drop it back'); await w.liftBack('17');
@@ -2229,7 +2229,7 @@ const WALKS = {
     w.at('mistake 6: Add 4, Enter'); await w.addEnter(4); await w.lateLayer(); await w.see('did not eliminate the term');
     w.at('mistake 6: Undo, type −4, Enter'); await w.click(act('undo')); await wait(w.page, 800); await w.type('-4');
     await w.typedIn('[data-fk="blank"]', '−4');
-    await w.enter(); await wait(w.page, 400); await w.see('3x + 4 − 4 = 19 − 4');
+    await w.enter(); await wait(w.page, 400); await w.see('3x + 4 + −4 = 19 + −4');          // (since Build Y the −4 is written under the +4 and under the 19)
     await w.click(act('foldNext')); await wait(w.page, 400); await w.row('3x = 19 − 4'); await w.shot('student-two-step-typed-after-undo');
     w.at('wait 3 seconds and watch the nudge'); await w.idle(5000); await w.nudged(2, 'Drag one onto the other to combine them.'); await w.shot('student-two-step-nudge');
     w.at('last: pick up the 19 and drop it back'); await w.liftBack('19');
@@ -2418,7 +2418,7 @@ const WALKS = {
     await w.start(); await w.see('x', '8', '11');
     w.at("I'm stuck once"); await w.stuck(); await w.see('What would we add to both sides to eliminate it?');
     w.at('type −8, Enter'); await w.type('-8'); await w.enter();
-    await w.see('x + 8 − 8 = 11 − 8');
+    await w.see('x + 8 + −8 = 11 + −8', 'x = 11 − 8');          // (since Build Y the −8 is written under the +8 and under the 11)
     const first = await w.text();
     w.at('Enter again'); await w.enter();
     if ((await w.text()) !== first) throw new Error('a second Enter should do nothing');
