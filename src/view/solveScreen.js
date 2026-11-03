@@ -5,6 +5,7 @@
 
 import { html, actionRow } from './addBothMat.js';
 import { equationRow } from './lightScreen.js';
+import { parens, tallParensIn } from './parens.js';
 import { MINUS } from '../engine/expr.js';
 import { signed, fractionText, factorText, boardText, equationSegs } from '../engine/solveTerms.js';
 
@@ -63,7 +64,7 @@ function termsOf(side, s, o) {
       // (a fraction factor drawn stacked, its sign before it: Build U)
       const front = t.den > 1 ? [...(f < 0 ? [MINUS] : []), html('span', 'lx-sfrac', [html('span', 'lx-sfrac-top', [String(Math.abs(f))]), html('span', 'lx-sfrac-bar'), html('span', 'lx-sfrac-bot', [String(t.den)])], { 'aria-label': factorText(f, t.den) })]
         : [o.strike && ft ? struckText(ft, o.strike, 'lb-factorstrike', o) : ft];
-      out.push(html('span', 'lb-frac lb-group', [...front, '(', ...termsOf(t.inner, s, { ...o, live: false, strike: null }), ')']));
+      out.push(html('span', 'lb-frac lb-group', [...front, ...parens(termsOf(t.inner, s, { ...o, live: false, strike: null }))]));
     } else if (t.kind === 'frac' && (o.div || s?.divIds?.includes(t.id))) {
       // a row made with the Divide button, in division form (Build O, display only): the side in parentheses over a bar, n beneath.
       // A product that can be worked out (Build P, Part 2): the bar is the button
@@ -77,7 +78,7 @@ function termsOf(side, s, o) {
       // a product that can be worked out (Build P, Part 2): a small dot between the fraction and its number is the button
       const calc = o.calc === t.id;
       const dot = calc ? [calcButton(t, 'lb-calcdot', 'Multiply: work it out', '·')] : [];
-      const el = html('span', 'lb-frac', [struckText(`${t.sign < 0 ? MINUS : ''}${fractionText(t.n)}`, cancel?.outer ?? null, 'is-blue', o), ...dot, '(', ...inner(), ')']);
+      const el = html('span', 'lb-frac', [struckText(`${t.sign < 0 ? MINUS : ''}${fractionText(t.n)}`, cancel?.outer ?? null, 'is-blue', o), ...dot, ...parens(inner())]);
       if (calc || o.calcOn === t.id) el.dataset.calc = t.id;
       out.push(el);
     } else if (t.kind === 'times' && o.div) {
@@ -87,10 +88,10 @@ function termsOf(side, s, o) {
       out.push(divisionEl(termsOf(t.inner, s, { ...o, live: false, plug: false, work: false }), `${MINUS}1`));         // `x = (12)/(−1)`
     } else if (t.kind === 'times') {
       // both sides times a number, written out: `−1(−x)` (no times sign: Build U) (Flip everything's work row, Build J); the number in blue (loop §3D)
-      out.push(html('span', 'lb-frac', [html('span', 'is-blue', [struckText(signed(t.f), cancel?.outer ?? null, '', o)]), '(', ...inner(), ')']));
+      out.push(html('span', 'lb-frac', [html('span', 'is-blue', [struckText(signed(t.f), cancel?.outer ?? null, '', o)]), ...parens(inner())]));
     } else if (t.kind === 'neg') {
       // the opposite of a number, left unsimplified at x alone: `x = −(12)` (Build J)
-      out.push(html('span', 'lb-frac lb-neg', [html('span', 'is-blue', [MINUS]), '(', ...termsOf(t.inner, s, { ...o, live: false, plug: false }), ')']));
+      out.push(html('span', 'lb-frac lb-neg', [html('span', 'is-blue', [MINUS]), ...parens(termsOf(t.inner, s, { ...o, live: false, plug: false }))]));
     } else if (t.kind === 'x' && (t.den ?? 1) > 1) {
       out.push(fxEl(t, s, o));
     } else if (t.kind === 'x') {
@@ -164,6 +165,7 @@ const FRACTION_TEXT = /^(\(?)([−-]?\d+)\/(\d+)(\)?)$/;
 export function segKids(text) {
   const m = FRACTION_TEXT.exec(text);
   if (!m) return [text];
+  if (m[1] && m[4]) return parens([stackedText(m[2], m[3])]);                           // `(−5/2)`: parentheses as tall as the fraction (Build AC)
   return [...(m[1] ? ['('] : []), stackedText(m[2], m[3]), ...(m[4] ? [')'] : [])];
 }
 
@@ -184,7 +186,7 @@ export const sideTerms = (terms, s, o = {}) => termsOf(terms, s, { live: false, 
 // Division form (Build O): `(5x)` over a bar, the divisor under it in the operation's blue. `top` is the side's elements; `bottom` the
 // divisor's text, or an element (the Divide button's blank).
 export function divisionEl(top, bottom, bar = null) {
-  return html('span', 'lb-frac lb-divfrac', [html('span', 'lb-divtop', ['(', ...top, ')']), bar ?? html('span', 'lb-divbar'), typeof bottom === 'string' ? html('span', 'lb-divbot is-blue', [bottom]) : bottom]);
+  return html('span', 'lb-frac lb-divfrac', [html('span', 'lb-divtop', parens(top)), bar ?? html('span', 'lb-divbar'), typeof bottom === 'string' ? html('span', 'lb-divbot is-blue', [bottom]) : bottom]);
 }
 // The dot (or the fraction bar) of a product that can be worked out: a button (Build P, Part 2)
 function calcButton(t, cls, label, text = '') {
@@ -364,7 +366,7 @@ function alignPairs(list) {
 // (Balanced), false (Not balanced) or null (not yet), `current` the row being worked.
 export function checkSpace(lines, mark, current = lines.length - 1) {
   const list = html('ol', 'lb-subst sv-checklist');
-  lines.forEach((kids, i) => list.append(html('li', `sv-checkrow lb-sline${i === current ? ' is-current' : ''}`, kids)));
+  lines.forEach((kids, i) => list.append(html('li', `sv-checkrow lb-sline${i === current ? ' is-current' : ''}`, tallParensIn(kids))));   // (a stacked value's parentheses as tall as it: Build AC)
   if (mark !== null) list.append(html('li', `sv-checkrow sv-mark ${mark ? 'is-good' : 'is-bad'}`, [mark ? '✓ Balanced' : '✗ Not balanced']));
   return list;
 }

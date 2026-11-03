@@ -6,6 +6,7 @@ import { MINUS } from '../engine/expr.js';
 import { signed } from '../engine/addBoth.js';
 import { fractionText } from '../engine/divide.js';
 import { html } from './addBothMat.js';
+import { parens } from './parens.js';
 
 const btn = (label, action, cls = 'btn', data = {}) => html('button', cls, [label], { type: 'button', 'data-action': action, ...Object.fromEntries(Object.entries(data).map(([k, v]) => [`data-${k}`, v])) });
 
@@ -78,7 +79,7 @@ function termsOf(side, s, live, plug = false) {
   side.forEach((t, i) => {
     if (i > 0) out.push(html('span', 'lb-plus', ['+']));
     if (t.kind === 'frac') {
-      out.push(html('span', 'lb-frac', [html('span', 'is-blue', [fractionText(t.n)]), '(', ...termsOf(t.inner, s, false, false), ')']));
+      out.push(html('span', 'lb-frac', [html('span', 'is-blue', [fractionText(t.n)]), ...parens(termsOf(t.inner, s, false, false))]));
     } else if (t.kind === 'x') {
       const xel = live && plug && s.sub?.kind === 'guess'
         ? html('span', 'lb-x lb-guess', [signed(s.sub.typed)], { 'data-x': '1' })              // the guess slides onto x

@@ -8,6 +8,7 @@ import { html } from './addBothMat.js';
 import { sideTerms, divisionEl, sameAsLine, dividingLine } from './solveScreen.js';
 import { equationRow } from './lightScreen.js';
 import { groupDiagram } from './groupDiagram.js';
+import { parens } from './parens.js';
 import { FRACTIONS } from '../engine/divide.js';
 import { fractionText } from '../engine/solveTerms.js';
 import { MINUS } from '../engine/expr.js';
@@ -87,7 +88,7 @@ export function moveRow(s, menu, { blueFlip = false } = {}) {
   // Divide (Build O): each whole side in parentheses over a big fraction bar, the blank beneath it
   const side = kind === 'div'
     ? (terms, mirror) => [divisionEl(sideTerms(terms, s), divBox(s, mirror, typeable))]
-    : (terms, mirror) => [front(mirror), html('span', 'lb-plus', ['(']), ...sideTerms(terms, s), html('span', 'lb-plus', [')'])];
+    : (terms, mirror) => [front(mirror), ...parens(sideTerms(terms, s), { glyph: (t) => html('span', 'lb-plus', [t]) })];
   slot.append(equationRow(side(s.board.left, typedOn !== 'left'), side(s.board.right, typedOn !== 'right'), `lx-ghosteq${kind === 'div' ? ' is-division' : ''}`));
   const label = kind === 'div' ? divLabel(s) : kind === 'unit' ? unitLabel(s) : null;
   if (label) slot.append(label);

@@ -4204,3 +4204,13 @@ button.lb-divbar.is-calc:hover, button.lb-divbar.is-calc:focus-visible { backgro
 /* A link to a retired card (Build AA): the note over the play screen's top bar */
 .moved-note { position: fixed; top: 14px; left: 50%; transform: translateX(-50%); z-index: 60; background: #fff; border: 3px solid #0072b2; border-radius: 14px;
   padding: 12px 22px; font: 700 22px 'Lexend', system-ui, sans-serif; color: var(--ink); box-shadow: 0 6px 18px rgb(0 0 0 / 0.15); max-width: calc(100vw - 32px); }
+
+/* ---------- Build AC, Part 4: parentheses as tall as what is inside them (view/parens.js). Round anything stacked, the pair is one group:
+   the two parentheses stretch to the group's height (a little past it) and keep the stroke weight of the text beside them; the font's own
+   glyph stays in place, transparent, for the width, the words and screen readers. Round plain text nothing changes. ---------- */
+.lb-pgroup { display: inline-flex; align-items: center; vertical-align: middle; white-space: nowrap; }
+.lb-pin { display: inline-block; white-space: nowrap; }
+.lb-pp { position: relative; align-self: stretch; display: inline-flex; align-items: center; min-width: 0.3em; justify-content: center; }
+.lb-ppg { color: transparent; }
+.lb-pp-ink { position: absolute; left: 0; right: 0; top: -0.06em; bottom: -0.06em; width: 100%; height: calc(100% + 0.12em); overflow: visible; }
+.lb-pp-ink path { fill: none; stroke: currentColor; stroke-width: 0.1em; stroke-linecap: round; }
