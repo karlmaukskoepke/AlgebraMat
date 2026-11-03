@@ -54,6 +54,7 @@ import { strangeFeedbackText } from '../view/strangeFeedback.js';
 import { bindStrangeKeys } from '../view/strangeKeys.js';
 // Fractions of x (Build AA): Flip everything's kind of card (one term a side, the Multiply menu) with its own term, toggle and model
 import { newFractions, reduceFractions, solve as fracLoop, FRAC_SPOT, FRAC_MENU, MODEL_LEVELS } from '../engine/cards/fractions.js';
+import { modelAutoDue, markModelShown } from '../fxModelStore.js';
 import { formatFracX } from '../engine/fractionsX.js';
 import { modelTyping } from '../engine/fractionsModel.js';
 import { renderFractionsScreen, introOpen as fracIntroOpen } from '../view/fractionsScreen.js';
@@ -375,8 +376,8 @@ export const strangePlay = makeSolvePlay({
 });
 
 // ---------- Fractions of x (Build AA) ----------
-// The model is drawn on its own on the first problem of Levels 1 and 3, and Level 2's one-time instruction shows on its first problem
-// (once a run of the level: `flags`); the first flip and Trade places of a level are pointed out once, as on Flip everything.
+// The model is drawn on its own on the first problem of Levels 1 and 3 the first time on this device (Build AC, fxModelStore.js), and
+// Level 2's one-time instruction shows on its first problem (once a run of the level: `flags`); the first flip and Trade places of a level are pointed out once, as on Flip everything.
 
 let fracTaught = null;
 
@@ -391,10 +392,12 @@ export const fractionsPlay = makeSolvePlay({
   newSession: (problem, { forceMove = false, flags = null } = {}) => {
     fracTaught = flags ?? fracTaught ?? {};
     const level = problem.logLevel ?? 1;
+    // the model draws itself on the first problem of Levels 1 and 3 once per device (Build AC; it was once a run of the level)
+    const autoModel = MODEL_LEVELS.includes(level) && !fracTaught.model && !forceMove && modelAutoDue(level);
     const s = newFractions(problem, {
-      level, forceMove, introTrade: !fracTaught.trade, introFlip: !fracTaught.flip,
-      autoModel: MODEL_LEVELS.includes(level) && !fracTaught.model, introRewrite: !fracTaught.rewrite,
+      level, forceMove, introTrade: !fracTaught.trade, introFlip: !fracTaught.flip, autoModel, introRewrite: !fracTaught.rewrite,
     });
+    if (s.model?.auto) markModelShown(level);
     fracTaught.model = true;
     fracTaught.rewrite = true;
     return { ...s, divNegIntro: !fracTaught.divneg };
