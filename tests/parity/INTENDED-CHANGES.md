@@ -897,6 +897,30 @@ x), but the quiz is not among the recorded screens.
 | `savecode:fractions-of-x-L5` | none | a v21 code, round-trips | Level 5 |
 | `savecode:fractions-of-x-L6` | none | a v21 code, round-trips | Level 6 |
 
+## Build AC (2026-11-03): Fractions of x refinements
+
+Problems, save codes, class-sheet records, the 25 scripted runs and the 70 recorded screens: unchanged (the harness lists nothing new). The
+screens were also compared picture by picture with `main` before this build, more strictly than the harness: every pixel off by more than
+64 of 255 in any channel counted, a screen flagged at 40 such pixels (two runs of the same code differ by up to 18 such pixels, from text
+anti-aliasing): **none of the 70 differs**. None of the recorded states has a stacked fraction in parentheses, a rewrite or Fractions of x.
+The screens that do change are outside the recorded set; each is listed here (it was wrong before in each case: the parentheses were
+shorter than the fraction inside them, Part 4; or the change is the build's own, Parts 1-3, 5):
+
+| Screen (not recorded) | Before | After | Why |
+|---|---|---|---|
+| Fractions of x: the divide row, `(⅔x)/2 = (6)/2` | parentheses about half the fraction's height | as tall as `⅔x`, the text's weight | Part 4 |
+| Fractions of x: the Divide preview (the ghost row) | the same | the same, tall | Part 4 |
+| Fractions of x: the multiply row, `3(⅓x) = 3(2)` | small parentheses round the fraction | tall | Part 4 |
+| Fractions of x: the Multiply preview, the whole number typed | small | tall | Part 4 |
+| Fractions of x: the flip row, `−1(−⅔x) = −1(12)` | small | tall | Part 4 |
+| Strange solutions: a fraction value in the check, `2(−2/5) + 10 = −4(−2/5) − 5` | small parentheses round the stacked value | tall | Part 4 |
+| Any card: the light rows' fraction of a stacked side (none reachable today) | | tall where something stacked is inside | Part 4 (the shared piece) |
+| Fractions of x: the rewrite row, just tapped | printed at once | five frames, about 1.5 s, then printed | Part 3 |
+| Fractions of x Levels 2, 4, 5, 6: I'm stuck's first and second clicks; the hint after a wrong value | the box, then the reminder | the reminder, then the box | Part 2 |
+| Fractions of x Levels 4-6: I'm stuck on a minus in front | the box with the minus moved over | "Multiply both sides by −1 first." / "…then I can draw the box." | Part 2 |
+| Fractions of x Levels 1 and 3: the problem after a correct value with no move | the forced-move pop-up | the next problem as usual | Part 1 |
+| Fractions of x Levels 1 and 3, a second run on the same computer | the box drawn by itself | no box until I'm stuck | Part 5 |
+
 <!-- history: nothing below this line is read by the harness -->
 
 ## History: screen changes accepted by the re-baseline of 2026-10-24 (Build O, Part 0)

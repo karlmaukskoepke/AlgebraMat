@@ -429,11 +429,141 @@ class Walk {
   }
   async aaMult(n) { await this.click(act('multOpen')); await this.click('.mo-opt[data-kind="whole"]'); await this.type(n); await this.enter(); }
   async row(text) { const rs = await this.rows(); const want = text.replace(/\s+/g, ''); if (!rs.some((r) => r.endsWith(want) || r === want)) throw new Error(`expected a row ${text} after step "${this.step}": ${rs.join(' | ')}`); }
+  // Build AC: in the newest `scope`, every pair of parentheses round a stacked thing is drawn tall: at least as tall as what is inside
+  async tallParens(scope) {
+    const r = await this.page.evaluate((sc) => {
+      const root = [...document.querySelectorAll(sc)].at(-1); if (!root) return 'none';
+      const gs = [...root.querySelectorAll('.lb-pgroup')]; if (!gs.length) return 'none';
+      for (const g of gs) {
+        const inside = [...g.querySelector('.lb-pin').querySelectorAll('.lx-sfrac, .lb-divfrac')];
+        const top = Math.min(...inside.map((e) => e.getBoundingClientRect().top)); const bottom = Math.max(...inside.map((e) => e.getBoundingClientRect().bottom));
+        for (const ink of g.querySelectorAll(':scope > .lb-pp > .lb-pp-ink')) { const b = ink.getBoundingClientRect(); if (b.top > top + 1 || b.bottom < bottom - 1) return `${Math.round(b.height)} px beside ${Math.round(bottom - top)} px`; }
+      }
+      return 'ok';
+    }, scope);
+    if (r !== 'ok') throw new Error(`the parentheses in ${scope} should be as tall as the fraction (${r}) after step "${this.step}"`);
+  }
   async box(selector) { return this.page.evaluate((s) => { const r = document.querySelector(s)?.getBoundingClientRect(); return r ? [r.left, r.top, r.right, r.bottom].map(Math.round) : null; }, selector); }
 }
 
 // ---- one walk per item (same id as in the data file) ---------------------------------------------------------------------------------
 const WALKS = {
+  // ---- Build AC: Fractions of x refinements ----
+  async 'ac-l1-no-moves'(w) {
+    await w.start(); await w.row('1/3x = 11'); await w.see('Cut into');
+    w.at('cut 3, one part, Go, fill'); await w.click('[data-action="mCut"][data-q="3"]'); await w.click('[data-action="mPart"][data-i="0"]'); await w.click(act('mGo'));
+    await w.click('[data-action="mPart"][data-i="1"]'); await w.click('[data-action="mPart"][data-i="2"]'); await w.aaParts('11', '11', '11');
+    w.at('type 33, check'); await w.answer(33); await w.see('Balanced');
+    w.at('Enter for the next problem'); await w.enter(); await wait(w.page, 900);
+    await w.row('1/4x = 9'); await w.notSee('mental math', 'using a move first');
+    if (await w.page.locator('[data-target="answer"][disabled]').count()) throw new Error('x = should be live on the next problem');
+    await w.both('ac-l1-no-moves');
+  },
+  async 'ac-l3-no-moves'(w) {
+    await w.start(); await w.row('2/3x = 6'); await w.see('Cut into');
+    w.at('type 9, check'); await w.answer(9); await w.see('Balanced');
+    w.at('Enter for the next problem'); await w.enter(); await wait(w.page, 900);
+    await w.row('2/5x = 10'); await w.notSee('mental math', 'using a move first');
+    if (await w.page.locator('[data-target="answer"][disabled]').count()) throw new Error('x = should be live on the next problem');
+    await w.both('ac-l3-no-moves');
+  },
+  async 'ac-l2-rule'(w) {
+    await w.start(); await w.row('1/3x = 2');
+    w.at('type 6, check'); await w.answer(6); await w.see('Balanced');
+    w.at('Enter for the next problem'); await w.enter(); await wait(w.page, 900);
+    await w.row('x/4 = 3'); await w.see('Your mental math is very strong.', 'Let’s try solving this next problem using a move first.');
+    await w.both('ac-l2-rule');
+  },
+  async 'ac-model-once'(w) {
+    await w.start(); await w.row('2/3x = 6'); if (!await w.page.locator('.fm-model').count()) throw new Error('the box should draw itself the first time');
+    w.at('Reload'); await w.page.reload(); await wait(w.page, 900);
+    await w.row('2/3x = 6'); if (await w.page.locator('.fm-model').count()) throw new Error('the box should not draw itself a second time');
+    w.at('I’m stuck'); await w.stuck(); await w.see('The whole box is x. Cut it into equal parts'); if (!await w.page.locator('.fm-model').count()) throw new Error('I’m stuck should draw the box');
+    w.at('I’m stuck again'); await w.stuck(); await w.see('⅔x means ⅔ of x: 2 of 3 equal parts make 6. Divide both sides by 2: one part is ⅓x = 3.');
+    await w.both('ac-model-once');
+  },
+  async 'ac-help-l4'(w) {
+    await w.start(); await w.row('2/3x = −10'); if (await w.page.locator('.fm-model').count()) throw new Error('no box at first');
+    w.at('I’m stuck'); await w.stuck(); await w.see('⅔x means ⅔ of x: 2 of 3 equal parts make −10. Divide both sides by 2: one part is ⅓x = −5.');
+    if (await w.page.locator('.fm-model').count()) throw new Error('the first I’m stuck should not draw the box'); await w.both('ac-help-l4-move');
+    w.at('I’m stuck again'); await w.stuck(); if (!await w.page.locator('.fm-model').count()) throw new Error('the second I’m stuck should draw the box');
+    w.at('cut 3, two parts, Go'); await w.click('[data-action="mCut"][data-q="3"]'); await w.click('[data-action="mPart"][data-i="0"]'); await w.click('[data-action="mPart"][data-i="1"]'); await w.click(act('mGo'));
+    if ((await w.page.locator('.fm-brace.is-over').innerText()).trim() !== '−10') throw new Error('a bracket marked −10 should sit over the two parts');
+    await w.see('What does 1 part make?'); await w.both('ac-help-l4');
+  },
+  async 'ac-negative'(w) {
+    await w.start(); await w.row('−2/3x = 12');
+    w.at('I’m stuck'); await w.stuck(); await w.see('Multiply both sides by −1 first.'); await w.notSee('then I can draw'); await w.both('ac-negative-first');
+    w.at('I’m stuck again'); await w.stuck(); await w.see('Multiply both sides by −1 first, then I can draw the box.');
+    if (await w.page.locator('.fm-model').count()) throw new Error('no box before the flip'); await w.both('ac-negative-nobox');
+    w.at('flip, Next'); await w.click(act('flipPick')); await w.enter(); await wait(w.page, 4800); await w.row('2/3x = −12'); await w.click(act('foldNext'));
+    w.at('I’m stuck twice'); await w.stuck(); await w.see('Divide both sides by 2: one part is ⅓x = −6.'); await w.stuck();
+    if (!await w.page.locator('.fm-model').count()) throw new Error('after the flip the box should be drawn'); await w.see('Cut it into equal parts');
+    await w.both('ac-negative');
+  },
+  // the term's frames while the rewrite plays: each frame's text (a stacked fraction reads a/b)
+  async 'ac-toggle-anim'(w) {
+    await w.start(); await w.row('10 = 2/3x');
+    const frames = () => w.page.evaluate(() => [...document.querySelectorAll('.lb-rowwrap.is-rewriteanim:not(.is-settled) .fa-frame')].map((f) => { const c = f.cloneNode(true); for (const s of c.querySelectorAll('.lx-sfrac')) s.replaceWith(`${s.querySelector('.lx-sfrac-top').textContent}/${s.querySelector('.lx-sfrac-bot').textContent}`); return c.textContent.replace(/\s+/g, ''); }).join(' | '));
+    const shown = () => w.page.evaluate(() => [...document.querySelectorAll('.fa-frame')].filter((f) => getComputedStyle(f).display !== 'none' && Number(getComputedStyle(f).opacity) > 0.5).length);
+    w.at('click ⅔x'); await w.click('[data-fx]');
+    const f1 = await frames(); if (f1 !== '2/3x | 2/3x/1 | 2/3·x/1 | 2·x/3·1 | 2x/3') throw new Error(`the frames should run ⅔x … 2x/3: ${f1}`);
+    if (!(await shown())) throw new Error('a frame should be showing while it plays');
+    await wait(w.page, 1700); await w.row('10 = 2x/3'); await w.see('rewrite');
+    w.at('click 2x/3'); await w.click('[data-fx]');
+    const f2 = await frames(); if (f2 !== '2x/3 | 2·x/3 | 2/3·x/1 | 2/3·x/1 | 2/3x') throw new Error(`the frames should run 2x/3 … ⅔x: ${f2}`);
+    await wait(w.page, 1700); await w.row('10 = 2/3x');
+    w.at('click ⅔x, Shift at once'); await w.click('[data-fx]'); await w.page.keyboard.press('Shift'); await wait(w.page, 150);
+    if (await shown()) throw new Error('a key should print the row at once'); await w.row('10 = 2x/3');
+    w.at('Trade places, click on the left'); await w.click('.lx-pgrid .lx-move[data-move="trade"]'); await wait(w.page, 500); await w.row('2x/3 = 10');
+    await w.click('[data-fx]'); const f3 = await frames(); if (!f3.startsWith('2x/3 |')) throw new Error(`it should play on the left too: ${f3}`);
+    await wait(w.page, 1700); await w.row('2/3x = 10');
+    if ((await w.text()).includes('×') && !(await w.page.evaluate(() => [...document.querySelectorAll('.lb-stack')].every((e) => !e.textContent.includes('×'))))) throw new Error('no times sign in the rows');
+    await w.both('ac-toggle-anim');
+    // reduced motion: no frames, the row simply appears
+    const ctx = await w.page.context().browser().newContext({ viewport: { width: 1366, height: 768 }, reducedMotion: 'reduce' });
+    const p2 = await ctx.newPage(); await p2.goto(new URL(w.item.link.query, BASE).href); await wait(p2, 900);
+    await p2.click('[data-fx]'); await wait(p2, 200);
+    const vis = await p2.evaluate(() => [...document.querySelectorAll('.fa-frame')].filter((f) => getComputedStyle(f).display !== 'none').length);
+    await ctx.close(); if (vis) throw new Error('under reduced motion no frame should show');
+  },
+  // a tall pair of parentheses round each stacked thing in the newest work row (or the preview): each at least as tall as what is inside
+  async 'ac-parens'(w) {
+    await w.start(); await w.row('2/3x = 6');
+    w.at('rest on Divide'); await w.page.hover(DIV); await wait(w.page, 600); await w.tallParens('.lx-ghost'); await w.both('ac-parens-preview');
+    w.at('Divide 2, Enter'); await w.divEnter(2); await wait(w.page, 600); await w.tallParens('.lb-work'); await w.row('1/3x = 3');
+    await w.both('ac-parens');
+  },
+  async 'ac-parens-more'(w) {
+    await w.start(); await w.row('−2/3x = 12');
+    w.at('flip, Next'); await w.click(act('flipPick')); await w.enter(); await wait(w.page, 4800); await w.row('2/3x = −12'); await w.tallParens('.lb-work'); await w.both('ac-parens-flip'); await w.click(act('foldNext'));
+    w.at('Multiply, 3'); await w.click(act('multOpen')); await w.click('.mo-opt[data-kind="whole"]'); await w.type(3); await wait(w.page, 300); await w.tallParens('.lx-ghost');
+    w.at('Enter'); await w.enter(); await wait(w.page, 700); await w.row('2x = −36'); await w.tallParens('.lb-work');
+    await w.both('ac-parens-more');
+  },
+  async 'ac-parens-strange'(w) {
+    await w.start(); await w.see('2x + 10 = −4x − 5');
+    w.at('to x = −15/6'); await w.crossTerm('−4x', 'left'); await w.combineTerms('4x', '2x', '6x'); await w.addEnter(-10); await w.combineTerms('−10', '−5', -15); await w.divEnter(6); await w.row('x = −15/6');
+    w.at('−5/2 into each x'); await w.fraction('-5/2');
+    for (let k = 0; k < 4 && await w.page.locator('[data-x][data-action="placeValue"]').count(); k++) await w.drag();
+    await wait(w.page, 400); await w.lines('2(−5/2)+10=−4(−5/2)−5'); await w.tallParens('.sv-checklist');
+    await w.both('ac-parens-strange');
+  },
+  async 'student-fractions-ac'(w) {
+    await w.start(); await w.row('2/3x = −10');
+    w.at('mistake 1: −5'); await w.click(act('focus')); await w.type(-5); await w.enter(); await w.drag();
+    for (let k = 0; k < 6 && !(await w.text()).includes('Not balanced'); k++) await w.enter();
+    await w.see('Not balanced');
+    w.at('Undo'); await w.click(act('undo')); await wait(w.page, 600); await w.see('Divide both sides by 2: one part is ⅓x = −5.');
+    if (await w.page.locator('.fm-model').count()) throw new Error('the hint should name the move, not draw the box'); await w.both('ac-student-part');
+    w.at('Got it, mistake 2: multiply 2'); await w.click('[data-action="spotDismiss"]'); await w.aaMult(2); await wait(w.page, 700); await w.see('x is still cut into parts'); await w.both('ac-student-mult');
+    w.at('Undo'); await w.click(act('undo')); await wait(w.page, 600); await w.click('[data-action="spotDismiss"]').catch(() => {});
+    const n = (await w.rows()).length;
+    w.at('mistake 3: two quick taps'); await w.page.click('[data-fx]'); await wait(w.page, 120); await w.page.click('[data-fx]'); await wait(w.page, 1800);
+    const rs = await w.rows();
+    if (rs.length !== n + 2 || !rs.at(-2).endsWith('2x/3=−10') || !rs.at(-1).endsWith('2/3x=−10')) throw new Error(`two rewrite rows should be written: ${rs.join(' | ')}`);
+    await w.notSee('Press Undo'); await w.both('student-fractions-ac');
+  },
   // ---- Build AA: Fractions of x ----
   async 'aa-model-l1'(w) {
     await w.start(); await w.row('1/3x = 4'); await w.see('Cut into');
@@ -478,9 +608,10 @@ const WALKS = {
   async 'aa-model-help'(w) {
     await w.start(); await w.row('2x/3 = 6');
     if (await w.page.locator('.fm-model').count()) throw new Error('no box should be drawn at first');
-    w.at('I’m stuck'); await w.stuck(); await w.see('Cut it into equal parts'); await w.both('aa-help-model');
-    w.at('I’m stuck again'); await w.stuck(); await w.see('2x/3 means 2x divided by 3. Multiply both sides by 3 to cancel the divide by 3.');
-    await w.both('aa-help-reminder');
+    // (Build AC: on Level 6 the move comes first, then the model)
+    w.at('I’m stuck'); await w.stuck(); await w.see('2x/3 means 2x divided by 3. Multiply both sides by 3 to cancel the divide by 3.');
+    if (await w.page.locator('.fm-model').count()) throw new Error('the first I’m stuck should not draw the box'); await w.both('aa-help-reminder');
+    w.at('I’m stuck again'); await w.stuck(); await w.see('Cut it into equal parts'); await w.both('aa-help-model');
   },
   async 'aa-model-wrong'(w) {
     await w.start(); await w.row('−2/3x = 6');
@@ -488,7 +619,8 @@ const WALKS = {
     for (let k = 0; k < 6 && !(await w.text()).includes('Not balanced'); k++) await w.enter();
     await w.see('Not balanced');
     w.at('Undo'); await w.click(act('undo')); await wait(w.page, 400);
-    await w.see('Let’s model it.'); if (!await w.page.locator('.fm-model').count()) throw new Error('the box should be drawn');
+    // (Build AC: on Level 4 the hint names the move; a minus in front is flipped before the box)
+    await w.see('Multiply both sides by −1 first.'); if (await w.page.locator('.fm-model').count()) throw new Error('no box should be drawn');
     await w.both('aa-model-wrong');
   },
   async 'aa-toggle'(w) {
@@ -497,10 +629,11 @@ const WALKS = {
     const ghost = await w.page.evaluate(() => { const g = document.querySelector('.fx-ghost'); if (!g) return null; const c = g.cloneNode(true); for (const f of c.querySelectorAll('.lx-sfrac')) f.replaceWith(`${f.querySelector('.lx-sfrac-top').textContent}/${f.querySelector('.lx-sfrac-bot').textContent}`); return c.textContent.replace(/\s+/g, ''); });
     if (ghost !== '6=2x/3') throw new Error(`resting on the fraction should show a faint 6 = 2x/3: ${ghost}`);
     await w.both('aa-toggle-ghost');
-    w.at('click it'); await w.click('[data-fx]'); await w.row('6 = 2x/3'); await w.see('rewrite'); await w.both('aa-toggle-over');
-    w.at('click 2x/3'); await w.click('[data-fx]'); await w.row('6 = 2/3x'); await w.both('aa-toggle-times');
+    // (Build AC: each new row is drawn first, about 1.5 s)
+    w.at('click it'); await w.click('[data-fx]'); await wait(w.page, 1700); await w.row('6 = 2x/3'); await w.see('rewrite'); await w.both('aa-toggle-over');
+    w.at('click 2x/3'); await w.click('[data-fx]'); await wait(w.page, 1700); await w.row('6 = 2/3x'); await w.both('aa-toggle-times');
     w.at('Trade places, click on the left'); await w.click('.lx-pgrid .lx-move[data-move="trade"]'); await wait(w.page, 500); await w.row('2/3x = 6');
-    await w.click('[data-fx]'); await w.row('2x/3 = 6');
+    await w.click('[data-fx]'); await wait(w.page, 1700); await w.row('2x/3 = 6');
     const n = (await w.rows()).length;
     w.at('Undo'); await w.click(act('undo')); await wait(w.page, 300);
     if ((await w.rows()).length !== n - 1) throw new Error('Undo should take the last rewrite back');

@@ -6,6 +6,7 @@
 import { html, actionRow } from './addBothMat.js';
 import { equationRow } from './lightScreen.js';
 import { parens, tallParensIn } from './parens.js';
+import { rewritePlaying, animatedTerm, REWRITE_MS } from './rewriteAnim.js';
 import { MINUS } from '../engine/expr.js';
 import { signed, fractionText, factorText, boardText, equationSegs } from '../engine/solveTerms.js';
 
@@ -139,7 +140,9 @@ function fxEl(t, s, o) {
   const bot = strikeBot ? struckText(String(t.den), 'digits', 'lb-fxbot', o) : html('span', 'lb-fxbot', [String(t.den)]);
   const minus = t.coef < 0 ? [o.strike === 'minus' || o.strike === 'all' ? struckText(MINUS, 'all', 'lb-num lb-front', o) : html('span', 'lb-num lb-front', [MINUS])] : [];
   const stack = (top) => html('span', 'lx-sfrac lb-fxfrac', [html('span', 'lx-sfrac-top', top), html('span', 'lx-sfrac-bar'), html('span', 'lx-sfrac-bot', [bot])]);
-  const kids = t.form === 'over' ? [...minus, stack([...(topNum ? [topNum] : []), xel])] : [...minus, stack([topNum]), xel];
+  const ink = t.form === 'over' ? [stack([...(topNum ? [topNum] : []), xel])] : [stack([topNum]), xel];
+  // (the newest rewrite row, just tapped: the change drawn in the term's own place, the minus kept where it is: Build AC)
+  const kids = [...minus, ...(o.anim ? [animatedTerm(ink, t, o.side)] : ink)];
   const words = `${t.coef < 0 ? 'negative ' : ''}${t.form === 'over' ? `${a === 1 ? '' : a}x over ${t.den}` : `${a} over ${t.den} x`}`;
   const el = html('span', `lb-coef lb-fx is-${t.form === 'over' ? 'over' : 'times'}`, kids, { 'aria-label': words });
   // the rewrite toggle (Build AA): the newest equation's fraction, while nothing else is going on
@@ -178,7 +181,7 @@ export const waitingGhost = (v) => html('span', 'lb-xwait', segKids(signed(v)), 
 const charsOf = (list) => list.map((x) => (x.kind === 'frac' || x.kind === 'neg' || x.kind === 'group' ? 5 + charsOf(x.inner) : x.kind === 'times' ? 7 + charsOf(x.inner) : x.kind === 'x' && (x.den ?? 1) > 1 ? 3 : x.kind === 'x' ? ((x.coef ?? 1) > 1 ? 2 : (x.coef ?? 1) < 0 ? String(x.coef).length : 1) : String(signed(x.v)).length + 3)).reduce((a, b) => a + b, 0);
 const eqClass = (chars) => (chars > 30 ? ' is-xlong' : chars > 20 ? ' is-long' : '');
 
-const sideEls = (board, s, o) => { const oo = { ...o, xi: { n: 0 }, mi: { n: 0 } }; return [termsOf(board.left, s, oo), termsOf(board.right, s, oo)]; };
+const sideEls = (board, s, o) => { const oo = { ...o, xi: { n: 0 }, mi: { n: 0 } }; return [termsOf(board.left, s, { ...oo, side: 'left' }), termsOf(board.right, s, { ...oo, side: 'right' })]; };
 const isDiv = (row) => row.shown === 'div';
 // A side as written, inert (the move's preview row). `div`: its fractions in division form (a row made with the Divide button, Build O).
 export const sideTerms = (terms, s, o = {}) => termsOf(terms, s, { live: false, plug: false, ...o });
@@ -271,14 +274,18 @@ export function stackRows(s) {
     const plug = i === plugIdx;
     // (Fractions of x, Build AA: the newest equation's fraction is the rewrite toggle while nothing else is going on)
     const toggle = i === last && s.problem?.kind === 'fracx' && s.stage === 'moves' && !s.sub && !s.needUndo && !s.fail;
-    const [l, r] = sideEls(row.board, s, { live: i === last, plug, div: isDiv(row), toggle });
+    // (the rewrite just tapped plays once, Build AC: view/rewriteAnim.js)
+    const anim = i === last && row.type === 'fold' && Boolean(row.label?.rewrite) && rewritePlaying(rowKey(row, i));
+    const [l, r] = sideEls(row.board, s, { live: i === last, plug, div: isDiv(row), toggle, anim });
     const eq = equationRow(l, r, `${isDiv(row) ? 'is-division ' : ''}` + eqClass(charsOf([...row.board.left, ...row.board.right])));
     eq.setAttribute('role', 'img');
     eq.setAttribute('aria-label', 'The equation');
     const kids = [];                                                // which equation is being checked is said on its own line above the check rows
     if (row.type === 'fold') kids.push(foldTag(row.label));
     kids.push(eq);
-    return html('div', `lb-rowwrap is-settled${row.type === 'fold' ? ' is-fold' : ''}${plug ? ' is-plugrow' : ''}`, kids);
+    const wrap = html('div', `lb-rowwrap${anim ? ' is-rewriteanim' : ' is-settled'}${row.type === 'fold' ? ' is-fold' : ''}${plug ? ' is-plugrow' : ''}`, kids);
+    if (anim) wrap.dataset.settleMs = String(REWRITE_MS + 200);
+    return wrap;
   }).map((el, i) => { el.dataset.rk = rowKey(s.rows[i], i); return el; });
   return markFlips(rows, { newest: true });
 }

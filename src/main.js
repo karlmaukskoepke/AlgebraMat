@@ -50,6 +50,7 @@ import {
 import { createDiagnosticView } from './view/diagnostic.js';
 import { loadDiag, saveDiag, clearDiag, saveOldPlacement } from './diagStore.js';
 import { redrawMat, finishFlips } from './view/keepRows.js';
+import { finishRewrites } from './view/rewriteAnim.js';
 import { chooseSize } from './view/fitSize.js';
 import { nextMove } from './engine/solveit/honest.js';
 import { snapshot, changesSince, SEEN_KEY } from './engine/status.js';
@@ -621,7 +622,7 @@ function earnPlaced(session) {
 }
 
 // a key or a click first finishes a flip's cross-off still playing, then does what it does (Build Q, Part 5)
-for (const type of ['keydown', 'pointerdown']) document.addEventListener(type, () => finishFlips(matRoot), true);
+for (const type of ['keydown', 'pointerdown']) document.addEventListener(type, () => { finishFlips(matRoot); finishRewrites(matRoot); }, true);
 
 matRoot.addEventListener('click', (e) => {
   const t = e.target.closest('[data-action]');

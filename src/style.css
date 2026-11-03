@@ -4214,3 +4214,30 @@ button.lb-divbar.is-calc:hover, button.lb-divbar.is-calc:focus-visible { backgro
 .lb-ppg { color: transparent; }
 .lb-pp-ink { position: absolute; left: 0; right: 0; top: -0.06em; bottom: -0.06em; width: 100%; height: calc(100% + 0.12em); overflow: visible; }
 .lb-pp-ink path { fill: none; stroke: currentColor; stroke-width: 0.1em; stroke-linecap: round; }
+
+/* ---------- Build AC, Part 3: the rewrite toggle drawn (view/rewriteAnim.js). In the new row, the term's printed ink and five frames share
+   one cell; while the row is playing (not settled) the frames show one after another (about 0.3 s each, with a short crossfade) and the
+   printed ink appears when they end. Settled, finished by a key or click, or under reduced motion: only the printed ink. ---------- */
+.fa-grid { display: inline-grid; vertical-align: middle; align-items: center; --fa-t: 0.3s; }
+.fa-grid > * { grid-area: 1 / 1; white-space: nowrap; }
+.fa-grid.is-left > * { justify-self: end; }
+.fa-grid.is-right > * { justify-self: start; }
+.fa-frame { display: none; align-items: center; }
+.fa-dot { margin: 0 0.1em; }
+.lx-sfrac-top .fa-dot, .lx-sfrac-bot .fa-dot { margin: 0 0.06em; }
+.lb-rowwrap.is-rewriteanim:not(.is-settled) .fa-frame { display: inline-flex; opacity: 0; visibility: hidden; animation: fa-frame var(--fa-t) linear calc(var(--fa-t) * var(--fa-i)) both; }
+.lb-rowwrap.is-rewriteanim:not(.is-settled) .fa-frame.is-last { animation-name: fa-frame-last; }
+.lb-rowwrap.is-rewriteanim:not(.is-settled) .fa-real { animation: fa-real calc(var(--fa-t) * 5) step-end both; }
+.lb-rowwrap.is-rewriteanim:not(.is-settled) .fa-lift { display: inline-block; animation: fa-lift var(--fa-t) ease-out both; }
+.lb-rowwrap.is-rewriteanim:not(.is-settled) .fa-new > .lx-sfrac-bar, .lb-rowwrap.is-rewriteanim:not(.is-settled) .fa-new > .lx-sfrac-bot { animation: fa-in var(--fa-t) ease-out both; }
+.lb-rowwrap.is-rewriteanim:not(.is-settled) .fa-drop > .lx-sfrac-bar, .lb-rowwrap.is-rewriteanim:not(.is-settled) .fa-drop > .lx-sfrac-bot { animation: fa-out var(--fa-t) ease-in calc(var(--fa-t) * 3) both; }
+@keyframes fa-frame { 0% { opacity: 0; visibility: visible; } 15% { opacity: 1; } 88% { opacity: 1; } 100% { opacity: 0; visibility: hidden; } }
+@keyframes fa-frame-last { 0% { opacity: 0; visibility: visible; } 25% { opacity: 1; } 100% { opacity: 1; visibility: hidden; } }
+@keyframes fa-real { from { visibility: hidden; } to { visibility: visible; } }
+@keyframes fa-lift { from { transform: none; } to { transform: translateY(-0.32em); } }
+@keyframes fa-in { from { opacity: 0; transform: translateY(0.2em); } to { opacity: 1; transform: none; } }
+@keyframes fa-out { from { opacity: 1; transform: none; } to { opacity: 0; transform: translateY(0.35em); } }
+@media (prefers-reduced-motion: reduce) {
+  .lb-rowwrap.is-rewriteanim .fa-frame { display: none !important; }
+  .lb-rowwrap.is-rewriteanim .fa-real { animation: none !important; visibility: visible !important; }
+}

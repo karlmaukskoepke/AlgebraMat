@@ -74,7 +74,7 @@
     <script>
       // This browser's progress (the keys the app saves under). Sign-in and unsent class-sheet records are left alone.
       const PROGRESS_KEYS = ['mat.v1', 'mat.v1.backup', 'mat.diag.v1', 'mat.diag.v2', 'mat.streaks.v1', 'mat.skills.v1',
-        'mat.lights.v1', 'mat.tour.v1', 'mat.tips.v1', 'mat.seen.v1', 'mat.demo.v1'];   // (Build X: what the menu saw last time, and a test state already applied)
+        'mat.lights.v1', 'mat.tour.v1', 'mat.tips.v1', 'mat.seen.v1', 'mat.demo.v1', 'mat.fxmodel.v1'];   // (Build X: what the menu saw last time, and a test state already applied; Build AC: the box drawn once on this computer)
       function resetProgress() {
         try { PROGRESS_KEYS.forEach((k) => localStorage.removeItem(k)); return true; } catch { return false; }
       }

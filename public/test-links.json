@@ -3,6 +3,190 @@
   "updated": "2026-11-03",
   "checks": [
     {
+      "id": "ac-l1-no-moves",
+      "name": "Fractions of x: Level 1 solved with the box, and no “use a move” on the next problem",
+      "build": "Build AC",
+      "link": {
+        "label": "Open Fractions of x · Level 1",
+        "query": "?pack=fractions-of-x&level=1&seed=6&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Fractions of x, Level 1, on ⅓x = 11, with the box drawn on the right.",
+        "Click 3 under “Cut into”. Click one part, then click Go. Click each of the two empty parts.",
+        "Type 33 in x = and press Enter. Drag the 33 onto the x, then press Enter until the check ends.",
+        "Press Enter once more for the next problem."
+      ],
+      "see": "The check ends Balanced. The next problem, ¼x = 9, opens as usual: no “Your mental math is very strong” pop-up, and x = is not greyed."
+    },
+    {
+      "id": "ac-l3-no-moves",
+      "name": "Fractions of x: Level 3, a correct value typed straight away, and no “use a move”",
+      "build": "Build AC",
+      "link": {
+        "label": "Open Fractions of x · Level 3",
+        "query": "?pack=fractions-of-x&level=3&seed=5&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Fractions of x, Level 3, on ⅔x = 6, with the box drawn.",
+        "Without using the box, type 9 in x = and press Enter. Drag the 9 onto the x, then press Enter until the check ends.",
+        "Press Enter once more for the next problem."
+      ],
+      "see": "The check ends Balanced. The next problem, ⅖x = 10, opens with no “Your mental math is very strong” pop-up, and x = is live."
+    },
+    {
+      "id": "ac-l2-rule",
+      "name": "Fractions of x: Level 2 still asks for a move after a correct value",
+      "build": "Build AC",
+      "link": {
+        "label": "Open Fractions of x · Level 2",
+        "query": "?pack=fractions-of-x&level=2&seed=4&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Fractions of x, Level 2, on ⅓x = 2, with the tip under it.",
+        "Type 6 in x = and press Enter. Drag the 6 onto the x, then press Enter until the check ends.",
+        "Press Enter once more for the next problem."
+      ],
+      "see": "The next problem, x/4 = 3, opens greyed with the pop-up “Your mental math is very strong. Let’s try solving this next problem using a move first.” and x = greyed, as before. (The rule is off only on Levels 1 and 3.)"
+    },
+    {
+      "id": "ac-model-once",
+      "name": "Fractions of x: the box draws itself once on this computer, then I’m stuck on Level 3 gives the box first",
+      "build": "Build AC",
+      "link": {
+        "label": "Open Fractions of x · Level 3",
+        "query": "?pack=fractions-of-x&level=3&seed=5&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Fractions of x, Level 3, on ⅔x = 6, with the box drawn by itself.",
+        "Press the browser’s Reload button (the round arrow), so Level 3 starts again.",
+        "Click I’m stuck.",
+        "Click I’m stuck again."
+      ],
+      "see": "After the reload Level 3 opens on ⅔x = 6 with no box. The first I’m stuck draws the box (“The whole box is x. Cut it into equal parts…”); the second shows “⅔x means ⅔ of x: 2 of 3 equal parts make 6. Divide both sides by 2: one part is ⅓x = 3.” with Divide lit."
+    },
+    {
+      "id": "ac-help-l4",
+      "name": "Fractions of x: on Level 4 I’m stuck names the move first, then draws the box",
+      "build": "Build AC",
+      "link": {
+        "label": "Open Fractions of x · Level 4",
+        "query": "?pack=fractions-of-x&level=4&seed=9&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Fractions of x, Level 4, on ⅔x = −10. No box is drawn.",
+        "Click I’m stuck.",
+        "Click I’m stuck again.",
+        "Click 3 under “Cut into”. Click two parts, then click Go."
+      ],
+      "see": "The first I’m stuck is a pop-up: “⅔x means ⅔ of x: 2 of 3 equal parts make −10. Divide both sides by 2: one part is ⅓x = −5.” with Divide lit. The second draws the box. After Go a bracket marked −10 sits over the two parts and it asks what 1 part makes."
+    },
+    {
+      "id": "ac-negative",
+      "name": "Fractions of x: a minus in front asks for −1 first, then the box",
+      "build": "Build AC",
+      "link": {
+        "label": "Open Fractions of x · Level 4",
+        "query": "?pack=fractions-of-x&level=4&seed=11&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Fractions of x, Level 4, on −⅔x = 12.",
+        "Click I’m stuck.",
+        "Click I’m stuck again.",
+        "Click Flip everything (×(−1)) and press Enter. Wait for the row ⅔x = −12, then click Next.",
+        "Click I’m stuck twice."
+      ],
+      "see": "The first I’m stuck says “Multiply both sides by −1 first.” and the second “Multiply both sides by −1 first, then I can draw the box.”, each with Flip everything lit and no box. After the flip, I’m stuck names dividing by 2 (one part is ⅓x = −6), then draws the box."
+    },
+    {
+      "id": "ac-toggle-anim",
+      "name": "Fractions of x: the rewrite is drawn, both ways, on both sides; a key skips it",
+      "build": "Build AC",
+      "link": {
+        "label": "Open Fractions of x · Level 5",
+        "query": "?pack=fractions-of-x&level=5&seed=10&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Fractions of x, Level 5, on 10 = ⅔x.",
+        "Click the ⅔x and watch the new row for two seconds.",
+        "Click the 2x/3 in the new row and watch again.",
+        "Click the ⅔x in the newest row, and at once press the Shift key.",
+        "Click Trade places (the two curved arrows). Click the 2x/3, now on the left, and watch."
+      ],
+      "see": "The first click writes a row labelled “rewrite”: in about a second and a half the x lifts off, is written over 1, a dot appears (⅔ · x/1), the two join (2·x over 3·1) and 10 = 2x/3 is printed. The second click runs it the other way (2·x over 3, ⅔ · x/1, the /1 drops) and prints 10 = ⅔x. Shift prints the row at once. On the left it plays the same way. Only dots, never a times sign. (On a computer set to reduce motion the row simply appears.)"
+    },
+    {
+      "id": "ac-parens",
+      "name": "Fractions of x: dividing ⅔x = 6 by 2, the parentheses as tall as the fraction",
+      "build": "Build AC",
+      "link": {
+        "label": "Open Fractions of x · Level 3",
+        "query": "?pack=fractions-of-x&level=3&seed=5&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Fractions of x, Level 3, on ⅔x = 6.",
+        "Rest the pointer on Divide (÷).",
+        "Click Divide, type 2 and press Enter."
+      ],
+      "see": "In the preview and in the divide row, the parentheses round ⅔x reach from the top of the 2 to the bottom of the 3, as heavy as the ( ) round the 6 beside them. The row under it reads ⅓x = 3."
+    },
+    {
+      "id": "ac-parens-more",
+      "name": "Tall parentheses in the flip row and the multiply row",
+      "build": "Build AC",
+      "link": {
+        "label": "Open Fractions of x · Level 4",
+        "query": "?pack=fractions-of-x&level=4&seed=11&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Fractions of x, Level 4, on −⅔x = 12.",
+        "Click Flip everything (×(−1)) and press Enter. Wait for the row ⅔x = −12, then click Next.",
+        "Click Multiply (×), click the first option and type 3 (do not press Enter yet). Then press Enter."
+      ],
+      "see": "The flip row reads −1(−⅔x) = −1(12), and the multiply preview and row read 3(⅔x) = 3(−12): in each, the parentheses round the fraction are as tall as it, and those round 12 are the usual size."
+    },
+    {
+      "id": "ac-parens-strange",
+      "name": "Strange solutions: a fraction put into x sits in parentheses as tall as it",
+      "build": "Build AC",
+      "link": {
+        "label": "Open Strange solutions · Level 2",
+        "query": "?pack=strange-solutions&level=2&seed=27&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Strange solutions, Level 2, on 2x + 10 = −4x − 5.",
+        "Drag the −4x across the = onto the left side. Drag the 4x onto the 2x, type 6x, Enter. Click Add, type −10, Enter. Drag the −10 onto the −5, type −15, Enter. Click Divide (÷), type 6, Enter.",
+        "Click the left box after x =, type −5/2 and press Enter. Drag the −5/2 onto each x."
+      ],
+      "see": "The check’s second line reads 2(−5/2) + 10 = −4(−5/2) − 5, each −5/2 stacked, with parentheses as tall as the fraction."
+    },
+    {
+      "id": "student-fractions-ac",
+      "name": "Play it like a student: Fractions of x, Level 4",
+      "build": "Build AC",
+      "link": {
+        "label": "Open Fractions of x · Level 4",
+        "query": "?pack=fractions-of-x&level=4&seed=9&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Fractions of x, Level 4, on ⅔x = −10.",
+        "Mistake 1, one part’s value for x: type −5 in x = and press Enter. Drag the −5 onto the x, press Enter until the check ends, then click Undo. A good response: Not balanced, then a hint naming the move (divide both sides by 2), not the box.",
+        "Click Got it. Mistake 2, multiply by the wrong number: click Multiply (×), the first option, type 2 and press Enter. A good response: the screen greys, it says x is still cut into parts, Undo pulses. Click Undo.",
+        "Mistake 3, tap the fraction twice quickly: click the ⅔x, then at once click the 2x/3 in the new row."
+      ],
+      "see": "Every mistake is answered without red on the work: Not balanced and the divide hint, then “x is still cut into parts” with Undo. The two quick taps write two “rewrite” rows (⅔x = −10 written as 2x/3, then back), the first printed at once by the second tap; nothing waits."
+    },
+    {
       "id": "aa-model-l1",
       "name": "Fractions of x: the box model on Level 1 (a unit fraction)",
       "build": "Build AA",
@@ -57,7 +241,7 @@
     },
     {
       "id": "aa-model-help",
-      "name": "Fractions of x: the model on I’m stuck, then the reminder",
+      "name": "Fractions of x: on Level 6 I’m stuck names the move first, then draws the model",
       "build": "Build AA",
       "link": {
         "label": "Open Fractions of x · Level 6",
@@ -69,11 +253,11 @@
         "Click I’m stuck.",
         "Click I’m stuck again."
       ],
-      "see": "The first click draws the box marked x on the right, asking how many parts the bottom says. The second shows a pop-up: “2x/3 means 2x divided by 3. Multiply both sides by 3 to cancel the divide by 3.” with Multiply lit and its preview on the equation."
+      "see": "The first click shows a pop-up: “2x/3 means 2x divided by 3. Multiply both sides by 3 to cancel the divide by 3.” with Multiply lit and its preview on the equation. The second draws the box marked x on the right, asking how many parts the bottom says. (Since Build AC the move comes first on Levels 2, 4, 5 and 6.)"
     },
     {
       "id": "aa-model-wrong",
-      "name": "Fractions of x: after a wrong value, the model",
+      "name": "Fractions of x: after a wrong value on a negative fraction, −1 first",
       "build": "Build AA",
       "link": {
         "label": "Open Fractions of x · Level 4",
@@ -85,7 +269,7 @@
         "Type 6 in x = and press Enter. Drag the 6 onto the x, then press Next until the check ends.",
         "Click Undo."
       ],
-      "see": "The check ends Not balanced. After Undo the box marked x is drawn on the right, its words starting “Let’s model it.”"
+      "see": "The check ends Not balanced. After Undo a pop-up says “Multiply both sides by −1 first.” with Flip everything lit; no box is drawn. (Since Build AC: on Level 4 the hint names the move, and a minus in front is flipped before the box.)"
     },
     {
       "id": "aa-toggle",
@@ -103,7 +287,7 @@
         "Click Trade places (the two curved arrows). Click the ⅔x, now on the left.",
         "Click Undo."
       ],
-      "see": "Resting on ⅔x shows a faint 6 = 2x/3 under the equation. The click writes a row labelled “rewrite”, 6 = 2x/3; the next click writes 6 = ⅔x again. After Trade places, the click on the left writes 2x/3 = 6; Undo takes that row back."
+      "see": "Resting on ⅔x shows a faint 6 = 2x/3 under the equation. The click writes a row labelled “rewrite”, 6 = 2x/3; the next click writes 6 = ⅔x again. After Trade places, the click on the left writes 2x/3 = 6; Undo takes that row back. (Since Build AC each new row is drawn first, about a second and a half.)"
     },
     {
       "id": "aa-level2",
@@ -3592,6 +3776,29 @@
     {
       "title": "Live",
       "items": [
+        {
+          "name": "Build AC: Fractions of x refinements (2026-11-03)",
+          "about": "Levels 1 and 3 never ask for a move after a correct value; the box is the first help only on Levels 1 and 3 (the move first on 2, 4, 5, 6); a minus in front is flipped before the box is drawn; the rewrite is drawn as a short animation; parentheses are as tall as the fraction inside them; the box draws itself once per computer.",
+          "links": [
+            {
+              "label": "The box again, every time (testers)",
+              "query": "?pack=fractions-of-x&level=1&seed=6&model=auto&nosignin=1",
+              "look": "With model=auto the box draws itself even on a computer that has seen it. A teacher clears the memory by clearing the site’s data."
+            },
+            {
+              "label": "The rewrite, slowly (testers)",
+              "query": "?pack=fractions-of-x&level=5&seed=10&animslow=1&nosignin=1",
+              "reset": true,
+              "look": "Click the ⅔x: the rewrite plays four times slower, about 6 seconds."
+            },
+            {
+              "label": "Level 4: −⅔x = 12, −1 first",
+              "query": "?pack=fractions-of-x&level=4&seed=11&nosignin=1",
+              "reset": true,
+              "look": "I’m stuck asks for Flip everything before it draws the box."
+            }
+          ]
+        },
         {
           "name": "Where students go",
           "about": "Students open the site on GitHub Pages (the link on Karl's website). A push to main shows there about a minute later.",
