@@ -17,8 +17,6 @@ import { boxModelPlay } from './play/boxModelPlay.js';
 import { termGroupLightPlay } from './play/termGroupLightPlay.js';
 import { distributeLightPlay } from './play/distributeLightPlay.js';
 import { valueLightPlay } from './play/valueLightPlay.js';
-import { solveLightPlay } from './play/solveLightPlay.js';
-import { switchPlay } from './play/switchPlay.js';
 import { addBothPlay, divideMovesPlay, flipPlay, twoStepPlay, distSolvePlay, bothSidesPlay, distMorePlay, strangePlay, fractionsPlay } from './play/solveCards.js';
 import { divideNumericPlay } from './play/divideNumericPlay.js';
 import { addBothNumericPlay } from './play/addBothNumericPlay.js';
@@ -74,9 +72,6 @@ const PLAY = {
   boxes: (level) => (level === 2 ? boxModelPlay : LIGHT ? boxLightPlay : boxPlay),   // Level 2 reads a model (no walk)
   'groups-of-terms': LIGHT ? termGroupLightPlay : termGroupPlay,
   value: valueLightPlay,
-  'one-step': solveLightPlay,
-  'two-step': solveLightPlay,
-  switch: switchPlay,
   'divide-it': (level) => (level === 1 ? divideNumericPlay : divideMovesPlay),   // Level 1 is numeric (no x)
   'add-both': (level) => (level === 1 ? addBothNumericPlay : addBothPlay),   // Level 1 is numeric (no x): "See why it works"
   'flip-everything': flipPlay,                                                   // (its Level 1, numbers only, is not built yet: Build J)

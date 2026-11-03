@@ -4,15 +4,10 @@ import {
 } from '../src/engine/solve2.js';
 import { formatEquation as formatAny, checkEquation } from '../src/engine/equation.js';
 import { generateSolve2Level, MAX_C } from '../src/engine/generateSolve2.js';
-import { newSolveLight, reduceSolveLight } from '../src/engine/solveLight.js';
-import { solveFeedbackText } from '../src/view/solveFeedback.js';
-import { twoStepRows } from '../src/view/solve2Rows.js';
 import { PACKS, packById } from '../src/packs/index.js';
 import { newProgress, encodeProgress, decodeProgress } from '../src/engine/progress.js';
 
 const typed = (text) => [...text.replace(/−/g, '-')].map((ch) => (/\d/.test(ch) ? { type: 'digit', digit: Number(ch) } : { type: 'toggleSign' }));
-const answer = (text) => [...typed(text), { type: 'check' }];
-const run = (s, ...actions) => actions.reduce(reduceSolveLight, s);
 
 const PLUS = makeSolve2('ax+b', 3, 6, 5);            // 3x + 6 = 21
 const MINUS = makeSolve2('ax-b', 2, 3, 5);           // 2x − 3 = 7
@@ -117,82 +112,5 @@ describe('the problems', () => {
     progress.packs['two-step'].levels = [true, false, true, true, false, true, true];
     expect(decodeProgress(encodeProgress(progress), PACKS).packs['two-step'].levels).toEqual([true, false, true, true, false, true, true]);
     expect(decodeProgress(encodeProgress(newProgress(PACKS), 10), PACKS).packs['two-step'].levels).toEqual(Array(7).fill(false));
-  });
-});
-
-describe('light mode', () => {
-  it('finishes on a right answer, including a negative one', () => {
-    expect(run(newSolveLight(PLUS), ...answer('5'))).toMatchObject({ stage: 'done', clean: true, finalText: '5' });
-    expect(run(newSolveLight(NEGX), ...answer('−5'))).toMatchObject({ stage: 'done', clean: true, finalText: '−5' });
-  });
-
-  it('puts a wrong answer back in first, with the slip named and its own numbers', () => {
-    let s = run(newSolveLight(PLUS), ...answer('1'));
-    expect(s).toMatchObject({ rung: 1, tag: 'divided-one-term', tried: 1 });
-    const msg = solveFeedbackText(s.feedback);
-    expect(msg).toMatch(/divide every term, including the number/);
-    expect(msg).toContain('3x ÷ 3 = x, 6 ÷ 3 = 2, and 21 ÷ 3 = 7');
-    s = run(s, ...answer('15'));
-    expect(s.rung).toBe(2);
-    expect(solveFeedbackText(s.feedback)).toMatch(/Undo the number first/);
-    s = run(s, ...answer('7'));
-    expect(s.rung).toBe(3);
-    s = run(s, ...answer('5'));
-    expect(s).toMatchObject({ stage: 'done', clean: false });
-    expect(s.supportsShown).toEqual(['check', 'balance', 'undo']);
-  });
-
-  it('says every slip in words, for every form', () => {
-    for (const p of [PLUS, MINUS, FIRST, NEG, MIRROR, NEGX]) {
-      const params = messageParams(p);
-      for (const tag of ['divided-one-term', 'stopped-early', 'skipped-constant', 'constant-wrong-way', 'multiplied', 'untouched', 'sign-flipped', 'sign-lost', 'unmatched']) {
-        expect(solveFeedbackText({ key: `tTag_${tag.replace(/-/g, '_')}`, params }), tag).toMatch(/\S/);
-      }
-      for (const key of ['tCheck', 'tModel', 'tModelWrong', 'tWork', 'tTeach']) expect(solveFeedbackText({ key, params })).toMatch(/\S/);
-    }
-    expect(solveFeedbackText(run(newSolveLight(NEG), { type: 'teach' }).feedback)).toMatch(/flip at the end/);
-    expect(run(newSolveLight(PLUS), { type: 'stuck' }).rung).toBe(2);
-  });
-});
-
-describe('the pictures', () => {
-  it('start from a balance of boxes and counters, constant first', () => {
-    expect(twoStepRows(PLUS, 1)).toEqual([]);
-    const [bal] = twoStepRows(PLUS, 2);
-    expect(bal.left.map((i) => i.type)).toEqual(['box', 'counters']);
-    expect(bal.left[0]).toMatchObject({ count: 3, neg: false });
-    expect(bal.left[1].n).toBe(6);
-    expect(bal.right[0].n).toBe(21);
-    expect(twoStepRows(FIRST, 2)[0].left.map((i) => i.type)).toEqual(['counters', 'box']);        // 5 + 4x: the number first
-    expect(twoStepRows(MIRROR, 2)[0].right.map((i) => i.type)).toEqual(['box', 'counters']);       // x on the right
-    expect(twoStepRows(MIRROR, 2)[0].left[0].n).toBe(21);
-  });
-
-  it('add the opposite of the number to both sides, the pairs cancel; then share; then (negative) flip', () => {
-    const [undo, share, left] = twoStepRows(PLUS, 3);
-    expect(undo.label).toBe('Add −6 to both sides: the pairs cancel');
-    expect(undo.left.map((i) => [i.type, i.sign, i.n, i.struck, i.added])).toEqual([['box', undefined, undefined, undefined, undefined], ['counters', '+', 6, 6, false], ['counters', '-', 6, 6, true]]);
-    expect(undo.right.map((i) => [i.sign, i.n, i.struck, i.added])).toEqual([['+', 21, 6, false], ['-', 6, 6, true]]);   // 6 of the 21 pair off with the 6 negatives
-    expect(share.right[0]).toMatchObject({ type: 'groups', count: 3, size: 5 });
-    expect(left.right[0].n).toBe(5);
-    expect(left.solved).toBe(true);
-    // 2x − 3 = 7: put 3 on both sides
-    const [m] = twoStepRows(MINUS, 3);
-    expect(m.left.map((i) => [i.type, i.sign, i.added])).toEqual([['box', undefined, undefined], ['counters', '-', false], ['counters', '+', true]]);
-    expect(m.right.map((i) => [i.n, i.sign, i.added])).toEqual([[7, '+', false], [3, '+', true]]);
-    // 5 − 2x = −3: negative boxes, add 5 negatives to both sides, share 8 negatives, flip
-    const rows = twoStepRows(NEG, 3);
-    expect(rows).toHaveLength(4);
-    expect(rows[0].left.at(-1)).toMatchObject({ type: 'box', neg: true });   // 5 − 2x: the number first, then the boxes of −x
-  });
-
-  it('a negative coefficient ends with a flip to x', () => {
-    const rows = twoStepRows(NEG, 3);
-    expect(rows.map((r) => r.label)).toEqual(['Add −5 to both sides: the pairs cancel', 'Share the counters equally: 2 boxes, 2 groups', 'What’s left: the opposite of x', 'Flip both sides to the opposite']);
-    expect(rows[1].right[0]).toMatchObject({ count: 2, size: 4, sign: '-' });
-    expect(rows[3].right[0]).toMatchObject({ n: 4, sign: '+' });
-    expect(rows[3].solved).toBe(true);
-    expect(twoStepRows(NEGX, 3).at(-1).right[0]).toMatchObject({ n: 5, sign: '-' });
-    expect(twoStepRows(NEGX, 3).at(-1).solved).toBe(true);
   });
 });
