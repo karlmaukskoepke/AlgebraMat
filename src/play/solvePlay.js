@@ -27,6 +27,7 @@ export function makeSolvePlay(card) {
     padOpen: (s) => card.padOpen(s) && spotOf(s, card.spot)?.kind !== 'error',   // an error waits for Undo: no keypad (Build N)
     owesMove: card.loop.owesMove,                                   // a correct guess at the first state makes the next problem a move
     steps: () => [],
+    format: card.format,                                            // (the problem as the class sheet writes it: a test-out's rows, Build Z)
     newSession: card.newSession,
     reduce: withIntro(withSpotlight(card.layer, card.spot), card.introOpen),
     feedbackText: card.feedbackText,

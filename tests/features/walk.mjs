@@ -218,6 +218,29 @@ class Walk {
       return { left: side('left'), right: side('right') };
     }, sel);
   }
+  // Build Z: from the menu, Two-step equations, a locked level, Try it
+  async zTry(level) {
+    await this.start();
+    this.at('Two-step equations'); await this.click('.card-name[data-card="two-step-equations"]');
+    this.at(`Level ${level}, Try it`); await this.click(`.level-btn[data-try-level="${level}"]`); await this.click('#dialog [data-try]'); await wait(this.page, 700);
+  }
+  // the card's levels, as they show: placed (silver), earned (gold), open, try (locked, Tap to skip ahead)
+  async zStates(want) {
+    const got = await this.page.evaluate(() => [...document.querySelectorAll('.card-view .level-btn')].map((b) => (b.classList.contains('is-earned') ? 'earned'
+      : b.classList.contains('is-placed') ? 'placed' : b.dataset.tryLevel ? 'try' : b.disabled ? 'locked' : 'open')));
+    if (JSON.stringify(got) !== JSON.stringify(want)) throw new Error(`the levels should be ${want.join(', ')} after step "${this.step}", not ${got.join(', ')}`);
+  }
+  // nothing that helps on screen: no pop-up but the check's own, no help button, nothing glowing or flashing, no picture
+  async zNoHelp() {
+    const found = await this.page.evaluate(() => {
+      const out = [];
+      for (const l of document.querySelectorAll('.spot-layer')) if (!l.classList.contains('is-intro')) out.push(`a pop-up: ${l.innerText.slice(0, 60)}`);
+      for (const e of document.querySelectorAll('[data-action="stuck"], [data-action="teach"]')) if (e.offsetParent) out.push('a help button');
+      if (document.querySelector('.nudge-glow, .nudge-still, .nudge-ghost, .is-nudgelayer, .is-idle, .fm-model')) out.push('something glowing, flashing or drawn');
+      return out;
+    });
+    if (found.length) throw new Error(`no help in a try, but after step "${this.step}": ${found.join('; ')}`);
+  }
   async text() { return (await this.page.evaluate(() => document.body.innerText)).replace(/\s+/g, ' '); }
   async see(...words) {                             // every piece of text must be on the screen
     const t = await this.text();
@@ -448,6 +471,84 @@ class Walk {
 
 // ---- one walk per item (same id as in the data file) ---------------------------------------------------------------------------------
 const WALKS = {
+  // ---- Build Z: skip ahead (test out of a locked level) ----
+  async 'z-tap-locked'(w) {
+    await w.start();
+    w.at('Two-step equations'); await w.click('.card-name[data-card="two-step-equations"]');
+    for (let l = 2; l <= 7; l++) if (!(await w.page.locator(`.level-btn[data-try-level="${l}"]`).innerText()).includes('Tap to skip ahead')) throw new Error(`Level ${l} should say Tap to skip ahead`);
+    await w.both('z-locked');
+    w.at('Level 3'); await w.click('.level-btn[data-try-level="3"]');
+    await w.see('Two-step equations · Level 3', 'Want to try it? Solve 2 problems here to skip ahead.', 'Not now', 'Try it'); await w.notSee('second');
+    await w.both('z-ask');
+    w.at('Not now'); await w.click('#dialog [data-close]');
+    if (await w.page.locator('#dialog[open]').count()) throw new Error('the panel should close');
+    w.at('All sections, the arrow beside Divide it'); await w.click('[data-back]'); await w.click('[data-chev="divide-it"]');
+    w.at('point at Level 3'); await w.page.hover('.lv-pop:not([hidden]) .pop-level[data-try-level="4"]'); await wait(w.page, 400);
+    await w.see('Finish Level 2 to open this, or tap to skip ahead.');
+    await w.both('z-popup-row');
+    w.at('click Level 3'); await w.click('.lv-pop:not([hidden]) .pop-level[data-try-level="4"]');
+    await w.see('Divide it · Level 3', 'Want to try it? Solve 2 problems here to skip ahead.');
+  },
+  async 'z-pass'(w) {
+    await w.zTry(3); await w.row('24 = 9 + 5x'); await w.see('Problem 1 of 2');
+    if (await w.page.locator('[data-action="stuck"]:visible, [data-action="teach"]:visible').count()) throw new Error('no I’m stuck or Teach me in a try');
+    if (!(await w.page.locator('[data-action="undo"]:visible').count()) || !(await w.page.locator('[data-action="startOver"]:visible').count())) throw new Error('Undo and Start over should be there');
+    await w.both('z-problem-1-of-2');
+    w.at('type 3, check'); await w.answer(3); await w.see('Balanced');
+    w.at('Enter'); await w.enter(); await wait(w.page, 600); await w.row('12 = 2 + 5x'); await w.see('Problem 2 of 2');
+    w.at('type 2, check'); await w.answer(2); await w.see('Balanced', '2 of 2 balanced!');
+    w.at('wait two seconds'); await wait(w.page, 2200);
+    await w.see('You skipped ahead! Do one more problem on Level 3 to make it gold.');
+    await w.zStates(['placed', 'placed', 'placed', 'open', 'try', 'try', 'try']);
+    await w.both('z-pass');
+  },
+  async 'z-fail'(w) {
+    await w.zTry(5); await w.row('6 − 5x = −14');
+    w.at('type 9, check'); await w.click(act('focus')); await w.type(9); await w.enter(); await w.drag();
+    for (let k = 0; k < 8 && !(await w.text()).includes('Not balanced'); k++) await w.enter();
+    await w.see('Not balanced', 'This try is over.');
+    await w.shot('z-not-balanced-768');                     // (one size: the panel follows in 1.5 s)
+    w.at('Enter twice more, wait two seconds'); await w.enter(2); await wait(w.page, 2200);   // (Enter never presses a button on the panel)
+    await w.see('Not yet.', 'Try Level 1 first.', 'x = 9 did not balance.', 'Go to Level 1', 'Try again', 'Pack map');
+    await w.both('z-fail');
+    w.at('Try again'); await w.click('[data-go="retry"]'); await wait(w.page, 600);
+    await w.row('11 − 4x = −1'); await w.see('Problem 1 of 2');
+  },
+  async 'z-giveup'(w) {
+    await w.zTry(4); await w.row('12 + 2x = 28');
+    w.at('Give up'); await w.click('[data-giveup]');
+    await w.see('Not yet.', 'Try Level 1 first.'); await w.notSee('did not balance');
+    w.at('Pack map'); await w.click('[data-go="map"]'); await wait(w.page, 500);
+    await w.zStates(['open', 'try', 'try', 'try', 'try', 'try', 'try']);
+    await w.both('z-giveup');
+  },
+  async 'z-gold'(w) {
+    await w.zTry(3); await w.answer(3); await w.enter(); await wait(w.page, 600); await w.answer(2); await wait(w.page, 2200);
+    await w.zStates(['placed', 'placed', 'placed', 'open', 'try', 'try', 'try']);
+    await w.both('z-silver');
+    w.at('Level 3 (silver)'); await w.click('.card-view .level-btn[data-level="3"]'); await wait(w.page, 600);
+    await w.row('24 = 9 + 5x');
+    if (!(await w.page.locator('[data-action="stuck"]:visible').count())) throw new Error('I’m stuck should be back on the level itself');
+    w.at('type 3, check'); await w.answer(3); await w.see('Level 3 earned!');
+    w.at('Packs, Two-step equations'); await w.click('#back'); await wait(w.page, 400); await w.click('.card-name[data-card="two-step-equations"]');
+    await w.zStates(['placed', 'placed', 'earned', 'open', 'try', 'try', 'try']);
+    await w.both('z-gold');
+  },
+  async 'z-student'(w) {
+    await w.zTry(3); await w.row('24 = 9 + 5x');
+    w.at('S, then T'); await w.page.keyboard.press('s'); await wait(w.page, 300); await w.page.keyboard.press('t'); await wait(w.page, 300);
+    await w.zNoHelp();
+    w.at('10 seconds of nothing'); await w.idle(10500); await w.zNoHelp();
+    w.at('Add, 9, Enter'); await w.addEnter(9); await wait(w.page, 2200); await w.zNoHelp();
+    await w.row('24 + 9 = 18 + 5x');
+    w.at('Undo'); await w.click(act('undo')); await wait(w.page, 500); await w.zNoHelp(); await w.row('24 = 9 + 5x');
+    await w.both('z-student-undo');
+    w.at('solve both'); await w.answer(3); await w.enter(); await wait(w.page, 600); await w.answer(2); await wait(w.page, 2200);
+    w.at('Level 3 again'); await w.click('.card-view .level-btn[data-level="3"]'); await wait(w.page, 600);
+    if (await w.page.locator('#dialog[open]').count()) throw new Error('a placed level opens itself, not another try');
+    await w.see('TWO-STEP EQUATIONS · Level 3'); await w.row('24 = 9 + 5x');
+    if (!(await w.page.locator('[data-action="stuck"]:visible').count())) throw new Error('I’m stuck should be back');
+  },
   // ---- Build AC: Fractions of x refinements ----
   async 'ac-l1-no-moves'(w) {
     await w.start(); await w.row('1/3x = 11'); await w.see('Cut into');

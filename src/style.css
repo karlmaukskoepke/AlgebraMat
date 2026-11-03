@@ -4241,3 +4241,37 @@ button.lb-divbar.is-calc:hover, button.lb-divbar.is-calc:focus-visible { backgro
   .lb-rowwrap.is-rewriteanim .fa-frame { display: none !important; }
   .lb-rowwrap.is-rewriteanim .fa-real { animation: none !important; visibility: visible !important; }
 }
+
+/* ---------- Build Z: test out of a locked level ---------- */
+/* A locked level on a Solve it card: still greyed and dashed like a locked row, but a button ("Tap to skip ahead") */
+.home .btn.level-btn.is-tryable { color: #6f6a5f; background: #efede6; border-style: dashed; border-color: #9a958a; cursor: pointer; }
+.home .btn.level-btn.is-tryable:hover, .home .btn.level-btn.is-tryable:focus-visible { border-color: var(--ink); color: var(--ink); }
+.level-try { display: block; font-size: 14px; font-weight: 700; color: #3c4650; text-decoration: underline; text-underline-offset: 3px; }
+.pop-level.is-locked[data-try-pack] { cursor: pointer; }
+.pop-level.is-locked[data-try-pack]:hover { border-color: var(--ink); color: var(--ink); }
+/* The panel a locked level opens */
+.testout-ask h2 { margin: 0 0 8px; font-size: 22px; }
+.testout-ask-text { margin: 0 0 18px; font-size: 22px; font-weight: 700; line-height: 1.35; }
+/* No help during an attempt: the help buttons are not there at all */
+#play.is-testout [data-action="stuck"], #play.is-testout [data-action="teach"] { display: none !important; }
+/* The bar: "Skip ahead · Level 3", "Problem 1 of 2", Give up. Over the header's thin strip, so the Mat keeps all its room. */
+.testout-bar {
+  position: fixed; top: 6px; left: 50%; transform: translateX(-50%); z-index: 55; display: flex; align-items: center; gap: 14px;
+  padding: 6px 8px 6px 18px; max-width: calc(100vw - 32px); background: #fff; border: 2px solid var(--ink); border-radius: 999px;
+  box-shadow: 0 3px 10px rgb(0 0 0 / 0.12); font: 700 17px 'Lexend', system-ui, sans-serif; color: var(--ink); white-space: nowrap;
+}
+.testout-bar[hidden] { display: none; }
+.testout-tag { color: #4a4f57; font-weight: 600; }
+.testout-count { font-size: 19px; font-weight: 800; }
+.testout-bar .testout-giveup { min-height: 0; padding: 6px 14px; font-size: 16px; }
+.testout-bar.is-pass { border-color: var(--edge-silver); background: var(--metal-silver); padding-right: 18px; }
+.testout-bar.is-fail { padding-right: 18px; }
+@media (max-width: 600px) { .testout-tag { display: none; } }
+/* A fail, in place of the Mat */
+.testout-done .testout-suggest { font-size: 28px; font-weight: 800; }
+.testout-done .testout-small { font-size: 18px; color: #3c4650; }
+#play.is-testout #title { visibility: hidden; }   /* (the bar names the level) */
+.home-note.is-warm {
+  display: inline-block; margin: 6px 0 4px; padding: 10px 22px; font-size: 24px; font-weight: 800; color: var(--ink);
+  background: var(--metal-silver); border: 2px solid var(--edge-silver); border-radius: 14px;
+}

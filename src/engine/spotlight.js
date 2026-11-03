@@ -9,11 +9,13 @@
 // applied to the state Undo returned to (it may also set the card's own outline, `s.hint`). The pop-up's text is the line's message
 // (`s.feedback`); the line itself then shows the prompt. No DOM here.
 
+import { noHelp } from './noHelp.js';
+
 const STARTS_THE_MOVE = new Set(['choose', 'go', 'take', 'stuck', 'teach', 'check', 'digit', 'toggleSign', 'backspace', 'setAmount', 'multOpen', 'multPick', 'divPick']);
 
 // The spotlight the screen draws for this state, or null.
 export function spotOf(s, card) {
-  if (s.stage === 'done') return null;
+  if (s.stage === 'done' || noHelp()) return null;                 // a test-out shows no spotlight of any kind (Build Z)
   const err = card.error(s);
   if (err) return { kind: 'error', ...err };
   if (s.spot?.kind === 'hint') return s.spot;
@@ -24,6 +26,7 @@ export function withSpotlight(reduce, card) {
   return (state, action) => {
     const err = state.stage === 'done' ? null : card.error(state);
     if (err) {
+      if (action.type === 'startOver' && noHelp()) return reduce(state, action);  // (in a test-out Start over stays too: Build Z)
       if (action.type !== 'undo') return state;                                  // Undo is the only way out
       const before = state.reds ?? 0;
       let s = err.clear ? structuredClone(state) : reduce(state, action);

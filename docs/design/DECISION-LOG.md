@@ -515,3 +515,25 @@ Its notes: "Improper fractions are full credit, no mixed numbers" and "x can be 
    synced, not on the class sheet); if storage is refused it is shown each time. `?model=auto` brings it back for testers. On a shared
    Chromebook only the first student to reach Level 1 (or Level 3) sees it drawn by itself.
 7. **The old Two-step item stays removed** (Karl's answer to Build AA).
+
+## 2026-11-01: test out (Karl; built in Build Z)
+
+1. **Students can skip ahead on their own by showing they can do it.** Any student can tap a locked level on a Solve it or Solve it Plus
+   card (in the card's level list or its level popup). A small panel asks "Want to try it? Solve 2 problems here to skip ahead." with
+   Try it and Not now. No timer, no countdown. Strange solutions' hidden Levels 4-5 are not displayed, so they cannot be tried; "See why
+   it works" is not a level here. Count it and Build it are not changed.
+2. **The bar is two independent problems** from that level, fresh problems each attempt. **Independent** means the first value the
+   student checks (a guess before x is alone, or the final value) is right. A wrong value ends the attempt; so does Give up.
+3. **No scaffolds in a test-out**, as in the placement quiz: no I'm stuck, no Teach me, no model pictures, no nudges, no hints after Undo,
+   no spotlights or messages beyond the check's Balanced or Not balanced. Undo and Start over stay (they are not help); the moves, the
+   previews and the check work as normal.
+4. **A pass places** (silver), it does not earn: the level tried and every displayed level below it become placed, the next level opens,
+   and the student is taken to the card with a short, warm message. The student earns gold with one extra problem on the level (Build X's
+   rule). Placed counts as done for opening the next level.
+5. **A fail costs nothing:** "Not yet. Try Level N first." (N is the highest level the student has open), the level stays locked, and the
+   student can try again at once, as often as they like, with new problems each time.
+6. **Two new class-sheet words, `test-out-pass` and `test-out-fail`.** Each problem of an attempt is logged as a usual per-problem row
+   (level, answers and tags) with the attempt's word in its Supports, so the sheet shows the topic's level from a test-out instead of
+   leaving a gap. The placed credit goes to the sheet's placed column as Build X defined it.
+7. **Eventually (not built):** a chain of test-outs as an adaptive per-card placement; a limited scaffold set in a test-out; a teacher
+   switch to open all levels on a device.

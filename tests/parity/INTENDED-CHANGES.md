@@ -921,6 +921,27 @@ shorter than the fraction inside them, Part 4; or the change is the build's own,
 | Fractions of x Levels 1 and 3: the problem after a correct value with no move | the forced-move pop-up | the next problem as usual | Part 1 |
 | Fractions of x Levels 1 and 3, a second run on the same computer | the box drawn by itself | no box until I'm stuck | Part 5 |
 
+## Build Z (2026-11-03): test out of a locked level
+
+Problems, save codes, class-sheet records for existing progress, the 25 scripted runs and the 70 recorded screens: unchanged (the harness
+lists nothing new; none of the recorded states is the main menu or a test-out). The no-help switch is off outside a test-out, so every play
+screen is as before. The screens that change are outside the recorded set, one per card with locked levels (the card's levels as numbered on
+screen; Count it and Build it cards are unchanged):
+
+| Screen (not recorded) | Before | After | Why |
+|---|---|---|---|
+| Add to both sides: the card view (a fresh student: Levels 2-5) and its level popup | greyed, disabled buttons “Locked”; the popup row's note “Finish Level N to open this.”, a tap shows the note | dashed buttons “Locked” and “Tap to skip ahead” that open the panel; the popup row's note “…, or tap to skip ahead.”, a tap opens the panel | Part 1, item 1 |
+| Divide it: the card view (a fresh student: Levels 2-5) and its level popup | greyed, disabled buttons “Locked”; the popup row's note “Finish Level N to open this.”, a tap shows the note | dashed buttons “Locked” and “Tap to skip ahead” that open the panel; the popup row's note “…, or tap to skip ahead.”, a tap opens the panel | Part 1, item 1 |
+| Flip everything: the card view (a fresh student: Levels 2-5) and its level popup | greyed, disabled buttons “Locked”; the popup row's note “Finish Level N to open this.”, a tap shows the note | dashed buttons “Locked” and “Tap to skip ahead” that open the panel; the popup row's note “…, or tap to skip ahead.”, a tap opens the panel | Part 1, item 1 |
+| Fractions of x: the card view (a fresh student: Levels 2-6) and its level popup | greyed, disabled buttons “Locked”; the popup row's note “Finish Level N to open this.”, a tap shows the note | dashed buttons “Locked” and “Tap to skip ahead” that open the panel; the popup row's note “…, or tap to skip ahead.”, a tap opens the panel | Part 1, item 1 |
+| Two-step equations: the card view (a fresh student: Levels 2-7) and its level popup | greyed, disabled buttons “Locked”; the popup row's note “Finish Level N to open this.”, a tap shows the note | dashed buttons “Locked” and “Tap to skip ahead” that open the panel; the popup row's note “…, or tap to skip ahead.”, a tap opens the panel | Part 1, item 1 |
+| Distribute, combine, solve: the card view (a fresh student: Levels 2-5) and its level popup | greyed, disabled buttons “Locked”; the popup row's note “Finish Level N to open this.”, a tap shows the note | dashed buttons “Locked” and “Tap to skip ahead” that open the panel; the popup row's note “…, or tap to skip ahead.”, a tap opens the panel | Part 1, item 1 |
+| Variables on both sides: the card view (a fresh student: Levels 2-5) and its level popup | greyed, disabled buttons “Locked”; the popup row's note “Finish Level N to open this.”, a tap shows the note | dashed buttons “Locked” and “Tap to skip ahead” that open the panel; the popup row's note “…, or tap to skip ahead.”, a tap opens the panel | Part 1, item 1 |
+| Distribute more: the card view (a fresh student: Levels 2-5) and its level popup | greyed, disabled buttons “Locked”; the popup row's note “Finish Level N to open this.”, a tap shows the note | dashed buttons “Locked” and “Tap to skip ahead” that open the panel; the popup row's note “…, or tap to skip ahead.”, a tap opens the panel | Part 1, item 1 |
+| Strange solutions: the card view (a fresh student: Levels 2-3 (4-5 stay hidden)) and its level popup | greyed, disabled buttons “Locked”; the popup row's note “Finish Level N to open this.”, a tap shows the note | dashed buttons “Locked” and “Tap to skip ahead” that open the panel; the popup row's note “…, or tap to skip ahead.”, a tap opens the panel | Part 1, item 1 |
+| The play screen during a test-out (new) | | the bar “Skip ahead · Level N · Problem 1 of 2 · Give up”, the title hidden, no I'm stuck or Teach me, two problem dots | Part 1, item 2 |
+| The fail panel (new) and the pass message on the card (new) | | “Not yet. Try Level N first.”; “You skipped ahead! Do one more problem on Level N to make it gold.” | Part 1, items 4-5 |
+
 <!-- history: nothing below this line is read by the harness -->
 
 ## History: screen changes accepted by the re-baseline of 2026-10-24 (Build O, Part 0)

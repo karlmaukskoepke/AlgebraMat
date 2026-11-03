@@ -131,7 +131,7 @@ const wait = (page, ms) => page.waitForTimeout(ms);
     expect(info.rows[2].text).toContain('One problem earns it');
     expect(info.rows[3].cls).toContain('is-current');
     expect(info.rows[4].text).toBe('Level 5 all mixed');                      // (greyed, with a lock; its note shows on pointing)
-    expect(info.rows[4].label).toBe('Level 5, all mixed, locked. Finish Level 4 to open this.');
+    expect(info.rows[4].label).toBe('Level 5, all mixed, locked. Finish Level 4 to open this, or tap to skip ahead.');   // (a Solve it card: Build Z)
     expect(info.rows[4].locked).toBe('6');
     expect(info.rows[5].text).toBe('? See why it works');
     expect(await page.locator('.card-chev[data-chev="divide-it"]').getAttribute('aria-expanded')).toBe('true');
@@ -223,7 +223,7 @@ const wait = (page, ms) => page.waitForTimeout(ms);
     await context.close();
   }, 60000);
 
-  it('works on a touch screen: the chevron opens and closes the popup, a tap outside closes it, a tap on a name opens the card, a locked row shows its note', async () => {
+  it('works on a touch screen: the chevron opens and closes the popup, a tap outside closes it, a tap on a name opens the card, a locked row shows its note (Count it) or asks to skip ahead (Solve it)', async () => {
     const { page, context } = await open('&demo=menu', { hasTouch: true, isMobile: true });
     expect(await page.evaluate(() => matchMedia('(hover: none)').matches)).toBe(true);
     const chev = await page.locator('.card-chev[data-chev="flip-everything"]').boundingBox();
@@ -233,13 +233,23 @@ const wait = (page, ms) => page.waitForTimeout(ms);
     expect(await popOpen(page)).toBe('flip-everything');
     const info = await popInfo(page);
     expect(info.inside).toBe(true);
-    // a tap on a locked row shows its note and keeps the popup
+    // a tap on a locked row of a Solve it card asks to skip ahead (Build Z): the popup goes, the panel opens; Not now closes it
+    await page.tap('.lv-pop:not([hidden]) .pop-level.is-locked');
+    await wait(page, 250);
+    expect(await popOpen(page)).toBe(null);
+    expect(await page.locator('#dialog[open]').innerText()).toContain('Want to try it? Solve 2 problems here to skip ahead.');
+    await page.tap('#dialog [data-close]');
+    await wait(page, 200);
+    // on a Count it card a tap on a locked row still shows its note and keeps the popup
+    await page.tap('.card-chev[data-chev="lasso"]');
+    await wait(page, 250);
     await page.tap('.lv-pop:not([hidden]) .pop-level.is-locked', { force: true });   // (aria-disabled: Playwright waits for it to be enabled; a finger does not)
     await wait(page, 200);
-    expect(await popOpen(page)).toBe('flip-everything');
+    expect(await popOpen(page)).toBe('lasso');
     expect(await page.locator('.lv-pop:not([hidden]) .pop-level.is-tipping .pop-tip').count()).toBe(1);
+    expect(await page.locator('#dialog[open]').count()).toBe(0);
     // a second tap on the chevron closes it
-    await page.tap('.card-chev[data-chev="flip-everything"]');
+    await page.tap('.card-chev[data-chev="lasso"]');
     await wait(page, 250);
     expect(await popOpen(page)).toBe(null);
     // a tap outside closes it

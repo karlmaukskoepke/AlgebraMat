@@ -55,6 +55,14 @@ import { chooseSize } from './view/fitSize.js';
 import { nextMove } from './engine/solveit/honest.js';
 import { snapshot, changesSince, SEEN_KEY } from './engine/status.js';
 import { demoProgress, demoSeen } from './engine/demo.js';
+import {
+  canTestOut, testOutSeed, testOutProblems, ALL_TAUGHT, checkResult, quiet, HELP_ACTIONS, passCredit, suggestedLevel, attemptRecords,
+  PASS_WORD, FAIL_WORD, TEST_OUT_PROBLEMS,
+} from './engine/testOut.js';
+import { setNoHelp } from './engine/noHelp.js';
+import { holdRecords, heldRecords, appendRecords } from './lightStore.js';
+import { closeFirst } from './view/visit.js';
+import { askTestOut, renderTestOutBar, renderTestOutFail, passNote } from './view/testOut.js';
 
 const $ = (id) => document.getElementById(id);
 
@@ -117,7 +125,7 @@ try { navigator.storage?.persist?.(); } catch { /* not supported: nothing to do 
 let play = null; // { pack, adapter, level, seed, problems, index, session, finished }
 
 function saveProgress() {
-  const current = play && !play.finished
+  const current = play && !play.finished && !play.testOut      // (a test-out is never resumed: Build Z)
     ? { pack: play.pack.id, level: play.level, seed: play.seed, index: play.index }
     : null;
   try {
@@ -212,10 +220,11 @@ try { localStorage.removeItem('mat.section.v1'); } catch { /* storage blocked */
 const loadSeen = () => { try { return JSON.parse(localStorage.getItem(SEEN_KEY)); } catch { return null; } };
 const saveSeen = (seen) => { try { localStorage.setItem(SEEN_KEY, JSON.stringify(seen)); } catch { /* storage blocked */ } };
 
-function goHome({ keepView = false } = {}) {
+function goHome({ keepView = false, openCard = null } = {}) {
   endTour();
   endDragDemo();
   endQuiz();
+  endTestOut();
   clearTimeout(nextTimer);
   play = null;
   persist();
@@ -233,11 +242,15 @@ function goHome({ keepView = false } = {}) {
     onDiagnostic: (id) => startDiagnostic(id),
     onFluency: startFluency,
     onPlay: startLevel,
+    onTestOut: offerTestOut,
+    canTry: (packId, level) => canTestOut(progress, packById(packId), level, SECTIONS),
+    openCard,
     onSaveCode: CODES ? () => showSaveCode(encodeProgress(progress)) : null,
     onEnterCode: CODES ? () => askForCode(restoreFromCode) : null,
     onAccount: () => showAccount(sync, () => { if (!$('home').hidden) goHome({ keepView: true }); }),
     account: sync.status(),
     note: homeNote ?? (store.available ? null : STORAGE_NOTE),
+    noteWarm: Boolean(homeNote && openCard),                    // (a test-out passed: the warm message, big)
   });
   showScreen('home');
 }
@@ -257,6 +270,7 @@ function startLevel(packId, level, resume = null) {
   endTour();
   endDragDemo();
   endQuiz();
+  endTestOut();
   clearTimeout(nextTimer);
   const pack = packById(packId);
   const adapter = adapterFor(pack.id, level);
@@ -290,6 +304,7 @@ function startFluency(id) {
   endTour();
   endDragDemo();
   endQuiz();
+  endTestOut();
   clearTimeout(nextTimer);
   play = null;
   let state = newFluency(id, newSeed());
@@ -325,6 +340,7 @@ function startDiagnostic(section, retake = false) {
   endTour();
   endDragDemo();
   endQuiz();
+  endTestOut();
   clearTimeout(nextTimer);
   play = null;
   if (retake) clearDiag(section);
@@ -358,10 +374,153 @@ function startDiagnostic(section, retake = false) {
 
 function dispatch(action) {
   if (!play || play.finished) return;
+  if (play.testOut) return testOutDispatch(action);
   if (action.type === 'next') return nextProblem();
   const before = play.session;
   play.session = play.adapter.reduce(before, action);
   if (play.session !== before) render(before);
+}
+
+// ---------- Test out (Build Z): two problems of a locked level, with no help ----------
+// play.testOut = { attempt, over: null | 'pass' | 'fail', timer }. The no-help switch is on for as long as the attempt is on screen.
+
+const levelText = (pack, level) => `Level ${levelNumber(pack, level)}`;
+const RESULT_WAIT = 1500;          // the check's Balanced or Not balanced stays on screen this long (any key or click goes on at once)
+
+function offerTestOut(packId, level) {
+  const pack = packById(packId);
+  if (!canTestOut(progress, pack, level, SECTIONS)) return;
+  askTestOut({ title: pack.title, levelText: levelText(pack, level) }, () => startTestOut(packId, level, 0));
+}
+
+function startTestOut(packId, level, attempt) {
+  endTour();
+  endDragDemo();
+  endQuiz();
+  endTestOut();
+  clearTimeout(nextTimer);
+  const pack = packById(packId);
+  const adapter = adapterFor(pack.id, level);
+  const seed = testOutSeed(fixedSeed, attempt, newSeed);
+  const problems = levelled(testOutProblems(pack, level, seed), level);
+  const flags = ALL_TAUGHT();
+  setNoHelp(true);
+  holdRecords(true);
+  closeFirst();                                     // (no "Find the value of x." pop-up either)
+  $('play').classList.add('is-testout');
+  play = {
+    pack, adapter, level, seed, problems, index: 0, flags, finished: false, practicing: false, streak: 0, best: 0,
+    session: quiet(adapter.newSession(problems[0], { flags, forceMove: false })),
+    testOut: { attempt, over: null, timer: null },
+  };
+  useControls(adapter);
+  useMat(adapter);
+  $('title').textContent = `${pack.title.toUpperCase()} · ${levelText(pack, level)}`;
+  $('practice').hidden = true;
+  persist();
+  showScreen('play');
+  render();
+  drawTestOutBar();
+}
+
+function drawTestOutBar() {
+  if (!play?.testOut) return;
+  renderTestOutBar($('testout-bar'), {
+    index: play.index, total: TEST_OUT_PROBLEMS, levelText: levelText(play.pack, play.level), over: play.testOut.over,
+    onGiveUp: () => endAttempt('fail', { gaveUp: true }),
+  });
+}
+
+function endTestOut() {
+  if (play?.testOut && !play.testOut.over) logAttempt('fail');           // left in the middle (← Packs): logged as a give-up
+  setNoHelp(false);
+  holdRecords(false);
+  $('play').classList.remove('is-testout');
+  $('testout-bar').hidden = true;
+  if (play?.testOut) { clearTimeout(play.testOut.timer); play.testOut.skip?.(); }
+}
+
+function testOutDispatch(action) {
+  const t = play.testOut;
+  if (t.over) { if (action.type === 'next' && t.over === 'pass') t.go?.(); return; }
+  if (HELP_ACTIONS.has(action.type)) return;                                  // no I'm stuck, no Teach me
+  if (action.type === 'next') {
+    if (checkResult(play.session) !== 'right' || play.index + 1 >= play.problems.length) return;
+    play.index += 1;
+    play.session = quiet(play.adapter.newSession(play.problems[play.index], { flags: play.flags, forceMove: false }));
+    play.fit = null;
+    render();
+    drawTestOutBar();
+    return;
+  }
+  const before = play.session;
+  const next = play.adapter.reduce(before, action);
+  if (next === before) return;
+  play.session = quiet(next);
+  render(before);
+  const result = checkResult(play.session);
+  if (result === 'wrong') endAttempt('fail', { typed: play.session.answers.at(-1)?.typed ?? null });
+  else if (result === 'right' && play.index + 1 >= play.problems.length) endAttempt('pass');
+}
+
+// The attempt is over: its rows go to the class sheet with the attempt's word; a pass places the levels. The result shows after the check
+// has been on screen a moment (a give-up at once).
+function endAttempt(outcome, { typed = null, gaveUp = false } = {}) {
+  const t = play.testOut;
+  if (t.over) return;
+  const { pack, level } = play;
+  logAttempt(outcome);
+  drawTestOutBar();
+  const show = outcome === 'pass'
+    ? () => { homeNote = passNote(levelText(pack, level)); goHome({ openCard: pack.id }); homeNote = null; }
+    : () => showTestOutFail(typed);
+  let done = false;
+  const go = () => {
+    if (done) return;
+    done = true;
+    clearTimeout(t.timer);
+    window.removeEventListener('pointerdown', skip, true);
+    window.removeEventListener('keydown', skip, true);
+    if (play?.testOut === t) show();
+  };
+  const skip = (e) => { if (e?.target?.closest?.('#back')) return; e?.preventDefault?.(); e?.stopPropagation?.(); go(); };
+  t.go = go;
+  t.skip = () => { done = true; window.removeEventListener('pointerdown', skip, true); window.removeEventListener('keydown', skip, true); };
+  if (gaveUp) return go();
+  t.timer = setTimeout(go, RESULT_WAIT);
+  setTimeout(() => { if (!done) { window.addEventListener('pointerdown', skip, true); window.addEventListener('keydown', skip, true); } }, 0);
+}
+
+// The attempt's rows (each problem's usual record, the attempt's word in its supports) and, for a pass, the placed levels.
+function logAttempt(outcome) {
+  const t = play.testOut;
+  const { pack, level } = play;
+  t.over = outcome;
+  const entries = [...heldRecords()];
+  if (outcome === 'fail' && checkResult(play.session) !== 'right') {
+    entries.push({ session: play.session, meta: { t: Date.now(), pack: pack.id, level, problem: play.adapter.format?.(play.session.problem) ?? '' } });
+  }
+  holdRecords(false);
+  appendRecords(attemptRecords(entries, outcome === 'pass' ? PASS_WORD : FAIL_WORD));
+  if (outcome === 'pass' && !pack.comingSoon && !pack.hidden) progress = passCredit(progress, pack.id, level);
+  persist();
+}
+
+function showTestOutFail(typed) {
+  const { pack, level } = play;
+  const t = play.testOut;
+  play.finished = true;
+  controls.update({ ...play.session, step: 'levelDone' }, null);
+  hintLine.hidden = true;
+  feedback.textContent = '';
+  const to = suggestedLevel(progress, pack, level);
+  renderTestOutFail(matRoot, {
+    suggestText: levelText(pack, to),
+    typed: typed === null ? null : String(typed).replace('-', '−'),
+    onSuggested: () => startLevel(pack.id, to),
+    onRetry: () => startTestOut(pack.id, level, t.attempt + 1),
+    onMap: () => goHome({ openCard: pack.id }),
+  });
 }
 
 // The standing browser tests (tests/screenSweep.test.js) drive the dev server's page with the card's own actions: only in development
@@ -481,7 +640,7 @@ function renderDots() {
   const { index, session, finished } = play;
   const dots = $('dots');
   while (dots.children.length < play.problems.length) dots.append(Object.assign(document.createElement('span'), { className: 'dot' }));
-  while (dots.children.length > play.problems.length && dots.children.length > PROBLEMS_PER_LEVEL) dots.lastElementChild.remove();
+  while (dots.children.length > play.problems.length && (play.testOut || dots.children.length > PROBLEMS_PER_LEVEL)) dots.lastElementChild.remove();   // (a test-out has 2)
   $('dots').querySelectorAll('.dot').forEach((d, i) => {
     const solved = finished || i < index || (i === index && session.step === 'done');
     d.classList.toggle('done', solved);
@@ -597,7 +756,7 @@ function render(before) {
   if (session.feedback?.bad) feedback.classList.add('bad');
   if (session.step === 'done') feedback.classList.add('celebrate');
 
-  if (session.step === 'done' && before?.step !== 'done') earnPlaced(session);
+  if (session.step === 'done' && before?.step !== 'done' && !play.testOut) earnPlaced(session);
   if (session.step === 'done' && before?.step !== 'done' && !adapter.noAuto) {
     nextTimer = setTimeout(nextProblem, 2500);
   }

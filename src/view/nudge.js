@@ -9,6 +9,7 @@ import { html } from './addBothMat.js';
 import { spotlightLayer } from './spotlight.js';
 import { nudgeOf, calcParams } from '../engine/nudge.js';
 import { onRedraw } from './keepRows.js';
+import { noHelp } from '../engine/noHelp.js';
 
 export const NUDGE_WAIT = 2500;        // idle before the glow
 const GLOW_MS = 1500;                  // the glow alone, before the pop-up
@@ -92,7 +93,7 @@ export function bindNudge(root, getSession, { of = nudgeOf, text = nudgeText } =
 
   function tick() {
     const s = getSession?.();
-    const n = s ? of(s) : null;
+    const n = s && !noHelp() ? of(s) : null;                 // (never in a test-out: Build Z)
     if (!n || busy(root)) { if (current) clear(); return; }
     const now = Date.now();
     if (current && current.key !== keyOf(n)) clear();

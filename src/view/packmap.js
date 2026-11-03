@@ -80,22 +80,28 @@ function levelDots(progress, pack, shine) {
 }
 
 const LEVEL_WORDS = { earned: ', earned', placed: ', placed: one problem earns it' };
+// A locked level a student may test out of (Build Z: Solve it and Solve it Plus cards): set by renderPackMap from opts.canTry.
+let canTry = () => false;
+const TRY_WORDS = 'Tap to skip ahead';
 function packCard(progress, pack, { shine = null, grew = false } = {}) {
   const status = cardStatus(progress, pack);
   const levels = h('div', { class: `level-list${lastLevelOf(pack) > 4 ? ' many' : ''}` });
   for (let l = firstOf(pack); l <= lastLevelOf(pack); l++) {
     const state = levelState(progress, pack.id, l);
     const open = isLevelUnlocked(progress, pack.id, l);
+    const tryable = !open && state === 'none' && canTry(pack.id, l);
     levels.append(h('button', {
       type: 'button',
       class: `btn level-btn${state === 'earned' ? ' is-done is-earned' : state === 'placed' ? ' is-placed' : ''}${shine?.includes(l) ? ' is-shining' : ''}`,
-      disabled: !open && state === 'none',
-      dataset: { pack: pack.id, level: String(l) },
-      'aria-label': `${pack.title} Level ${levelNumber(pack, l)}, ${pack.levelNames[l - 1]}${LEVEL_WORDS[state] ?? (open ? '' : ', locked')}`,
+      disabled: !open && state === 'none' && !tryable,
+      dataset: tryable ? { tryPack: pack.id, tryLevel: String(l) } : { pack: pack.id, level: String(l) },
+      'aria-label': `${pack.title} Level ${levelNumber(pack, l)}, ${pack.levelNames[l - 1]}${LEVEL_WORDS[state] ?? (open ? '' : tryable ? `, locked. ${TRY_WORDS}` : ', locked')}`,
+      ...(tryable ? { class: 'btn level-btn is-locked is-tryable', 'aria-haspopup': 'dialog' } : {}),
     },
     h('span', { class: 'level-num' }, state === 'earned' ? icon('gold', 'lv-icon') : state === 'placed' ? icon('silver', 'lv-icon') : null, `Level ${levelNumber(pack, l)}`),
     h('span', { class: 'level-name' }, open || state !== 'none' ? pack.levelNames[l - 1] : 'Locked'),
-    state === 'placed' ? h('span', { class: 'level-placed' }, 'One problem earns it') : null));
+    state === 'placed' ? h('span', { class: 'level-placed' }, 'One problem earns it') : null,
+    tryable ? h('span', { class: 'level-try' }, TRY_WORDS) : null));
   }
   return h('article', { class: `pack-card st-card-${status.status}` },
     h('div', { class: 'pack-head' }, h('h2', {}, pack.title),
@@ -119,7 +125,7 @@ function packCard(progress, pack, { shine = null, grew = false } = {}) {
 // row carries data-locked (its saved level number) and aria-disabled, and a click or tap on it only shows its note. An open row carries
 // data-pack and data-level, like a level button, and opens that level.
 
-const lockNote = (pack, l) => `Finish Level ${levelNumber(pack, l - 1)} to open this.`;
+const lockNote = (pack, l) => `Finish Level ${levelNumber(pack, l - 1)} to open this${canTry(pack.id, l) ? ', or tap to skip ahead' : ''}.`;
 
 function popRow(progress, pack, l, current, shine) {
   const state = levelState(progress, pack.id, l);
@@ -130,8 +136,9 @@ function popRow(progress, pack, l, current, shine) {
   const cls = `pop-level is-${open ? state : 'locked'}${l === current ? ' is-current' : ''}${shine?.includes(l) ? ' is-shining' : ''}`;
   return h('li', { role: 'none' },
     h('button', {
-      type: 'button', role: 'menuitem', tabindex: '-1', class: cls, 'aria-label': words, 'aria-disabled': open ? false : 'true',
-      dataset: open ? { pack: pack.id, level: String(l) } : { locked: String(l), lockPack: pack.id },
+      type: 'button', role: 'menuitem', tabindex: '-1', class: cls, 'aria-label': words, 'aria-disabled': open || canTry(pack.id, l) ? false : 'true',
+      dataset: open ? { pack: pack.id, level: String(l) } : { locked: String(l), lockPack: pack.id, ...(canTry(pack.id, l) ? { tryPack: pack.id, tryLevel: String(l) } : {}) },
+      ...(!open && canTry(pack.id, l) ? { 'aria-haspopup': 'dialog' } : {}),
     },
     h('span', { class: 'pop-mark' }, state === 'earned' ? icon('gold', 'pop-icon') : state === 'placed' ? icon('silver', 'pop-icon') : open ? h('span', { class: 'pop-dot' }) : icon('lock', 'pop-icon is-lock')),
     h('span', { class: 'pop-num' }, `Level ${num}`),
@@ -255,12 +262,14 @@ function consume(drawn) {
 
 export function renderPackMap(root, progress, packs, opts = {}) {
   const {
-    onPlay, onSaveCode, onEnterCode, onDiagnostic, onFluency, onAccount, sections = [],
-    account = { state: 'off' }, diags = {}, bests = {}, note, shine, keepView = false,
+    onPlay, onSaveCode, onEnterCode, onDiagnostic, onFluency, onAccount, onTestOut, sections = [],
+    account = { state: 'off' }, diags = {}, bests = {}, note, shine, keepView = false, openCard: cardToOpen = null,
   } = opts;
   if (!keepView) view = { card: null };
+  if (cardToOpen) view = { card: cardToOpen };                      // (after a test-out passed: the card, with its levels in silver)
+  canTry = opts.canTry ?? (() => false);
   if (shine) pending = { cards: new Set(shine.cards), levels: { ...shine.levels }, sections: new Set(shine.sections), grew: new Set(shine.grew) };
-  last = { root, progress, packs, opts: { ...opts, shine: null, keepView: true } };
+  last = { root, progress, packs, opts: { ...opts, shine: null, keepView: true, openCard: null } };
   root.className = 'home';
   const card = view.card && packs.some((p) => p.id === view.card) ? view.card : null;
   root.replaceChildren(...[
@@ -272,13 +281,13 @@ export function renderPackMap(root, progress, packs, opts = {}) {
         onAccount ? h('button', { type: 'button', class: 'btn', 'data-home': 'account' }, accountLabel(account)) : null,
         onSaveCode ? h('button', { type: 'button', class: 'btn', 'data-home': 'save' }, 'Save code') : null,   // (only with ?codes=1)
         onEnterCode ? h('button', { type: 'button', class: 'btn', 'data-home': 'enter' }, 'Enter code') : null)),
-    h('p', { class: 'home-note', role: 'status', hidden: !note }, note ?? ''),
+    h('p', { class: `home-note${opts.noteWarm ? ' is-warm' : ''}`, role: 'status', hidden: !note }, note ?? ''),
     installBar(h),
     card ? cardView(card, packs, sections, progress, pending)
       : h('nav', { class: 'landing', 'aria-label': 'Sections' }, ...sections.map((sec) => sectionPanel(sec, packs, progress, bests, diags[sec.id], pending))),
   ].filter(Boolean));
   consume(card ? 'card' : 'menu');
-  bindMenu(root, { onPlay, onSaveCode, onEnterCode, onDiagnostic, onFluency, onAccount });
+  bindMenu(root, { onPlay, onSaveCode, onEnterCode, onDiagnostic, onFluency, onAccount, onTestOut });
 }
 
 const hoverDevice = () => matchMedia('(hover: hover)').matches;
@@ -309,7 +318,7 @@ export function placePopup(anchor, pop, win = { w: window.innerWidth, h: window.
   return side;
 }
 
-function bindMenu(root, { onPlay, onSaveCode, onEnterCode, onDiagnostic, onFluency, onAccount }) {
+function bindMenu(root, { onPlay, onSaveCode, onEnterCode, onDiagnostic, onFluency, onAccount, onTestOut }) {
   let openPop = null;        // { pop, anchor, opener, by }
   let hoverTimer = null;
   let leaveTimer = null;
@@ -401,9 +410,13 @@ function bindMenu(root, { onPlay, onSaveCode, onEnterCode, onDiagnostic, onFluen
       if (e.key === 'ArrowDown' || e.key === 'ArrowUp') { e.preventDefault(); close(); open(pop, 'keys'); if (e.key === 'ArrowUp') items().at(-1)?.focus(); }
     });
   }
-  // a locked row: a click, a tap or Enter shows its note (Build Z will give it an action)
+  // a locked row: a click, a tap or Enter shows its note; on a Solve it card it asks to test out (Build Z)
   for (const row of root.querySelectorAll('.pop-level[data-locked]')) {
-    row.addEventListener('click', (e) => { e.stopPropagation(); row.classList.add('is-tipping'); });
+    row.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (row.dataset.tryPack && onTestOut) { const { tryPack, tryLevel } = row.dataset; close(); onTestOut(tryPack, Number(tryLevel)); return; }
+      row.classList.add('is-tipping');
+    });
     row.addEventListener('blur', () => row.classList.remove('is-tipping'));
   }
   // the page scrolls or the window changes size: the popup follows its name
@@ -431,6 +444,8 @@ function bindMenu(root, { onPlay, onSaveCode, onEnterCode, onDiagnostic, onFluen
   }
 
   root.onclick = (e) => {
+    const t = e.target.closest('button[data-try-pack]');
+    if (t && onTestOut) { root._closePop?.(); return onTestOut(t.dataset.tryPack, Number(t.dataset.tryLevel)); }
     const b = e.target.closest('button[data-level]');
     if (b && !b.disabled) { root._closePop?.(); return onPlay(b.dataset.pack, Number(b.dataset.level)); }
     const f = e.target.closest('button[data-fluency]');

@@ -20,8 +20,19 @@ function writeJson(key, value) {
 export const loadSkills = () => (readJson(SKILLS_KEY) ? readSkills(readJson(SKILLS_KEY)) : emptySkills());
 export const loadLog = () => (Array.isArray(readJson(LOG_KEY)) ? readJson(LOG_KEY) : []);
 
+// A test-out (Build Z) holds its problems' records until the attempt ends, then writes them with the attempt's word (main.js).
+let held = null;
+export function holdRecords(on) { held = on ? [] : null; }
+export const heldRecords = () => held ?? [];
+export function appendRecords(records) {
+  let log = loadLog();
+  for (const r of records) log = appendRecord(log, r);
+  writeJson(LOG_KEY, log);
+}
+
 // A problem is finished (right, by the typed answer or by the full walk): update the supports and log it.
 export function recordProblem(session, meta) {
+  if (held) { held.push({ session: structuredClone(session), meta: { t: Date.now(), ...meta } }); return loadSkills(); }
   const skills = afterProblem(loadSkills(), {
     tags: session.tags, wrongs: session.wrongs, stuck: session.stuck, on: session.on,
   });

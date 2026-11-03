@@ -3,6 +3,112 @@
   "updated": "2026-11-03",
   "checks": [
     {
+      "id": "z-tap-locked",
+      "name": "Skip ahead: tap a locked level",
+      "build": "Build Z",
+      "link": {
+        "label": "Open the main menu (a fresh student)",
+        "query": "?menu=1&seed=7&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens the main menu for a student who has done nothing yet.",
+        "Under Solve it, click Two-step equations. Levels 2 to 7 are greyed with dashed edges, each saying “Locked” and “Tap to skip ahead”.",
+        "Click Level 3. A small panel opens.",
+        "Click Not now. The panel closes and nothing else changes.",
+        "Click ← All sections. Click the small arrow beside Divide it. In its list of levels, point at Level 3, then click it."
+      ],
+      "see": "The panel says “Want to try it? Solve 2 problems here to skip ahead.” with Try it and Not now, and no timer. Pointing at Divide it’s Level 3 says “Finish Level 2 to open this, or tap to skip ahead.”, and clicking it opens the same panel, headed “Divide it · Level 3”."
+    },
+    {
+      "id": "z-pass",
+      "name": "Skip ahead: a pass (two right answers)",
+      "build": "Build Z",
+      "link": {
+        "label": "Open the main menu (a fresh student)",
+        "query": "?menu=1&seed=7&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. Under Solve it, click Two-step equations, then click Level 3, then Try it.",
+        "The first problem is 24 = 9 + 5x, with “Problem 1 of 2” at the top. Look in the corners: there is no I’m stuck and no Teach me (Undo and Start over are there).",
+        "Click the box after x =, type 3 and press Enter. Drag the 3 onto the x, then press Enter until the check says Balanced. Press Enter once more.",
+        "The top says “Problem 2 of 2” and the problem is 12 = 2 + 5x. Type 2 in x =, press Enter, drag the 2 onto the x, and press Enter until Balanced.",
+        "Wait two seconds."
+      ],
+      "see": "The top says “2 of 2 balanced!”, then Two-step equations opens with “You skipped ahead! Do one more problem on Level 3 to make it gold.” Levels 1, 2 and 3 are silver (“One problem earns it”), Level 4 is open, and Levels 5 to 7 still say “Tap to skip ahead”."
+    },
+    {
+      "id": "z-fail",
+      "name": "Skip ahead: a wrong answer ends the try, and you can try again at once",
+      "build": "Build Z",
+      "link": {
+        "label": "Open the main menu (a fresh student)",
+        "query": "?menu=1&seed=7&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. Under Solve it, click Two-step equations, then click Level 5, then Try it. The problem is 6 − 5x = −14.",
+        "Click the box after x =, type 9 and press Enter. Drag the 9 onto the x, then press Enter until the check ends, and press Enter twice more.",
+        "Wait two seconds.",
+        "Click Try again."
+      ],
+      "see": "The check ends “✗ Not balanced”, and the top says “This try is over.” The extra Enters do not click anything. A panel says “Not yet.”, “Try Level 1 first.” and “x = 9 did not balance.”, with Go to Level 1, Try again and Pack map. Try again starts at once with a different problem, 11 − 4x = −1, and “Problem 1 of 2”."
+    },
+    {
+      "id": "z-giveup",
+      "name": "Skip ahead: Give up, and nothing is lost",
+      "build": "Build Z",
+      "link": {
+        "label": "Open the main menu (a fresh student)",
+        "query": "?menu=1&seed=7&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. Under Solve it, click Two-step equations, then click Level 4, then Try it. The problem is 12 + 2x = 28.",
+        "Click Give up at the top.",
+        "Click Pack map."
+      ],
+      "see": "“Not yet.” and “Try Level 1 first.” show at once (no “did not balance” line). Back on Two-step equations, Level 1 is still the only open level and Level 4 still says “Tap to skip ahead”."
+    },
+    {
+      "id": "z-gold",
+      "name": "Skip ahead: a silver level turns gold with one more problem",
+      "build": "Build Z",
+      "link": {
+        "label": "Open the main menu (a fresh student)",
+        "query": "?menu=1&seed=7&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. Under Solve it, click Two-step equations, then click Level 3, then Try it.",
+        "Solve both problems: type 3 for 24 = 9 + 5x (drag it onto the x, Enter until Balanced, Enter again), then type 2 for 12 = 2 + 5x the same way. Wait two seconds: the card opens with Levels 1 to 3 in silver.",
+        "Click Level 3 (silver). The problem is 24 = 9 + 5x again, and I’m stuck is back in the corner.",
+        "Type 3 in x =, press Enter, drag the 3 onto the x and press Enter until Balanced.",
+        "Click ← Packs, then click Two-step equations."
+      ],
+      "see": "A gold note says “Level 3 earned!”. On the card, Level 3 is gold with a star, and Levels 1 and 2 stay silver."
+    },
+    {
+      "id": "z-student",
+      "name": "Play it like a student: Skip ahead",
+      "build": "Build Z",
+      "link": {
+        "label": "Open the main menu (a fresh student)",
+        "query": "?menu=1&seed=7&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. Under Solve it, click Two-step equations, then click Level 3, then Try it. The problem is 24 = 9 + 5x. You are going to play a student looking for help.",
+        "Mistake 1, asking for help: press the S key, then the T key (the keys for I’m stuck and Teach me). A good response is nothing at all: no clue, no picture, no message.",
+        "Mistake 2, ignoring the screen: touch nothing for 10 seconds. A good response is nothing: nothing flashes, glows or pops up.",
+        "Mistake 3, a move that makes it worse: click Add (+), type 9 and press Enter. A good response writes the move (24 + 9 = 18 + 5x) and says nothing: no red pop-up, no dimming. Undo is the way back. Press Undo: the equation is back, with no hint.",
+        "Mistake 4, a half-right answer: type 3 in x =, press Enter, drag the 3 onto the x and press Enter until Balanced, then press Enter. Now on 12 = 2 + 5x, type 2 and finish the check the same way. Wait two seconds.",
+        "Mistake 5, testing into the same level twice: on the card, click Level 3 again."
+      ],
+      "see": "In the try there is never a clue, pop-up, flash or picture, only the check’s own “Balanced”. After the pass, Level 3 is silver and clicking it opens Level 3 itself (with I’m stuck back), not another try."
+    },
+    {
       "id": "ac-l1-no-moves",
       "name": "Fractions of x: Level 1 solved with the box, and no “use a move” on the next problem",
       "build": "Build AC",
@@ -30,7 +136,7 @@
       },
       "steps": [
         "Click the button. It opens Fractions of x, Level 3, on ⅔x = 6, with the box drawn.",
-        "Without using the box, type 9 in x = and press Enter. Drag the 9 onto the x, then press Enter until the check ends.",
+        "Without using the box, type 9 in x = and press Enter. Drag the 9 onto the x, then press Enter until the check ends, and press Enter twice more.",
         "Press Enter once more for the next problem."
       ],
       "see": "The check ends Balanced. The next problem, ⅖x = 10, opens with no “Your mental math is very strong” pop-up, and x = is live."
@@ -3776,6 +3882,18 @@
     {
       "title": "Live",
       "items": [
+        {
+          "name": "Build Z: skip ahead by testing out (2026-11-03)",
+          "about": "On a Solve it or Solve it Plus card, a locked level can be tapped: two problems of that level with no help (no I’m stuck, no Teach me, no pop-ups or nudges; Undo and Start over stay). Both right on the first check places that level and the ones below it (silver) and opens the next; a wrong answer or Give up says “Not yet. Try Level N first.” and the student can try again at once. The class sheet logs each problem with test-out-pass or test-out-fail.",
+          "links": [
+            {
+              "label": "The main menu, a fresh student",
+              "query": "?menu=1&seed=7&nosignin=1",
+              "reset": true,
+              "look": "Click Two-step equations: Levels 2 to 7 say “Tap to skip ahead”."
+            }
+          ]
+        },
         {
           "name": "Build AC: Fractions of x refinements (2026-11-03)",
           "about": "Levels 1 and 3 never ask for a move after a correct value; the box is the first help only on Levels 1 and 3 (the move first on 2, 4, 5, 6); a minus in front is flipped before the box is drawn; the rewrite is drawn as a short animation; parentheses are as tall as the fraction inside them; the box draws itself once per computer.",

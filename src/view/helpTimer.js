@@ -2,6 +2,7 @@
 // redraw of the screen) starts the 10 seconds again. Reduced motion: a steady highlight instead (style.css).
 
 import { onRedraw } from './keepRows.js';
+import { noHelp } from '../engine/noHelp.js';
 
 const IDLE_MS = 10000;
 
@@ -12,7 +13,7 @@ export function bindHelpTimer(root) {
     root.querySelector('.lx-help.is-idle')?.classList.remove('is-idle');
     timer = setTimeout(() => {
       const b = root.querySelector('[data-action="stuck"]');
-      if (b && !b.disabled && !root.closest('[hidden]') && !document.querySelector('.spot-layer.is-error')) b.classList.add('is-idle');
+      if (b && !b.disabled && !noHelp() && !root.closest('[hidden]') && !document.querySelector('.spot-layer.is-error')) b.classList.add('is-idle');
     }, IDLE_MS);
   };
   document.addEventListener('pointerdown', reset, true);
