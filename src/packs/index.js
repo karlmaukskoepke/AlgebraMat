@@ -254,6 +254,8 @@ export const fractionsOfX = {
   blurb: 'Cut x into equal parts, find one part, then the whole box.',
   levels: 6,
   levelNames: ['unit fractions: the model', 'unit fractions: the algebra', 'fractions: the model', 'negatives', 'x on the right', 'everything mixed'],
+  // the model-first levels: a correct value with no move never forces a move on the next problem (Build AC, Karl 2026-11-03)
+  noForcedMove: [1, 3],
   generate: (level, seed) => generateFractionsLevel(level, seed),
 };
 
@@ -303,4 +305,7 @@ export const levelNumber = (pack, level) => level - ((pack?.firstLevel ?? 1) - 1
 // The last level a card shows: its saved levels after it are kept (in progress, codes and on the class sheet) but hidden until they are
 // built (Strange solutions shows 3 of its 5, Build V).
 export const lastLevelOf = (pack) => pack?.lastLevel ?? pack?.levels ?? 0;
+// The forced-move rule (loop spec §1B) is on at every level of every card, except the levels a card lists in `noForcedMove` (Build AC:
+// Fractions of x Levels 1 and 3). Another card or level is switched off by listing it there: one line.
+export const forcedMoveOn = (pack, level) => !(pack?.noForcedMove ?? []).includes(level);
 export const packById = (id) => PACKS.find((p) => p.id === id) ?? HIDDEN_PACKS.find((p) => p.id === id);

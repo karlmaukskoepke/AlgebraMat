@@ -488,3 +488,30 @@ Its notes: "Improper fractions are full credit, no mixed numbers" and "x can be 
 5. **Later, in Solve it Plus (not built):** rewriting `2/3 x` as `2x/3` as the method itself, multiplying by the reciprocal, and answers that
    are not whole. On this card Multiply's whole number is live for the first time, and the fraction can be rewritten by a tap (the rewrite
    toggle, `(p/q)x` ↔ `px/q`; Karl: "Love the toggle."); the loop spec says so (rev 2.15).
+
+## 2026-11-03: Fractions of x refinements (Karl, after playing Build AA; built in Build AC)
+
+1. **"Use a move" is suspended on Levels 1 and 3** (the two model-first levels). A student who solves with the model (the five steps, then
+   typing x) or who types a correct value is never asked to use moves there: no "Your mental math is very strong" pop-up and no forced move
+   on the next problem. The model's steps count as the student's work. Levels 2, 4, 5 and 6, and every other card, keep the forced-move
+   rule as built. It is a setting on the card's levels (`noForcedMove: [1, 3]`), so another level or card can be switched off with one line.
+2. **The model is the first help only on Levels 1 and 3.** On Levels 2, 4, 5 and 6 I'm stuck's first click is the reminder naming the move,
+   in the form on screen ("Multiply both sides by 3 to cancel the divide by 3.", "Divide both sides by 2: one part is ⅓x = 3."); the second
+   click draws the model on the current equation (never on its own); a third repeats the reminder. The hint after a wrong value and Undo
+   is the reminder there too (the model on the next I'm stuck). Levels 1 and 3 are unchanged (model, then the reminder).
+3. **A negative fraction asks for −1 first, then the box is drawn** (Karl's answer to Build AA). With a minus in front of the fraction
+   (`−⅔x = 6`) the first I'm stuck says "Multiply both sides by −1 first." and lights Flip everything; asking for the model before the flip
+   says "Multiply both sides by −1 first, then I can draw the box." (recorded as a reminder, `hint`), and after the flip the model draws
+   from the current equation. This replaces Build AA's "minus moved over" model for that case. A negative on the right only (`⅔x = −6`)
+   keeps Build AA's model (parts worth negative amounts). Either order of moves stays helpful and never red.
+4. **The rewrite toggle is shown as a short animation** (about 1.5 s, any key or click finishes it, none under reduced motion, only on the
+   tap): `⅔x` → `2x/3`: the x lifts off, is written over 1 (`x/1`), a dot appears (`⅔ · x/1`), the tops and bottoms join and the row is
+   printed. `2x/3` → `⅔x`, the reverse: `2 · x` over 3, the x split out as `x/1` (`⅔ · x/1`), the `/1` drops, the row is printed. Dots only,
+   never a times sign; a minus in front stays put. The stored term and the "rewrite" row are as Build AA made them.
+5. **Parentheses are as tall as what is inside them** (a stacked fraction, a fraction of x, a divide row), with the same weight as their
+   neighbours, everywhere in Solve it, through one shared drawing piece. Karl saw it on dividing `⅔x = 6` by 2.
+6. **The model appears by itself once per device** (Karl's answer to Build AA: not once per run): the first time on this device on the first
+   problem of Level 1, and the first time on Level 3; then it is one click away. Remembered in the browser only (not in the save code, not
+   synced, not on the class sheet); if storage is refused it is shown each time. `?model=auto` brings it back for testers. On a shared
+   Chromebook only the first student to reach Level 1 (or Level 3) sees it drawn by itself.
+7. **The old Two-step item stays removed** (Karl's answer to Build AA).

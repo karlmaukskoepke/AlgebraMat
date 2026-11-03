@@ -5,7 +5,7 @@ import {
   encodeProgress, decodeProgress, doneCount, nextLevel, isLevelPlaced, PROGRESS_VERSION,
 } from './engine/progress.js';
 import { createStore } from './storage.js';
-import { PACKS, SECTIONS, HIDDEN_PACKS, packById, levelNumber, isWhyLevel, WHY_LABEL, lastLevelOf } from './packs/index.js';
+import { PACKS, SECTIONS, HIDDEN_PACKS, packById, levelNumber, isWhyLevel, WHY_LABEL, lastLevelOf, forcedMoveOn } from './packs/index.js';
 import { flipitPlay } from './play/flipitPlay.js';
 import { combinePlay } from './play/combinePlay.js';
 import { lightPlay, flipLightPlay } from './play/lightPlay.js';
@@ -264,7 +264,7 @@ function startLevel(packId, level, resume = null) {
   const flags = {};                 // things a card has shown the student in this level (Add to both sides: Trade places)
   let index = resume?.index ?? 0;
   if (index >= problems.length) {          // a reload in the extra, move-only problem after a correct guess
-    const extra = adapter.owesMove ? extraProblem(pack, level, seed, problems) : null;
+    const extra = adapter.owesMove && forcedMoveOn(pack, level) ? extraProblem(pack, level, seed, problems) : null;
     if (extra) problems.push(extra); else index = 0;
   }
   play = {
@@ -380,7 +380,7 @@ function extraProblem(pack, level, seed, used) {
 
 function nextProblem() {
   clearTimeout(nextTimer);
-  const owed = Boolean(play.adapter.owesMove?.(play.session));
+  const owed = forcedMoveOn(play.pack, play.level) && Boolean(play.adapter.owesMove?.(play.session));   // (not on a level that lists it off: Build AC)
   if (play.index + 1 >= play.problems.length) {
     const extra = owed && play.problems.length === PROBLEMS_PER_LEVEL ? extraProblem(play.pack, play.level, play.seed, play.problems) : null;
     if (extra) play.problems.push(extra);
