@@ -146,7 +146,7 @@ describe('the problems and the card', () => {
     expect(pack).toMatchObject({ levels: 6, title: 'Switch sides' });
     expect(pack.levelNames).toHaveLength(6);
     expect(pack.retired).toBe(true);
-    expect(SECTIONS.flatMap((s) => (s.id.startsWith('solve') ? s.packs : []))).toEqual(['add-both', 'divide-it', 'flip-everything', 'one-step', 'two-step-equations', 'distribute-solve', 'variables-both-sides', 'distribute-more', 'strange-solutions']);   // (two sections since Build X)
+    expect(SECTIONS.flatMap((s) => (s.id.startsWith('solve') ? s.packs : []))).toEqual(['add-both', 'divide-it', 'flip-everything', 'fractions-of-x', 'two-step-equations', 'distribute-solve', 'variables-both-sides', 'distribute-more', 'strange-solutions']);   // (two sections since Build X)
     const progress = newProgress(PACKS);
     progress.packs.switch.levels = [true, true, false, true, false, true];
     expect(decodeProgress(encodeProgress(progress), PACKS).packs.switch.levels).toEqual([true, true, false, true, false, true]);

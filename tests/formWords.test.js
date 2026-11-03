@@ -4,7 +4,7 @@
 // fraction bar), and as a fraction of a number if it was made with the Fraction option (drawn `⅓(15)`). Every card and level, both forms.
 
 import { describe, it, expect } from 'vitest';
-import { bothSidesPlay, twoStepPlay, distSolvePlay, divideMovesPlay, flipPlay, distMorePlay, strangePlay } from '../src/play/solveCards.js';
+import { bothSidesPlay, twoStepPlay, distSolvePlay, divideMovesPlay, flipPlay, distMorePlay, strangePlay, fractionsPlay } from '../src/play/solveCards.js';
 import { packById } from '../src/packs/index.js';
 import { nextMove, xAlone } from '../src/engine/solveit/honest.js';
 
@@ -95,4 +95,30 @@ describe('Build T, Part 2: after dividing, help uses the form on the screen', ()
       expect(checked).toBeGreaterThan(20);
     });
   }
+});
+
+// Build AA: on Fractions of x the fraction of x itself is in a form: `⅔x` is said with fraction words ("⅔ of x"), `2x/3` and `x/3` with
+// divide-by words ("x divided by 3"). Every level, seeds 1-3, both forms (the rewrite toggle), I'm stuck's rungs, the hint after Undo.
+describe('Build AA: help on a fraction of x follows its form', () => {
+  const TIMES_BAD = /divided by/i;
+  const OVER_BAD = /[½⅓¼⅕⅙⅔¾⅖⅗⅘⅚]x|\bof x\b/i;
+  it('fractions-of-x: every level, seeds 1-3, both forms', () => {
+    let checked = 0;
+    for (const lv of [1, 2, 3, 4, 5, 6]) for (const seed of [1, 2, 3]) for (const p of packById('fractions-of-x').generate(lv, seed)) {
+      const start = fractionsPlay.newSession({ ...p, logLevel: lv }, {});
+      for (const s of [start, fractionsPlay.reduce(start, { type: 'rewrite' })]) {
+        const t = [...s.board.left, ...s.board.right].find((u) => u.kind === 'x');
+        const texts = [];
+        let h = s;
+        for (let i = 0; i < 3; i++) { h = fractionsPlay.reduce(h, { type: 'stuck' }); if (h.feedback) texts.push(fractionsPlay.feedbackText(h.feedback)); }
+        const wrong = run(fractionsPlay, s, [{ type: 'multOpen' }, { type: 'multPick', kind: 'whole' }, ...digits(t.den + 1), { type: 'go' }, { type: 'undo' }]);
+        if (wrong.feedback) texts.push(fractionsPlay.feedbackText(wrong.feedback));
+        for (const text of texts.filter((x) => /\S/.test(x) && !/box|part/.test(x) || /means/.test(x))) {
+          expect(text, `L${lv} seed ${seed} ${t.form}: “${text}”`).not.toMatch(t.form === 'over' ? OVER_BAD : TIMES_BAD);
+          checked += 1;
+        }
+      }
+    }
+    expect(checked).toBeGreaterThan(100);
+  });
 });

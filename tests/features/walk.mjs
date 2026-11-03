@@ -422,12 +422,158 @@ class Walk {
       document.body.append(c); const t = c.innerText.replace(/\s+/g, ''); c.remove(); return t;
     })));
   }
+  // Fractions of x (Build AA): what each part of the box shows, and Multiply's whole number
+  async aaParts(...want) {
+    const got = await this.page.evaluate(() => [...document.querySelectorAll('.fm-part')].map((e) => e.textContent.trim()));
+    if (got.join('|') !== want.join('|')) throw new Error(`the parts should show ${want.join(', ')} after step "${this.step}": ${got.join(', ')}`);
+  }
+  async aaMult(n) { await this.click(act('multOpen')); await this.click('.mo-opt[data-kind="whole"]'); await this.type(n); await this.enter(); }
   async row(text) { const rs = await this.rows(); const want = text.replace(/\s+/g, ''); if (!rs.some((r) => r.endsWith(want) || r === want)) throw new Error(`expected a row ${text} after step "${this.step}": ${rs.join(' | ')}`); }
   async box(selector) { return this.page.evaluate((s) => { const r = document.querySelector(s)?.getBoundingClientRect(); return r ? [r.left, r.top, r.right, r.bottom].map(Math.round) : null; }, selector); }
 }
 
 // ---- one walk per item (same id as in the data file) ---------------------------------------------------------------------------------
 const WALKS = {
+  // ---- Build AA: Fractions of x ----
+  async 'aa-model-l1'(w) {
+    await w.start(); await w.row('1/3x = 4'); await w.see('Cut into');
+    w.at('cut into 4'); await w.click('[data-action="mCut"][data-q="4"]'); await w.see('The fraction’s bottom is 3');
+    w.at('cut into 3'); await w.click('[data-action="mCut"][data-q="3"]');
+    if (await w.page.locator('.fm-part').count() !== 3) throw new Error('the box should have three parts');
+    w.at('one part, Go'); await w.click('[data-action="mPart"][data-i="1"]'); await w.click(act('mGo'));
+    await w.aaParts('4', '', '');
+    if ((await w.page.locator('.fm-brace.is-over').innerText()).trim() !== '4') throw new Error('a bracket marked 4 should sit over the part');
+    w.at('fill the others'); await w.click('[data-action="mPart"][data-i="1"]'); await w.click('[data-action="mPart"][data-i="2"]');
+    await w.aaParts('4', '4', '4'); await w.both('aa-model-l1-filled');
+    w.at('type 12, check'); await w.answer(12); await w.lines('1/3(12)=4', '4=4'); await w.see('Balanced');
+    await w.both('aa-model-l1');
+  },
+  async 'aa-model-l3'(w) {
+    await w.start(); await w.row('2/3x = 6');
+    await w.both('aa-model-step1');
+    w.at('cut 3, one part, Go'); await w.click('[data-action="mCut"][data-q="3"]'); await w.click('[data-action="mPart"][data-i="0"]'); await w.click(act('mGo'));
+    await w.see('The fraction says 2 of the 3 parts.');
+    w.at('a second part, Go'); await w.click('[data-action="mPart"][data-i="1"]'); await w.both('aa-model-step2'); await w.click(act('mGo'));
+    if ((await w.page.locator('.fm-brace.is-over').innerText()).trim() !== '6') throw new Error('a bracket marked 6 should sit over the two parts');
+    await w.both('aa-model-step3');
+    w.at('type 3, Enter'); await w.type(3); await w.enter(); await wait(w.page, 400);
+    await w.row('1/3x = 3'); await w.see('one part'); await w.aaParts('3', '3', '');
+    await w.both('aa-model-step4');
+    w.at('fill the last part'); await w.click('[data-action="mPart"][data-i="2"]'); await w.aaParts('3', '3', '3');
+    await w.both('aa-model-step5');
+    w.at('type 9, check'); await w.answer(9); await w.lines('2/3(9)=6', '6=6'); await w.see('Balanced');
+    await w.both('aa-model-l3');
+  },
+  async 'aa-bridge'(w) {
+    await w.start(); await w.row('2/3x = 6');
+    await w.click('[data-action="mCut"][data-q="3"]'); await w.click('[data-action="mPart"][data-i="0"]'); await w.click('[data-action="mPart"][data-i="1"]'); await w.click(act('mGo'));
+    w.at('type 6'); await w.type(6); await w.enter(); await w.see('2 parts make 6. What does 1 part make?');
+    if ((await w.rows()).length !== 1) throw new Error('no row should be written for a wrong amount');
+    w.at('type 3'); await w.type(3); await w.enter(); await w.row('1/3x = 3'); await w.see('one part');
+    await w.both('aa-bridge');
+    w.at('Undo'); await w.click(act('undo')); await wait(w.page, 300);
+    if ((await w.rows()).length !== 1) throw new Error(`Undo should take the "one part" row away: ${(await w.rows()).join(' | ')}`);
+    await w.see('What does 1 part make?');
+  },
+  async 'aa-model-help'(w) {
+    await w.start(); await w.row('2x/3 = 6');
+    if (await w.page.locator('.fm-model').count()) throw new Error('no box should be drawn at first');
+    w.at('I’m stuck'); await w.stuck(); await w.see('Cut it into equal parts'); await w.both('aa-help-model');
+    w.at('I’m stuck again'); await w.stuck(); await w.see('2x/3 means 2x divided by 3. Multiply both sides by 3 to cancel the divide by 3.');
+    await w.both('aa-help-reminder');
+  },
+  async 'aa-model-wrong'(w) {
+    await w.start(); await w.row('−2/3x = 6');
+    w.at('type 6, check'); await w.click(act('focus')); await w.type(6); await w.enter(); await w.drag();
+    for (let k = 0; k < 6 && !(await w.text()).includes('Not balanced'); k++) await w.enter();
+    await w.see('Not balanced');
+    w.at('Undo'); await w.click(act('undo')); await wait(w.page, 400);
+    await w.see('Let’s model it.'); if (!await w.page.locator('.fm-model').count()) throw new Error('the box should be drawn');
+    await w.both('aa-model-wrong');
+  },
+  async 'aa-toggle'(w) {
+    await w.start(); await w.row('6 = 2/3x');
+    w.at('rest on ⅔x'); await w.page.hover('[data-fx]'); await wait(w.page, 600);
+    const ghost = await w.page.evaluate(() => { const g = document.querySelector('.fx-ghost'); if (!g) return null; const c = g.cloneNode(true); for (const f of c.querySelectorAll('.lx-sfrac')) f.replaceWith(`${f.querySelector('.lx-sfrac-top').textContent}/${f.querySelector('.lx-sfrac-bot').textContent}`); return c.textContent.replace(/\s+/g, ''); });
+    if (ghost !== '6=2x/3') throw new Error(`resting on the fraction should show a faint 6 = 2x/3: ${ghost}`);
+    await w.both('aa-toggle-ghost');
+    w.at('click it'); await w.click('[data-fx]'); await w.row('6 = 2x/3'); await w.see('rewrite'); await w.both('aa-toggle-over');
+    w.at('click 2x/3'); await w.click('[data-fx]'); await w.row('6 = 2/3x'); await w.both('aa-toggle-times');
+    w.at('Trade places, click on the left'); await w.click('.lx-pgrid .lx-move[data-move="trade"]'); await wait(w.page, 500); await w.row('2/3x = 6');
+    await w.click('[data-fx]'); await w.row('2x/3 = 6');
+    const n = (await w.rows()).length;
+    w.at('Undo'); await w.click(act('undo')); await wait(w.page, 300);
+    if ((await w.rows()).length !== n - 1) throw new Error('Undo should take the last rewrite back');
+  },
+  async 'aa-level2'(w) {
+    await w.start(); await w.row('1/3x = 4');
+    await w.see('Tap the fraction to rewrite ⅓x as x/3. To cancel the divide by 3, multiply both sides by 3.'); await w.both('aa-level2-tip');
+    w.at('Multiply 3, Enter'); await w.aaMult(3); await wait(w.page, 600);
+    await w.row('3(1/3x) = 3(4)'); await w.row('x = 3(4)');
+    const struck = await w.page.evaluate(() => [...document.querySelectorAll('.lb-work .xo.is-struck')].map((e) => e.textContent));
+    if (struck.join(',') !== '3,3') throw new Error(`the two 3s should be crossed off: ${struck}`);
+    await w.both('aa-multiply-crossoff');
+    w.at('type 12, check'); await w.answer(12); await w.lines('4=4'); await w.see('Balanced');
+  },
+  async 'aa-divide-first'(w) {
+    await w.start(); await w.row('2/3x = 6');
+    w.at('Divide 2'); await w.divide(2); await wait(w.page, 500); await w.row('1/3x = 3'); await w.notSee('Press Undo');
+    await w.both('aa-divide-first'); await w.click(act('foldNext'));
+    w.at('Multiply 3'); await w.aaMult(3); await wait(w.page, 500); await w.row('x = 3(3)');
+    w.at('type 9'); await w.click(act('focus')); await w.type(9); await w.enter(); await w.see('Drag the 9');
+  },
+  async 'aa-negative'(w) {
+    await w.start(); await w.row('−2/3x = 6');
+    w.at('flip'); await w.click(act('flipPick')); await w.enter(); await wait(w.page, 4800);
+    await w.row('−1(−2/3x) = −1(6)'); await w.row('2/3x = −6'); await w.both('aa-negative'); await w.click(act('foldNext'));
+    w.at('divide 2'); await w.divide(2); await wait(w.page, 500); await w.row('1/3x = −3'); await w.click(act('foldNext'));
+    w.at('multiply 3'); await w.aaMult(3); await wait(w.page, 500); await w.row('x = 3(−3)');
+    w.at('type −9'); await w.click(act('focus')); await w.type(-9); await w.enter(); await w.see('Drag the −9');
+  },
+  async 'aa-right'(w) {
+    await w.start(); await w.row('6 = 2/3x');
+    w.at('multiply 3'); await w.aaMult(3); await wait(w.page, 500); await w.row('18 = 2x'); await w.click(act('foldNext'));
+    w.at('divide 2'); await w.divide(2); await wait(w.page, 500); await w.row('(18)2 = x');                                   // (18 over a bar, 2 under it) await w.both('aa-right');
+    w.at('type 9'); await w.click(act('focus')); await w.type(9); await w.enter(); await w.see('Drag the 9');
+  },
+  async 'aa-retired'(w) {
+    await w.start(); await w.see('That set has moved. Here is the new one.', 'FRACTIONS OF X');
+    await w.both('aa-retired');
+    w.at('click'); await w.page.mouse.click(700, 600); await wait(w.page, 400); await w.notSee('That set has moved');
+  },
+  async 'aa-quiz'(w) {
+    await w.start(); await w.see('x − 4 = −7');
+    w.at('−3, Next'); await w.type(-3); await w.click('[data-go="next"]'); await wait(w.page, 300);
+    await w.see('½x = 12');
+    w.at('24, Next'); await w.type(24); await w.click('[data-go="next"]'); await wait(w.page, 300);
+    for (let i = 0; i < 8; i++) await w.click('[data-go="skip"]');
+    await wait(w.page, 500); await w.see('Fractions of x', 'Add to both sides', 'Start at Level 3'); await w.notSee('One-step equations');
+    await w.both('aa-quiz');
+  },
+  async 'aa-home'(w) {
+    await w.start();
+    const names = await w.page.evaluate(() => { const sec = [...document.querySelectorAll('.card-name')].map((e) => e.dataset.card); return sec; });
+    const i = names.indexOf('fractions-of-x');
+    if (i < 0 || names[i - 1] !== 'flip-everything' || names[i + 1] !== 'two-step-equations' || names.includes('one-step')) throw new Error(`Fractions of x should sit after Flip everything and before Two-step equations: ${names}`);
+    w.at('rest on the name'); await w.page.hover('.card-name[data-card="fractions-of-x"]'); await wait(w.page, 900); await w.see('Level 6');
+    await w.both('aa-home');
+  },
+  async 'aa-student'(w) {
+    await w.start(); await w.row('2/3x = 6');
+    w.at('three parts, Go'); await w.click('[data-action="mCut"][data-q="3"]');
+    for (const i of [0, 1, 2]) await w.click(`[data-action="mPart"][data-i="${i}"]`);
+    await w.click(act('mGo')); await w.see('The fraction says 2 of the 3 parts.'); await w.both('aa-student-parts');
+    w.at('unchoose one, Go, type 6'); await w.click('[data-action="mPart"][data-i="2"]'); await w.click(act('mGo')); await w.type(6); await w.enter();
+    await w.see('2 parts make 6. What does 1 part make?'); await w.both('aa-student-six');
+    w.at('multiply by 2'); await w.aaMult(2); await wait(w.page, 700); await w.row('4/3x = 12'); await w.see('x is still cut into parts');
+    await w.both('aa-student-mult2');
+    w.at('Undo'); await w.click(act('undo')); await wait(w.page, 600); await w.see('Divide both sides by 2: one part is ⅓x = 3.');
+    w.at('hands off'); await w.click('[data-action="spotDismiss"]'); await w.idle(10600);
+    if (!await w.page.locator('.lx-help.is-idle').count()) {
+      const cls = await w.page.locator('[data-action="stuck"]').first().getAttribute('class');
+      throw new Error(`I’m stuck should flash after 10 seconds: ${cls}`);
+    }
+  },
   // ---- Build X ----
   async 'x-card-name'(w) {
     await w.start(); await w.see('Count it', 'Build it', 'Solve it', 'Solve it Plus');
@@ -2038,10 +2184,10 @@ const WALKS = {
   async 'm-placement-level1'(w) {
     await w.start(); await w.see('DIAGNOSTIC', '1 of 10');
     w.at('I don’t know, ten times'); for (let i = 0; i < 10; i++) await w.click('[data-go="skip"]');
-    await w.see('RESULTS', 'One-step equations', 'Start at Level 1: ax = b'); await w.notSee('Level -1', 'Level −1', 'Level 0');
+    await w.see('RESULTS', 'Fractions of x', 'Start at Level 1: unit fractions: the model'); await w.notSee('Level -1', 'Level −1', 'Level 0', 'One-step equations');
     await w.both('m-placement-level1');
-    w.at('click the green button'); await w.click('.diag-go[data-pack="one-step"]'); await wait(w.page, 700);
-    await w.see('ONE-STEP EQUATIONS · Level 1');
+    w.at('click the green button'); await w.click('.diag-go[data-pack="fractions-of-x"]'); await wait(w.page, 700);
+    await w.see('FRACTIONS OF X · Level 1');
   },
   // ---- Build L: the Multiply menu is multiply / divide / fraction, and Flip leaves it ----
   async 'l-hint-divide'(w) {

@@ -35,6 +35,7 @@ const CARDS = [
   ['Variables on both sides', 'variables-both-sides', [1, 2, 3, 4, 5]],
   ['Distribute more', 'distribute-more', [1, 2, 3, 4, 5]],                                       // (Build U)
   ['Strange solutions', 'strange-solutions', [1, 2, 3]],                                         // (Build V)
+  ['Fractions of x', 'fractions-of-x', [1, 2, 3, 4, 5, 6]],                                       // (Build AA)
 ];
 const SEED = 7;
 

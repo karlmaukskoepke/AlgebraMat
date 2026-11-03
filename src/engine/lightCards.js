@@ -16,6 +16,7 @@ import { formatValue, answerText as answerValueText, checkValue } from './value.
 import { formatEquation, answerText as answerSolveText, checkEquation } from './equation.js';
 import { formatAddBoth, answerText as answerAddBothText, checkAddBoth } from './addBoth.js';
 import { formatDivide, answerText as answerDivideText, checkDivide } from './divide.js';
+import { formatFracX, tagFracX, signed as signedText } from './fractionsX.js';
 
 const UNREADABLE = new Set(['typeAnswer', 'answerUnreadable']);
 
@@ -210,6 +211,18 @@ export const CARDS = {
     answerText: answerDivideText,
     check: (p, text) => { const r = checkDivide(p, text); return { correct: r.correct, tag: r.unreadable ? 'unreadable' : r.tag }; },
   },
+  // Fractions of x (Build AA): only the placement quiz reads it (the card plays on the shared loop).
+  fractions: {
+    pad: 'integer',
+    problemText: formatFracX,
+    lead: 'x =',
+    answerText: (p) => signedText(p.x),
+    check: (p, text) => {
+      const t = String(text).replace(/−/g, '-').trim();
+      if (!/^-?\d+$/.test(t)) return { correct: false, tag: 'unreadable' };
+      return { correct: Number(t) === p.x, tag: tagFracX(p, Number(t)) };
+    },
+  },
   distribute: {
     pad: 'algebra',
     problemText: formatDistribute,
@@ -224,5 +237,5 @@ export const CARDS = {
 export function cardIdFor(packId, level) {
   if (packId === 'combineit') return level <= 3 ? 'twoTerm' : 'integers';
   if (packId === 'flipit') return level <= 4 ? 'twoTerm' : 'integers';
-  return { lasso: 'group', boxes: 'boxes', 'groups-of-terms': 'termGroups', 'distribute-combine': 'distribute', value: 'value', 'one-step': 'solve', 'two-step': 'solve', 'add-both': 'addBoth', 'divide-it': 'divide' }[packId] ?? null;
+  return { lasso: 'group', boxes: 'boxes', 'groups-of-terms': 'termGroups', 'distribute-combine': 'distribute', value: 'value', 'one-step': 'solve', 'two-step': 'solve', 'add-both': 'addBoth', 'divide-it': 'divide', 'fractions-of-x': 'fractions' }[packId] ?? null;
 }

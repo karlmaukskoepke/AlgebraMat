@@ -11,7 +11,7 @@ const state = (flipit, lasso = Array(7).fill(false), boxes = Array(6).fill(false
   v: 2,                // (the progress version: 2 since Build X, earned and placed)
   packs: {
     combineit: { levels: pad(combine, 5) }, flipit: { levels: pad(flipit, 5) }, lasso: { levels: lasso }, boxes: { levels: pad(boxes, 6) },
-    'groups-of-terms': { levels: terms }, 'distribute-combine': { levels: distribute }, value: { levels: [false, false, false, false] }, 'add-both': { levels: Array(6).fill(false), first: 2 }, 'divide-it': { levels: Array(6).fill(false), first: 2 }, 'flip-everything': { levels: Array(6).fill(false), first: 2 }, 'one-step': { levels: Array(5).fill(false), first: 3 }, 'two-step': { levels: Array(7).fill(false) }, switch: { levels: Array(6).fill(false) }, 'two-step-equations': { levels: Array(7).fill(false) }, 'distribute-solve': { levels: Array(5).fill(false) }, 'variables-both-sides': { levels: Array(5).fill(false) }, 'distribute-more': { levels: Array(5).fill(false) }, 'strange-solutions': { levels: Array(5).fill(false), last: 3 },
+    'groups-of-terms': { levels: terms }, 'distribute-combine': { levels: distribute }, value: { levels: [false, false, false, false] }, 'add-both': { levels: Array(6).fill(false), first: 2 }, 'divide-it': { levels: Array(6).fill(false), first: 2 }, 'flip-everything': { levels: Array(6).fill(false), first: 2 }, 'one-step': { levels: Array(5).fill(false), first: 3 }, 'two-step': { levels: Array(7).fill(false) }, switch: { levels: Array(6).fill(false) }, 'two-step-equations': { levels: Array(7).fill(false) }, 'distribute-solve': { levels: Array(5).fill(false) }, 'variables-both-sides': { levels: Array(5).fill(false) }, 'distribute-more': { levels: Array(5).fill(false) }, 'strange-solutions': { levels: Array(5).fill(false), last: 3 }, 'fractions-of-x': { levels: Array(6).fill(false) },
   },
 });
 const state3 = state;
@@ -40,7 +40,7 @@ describe('save code v13', () => {
     const codes = new Set();
     for (const p of allStates3) {
       const code = encodeProgress(p);
-      expect(code).toMatch(/^MAT-P[2-9A-HJKMNP-Z]{23}$/); // "P" is version 20 (Build V)
+      expect(code).toMatch(/^MAT-Q[2-9A-HJKMNP-Z]{25}$/); // "Q" is version 21 (Build AA)
       expect(decodeProgress(code, WITH_BOXES)).toEqual(p);
       codes.add(code);
     }
@@ -281,7 +281,7 @@ describe('save code v17 (Build M)', () => {
     prog.packs['distribute-solve'].levels = [true, false, true, true, false];
     prog.packs['two-step-equations'].levels = [true, true, false, false, false, false, true];
     const code = encodeProgress(prog);
-    expect(code).toMatch(/^MAT-P[2-9A-HJKMNP-Z]{23}$/);                       // (v20 now: Build V)
+    expect(code).toMatch(/^MAT-Q[2-9A-HJKMNP-Z]{25}$/);                       // (v21 now: Build AA)
     expect(decodeProgress(code, PACKS)).toEqual(decodeProgress(encodeProgress(decodeProgress(code, PACKS)), PACKS));
     expect(decodeProgress(code, PACKS).packs['distribute-solve'].levels).toEqual([true, false, true, true, false]);
     const all = newProgress(PACKS);

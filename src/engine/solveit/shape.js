@@ -121,6 +121,14 @@ export const SHAPES = {
   SR: 'x = p/q, not in lowest terms',
   SQ: 'x = p/q, in lowest terms',
   SF: '−x = p/q',
+  FU: '⅟q x = b (a unit fraction of x)',
+  FUD: 'x/q = b (division form)',
+  FP: 'p/q x = b (a fraction of x)',
+  FPD: 'px/q = b (division form)',
+  FN: '−p/q x = b (a negative fraction of x, either form)',
+  FW: 'ax = b (after the multiply that cancels the bottom)',
+  FWN: '−ax = b (after the multiply, x has a minus)',
+  FM: 'x = q(b) (the multiply that finishes)',
   SM: 'x = −(p/q)',
   NT: 'no x: a true statement',
   NF: 'no x: a false statement',
@@ -142,6 +150,7 @@ export function shapeOfBoard(board, family = null) {
   if (family === 'dist') return distShape(board);
   if (family === 'both') return bothShape(board);
   if (family === 'strange') return strangeShape(board);
+  if (family === 'fracx') return fracxShape(board);
   const xl = board.left.filter((t) => t.kind === 'x').length;
   const xr = board.right.filter((t) => t.kind === 'x').length;
   if (xl + xr !== 1) return { id: UNKNOWN, why: xl + xr === 0 ? 'no x' : 'x on both sides' };
@@ -367,8 +376,51 @@ function strangeShape(board) {
 }
 const gcdOf = (a, b) => { a = Math.abs(a); b = Math.abs(b); while (b) [a, b] = [b, a % b]; return a; };
 
+// Fractions of x (Build AA; read with its own family, 'fracx'). The x-term's number in front may be a fraction, `{ kind: 'x', coef: top,
+// den: q, form }`: `⅔x` (form 'times') or `2x/3` (form 'over') are the same term. Sign-normalised (a negative fraction is FN whatever its
+// form), mirrored as r.
+//   FU  ⅟q x = b              a unit fraction, times form (the original at Levels 1-2, and after the divide that splits the top)
+//   FUD x/q = b               a unit fraction, division form (Level 2's other form, or rewritten)
+//   FP  ⅔x = b                a fraction with a top of 2 or more, times form
+//   FPD 2x/3 = b              the same, division form
+//   FN  −⅔x = b, −x/3 = b     a negative fraction, either form (flip, or multiply first: either order helps)
+//   FW  ax = b                a whole number in front after the multiply that cancels the bottom (`2x = 18`): divide next
+//   FWN −ax = b, −x = b       the same with a minus (flip next)
+//   FM  x = q(b)              the multiply that finishes: x alone, the other side the product, never worked out (the student types it)
+//   F4  x = −(b), F5 x = ⅟a(b)  as on Flip everything (a flip or a divide that finishes)
+function fracxShape(board) {
+  const xl = board.left.filter((t) => t.kind === 'x').length;
+  const xr = board.right.filter((t) => t.kind === 'x').length;
+  if (xl + xr !== 1) return { id: UNKNOWN, why: xl + xr === 0 ? 'no x' : 'x on both sides' };
+  const r = xr === 1;
+  const mine = board[r ? 'right' : 'left'];
+  const theirs = board[r ? 'left' : 'right'];
+  if (mine.length !== 1 || theirs.length !== 1) return { id: UNKNOWN, why: 'more than one term on a side' };
+  const t = mine[0];
+  const o = theirs[0];
+  const top = t.coef ?? 1;
+  const q = t.den ?? 1;
+  const base = { family: 'fracx', r, coef: top / q, top, q, form: t.form ?? 'times', xNums: [], xSum: 0 };
+  if (q > 1) {
+    if (o.kind !== 'num') return { id: UNKNOWN, why: `a ${o.kind} beside a fraction of x` };
+    const params = { top, p: Math.abs(top), q, b: o.v, form: base.form };
+    const id = top < 0 ? 'FN' : top === 1 ? (base.form === 'over' ? 'FUD' : 'FU') : (base.form === 'over' ? 'FPD' : 'FP');
+    return { ...base, id, other: [o.v], params };
+  }
+  if (o.kind === 'num') {
+    if (top === 1) return { id: UNKNOWN, why: 'x = a number (the app never writes the value)' };
+    return { ...base, id: top < 0 ? 'FWN' : 'FW', other: [o.v], params: { a: Math.abs(top), b: o.v } };
+  }
+  if (top !== 1) return { id: UNKNOWN, why: `a ${o.kind} with x not alone` };
+  const b = o.inner?.[0]?.v;
+  if (o.kind === 'times') return { ...base, id: 'FM', other: { times: o.f, inner: b }, params: { m: o.f, b } };
+  if (o.kind === 'neg') return { ...base, id: 'F4', other: { neg: b }, params: { b } };
+  if (o.kind === 'frac') return { ...base, id: 'F5', other: { n: o.n, inner: b }, params: { n: o.n, sign: o.sign ?? 1, b } };
+  return { id: UNKNOWN, why: `a ${o.kind} on the other side` };
+}
+
 // (the cards whose boards are read with their own family)
-const FAMILY_OF = { flip: 'flip', 'two-step': 'two', 'distribute-solve': 'dist', 'variables-both-sides': 'both', 'distribute-more': 'both', 'strange-solutions': 'strange' };
+const FAMILY_OF = { fracx: 'fracx', flip: 'flip', 'two-step': 'two', 'distribute-solve': 'dist', 'variables-both-sides': 'both', 'distribute-more': 'both', 'strange-solutions': 'strange' };
 
 // The shape of a state: the board's, refined by the flags the board does not hold. `waiting` says a move (or a try) waits for Undo.
 export function shapeOf(s) {

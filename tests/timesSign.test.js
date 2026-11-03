@@ -6,7 +6,7 @@
 // pop-up, hint or I'm stuck text outside those places. Divide it's numbers-only walkthrough and its numeric level are walked too.
 
 import { describe, it, expect, afterEach } from 'vitest';
-import { addBothPlay, divideMovesPlay, flipPlay, twoStepPlay, distSolvePlay, bothSidesPlay, distMorePlay, strangePlay } from '../src/play/solveCards.js';
+import { addBothPlay, divideMovesPlay, flipPlay, twoStepPlay, distSolvePlay, bothSidesPlay, distMorePlay, strangePlay, fractionsPlay } from '../src/play/solveCards.js';
 import { divideNumericPlay } from '../src/play/divideNumericPlay.js';
 import { packById } from '../src/packs/index.js';
 import { nextMove, xAlone } from '../src/engine/solveit/honest.js';
@@ -20,6 +20,7 @@ const CARDS = [
   ['variables-both-sides', bothSidesPlay, [1, 2, 3, 4, 5]],
   ['distribute-more', distMorePlay, [1, 2, 3, 4, 5]],
   ['strange-solutions', strangePlay, [1, 2, 3]],
+  ['fractions-of-x', fractionsPlay, [1, 2, 3, 4, 5, 6]],                     // (Build AA)
 ];
 const TIMES = /×/;
 const digits = (n) => [...String(Math.abs(n))].map((d) => ({ type: 'digit', digit: Number(d) })).concat(n < 0 ? [{ type: 'toggleSign' }] : []);

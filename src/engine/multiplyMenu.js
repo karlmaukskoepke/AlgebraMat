@@ -42,7 +42,8 @@ export const goReady = (m) => m.kind === 'flip' || (m.kind === 'whole' && okWhol
 const DIVIDE_IT = { whole: 'explain', div: 'live', frac: 'live', flip: 'explain' };
 
 export function makeMultiplyMenu({ xAlone, coefOf, option: cardOption = (kind) => DIVIDE_IT[kind], greyKey: cardGreyKey = () => 'aLater', probe = 'fraction', negTop = false }) {
-  const option = (kind, s) => cardOption(asCardKind(kind), s);
+  // (the raw kind goes along too: a card may grey one over a blank while Divide is live, Fractions of x, Build AA)
+  const option = (kind, s) => cardOption(asCardKind(kind), s, kind);
   const greyKey = (kind, s) => cardGreyKey(asCardKind(kind), s);
   // Can the move be previewed (hovered) right now? Is its blank open?
   const canPreview = (s) => s.stage === 'moves' && !s.sub && !s.deal && !s.diag && !s.fail && !s.needUndo && s.menu !== 'fraction' && s.menu !== 'add' && !s.lx?.combine && !s.lx?.distribute && !xAlone(s.board) && !s.mopts?.kind;   // (not over Add's open blank, a sum or the distribute blanks: it hid the blank the keys go to, Build N)

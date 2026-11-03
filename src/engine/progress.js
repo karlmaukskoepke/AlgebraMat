@@ -201,7 +201,15 @@ function creditPack(progress, id, rules, earned) {
   if (top >= 2) entry.open = Math.max(entry.open ?? 0, top);
 }
 
+// Fractions of x (Build AA): the old One-step `x/a = b` level (4) or its mixed level (5) places Levels 1 and 2 (unit fractions, the model
+// and the algebra); nothing credits Levels 3-6.
+const LEGACY_FRACTIONS = [
+  (p) => done(p, 'one-step', 4) || done(p, 'one-step', 5),
+  (p) => done(p, 'one-step', 4) || done(p, 'one-step', 5),
+];
+
 export function withLegacyCredit(progress, { earned = false } = {}) {
+  creditPack(progress, 'fractions-of-x', LEGACY_FRACTIONS, false);
   creditPack(progress, 'add-both', LEGACY_ADD_BOTH, earned);
   creditPack(progress, 'divide-it', LEGACY_DIVIDE, earned);
   creditPack(progress, 'two-step-equations', LEGACY_TWO_STEP, earned);
@@ -252,7 +260,10 @@ export function mergeProgress(a, b) {
 // exactly, and v11 and v12 codes (57 and 63 bits) were written with plain numbers, which rounded the low bits (Count it and
 // Build it's levels). Those codes can still be read, but what they carry for those cards may be wrong; v13 is exact.
 //
-// New codes are always v17; older codes (written down earlier) still work, and a code from before Combine it's
+//   v18-v20: + Variables on both sides (5), Distribute more (5), Strange solutions (5): 108 bits in 22 symbols
+//   v21: 24 data symbols (about 118.9 bits): + Fractions of x (6), 114 bits in use (Build AA)
+//
+// New codes are always v21 (the line said v17 until Build AA; it was v20); older codes (written down earlier) still work, and a code from before Combine it's
 // mixed round (or Boxes & Circles' read-the-model round) brings its levels back in the right places (see
 // normalizeProgress). (Group It's pack id is still `lasso`.) v8 uses 36 of about 39.6 bits.
 
@@ -417,8 +428,21 @@ const LAYOUTS = {
       { id: 'distribute-solve', levels: 5 }, { id: 'variables-both-sides', levels: 5 }, { id: 'distribute-more', levels: 5 }, { id: 'strange-solutions', levels: 5 },
     ],
   },
+  // Fractions of x, 6 levels (Build AA), appended at the end: 114 bits, in 24 symbols (about 118.9; 23 hold only about 113.9). v1-v20 codes
+  // read as before.
+  21: {
+    data: 24,
+    packs: [
+      { id: 'flipit', levels: 5 }, { id: 'lasso', levels: 7 }, { id: 'boxes', levels: 6 },
+      { id: 'groups-of-terms', levels: 8 }, { id: 'combineit', levels: 5 }, { id: 'distribute-combine', levels: 5 },
+      { id: 'value', levels: 5 }, { id: 'one-step', levels: 8 }, { id: 'two-step', levels: 8 }, { id: 'switch', levels: 6 },
+      { id: 'add-both', levels: 6 }, { id: 'divide-it', levels: 6 }, { id: 'flip-everything', levels: 6 }, { id: 'two-step-equations', levels: 7 },
+      { id: 'distribute-solve', levels: 5 }, { id: 'variables-both-sides', levels: 5 }, { id: 'distribute-more', levels: 5 }, { id: 'strange-solutions', levels: 5 },
+      { id: 'fractions-of-x', levels: 6 },
+    ],
+  },
 };
-export const CODE_VERSION = 20;
+export const CODE_VERSION = 21;
 
 // Weighted sum mod 31. Weights 2, 3, 4, … are all nonzero mod 31 and differ
 // by 1 between neighbors, so any single typo or neighbor swap is caught.

@@ -19,7 +19,7 @@ import { distributeLightPlay } from './play/distributeLightPlay.js';
 import { valueLightPlay } from './play/valueLightPlay.js';
 import { solveLightPlay } from './play/solveLightPlay.js';
 import { switchPlay } from './play/switchPlay.js';
-import { addBothPlay, divideMovesPlay, flipPlay, twoStepPlay, distSolvePlay, bothSidesPlay, distMorePlay, strangePlay } from './play/solveCards.js';
+import { addBothPlay, divideMovesPlay, flipPlay, twoStepPlay, distSolvePlay, bothSidesPlay, distMorePlay, strangePlay, fractionsPlay } from './play/solveCards.js';
 import { divideNumericPlay } from './play/divideNumericPlay.js';
 import { addBothNumericPlay } from './play/addBothNumericPlay.js';
 import { boxPlay } from './play/boxPlay.js';
@@ -85,6 +85,7 @@ const PLAY = {
   'variables-both-sides': bothSidesPlay,                                            // Variables on both sides (Build R)
   'distribute-more': distMorePlay,                                                  // Distribute more (Build U)
   'strange-solutions': strangePlay,                                                 // Strange solutions (Build V)
+  'fractions-of-x': fractionsPlay,                                                  // Fractions of x (Build AA)
   'distribute-combine': (level) => (level >= 4 ? distributeTypedPlay : LIGHT ? distributeLightPlay : distributePlay),
 };
 const adapterFor = (packId, level) => (typeof PLAY[packId] === 'function' ? PLAY[packId](level) : PLAY[packId]);
@@ -715,16 +716,35 @@ if (params.get('demo') && demoProgress(params.get('demo'), PACKS) && demoApplied
 }
 sync.request();   // signed in to a class sheet? catch up
 const urlLevel = Number(params.get('level'));
-const urlPack = packById(params.get('pack') === 'groupit' ? 'lasso' : params.get('pack') ?? 'flipit');
+const askedPack = packById(params.get('pack') === 'groupit' ? 'lasso' : params.get('pack') ?? 'flipit');
+// A link to a retired card (Build AA) opens the card that replaced it, at its first level, with a short note: One-step equations →
+// Fractions of x; Switch sides and the old Two-step → Two-step equations. It never crashes on a card that is gone.
+const MOVED = { 'one-step': 'fractions-of-x', switch: 'two-step-equations', 'two-step': 'two-step-equations' };
+const movedTo = askedPack?.retired && MOVED[askedPack.id] ? packById(MOVED[askedPack.id]) : null;
+const urlPack = movedTo ?? askedPack;
 const resume = savedCurrent();
 if (DIAGNOSTIC_SECTIONS.includes(params.get('diag'))) {
   startDiagnostic(params.get('diag'));                // ?diag=solve opens a section's diagnostic (a test link, Build L)
+} else if (movedTo) {
+  startLevel(movedTo.id, movedTo.firstLevel ?? 1);
+  showMovedNote();
 } else if (urlPack && PLAY[urlPack.id] && Number.isInteger(urlLevel) && urlLevel >= 1 && urlLevel <= lastLevelOf(urlPack)) {
   startLevel(urlPack.id, urlLevel);
 } else if (resume && !params.get('menu')) {
   startLevel(resume.pack, resume.level, resume);
 } else {
   goHome();
+}
+
+// The note for a link to a retired card (Build AA): a small pop-up at the top of the play screen; it goes with the first click or key.
+function showMovedNote() {
+  const note = document.createElement('div');
+  note.className = 'moved-note';
+  note.setAttribute('role', 'status');
+  note.textContent = 'That set has moved. Here is the new one.';
+  document.body.append(note);
+  const off = () => { note.remove(); window.removeEventListener('pointerdown', off, true); window.removeEventListener('keydown', off, true); };
+  setTimeout(() => { window.addEventListener('pointerdown', off, true); window.addEventListener('keydown', off, true); }, 300);
 }
 
 // Sign in at the start of every visit (Karl, 2026-10-12). A student who signed in before has this device's token and is signed in

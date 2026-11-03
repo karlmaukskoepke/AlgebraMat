@@ -229,13 +229,13 @@ describe('Part 4: metallic progress', () => {
   it('counts only displayed levels: not "See why it works", not hidden levels, not retired or coming-soon cards', () => {
     expect(displayedLevels(packById('add-both'))).toEqual([2, 3, 4, 5, 6]);
     expect(displayedLevels(packById('strange-solutions'))).toEqual([1, 2, 3]);
-    expect(displayedLevels(packById('one-step'))).toEqual([3, 4, 5]);
+    expect(displayedLevels(packById('one-step'))).toEqual([]);                 // (retired in Build AA: Fractions of x replaced it)
     expect(displayedLevels(packById('switch'))).toEqual([]);
     expect(displayedLevels({ id: 'later', comingSoon: true, levels: 0 })).toEqual([]);
     let p = completeLevel(newProgress(PACKS), 'add-both', 1);             // the walkthrough
     expect(cardStatus(p, packById('add-both'))).toMatchObject({ status: 'plain', done: 0, shown: 5 });
-    p = completeLevel(newProgress(PACKS), 'one-step', 1);                 // a hidden early level
-    expect(cardStatus(p, packById('one-step')).status).toBe('plain');
+    p = completeLevel(newProgress(PACKS), 'flip-everything', 1);                 // a hidden early level
+    expect(cardStatus(p, packById('flip-everything')).status).toBe('plain');
     p = newProgress(PACKS);
     for (const l of [1, 2, 3]) p = completeLevel(p, 'strange-solutions', l);
     expect(cardStatus(p, packById('strange-solutions'))).toMatchObject({ status: 'gold', shown: 3 });  // 3 of 3, Levels 4-5 not counted

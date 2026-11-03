@@ -30,6 +30,8 @@ export function cancelOf(t) {
   const k = u?.kind === 'x' ? (u.coef ?? 1) : u?.kind === 'group' ? u.factor : null;
   if (k === null) return null;
   if (t.kind === 'times' && t.f === -1) return k < 0 ? { outer: 'minus', inner: 'minus' } : null;
+  // multiplying a fraction of x by its bottom (Fractions of x, Build AA): the multiplier and the bottom crossed off, `3(⅔x)`
+  if (t.kind === 'times' && (u.den ?? 1) > 1) return Math.abs(t.f) === u.den ? { outer: 'digits', inner: 'den' } : null;
   if (t.kind !== 'frac' || Math.abs(k) !== t.n) return null;
   const both = t.sign < 0 && k < 0;
   return { outer: both ? 'all' : 'digits', inner: both ? 'all' : 'digits' };
@@ -89,6 +91,8 @@ function termsOf(side, s, o) {
     } else if (t.kind === 'neg') {
       // the opposite of a number, left unsimplified at x alone: `x = −(12)` (Build J)
       out.push(html('span', 'lb-frac lb-neg', [html('span', 'is-blue', [MINUS]), '(', ...termsOf(t.inner, s, { ...o, live: false, plug: false }), ')']));
+    } else if (t.kind === 'x' && (t.den ?? 1) > 1) {
+      out.push(fxEl(t, s, o));
     } else if (t.kind === 'x') {
       const xi = o.xi ? o.xi.n++ : 0;                           // which x of the equation this is, left to right
       const filled = Boolean(o.plug && s.sub && (!s.sub.placing || s.sub.filled?.includes(xi)));
@@ -119,6 +123,40 @@ function termsOf(side, s, o) {
   return out;
 }
 
+// A fraction of x (Fractions of x, Build AA): `⅔x` (form 'times': the fraction stacked, then x) or `2x/3` (form 'over': `2x` over the
+// bottom), its minus before it. Both forms are the same term. In a work row its cancelled parts are crossed off (`o.strike`: the top's
+// digits after a divide, the bottom after a multiply). On the newest row the term is the rewrite toggle (a tap writes the other form).
+function fxEl(t, s, o) {
+  const xi = o.xi ? o.xi.n++ : 0;
+  const filled = Boolean(o.plug && s?.sub && (!s.sub.placing || s.sub.filled?.includes(xi)));
+  const dropOn = o.plug && s?.sub?.placing && !filled;
+  const xel = html('span', `lb-x${o.plug ? ' is-plugx' : ''}${dropOn ? ' is-droptarget' : ''}${filled ? ' is-placed' : ''}`, ['x'], { 'data-x': '1', 'data-xi': String(xi), ...(dropOn ? { 'data-action': 'placeValue', role: 'button', tabindex: '0', 'aria-label': 'Put your value into x' } : {}) });
+  const a = Math.abs(t.coef);
+  const strikeTop = o.strike === 'digits' || o.strike === 'all' ? o.strike : null;
+  const strikeBot = o.strike === 'den' ? 'digits' : null;
+  const topNum = a === 1 && t.form === 'over' ? null : (strikeTop ? struckText(String(a), 'digits', 'lb-fxtop', o) : html('span', 'lb-fxtop', [String(a)]));
+  const bot = strikeBot ? struckText(String(t.den), 'digits', 'lb-fxbot', o) : html('span', 'lb-fxbot', [String(t.den)]);
+  const minus = t.coef < 0 ? [o.strike === 'minus' || o.strike === 'all' ? struckText(MINUS, 'all', 'lb-num lb-front', o) : html('span', 'lb-num lb-front', [MINUS])] : [];
+  const stack = (top) => html('span', 'lx-sfrac lb-fxfrac', [html('span', 'lx-sfrac-top', top), html('span', 'lx-sfrac-bar'), html('span', 'lx-sfrac-bot', [bot])]);
+  const kids = t.form === 'over' ? [...minus, stack([...(topNum ? [topNum] : []), xel])] : [...minus, stack([topNum]), xel];
+  const words = `${t.coef < 0 ? 'negative ' : ''}${t.form === 'over' ? `${a === 1 ? '' : a}x over ${t.den}` : `${a} over ${t.den} x`}`;
+  const el = html('span', `lb-coef lb-fx is-${t.form === 'over' ? 'over' : 'times'}`, kids, { 'aria-label': words });
+  // the rewrite toggle (Build AA): the newest equation's fraction, while nothing else is going on
+  if (o.live && o.toggle) {
+    Object.assign(el.dataset, { action: 'rewrite', fx: '1' });
+    el.setAttribute('role', 'button');
+    el.setAttribute('tabindex', '0');
+    el.setAttribute('aria-label', `${words}: tap to write it as ${t.form === 'over' ? 'a fraction times x' : 'x over the bottom'}`);
+    el.classList.add('is-toggle');
+  }
+  return el;
+}
+
+// A check segment drawn stacked (`stack: { top: [segs], bot }`, Fractions of x): the top's segments drawn by `leaf`, the bottom under a bar
+export function stackSeg(seg, leaf) {
+  return html('span', `lx-sfrac sv-stack${seg.cls ? ` ${seg.cls}` : ''}`, [html('span', 'lx-sfrac-top', seg.stack.top.flatMap(leaf)), html('span', 'lx-sfrac-bar'), html('span', 'lx-sfrac-bot', [seg.stack.bot])]);
+}
+
 // A fraction drawn stacked, its top over its bottom (Build U's fraction factor; Build V's answers and checks)
 export const stackedText = (top, bottom) => html('span', 'lx-sfrac', [html('span', 'lx-sfrac-top', [top]), html('span', 'lx-sfrac-bar'), html('span', 'lx-sfrac-bot', [bottom])]);
 // A piece of a check's line: a fraction (`5/2`, `(−5/2)`, `−15/2`) is drawn stacked, anything else as it is (Build V)
@@ -135,7 +173,7 @@ export const coefDot = () => html('span', 'lb-coefdot', ['·'], { 'aria-label': 
 // An x still waiting for the value once another x has it: a faint ghost of the value above it (Build P, Part 8)
 export const waitingGhost = (v) => html('span', 'lb-xwait', segKids(signed(v)), { 'aria-hidden': 'true' });
 
-const charsOf = (list) => list.map((x) => (x.kind === 'frac' || x.kind === 'neg' || x.kind === 'group' ? 5 + charsOf(x.inner) : x.kind === 'times' ? 7 + charsOf(x.inner) : x.kind === 'x' ? ((x.coef ?? 1) > 1 ? 2 : (x.coef ?? 1) < 0 ? String(x.coef).length : 1) : String(signed(x.v)).length + 3)).reduce((a, b) => a + b, 0);
+const charsOf = (list) => list.map((x) => (x.kind === 'frac' || x.kind === 'neg' || x.kind === 'group' ? 5 + charsOf(x.inner) : x.kind === 'times' ? 7 + charsOf(x.inner) : x.kind === 'x' && (x.den ?? 1) > 1 ? 3 : x.kind === 'x' ? ((x.coef ?? 1) > 1 ? 2 : (x.coef ?? 1) < 0 ? String(x.coef).length : 1) : String(signed(x.v)).length + 3)).reduce((a, b) => a + b, 0);
 const eqClass = (chars) => (chars > 30 ? ' is-xlong' : chars > 20 ? ' is-long' : '');
 
 const sideEls = (board, s, o) => { const oo = { ...o, xi: { n: 0 }, mi: { n: 0 } }; return [termsOf(board.left, s, oo), termsOf(board.right, s, oo)]; };
@@ -183,6 +221,9 @@ export function foldTag(label) {
   if (label.shown === 'div') return html('span', 'lb-foldtag', ['both sides ', html('span', 'is-blue', [`÷ ${label.sign < 0 ? MINUS : ''}${label.n}`])]);   // (made with Divide, Build O)
   if (label.dist !== undefined) return html('span', 'lb-foldtag', [html('span', 'is-blue', [`${factorText(label.dist, label.den)} ·`]), ' each piece']);   // a distribute (Build M; a fraction, Build U)
   if (label.flip) return html('span', 'lb-foldtag', [html('span', 'is-blue', [`${MINUS}1 ·`]), ' both sides']);
+  if (label.mult !== undefined) return html('span', 'lb-foldtag', [html('span', 'is-blue', [`${signed(label.mult)} ·`]), ' both sides']);   // (Fractions of x, Build AA)
+  if (label.rewrite) return html('span', 'lb-foldtag is-rewrite', ['rewrite']);
+  if (label.part) return html('span', 'lb-foldtag is-part', ['one part']);
   return html('span', 'lb-foldtag', [html('span', 'is-blue', [`${label.sign < 0 ? MINUS : ''}${fractionText(label.n)}`]), ' of both sides']);
 }
 
@@ -226,7 +267,9 @@ export function stackRows(s) {
       return html('div', 'lb-rowwrap has-work is-settled', [w, ...(line ? [line] : [])]);
     }
     const plug = i === plugIdx;
-    const [l, r] = sideEls(row.board, s, { live: i === last, plug, div: isDiv(row) });
+    // (Fractions of x, Build AA: the newest equation's fraction is the rewrite toggle while nothing else is going on)
+    const toggle = i === last && s.problem?.kind === 'fracx' && s.stage === 'moves' && !s.sub && !s.needUndo && !s.fail;
+    const [l, r] = sideEls(row.board, s, { live: i === last, plug, div: isDiv(row), toggle });
     const eq = equationRow(l, r, `${isDiv(row) ? 'is-division ' : ''}` + eqClass(charsOf([...row.board.left, ...row.board.right])));
     eq.setAttribute('role', 'img');
     eq.setAttribute('aria-label', 'The equation');
@@ -250,7 +293,9 @@ function substList(s, sub, view) {
   const segs = equationSegs(target);
   // with several x's, line 1 has a space kept before each x-term (its number in front, then the x), for the shared column grid (rev 2.6)
   const many = segs.filter((seg) => seg.xi !== undefined).length > 1;
+  const leaf1 = (seg) => (seg.stack ? [stackSeg(seg, leaf1)] : seg.xi !== undefined ? [html('span', seg.cls, [seg.text], { 'data-pair': String(seg.xi) })] : seg.cls ? [html('span', seg.cls, segKids(seg.text))] : segKids(seg.text));
   const head = segs.flatMap((seg, j) => {
+    if (seg.stack) { const startsX = many && seg.front; return startsX ? [html('span', 'sv-pad1'), ...leaf1(seg)] : leaf1(seg); }
     const el = seg.xi !== undefined ? html('span', seg.cls, [seg.text], { 'data-pair': String(seg.xi) }) : seg.cls ? html('span', seg.cls, segKids(seg.text)) : segKids(seg.text);
     const startsX = many && (seg.xi !== undefined ? !(j > 0 && segs[j - 1].front) : seg.front);
     return startsX ? [html('span', 'sv-pad1'), ...[el].flat()] : [el].flat();
@@ -260,7 +305,8 @@ function substList(s, sub, view) {
     if (sub.placing) list.append(html('div', 'sv-line1src', head, { hidden: '', 'aria-hidden': 'true' }));
     return list;
   }
-  const lines = view.lines.map((line, i) => (i === 0 ? pairedSegs(line.segs) : line.segs.flatMap((seg) => (seg.cls ? [html('span', seg.cls, segKids(seg.text))] : segKids(seg.text)))));
+  const leaf = (seg) => (seg.stack ? [stackSeg(seg, leaf)] : seg.cls ? [html('span', seg.cls, segKids(seg.text))] : segKids(seg.text));
+  const lines = view.lines.map((line, i) => (i === 0 ? pairedSegs(line.segs) : line.segs.flatMap(leaf)));
   const list = checkSpace([head, ...lines], view.mark ? sub.ok : null, view.last + 1);
   list.children[0].classList.add('sv-line1');
   list.children[1].classList.add('sv-line2');
@@ -274,7 +320,10 @@ function substList(s, sub, view) {
 function pairedSegs(segs) {
   const out = [html('span', 'sv-pad')];
   let k = 0;
+  // (a stacked segment, Fractions of x: its value is paired inside the stack)
+  const inStack = (seg) => [stackSeg(seg, (t) => (t.stack ? [] : t.cls.split(' ').includes('is-blue') ? [html('span', t.cls, segKids(t.text), { 'data-pair': String(k++) })] : t.cls ? [html('span', t.cls, segKids(t.text))] : segKids(t.text)))];
   segs.forEach((seg, j) => {
+    if (seg.stack) { out.push(...inStack(seg)); return; }
     const value = seg.cls.split(' ').includes('is-blue');
     const prefix = !value && segs[j + 1]?.cls.split(' ').includes('is-blue') && /×\s$|\($/.test(seg.text);
     if (k > 0 && (prefix || (value && !/×\s$|\($/.test(segs[j - 1]?.text ?? '')))) out.push(html('span', 'sv-pad'));

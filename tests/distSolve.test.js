@@ -428,10 +428,10 @@ describe('rows and fit', () => {
 
 describe('the pack', () => {
   it('sits last in Solve it (7th grade), after Two-step equations, five saved levels shown as saved, with its practice link to Build it', () => {
-    expect(SECTIONS.find((s) => s.id === 'solve').packs).toEqual(['add-both', 'divide-it', 'flip-everything', 'one-step', 'two-step-equations', 'distribute-solve']);   // (the 8th grade cards are in Solve it Plus since Build X)
+    expect(SECTIONS.find((s) => s.id === 'solve').packs).toEqual(['add-both', 'divide-it', 'flip-everything', 'fractions-of-x', 'two-step-equations', 'distribute-solve']);   // (the 8th grade cards are in Solve it Plus since Build X)
     expect(SECTIONS.find((s) => s.id === 'solve-plus').packs).toEqual(['variables-both-sides', 'distribute-more', 'strange-solutions']);
     expect(distributeSolve).toMatchObject({ id: 'distribute-solve', title: 'Distribute, combine, solve', levels: 5, practice: { pack: 'distribute-combine' } });
     expect(distributeSolve.firstLevel).toBeUndefined();
-    expect(PACKS.filter((p) => !p.comingSoon && p.levels).length).toBe(18);        // (Build V: Strange solutions; the class sheet takes up to 30)
+    expect(PACKS.filter((p) => !p.comingSoon && p.levels).length).toBe(19);        // (Build V: Strange solutions; the class sheet takes up to 30)
   });
 });

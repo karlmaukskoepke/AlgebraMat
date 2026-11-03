@@ -31,6 +31,7 @@ const CARDS = [
   ['Variables on both sides', 'variables-both-sides', [1, 5]],
   ['Distribute more', 'distribute-more', [1, 5]],
   ['Strange solutions', 'strange-solutions', [1, 2, 3]],
+  ['Fractions of x', 'fractions-of-x', [1, 3, 6]],
 ];
 const SIZES = [[650, true], [768, false]];
 

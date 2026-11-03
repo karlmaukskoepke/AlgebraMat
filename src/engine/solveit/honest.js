@@ -19,7 +19,7 @@ const coefOf = (t) => t.coef ?? 1;
 export function xAlone(board) {
   return sides.some((k) => {
     const o = k === 'left' ? 'right' : 'left';
-    const one = board[k].length === 1 && board[k][0].kind === 'x' && coefOf(board[k][0]) === 1;
+    const one = board[k].length === 1 && board[k][0].kind === 'x' && coefOf(board[k][0]) === 1 && (board[k][0].den ?? 1) === 1;   // (⅓x is not alone: Build AA)
     return one && !JSON.stringify(board[o]).includes('"kind":"x"');
   });
 }
@@ -70,6 +70,13 @@ export function nextMove(s, { grab = true } = {}) {
   }
   // the number in front of x: a minus flipped, anything else divided by (one digit; a bigger one as its fraction)
   const x = xs ? b[xs].find((t) => t.kind === 'x') : null;
+  // a fraction of x (Fractions of x, Build AA): a minus flipped, a top of 2 or more divided by (one part), then the bottom multiplied by
+  if (x && b[xs].length === 1 && (x.den ?? 1) > 1) {
+    const a = coefOf(x);
+    if (a < 0) return [{ type: 'flipPick' }, { type: 'go' }];
+    if (a > 1) return [{ type: 'divPick' }, ...digitsOf(a), { type: 'go' }];
+    return [{ type: 'multOpen' }, { type: 'multPick', kind: 'whole' }, ...digitsOf(x.den), { type: 'go' }];
+  }
   if (x && b[xs].length === 1) {
     const a = coefOf(x);
     if (a === -1) return [{ type: 'flipPick' }, { type: 'go' }];

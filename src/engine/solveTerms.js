@@ -23,7 +23,14 @@ const frontText = (f, den = 1) => (den > 1 ? factorText(f, den) : f === 1 ? '' :
 const xIn = (terms) => terms.reduce((n, t) => n + (t.kind === 'x' ? 1 : t.kind === 'group' ? xIn(t.inner) : 0), 0);
 export const xCount = (board) => xIn(board.left) + xIn(board.right);
 
+// a fraction of x (Fractions of x, Build AA): `⅔x` (form 'times') or `2x/3` (form 'over'), the same term
+export const fxTermText = (t) => {
+  const a = Math.abs(t.coef);
+  const m = t.coef < 0 ? MINUS : '';
+  return t.form === 'over' ? `${m}${a === 1 ? '' : a}x/${t.den}` : `${m}${ratioText(a, t.den)}x`;
+};
 export const termText = (t) => {
+  if (t.kind === 'x' && (t.den ?? 1) > 1) return fxTermText(t);
   if (t.kind === 'x') return (t.coef ?? 1) > 1 ? `${t.coef}x` : (t.coef ?? 1) < -1 ? `${MINUS}${-t.coef}x` : (t.coef ?? 1) === -1 ? `${MINUS}x` : 'x';
   if (t.kind === 'frac') return `${t.sign < 0 ? MINUS : ''}${fractionText(t.n)}(${t.inner.map(termText).join(' + ')})`;
   if (t.kind === 'neg') return `${MINUS}(${t.inner.map(termText).join(' + ')})`;                       // `−(12)` (Build J)
@@ -177,6 +184,14 @@ export const lineText = (line) => line.segs.map((s) => s.text).join('');
 export function equationSegs(board) {
   let xi = 0;
   const termSegs = (t) => {
+    if (t.kind === 'x' && (t.den ?? 1) > 1) {
+      // a fraction of x (Build AA), stacked: `⅔x` (the fraction, then x) or `2x/3` (the x over the bottom)
+      const a = Math.abs(t.coef);
+      const sign = t.coef < 0 ? [{ text: MINUS, cls: '', front: true }] : [];
+      const x = { text: 'x', cls: 'is-blue', xi: xi++ };
+      if (t.form === 'over') return [...sign, { text: '', cls: '', front: !sign.length, stack: { top: [...(a === 1 ? [] : [{ text: String(a), cls: '' }]), x], bot: String(t.den) } }];
+      return [...sign, { text: ratioText(a, t.den), cls: '', front: !sign.length, stack: { top: [{ text: String(a), cls: '' }], bot: String(t.den) } }, x];
+    }
     if (t.kind === 'x') {
       const c = t.coef ?? 1;
       const front = c === 1 ? [] : [{ text: c === -1 ? MINUS : signed(c), cls: '', front: true }];      // (`front`: the start of an x-term)

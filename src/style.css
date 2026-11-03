@@ -4185,3 +4185,45 @@ button.lb-divbar.is-calc:hover, button.lb-divbar.is-calc:focus-visible { backgro
 .lx-col.is-num { line-height: 0.9; }
 .lx-col.is-num > .lx-signed, .lx-col.is-num > .lx-xo, .lx-col.is-num > .lb-num, .lx-col.is-num > .lx-under { line-height: 0.9; }
 .lb-work .lx-col.is-num > .lx-under { margin-top: 0.1em; }
+
+/* ---------- Fractions of x (Build AA) ---------- */
+/* A fraction of x: `⅔x` (the fraction stacked, then x) or `2x/3` (2x over the bottom). On the newest row it is the rewrite toggle. */
+.lb-fx { display: inline-flex; align-items: center; }
+.lb-fx .lx-sfrac.lb-fxfrac { font-size: 0.72em; }
+.lb-fx.is-over .lx-sfrac.lb-fxfrac { font-size: 0.8em; }
+.lb-fx.is-toggle { cursor: pointer; border-radius: 10px; padding: 0 0.08em; outline: 2px dashed transparent; outline-offset: 2px; }
+.lb-fx.is-toggle:hover, .lb-fx.is-toggle:focus-visible { outline-color: #0072b2; background: rgb(0 114 178 / 0.06); }
+.lb-fx .xo.is-struck { display: inline-block; }
+.lb-foldtag.is-rewrite, .lb-foldtag.is-part { font-style: italic; }
+.fx-ghost .lb-eq { opacity: 0.45; }
+.sv-stack { font-size: 0.8em; }
+
+/* The model: x as one box cut into equal parts (Group It's fraction bar: parts that touch inside one outline, a bracket with a label). */
+.sv-check.has-model { display: flex; align-items: flex-start; }
+.fm-model { display: flex; flex-direction: column; gap: 14px; width: min(100%, 520px); font-family: 'Lexend', system-ui, sans-serif; }
+.fm-caption { margin: 0; font-size: 22px; font-weight: 600; line-height: 1.35; color: var(--ink); }
+.fm-caption.is-bad { color: #a3281b; }
+.fm-area { position: relative; padding: 46px 0 46px; }
+.fm-bar { display: grid; grid-template-columns: repeat(var(--of), 1fr); border: 4px solid #0072b2; border-radius: 6px; min-height: 84px; background: #fff; }
+.fm-part { all: unset; box-sizing: border-box; display: flex; align-items: center; justify-content: center; min-height: 84px; min-width: 44px;
+  border-left: 2px solid #0072b2; font: 700 34px 'Kalam', 'Lexend', system-ui, sans-serif; color: var(--ink); }
+.fm-part:first-child { border-left: 0; }
+.fm-part.is-live { cursor: pointer; }
+.fm-part.is-live:hover, .fm-part:focus-visible { background: rgb(0 114 178 / 0.08); outline: 3px solid #e69f00; outline-offset: -5px; }
+.fm-part.is-sel { background: rgb(0 114 178 / 0.18); }
+.fm-part.is-filled { background: rgb(0 158 115 / 0.12); }
+.fm-valuebox { min-width: 1.6em; font: inherit; }
+.fm-brace { position: absolute; left: calc(100% * var(--at) / var(--of)); width: calc(100% * var(--span) / var(--of)); height: 16px; box-sizing: border-box;
+  border: 3px solid #0072b2; pointer-events: none; }
+.fm-brace.is-over { top: 18px; border-bottom: 0; border-radius: 8px 8px 0 0; }
+.fm-brace.is-under { bottom: 18px; border-top: 0; border-radius: 0 0 8px 8px; }
+.fm-bracelabel { position: absolute; left: 50%; transform: translateX(-50%); font: 700 28px 'Kalam', 'Lexend', system-ui, sans-serif; color: #0072b2; background: var(--paper, #fffdf6); padding: 0 6px; line-height: 1; }
+.fm-brace.is-over .fm-bracelabel { top: -20px; }
+.fm-brace.is-under .fm-bracelabel { bottom: -22px; }
+.fm-cuts { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.fm-cutlabel { font-size: 20px; font-weight: 600; }
+.fm-cut { min-width: 56px; min-height: 56px; font-size: 26px; font-weight: 800; }
+@media (max-height: 700px) { .fm-caption { font-size: 19px; } .fm-bar, .fm-part { min-height: 68px; } .fm-area { padding: 40px 0; } }
+/* A link to a retired card (Build AA): the note over the play screen's top bar */
+.moved-note { position: fixed; top: 14px; left: 50%; transform: translateX(-50%); z-index: 60; background: #fff; border: 3px solid #0072b2; border-radius: 14px;
+  padding: 12px 22px; font: 700 22px 'Lexend', system-ui, sans-serif; color: var(--ink); box-shadow: 0 6px 18px rgb(0 0 0 / 0.15); max-width: calc(100vw - 32px); }

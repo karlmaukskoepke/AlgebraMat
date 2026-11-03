@@ -193,13 +193,13 @@ describe('the help (basic form: the reminder only)', () => {
 
 describe('the pack, the home screen and the save codes', () => {
   it('a new card in Solve it, after Divide it and before One-step equations, with six saved levels and no "See why it works" yet', () => {
-    expect(SECTIONS.find((x) => x.id === 'solve').packs.slice(0, 4)).toEqual(['add-both', 'divide-it', 'flip-everything', 'one-step']);
+    expect(SECTIONS.find((x) => x.id === 'solve').packs.slice(0, 4)).toEqual(['add-both', 'divide-it', 'flip-everything', 'fractions-of-x']);   // (One-step's slot is Fractions of x since Build AA)
     expect(flipEverything).toMatchObject({ id: 'flip-everything', title: 'Flip everything', levels: 6, firstLevel: 2 });
     expect(flipEverything.whyLevel).toBeUndefined();
     expect(PACKS.find((p) => p.id === 'flipit').title).not.toBe('Flip everything');
   });
   it('v15 codes carry its six levels; v14 codes decode exactly as before', () => {
-    expect(CODE_VERSION).toBe(20);                                                          // (v18: Variables on both sides, Build R)                                                          // (v16 appends the Two-step card, Build K; v17 Distribute, Build M)
+    expect(CODE_VERSION).toBe(21);                                                          // (v18: Variables on both sides, Build R)                                                          // (v16 appends the Two-step card, Build K; v17 Distribute, Build M)
     const prog = newProgress(PACKS);
     prog.packs['flip-everything'].levels = [false, true, true, false, true, false];
     prog.packs['divide-it'].levels = [true, true, false, false, false, false];

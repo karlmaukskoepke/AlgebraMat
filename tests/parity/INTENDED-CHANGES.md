@@ -879,6 +879,24 @@ the harness's own measure, above its 0.2% tolerance in every case):
 Unchanged: `add-opening`, `add-stuck-2` to `-4`, `add-teach`, `add-wrong-guess`, `add-forced-move`, `add-L2-stuck-2`, every Divide it picture,
 `div-menu`, and the openings of Flip everything, Two-step equations and Distribute, combine, solve (no Add row or box is on them).
 
+## Build AA (2026-11-03): Fractions of x, One-step equations retired
+
+Problems, class-sheet records, the 25 scripted runs and the 70 screens: unchanged. The screens were also compared picture by picture with
+`main` before this build (any channel off by more than 30 of 255 on more than 0.05% of the picture): none of the 70 differs. Every recorded
+save code decodes as before; the six new rows are the new card's six saved levels, in the new layout (v21, the card appended at the end; 24
+data symbols, one more than v20). (Codes are now written in v21, so the rows above that say "a v20 code" are v21 codes today; each still
+decodes to the same progress.) The placement quiz's screens change (its One-step slots now ask the Add card's `x − a = b` and a fraction of
+x), but the quiz is not among the recorded screens.
+
+| Key | Before | After | Why |
+|---|---|---|---|
+| `savecode:fractions-of-x-L1` | none (no such card) | a v21 code, round-trips | the new card's Level 1 done |
+| `savecode:fractions-of-x-L2` | none | a v21 code, round-trips | Level 2 |
+| `savecode:fractions-of-x-L3` | none | a v21 code, round-trips | Level 3 |
+| `savecode:fractions-of-x-L4` | none | a v21 code, round-trips | Level 4 |
+| `savecode:fractions-of-x-L5` | none | a v21 code, round-trips | Level 5 |
+| `savecode:fractions-of-x-L6` | none | a v21 code, round-trips | Level 6 |
+
 <!-- history: nothing below this line is read by the harness -->
 
 ## History: screen changes accepted by the re-baseline of 2026-10-24 (Build O, Part 0)

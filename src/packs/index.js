@@ -19,6 +19,7 @@ import { generateDistSolveLevel } from '../engine/generateDistSolve.js';
 import { generateBothLevel } from '../engine/generateBoth.js';
 import { generateDistMoreLevel } from '../engine/generateDistMore.js';
 import { generateStrangeLevel, STRANGE_SHOWN } from '../engine/generateStrange.js';
+import { generateFractionsLevel } from '../engine/generateFractions.js';
 
 // Group It (built as "Lasso"; its id stays 'lasso' so saved progress and
 // save codes from before the rename still work).
@@ -96,6 +97,7 @@ export const valueIt = {
 // your answer put back in (does it balance?), then the equation as a balance of a box and counters, then the undo.
 export const oneStep = {
   id: 'one-step',
+  retired: true,        // off the home screen (Build AA: Fractions of x replaced it); its saved levels are kept (legacy credit, codes)
   title: 'One-step equations',
   subtitle: 'Multiplying and dividing',
   blurb: 'Undo the one thing stuck to x.',
@@ -243,6 +245,18 @@ export const strangeSolutions = {
   generate: (level, seed) => generateStrangeLevel(level, seed),
 };
 
+// Fractions of x (Build AA, Karl 2026-11-01): `⅓x = 4`, `x/3 = 4`, `⅔x = 6`, their negatives and mirrors, whole answers. It replaces One-step
+// equations, in its slot. Six saved levels, shown as saved (no walkthrough). The box cut into equal parts is its model.
+export const fractionsOfX = {
+  id: 'fractions-of-x',
+  title: 'Fractions of x',
+  subtitle: 'Cut the box, then solve',
+  blurb: 'Cut x into equal parts, find one part, then the whole box.',
+  levels: 6,
+  levelNames: ['unit fractions: the model', 'unit fractions: the algebra', 'fractions: the model', 'negatives', 'x on the right', 'everything mixed'],
+  generate: (level, seed) => generateFractionsLevel(level, seed),
+};
+
 // The rest of the equations are still to come: they show as cards under Solve it, with no levels (so they take no room in saves).
 const soon = (id, title, subtitle) => ({ id, title, subtitle, comingSoon: true, levels: 0, levelNames: [] });
 
@@ -265,6 +279,7 @@ export const PACKS = [
   variablesBothSides,
   distributeMore,
   strangeSolutions,
+  fractionsOfX,
 ];
 
 // The home screen's sections (Karl, 2026-10-04): which cards live under each, and its color (a pastel). Solve it became two sections on
@@ -273,7 +288,7 @@ export const PACKS = [
 export const SECTIONS = [
   { id: 'count', title: 'Count it', blurb: 'Adding, subtracting and multiplying numbers', packs: ['combineit', 'flipit', 'lasso'] },
   { id: 'build', title: 'Build it', blurb: 'Expressions, with boxes, circles and groups', packs: ['boxes', 'groups-of-terms', 'distribute-combine', 'value'] },
-  { id: 'solve', title: 'Solve it', grade: '7th grade', blurb: 'Solving equations', packs: ['add-both', 'divide-it', 'flip-everything', 'one-step', 'two-step-equations', 'distribute-solve'] },
+  { id: 'solve', title: 'Solve it', grade: '7th grade', blurb: 'Solving equations', packs: ['add-both', 'divide-it', 'flip-everything', 'fractions-of-x', 'two-step-equations', 'distribute-solve'] },
   { id: 'solve-plus', title: 'Solve it Plus', grade: '8th grade', blurb: 'Equations with x on both sides', packs: ['variables-both-sides', 'distribute-more', 'strange-solutions'] },
 ];
 export const sectionById = (id) => SECTIONS.find((s) => s.id === id);

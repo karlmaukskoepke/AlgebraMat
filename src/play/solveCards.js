@@ -52,6 +52,13 @@ import { newStrange, solve as strangeLoop, xAlone as strangeAlone, STRANGE_MENU,
 import { renderStrangeScreen } from '../view/strangeScreen.js';
 import { strangeFeedbackText } from '../view/strangeFeedback.js';
 import { bindStrangeKeys } from '../view/strangeKeys.js';
+// Fractions of x (Build AA): Flip everything's kind of card (one term a side, the Multiply menu) with its own term, toggle and model
+import { newFractions, reduceFractions, solve as fracLoop, FRAC_SPOT, FRAC_MENU, MODEL_LEVELS } from '../engine/cards/fractions.js';
+import { formatFracX } from '../engine/fractionsX.js';
+import { modelTyping } from '../engine/fractionsModel.js';
+import { renderFractionsScreen, introOpen as fracIntroOpen } from '../view/fractionsScreen.js';
+import { fractionsFeedbackText } from '../view/fractionsFeedback.js';
+import { bindRewrite } from '../view/fractionsPointer.js';
 
 // ---------- Add to both sides ----------
 
@@ -362,6 +369,59 @@ export const strangePlay = makeSolvePlay({
       case 'flipPick': return { type: 'flipPick' };
       case 'take': return { type: 'take', n: Number(d.n), ...(d.from === 'list' ? { fromList: true } : {}) };
       case 'focus': return d.target === 'dist' ? { type: 'focus', target: 'dist', index: Number(d.index) } : null;
+      default: return null;
+    }
+  },
+});
+
+// ---------- Fractions of x (Build AA) ----------
+// The model is drawn on its own on the first problem of Levels 1 and 3, and Level 2's one-time instruction shows on its first problem
+// (once a run of the level: `flags`); the first flip and Trade places of a level are pointed out once, as on Flip everything.
+
+let fracTaught = null;
+
+export const fractionsPlay = makeSolvePlay({
+  pack: 'fractions-of-x',
+  grab: false,
+  loop: fracLoop,
+  layer: reduceFractions,
+  spot: FRAC_SPOT,
+  introOpen: fracIntroOpen,
+  format: formatFracX,
+  newSession: (problem, { forceMove = false, flags = null } = {}) => {
+    fracTaught = flags ?? fracTaught ?? {};
+    const level = problem.logLevel ?? 1;
+    const s = newFractions(problem, {
+      level, forceMove, introTrade: !fracTaught.trade, introFlip: !fracTaught.flip,
+      autoModel: MODEL_LEVELS.includes(level) && !fracTaught.model, introRewrite: !fracTaught.rewrite,
+    });
+    fracTaught.model = true;
+    fracTaught.rewrite = true;
+    return { ...s, divNegIntro: !fracTaught.divneg };
+  },
+  feedbackText: fractionsFeedbackText,
+  buildControls: (root, dispatch) => buildSolvePad(root, dispatch, (s) => fracLoop.answerLive(s) || FRAC_MENU.typingOpen(s) || modelTyping(s)),
+  renderMat: (s) => renderFractionsScreen(s),
+  bindMat: (root, dispatch, getSession) => {
+    const off = [bindTypingKeys(root, dispatch, getSession), bindValueDrag(root, dispatch), bindForwardKey(root), bindHelpTimer(root), bindFractionKeys(root, dispatch, getSession, FRAC_MENU), bindBlankKeys(root, dispatch), bindRewrite(root, dispatch, getSession)];
+    return () => off.forEach((f) => f());
+  },
+  padOpen: (s) => s.stage !== 'done' && !s.sub && (FRAC_MENU.typingOpen(s) || modelTyping(s) || (fracLoop.answerLive(s) && (s.typing === 'answer' || fracLoop.alone(s) || s.model?.step === 'x'))),
+  effects(before, s) {
+    if (s.tradeCount > 0 && fracTaught) fracTaught.trade = true;
+    if (s.flipCount > 0 && fracTaught) fracTaught.flip = true;
+    if (s.divNegCount > 0 && fracTaught) fracTaught.divneg = true;
+  },
+  matAction(d) {
+    switch (d.action) {
+      case 'multOpen': return { type: 'multOpen' };
+      case 'divPick': return { type: 'divPick' };
+      case 'multPick': return { type: 'multPick', kind: d.kind };
+      case 'flipPick': return { type: 'flipPick' };
+      case 'rewrite': return { type: 'rewrite' };
+      case 'mCut': return { type: 'mCut', q: Number(d.q) };
+      case 'mPart': return { type: 'mPart', i: Number(d.i) };
+      case 'mGo': return { type: 'mGo' };
       default: return null;
     }
   },

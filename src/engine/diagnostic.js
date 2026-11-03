@@ -19,7 +19,11 @@ export const PROBES = [
   { pack: 'groups-of-terms', levels: [2, 5], section: 'build' },
   { pack: 'distribute-combine', levels: [1, 3], section: 'build' },
   { pack: 'value', levels: [1, 3], section: 'build' },
-  { pack: 'one-step', levels: [2, 4], section: 'solve' },   // x − a = b, and x / a = b
+  // One-step equations' two slots (x − a = b, then x / a = b), repointed in Build AA when the card retired: the first slot is the Add card's
+  // own `x − a = b` (its saved Level 3), the second Fractions of x's `x/q = b` level (its Level 2). Same slots, same seeds (each problem's
+  // seed is worked out from its place in this list), so no later problem changes. A result reads them as two cards: the Add slot right
+  // opens Add to both sides up to its Level 4; the Fractions slot right places Fractions of x's Levels 1-2 and opens its Level 3.
+  { pack: 'one-step', levels: [2, 4], section: 'solve', slots: [{ pack: 'add-both', level: 3, rec: (ok) => (ok ? 4 : 1) }, { pack: 'fractions-of-x', level: 2, rec: (ok) => (ok ? 3 : 1) }] },
   // Two-step: ax − b = c, and b − ax = c (a negative coefficient), the old card's Levels 2 and 5 (the same problems, in the same order:
   // saved places depend on it). Build L: what they open is the new Two-step card (the old one is retired), each old level read through
   // Build K's legacy-credit table (old 2 → new 2, old 3 → new 4, old 5 → new 5, old 6 → new 6): a result opens the new card up to the
@@ -44,10 +48,11 @@ export const probesOf = (section = 'all') => PROBES.filter((p) => section === 'a
 
 // The problems for a seed: [{ pack, level, problem }], in order.
 export function diagnosticItems(seed, section = 'all') {
-  return PROBES.flatMap(({ pack, levels, section: of, pick }, p) => (section === 'all' || of === section
+  return PROBES.flatMap(({ pack, levels, section: of, pick, slots }, p) => (section === 'all' || of === section
     ? levels.map((level, i) => {
-      const set = packById(pack).generate(level, (seed + p * 7 + i * 13) >>> 0);
-      return { pack, level, problem: pick?.[i]?.(set) ?? set[0] };
+      const at = slots?.[i] ?? { pack, level };
+      const set = packById(at.pack).generate(at.level, (seed + p * 7 + i * 13) >>> 0);
+      return { pack: at.pack, level: at.level, probe: p, problem: pick?.[i]?.(set) ?? set[0] };
     })
     : []));
 }
@@ -90,8 +95,37 @@ export function reduceDiagnostic(state, action, items = diagnosticItems(state.se
 // the level after it; otherwise from the start. A probe of a retired card says which card it opens now (`opens`, Build L). A result
 // finished before Build L reads the same way (Build M, 2026-10-23: Karl): see upgradePlacement.
 export function readout(seed, answers, items = diagnosticItems(seed), section = 'all') {
-  return probesOf(section).map(({ pack, levels, rec: recOf, opens }) => {
-    const mine = items.map((it, i) => ({ it, a: answers[i], i })).filter((x) => x.it.pack === pack);
+  return mergeRows(rowsOf(seed, answers, items, section));
+}
+// One row a card: a slot that reads a card another probe reads too (Add to both sides) joins that card's row, its problems after the
+// others', its level the higher of the two.
+function mergeRows(rows) {
+  const out = [];
+  for (const r of rows) {
+    const same = out.find((o) => o.pack === r.pack);
+    if (!same) { out.push(r); continue; }
+    same.rec = Math.max(same.rec, r.rec);
+    same.problems = [...same.problems, ...r.problems];
+    const right = same.problems.map((x) => x.right);
+    same.standing = right.every(Boolean) ? 'strong' : right.some(Boolean) ? 'growing' : 'start';
+  }
+  return out;
+}
+function rowsOf(seed, answers, items, section) {
+  const probeIndex = (probe) => PROBES.indexOf(probe);
+  return probesOf(section).flatMap((probe) => {
+    const { pack, levels, rec: recOf, opens, slots } = probe;
+    const mine = items.map((it, i) => ({ it, a: answers[i], i })).filter((x) => (x.it.probe ?? PROBES.findIndex((q) => q.pack === x.it.pack)) === probeIndex(probe));
+    // a probe whose slots read other cards (Build AA): one result a slot, each its own card's
+    if (slots) {
+      return mine.map((x, k) => {
+        const right = isRight(x.it, x.a?.typed);
+        return {
+          pack: slots[k].pack, rec: slots[k].rec(right), standing: right ? 'strong' : 'start',
+          problems: [{ lead: itemLead(x.it), level: x.it.level, text: itemText(x.it), answer: itemAnswer(x.it), typed: x.a?.typed ?? '', skipped: Boolean(x.a?.skipped), right }],
+        };
+      });
+    }
     const right = mine.map((x) => isRight(x.it, x.a?.typed));
     const total = packById(pack).levels;
     const rec = recOf ? recOf(right) : right.every(Boolean) ? Math.min(total, levels[1] + 1)

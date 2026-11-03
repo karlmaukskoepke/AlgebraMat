@@ -35,7 +35,7 @@ export const optionSel = (m) => (m === 'divOption' ? '[data-move="div"]' : m ===
 // button, a second way in to the same move) is chosen in one click, previewed on hover (data-mopt), greyed where the card says so (a tap
 // says why), and lit by the hint after Undo. `option(kind, s)` is the card's; `ring`: which of the two has the forced move's ring.
 export function multiplyMoves(s, option, { move = 'mult', ring = null } = {}) {
-  const grey = MULT_KINDS.filter((k) => option(asCardKind(k), s) === 'grey');
+  const grey = MULT_KINDS.filter((k) => option(asCardKind(k), s, k) === 'grey');
   const open = optionsOpen(s);
   const divGrey = option('div', s) === 'grey';
   const divCycle = s.menu === 'fraction' && !s.fail && s.tryForm === 'div';      // (Build T: the choices after a division are Divide's)

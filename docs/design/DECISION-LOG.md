@@ -475,3 +475,16 @@ Its notes: "Improper fractions are full credit, no mixed numbers" and "x can be 
    is written as before. Only the chosen option's boxes show (x-term under the x-term, number under the number).
 5. Unchanged: the stored Add move, the check, the shapes, the class-sheet words, save codes, problems; wrong and partial amounts get the
    same spotlights, the stacked amounts lit. Text never shrinks for the extra line: older moves fold sooner instead.
+
+## 2026-11-01: Fractions of x (Karl; built in Build AA)
+
+1. **A 7th grade card, "Fractions of x", replaces One-step equations completely.** It is in Solve it (not Plus), in One-step's slot (after
+   Flip everything, before Two-step equations). One-step equations is retired: off the home screen, its saved levels kept.
+2. **The box cut into equal parts is the card's pedagogy.** The problem is shown as it is (the student may try it mentally); the model is the
+   first scaffold (I'm stuck's first click, and the hint after a wrong value and Undo), drawn automatically the first time a student meets
+   a unit fraction (Level 1) and a non-unit fraction (Level 3).
+3. **The algebraic way is its own level (Level 2)**, taught the first time with a one-time instruction, after the visual level.
+4. **Every fraction of x is a whole number and x is a whole number.** No reciprocal method on this card.
+5. **Later, in Solve it Plus (not built):** rewriting `2/3 x` as `2x/3` as the method itself, multiplying by the reciprocal, and answers that
+   are not whole. On this card Multiply's whole number is live for the first time, and the fraction can be rewritten by a tap (the rewrite
+   toggle, `(p/q)x` ↔ `px/q`; Karl: "Love the toggle."); the loop spec says so (rev 2.15).

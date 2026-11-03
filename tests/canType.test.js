@@ -7,7 +7,7 @@
 // No later build can break typing on any card without failing here.
 
 import { describe, it, expect, afterEach } from 'vitest';
-import { addBothPlay, divideMovesPlay, flipPlay, twoStepPlay, distSolvePlay, bothSidesPlay, distMorePlay, strangePlay } from '../src/play/solveCards.js';
+import { addBothPlay, divideMovesPlay, flipPlay, twoStepPlay, distSolvePlay, bothSidesPlay, distMorePlay, strangePlay, fractionsPlay } from '../src/play/solveCards.js';
 import { packById } from '../src/packs/index.js';
 import { shapeOf } from '../src/engine/solveit/shape.js';
 import { seesawAdd } from '../src/engine/addBothLights.js';
@@ -21,6 +21,7 @@ const CARDS = [
   ['Variables on both sides', 'variables-both-sides', bothSidesPlay, [1, 2, 3, 4, 5]],             // (Build R)
   ['Distribute more', 'distribute-more', distMorePlay, [1, 2, 3, 4, 5]],                           // (Build U)
   ['Strange solutions', 'strange-solutions', strangePlay, [1, 2, 3]],                              // (Build V: Levels 4-5 are V2's)
+  ['Fractions of x', 'fractions-of-x', fractionsPlay, [1, 2, 3, 4, 5, 6]],                         // (Build AA)
 ];
 
 // what a student can do (an action a card does not have leaves its state alone)

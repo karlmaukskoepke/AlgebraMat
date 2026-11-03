@@ -1,7 +1,245 @@
 {
   "_about": "The test-links page (test-links.html) reads this list: Karl's change list. `checks` is the Features to check section at the top: one item per new feature (id, name, build, one link, numbered steps, what you should see), written from the real code and walked through with tests/features/walk.mjs before a build is called finished; the ticks live only in Karl's browser, and an item stays here until Karl has ticked it. The rest of the page: Live = on the site for everyone. Testing = behind a flag, waiting for Karl to keep or retire it. Retired = deleted. Every build adds or updates its entries (CLAUDE.md, Working with Karl). Each entry is a name, one plain sentence (`about`) and, for Live and Testing, its buttons. A button's `query` is the part after the address: card, level, seed, flags, sign-in skipped. `level` in a link is the saved level number (Add to both sides and Divide it: link level 2 is shown as Level 1). `reset: true` clears this browser's progress first; `look` is one sentence on what to look for; `notLive` says plainly why a link won't work on the live site.",
-  "updated": "2026-11-01",
+  "updated": "2026-11-03",
   "checks": [
+    {
+      "id": "aa-model-l1",
+      "name": "Fractions of x: the box model on Level 1 (a unit fraction)",
+      "build": "Build AA",
+      "link": {
+        "label": "Open Fractions of x · Level 1",
+        "query": "?pack=fractions-of-x&level=1&seed=69&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Fractions of x, Level 1, on ⅓x = 4, with a box marked x on the right.",
+        "Click 4 under “Cut into”. Then click 3.",
+        "Click one part of the box, then click Go.",
+        "Click each of the two empty parts.",
+        "Type 12 in x = and press Enter. Drag the 12 onto the x, then press Next until the check ends."
+      ],
+      "see": "Clicking 4 says the fraction’s bottom is 3. After 3 the box has three equal parts; after Go the part you chose shows 4 with a bracket marked 4 over it, and clicking the other two fills them with 4. The check reads ⅓(12) = 4, then 4 = 4, Balanced."
+    },
+    {
+      "id": "aa-model-l3",
+      "name": "Fractions of x: the box model on Level 3, all five steps",
+      "build": "Build AA",
+      "link": {
+        "label": "Open Fractions of x · Level 3",
+        "query": "?pack=fractions-of-x&level=3&seed=5&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Fractions of x, Level 3, on ⅔x = 6, with a box marked x on the right.",
+        "Click 3 under “Cut into”. Click one part, then click Go.",
+        "Click a second part, then click Go. Type 3 and press Enter.",
+        "Click the empty part.",
+        "Type 9 in x = and press Enter. Drag the 9 onto the x, then press Next until the check ends."
+      ],
+      "see": "With one part chosen, Go says “The fraction says 2 of the 3 parts.” With two, a bracket marked 6 sits over them and you type what one part makes. After 3, a new row labelled “one part” reads ⅓x = 3, the two chosen parts show 3, and the last part fills with 3. The check reads ⅔(9) = 6, then 6 = 6, Balanced."
+    },
+    {
+      "id": "aa-bridge",
+      "name": "Fractions of x: the “one part” row comes from what you type",
+      "build": "Build AA",
+      "link": {
+        "label": "Open Fractions of x · Level 3",
+        "query": "?pack=fractions-of-x&level=3&seed=5&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Fractions of x, Level 3, on ⅔x = 6.",
+        "Click 3 under “Cut into”. Click two parts, then click Go.",
+        "Type 6 and press Enter.",
+        "Type 3 and press Enter. Then click Undo."
+      ],
+      "see": "After 6 the box says “2 parts make 6. What does 1 part make?” and no row is written. After 3 a row labelled “one part” reads ⅓x = 3 under the equation. Undo takes that row away and the box asks for one part again."
+    },
+    {
+      "id": "aa-model-help",
+      "name": "Fractions of x: the model on I’m stuck, then the reminder",
+      "build": "Build AA",
+      "link": {
+        "label": "Open Fractions of x · Level 6",
+        "query": "?pack=fractions-of-x&level=6&seed=1505&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Fractions of x, Level 6, on 2x/3 = 6. No box is drawn.",
+        "Click I’m stuck.",
+        "Click I’m stuck again."
+      ],
+      "see": "The first click draws the box marked x on the right, asking how many parts the bottom says. The second shows a pop-up: “2x/3 means 2x divided by 3. Multiply both sides by 3 to cancel the divide by 3.” with Multiply lit and its preview on the equation."
+    },
+    {
+      "id": "aa-model-wrong",
+      "name": "Fractions of x: after a wrong value, the model",
+      "build": "Build AA",
+      "link": {
+        "label": "Open Fractions of x · Level 4",
+        "query": "?pack=fractions-of-x&level=4&seed=733&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Fractions of x, Level 4, on −⅔x = 6.",
+        "Type 6 in x = and press Enter. Drag the 6 onto the x, then press Next until the check ends.",
+        "Click Undo."
+      ],
+      "see": "The check ends Not balanced. After Undo the box marked x is drawn on the right, its words starting “Let’s model it.”"
+    },
+    {
+      "id": "aa-toggle",
+      "name": "Fractions of x: tap the fraction to rewrite it, both ways, on both sides",
+      "build": "Build AA",
+      "link": {
+        "label": "Open Fractions of x · Level 5",
+        "query": "?pack=fractions-of-x&level=5&seed=440&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Fractions of x, Level 5, on 6 = ⅔x.",
+        "Rest the pointer on the ⅔x. Then click it.",
+        "Click the 2x/3 in the new row.",
+        "Click Trade places (the two curved arrows). Click the ⅔x, now on the left.",
+        "Click Undo."
+      ],
+      "see": "Resting on ⅔x shows a faint 6 = 2x/3 under the equation. The click writes a row labelled “rewrite”, 6 = 2x/3; the next click writes 6 = ⅔x again. After Trade places, the click on the left writes 2x/3 = 6; Undo takes that row back."
+    },
+    {
+      "id": "aa-level2",
+      "name": "Fractions of x: Level 2’s one-time tip, then multiplying by 3",
+      "build": "Build AA",
+      "link": {
+        "label": "Open Fractions of x · Level 2",
+        "query": "?pack=fractions-of-x&level=2&seed=49&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Fractions of x, Level 2, on ⅓x = 4.",
+        "Read the pop-up under the equation.",
+        "Click Multiply (×), click the first option, type 3 and press Enter.",
+        "Type 12 in x = and press Enter. Drag the 12 onto the x, then press Next until the check ends."
+      ],
+      "see": "The pop-up says “Tap the fraction to rewrite ⅓x as x/3. To cancel the divide by 3, multiply both sides by 3.” The multiply writes 3(⅓x) = 3(4) with the two 3s crossed off, then x = 3(4). The check ends 4 = 4, Balanced."
+    },
+    {
+      "id": "aa-divide-first",
+      "name": "Fractions of x: dividing first on ⅔x = 6",
+      "build": "Build AA",
+      "link": {
+        "label": "Open Fractions of x · Level 3",
+        "query": "?pack=fractions-of-x&level=3&seed=5&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Fractions of x, Level 3, on ⅔x = 6.",
+        "Click Divide (÷), type 2 and press Enter. Click Next.",
+        "Click Multiply (×), click the first option, type 3 and press Enter.",
+        "Type 9 in x = and press Enter."
+      ],
+      "see": "Dividing by 2 is never red: it writes ⅓x = 3 (one part is 3). Multiplying by 3 writes x = 3(3). The check of 9 is started."
+    },
+    {
+      "id": "aa-negative",
+      "name": "Fractions of x: a negative fraction",
+      "build": "Build AA",
+      "link": {
+        "label": "Open Fractions of x · Level 4",
+        "query": "?pack=fractions-of-x&level=4&seed=733&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Fractions of x, Level 4, on −⅔x = 6.",
+        "Click Flip everything (×(−1)) and press Enter. Click Next.",
+        "Click Divide (÷), type 2 and press Enter. Click Next.",
+        "Click Multiply (×), click the first option, type 3 and press Enter. Type −9 in x = and press Enter."
+      ],
+      "see": "The flip writes −1(−⅔x) = −1(6), then ⅔x = −6. Dividing by 2 gives ⅓x = −3; multiplying by 3 gives x = 3(−3). The check of −9 is started."
+    },
+    {
+      "id": "aa-right",
+      "name": "Fractions of x: x on the right",
+      "build": "Build AA",
+      "link": {
+        "label": "Open Fractions of x · Level 5",
+        "query": "?pack=fractions-of-x&level=5&seed=440&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Fractions of x, Level 5, on 6 = ⅔x.",
+        "Click Multiply (×), click the first option, type 3 and press Enter. Click Next.",
+        "Click Divide (÷), type 2 and press Enter.",
+        "Type 9 in x = and press Enter."
+      ],
+      "see": "Multiplying by 3 works with x on the right: 18 = 2x. Dividing by 2 gives (18)/2 = x. The check of 9 is started."
+    },
+    {
+      "id": "aa-retired",
+      "name": "An old One-step link opens Fractions of x",
+      "build": "Build AA",
+      "link": {
+        "label": "Open the old One-step equations link",
+        "query": "?pack=one-step&level=4&seed=7&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It is a link to One-step equations, Level 2, from before this build.",
+        "Read the note at the top.",
+        "Click anywhere."
+      ],
+      "see": "A note says “That set has moved. Here is the new one.” and Fractions of x opens at Level 1. The note goes with the click."
+    },
+    {
+      "id": "aa-quiz",
+      "name": "The Solve it placement quiz asks a fraction of x",
+      "build": "Build AA",
+      "link": {
+        "label": "Open the Solve it placement quiz",
+        "query": "?diag=solve&seed=7&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens the Solve it placement quiz, problem 1 of 10.",
+        "Problem 1 is x − 4 = −7: type −3 and click Next.",
+        "Problem 2 is ½x = 12: type 24 and click Next. Then click “I don’t know” eight times, until the results show.",
+        "Look at the results."
+      ],
+      "see": "The results list Add to both sides and Fractions of x, not One-step equations. Fractions of x shows ½x = 12 right and its button says “Start at Level 3”. Back on the home screen Fractions of x has Levels 1 and 2 silver."
+    },
+    {
+      "id": "aa-home",
+      "name": "Fractions of x on the home screen, in One-step’s place",
+      "build": "Build AA",
+      "link": {
+        "label": "Open the home screen",
+        "query": "?menu=1&seed=7&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens the home screen.",
+        "Look at Solve it (7th grade).",
+        "Rest the pointer on Fractions of x until its levels open."
+      ],
+      "see": "Solve it lists Add to both sides, Divide it, Flip everything, Fractions of x, Two-step equations, Distribute, combine, solve. One-step equations is not there. The popup shows six levels, Level 1 open."
+    },
+    {
+      "id": "aa-student",
+      "name": "Play it like a student: Fractions of x",
+      "build": "Build AA",
+      "link": {
+        "label": "Open Fractions of x · Level 3",
+        "query": "?pack=fractions-of-x&level=3&seed=5&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Fractions of x, Level 3, on ⅔x = 6, with the box.",
+        "Mistake 1, the wrong number of parts: click 3 under “Cut into”, click three parts, then click Go.",
+        "Click one chosen part to unchoose it, click Go. Mistake 2, 6 for each part: type 6 and press Enter.",
+        "Mistake 3, multiply by 2 instead of 3: click Multiply (×), the first option, type 2 and press Enter. Then click Undo.",
+        "Take your hands off for 10 seconds."
+      ],
+      "see": "Go with three parts says “The fraction says 2 of the 3 parts.” Typing 6 says “2 parts make 6. What does 1 part make?” Multiplying by 2 writes 4/3x = 12, greys the screen and says x is still cut into parts, with Undo pulsing; after Undo a hint names dividing by 2 (one part is ⅓x = 3), Divide lit. After 10 seconds I’m stuck flashes."
+    },
     {
       "id": "y-stack-add",
       "name": "Stacked numbers: Add to both sides, x on the left",
@@ -2428,9 +2666,9 @@
       "steps": [
         "Click the button. It opens the Solve it placement quiz, problem 1 of 10.",
         "Click “I don’t know” ten times, until the results show.",
-        "Under One-step equations, click the green button."
+        "Under Fractions of x, click the green button."
       ],
-      "see": "The One-step equations button says “Start at Level 1: ax = b” (it said “Start at Level −1: x + a = b” before). It opens One-step equations at Level 1."
+      "see": "The Fractions of x button says “Start at Level 1: unit fractions: the model” (never a level below 1; the quiz’s old One-step slot asks a fraction of x since Build AA). It opens Fractions of x at Level 1."
     },
     {
       "id": "l-hint-divide",
@@ -2572,22 +2810,6 @@
         "On the next equation, click Flip everything, then Go."
       ],
       "see": "The first flip shows a small pop-up: “Multiplying both sides by −1 flips every sign. −x becomes x.” The flip on the second problem works the same way but shows no pop-up."
-    },
-    {
-      "id": "k-credit",
-      "name": "Finished old Two-step levels already count on the new card",
-      "build": "Build K",
-      "link": {
-        "label": "Open the old Two-step card · Level 1",
-        "query": "?pack=two-step&level=1&seed=7&nosignin=1",
-        "reset": true
-      },
-      "steps": [
-        "Click the button. It opens the old Two-step equations card (now off the home screen), Level 1. Click Skip tour if a tour starts.",
-        "Type 6 and press Enter, then press Enter again for the next problem. Do the same with 8, 1, 3 and 2.",
-        "Click ← Packs at the top left, then the name Two-step equations under Solve it."
-      ],
-      "see": "The old card says Level 1 is complete. On the home screen the new Two-step equations card shows Level 1 silver (placed: “One problem earns it”) and Level 2 open. (Since Build X a level an older card credits is placed, not earned: one problem on it makes it gold. Levels a student finished before Build X stay as they were.)"
     },
     {
       "id": "k-level-1",
@@ -3383,6 +3605,48 @@
               "label": "Save codes (teacher only)",
               "query": "?codes=1&nosignin=1",
               "look": "With ?codes=1 the Save code and Enter code buttons come back, for moving a student by hand."
+            }
+          ]
+        },
+        {
+          "name": "Build AA: Fractions of x, in One-step equations’ place (2026-11-03)",
+          "about": "A new Solve it card: ⅓x = 4, x/3 = 4, ⅔x = 6 and their negatives and mirrors. The box cut into equal parts is drawn on its own on the first problem of Levels 1 and 3, and is I’m stuck’s first help. A tap on the fraction rewrites ⅔x as 2x/3 and back. Multiply by a whole number works here for the first time.",
+          "links": [
+            {
+              "label": "Level 1: ⅓x = 4 (the box drawn)",
+              "query": "?pack=fractions-of-x&level=1&seed=69&nosignin=1",
+              "reset": true,
+              "look": "The box on the right: cut it, choose the part, fill the rest, type x."
+            },
+            {
+              "label": "Level 2: ⅓x = 4 and x/3 (the tip)",
+              "query": "?pack=fractions-of-x&level=2&seed=49&nosignin=1",
+              "reset": true,
+              "look": "The one-time tip under the equation; multiply both sides by 3."
+            },
+            {
+              "label": "Level 3: ⅔x = 6 (the box drawn)",
+              "query": "?pack=fractions-of-x&level=3&seed=5&nosignin=1",
+              "reset": true,
+              "look": "All five steps of the box, and the “one part” row."
+            },
+            {
+              "label": "Level 4: −⅔x = 6",
+              "query": "?pack=fractions-of-x&level=4&seed=733&nosignin=1",
+              "reset": true,
+              "look": "Flip everything is live; either order helps."
+            },
+            {
+              "label": "Level 5: 6 = ⅔x",
+              "query": "?pack=fractions-of-x&level=5&seed=440&nosignin=1",
+              "reset": true,
+              "look": "x on the right; Trade places is live."
+            },
+            {
+              "label": "Level 6: 2x/3 = 6, mixed",
+              "query": "?pack=fractions-of-x&level=6&seed=1505&nosignin=1",
+              "reset": true,
+              "look": "Every form mixed; I’m stuck draws the box."
             }
           ]
         },
@@ -5436,6 +5700,10 @@
       "title": "Retired",
       "items": [
         {
+          "name": "One-step equations (retired 2026-11-03, Build AA)",
+          "about": "Replaced by Fractions of x, in the same place in Solve it. Old links open Fractions of x with the note “That set has moved. Here is the new one.” Finished Level 4 or 5 places Fractions of x’s Levels 1 and 2 (silver); saved levels and save codes are kept."
+        },
+        {
           "name": "Section titles that show the whole section (Build X, retired 2026-11-01)",
           "about": "Resting on a section title, a click, Tab or a tap opened the whole section over the panels, with its placement quiz and every card’s levels. Karl: “not exactly what I want”. Replaced by the level popups and the section footers (Build AB)."
         },
@@ -5453,51 +5721,7 @@
         },
         {
           "name": "The old Two-step equations card (Build K)",
-          "about": "Replaced by the new Two-step equations card and taken off the home screen. Its saved levels are kept and count on the new card. Its links still open it.",
-          "links": [
-            {
-              "label": "Old Two-step · Level 1",
-              "look": "The old card: type x, with its help pictures.",
-              "query": "?pack=two-step&level=1&seed=7&nosignin=1",
-              "reset": true
-            },
-            {
-              "label": "Old Two-step · Level 2",
-              "look": "The old card: type x, with its help pictures.",
-              "query": "?pack=two-step&level=2&seed=7&nosignin=1",
-              "reset": true
-            },
-            {
-              "label": "Old Two-step · Level 3",
-              "look": "The old card: type x, with its help pictures.",
-              "query": "?pack=two-step&level=3&seed=7&nosignin=1",
-              "reset": true
-            },
-            {
-              "label": "Old Two-step · Level 4",
-              "look": "The old card: type x, with its help pictures.",
-              "query": "?pack=two-step&level=4&seed=7&nosignin=1",
-              "reset": true
-            },
-            {
-              "label": "Old Two-step · Level 5",
-              "look": "The old card: type x, with its help pictures.",
-              "query": "?pack=two-step&level=5&seed=7&nosignin=1",
-              "reset": true
-            },
-            {
-              "label": "Old Two-step · Level 6",
-              "look": "The old card: type x, with its help pictures.",
-              "query": "?pack=two-step&level=6&seed=7&nosignin=1",
-              "reset": true
-            },
-            {
-              "label": "Old Two-step · Level 7",
-              "look": "The old card: type x, with its help pictures.",
-              "query": "?pack=two-step&level=7&seed=7&nosignin=1",
-              "reset": true
-            }
-          ]
+          "about": "Replaced by the new Two-step equations card and taken off the home screen. Its saved levels are kept and count on the new card. Since Build AA its old links open Two-step equations with the note “That set has moved. Here is the new one.”"
         },
         {
           "name": "The banner",

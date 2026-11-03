@@ -317,7 +317,7 @@ describe('the pack: 5 saved levels, 3 shown; save codes', () => {
     expect(nextLevel(prog, 'strange-solutions')).toBeNull();
   });
   it('v20 codes carry its five levels; v19 codes decode as before and round-trip', () => {
-    expect(CODE_VERSION).toBe(20);
+    expect(CODE_VERSION).toBe(21);
     const prog = newProgress(PACKS);
     prog.packs['strange-solutions'].levels = [true, false, true, false, false];
     prog.packs['distribute-more'].levels = [true, true, false, false, true];

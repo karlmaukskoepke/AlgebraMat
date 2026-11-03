@@ -7,7 +7,7 @@ import { describe, it, expect, afterEach } from 'vitest';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { addBothPlay, divideMovesPlay, flipPlay, twoStepPlay, distSolvePlay, bothSidesPlay, distMorePlay, strangePlay } from '../src/play/solveCards.js';
+import { addBothPlay, divideMovesPlay, flipPlay, twoStepPlay, distSolvePlay, bothSidesPlay, distMorePlay, strangePlay, fractionsPlay } from '../src/play/solveCards.js';
 import { packById } from '../src/packs/index.js';
 import { setShowLights, showLights } from '../src/view/narrowPanel.js';
 import { crossGeometry, OVERSHOOT_EM, MIN_WEIGHT_PX, RISE_MAX } from '../src/view/crossOut.js';
@@ -46,7 +46,7 @@ let m = null;
 afterEach(() => { m?.off?.(); m = null; setShowLights(false); document.body.replaceChildren(); });
 
 const CARDS = [['add-both', addBothPlay, 2], ['divide-it', divideMovesPlay, 2], ['flip-everything', flipPlay, 3], ['two-step-equations', twoStepPlay, 1],
-  ['distribute-solve', distSolvePlay, 1], ['variables-both-sides', bothSidesPlay, 1], ['distribute-more', distMorePlay, 1], ['strange-solutions', strangePlay, 1]];
+  ['distribute-solve', distSolvePlay, 1], ['variables-both-sides', bothSidesPlay, 1], ['distribute-more', distMorePlay, 1], ['strange-solutions', strangePlay, 1], ['fractions-of-x', fractionsPlay, 3]];
 const GLYPHS = ['Plus sign', 'Times sign', 'Division sign', 'Times negative one', 'Two curved arrows making a circle'];
 
 describe('Build W, Part 1: five square buttons, one plain symbol each', () => {
