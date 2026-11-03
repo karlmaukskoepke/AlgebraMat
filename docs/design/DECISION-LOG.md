@@ -537,3 +537,7 @@ Its notes: "Improper fractions are full credit, no mixed numbers" and "x can be 
    leaving a gap. The placed credit goes to the sheet's placed column as Build X defined it.
 7. **Eventually (not built):** a chain of test-outs as an adaptive per-card placement; a limited scaffold set in a test-out; a teacher
    switch to open all levels on a device.
+8. **Karl's answers to Build Z's decisions (2026-11-03, all four kept as built):** an unsimplified fraction on Strange solutions is not a
+   wrong answer in a test-out, and the check's "Can you simplify this further?" is allowed there; a move that makes things worse is written
+   and waits for Undo with Undo outlined and no words; the result shows after a 1.5-second pause (a click skips it); "Try Level N first"
+   names the highest level the student already has open.
