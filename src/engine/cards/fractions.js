@@ -23,7 +23,7 @@ import { makeMultiplyMenu } from '../multiplyMenu.js';
 import { hintAfterUndo } from '../solveit/registry.js';
 import { FRACTIONS } from '../divide.js';
 import { topOf, tagFracX, formatFracX, gcd } from '../fractionsX.js';
-import { newModel, modelReduce, modelOpen, modelTyping } from '../fractionsModel.js';
+import { newModel, modelReduce, modelOpen, modelTyping, MODEL_LEVELS, modelFirst } from '../fractionsModel.js';
 import { fractionsLines } from '../fractionsCheck.js';
 import { xCount } from '../solveTerms.js';
 
@@ -31,7 +31,7 @@ export { formatFracX, signed };
 
 export const FLIP_LEVEL = 4;               // −⅔x = b
 export const TRADE_LEVEL = 5;              // b = ⅔x
-export const MODEL_LEVELS = [1, 3];        // the model is drawn on its own on the first problem of these levels
+export { MODEL_LEVELS };                    // the model-first levels: drawn on its own (once per device), and I'm stuck's first help
 export const REWRITE_LEVEL = 2;            // the one-time instruction
 
 let counter = 0;
@@ -337,17 +337,21 @@ export const FRAC_SPOT = {
   error: (s) => ERRORS[s.feedback?.key] ?? null,
   keepsReds: (s) => ['dFail', 'dFail3', 'xDivSplit', 'fWorse', 'xMultNo', 'xMultWhole', 'xDivNo'].includes(s.feedback?.key),
   clear: (s) => { s.entry = ''; s.sub = null; },
-  // after a wrong value (or a wrong guess) the hint is the model (Karl: the model is the first scaffold); after a move, the reminder
+  // after a wrong value (or a wrong guess) the hint is the model on the model-first levels (Karl: the model is the first scaffold there),
+  // the reminder on the others (Build AC); after a move, the reminder
   hint: (s, before = null) => {
     if (before?.sub && !before.sub.ok && s.model) { say(s, s.model.step === 'x' ? 'mXAgain' : 'mCutAsk', { q: s.problem.q, after: true }); return null; }
-    if (before?.sub && !before.sub.ok && !s.model) {
+    if (before?.sub && !before.sub.ok && !s.model && modelFirst(s)) {
       s.model = newModel(s.problem, { help: true });
       if (!s.supportsShown.includes('model')) s.supportsShown.push('model');
       if (!s.supportsShown.includes('hint')) s.supportsShown.push('hint');
       say(s, 'mCutAsk', { q: s.problem.q, after: true });
       return null;
     }
-    return hintAfterUndo(s, before);
+    const h = hintAfterUndo(s, before);
+    // (on a level where the move comes first, the reminder after a wrong value stands for I'm stuck's first click: the next is the model)
+    if (h && before?.sub && !before.sub.ok) s.rung = Math.max(s.rung, 1);
+    return h;
   },
   prompt: (s) => (loop.moveOwed(s) ? 'aMustMove' : 'aFindX'),
 };

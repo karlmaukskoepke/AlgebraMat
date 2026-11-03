@@ -1,12 +1,14 @@
-// Fractions of x's help (Build AA), as entries of the scaffold registry (../registry.js), keyed by shape (../shape.js). On a fraction of x
-// the first rung of I'm stuck is the model (the box cut into equal parts, engine/fractionsModel.js); the second is the reminder (the move
-// to make, said in the form on the screen, its move lit with its preview), which then repeats. After a move and Undo the hint is the
-// reminder; after a wrong value and Undo it is the model (the card's spotlight, engine/cards/fractions.js). Fraction words for `⅔x`
-// ("⅔ of x"), divide-by words for `2x/3` and `x/3` (Build T's rule).
+// Fractions of x's help (Build AA), as entries of the scaffold registry (../registry.js), keyed by shape (../shape.js). On a fraction of x,
+// on the model-first levels (1 and 3), the first rung of I'm stuck is the model (the box cut into equal parts, engine/fractionsModel.js);
+// the second is the reminder (the move to make, said in the form on the screen, its move lit with its preview), which then repeats. On
+// Levels 2, 4, 5 and 6 the move comes first (Build AC, Karl 2026-11-03): the reminder, then the model drawn on the current equation, then
+// the reminder again. A minus in front of the fraction asks for −1 first, and the model waits for the flip. After a move and Undo the hint
+// is the reminder; after a wrong value and Undo it is the model on Levels 1 and 3, the reminder on the others (the card's spotlight,
+// engine/cards/fractions.js). Fraction words for `⅔x` ("⅔ of x"), divide-by words for `2x/3` and `x/3` (Build T's rule).
 
 import { signed, fractionText } from '../../solveTerms.js';
 import { ratioText } from '../../solveTerms.js';
-import { newModel } from '../../fractionsModel.js';
+import { newModel, modelFirst, problemOfShape } from '../../fractionsModel.js';
 
 const record = (s, word) => { if (!s.supportsShown.includes(word)) s.supportsShown.push(word); };
 // `⅔x` or `2x/3` as the screen writes it
@@ -43,11 +45,11 @@ const REMINDERS = {
     litMultiply(s);
     return { target: 'coef', key: 'xOverHint', params: { p: p.p, q: p.q, b: signed(p.b), was: fx(p.top, p.q, 'over'), form: 'over' }, move: 'mult' };
   },
-  // −⅔x = 6: flip first, or multiply first; the reminder names the flip where it is live, else the multiply
+  // −⅔x = 6: multiply both sides by −1 first (Karl, 2026-11-03: then the box can be drawn), where Flip everything is live; else the multiply
   FN(s, { params: p }) {
     if (s.level >= 4) {
       litFlip(s);
-      return { target: 'coef', key: 'xNegHint', params: { was: fx(p.top, p.q, p.form), q: p.q, form: p.form }, move: 'flip' };
+      return { target: 'coef', key: 'xNegFirst', params: { was: fx(p.top, p.q, p.form), q: p.q, form: p.form }, move: 'flip' };
     }
     litMultiply(s);
     return { target: 'coef', key: 'xOverHint', params: { p: p.p, q: p.q, b: signed(p.b), was: fx(p.top, p.q, p.form), form: p.form }, move: 'mult' };
@@ -82,17 +84,33 @@ const hintPopup = (id) => ({
   },
 });
 
-// The model rung: the box cut into equal parts (of the original problem). If it is up already, the reminder.
+// The model rung: the box cut into equal parts (of the original problem on Levels 1 and 3, of the equation on screen on the others). If it
+// is up already, the reminder. A minus in front of the fraction (Levels 4-6): not drawn until the flip; it says so, Flip everything lit,
+// recorded as a reminder (`hint`).
+const flipFirst = (s, shape) => shape?.id === 'FN' && s.level >= 4;
 const model = (id) => ({
   word: 'model',
+  wordFor: (s, shape) => (s.model || flipFirst(s, shape) ? 'hint' : 'model'),
   open(s, api, shape) {
     if (s.model) { record(s, 'hint'); return hintPopup(id).open(s, api, shape); }
-    s.model = newModel(s.problem, { help: true });
-    return api.say(s, 'mCutAsk', { q: s.problem.q });
+    if (flipFirst(s, shape)) {
+      s.hint = { kind: 'coef' };
+      litFlip(s);
+      return api.say(s, 'xModelFlipFirst', { was: fx(shape.params.top, shape.params.q, shape.params.form) });
+    }
+    const p = modelFirst(s) ? s.problem : problemOfShape(shape.params);
+    s.model = newModel(p, { help: true });
+    return api.say(s, 'mCutAsk', { q: p.q });
   },
 });
 
-const withModel = (id) => ({ ladder: ['model', 'hintPopup'], model: model(id), hintPopup: hintPopup(id) });
+// Levels 1 and 3: the model, then the reminder (repeating). Levels 2, 4, 5, 6: the reminder, the model, then the reminder (repeating).
+const withModel = (id) => ({
+  ladder: ['model', 'hintPopup'],
+  ladderFor: (s) => (modelFirst(s) ? ['model', 'hintPopup'] : ['hintPopup', 'model', 'hintPopup']),
+  model: model(id),
+  hintPopup: hintPopup(id),
+});
 const reminderOnly = (id) => ({ ladder: ['hintPopup'], hintPopup: hintPopup(id) });
 
 export const FRACTIONS_RUNGS = {

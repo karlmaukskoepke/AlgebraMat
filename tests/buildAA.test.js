@@ -215,9 +215,10 @@ describe('the model: a box cut into equal parts', () => {
     expect(s.supportsShown).toContain('model');
     s = go(s, { type: 'stuck' });
     expect(said(s)).toBe('⅔x means ⅔ of x: 2 of 3 equal parts make 6. Divide both sides by 2: one part is ⅓x = 3.');
-    let o = go(newFractions(P(2, 3, 9, { form: 'over' }), { level: 6 }), { type: 'stuck' }, { type: 'stuck' });
+    // (Build AC: on Levels 2, 4, 5 and 6 the reminder is the first click)
+    let o = go(newFractions(P(2, 3, 9, { form: 'over' }), { level: 6 }), { type: 'stuck' });
     expect(said(o)).toBe('2x/3 means 2x divided by 3. Multiply both sides by 3 to cancel the divide by 3.');
-    o = go(newFractions(P(1, 3, 12, { form: 'over' }), { level: 2 }), { type: 'stuck' }, { type: 'stuck' });
+    o = go(newFractions(P(1, 3, 12, { form: 'over' }), { level: 2 }), { type: 'stuck' });
     expect(said(o)).toBe('x/3 means x divided by 3. Multiply both sides by 3 to cancel the divide by 3.');
   });
   it('after a wrong value and Undo, the hint is the model', () => {

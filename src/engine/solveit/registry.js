@@ -5,6 +5,7 @@
 //                  waiting?, none? } }
 //
 //   ladder        the I'm stuck rungs in order, by name: one click a rung, the last repeats; rungs restart at each equation state
+//   ladderFor(s)  optional: the same rungs in a level's own order (Fractions of x, Build AC: the move first on Levels 2, 4, 5, 6)
 //   a rung        { word, open(s, api, shape) → s }: `word` is the class-sheet word it records (`hint`, `model`, `move`, `guided`),
 //                 or null; `open` sets up what the student does next (every rung gives something to do)
 //   hintPopup     { word, open, after(s, before) → spot }: the reminder rung, and the hint pop-up after Undo (`before`: the state Undo was
@@ -49,10 +50,12 @@ const record = (s, word) => { if (word && !s.supportsShown.includes(word)) s.sup
 export function climb(s, api) {
   const { shape, entry } = entryOf(s);
   if (!entry?.ladder?.length) return api.say(s, entry?.none ?? 'aFindX');
-  const i = Math.min(s.rung, entry.ladder.length - 1);
+  // (a card may order its rungs by level: `ladderFor(s)`, the same rung names; Fractions of x, Build AC)
+  const ladder = entry.ladderFor?.(s) ?? entry.ladder;
+  const i = Math.min(s.rung, ladder.length - 1);
   s.rung += 1;
-  const rung = entry[entry.ladder[i]];
-  record(s, rung.word);
+  const rung = entry[ladder[i]];
+  record(s, rung.wordFor?.(s, shape) ?? rung.word);                             // (a rung that gives a reminder instead records `hint`)
   return rung.open(s, api, shape);
 }
 

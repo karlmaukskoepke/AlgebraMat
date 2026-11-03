@@ -16,6 +16,13 @@ import { typeInto, isTyping } from './entry.js';
 import { signed } from './solveTerms.js';
 
 export const CUTS = [2, 3, 4, 5, 6];
+// The model-first levels (Build AC, Karl 2026-11-03): the model is the first help, and is drawn on its own once per device, only here.
+// On the other levels the move comes first and the model second.
+export const MODEL_LEVELS = [1, 3];
+export const modelFirst = (s) => MODEL_LEVELS.includes(s?.level);
+// The model of the equation on screen (a fraction of x, no minus in front): the help on a level where the move comes first draws the
+// current equation, not the original (Build AC).
+export const problemOfShape = (params) => ({ p: params.p, q: params.q, b: params.b, neg: params.top < 0 });
 
 // The model of a problem: the parts it has to be cut into, how many are given, what they make (the minus moved over)
 export function newModel(p, { auto = false, help = false } = {}) {

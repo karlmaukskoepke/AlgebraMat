@@ -17,6 +17,9 @@ const M = {
   xNegHint: (p) => (p.form === 'over'
     ? `${p.was} has a minus. Flip everything (multiply both sides by −1), or multiply both sides by ${p.q} to cancel the divide by ${p.q}: either order works.`
     : `${p.was} has a minus. Flip everything (multiply both sides by −1), or multiply both sides by ${p.q} first: either order works.`),
+  // a minus in front of the fraction (Build AC, Karl 2026-11-03): −1 first, then the box
+  xNegFirst: () => 'Multiply both sides by −1 first.',
+  xModelFlipFirst: () => 'Multiply both sides by −1 first, then I can draw the box.',
   xWholeHint: (p) => `${p.a}x means ${p.a} · x. Divide both sides by ${p.a}.`,
   xTimesHint: (p) => `x is ${p.m}(${p.b}): ${p.m} groups of ${p.b}. Work it out, then type x.`,
   // a legal move that does not help (the spotlight, then Undo)

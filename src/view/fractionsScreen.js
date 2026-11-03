@@ -160,7 +160,7 @@ const NUDGE = {
 };
 const REMINDER = {
   xUnitHint: { target: 'coef', move: 'mult' }, xNonUnitHint: { target: 'coef', move: 'divOption' }, xOverHint: { target: 'coef', move: 'mult' },
-  xNegHint: { target: 'coef', move: 'flip' }, xWholeHint: { target: 'coef', move: 'divOption' }, fFlipHint: { target: 'coef', move: 'flip' },
+  xNegHint: { target: 'coef', move: 'flip' }, xNegFirst: { target: 'coef', move: 'flip' }, xModelFlipFirst: { target: 'coef', move: 'flip' }, xWholeHint: { target: 'coef', move: 'divOption' }, fFlipHint: { target: 'coef', move: 'flip' },
   xTimesHint: { target: 'answer' }, fNegHint: { target: 'answer' }, fFracHint: { target: 'answer' },
 };
 
