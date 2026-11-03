@@ -48,3 +48,50 @@ out". Loop spec: revision 2.17 (a new item in section 7). Solve it and Solve it 
   `test-out-pass` rows). A fail, Try again (new problems), Give up, nothing lowered, help back on the suggested level.
 - Two older browser checks changed on purpose (`tests/menuSweep.test.js`): Divide it's locked row's words, and a touch tap on a Solve it
   locked row now opens the panel (a Count it row still shows its note).
+
+## Before every push: the real-browser sweeps
+
+`npm test` ran with Playwright found (no "SKIP" line): **109 files, 2261 tests, all pass**, including the typing, drag, redraw, font-size
+(screen sweep), panel-room and Add cross-out sweeps, the menu sweep and the new test-out sweep. GitHub's "Real-browser sweeps" job runs them
+too.
+
+## Parity
+
+`npm run parity`: **PASS** on all five checks (problems, save codes, class-sheet records, traces, 70 screens), nothing new. The one note
+it prints (two trace keys listed but unchanged) was already there before this build. The screens that change are outside the recorded set
+(the main menu and the card views), listed one card at a time in `tests/parity/INTENDED-CHANGES.md` under Build Z.
+
+## Test-links and Features to check
+
+Six new items (tap a locked level; a pass; a fail and Try again; Give up; a silver level turning gold; Play it like a student), a Live
+entry, and three Build AB items updated because their locked-row note and tap changed (`ab-pop-point`, `ab-pop-locked`, `ab-pop-tap`).
+Walked on the live site: the six new items pass; the full list's result is at the end of this report.
+
+## Pictures (`docs/build-z/`, 1366×768 and 1366×650, from the live site)
+
+`z-locked-*` (a card's locked levels), `z-ask-*` (the panel), `z-popup-row-*` (the popup note), `z-problem-1-of-2-*`, `z-pass-*` (the warm
+message, levels in silver), `z-not-balanced-768` (the try ending), `z-fail-*` (the fail panel), `z-giveup-*`, `z-silver-*`, `z-gold-*`,
+`z-student-undo-*`.
+
+## Could Count it and Build it take it later?
+
+Yes, with moderate work. The level rule (`canTestOut`) is one list of sections, and the credit, the records and the panel are shared. What
+they would need is their own no-help cleaning: their light-mode cards have different help (the tour, the supports a wrong answer brings
+in, their own I'm stuck rungs) and no Solve it spotlight, so `quiet` and the hidden buttons would need a version for their sessions, and
+"independent" there would be the first typed answer right. Not built (Karl: read-only).
+
+## Anything that surprised me
+
+- **Enter through the check.** A student who keeps pressing Enter through a wrong check would have pressed "Go to Level 1" on the fail
+  panel by accident. The panel now takes the focus itself (Tab reaches the buttons), so extra Enters do nothing. Found by the walk.
+- **The result waits 1.5 s** so the student sees "Balanced" or "Not balanced" before the card or the fail panel. A click skips the wait;
+  Enter does not (the play screen's Enter key is taken first), so Enter just waits the 1.5 s.
+- **Divide it's "doesn't split" pop-up** is keyed to its message, so in a test-out (where the message is cleared) it does not hold the
+  screen for Undo; the move still waits for Undo, as every red move does.
+- **Leaving mid-try** (← Packs) is logged as a give-up (`test-out-fail`), so the sheet has no attempt with no outcome.
+
+## The full Features to check list, walked on the live site
+
+All 226 items: 221 passed on the first run. Two (`ac-help-l4`, `s-add-options`) timed out loading the page and pass on a second run. Three
+Build AB items failed because they expected the old locked-row note ("Finish Level 4 to open this.") and the old tap; they were updated
+(items and walks) and pass on the live site after the second push.

@@ -1125,7 +1125,7 @@ const WALKS = {
     await w.page.setViewportSize({ width: 1366, height: 768 }); await wait(w.page, 400); await w.restOn('divide-it');
     w.at('onto Level 5'); await w.page.hover('.lv-pop:not([hidden]) .pop-level.is-locked'); await wait(w.page, 300);
     const tip = await w.page.locator('.lv-pop:not([hidden]) .pop-level.is-locked .pop-tip').evaluate((e) => (getComputedStyle(e).visibility === 'visible' ? e.textContent : ''));
-    if (tip !== 'Finish Level 4 to open this.') throw new Error(`Level 5 should say “Finish Level 4 to open this.”: ${tip}`);
+    if (tip !== 'Finish Level 4 to open this, or tap to skip ahead.') throw new Error(`Level 5 should say “Finish Level 4 to open this, or tap to skip ahead.”: ${tip}`);
     await w.shot('ab-pop-locked-note');
     w.at('off to the empty page'); await m.move(700, 760, { steps: 6 }); await wait(w.page, 500);
     if (await w.page.locator('.lv-pop:not([hidden])').count()) throw new Error('leaving should close the popup');
@@ -1144,11 +1144,13 @@ const WALKS = {
     if (rows.length !== 7 || !rows[0].current || rows[0].state !== 'none' || rows.slice(1).some((r) => r.state !== 'locked') || !rows[1].text.includes('Level 2 ax − b = c')) throw new Error(`Two-step equations: Level 1 open and ringed, 2-7 locked with their names: ${JSON.stringify(rows)}`);
     w.at('point at Level 2'); await w.page.hover('.lv-pop:not([hidden]) .pop-level.is-locked >> nth=0'); await wait(w.page, 300);
     const tip = await w.page.locator('.lv-pop:not([hidden]) .pop-level.is-locked >> nth=0').locator('.pop-tip').evaluate((e) => (getComputedStyle(e).visibility === 'visible' ? e.textContent : ''));
-    if (tip !== 'Finish Level 1 to open this.') throw new Error(`Level 2 should say “Finish Level 1 to open this.”: ${tip}`);
+    if (tip !== 'Finish Level 1 to open this, or tap to skip ahead.') throw new Error(`Level 2 should say “Finish Level 1 to open this, or tap to skip ahead.”: ${tip}`);
     await w.popBoth('two-step-equations', 'ab-pop-locked');
     await w.page.hover('.lv-pop:not([hidden]) .pop-level.is-locked >> nth=0'); await wait(w.page, 300); await w.shot('ab-pop-locked-note-650');
     w.at('click Level 2'); await w.page.locator('.lv-pop:not([hidden]) .pop-level.is-locked >> nth=0').click({ force: true }); await wait(w.page, 500);
-    if (!(await w.page.locator('#home').isVisible())) throw new Error('clicking a locked level should open nothing');
+    if (!(await w.page.locator('#home').isVisible())) throw new Error('clicking a locked level should stay on the home screen');
+    await w.see('Want to try it? Solve 2 problems here to skip ahead.');              // (Build Z: the skip-ahead panel)
+    w.at('Not now'); await w.click('#dialog [data-close]');
   },
   async 'ab-pop-keys'(w) {
     await w.start();
@@ -1182,10 +1184,13 @@ const WALKS = {
       const rows = await page.evaluate(() => [...document.querySelectorAll('.lv-pop:not([hidden]) .pop-level')].map((e) => ({ text: e.innerText.replace(/\s+/g, ' ').trim(), state: e.className.match(/is-(earned|placed|none|locked)/)?.[1], current: e.classList.contains('is-current') })));
       if (rows.length !== 5 || rows[0].state !== 'placed' || !rows[0].text.includes('One problem earns it') || !rows[1].current || rows.slice(2).some((r) => r.state !== 'locked')) throw new Error(`Flip everything's popup: ${JSON.stringify(rows)}`);
       w.at('tap Level 3'); await page.tap('.lv-pop:not([hidden]) .pop-level.is-locked >> nth=0', { force: true }); await wait(page, 300);
-      const tip = await page.locator('.lv-pop:not([hidden]) .pop-level.is-tipping .pop-tip').textContent().catch(() => '');
-      if (tip !== 'Finish Level 2 to open this.' || !(await page.locator('#pop-flip-everything:not([hidden])').count())) throw new Error(`the tap should show “Finish Level 2 to open this.” and keep the popup: ${tip}`);
+      const panel = await page.locator('#dialog[open]').innerText().catch(() => '');
+      if (!panel.includes('Want to try it? Solve 2 problems here to skip ahead.') || await page.locator('.lv-pop:not([hidden])').count()) throw new Error(`the tap should close the popup and open the skip-ahead panel (Build Z): ${panel}`);
       await page.screenshot({ path: path.join(OUT, 'ab-pop-tap-768.png') });
-      w.at('tap the arrow again'); await page.tap('.card-chev[data-chev="flip-everything"]'); await wait(page, 300);
+      w.at('Not now'); await page.tap('#dialog [data-close]'); await wait(page, 300);
+      w.at('tap the arrow twice'); await page.tap('.card-chev[data-chev="flip-everything"]'); await wait(page, 300);
+      if (!(await page.locator('#pop-flip-everything:not([hidden])').count())) throw new Error('the arrow should open the popup again');
+      await page.tap('.card-chev[data-chev="flip-everything"]'); await wait(page, 300);
       if (await page.locator('.lv-pop:not([hidden])').count()) throw new Error('a second tap should close the popup');
       w.at('tap Distribute more'); await page.tap('.card-name[data-card="distribute-more"]'); await wait(page, 400);
       if ((await page.locator('.card-view .pack-head h2').textContent()) !== 'Distribute more') throw new Error('the tap should open Distribute more');

@@ -661,7 +661,7 @@
         "Now rest the pointer on the name Divide it for a moment.",
         "Move the pointer into the popup and onto Level 5, then off to the empty page below."
       ],
-      "see": "A quick pass opens nothing. Resting on Divide it opens a small popup beside it (to its right, not over the names below): “Divide it” with “3 of 5”, Levels 1 and 2 gold with a star, Level 3 silver with “One problem earns it”, Level 4 ringed (the level to do next), Level 5 greyed with a lock, then See why it works. On Level 5 a note says “Finish Level 4 to open this.” The popup goes as soon as the pointer leaves both the name and the popup."
+      "see": "A quick pass opens nothing. Resting on Divide it opens a small popup beside it (to its right, not over the names below): “Divide it” with “3 of 5”, Levels 1 and 2 gold with a star, Level 3 silver with “One problem earns it”, Level 4 ringed (the level to do next), Level 5 greyed with a lock, then See why it works. On Level 5 a note says “Finish Level 4 to open this, or tap to skip ahead.” (since Build Z) The popup goes as soon as the pointer leaves both the name and the popup."
     },
     {
       "id": "ab-pop-level",
@@ -691,9 +691,9 @@
       "steps": [
         "Click the button. It opens the home screen for a fresh student.",
         "Rest the pointer on the name Two-step equations until its popup opens.",
-        "Point at Level 2, then click it."
+        "Point at Level 2, then click it. Click Not now."
       ],
-      "see": "Level 1 is ringed and open; Levels 2 to 7 are greyed, each with a small lock, and still show their names. Pointing at Level 2 shows “Finish Level 1 to open this.” Clicking it opens nothing."
+      "see": "Level 1 is ringed and open; Levels 2 to 7 are greyed, each with a small lock, and still show their names. Pointing at Level 2 shows “Finish Level 1 to open this, or tap to skip ahead.” Clicking it closes the popup and opens the skip-ahead panel (“Want to try it?”), since Build Z; Not now closes it."
     },
     {
       "id": "ab-pop-keys",
@@ -726,11 +726,11 @@
       "steps": [
         "On a touch screen (a tablet, or a Chromebook with a touch screen), click the button. It opens the home screen.",
         "Tap the small arrow (›) at the right end of Flip everything.",
-        "Tap Level 3 in the popup (greyed, with a lock).",
-        "Tap the small arrow beside Flip everything again.",
+        "Tap Level 3 in the popup (greyed, with a lock), then tap Not now.",
+        "Tap the small arrow beside Flip everything twice.",
         "Tap the name Distribute more."
       ],
-      "see": "The arrow is finger-sized. The first tap opens Flip everything’s popup: Level 1 silver with “One problem earns it”, Level 2 ringed, Levels 3 to 5 greyed with a lock. Tapping Level 3 shows “Finish Level 2 to open this.” and keeps the popup. Tapping the arrow again closes it (so does a tap anywhere outside it). Tapping Distribute more opens that card’s page, as before. Nothing needs the pointer to rest anywhere."
+      "see": "The arrow is finger-sized. The first tap opens Flip everything’s popup: Level 1 silver with “One problem earns it”, Level 2 ringed, Levels 3 to 5 greyed with a lock. Tapping Level 3 closes the popup and opens the skip-ahead panel (“Want to try it? Solve 2 problems here to skip ahead.”), since Build Z; Not now closes it. The arrow opens the popup again, and a second tap closes it (so does a tap anywhere outside it). Tapping Distribute more opens that card’s page, as before. Nothing needs the pointer to rest anywhere."
     },
     {
       "id": "ab-pop-edge",
