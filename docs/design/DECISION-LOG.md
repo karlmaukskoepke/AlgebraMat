@@ -541,3 +541,20 @@ Its notes: "Improper fractions are full credit, no mixed numbers" and "x can be 
    wrong answer in a test-out, and the check's "Can you simplify this further?" is allowed there; a move that makes things worse is written
    and waits for Undo with Undo outlined and no words; the result shows after a 1.5-second pause (a click skips it); "Try Level N first"
    names the highest level the student already has open.
+
+## 2026-11-03: check simplifies fractions; slower rewrite animation (Karl; built in Build AD)
+
+1. **The check never carries a fraction that could be simpler** (Karl: carrying `−20/5` from line to line "seems a little absurd"). A
+   fraction may appear on the line whose step produced it, and every step is still shown, but the next line writes it in its simplest form:
+   a fraction equal to a whole number becomes that number (`−20/5` → `−4`, `18/3` → `6`); one not in lowest terms goes to lowest terms
+   (`10/4` → `5/2`); one already in lowest terms stays a fraction, proper or improper (`7/5`, `−8/5`, `47/2`), never a mixed number or a
+   decimal. Everywhere in a line, a fraction inside a sum or a product too (`−20/5 + 3` → `−4 + 3`). A sum of fractions keeps its steps
+   (a common bottom, then add), and each result is simplified on its next line. Unchanged: every step shown, the order of operations, a line
+   never rewritten after it appears, how a typed answer is judged, the work rows (the solved value is never written for the student).
+2. **The rewrite animation on Fractions of x takes about 3 seconds** (Build AC's 1.5 s was far too fast to follow), holding longest on the
+   frames that carry the idea: `x/1` appearing and the dot between the fractions; in the reverse direction, `x` split out as `x/1`.
+   Everything else as Build AC built it; `?animslow=1` stays four times slower than the new pace.
+3. **A shorter note on a locked level:** "Finish Level N or tap to skip ahead." (it was "Finish Level N to open this, or tap to skip
+   ahead.", too many words for the little pop-up). What a tap does, the panel, the card page's locked rows and Count it and Build it's note
+   are unchanged.
+4. **Build Z's six Features to check items: ticked and kept** (2026-11-03).

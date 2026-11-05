@@ -238,9 +238,9 @@ describe('the check with a fraction (3x + 4 = x + 9 at 5/2)', () => {
     expect(lineText(r.lines[0])).toBe('3(−5/2) + 4 = (−5/2) + 9');
     expect(r.ok).toBe(false);
   });
-  it('a whole side meets a fraction at the end: written over the same bottom (8/2 = 4 → 8/2 = 8/2)', () => {
+  it('a fraction that is a whole number is written as one on the next line (Build AD: 20/2 → 10, so 4 = 4, not 8/2 = 8/2)', () => {
     const r = fractionLines({ left: [{ kind: 'x', coef: 4 }, { kind: 'num', v: -6 }], right: [{ kind: 'num', v: 4 }] }, frac(5, 2));
-    expect(r.lines.map(lineText).slice(-2)).toEqual(['8/2 = 4', '8/2 = 8/2']);
+    expect(r.lines.map(lineText)).toEqual(['4(5/2) − 6 = 4', '20/2 − 6 = 4', '10 − 6 = 4', '4 = 4']);
     expect(r.ok).toBe(true);
   });
   it('the card checks a fraction on the original equation, one drop per x', () => {

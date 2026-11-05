@@ -241,6 +241,19 @@ class Walk {
     });
     if (found.length) throw new Error(`no help in a try, but after step "${this.step}": ${found.join('; ')}`);
   }
+  // Build AD: the check's lines under the equation, exactly (a stacked fraction reads 5/2), then its mark
+  async adLines(want, mark) {
+    const got = await this.checkLines();
+    const flat = (l) => l.replace(/\s+/g, '');
+    const body = got.slice(1, -1);
+    if (JSON.stringify(body) !== JSON.stringify(want.map(flat)) || got.at(-1) !== flat(mark)) throw new Error(`the check should read ${want.join(' | ')} then ${mark} after step "${this.step}": ${got.join(' | ')}`);
+  }
+  // Build AD: Strange solutions Level 1, seed 7, from 3x − 15 = −3x − 4 to x = 11/6
+  async adTo11over6() {
+    await this.see('3x − 15 = −3x − 4');
+    this.at('to 6x = 11'); await this.crossTerm('−3x', 'left'); await this.combineTerms('3x', '3x', '6x'); await this.addEnter(15); await this.combineTerms('15', '−4', 11); await this.row('6x = 11');
+    this.at('Divide 6'); await this.divEnter(6); await this.row('x = 11/6');
+  }
   async text() { return (await this.page.evaluate(() => document.body.innerText)).replace(/\s+/g, ' '); }
   async see(...words) {                             // every piece of text must be on the screen
     const t = await this.text();
@@ -471,6 +484,42 @@ class Walk {
 
 // ---- one walk per item (same id as in the data file) ---------------------------------------------------------------------------------
 const WALKS = {
+  // ---- Build AD, Part 1: the check simplifies fractions on the next line (Strange solutions) ----
+  async 'ad-whole'(w) {
+    await w.start(); await w.see('6x + 6 = 3x + 5');
+    w.at('to 3x = −1'); await w.crossTerm('3x', 'left'); await w.combineTerms('−3x', '6x', '3x'); await w.addEnter(-6); await w.combineTerms('−6', '5', -1); await w.row('3x = −1');
+    w.at('Divide 3'); await w.divEnter(3); await w.row('x = −1/3');
+    w.at('check −1/3'); await w.checkFraction('-1/3'); await w.adLines(['6(−1/3) + 6 = 3(−1/3) + 5', '−6/3 + 6 = −3/3 + 5', '−2 + 6 = −1 + 5', '4 = 4'], '✓ Balanced');
+    await w.both('ad-whole');
+  },
+  async 'ad-lowest'(w) {
+    await w.start(); await w.adTo11over6();
+    w.at('check 11/6'); await w.checkFraction('11/6');
+    await w.adLines(['3(11/6) − 15 = −3(11/6) − 4', '33/6 − 15 = −33/6 − 4', '11/2 − 15 = −11/2 − 4', '11/2 − 30/2 = −11/2 − 8/2', '−19/2 = −19/2'], '✓ Balanced');
+    await w.both('ad-lowest');
+  },
+  async 'ad-stays'(w) {
+    await w.start(); await w.see('3x + 10 = −2x + 2');
+    w.at('to 5x = −8'); await w.crossTerm('−2x', 'left'); await w.combineTerms('2x', '3x', '5x'); await w.addEnter(-10); await w.combineTerms('−10', '2', -8); await w.row('5x = −8');
+    w.at('Divide 5'); await w.divEnter(5); await w.row('x = −8/5');
+    w.at('check −8/5'); await w.checkFraction('-8/5');
+    await w.adLines(['3(−8/5) + 10 = −2(−8/5) + 2', '−24/5 + 10 = 16/5 + 2', '−24/5 + 50/5 = 16/5 + 10/5', '26/5 = 26/5'], '✓ Balanced');
+    await w.both('ad-stays');
+  },
+  async 'ad-improper'(w) {
+    await w.start(); await w.see('5x − 3 = 2x + 10');
+    w.at('to 3x = 13'); await w.crossTerm('2x', 'left'); await w.combineTerms('−2x', '5x', '3x'); await w.addEnter(3); await w.combineTerms('3', '10', 13); await w.row('3x = 13');
+    w.at('Divide 3'); await w.divEnter(3); await w.row('x = 13/3');
+    w.at('check 13/3'); await w.checkFraction('13/3');
+    await w.adLines(['5(13/3) − 3 = 2(13/3) + 10', '65/3 − 3 = 26/3 + 10', '65/3 − 9/3 = 26/3 + 30/3', '56/3 = 56/3'], '✓ Balanced');
+    await w.both('ad-improper');
+  },
+  async 'ad-wrong'(w) {
+    await w.start(); await w.adTo11over6();
+    w.at('check 5/6'); await w.checkFraction('5/6');
+    await w.adLines(['3(5/6) − 15 = −3(5/6) − 4', '15/6 − 15 = −15/6 − 4', '5/2 − 15 = −5/2 − 4', '5/2 − 30/2 = −5/2 − 8/2', '−25/2 = −13/2'], '✗ Not balanced');
+    await w.both('ad-wrong');
+  },
   // ---- Build Z: skip ahead (test out of a locked level) ----
   async 'z-tap-locked'(w) {
     await w.start();

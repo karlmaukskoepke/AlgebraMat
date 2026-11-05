@@ -4,13 +4,21 @@
 // reduced: the denominator is the value's all the way down. A board may hold a fraction already (`−x = 15/6`, a guess at the current
 // equation): it is a number like any other. Whole values on boards with no fraction keep solveTerms.js's own check (the same lines as
 // every other card). Same output as substitutionLines: { lines: [{ segs }], ok, left, right }. Pure logic, no DOM.
+//
+// Since Build AD (Karl, 2026-11-03) the check never carries a fraction that could be simpler: a fraction may appear on the line whose step
+// produced it, and the next line writes it simplest (`−24/3` → `−8`, `63/6` → `21/2`; `7/5` stays), everywhere in the line (inside a sum,
+// a product or parentheses). That is its own step, the first of the kinds. Two kinds of fraction are written over a bottom on purpose and
+// are left as they are: a number written over the common bottom so it can be added (`15/2 + 4` → `15/2 + 8/2`, then `23/2`), and the two
+// sides written over one bottom to compare them at the end (`5/2 = 7/3` → `15/6 = 14/6`). Each sum's result is simplified on its next line.
 
 import { MINUS } from './expr.js';
-import { frac, add, times, neg, same } from './fraction.js';
+import { frac, add, times, neg, same, lowest } from './fraction.js';
 import { factorText } from './solveTerms.js';
 
 const lcm = (a, b) => { let x = a; let y = b; while (y) [x, y] = [y, x % y]; return (a / x) * b; };
 const over = (f, d) => ({ n: (f.n * d) / f.d, d });
+// (a number written over a bottom on purpose: kept as it is, `keep`)
+const kept = (v) => ({ k: 'num', v, keep: true });
 // a number's text: `5/2`, `−15/2`, `4`
 const text = (f) => `${f.n < 0 ? MINUS : ''}${Math.abs(f.n)}${f.d === 1 ? '' : `/${f.d}`}`;
 const bare = (f) => `${Math.abs(f.n)}${f.d === 1 ? '' : `/${f.d}`}`;
@@ -60,7 +68,19 @@ function sumSegs(items, ctx, inGroup = false) {
 // One step (Karl, after Build V): every operation of the same kind, on both sides at once: first inside the parentheses, then every
 // product (and the opposite of a number), then every run of numbers written over one denominator where they differ, then every run added
 // together in one go.
-const KINDS = ['inner', 'mul', 'den', 'sum'];
+const KINDS = ['simplify', 'inner', 'mul', 'den', 'sum'];
+// a fraction that could be written more simply (a whole number, or not in lowest terms), not one written over a bottom on purpose
+const reducible = (it) => (it.k === 'num' || it.k === 'negnum') && !it.keep && it.v.d > 1 && (lowest(it.v).d !== it.v.d);
+const needsSimplify = (items) => items.some((it) => reducible(it) || (it.k === 'grp' && needsSimplify(it.inner)));
+function simplified(items, ctx) {
+  return items.map((it) => {
+    if (it.k === 'grp' && needsSimplify(it.inner)) return { ...it, inner: simplified(it.inner, ctx) };
+    if (!reducible(it)) return it;
+    const r = { k: it.k, v: lowest(it.v) };
+    ctx.ops.add(it); ctx.res.add(r);
+    return r;
+  });
+}
 const single = (it) => it.inner.length === 1 && isNumber(it.inner[0]);
 const runs = (items) => {                                          // the runs of two or more numbers side by side: [start, end)
   const out = [];
@@ -73,6 +93,7 @@ const runs = (items) => {                                          // the runs o
   return out;
 };
 function kindOf(items) {
+  if (needsSimplify(items)) return 'simplify';
   let mul = false;
   for (const it of items) {
     if (it.k === 'grp') { if (!single(it)) return 'inner'; mul = true; }
@@ -85,6 +106,7 @@ function kindOf(items) {
 }
 const earliest = (...kinds) => KINDS.find((k) => kinds.includes(k)) ?? null;
 function stepOf(items, kind, ctx) {
+  if (kind === 'simplify') return simplified(items, ctx);
   if (kind === 'inner') return items.map((it) => (it.k === 'grp' && !single(it) ? { ...it, inner: stepOf(it.inner, kindOf(it.inner), ctx) } : it));
   if (kind === 'mul') {
     return items.map((it) => {
@@ -104,7 +126,7 @@ function stepOf(items, kind, ctx) {
     if (kind === 'den') {
       // (a whole number meeting a fraction is written over its denominator: `15/2 + 4` → `15/2 + 8/2`)
       const d = run.reduce((m, it) => lcm(m, it.v.d), 1);
-      run.forEach((it, k) => { if (it.v.d !== d) { const r = { k: 'num', v: over(it.v, d) }; ctx.ops.add(it); ctx.res.add(r); out[i + k] = r; } });
+      run.forEach((it, k) => { if (it.v.d !== d) { const r = kept(over(it.v, d)); ctx.ops.add(it); ctx.res.add(r); out[i + k] = r; } });
     } else if (kind === 'sum') {
       const r = { k: 'num', v: run.slice(1).reduce((a, it) => add(a, it.v), run[0].v) };
       run.forEach((it) => { ctx.ops.add(it); ctx.sums.add(it); });
@@ -132,8 +154,8 @@ export function fractionLines(board, value) {
       const r = valueOf(right);
       if (l && r && l.d !== r.d) {
         const d = lcm(l.d, r.d);
-        const nl = l.d === d ? left[0] : { k: 'num', v: over(l, d) };
-        const nr = r.d === d ? right[0] : { k: 'num', v: over(r, d) };
+        const nl = l.d === d ? left[0] : kept(over(l, d));
+        const nr = r.d === d ? right[0] : kept(over(r, d));
         if (nl !== left[0]) { ctx.ops.add(left[0]); ctx.res.add(nl); }
         if (nr !== right[0]) { ctx.ops.add(right[0]); ctx.res.add(nr); }
         lines.push({ segs: lineOf(left, right, { ops: ctx.ops, sums: ctx.sums, res: prevRes }), op: true, res: prevRes.size > 0 });

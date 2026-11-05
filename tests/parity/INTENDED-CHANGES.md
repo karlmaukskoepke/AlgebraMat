@@ -942,6 +942,22 @@ screen; Count it and Build it cards are unchanged):
 | The play screen during a test-out (new) | | the bar “Skip ahead · Level N · Problem 1 of 2 · Give up”, the title hidden, no I'm stuck or Teach me, two problem dots | Part 1, item 2 |
 | The fail panel (new) and the pass message on the card (new) | | “Not yet. Try Level N first.”; “You skipped ahead! Do one more problem on Level N to make it gold.” | Part 1, items 4-5 |
 
+## Build AD, Part 1 (2026-11-05): the check simplifies fractions on the next line
+
+Problems, save codes, class-sheet records, the 25 scripted runs and the 70 recorded screens: unchanged (the harness lists nothing new;
+none of the recorded states is a Strange solutions check). The stricter picture-by-picture comparison of the 70 screens with the build
+before is in the report. The screens that change are outside the recorded set: Strange solutions' check, Levels 1-3, wherever a line holds
+a fraction that could be simpler (about a quarter to a third of the checks in a 200-seed scan). One before and after a kind, at
+1366x768 and 1366x650 (`docs/build-ad/ad-*-before-*.png`, `ad-*-after-*.png`):
+
+| Screen (not recorded) | Before | After | Why |
+|---|---|---|---|
+| Strange solutions L1, seed 2, the check of −1/3 | `−6/3 + 6 = −3/3 + 5`, `−6/3 + 18/3 = −3/3 + 15/3`, `12/3 = 12/3` | `−6/3 + 6 = −3/3 + 5`, `−2 + 6 = −1 + 5`, `4 = 4` | a whole-number fraction written as the number |
+| Strange solutions L1, seed 7, the check of 11/6 | `33/6 − 15 …`, `33/6 − 90/6 …`, `−57/6 = −57/6` | `33/6 − 15 …`, `11/2 − 15 …`, `11/2 − 30/2 …`, `−19/2 = −19/2` (one line more) | lowest terms, inside a sum |
+| Strange solutions L1, seed 7, a wrong 5/6 | `15/6 − 15 …`, `15/6 − 90/6 …`, `−75/6 = −39/6` | `15/6 − 15 …`, `5/2 − 15 …`, `5/2 − 30/2 …`, `−25/2 = −13/2` | both sides of a Not balanced check |
+| Strange solutions L3, seed 4, the check of 13/3 | unchanged: `65/3 − 3 …`, `65/3 − 9/3 …`, `56/3 = 56/3` | the same | already lowest terms, improper, stays |
+| Strange solutions L1, seed 4 at 1366x650 (the longest check: 5 lines and the mark) | 4 lines | 5 lines, still 62 px above x =, no scrolling, the text size unchanged (32 px) | the worst case |
+
 <!-- history: nothing below this line is read by the harness -->
 
 ## History: screen changes accepted by the re-baseline of 2026-10-24 (Build O, Part 0)
