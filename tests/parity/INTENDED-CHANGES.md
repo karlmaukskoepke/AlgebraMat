@@ -958,6 +958,25 @@ a fraction that could be simpler (about a quarter to a third of the checks in a 
 | Strange solutions L3, seed 4, the check of 13/3 | unchanged: `65/3 − 3 …`, `65/3 − 9/3 …`, `56/3 = 56/3` | the same | already lowest terms, improper, stays |
 | Strange solutions L1, seed 4 at 1366x650 (the longest check: 5 lines and the mark) | 4 lines | 5 lines, still 62 px above x =, no scrolling, the text size unchanged (32 px) | the worst case |
 
+## Build AD, Part 3 (2026-11-05): a shorter note on a locked level
+
+Problems, save codes, class-sheet records, the 25 scripted runs and the 70 recorded screens: unchanged (no recorded state is the main menu).
+The screens that change are outside the recorded set, one per Solve it and Solve it Plus card (`docs/build-ad/ad-note-solveit-*.png`).
+Count it and Build it's note, “Finish Level N to open this.”, is a different sentence and stays (`ad-note-countit-*.png`, unchanged). What
+a tap does, the panel's words and the card page's locked rows (“Locked”, “Tap to skip ahead”) are unchanged.
+
+| Screen (not recorded) | Before | After | Why |
+|---|---|---|---|
+| Add to both sides: a locked level's note in the level popup (Levels 2-5, on pointing, focus or a tap) and the row's accessible name | “Finish Level N to open this, or tap to skip ahead.” | “Finish Level N or tap to skip ahead.” | Part 3 |
+| Divide it: a locked level's note in the level popup (Levels 2-5, on pointing, focus or a tap) and the row's accessible name | “Finish Level N to open this, or tap to skip ahead.” | “Finish Level N or tap to skip ahead.” | Part 3 |
+| Flip everything: a locked level's note in the level popup (Levels 2-5, on pointing, focus or a tap) and the row's accessible name | “Finish Level N to open this, or tap to skip ahead.” | “Finish Level N or tap to skip ahead.” | Part 3 |
+| Fractions of x: a locked level's note in the level popup (Levels 2-6, on pointing, focus or a tap) and the row's accessible name | “Finish Level N to open this, or tap to skip ahead.” | “Finish Level N or tap to skip ahead.” | Part 3 |
+| Two-step equations: a locked level's note in the level popup (Levels 2-7, on pointing, focus or a tap) and the row's accessible name | “Finish Level N to open this, or tap to skip ahead.” | “Finish Level N or tap to skip ahead.” | Part 3 |
+| Distribute, combine, solve: a locked level's note in the level popup (Levels 2-5, on pointing, focus or a tap) and the row's accessible name | “Finish Level N to open this, or tap to skip ahead.” | “Finish Level N or tap to skip ahead.” | Part 3 |
+| Variables on both sides: a locked level's note in the level popup (Levels 2-5, on pointing, focus or a tap) and the row's accessible name | “Finish Level N to open this, or tap to skip ahead.” | “Finish Level N or tap to skip ahead.” | Part 3 |
+| Distribute more: a locked level's note in the level popup (Levels 2-5, on pointing, focus or a tap) and the row's accessible name | “Finish Level N to open this, or tap to skip ahead.” | “Finish Level N or tap to skip ahead.” | Part 3 |
+| Strange solutions: a locked level's note in the level popup (Levels 2-3, on pointing, focus or a tap) and the row's accessible name | “Finish Level N to open this, or tap to skip ahead.” | “Finish Level N or tap to skip ahead.” | Part 3 |
+
 <!-- history: nothing below this line is read by the harness -->
 
 ## History: screen changes accepted by the re-baseline of 2026-10-24 (Build O, Part 0)

@@ -103,7 +103,7 @@
         "Click Not now. The panel closes and nothing else changes.",
         "Click ← All sections. Click the small arrow beside Divide it. In its list of levels, point at Level 3, then click it."
       ],
-      "see": "The panel says “Want to try it? Solve 2 problems here to skip ahead.” with Try it and Not now, and no timer. Pointing at Divide it’s Level 3 says “Finish Level 2 to open this, or tap to skip ahead.”, and clicking it opens the same panel, headed “Divide it · Level 3”."
+      "see": "The panel says “Want to try it? Solve 2 problems here to skip ahead.” with Try it and Not now, and no timer. Pointing at Divide it’s Level 3 says “Finish Level 2 or tap to skip ahead.”, and clicking it opens the same panel, headed “Divide it · Level 3”."
     },
     {
       "id": "z-pass",
@@ -746,7 +746,7 @@
         "Now rest the pointer on the name Divide it for a moment.",
         "Move the pointer into the popup and onto Level 5, then off to the empty page below."
       ],
-      "see": "A quick pass opens nothing. Resting on Divide it opens a small popup beside it (to its right, not over the names below): “Divide it” with “3 of 5”, Levels 1 and 2 gold with a star, Level 3 silver with “One problem earns it”, Level 4 ringed (the level to do next), Level 5 greyed with a lock, then See why it works. On Level 5 a note says “Finish Level 4 to open this, or tap to skip ahead.” (since Build Z) The popup goes as soon as the pointer leaves both the name and the popup."
+      "see": "A quick pass opens nothing. Resting on Divide it opens a small popup beside it (to its right, not over the names below): “Divide it” with “3 of 5”, Levels 1 and 2 gold with a star, Level 3 silver with “One problem earns it”, Level 4 ringed (the level to do next), Level 5 greyed with a lock, then See why it works. On Level 5 a note says “Finish Level 4 or tap to skip ahead.” (since Build Z; shorter since Build AD) The popup goes as soon as the pointer leaves both the name and the popup."
     },
     {
       "id": "ab-pop-level",
@@ -778,7 +778,7 @@
         "Rest the pointer on the name Two-step equations until its popup opens.",
         "Point at Level 2, then click it. Click Not now."
       ],
-      "see": "Level 1 is ringed and open; Levels 2 to 7 are greyed, each with a small lock, and still show their names. Pointing at Level 2 shows “Finish Level 1 to open this, or tap to skip ahead.” Clicking it closes the popup and opens the skip-ahead panel (“Want to try it?”), since Build Z; Not now closes it."
+      "see": "Level 1 is ringed and open; Levels 2 to 7 are greyed, each with a small lock, and still show their names. Pointing at Level 2 shows “Finish Level 1 or tap to skip ahead.” Clicking it closes the popup and opens the skip-ahead panel (“Want to try it?”), since Build Z; Not now closes it."
     },
     {
       "id": "ab-pop-keys",

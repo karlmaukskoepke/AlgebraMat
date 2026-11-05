@@ -533,7 +533,7 @@ const WALKS = {
     if (await w.page.locator('#dialog[open]').count()) throw new Error('the panel should close');
     w.at('All sections, the arrow beside Divide it'); await w.click('[data-back]'); await w.click('[data-chev="divide-it"]');
     w.at('point at Level 3'); await w.page.hover('.lv-pop:not([hidden]) .pop-level[data-try-level="4"]'); await wait(w.page, 400);
-    await w.see('Finish Level 2 to open this, or tap to skip ahead.');
+    await w.see('Finish Level 2 or tap to skip ahead.');
     await w.both('z-popup-row');
     w.at('click Level 3'); await w.click('.lv-pop:not([hidden]) .pop-level[data-try-level="4"]');
     await w.see('Divide it · Level 3', 'Want to try it? Solve 2 problems here to skip ahead.');
@@ -1174,7 +1174,7 @@ const WALKS = {
     await w.page.setViewportSize({ width: 1366, height: 768 }); await wait(w.page, 400); await w.restOn('divide-it');
     w.at('onto Level 5'); await w.page.hover('.lv-pop:not([hidden]) .pop-level.is-locked'); await wait(w.page, 300);
     const tip = await w.page.locator('.lv-pop:not([hidden]) .pop-level.is-locked .pop-tip').evaluate((e) => (getComputedStyle(e).visibility === 'visible' ? e.textContent : ''));
-    if (tip !== 'Finish Level 4 to open this, or tap to skip ahead.') throw new Error(`Level 5 should say “Finish Level 4 to open this, or tap to skip ahead.”: ${tip}`);
+    if (tip !== 'Finish Level 4 or tap to skip ahead.') throw new Error(`Level 5 should say “Finish Level 4 or tap to skip ahead.”: ${tip}`);
     await w.shot('ab-pop-locked-note');
     w.at('off to the empty page'); await m.move(700, 760, { steps: 6 }); await wait(w.page, 500);
     if (await w.page.locator('.lv-pop:not([hidden])').count()) throw new Error('leaving should close the popup');
@@ -1193,7 +1193,7 @@ const WALKS = {
     if (rows.length !== 7 || !rows[0].current || rows[0].state !== 'none' || rows.slice(1).some((r) => r.state !== 'locked') || !rows[1].text.includes('Level 2 ax − b = c')) throw new Error(`Two-step equations: Level 1 open and ringed, 2-7 locked with their names: ${JSON.stringify(rows)}`);
     w.at('point at Level 2'); await w.page.hover('.lv-pop:not([hidden]) .pop-level.is-locked >> nth=0'); await wait(w.page, 300);
     const tip = await w.page.locator('.lv-pop:not([hidden]) .pop-level.is-locked >> nth=0').locator('.pop-tip').evaluate((e) => (getComputedStyle(e).visibility === 'visible' ? e.textContent : ''));
-    if (tip !== 'Finish Level 1 to open this, or tap to skip ahead.') throw new Error(`Level 2 should say “Finish Level 1 to open this, or tap to skip ahead.”: ${tip}`);
+    if (tip !== 'Finish Level 1 or tap to skip ahead.') throw new Error(`Level 2 should say “Finish Level 1 or tap to skip ahead.”: ${tip}`);
     await w.popBoth('two-step-equations', 'ab-pop-locked');
     await w.page.hover('.lv-pop:not([hidden]) .pop-level.is-locked >> nth=0'); await wait(w.page, 300); await w.shot('ab-pop-locked-note-650');
     w.at('click Level 2'); await w.page.locator('.lv-pop:not([hidden]) .pop-level.is-locked >> nth=0').click({ force: true }); await wait(w.page, 500);

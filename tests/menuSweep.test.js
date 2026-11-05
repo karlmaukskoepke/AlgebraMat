@@ -131,7 +131,7 @@ const wait = (page, ms) => page.waitForTimeout(ms);
     expect(info.rows[2].text).toContain('One problem earns it');
     expect(info.rows[3].cls).toContain('is-current');
     expect(info.rows[4].text).toBe('Level 5 all mixed');                      // (greyed, with a lock; its note shows on pointing)
-    expect(info.rows[4].label).toBe('Level 5, all mixed, locked. Finish Level 4 to open this, or tap to skip ahead.');   // (a Solve it card: Build Z)
+    expect(info.rows[4].label).toBe('Level 5, all mixed, locked. Finish Level 4 or tap to skip ahead.');   // (a Solve it card: Build Z; shorter since Build AD)
     expect(info.rows[4].locked).toBe('6');
     expect(info.rows[5].text).toBe('? See why it works');
     expect(await page.locator('.card-chev[data-chev="divide-it"]').getAttribute('aria-expanded')).toBe('true');

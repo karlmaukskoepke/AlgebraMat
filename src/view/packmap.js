@@ -125,7 +125,8 @@ function packCard(progress, pack, { shine = null, grew = false } = {}) {
 // row carries data-locked (its saved level number) and aria-disabled, and a click or tap on it only shows its note. An open row carries
 // data-pack and data-level, like a level button, and opens that level.
 
-const lockNote = (pack, l) => `Finish Level ${levelNumber(pack, l - 1)} to open this${canTry(pack.id, l) ? ', or tap to skip ahead' : ''}.`;
+// (a Solve it card's locked level can be tested out of: "Finish Level 2 or tap to skip ahead.", Build AD; Count it and Build it keep theirs)
+const lockNote = (pack, l) => (canTry(pack.id, l) ? `Finish Level ${levelNumber(pack, l - 1)} or tap to skip ahead.` : `Finish Level ${levelNumber(pack, l - 1)} to open this.`);
 
 function popRow(progress, pack, l, current, shine) {
   const state = levelState(progress, pack.id, l);
