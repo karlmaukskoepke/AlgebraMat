@@ -3,6 +3,57 @@
   "updated": "2026-11-05",
   "checks": [
     {
+      "id": "ad-anim",
+      "name": "The rewrite animation: about three seconds, longest on x/1 and the dot",
+      "build": "Build AD",
+      "link": {
+        "label": "Open Fractions of x · Level 5",
+        "query": "?pack=fractions-of-x&level=5&seed=10&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Fractions of x, Level 5, on 10 = ⅔x.",
+        "Click the ⅔x and watch the new row for three seconds.",
+        "Click the 2x/3 in the new row and watch for three seconds.",
+        "Click the ⅔x in the newest row, and at once press the Shift key."
+      ],
+      "see": "The first click takes about three seconds: the x lifts off, then x is written over 1 (⅔ x/1) and stays a moment, then the dot appears (⅔ · x/1) and stays a moment, then the two join (2·x over 3·1) and 10 = 2x/3 is printed. The second click runs the other way and holds longest on ⅔ · x/1 (the x split out over 1) before the /1 drops and 10 = ⅔x is printed. Shift prints the row at once."
+    },
+    {
+      "id": "ad-anim-slow",
+      "name": "The rewrite animation, four times slower (for testers)",
+      "build": "Build AD",
+      "link": {
+        "label": "Open Fractions of x · Level 5, slow",
+        "query": "?pack=fractions-of-x&level=5&seed=10&animslow=1&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Fractions of x, Level 5, on 10 = ⅔x, with the animation slowed down.",
+        "Click the ⅔x and watch the new row for twelve seconds.",
+        "Click the 2x/3 in the new row and watch for twelve seconds."
+      ],
+      "see": "The same frames as at normal speed, each four times as long: about twelve seconds each way, the longest holds on ⅔ x/1 and ⅔ · x/1 (and, back the other way, on ⅔ · x/1). Then 10 = 2x/3 and 10 = ⅔x are printed."
+    },
+    {
+      "id": "ad-student-fractions",
+      "name": "Play it like a student: Fractions of x",
+      "build": "Build AD",
+      "link": {
+        "label": "Open Fractions of x · Level 4",
+        "query": "?pack=fractions-of-x&level=4&seed=9&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Fractions of x, Level 4, on ⅔x = −10. You are going to play a student who gets things wrong.",
+        "Mistake 1, a value that leaves a fraction: type −7 in x = and press Enter. Drag the −7 onto the x and press Enter until the check ends. A good response: ⅔(−7) = −10, then −14/3 = −10 (a fraction already in lowest terms, so it stays), and ✗ Not balanced. Click Undo, then Got it.",
+        "Mistake 2, not waiting for the animation: click the ⅔x and at once press the Shift key. A good response prints 2x/3 = −10 at once, with no animation left playing.",
+        "Mistake 3, tapping again while it plays: click the 2x/3, then click it again straight away. A good response finishes the first rewrite at once and then writes the second one (⅔x = −10 again), nothing waiting for Undo.",
+        "Mistake 4, ignoring the screen: touch nothing for 10 seconds. A good response is a gentle flashing of I’m stuck, nothing else changing."
+      ],
+      "see": "Every mistake is answered calmly: the fraction −14/3 stays a fraction and the check says Not balanced; a key or a second tap never leaves the animation half-drawn; nothing is red on the work and nothing asks for Undo after a rewrite."
+    },
+    {
       "id": "ad-whole",
       "name": "The check: a fraction that is a whole number is written as one on the next line",
       "build": "Build AD",
@@ -305,12 +356,12 @@
       },
       "steps": [
         "Click the button. It opens Fractions of x, Level 5, on 10 = ⅔x.",
-        "Click the ⅔x and watch the new row for two seconds.",
+        "Click the ⅔x and watch the new row for three seconds.",
         "Click the 2x/3 in the new row and watch again.",
         "Click the ⅔x in the newest row, and at once press the Shift key.",
         "Click Trade places (the two curved arrows). Click the 2x/3, now on the left, and watch."
       ],
-      "see": "The first click writes a row labelled “rewrite”: in about a second and a half the x lifts off, is written over 1, a dot appears (⅔ · x/1), the two join (2·x over 3·1) and 10 = 2x/3 is printed. The second click runs it the other way (2·x over 3, ⅔ · x/1, the /1 drops) and prints 10 = ⅔x. Shift prints the row at once. On the left it plays the same way. Only dots, never a times sign. (On a computer set to reduce motion the row simply appears.)"
+      "see": "The first click writes a row labelled “rewrite”: in about three seconds (since Build AD) the x lifts off, is written over 1, a dot appears (⅔ · x/1), the two join (2·x over 3·1) and 10 = 2x/3 is printed. The second click runs it the other way (2·x over 3, ⅔ · x/1, the /1 drops) and prints 10 = ⅔x. Shift prints the row at once. On the left it plays the same way. Only dots, never a times sign. (On a computer set to reduce motion the row simply appears.)"
     },
     {
       "id": "ac-parens",
@@ -478,7 +529,7 @@
         "Click Trade places (the two curved arrows). Click the ⅔x, now on the left.",
         "Click Undo."
       ],
-      "see": "Resting on ⅔x shows a faint 6 = 2x/3 under the equation. The click writes a row labelled “rewrite”, 6 = 2x/3; the next click writes 6 = ⅔x again. After Trade places, the click on the left writes 2x/3 = 6; Undo takes that row back. (Since Build AC each new row is drawn first, about a second and a half.)"
+      "see": "Resting on ⅔x shows a faint 6 = 2x/3 under the equation. The click writes a row labelled “rewrite”, 6 = 2x/3; the next click writes 6 = ⅔x again. After Trade places, the click on the left writes 2x/3 = 6; Undo takes that row back. (Since Build AC each new row is drawn first, about three seconds since Build AD.)"
     },
     {
       "id": "aa-level2",
@@ -3968,8 +4019,8 @@
       "title": "Live",
       "items": [
         {
-          "name": "Build AD: the check simplifies fractions on the next line (2026-11-05)",
-          "about": "In the check, a fraction may appear on the line that makes it, and the next line writes it simplest: −6/3 becomes −2, 33/6 becomes 11/2; one already in lowest terms (−24/5, 56/3) stays. Fractions written over a common bottom to add them stay until they are added. Today this reaches Strange solutions (Levels 1-3): every other card’s check never had a fraction to simplify.",
+          "name": "Build AD: the check simplifies fractions, a slower rewrite, a shorter locked-level note (2026-11-05)",
+          "about": "In the check, a fraction may appear on the line that makes it, and the next line writes it simplest: −6/3 becomes −2, 33/6 becomes 11/2; one already in lowest terms (−24/5, 56/3) stays. Fractions written over a common bottom to add them stay until they are added. Today this reaches Strange solutions (Levels 1-3): every other card’s check never had a fraction to simplify. The rewrite animation on Fractions of x takes about three seconds, longest on x/1 and the dot; the note on a locked level reads “Finish Level N or tap to skip ahead.”",
           "links": [
             {
               "label": "Strange solutions · Level 1: 6x + 6 = 3x + 5",

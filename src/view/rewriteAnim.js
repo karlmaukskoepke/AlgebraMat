@@ -1,6 +1,8 @@
 // The rewrite toggle drawn (Build AC, Part 3; loop spec rev 2.16, §1D): a tap on a fraction of x writes the other form as its own row
 // ("rewrite"), and that row shows why the two forms are the same before it is printed. In the new row's own space, the term goes through
-// five frames, about 0.3 s each (1.5 s in all; `?animslow=1` four times slower, for testers):
+// five frames, about 3 s in all (Build AD, Karl: Build AC's 1.5 s was far too fast to follow), not held equally: longest on the frames
+// that carry the idea, `x/1` appearing and the dot between the fractions; the other way, `x` split out as `x/1` (FRAME_TIMES;
+// `?animslow=1` four times slower, for testers):
 //   ⅔x → 2x/3:  ⅔x (the x lifts off) · ⅔ x/1 (x written over 1) · ⅔ · x/1 (a dot) · 2·x over 3·1 (the tops and bottoms join) · 2x/3
 //   2x/3 → ⅔x:  2x/3 · 2·x over 3 (the top separates) · ⅔ · x/1 (the x split out) · ⅔ · x (the /1 drops) · ⅔x
 // (a unit fraction the same, the 1 on top absorbed: ⅓ · x/1, 1·x over 3·1, x/3). A minus in front stays where it is, outside the frames.
@@ -14,9 +16,16 @@
 import { html } from './addBothMat.js';
 
 const slow = (() => { try { return new URLSearchParams(globalThis.location?.search ?? '').get('animslow') === '1'; } catch { return false; } })();
-export const FRAME_S = slow ? 1.2 : 0.3;                 // one frame (s)
+const PACE = slow ? 4 : 1;
+// each frame's time (s) at the normal pace, by the form the term starts from: ⅔x → 2x/3 ('times'), 2x/3 → ⅔x ('over')
+export const FRAME_TIMES = {
+  times: [0.45, 0.85, 0.85, 0.45, 0.4],   // the x lifts off · x/1 appears · the dot · the tops and bottoms join · printed
+  over: [0.4, 0.5, 1.1, 0.6, 0.4],        // 2x/3 · the top separates · x split out as x/1 · the /1 drops · printed
+};
 export const FRAMES = 5;
-export const REWRITE_MS = Math.round(FRAME_S * FRAMES * 1000);
+export const frameTimes = (from) => FRAME_TIMES[from].map((t) => t * PACE);
+const sum = (ts) => ts.reduce((a, t) => a + t, 0);
+export const REWRITE_MS = Math.round(Math.max(sum(frameTimes('times')), sum(frameTimes('over'))) * 1000);
 
 // rows (by their key) that have started, and when; rows that were finished early
 const started = new Map();
@@ -66,12 +75,17 @@ export function rewriteFrames(from, a, q) {
       [stack([n(a)], [String(q)]), dot(), stack([X()], ['1'], 'fa-drop')],
       [stack([n(a)], [String(q)]), X()],
     ];
-  return frames.map((kids, i) => html('span', `fa-frame${i === frames.length - 1 ? ' is-last' : ''}`, kids, { 'aria-hidden': 'true', style: `--fa-i:${i}` }));
+  const times = frameTimes(from);
+  const starts = times.map((_, i) => sum(times.slice(0, i)));
+  // (each frame its own time and start; what moves inside a frame, the lifting x, the new /1, the /1 dropping, keeps to its frame)
+  return frames.map((kids, i) => html('span', `fa-frame${i === frames.length - 1 ? ' is-last' : ''}`, kids, {
+    'aria-hidden': 'true', style: `--fa-i:${i};--fa-d:${times[i].toFixed(2)}s;--fa-s:${starts[i].toFixed(2)}s`,
+  }));
 }
 
 // The term's ink (its stack and x, after any minus) laid in one cell with the frames over it; `side` says which way the cell grows
 export function animatedTerm(realKids, t, side) {
   const real = html('span', 'fa-real', realKids);
   const from = t.form === 'over' ? 'times' : 'over';                  // (the row shows the new form; the frames start from the old one)
-  return html('span', `fa-grid is-${side === 'left' ? 'left' : 'right'}`, [real, ...rewriteFrames(from, Math.abs(t.coef), t.den)], { style: `--fa-t:${FRAME_S}s` });
+  return html('span', `fa-grid is-${side === 'left' ? 'left' : 'right'}`, [real, ...rewriteFrames(from, Math.abs(t.coef), t.den)], { style: `--fa-total:${sum(frameTimes(from)).toFixed(2)}s` });
 }

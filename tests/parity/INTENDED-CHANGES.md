@@ -977,6 +977,19 @@ a tap does, the panel's words and the card page's locked rows (“Locked”, “
 | Distribute more: a locked level's note in the level popup (Levels 2-5, on pointing, focus or a tap) and the row's accessible name | “Finish Level N to open this, or tap to skip ahead.” | “Finish Level N or tap to skip ahead.” | Part 3 |
 | Strange solutions: a locked level's note in the level popup (Levels 2-3, on pointing, focus or a tap) and the row's accessible name | “Finish Level N to open this, or tap to skip ahead.” | “Finish Level N or tap to skip ahead.” | Part 3 |
 
+## Build AD, Part 2 (2026-11-05): the rewrite animation takes about 3 seconds
+
+Problems, save codes, class-sheet records, the 25 scripted runs and the 70 recorded screens: unchanged (no recorded state plays a rewrite).
+The animation's frames are the same pictures as Build AC's; only how long each shows changes. Outside the recorded set
+(`docs/build-ad/ad-film-*.png`, each frame frozen at its middle, 1366x768 and 1366x650):
+
+| Screen (not recorded) | Before | After | Why |
+|---|---|---|---|
+| Fractions of x: the rewrite ⅔x → 2x/3, frames 1-5 | 0.3 s each, 1.5 s in all | 0.45, 0.85 (x/1), 0.85 (the dot), 0.45, 0.4 s: 3.0 s | Part 2 |
+| Fractions of x: the rewrite 2x/3 → ⅔x, frames 1-5 | 0.3 s each, 1.5 s in all | 0.4, 0.5, 1.1 (x split out as x/1), 0.6, 0.4 s: 3.0 s | Part 2 |
+| The same with `?animslow=1` | 1.2 s each, 6 s | four times the above: 12 s | Part 2 |
+| The new x/1 under the lifted x, and the /1 dropping | drawn on the shared clock (the new /1's fade ran while its frame was still hidden) | each keeps to its own frame | Part 2 (a fix found on the way) |
+
 <!-- history: nothing below this line is read by the harness -->
 
 ## History: screen changes accepted by the re-baseline of 2026-10-24 (Build O, Part 0)

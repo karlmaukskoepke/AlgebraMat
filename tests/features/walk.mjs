@@ -254,6 +254,18 @@ class Walk {
     this.at('to 6x = 11'); await this.crossTerm('−3x', 'left'); await this.combineTerms('3x', '3x', '6x'); await this.addEnter(15); await this.combineTerms('15', '−4', 11); await this.row('6x = 11');
     this.at('Divide 6'); await this.divEnter(6); await this.row('x = 11/6');
   }
+  // Build AD: the rewrite frame showing at `ms` after `t0` (a stacked fraction reads a/b, dots as ·)
+  async adFrameAt(t0, ms, want) {
+    await wait(this.page, Math.max(0, t0 + ms - Date.now()));
+    const got = await this.page.evaluate(() => {
+      const f = [...document.querySelectorAll('.lb-rowwrap.is-rewriteanim:not(.is-settled) .fa-frame')].find((e) => Number(getComputedStyle(e).opacity) > 0.5 && getComputedStyle(e).visibility !== 'hidden');
+      if (!f) return null;
+      const c = f.cloneNode(true); for (const s of c.querySelectorAll('.lx-sfrac')) s.replaceWith(`${s.querySelector('.lx-sfrac-top').textContent}/${s.querySelector('.lx-sfrac-bot').textContent}`);
+      return c.textContent.replace(/\s+/g, '');
+    });
+    if (got !== want) throw new Error(`at ${(ms / 1000).toFixed(1)} s the frame should be ${want} after step "${this.step}", not ${got}`);
+  }
+  async adShown() { return this.page.evaluate(() => [...document.querySelectorAll('.lb-rowwrap.is-rewriteanim:not(.is-settled) .fa-frame')].some((f) => Number(getComputedStyle(f).opacity) > 0.5)); }
   async text() { return (await this.page.evaluate(() => document.body.innerText)).replace(/\s+/g, ' '); }
   async see(...words) {                             // every piece of text must be on the screen
     const t = await this.text();
@@ -484,6 +496,43 @@ class Walk {
 
 // ---- one walk per item (same id as in the data file) ---------------------------------------------------------------------------------
 const WALKS = {
+  // ---- Build AD, Part 2: the rewrite animation, about 3 s, longest on the frames that carry the idea ----
+  async 'ad-anim'(w) {
+    await w.start(); await w.row('10 = 2/3x');
+    w.at('click ⅔x'); await w.page.click('[data-fx]'); const t0 = Date.now();
+    await w.adFrameAt(t0, 900, '2/3x/1'); await w.adFrameAt(t0, 1750, '2/3·x/1'); await w.adFrameAt(t0, 2400, '2·x/3·1');
+    await wait(w.page, Math.max(0, t0 + 3300 - Date.now())); await w.row('10 = 2x/3'); await w.see('rewrite');
+    w.at('click 2x/3'); await w.page.click('[data-fx]'); const t1 = Date.now();
+    await w.adFrameAt(t1, 700, '2·x/3'); await w.adFrameAt(t1, 1500, '2/3·x/1');
+    await wait(w.page, Math.max(0, t1 + 3300 - Date.now())); await w.row('10 = 2/3x');
+    w.at('click ⅔x, a key at once'); await w.click('[data-fx]'); await w.page.keyboard.press('Shift'); await wait(w.page, 150);
+    if (await w.adShown()) throw new Error('a key should print the row at once'); await w.row('10 = 2x/3');
+  },
+  async 'ad-anim-slow'(w) {
+    await w.start(); await w.row('10 = 2/3x');
+    w.at('click ⅔x'); await w.page.click('[data-fx]'); const t0 = Date.now();
+    await w.adFrameAt(t0, 3600, '2/3x/1'); await w.adFrameAt(t0, 7000, '2/3·x/1');
+    await wait(w.page, Math.max(0, t0 + 12600 - Date.now())); await w.row('10 = 2x/3');
+    w.at('click 2x/3'); await w.page.click('[data-fx]'); const t1 = Date.now();
+    await w.adFrameAt(t1, 6000, '2/3·x/1');
+    await wait(w.page, Math.max(0, t1 + 12600 - Date.now())); await w.row('10 = 2/3x');
+  },
+  async 'ad-student-fractions'(w) {
+    await w.start(); await w.row('2/3x = −10');
+    w.at('mistake 1: −7'); await w.click(act('focus')); await w.type(-7); await w.enter(); await w.drag();
+    for (let k = 0; k < 6 && !(await w.text()).includes('Not balanced'); k++) await w.enter();
+    await w.adLines(['2/3(−7) = −10', '−14/3 = −10'], '✗ Not balanced'); await w.both('ad-student-fraction');
+    w.at('Undo, Got it'); await w.click(act('undo')); await wait(w.page, 600); await w.click('[data-action="spotDismiss"]').catch(() => {});
+    w.at('mistake 2: tap ⅔x, a key at once'); await w.click('[data-fx]'); await w.page.keyboard.press('Shift'); await wait(w.page, 150);
+    if (await w.adShown()) throw new Error('a key should print the row at once'); await w.row('2x/3 = −10');
+    w.at('mistake 3: tap 2x/3, tap again while it plays'); await w.click('[data-fx]'); await wait(w.page, 400); await w.click('[data-fx]'); await wait(w.page, 3400);
+    await w.row('2x/3 = −10'); await w.notSee('Press Undo');
+    const before = (await w.rows()).join(' | ');
+    w.at('mistake 4: 10 seconds of nothing'); await w.idle(10500);
+    if ((await w.rows()).join(' | ') !== before) throw new Error('nothing should change while the student waits');
+    if (!(await w.page.locator('[data-action="stuck"].is-idle').count())) throw new Error('I’m stuck should flash gently after 10 seconds');
+    await w.notSee('Press Undo'); await w.both('ad-student-fractions');
+  },
   // ---- Build AD, Part 1: the check simplifies fractions on the next line (Strange solutions) ----
   async 'ad-whole'(w) {
     await w.start(); await w.see('6x + 6 = 3x + 5');
@@ -659,15 +708,15 @@ const WALKS = {
     w.at('click ⅔x'); await w.click('[data-fx]');
     const f1 = await frames(); if (f1 !== '2/3x | 2/3x/1 | 2/3·x/1 | 2·x/3·1 | 2x/3') throw new Error(`the frames should run ⅔x … 2x/3: ${f1}`);
     if (!(await shown())) throw new Error('a frame should be showing while it plays');
-    await wait(w.page, 1700); await w.row('10 = 2x/3'); await w.see('rewrite');
+    await wait(w.page, 3300); await w.row('10 = 2x/3'); await w.see('rewrite');   // (about 3 s since Build AD)
     w.at('click 2x/3'); await w.click('[data-fx]');
     const f2 = await frames(); if (f2 !== '2x/3 | 2·x/3 | 2/3·x/1 | 2/3·x/1 | 2/3x') throw new Error(`the frames should run 2x/3 … ⅔x: ${f2}`);
-    await wait(w.page, 1700); await w.row('10 = 2/3x');
+    await wait(w.page, 3300); await w.row('10 = 2/3x');
     w.at('click ⅔x, Shift at once'); await w.click('[data-fx]'); await w.page.keyboard.press('Shift'); await wait(w.page, 150);
     if (await shown()) throw new Error('a key should print the row at once'); await w.row('10 = 2x/3');
     w.at('Trade places, click on the left'); await w.click('.lx-pgrid .lx-move[data-move="trade"]'); await wait(w.page, 500); await w.row('2x/3 = 10');
     await w.click('[data-fx]'); const f3 = await frames(); if (!f3.startsWith('2x/3 |')) throw new Error(`it should play on the left too: ${f3}`);
-    await wait(w.page, 1700); await w.row('2/3x = 10');
+    await wait(w.page, 3300); await w.row('2/3x = 10');
     if ((await w.text()).includes('×') && !(await w.page.evaluate(() => [...document.querySelectorAll('.lb-stack')].every((e) => !e.textContent.includes('×'))))) throw new Error('no times sign in the rows');
     await w.both('ac-toggle-anim');
     // reduced motion: no frames, the row simply appears
@@ -709,7 +758,7 @@ const WALKS = {
     w.at('Got it, mistake 2: multiply 2'); await w.click('[data-action="spotDismiss"]'); await w.aaMult(2); await wait(w.page, 700); await w.see('x is still cut into parts'); await w.both('ac-student-mult');
     w.at('Undo'); await w.click(act('undo')); await wait(w.page, 600); await w.click('[data-action="spotDismiss"]').catch(() => {});
     const n = (await w.rows()).length;
-    w.at('mistake 3: two quick taps'); await w.page.click('[data-fx]'); await wait(w.page, 120); await w.page.click('[data-fx]'); await wait(w.page, 1800);
+    w.at('mistake 3: two quick taps'); await w.page.click('[data-fx]'); await wait(w.page, 120); await w.page.click('[data-fx]'); await wait(w.page, 3400);
     const rs = await w.rows();
     if (rs.length !== n + 2 || !rs.at(-2).endsWith('2x/3=−10') || !rs.at(-1).endsWith('2/3x=−10')) throw new Error(`two rewrite rows should be written: ${rs.join(' | ')}`);
     await w.notSee('Press Undo'); await w.both('student-fractions-ac');
@@ -779,11 +828,11 @@ const WALKS = {
     const ghost = await w.page.evaluate(() => { const g = document.querySelector('.fx-ghost'); if (!g) return null; const c = g.cloneNode(true); for (const f of c.querySelectorAll('.lx-sfrac')) f.replaceWith(`${f.querySelector('.lx-sfrac-top').textContent}/${f.querySelector('.lx-sfrac-bot').textContent}`); return c.textContent.replace(/\s+/g, ''); });
     if (ghost !== '6=2x/3') throw new Error(`resting on the fraction should show a faint 6 = 2x/3: ${ghost}`);
     await w.both('aa-toggle-ghost');
-    // (Build AC: each new row is drawn first, about 1.5 s)
-    w.at('click it'); await w.click('[data-fx]'); await wait(w.page, 1700); await w.row('6 = 2x/3'); await w.see('rewrite'); await w.both('aa-toggle-over');
-    w.at('click 2x/3'); await w.click('[data-fx]'); await wait(w.page, 1700); await w.row('6 = 2/3x'); await w.both('aa-toggle-times');
+    // (Build AC: each new row is drawn first, about 3 s since Build AD)
+    w.at('click it'); await w.click('[data-fx]'); await wait(w.page, 3300); await w.row('6 = 2x/3'); await w.see('rewrite'); await w.both('aa-toggle-over');
+    w.at('click 2x/3'); await w.click('[data-fx]'); await wait(w.page, 3300); await w.row('6 = 2/3x'); await w.both('aa-toggle-times');
     w.at('Trade places, click on the left'); await w.click('.lx-pgrid .lx-move[data-move="trade"]'); await wait(w.page, 500); await w.row('2/3x = 6');
-    await w.click('[data-fx]'); await wait(w.page, 1700); await w.row('2x/3 = 6');
+    await w.click('[data-fx]'); await wait(w.page, 3300); await w.row('2x/3 = 6');
     const n = (await w.rows()).length;
     w.at('Undo'); await w.click(act('undo')); await wait(w.page, 300);
     if ((await w.rows()).length !== n - 1) throw new Error('Undo should take the last rewrite back');
