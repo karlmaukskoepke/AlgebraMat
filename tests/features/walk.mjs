@@ -678,17 +678,26 @@ const WALKS = {
     w.at('Reload'); await w.page.reload(); await wait(w.page, 900);
     await w.row('2/3x = 6'); if (await w.page.locator('.fm-model').count()) throw new Error('the box should not draw itself a second time');
     w.at('I’m stuck'); await w.stuck(); await w.see('The whole box is x. Cut it into equal parts'); if (!await w.page.locator('.fm-model').count()) throw new Error('I’m stuck should draw the box');
-    w.at('I’m stuck again'); await w.stuck(); await w.see('⅔x means ⅔ of x: 2 of 3 equal parts make 6. Divide both sides by 2: one part is ⅓x = 3.');
+    w.at('I’m stuck again'); await w.stuck(); await w.see('⅔x means ⅔ of x. Multiply both sides by 3 to cancel the bottom 3.');
     await w.both('ac-model-once');
   },
   async 'ac-help-l4'(w) {
     await w.start(); await w.row('2/3x = −10'); if (await w.page.locator('.fm-model').count()) throw new Error('no box at first');
-    w.at('I’m stuck'); await w.stuck(); await w.see('⅔x means ⅔ of x: 2 of 3 equal parts make −10. Divide both sides by 2: one part is ⅓x = −5.');
+    w.at('I’m stuck'); await w.stuck(); await w.see('⅔x means ⅔ of x. Multiply both sides by 3 to cancel the bottom 3.');
     if (await w.page.locator('.fm-model').count()) throw new Error('the first I’m stuck should not draw the box'); await w.both('ac-help-l4-move');
     w.at('I’m stuck again'); await w.stuck(); if (!await w.page.locator('.fm-model').count()) throw new Error('the second I’m stuck should draw the box');
     w.at('cut 3, two parts, Go'); await w.click('[data-action="mCut"][data-q="3"]'); await w.click('[data-action="mPart"][data-i="0"]'); await w.click('[data-action="mPart"][data-i="1"]'); await w.click(act('mGo'));
     if ((await w.page.locator('.fm-brace.is-over').innerText()).trim() !== '−10') throw new Error('a bracket marked −10 should sit over the two parts');
     await w.see('What does 1 part make?'); await w.both('ac-help-l4');
+  },
+  async 'ae-multiply-first'(w) {
+    await w.start(); await w.row('2/3x = −10');
+    w.at('I’m stuck'); await w.stuck(); await w.see('⅔x means ⅔ of x. Multiply both sides by 3 to cancel the bottom 3.'); await w.notSee('Divide both sides by 2');
+    await w.lit('.lx-move[data-action="multOpen"]');
+    w.at('Multiply 3, Next'); await w.aaMult(3); await wait(w.page, 900);
+    await w.row('2x = −30'); await w.notSee('Press Undo'); await w.click(act('foldNext'));
+    w.at('I’m stuck'); await w.stuck(); await w.see('2x means 2 · x. Divide both sides by 2.');
+    await w.both('ae-multiply-first');
   },
   async 'ac-negative'(w) {
     await w.start(); await w.row('−2/3x = 12');
@@ -696,7 +705,7 @@ const WALKS = {
     w.at('I’m stuck again'); await w.stuck(); await w.see('Multiply both sides by −1 first, then I can draw the box.');
     if (await w.page.locator('.fm-model').count()) throw new Error('no box before the flip'); await w.both('ac-negative-nobox');
     w.at('flip, Next'); await w.click(act('flipPick')); await w.enter(); await wait(w.page, 4800); await w.row('2/3x = −12'); await w.click(act('foldNext'));
-    w.at('I’m stuck twice'); await w.stuck(); await w.see('Divide both sides by 2: one part is ⅓x = −6.'); await w.stuck();
+    w.at('I’m stuck twice'); await w.stuck(); await w.see('Multiply both sides by 3 to cancel the bottom 3.'); await w.stuck();
     if (!await w.page.locator('.fm-model').count()) throw new Error('after the flip the box should be drawn'); await w.see('Cut it into equal parts');
     await w.both('ac-negative');
   },
@@ -753,7 +762,7 @@ const WALKS = {
     w.at('mistake 1: −5'); await w.click(act('focus')); await w.type(-5); await w.enter(); await w.drag();
     for (let k = 0; k < 6 && !(await w.text()).includes('Not balanced'); k++) await w.enter();
     await w.see('Not balanced');
-    w.at('Undo'); await w.click(act('undo')); await wait(w.page, 600); await w.see('Divide both sides by 2: one part is ⅓x = −5.');
+    w.at('Undo'); await w.click(act('undo')); await wait(w.page, 600); await w.see('Multiply both sides by 3 to cancel the bottom 3.');
     if (await w.page.locator('.fm-model').count()) throw new Error('the hint should name the move, not draw the box'); await w.both('ac-student-part');
     w.at('Got it, mistake 2: multiply 2'); await w.click('[data-action="spotDismiss"]'); await w.aaMult(2); await wait(w.page, 700); await w.see('x is still cut into parts'); await w.both('ac-student-mult');
     w.at('Undo'); await w.click(act('undo')); await wait(w.page, 600); await w.click('[data-action="spotDismiss"]').catch(() => {});
@@ -899,7 +908,7 @@ const WALKS = {
     await w.see('2 parts make 6. What does 1 part make?'); await w.both('aa-student-six');
     w.at('multiply by 2'); await w.aaMult(2); await wait(w.page, 700); await w.row('4/3x = 12'); await w.see('x is still cut into parts');
     await w.both('aa-student-mult2');
-    w.at('Undo'); await w.click(act('undo')); await wait(w.page, 600); await w.see('Divide both sides by 2: one part is ⅓x = 3.');
+    w.at('Undo'); await w.click(act('undo')); await wait(w.page, 600); await w.see('Multiply both sides by 3 to cancel the bottom 3.');
     w.at('hands off'); await w.click('[data-action="spotDismiss"]'); await w.idle(10600);
     if (!await w.page.locator('.lx-help.is-idle').count()) {
       const cls = await w.page.locator('[data-action="stuck"]').first().getAttribute('class');

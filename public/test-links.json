@@ -3,6 +3,23 @@
   "updated": "2026-11-05",
   "checks": [
     {
+      "id": "ae-multiply-first",
+      "name": "Fractions of x: I’m stuck names multiplying by the bottom first",
+      "build": "Build AE",
+      "link": {
+        "label": "Open Fractions of x · Level 4",
+        "query": "?pack=fractions-of-x&level=4&seed=9&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Fractions of x, Level 4, on ⅔x = −10.",
+        "Click I’m stuck.",
+        "Click Multiply (×), the first option, type 3 and press Enter. Wait for the row 2x = −30, then click Next.",
+        "Click I’m stuck."
+      ],
+      "see": "The first I’m stuck says “⅔x means ⅔ of x. Multiply both sides by 3 to cancel the bottom 3.” with Multiply lit (not Divide). Multiplying by 3 is not greyed or red and writes 2x = −30; then I’m stuck says “2x means 2 · x. Divide both sides by 2.”"
+    },
+    {
       "id": "ad-anim",
       "name": "The rewrite animation: about three seconds, longest on x/1 and the dot",
       "build": "Build AD",
@@ -308,7 +325,7 @@
         "Click I’m stuck.",
         "Click I’m stuck again."
       ],
-      "see": "After the reload Level 3 opens on ⅔x = 6 with no box. The first I’m stuck draws the box (“The whole box is x. Cut it into equal parts…”); the second shows “⅔x means ⅔ of x: 2 of 3 equal parts make 6. Divide both sides by 2: one part is ⅓x = 3.” with Divide lit."
+      "see": "After the reload Level 3 opens on ⅔x = 6 with no box. The first I’m stuck draws the box (“The whole box is x. Cut it into equal parts…”); the second shows “⅔x means ⅔ of x. Multiply both sides by 3 to cancel the bottom 3.” with Multiply lit."
     },
     {
       "id": "ac-help-l4",
@@ -325,7 +342,7 @@
         "Click I’m stuck again.",
         "Click 3 under “Cut into”. Click two parts, then click Go."
       ],
-      "see": "The first I’m stuck is a pop-up: “⅔x means ⅔ of x: 2 of 3 equal parts make −10. Divide both sides by 2: one part is ⅓x = −5.” with Divide lit. The second draws the box. After Go a bracket marked −10 sits over the two parts and it asks what 1 part makes."
+      "see": "The first I’m stuck is a pop-up: “⅔x means ⅔ of x. Multiply both sides by 3 to cancel the bottom 3.” with Multiply lit. The second draws the box. After Go a bracket marked −10 sits over the two parts and it asks what 1 part makes."
     },
     {
       "id": "ac-negative",
@@ -343,7 +360,7 @@
         "Click Flip everything (×(−1)) and press Enter. Wait for the row ⅔x = −12, then click Next.",
         "Click I’m stuck twice."
       ],
-      "see": "The first I’m stuck says “Multiply both sides by −1 first.” and the second “Multiply both sides by −1 first, then I can draw the box.”, each with Flip everything lit and no box. After the flip, I’m stuck names dividing by 2 (one part is ⅓x = −6), then draws the box."
+      "see": "The first I’m stuck says “Multiply both sides by −1 first.” and the second “Multiply both sides by −1 first, then I can draw the box.”, each with Flip everything lit and no box. After the flip, I’m stuck names multiplying both sides by 3, then draws the box."
     },
     {
       "id": "ac-toggle-anim",
@@ -422,11 +439,11 @@
       },
       "steps": [
         "Click the button. It opens Fractions of x, Level 4, on ⅔x = −10.",
-        "Mistake 1, one part’s value for x: type −5 in x = and press Enter. Drag the −5 onto the x, press Enter until the check ends, then click Undo. A good response: Not balanced, then a hint naming the move (divide both sides by 2), not the box.",
+        "Mistake 1, one part’s value for x: type −5 in x = and press Enter. Drag the −5 onto the x, press Enter until the check ends, then click Undo. A good response: Not balanced, then a hint naming the move (multiply both sides by 3), not the box.",
         "Click Got it. Mistake 2, multiply by the wrong number: click Multiply (×), the first option, type 2 and press Enter. A good response: the screen greys, it says x is still cut into parts, Undo pulses. Click Undo.",
         "Mistake 3, tap the fraction twice quickly: click the ⅔x, then at once click the 2x/3 in the new row."
       ],
-      "see": "Every mistake is answered without red on the work: Not balanced and the divide hint, then “x is still cut into parts” with Undo. The two quick taps write two “rewrite” rows (⅔x = −10 written as 2x/3, then back), the first printed at once by the second tap; nothing waits."
+      "see": "Every mistake is answered without red on the work: Not balanced and the multiply hint, then “x is still cut into parts” with Undo. The two quick taps write two “rewrite” rows (⅔x = −10 written as 2x/3, then back), the first printed at once by the second tap; nothing waits."
     },
     {
       "id": "aa-model-l1",
@@ -664,7 +681,7 @@
         "Mistake 3, multiply by 2 instead of 3: click Multiply (×), the first option, type 2 and press Enter. Then click Undo.",
         "Take your hands off for 10 seconds."
       ],
-      "see": "Go with three parts says “The fraction says 2 of the 3 parts.” Typing 6 says “2 parts make 6. What does 1 part make?” Multiplying by 2 writes 4/3x = 12, greys the screen and says x is still cut into parts, with Undo pulsing; after Undo a hint names dividing by 2 (one part is ⅓x = 3), Divide lit. After 10 seconds I’m stuck flashes."
+      "see": "Go with three parts says “The fraction says 2 of the 3 parts.” Typing 6 says “2 parts make 6. What does 1 part make?” Multiplying by 2 writes 4/3x = 12, greys the screen and says x is still cut into parts, with Undo pulsing; after Undo a hint names multiplying both sides by 3, Multiply lit. After 10 seconds I’m stuck flashes."
     },
     {
       "id": "y-stack-add",
@@ -4018,6 +4035,17 @@
     {
       "title": "Live",
       "items": [
+        {
+          "name": "Build AE: Fractions of x suggests multiplying by the bottom first (2026-11-05)",
+          "about": "On ⅔x = 6 (and 2x/3 = 6, the mirrored forms, and a negative once flipped) I’m stuck, the hint after Undo and the reminder after the box all say to multiply both sides by 3 first, with Multiply lit; at 2x = 18 the next reminder is “Divide both sides by 2.” Dividing by 2 first is still never red, and the box keeps its “one part” row.",
+          "links": [
+            {
+              "label": "Fractions of x · Level 4: ⅔x = −10",
+              "query": "?pack=fractions-of-x&level=4&seed=9&nosignin=1",
+              "reset": true
+            }
+          ]
+        },
         {
           "name": "Build AD: the check simplifies fractions, a slower rewrite, a shorter locked-level note (2026-11-05)",
           "about": "In the check, a fraction may appear on the line that makes it, and the next line writes it simplest: −6/3 becomes −2, 33/6 becomes 11/2; one already in lowest terms (−24/5, 56/3) stays. Fractions written over a common bottom to add them stay until they are added. Today this reaches Strange solutions (Levels 1-3): every other card’s check never had a fraction to simplify. The rewrite animation on Fractions of x takes about three seconds, longest on x/1 and the dot; the note on a locked level reads “Finish Level N or tap to skip ahead.”",

@@ -558,3 +558,17 @@ Its notes: "Improper fractions are full credit, no mixed numbers" and "x can be 
    ahead.", too many words for the little pop-up). What a tap does, the panel, the card page's locked rows and Count it and Build it's note
    are unchanged.
 4. **Build Z's six Features to check items: ticked and kept** (2026-11-03).
+
+## 2026-11-05: Fractions of x suggests multiplying by the bottom first (Karl; built in Build AE, Part 6)
+
+1. **On a non-unit fraction of x the first move suggested is multiplying both sides by the bottom** (Karl: on `⅔x = 6`, suggesting
+   "divide both sides by 2" first, to reach `⅓x = 3`, "makes sense for the visual way, but doesn't make sense for the algebraic way").
+   Wherever the algebraic help names or lights the first move on `⅔x = 6`, `2x/3 = 6`, the mirrored forms and a negative once flipped (the
+   reminder, I'm stuck, the hint after a wrong value or a move and Undo, the reminder after the model), it now says "Multiply both sides by
+   3" with Multiply lit: "2x/3 means 2x divided by 3. Multiply both sides by 3 to cancel the divide by 3." and, in fraction words, "⅔x
+   means ⅔ of x. Multiply both sides by 3 to cancel the bottom 3." After the multiply, `2x = 18`, the next reminder is "Divide both sides
+   by 2."
+2. **Unchanged:** dividing first stays legal and helpful, never red (either order helps; if a student divides first the next reminder is
+   multiply by the bottom); the model and its bridge row `⅓x = 3` (the visual way); Level 2's one-time instruction; the unit-fraction
+   reminders; −1 first on a negative fraction; the class-sheet words, slips and tags; the generator.
+

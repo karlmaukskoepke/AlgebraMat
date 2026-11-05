@@ -42,12 +42,12 @@ describe('Part 2: which help comes first, by level', () => {
     let t = go(newFractions(P(2, 3, 9), { level: 3 }), stuck);
     expect(t.model?.want).toBe(3);
     t = go(t, stuck);
-    expect(said(t)).toBe('⅔x means ⅔ of x: 2 of 3 equal parts make 6. Divide both sides by 2: one part is ⅓x = 3.');
+    expect(said(t)).toBe('⅔x means ⅔ of x. Multiply both sides by 3 to cancel the bottom 3.');
     t = go(t, stuck);
-    expect(t.feedback.key).toBe('xNonUnitHint');
+    expect(t.feedback.key).toBe('xOverHint');
   });
   it('Levels 2, 4, 5 and 6: the reminder first, then the model on the current equation, then the reminder again', () => {
-    for (const [level, p, key] of [[2, P(1, 3, 12, { form: 'over' }), 'xUnitHint'], [4, P(2, 3, 9), 'xNonUnitHint'], [5, P(2, 3, 9, { mirror: true }), 'xNonUnitHint'], [6, P(2, 3, 9, { form: 'over' }), 'xOverHint']]) {
+    for (const [level, p, key] of [[2, P(1, 3, 12, { form: 'over' }), 'xUnitHint'], [4, P(2, 3, 9), 'xOverHint'], [5, P(2, 3, 9, { mirror: true }), 'xOverHint'], [6, P(2, 3, 9, { form: 'over' }), 'xOverHint']]) {
       let s = go(newFractions(p, { level }), stuck);
       expect(s.feedback.key, `L${level}`).toBe(key);
       expect(s.model, `L${level}: no model on the first click`).toBeNull();
@@ -102,7 +102,7 @@ describe('Part 2: a negative fraction asks for −1 first, then the box', () => 
     expect(s.needUndo).toBe(false);
     expect(boardText(s.board)).toBe('⅔x = 6');
     s = go(s, { type: 'foldNext' }, stuck);
-    expect(s.feedback.key).toBe('xNonUnitHint');
+    expect(s.feedback.key).toBe('xOverHint');
     s = go(s, stuck);
     expect(s.model).toMatchObject({ want: 3, p: 2, given: 6, part: 3 });
     const m = go(neg(), [{ type: 'multOpen' }, { type: 'multPick', kind: 'whole' }, ...keys(3), { type: 'go' }]);

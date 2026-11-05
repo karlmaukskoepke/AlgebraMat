@@ -1,4 +1,4 @@
-// Fractions of x's help (Build AA), as entries of the scaffold registry (../registry.js), keyed by shape (../shape.js). On a fraction of x,
+// Fractions of x's help (Build AA; Build AE: on `⅔x = 6` the reminder is multiply by the bottom first), as entries of the scaffold registry (../registry.js), keyed by shape (../shape.js). On a fraction of x,
 // on the model-first levels (1 and 3), the first rung of I'm stuck is the model (the box cut into equal parts, engine/fractionsModel.js);
 // the second is the reminder (the move to make, said in the form on the screen, its move lit with its preview), which then repeats. On
 // Levels 2, 4, 5 and 6 the move comes first (Build AC, Karl 2026-11-03): the reminder, then the model drawn on the current equation, then
@@ -32,12 +32,9 @@ const REMINDERS = {
     litMultiply(s);
     return { target: 'coef', key: 'xUnitHint', params: { q: p.q, b: signed(p.b), frac: fractionText(p.q), form: 'over' }, move: 'mult' };
   },
-  // ⅔x = 6: divide both sides by 2 (one part is ⅓x = 3), the bridge to the model; 2x/3 = 6: multiply both sides by 3 to cancel the divide
+  // ⅔x = 6: multiply both sides by 3 first, to cancel the bottom (Karl, 2026-11-05: the algebraic way; dividing by 2 first stays legal
+  // and helpful, and the model keeps its bridge row `⅓x = 3`); then `2x = 18` and "Divide both sides by 2."
   FP(s, { params: p }) {
-    if (p.b % p.p === 0 && p.p > 1 && p.p <= 6) {
-      litDivide(s);
-      return { target: 'coef', key: 'xNonUnitHint', params: { p: p.p, q: p.q, b: signed(p.b), part: signed(p.b / p.p), frac: ratioText(p.p, p.q), unit: fractionText(p.q) }, move: 'divOption' };
-    }
     litMultiply(s);
     return { target: 'coef', key: 'xOverHint', params: { p: p.p, q: p.q, b: signed(p.b), was: fx(p.top, p.q, 'times'), form: 'times' }, move: 'mult' };
   },

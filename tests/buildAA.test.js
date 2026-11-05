@@ -214,7 +214,7 @@ describe('the model: a box cut into equal parts', () => {
     expect(s.model?.step).toBe('cut');
     expect(s.supportsShown).toContain('model');
     s = go(s, { type: 'stuck' });
-    expect(said(s)).toBe('⅔x means ⅔ of x: 2 of 3 equal parts make 6. Divide both sides by 2: one part is ⅓x = 3.');
+    expect(said(s)).toBe('⅔x means ⅔ of x. Multiply both sides by 3 to cancel the bottom 3.');
     // (Build AC: on Levels 2, 4, 5 and 6 the reminder is the first click)
     let o = go(newFractions(P(2, 3, 9, { form: 'over' }), { level: 6 }), { type: 'stuck' });
     expect(said(o)).toBe('2x/3 means 2x divided by 3. Multiply both sides by 3 to cancel the divide by 3.');

@@ -13,7 +13,7 @@ const M = {
   xNonUnitHint: (p) => `${p.frac}x means ${p.frac} of x: ${p.p} of ${p.q} equal parts make ${p.b}. Divide both sides by ${p.p}: one part is ${p.unit}x = ${p.part}.`,
   xOverHint: (p) => (p.form === 'over'
     ? `${p.was} means ${p.was.replace(`/${p.q}`, '')} divided by ${p.q}. Multiply both sides by ${p.q} to cancel the divide by ${p.q}.`
-    : `${p.was} is ${p.p} of ${p.q} equal parts of x. Multiply both sides by ${p.q} to put the ${p.q} parts back together.`),
+    : `${p.was} means ${p.was.replace('x', '')} of x. Multiply both sides by ${p.q} to cancel the bottom ${p.q}.`),
   xNegHint: (p) => (p.form === 'over'
     ? `${p.was} has a minus. Flip everything (multiply both sides by −1), or multiply both sides by ${p.q} to cancel the divide by ${p.q}: either order works.`
     : `${p.was} has a minus. Flip everything (multiply both sides by −1), or multiply both sides by ${p.q} first: either order works.`),
