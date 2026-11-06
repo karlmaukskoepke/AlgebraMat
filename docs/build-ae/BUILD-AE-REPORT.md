@@ -1,6 +1,6 @@
 # Build AE report: "Try with no help" at the start of every level, and multiply-first help on Fractions of x (2026-11-06)
 
-Everything is on `main` with no flag, in two pushes in the order asked: **Part 6 first, on its own**, then **Parts 0-5** together (the
+Everything is on `main` with no flag, in two pushes (and two small follow-ups: two items given a third step, then the pictures) in the order asked: **Part 6 first, on its own**, then **Parts 0-5** together (the
 chooser, the no-help attempt on an open level, a miss, the locked-level door and the data). Each push came after the unit tests, the
 real-browser sweeps and `npm run parity`. Decision log: "2026-11-05: Fractions of x suggests multiplying by the bottom first" and
 "2026-11-03: no-help choice". Loop spec: revision 2.19 (section 6 for Part 6; section 7's test-out item is now the no-help choice).
@@ -85,4 +85,37 @@ unchanged.
 
 ## Checks
 
-RESULTS
+- **Unit tests and the real-browser sweeps** (`npm test`, Playwright found, no SKIP line): Part 6 push 111 files, 2,346 tests, all pass;
+  Parts 1-5 push 112 files, 2,403 tests: two failed at first (two new items had only two steps; the test-links rule wants three) and pass
+  after the fix. The sweeps: typing, drags, redraws, font size, panel room, Add cross-out, menu, form words, no-times-sign, parentheses,
+  the test-out sweep (now 18 runs: each of the 9 cards on a locked level and on its open first level, with no help of any kind on screen;
+  Flip everything's first level has no move in the list that opens an error pop-up, so that one step is skipped there), and the new
+  chooser sweep (8 checks: when it opens and when not, Escape, a tap outside, focus back, arrows and Tab, Enter mashed or held, room at
+  1366×768, 1366×650 and 390 px, Next level, a pass, a miss, Give up, leaving, the locked door).
+- **New unit tests** (`tests/buildAE.test.js`, 13): Part 6's reminders and lit move, divide-first still helpful, the largest products;
+  the chooser's rule on every card and level, `seed=`, `choose=0`, `choose=1`, in progress, placed, earned, Count it and Build it; the
+  started memory (and storage refused); a pass on an open level (silver, next open, nothing lowered); the model memory untouched; the
+  class-sheet word.
+- **Parity** (`npm run parity`): PASS on problems, save codes, class-sheet records, the 25 scripted runs and the 70 screens, at both pushes.
+  The **stricter comparison** (every pixel off by more than 64 of 255 counted, a screen flagged at 40) of the 70 screens against the build
+  before: **0 pixels off on every screen**, after Part 6 and again after Parts 1-5. Every screen that changes is outside the recorded set
+  and listed one by one in `tests/parity/INTENDED-CHANGES.md` (Build AE, Part 6; Build AE, Parts 1-5).
+- **Features to check:** 12 new items (`ae-multiply-first`; the chooser from the card page, the popup, by keyboard, by touch, from Next
+  level; a pass; a miss; Give up; leaving and coming back; the locked door; Play it like a student: Try with no help). Updated: five Build
+  AA/AC help items (the divide-first reminder) and four Build Z/AB items (Z's old panel words: `z-tap-locked`, `z-pass`, `z-fail`,
+  `z-giveup`, `z-gold`, `z-student` steps say "Try with no help"; `ab-pop-locked`, `ab-pop-tap` describe the new door). No earlier item
+  opens a level without a seed, so none opened straight into play where the chooser now appears. Walked on the live site: **all 245
+  items pass** (the walk was cut off once by its time limit and finished in a second run).
+- **Pictures** (`docs/build-ae/`, from the live site, 1366×768 and 1366×650): `ae-chooser-*` (an open level), `ae-locked-door-*`,
+  `ae-chooser-touch-768`, `ae-problem-1-of-2-*` (the new bar), `ae-pass-*` (the warm message, Level 1 silver), `ae-miss-*` (help on after
+  the miss), `ae-giveup-*`, `ae-student-*`, `ae-multiply-first-*`.
+
+## Anything that surprised me
+
+- **Enter mashed fast landed nowhere.** The first build of the panel waited for the dialog's close before starting the level; five Enters in
+  a row could reopen the panel on the hidden card and leave the student on neither screen. Found by the chooser sweep: the choice now acts
+  at once, and a late close from an earlier panel is ignored.
+- **The sign-in prompt shares the dialog.** A signed-out student following a link with no seed sees the sign-in prompt at the start of the
+  visit, which takes the place of the chooser; after Not now they are on the card and tap the level again. Left as is.
+- **"Started" is per device.** A level started on another Chromebook shows the chooser here once. It never lowers or changes credit.
+- **The attempt's rows do not update the device's skill tallies** (as in Build Z): they go to the class sheet only.
