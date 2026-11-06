@@ -25,6 +25,23 @@ export function canTestOut(progress, pack, level, sections) {
   return !isLevelUnlocked(progress, pack.id, level) && levelState(progress, pack.id, level) === 'none';
 }
 
+// Build AE (Karl, 2026-11-03): the same no-help attempt is a choice at the start of every level. An open level, displayed, of a Solve it or
+// Solve it Plus card, with nothing placed or earned on it, can be started with help (the default) or tried with no help. (Count it and
+// Build it never; their numeric levels are not displayed levels here either: Divide it's and Add to both sides' saved Level 1.)
+export function canTryOpen(progress, pack, level, sections) {
+  if (!pack || pack.comingSoon || pack.retired || pack.hidden) return false;
+  const sec = sections.find((s) => s.packs.includes(pack.id));
+  if (!sec || !TEST_OUT_SECTIONS.includes(sec.id)) return false;
+  if (level < firstOf(pack) || level > lastOf(pack) || level === pack.whyLevel) return false;
+  return isLevelUnlocked(progress, pack.id, level) && levelState(progress, pack.id, level) === 'none';
+}
+// Does opening this level ask first? A fresh open level (canTryOpen, and no problem started on it) asks; `choose=0` never, a fixed seed
+// (every test link) never unless `choose=1` (testers: the chooser on a test link, its problems fixed by the seed).
+export function chooserDue({ progress, pack, level, sections, started, choose = null, fixedSeed = null }) {
+  if (choose === '0' || started || !canTryOpen(progress, pack, level, sections)) return false;
+  return choose === '1' || fixedSeed === null;
+}
+
 // The problems of an attempt: fresh each attempt. A fixed seed (a test link) gives the same first attempt every time, and a different
 // set for each retry.
 export function testOutSeed(fixedSeed, attempt, fresh) {

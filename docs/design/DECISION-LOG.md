@@ -559,6 +559,28 @@ Its notes: "Improper fractions are full credit, no mixed numbers" and "x can be 
    are unchanged.
 4. **Build Z's six Features to check items: ticked and kept** (2026-11-03).
 
+## 2026-11-03: no-help choice (Karl; built in Build AE, Parts 1-5)
+
+1. **One idea, two doors.** A level is entered with help or by trying it with no help; a locked level has only the second door. At the
+   start of every fresh open level of a Solve it or Solve it Plus card, from Level 1 on, a small panel (the **chooser**, not a small button
+   on each row) asks "Start with help" (the default: filled and focused, so Enter or Space starts it; today's level, unchanged) or "Try with
+   no help" (outlined, "2 problems" under it; never the default). Escape or a tap outside leaves the student on the card. A level in
+   progress, placed or earned opens as today; Count it and Build it get no chooser. A first step toward the parked "support-aware
+   progress".
+2. **The attempt is Build Z's** (the first two problems for a fresh seed, its no-help mode and "independent", the bar now "No help · Level 3
+   · Problem 1 of 2 · Give up" everywhere). **Credit 2 + 1 on an open level too:** two independent problems place the level and every
+   displayed level below it (silver) and open the next; one more problem earns gold (Build X). The message: "No help needed! Do one more
+   problem on Level 3 to make it gold." (a locked level keeps "You skipped ahead!").
+3. **A miss on an open level carries on with help on the same problem** (no fail panel, no new message: the usual spotlight after a wrong
+   value is the message). Problems already solved in the attempt count as ordinary credits on the level. Give up, or leaving mid-try, also
+   carries on with help (leaving is logged as a give-up, as in Build Z); the level is then in progress, so the no-help try is offered once
+   per fresh start. On a locked level a miss, Give up or leaving is as Build Z built it, with unlimited retries.
+4. **The class-sheet words `test-out-pass` and `test-out-fail` are reused for every no-help attempt** (no new words); a miss on an open level
+   logs the attempt's rows, the problem with the miss included, with `test-out-fail`, and the rest of the level logs as any level does.
+5. **The locked-level door** is the same small panel with one choice: "Try with no help" ("2 problems") and "Not now". Build Z's "Want to
+   try it? Solve 2 problems here to skip ahead." goes. The card page's locked rows ("Locked", "Tap to skip ahead") and Build AD's popup note
+   ("Finish Level N or tap to skip ahead.") are unchanged.
+
 ## 2026-11-05: Fractions of x suggests multiplying by the bottom first (Karl; built in Build AE, Part 6)
 
 1. **On a non-unit fraction of x the first move suggested is multiplying both sides by the bottom** (Karl: on `⅔x = 6`, suggesting

@@ -3,6 +3,186 @@
   "updated": "2026-11-05",
   "checks": [
     {
+      "id": "ae-chooser-card",
+      "name": "Opening a level: Start with help or Try with no help",
+      "build": "Build AE",
+      "link": {
+        "label": "Open the main menu (a fresh student)",
+        "query": "?menu=1&seed=7&choose=1&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. Under Solve it, click Two-step equations, then click Level 1.",
+        "Press the Escape key.",
+        "Click Level 1 again, then click Start with help."
+      ],
+      "see": "Clicking Level 1 opens a small panel over the card with two big buttons and no other words: “Start with help” (dark, filled) and “Try with no help” with “2 problems” under it. Escape closes it and leaves you on the card. Start with help opens Level 1 as always: 2x + 4 = 16, five dots at the top, I’m stuck in the corner."
+    },
+    {
+      "id": "ae-chooser-popup",
+      "name": "The same panel from a card’s level popup; a click outside closes it",
+      "build": "Build AE",
+      "link": {
+        "label": "Open the main menu (a fresh student)",
+        "query": "?menu=1&seed=7&choose=1&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. Click the small arrow (›) at the right end of Two-step equations.",
+        "Click Level 1 in the popup.",
+        "Click on the grey page outside the panel."
+      ],
+      "see": "Clicking Level 1 closes the popup and opens the panel (“Start with help”, “Try with no help”, “2 problems”) over Two-step equations’ card. The click outside closes it and you stay on the card; nothing starts."
+    },
+    {
+      "id": "ae-chooser-keys",
+      "name": "By keyboard: Enter starts with help, however many times it is pressed",
+      "build": "Build AE",
+      "link": {
+        "label": "Open the main menu (a fresh student)",
+        "query": "?menu=1&seed=7&choose=1&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. Under Solve it, click Two-step equations.",
+        "Press Tab until Level 1 has a dark outline, then press Enter.",
+        "Press the right arrow key, then the left arrow key.",
+        "Press Enter five times quickly."
+      ],
+      "see": "Enter on Level 1 opens the panel with Start with help outlined. The right arrow moves the outline to Try with no help and the left arrow back. The Enters open Level 1 with help (2x + 4 = 16, I’m stuck in the corner), never “No help” at the top."
+    },
+    {
+      "id": "ae-chooser-touch",
+      "name": "On a touch screen: the panel’s buttons are finger-sized",
+      "build": "Build AE",
+      "link": {
+        "label": "Open the main menu (a fresh student)",
+        "query": "?menu=1&seed=7&choose=1&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "On a touch screen (a tablet, or a Chromebook with a touch screen), click the button. Tap Two-step equations, then tap Level 1.",
+        "Tap Try with no help."
+      ],
+      "see": "The panel’s two buttons are big (well over a fingertip tall) and side by side, nothing overlapping. Tapping Try with no help starts the try: “No help · Level 1 · Problem 1 of 2 · Give up” at the top."
+    },
+    {
+      "id": "ae-next-level",
+      "name": "Next level at the end of a level asks too",
+      "build": "Build AE",
+      "link": {
+        "label": "Open Fractions of x · Level 1",
+        "query": "?pack=fractions-of-x&level=1&seed=7&choose=1&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. Fractions of x opens with the panel over its card. Click Start with help.",
+        "Solve the five problems by typing x and checking: ⅙x = 2 is 12, ⅓x = 7 is 21, ¼x = 2 is 8, ½x = 11 is 22, ¼x = 5 is 20. For each: click the box after x =, type the number, press Enter, drag it onto the x, press Enter until Balanced, then press Enter once more.",
+        "Click the Level 2 → button."
+      ],
+      "see": "Fractions of x’s card opens with the panel over it, for Level 2 (“Start with help”, “Try with no help”). Level 1 is gold on the card behind it."
+    },
+    {
+      "id": "ae-pass",
+      "name": "A no-help pass on an open level: silver, and the next level open",
+      "build": "Build AE",
+      "link": {
+        "label": "Open Two-step equations · Level 1",
+        "query": "?pack=two-step-equations&level=1&seed=7&choose=1&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. Two-step equations opens with the panel over its card. Click Try with no help.",
+        "The top says “No help · Level 1 · Problem 1 of 2 · Give up”; there is no I’m stuck. Click the box after x =, type 6 and press Enter. Drag the 6 onto the x, then press Enter until the check says Balanced. Press Enter once more.",
+        "The top says “Problem 2 of 2” and the problem is 2x + 2 = 18. Type 8 in x =, press Enter, drag the 8 onto the x, and press Enter until Balanced.",
+        "Wait two seconds."
+      ],
+      "see": "The top says “2 of 2 balanced!”, then the card opens with “No help needed! Do one more problem on Level 1 to make it gold.” in a silver box. Level 1 is silver (“One problem earns it”) and Level 2 is open."
+    },
+    {
+      "id": "ae-miss",
+      "name": "A miss on an open level: help comes on and you carry on",
+      "build": "Build AE",
+      "link": {
+        "label": "Open Two-step equations · Level 1",
+        "query": "?pack=two-step-equations&level=1&seed=7&choose=1&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button, then click Try with no help.",
+        "Solve 2x + 4 = 16: type 6 in x =, press Enter, drag the 6 onto the x, press Enter until Balanced, then press Enter once more.",
+        "On 2x + 2 = 18 type 9 in x =, press Enter, drag the 9 onto the x, and press Enter until the check ends.",
+        "Click Undo."
+      ],
+      "see": "After the wrong 9 the “No help” bar goes and the level carries on with help: “When x = 9, the equation is not balanced.” with Undo lit, I’m stuck back in the corner, and five dots with the first one filled (the first problem counts). Undo gives the usual hint, still on 2x + 2 = 18."
+    },
+    {
+      "id": "ae-giveup",
+      "name": "Give up on an open level: the same problem, with help",
+      "build": "Build AE",
+      "link": {
+        "label": "Open Two-step equations · Level 1",
+        "query": "?pack=two-step-equations&level=1&seed=7&choose=1&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button, then click Try with no help.",
+        "Click Give up at the top."
+      ],
+      "see": "No “Not yet” panel: the bar goes, and 2x + 4 = 16 stays on screen with I’m stuck in the corner and five dots. You carry on in Level 1 with help."
+    },
+    {
+      "id": "ae-resume",
+      "name": "Leaving a try and coming back opens the level straight away",
+      "build": "Build AE",
+      "link": {
+        "label": "Open Two-step equations · Level 1",
+        "query": "?pack=two-step-equations&level=1&seed=7&choose=1&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button, then click Try with no help.",
+        "Click ← Packs.",
+        "Under Solve it, click Two-step equations, then click Level 1."
+      ],
+      "see": "← Packs goes back to the main menu with no message. Level 1 then opens straight into play with help (2x + 4 = 16, I’m stuck in the corner): no panel, because the level is now started."
+    },
+    {
+      "id": "ae-locked-door",
+      "name": "A locked level: only Try with no help, and Not now",
+      "build": "Build AE",
+      "link": {
+        "label": "Open the main menu (a fresh student)",
+        "query": "?menu=1&seed=7&choose=1&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. Under Solve it, click Two-step equations, then click Level 3 (“Tap to skip ahead”).",
+        "Press Enter.",
+        "Click Level 3 again, then click Try with no help."
+      ],
+      "see": "The panel has “Try with no help” with “2 problems” under it, and “Not now”, outlined: Enter presses Not now and closes it, so Enter never starts a try. Try with no help starts “No help · Level 3 · Problem 1 of 2” on 24 = 9 + 5x."
+    },
+    {
+      "id": "student-ae",
+      "name": "Play it like a student: Try with no help",
+      "build": "Build AE",
+      "link": {
+        "label": "Open Two-step equations · Level 1",
+        "query": "?pack=two-step-equations&level=1&seed=7&choose=1&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. Two-step equations opens with the panel. You are going to play a student.",
+        "Mistake 1, mashing Enter: press Enter five times quickly. A good response: Level 1 starts with help (I’m stuck in the corner), never a try. Click ← Packs.",
+        "Under Solve it, click Fractions of x, then its Level 1. Click Try with no help.",
+        "Mistake 2, asking for help anyway: press the S key, then the T key (I’m stuck and Teach me). A good response is nothing at all: no clue, no picture, no message.",
+        "Mistake 3, a move that makes it worse: click Multiply (×), the first option, type 2 and press Enter. A good response: the row is written and Undo is outlined, with no words. Click Undo.",
+        "Mistake 4, leaving and coming back: click ← Packs, then click Fractions of x and its Level 1."
+      ],
+      "see": "The Enters start Level 1 with help. In the try, S and T do nothing, and the bad multiply waits for Undo with no message. After ← Packs, Level 1 opens straight into play with help (I’m stuck in the corner): no panel, and the try is over."
+    },
+    {
       "id": "ae-multiply-first",
       "name": "Fractions of x: I’m stuck names multiplying by the bottom first",
       "build": "Build AE",
@@ -171,7 +351,7 @@
         "Click Not now. The panel closes and nothing else changes.",
         "Click ← All sections. Click the small arrow beside Divide it. In its list of levels, point at Level 3, then click it."
       ],
-      "see": "The panel says “Want to try it? Solve 2 problems here to skip ahead.” with Try it and Not now, and no timer. Pointing at Divide it’s Level 3 says “Finish Level 2 or tap to skip ahead.”, and clicking it opens the same panel, headed “Divide it · Level 3”."
+      "see": "The panel has two buttons and no timer: “Try with no help” with “2 problems” under it, and “Not now”. Pointing at Divide it’s Level 3 says “Finish Level 2 or tap to skip ahead.”, and clicking it opens the same panel."
     },
     {
       "id": "z-pass",
@@ -183,7 +363,7 @@
         "reset": true
       },
       "steps": [
-        "Click the button. Under Solve it, click Two-step equations, then click Level 3, then Try it.",
+        "Click the button. Under Solve it, click Two-step equations, then click Level 3, then Try with no help.",
         "The first problem is 24 = 9 + 5x, with “Problem 1 of 2” at the top. Look in the corners: there is no I’m stuck and no Teach me (Undo and Start over are there).",
         "Click the box after x =, type 3 and press Enter. Drag the 3 onto the x, then press Enter until the check says Balanced. Press Enter once more.",
         "The top says “Problem 2 of 2” and the problem is 12 = 2 + 5x. Type 2 in x =, press Enter, drag the 2 onto the x, and press Enter until Balanced.",
@@ -201,7 +381,7 @@
         "reset": true
       },
       "steps": [
-        "Click the button. Under Solve it, click Two-step equations, then click Level 5, then Try it. The problem is 6 − 5x = −14.",
+        "Click the button. Under Solve it, click Two-step equations, then click Level 5, then Try with no help. The problem is 6 − 5x = −14.",
         "Click the box after x =, type 9 and press Enter. Drag the 9 onto the x, then press Enter until the check ends, and press Enter twice more.",
         "Wait two seconds.",
         "Click Try again."
@@ -218,7 +398,7 @@
         "reset": true
       },
       "steps": [
-        "Click the button. Under Solve it, click Two-step equations, then click Level 4, then Try it. The problem is 12 + 2x = 28.",
+        "Click the button. Under Solve it, click Two-step equations, then click Level 4, then Try with no help. The problem is 12 + 2x = 28.",
         "Click Give up at the top.",
         "Click Pack map."
       ],
@@ -234,7 +414,7 @@
         "reset": true
       },
       "steps": [
-        "Click the button. Under Solve it, click Two-step equations, then click Level 3, then Try it.",
+        "Click the button. Under Solve it, click Two-step equations, then click Level 3, then Try with no help.",
         "Solve both problems: type 3 for 24 = 9 + 5x (drag it onto the x, Enter until Balanced, Enter again), then type 2 for 12 = 2 + 5x the same way. Wait two seconds: the card opens with Levels 1 to 3 in silver.",
         "Click Level 3 (silver). The problem is 24 = 9 + 5x again, and I’m stuck is back in the corner.",
         "Type 3 in x =, press Enter, drag the 3 onto the x and press Enter until Balanced.",
@@ -252,7 +432,7 @@
         "reset": true
       },
       "steps": [
-        "Click the button. Under Solve it, click Two-step equations, then click Level 3, then Try it. The problem is 24 = 9 + 5x. You are going to play a student looking for help.",
+        "Click the button. Under Solve it, click Two-step equations, then click Level 3, then Try with no help. The problem is 24 = 9 + 5x. You are going to play a student looking for help.",
         "Mistake 1, asking for help: press the S key, then the T key (the keys for I’m stuck and Teach me). A good response is nothing at all: no clue, no picture, no message.",
         "Mistake 2, ignoring the screen: touch nothing for 10 seconds. A good response is nothing: nothing flashes, glows or pops up.",
         "Mistake 3, a move that makes it worse: click Add (+), type 9 and press Enter. A good response writes the move (24 + 9 = 18 + 5x) and says nothing: no red pop-up, no dimming. Undo is the way back. Press Undo: the equation is back, with no hint.",
@@ -846,7 +1026,7 @@
         "Rest the pointer on the name Two-step equations until its popup opens.",
         "Point at Level 2, then click it. Click Not now."
       ],
-      "see": "Level 1 is ringed and open; Levels 2 to 7 are greyed, each with a small lock, and still show their names. Pointing at Level 2 shows “Finish Level 1 or tap to skip ahead.” Clicking it closes the popup and opens the skip-ahead panel (“Want to try it?”), since Build Z; Not now closes it."
+      "see": "Level 1 is ringed and open; Levels 2 to 7 are greyed, each with a small lock, and still show their names. Pointing at Level 2 shows “Finish Level 1 or tap to skip ahead.” Clicking it closes the popup and opens the skip-ahead panel (“Try with no help”, “2 problems”, Not now); Not now closes it."
     },
     {
       "id": "ab-pop-keys",
@@ -883,7 +1063,7 @@
         "Tap the small arrow beside Flip everything twice.",
         "Tap the name Distribute more."
       ],
-      "see": "The arrow is finger-sized. The first tap opens Flip everything’s popup: Level 1 silver with “One problem earns it”, Level 2 ringed, Levels 3 to 5 greyed with a lock. Tapping Level 3 closes the popup and opens the skip-ahead panel (“Want to try it? Solve 2 problems here to skip ahead.”), since Build Z; Not now closes it. The arrow opens the popup again, and a second tap closes it (so does a tap anywhere outside it). Tapping Distribute more opens that card’s page, as before. Nothing needs the pointer to rest anywhere."
+      "see": "The arrow is finger-sized. The first tap opens Flip everything’s popup: Level 1 silver with “One problem earns it”, Level 2 ringed, Levels 3 to 5 greyed with a lock. Tapping Level 3 closes the popup and opens the skip-ahead panel (“Try with no help”, “2 problems”, Not now); Not now closes it. The arrow opens the popup again, and a second tap closes it (so does a tap anywhere outside it). Tapping Distribute more opens that card’s page, as before. Nothing needs the pointer to rest anywhere."
     },
     {
       "id": "ab-pop-edge",
@@ -4036,13 +4216,20 @@
       "title": "Live",
       "items": [
         {
-          "name": "Build AE: Fractions of x suggests multiplying by the bottom first (2026-11-05)",
-          "about": "On ⅔x = 6 (and 2x/3 = 6, the mirrored forms, and a negative once flipped) I’m stuck, the hint after Undo and the reminder after the box all say to multiply both sides by 3 first, with Multiply lit; at 2x = 18 the next reminder is “Divide both sides by 2.” Dividing by 2 first is still never red, and the box keeps its “one part” row.",
+          "name": "Build AE: Try with no help at the start of every level; Fractions of x multiplies by the bottom first (2026-11-05)",
+          "about": "On a Solve it or Solve it Plus card, opening a fresh open level asks first: “Start with help” (the default, today’s level) or “Try with no help” (2 problems). Two right with no help puts the level in silver and opens the next; one more problem makes it gold. A miss, or Give up, carries on in the level with help, the problems already solved counting. A locked level asks only “Try with no help” or “Not now”. A level already started, silver or gold, Count it and Build it open as before. On Fractions of x, ⅔x = 6 now suggests multiplying both sides by 3 first, with Multiply lit; dividing by 2 first is still never red.",
           "links": [
+            {
+              "label": "The main menu, a fresh student",
+              "query": "?menu=1&nosignin=1",
+              "reset": true,
+              "look": "Click Two-step equations, then Level 1: the panel opens."
+            },
             {
               "label": "Fractions of x · Level 4: ⅔x = −10",
               "query": "?pack=fractions-of-x&level=4&seed=9&nosignin=1",
-              "reset": true
+              "reset": true,
+              "look": "Click I’m stuck: “Multiply both sides by 3 to cancel the bottom 3.”"
             }
           ]
         },
@@ -4060,7 +4247,7 @@
         },
         {
           "name": "Build Z: skip ahead by testing out (2026-11-03)",
-          "about": "On a Solve it or Solve it Plus card, a locked level can be tapped: two problems of that level with no help (no I’m stuck, no Teach me, no pop-ups or nudges; Undo and Start over stay). Both right on the first check places that level and the ones below it (silver) and opens the next; a wrong answer or Give up says “Not yet. Try Level N first.” and the student can try again at once. The class sheet logs each problem with test-out-pass or test-out-fail.",
+          "about": "On a Solve it or Solve it Plus card, a locked level can be tapped (“Try with no help”, since Build AE): two problems of that level with no help (no I’m stuck, no Teach me, no pop-ups or nudges; Undo and Start over stay). Both right on the first check places that level and the ones below it (silver) and opens the next; a wrong answer or Give up says “Not yet. Try Level N first.” and the student can try again at once. The class sheet logs each problem with test-out-pass or test-out-fail.",
           "links": [
             {
               "label": "The main menu, a fresh student",

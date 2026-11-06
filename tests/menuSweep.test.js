@@ -233,11 +233,11 @@ const wait = (page, ms) => page.waitForTimeout(ms);
     expect(await popOpen(page)).toBe('flip-everything');
     const info = await popInfo(page);
     expect(info.inside).toBe(true);
-    // a tap on a locked row of a Solve it card asks to skip ahead (Build Z): the popup goes, the panel opens; Not now closes it
+    // a tap on a locked row of a Solve it card asks to skip ahead (Build Z; Build AE's door): the popup goes, the panel opens; Not now closes it
     await page.tap('.lv-pop:not([hidden]) .pop-level.is-locked');
     await wait(page, 250);
     expect(await popOpen(page)).toBe(null);
-    expect(await page.locator('#dialog[open]').innerText()).toContain('Want to try it? Solve 2 problems here to skip ahead.');
+    expect(await page.locator('#dialog[open]').innerText()).toContain('Try with no help');
     await page.tap('#dialog [data-close]');
     await wait(page, 200);
     // on a Count it card a tap on a locked row still shows its note and keeps the popup

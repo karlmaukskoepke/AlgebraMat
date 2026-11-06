@@ -27,6 +27,9 @@ const CARDS = [
   ['add-both', 4], ['divide-it', 4], ['flip-everything', 4], ['fractions-of-x', 4], ['two-step-equations', 3], ['distribute-solve', 3],
   ['variables-both-sides', 3], ['distribute-more', 3], ['strange-solutions', 3],
 ];
+// (Build AE: the same sweep on each card's first displayed level, open, tried with no help from the chooser)
+const FIRST = { 'add-both': 2, 'divide-it': 2, 'flip-everything': 2 };
+const RUNS = [...CARDS.map(([p, l]) => [p, l, 'locked']), ...CARDS.map(([p]) => [p, FIRST[p] ?? 1, 'open'])];
 const keys = (n) => [...String(Math.abs(n))].map((d) => ({ type: 'digit', digit: Number(d) })).concat(n < 0 ? [{ type: 'toggleSign' }] : []);
 // moves a student might make that make things worse (each card answers one of them with its error pop-up)
 const BAD = (n, a) => [
@@ -77,10 +80,18 @@ async function freshMenu(page, base) {
   await page.evaluate(() => localStorage.clear());
   await page.goto(url);
 }
+async function tryOpen(page, base, pack, level) {
+  const url = new URL(`?pack=${pack}&level=${level}&seed=${SEED}&choose=1&nosignin=1`, base).href;
+  await page.goto(url);
+  await page.evaluate(() => localStorage.clear());
+  await page.goto(url);
+  await page.click('#dialog [data-choose="try"]');
+  await page.waitForFunction(() => window.__mat?.session()?.board);
+}
 async function tryLevel(page, pack, level) {
   await page.click(`.card-name[data-card="${pack}"]`);
   await page.click(`.level-btn[data-try-level="${level}"]`);
-  await page.click('#dialog [data-try]');
+  await page.click('#dialog [data-choose="try"]');
   await page.waitForFunction(() => window.__mat?.session()?.board);
 }
 
@@ -101,21 +112,23 @@ describe.skipIf(!pw)('Build Z: test out, in a real browser', () => {
     await page.click('.card-name[data-card="two-step-equations"]');
     expect(await page.locator('.level-btn[data-try-level="3"]').innerText()).toContain('Tap to skip ahead');
     await page.click('.level-btn[data-try-level="3"]');
-    expect(await page.locator('#dialog[open]').innerText()).toContain('Want to try it? Solve 2 problems here to skip ahead.');
-    expect(await page.locator('#dialog[open] button').allInnerTexts()).toEqual(['Not now', 'Try it']);
+    // (Build AE: the locked-level door is the chooser with one choice, Try with no help, "2 problems", and Not now, focused)
+    expect((await page.locator('#dialog[open] button').allInnerTexts()).map((t) => t.replace(/\s+/g, ' ').trim())).toEqual(['Try with no help 2 problems', 'Not now']);
+    expect(await page.evaluate(() => document.activeElement?.textContent)).toBe('Not now');
+    expect(await page.locator('#dialog[open]').getAttribute('aria-label')).toBe('Try Level 3 with no help');
     await page.click('#dialog [data-close]');
     expect(await page.locator('#dialog[open]').count()).toBe(0);
     await page.click('[data-back]');
     await page.click('[data-chev="divide-it"]');
     await page.click('.lv-pop:not([hidden]) .pop-level[data-try-level="4"]');
-    expect(await page.locator('#dialog[open]').innerText()).toContain('Divide it · Level 3');
+    expect(await page.locator('#dialog[open]').getAttribute('aria-label')).toBe('Try Level 3 with no help');
     await page.click('#dialog [data-close]');
     await page.click('[data-chev="combineit"]');
     expect(await page.locator('.lv-pop:not([hidden]) [data-try-pack]').count()).toBe(0);
     await page.close();
   }, 60000);
 
-  it.concurrent.each(CARDS)('%s: no help of any kind in a test-out, then a pass places the levels', async (pack, level) => {
+  it.concurrent.each(RUNS)('%s Level %i (%s): no help of any kind in a no-help attempt, then a pass places the levels', async (pack, level, door) => {
     const report = [];
     const errors = [];
     // the same problem as students play it: which bad move opens its error pop-up
@@ -137,14 +150,16 @@ describe.skipIf(!pw)('Build Z: test out, in a real browser', () => {
       await dispatch(normal, [{ type: 'undo' }, { type: 'startOver' }, { type: 'spotDismiss' }]);
     }
     await normal.close();
-    if (!bad) report.push('no bad move found that opens the error pop-up on the card');
+    // (Flip everything's first level, x = −b shapes, has no move in this list that opens an error pop-up: there the rest still runs)
+    if (!bad && !(door === 'open' && pack === 'flip-everything')) report.push('no bad move found that opens the error pop-up on the card');
 
     const page = await browser.newPage({ viewport: { width: 1366, height: 768 } });
     page.on('pageerror', (e) => errors.push(String(e)));
-    await freshMenu(page, base);
-    await tryLevel(page, pack, level);
+    if (door === 'open') await tryOpen(page, base, pack, level);
+    else { await freshMenu(page, base); await tryLevel(page, pack, level); }
     const look = async (when) => { for (const h of await page.evaluate(helpOnScreen)) report.push(`${when}: ${h}`); };
     if (!(await page.locator('#testout-bar').innerText()).includes('Problem 1 of 2')) report.push('the bar should say Problem 1 of 2');
+    if (!(await page.locator('#testout-bar').innerText()).startsWith('No help · Level')) report.push('the bar should start “No help · Level”');
     await look('at the start');
     if (bad) {
       await dispatch(page, bad);
@@ -174,7 +189,8 @@ describe.skipIf(!pw)('Build Z: test out, in a real browser', () => {
     await solve(page);
     await page.waitForSelector('.home-note.is-warm', { timeout: 5000 }).catch(() => report.push('no warm message after the pass'));
     const note = await page.locator('.home-note').innerText().catch(() => '');
-    if (!/^You skipped ahead! Do one more problem on Level \d to make it gold\.$/.test(note)) report.push(`the message: "${note}"`);
+    const said = door === 'open' ? /^No help needed! Do one more problem on Level \d to make it gold\.$/ : /^You skipped ahead! Do one more problem on Level \d to make it gold\.$/;
+    if (!said.test(note)) report.push(`the message: "${note}"`);
     const placed = await page.locator('.card-view .level-btn.is-placed').count();
     const first = pack === 'add-both' || pack === 'divide-it' || pack === 'flip-everything' ? 2 : 1;
     if (placed !== level - first + 1) report.push(`${placed} levels placed, expected ${level - first + 1}`);

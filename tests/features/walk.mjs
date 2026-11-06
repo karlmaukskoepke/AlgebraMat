@@ -222,7 +222,22 @@ class Walk {
   async zTry(level) {
     await this.start();
     this.at('Two-step equations'); await this.click('.card-name[data-card="two-step-equations"]');
-    this.at(`Level ${level}, Try it`); await this.click(`.level-btn[data-try-level="${level}"]`); await this.click('#dialog [data-try]'); await wait(this.page, 700);
+    this.at(`Level ${level}, Try with no help`); await this.click(`.level-btn[data-try-level="${level}"]`); await this.click('#dialog [data-choose="try"]'); await wait(this.page, 700);
+  }
+  // Build AE: the chooser is open with these buttons (their words, in order) and nothing else to read
+  async aeChooser(want) {
+    await wait(this.page, 250);
+    if (!(await this.page.locator('#dialog[open]').count())) throw new Error(`the panel should be open after step "${this.step}"`);
+    const got = (await this.page.locator('#dialog[open] button').allInnerTexts()).map((t) => t.replace(/\s+/g, ' ').trim());
+    if (JSON.stringify(got) !== JSON.stringify(want)) throw new Error(`the panel's buttons should be ${want.join(' / ')}, not ${got.join(' / ')} after step "${this.step}"`);
+    const words = (await this.page.locator('#dialog[open]').innerText()).replace(/\s+/g, ' ').trim();
+    if (words !== want.join(' ')) throw new Error(`nothing else to read on the panel: “${words}”`);
+  }
+  // help on screen (I'm stuck in the corner, no No-help bar) or not
+  async aeHelp(on) {
+    const got = await this.page.evaluate(() => ({ stuck: [...document.querySelectorAll('[data-action="stuck"]')].some((e) => e.offsetParent), bar: !document.getElementById('testout-bar').hidden }));
+    if (on && (!got.stuck || got.bar)) throw new Error(`help should be on (I’m stuck in the corner, no No-help bar) after step "${this.step}": ${JSON.stringify(got)}`);
+    if (!on && (got.stuck || !got.bar)) throw new Error(`no help in a try after step "${this.step}": ${JSON.stringify(got)}`);
   }
   // the card's levels, as they show: placed (silver), earned (gold), open, try (locked, Tap to skip ahead)
   async zStates(want) {
@@ -576,7 +591,7 @@ const WALKS = {
     for (let l = 2; l <= 7; l++) if (!(await w.page.locator(`.level-btn[data-try-level="${l}"]`).innerText()).includes('Tap to skip ahead')) throw new Error(`Level ${l} should say Tap to skip ahead`);
     await w.both('z-locked');
     w.at('Level 3'); await w.click('.level-btn[data-try-level="3"]');
-    await w.see('Two-step equations · Level 3', 'Want to try it? Solve 2 problems here to skip ahead.', 'Not now', 'Try it'); await w.notSee('second');
+    await w.see('Try with no help', '2 problems', 'Not now'); await w.notSee('Want to try it', 'Start with help');
     await w.both('z-ask');
     w.at('Not now'); await w.click('#dialog [data-close]');
     if (await w.page.locator('#dialog[open]').count()) throw new Error('the panel should close');
@@ -585,7 +600,8 @@ const WALKS = {
     await w.see('Finish Level 2 or tap to skip ahead.');
     await w.both('z-popup-row');
     w.at('click Level 3'); await w.click('.lv-pop:not([hidden]) .pop-level[data-try-level="4"]');
-    await w.see('Divide it · Level 3', 'Want to try it? Solve 2 problems here to skip ahead.');
+    await w.see('Try with no help', '2 problems');
+    if (await w.page.locator('#dialog[open]').getAttribute('aria-label') !== 'Try Level 3 with no help') throw new Error('the panel should be for Divide it’s Level 3');
   },
   async 'z-pass'(w) {
     await w.zTry(3); await w.row('24 = 9 + 5x'); await w.see('Problem 1 of 2');
@@ -689,6 +705,145 @@ const WALKS = {
     w.at('cut 3, two parts, Go'); await w.click('[data-action="mCut"][data-q="3"]'); await w.click('[data-action="mPart"][data-i="0"]'); await w.click('[data-action="mPart"][data-i="1"]'); await w.click(act('mGo'));
     if ((await w.page.locator('.fm-brace.is-over').innerText()).trim() !== '−10') throw new Error('a bracket marked −10 should sit over the two parts');
     await w.see('What does 1 part make?'); await w.both('ac-help-l4');
+  },
+  // ---- Build AE: the no-help choice ----
+  async 'ae-chooser-card'(w) {
+    await w.start();
+    w.at('Two-step equations, Level 1'); await w.click('.card-name[data-card="two-step-equations"]'); await w.click('.card-view .level-btn[data-level="1"]');
+    await w.aeChooser(['Start with help', 'Try with no help 2 problems']);
+    await w.both('ae-chooser');
+    w.at('Escape'); await w.page.keyboard.press('Escape'); await wait(w.page, 300);
+    if (await w.page.locator('#dialog[open]').count()) throw new Error('Escape should close the panel');
+    if (!(await w.page.locator('.card-view').count()) || await w.page.locator('#play:not([hidden])').count()) throw new Error('Escape should leave you on the card');
+    w.at('Level 1, Start with help'); await w.click('.card-view .level-btn[data-level="1"]'); await w.click('#dialog [data-choose="help"]'); await wait(w.page, 600);
+    await w.row('2x + 4 = 16'); await w.aeHelp(true);
+    if (await w.page.locator('#dots .dot').count() !== 5) throw new Error('five dots at the top');
+  },
+  async 'ae-chooser-popup'(w) {
+    await w.start();
+    w.at('the arrow beside Two-step equations'); await w.click('[data-chev="two-step-equations"]');
+    w.at('Level 1 in the popup'); await w.click('.lv-pop:not([hidden]) .pop-level[data-level="1"]');
+    if (await w.page.locator('.lv-pop:not([hidden])').count()) throw new Error('the popup should close');
+    await w.aeChooser(['Start with help', 'Try with no help 2 problems']);
+    if (!(await w.page.locator('.card-view').count())) throw new Error('the panel should be over Two-step equations’ card');
+    w.at('click outside'); await w.page.mouse.click(12, 740); await wait(w.page, 300);
+    if (await w.page.locator('#dialog[open]').count()) throw new Error('a click outside should close the panel');
+    if (await w.page.locator('#play:not([hidden])').count()) throw new Error('nothing should start');
+  },
+  async 'ae-chooser-keys'(w) {
+    await w.start();
+    w.at('Two-step equations'); await w.click('.card-name[data-card="two-step-equations"]');
+    w.at('Tab to Level 1, Enter');
+    for (let k = 0; k < 40; k++) { await w.page.keyboard.press('Tab'); if (await w.page.evaluate(() => document.activeElement?.matches?.('.card-view .level-btn[data-level="1"]'))) break; }
+    if (!(await w.page.evaluate(() => document.activeElement?.matches?.('.card-view .level-btn[data-level="1"]')))) throw new Error('Tab should reach Level 1');
+    await w.page.keyboard.press('Enter'); await wait(w.page, 300);
+    await w.aeChooser(['Start with help', 'Try with no help 2 problems']);
+    const focus = () => w.page.evaluate(() => document.activeElement?.dataset?.choose);
+    if (await focus() !== 'help') throw new Error('Start with help should have the outline');
+    w.at('right arrow'); await w.page.keyboard.press('ArrowRight'); if (await focus() !== 'try') throw new Error('the right arrow should move to Try with no help');
+    w.at('left arrow'); await w.page.keyboard.press('ArrowLeft'); if (await focus() !== 'help') throw new Error('the left arrow should move back');
+    w.at('Enter five times'); for (let k = 0; k < 5; k++) await w.page.keyboard.press('Enter');
+    await wait(w.page, 700); await w.row('2x + 4 = 16'); await w.aeHelp(true);
+  },
+  async 'ae-chooser-touch'(w) {
+    const ctx = await w.page.context().browser().newContext({ viewport: { width: 1366, height: 768 }, hasTouch: true, isMobile: true });
+    const page = await ctx.newPage();
+    try {
+      const href = new URL(w.item.link.query, BASE).href;
+      await page.goto(href); await page.evaluate(() => { try { localStorage.clear(); } catch { /* */ } }); await page.goto(href); await wait(page, 600);
+      w.at('tap Two-step equations, Level 1'); await page.tap('.card-name[data-card="two-step-equations"]'); await wait(page, 400); await page.tap('.card-view .level-btn[data-level="1"]'); await wait(page, 400);
+      const boxes = await page.evaluate(() => [...document.querySelectorAll('#dialog[open] button')].map((b) => { const r = b.getBoundingClientRect(); return [r.left, r.top, r.right, r.bottom]; }));
+      if (boxes.length !== 2 || boxes.some(([, t, , b]) => b - t < 60)) throw new Error(`two finger-sized buttons: ${JSON.stringify(boxes)}`);
+      if (!(boxes[0][2] <= boxes[1][0] || boxes[1][2] <= boxes[0][0])) throw new Error('the buttons should sit side by side, not overlapping');
+      await page.screenshot({ path: path.join(OUT, 'ae-chooser-touch-768.png') });
+      w.at('tap Try with no help'); await page.tap('#dialog [data-choose="try"]'); await wait(page, 700);
+      const bar = (await page.locator('#testout-bar').innerText()).replace(/\s+/g, ' ');
+      if (!bar.includes('No help · Level 1') || !bar.includes('Problem 1 of 2') || !bar.includes('Give up')) throw new Error(`the bar: ${bar}`);
+    } finally { await ctx.close(); }
+  },
+  async 'ae-next-level'(w) {
+    await w.start(); await w.aeChooser(['Start with help', 'Try with no help 2 problems']);
+    w.at('Start with help'); await w.click('#dialog [data-choose="help"]'); await wait(w.page, 700);
+    for (const [eq, x] of [['1/6x = 2', 12], ['1/3x = 7', 21], ['1/4x = 2', 8], ['1/2x = 11', 22], ['1/4x = 5', 20]]) {
+      w.at(`${eq}: type ${x}`); await w.row(eq); await w.answer(x); await w.see('Balanced'); await w.enter(); await wait(w.page, 900);
+    }
+    w.at('Level 2 →'); await w.click('.level-done [data-go="next"]'); await wait(w.page, 600);
+    await w.aeChooser(['Start with help', 'Try with no help 2 problems']);
+    if (await w.page.locator('#dialog').getAttribute('aria-label') !== 'Start Level 2') throw new Error('the panel should be for Level 2');
+    if (!(await w.page.locator('.card-view .level-btn.is-earned[data-level="1"]').count())) throw new Error('Level 1 should be gold behind it');
+  },
+  async 'ae-pass'(w) {
+    await w.start(); await w.aeChooser(['Start with help', 'Try with no help 2 problems']);
+    w.at('Try with no help'); await w.click('#dialog [data-choose="try"]'); await wait(w.page, 700);
+    await w.row('2x + 4 = 16'); await w.see('No help · Level 1', 'Problem 1 of 2', 'Give up'); await w.aeHelp(false);
+    await w.both('ae-problem-1-of-2');
+    w.at('type 6, check'); await w.answer(6); await w.see('Balanced');
+    w.at('Enter'); await w.enter(); await wait(w.page, 600); await w.row('2x + 2 = 18'); await w.see('Problem 2 of 2');
+    w.at('type 8, check'); await w.answer(8); await w.see('Balanced', '2 of 2 balanced!');
+    w.at('wait two seconds'); await wait(w.page, 2200);
+    await w.see('No help needed! Do one more problem on Level 1 to make it gold.');
+    await w.zStates(['placed', 'open', 'try', 'try', 'try', 'try', 'try']);
+    await w.both('ae-pass');
+  },
+  async 'ae-miss'(w) {
+    await w.start();
+    w.at('Try with no help'); await w.click('#dialog [data-choose="try"]'); await wait(w.page, 700);
+    w.at('type 6, check'); await w.answer(6); await w.see('Balanced'); await w.enter(); await wait(w.page, 600);
+    w.at('type 9, check'); await w.row('2x + 2 = 18'); await w.click(act('focus')); await w.type(9); await w.enter(); await w.drag();
+    for (let k = 0; k < 8 && !(await w.text()).includes('Not balanced'); k++) await w.enter();
+    await wait(w.page, 500);
+    await w.see('When x = 9, the equation is not balanced.'); await w.notSee('No help ·', 'Not yet');
+    if (await w.page.locator('#testout-bar:not([hidden])').count()) throw new Error('the No help bar should go');
+    if (await w.page.locator('#dots .dot').count() !== 5 || await w.page.locator('#dots .dot.done').count() !== 1) throw new Error('five dots, the first filled');
+    await w.both('ae-miss');
+    w.at('Undo'); await w.click('.spot-undo'); await wait(w.page, 600);
+    await w.row('2x + 2 = 18'); await w.aeHelp(true);
+    if (!(await w.page.locator('.spot-layer').count())) throw new Error('Undo should give the usual hint');
+  },
+  async 'ae-giveup'(w) {
+    await w.start();
+    w.at('Try with no help'); await w.click('#dialog [data-choose="try"]'); await wait(w.page, 700);
+    w.at('Give up'); await w.click('[data-giveup]'); await wait(w.page, 500);
+    await w.notSee('Not yet', 'No help ·'); await w.row('2x + 4 = 16'); await w.aeHelp(true);
+    if (await w.page.locator('#dots .dot').count() !== 5) throw new Error('five dots: the level itself');
+    await w.both('ae-giveup');
+  },
+  async 'ae-resume'(w) {
+    await w.start();
+    w.at('Try with no help'); await w.click('#dialog [data-choose="try"]'); await wait(w.page, 700);
+    w.at('← Packs'); await w.click('#back'); await wait(w.page, 500);
+    if (await w.page.locator('#dialog[open]').count()) throw new Error('no message or panel after ← Packs');
+    w.at('Two-step equations, Level 1'); await w.click('.card-name[data-card="two-step-equations"]'); await w.click('.card-view .level-btn[data-level="1"]'); await wait(w.page, 600);
+    if (await w.page.locator('#dialog[open]').count()) throw new Error('the level is started: no panel');
+    await w.row('2x + 4 = 16'); await w.aeHelp(true);
+  },
+  async 'ae-locked-door'(w) {
+    await w.start();
+    w.at('Two-step equations, Level 3'); await w.click('.card-name[data-card="two-step-equations"]'); await w.click('.card-view .level-btn[data-try-level="3"]');
+    await w.aeChooser(['Try with no help 2 problems', 'Not now']);
+    if (await w.page.evaluate(() => document.activeElement?.textContent) !== 'Not now') throw new Error('Not now should have the outline');
+    await w.both('ae-locked-door');
+    w.at('Enter'); await w.page.keyboard.press('Enter'); await wait(w.page, 300);
+    if (await w.page.locator('#dialog[open]').count() || await w.page.locator('#play:not([hidden])').count()) throw new Error('Enter should press Not now');
+    w.at('Level 3, Try with no help'); await w.click('.card-view .level-btn[data-try-level="3"]'); await w.click('#dialog [data-choose="try"]'); await wait(w.page, 700);
+    await w.row('24 = 9 + 5x'); await w.see('No help · Level 3', 'Problem 1 of 2');
+  },
+  async 'student-ae'(w) {
+    await w.start(); await w.aeChooser(['Start with help', 'Try with no help 2 problems']);
+    w.at('Enter five times'); for (let k = 0; k < 5; k++) await w.page.keyboard.press('Enter');
+    await wait(w.page, 700); await w.aeHelp(true); await w.notSee('No help ·');
+    w.at('← Packs'); await w.click('#back'); await wait(w.page, 500);
+    w.at('Fractions of x, Level 1, Try with no help'); await w.click('.card-name[data-card="fractions-of-x"]'); await w.click('.card-view .level-btn[data-level="1"]'); await w.click('#dialog [data-choose="try"]'); await wait(w.page, 700);
+    await w.row('1/6x = 2'); await w.zNoHelp();
+    w.at('S, then T'); await w.page.keyboard.press('s'); await wait(w.page, 300); await w.page.keyboard.press('t'); await wait(w.page, 300); await w.zNoHelp();
+    w.at('Multiply 2'); await w.aaMult(2); await wait(w.page, 900); await w.zNoHelp(); await w.notSee('still cut into parts', 'Press Undo');
+    await w.shot('ae-student-undo-768');
+    w.at('Undo'); await w.click(act('undo')); await wait(w.page, 500); await w.zNoHelp(); await w.row('1/6x = 2');
+    w.at('← Packs, Fractions of x, Level 1'); await w.click('#back'); await wait(w.page, 500);
+    await w.click('.card-name[data-card="fractions-of-x"]'); await w.click('.card-view .level-btn[data-level="1"]'); await wait(w.page, 700);
+    if (await w.page.locator('#dialog[open]').count()) throw new Error('no panel the second time');
+    await w.aeHelp(true); await w.notSee('No help ·');
+    await w.both('ae-student');
   },
   async 'ae-multiply-first'(w) {
     await w.start(); await w.row('2/3x = −10');
@@ -1256,7 +1411,7 @@ const WALKS = {
     await w.page.hover('.lv-pop:not([hidden]) .pop-level.is-locked >> nth=0'); await wait(w.page, 300); await w.shot('ab-pop-locked-note-650');
     w.at('click Level 2'); await w.page.locator('.lv-pop:not([hidden]) .pop-level.is-locked >> nth=0').click({ force: true }); await wait(w.page, 500);
     if (!(await w.page.locator('#home').isVisible())) throw new Error('clicking a locked level should stay on the home screen');
-    await w.see('Want to try it? Solve 2 problems here to skip ahead.');              // (Build Z: the skip-ahead panel)
+    await w.see('Try with no help', '2 problems', 'Not now');              // (Build Z's skip-ahead panel, Build AE's door)
     w.at('Not now'); await w.click('#dialog [data-close]');
   },
   async 'ab-pop-keys'(w) {
@@ -1292,7 +1447,7 @@ const WALKS = {
       if (rows.length !== 5 || rows[0].state !== 'placed' || !rows[0].text.includes('One problem earns it') || !rows[1].current || rows.slice(2).some((r) => r.state !== 'locked')) throw new Error(`Flip everything's popup: ${JSON.stringify(rows)}`);
       w.at('tap Level 3'); await page.tap('.lv-pop:not([hidden]) .pop-level.is-locked >> nth=0', { force: true }); await wait(page, 300);
       const panel = await page.locator('#dialog[open]').innerText().catch(() => '');
-      if (!panel.includes('Want to try it? Solve 2 problems here to skip ahead.') || await page.locator('.lv-pop:not([hidden])').count()) throw new Error(`the tap should close the popup and open the skip-ahead panel (Build Z): ${panel}`);
+      if (!panel.includes('Try with no help') || await page.locator('.lv-pop:not([hidden])').count()) throw new Error(`the tap should close the popup and open the skip-ahead panel (Build Z): ${panel}`);
       await page.screenshot({ path: path.join(OUT, 'ab-pop-tap-768.png') });
       w.at('Not now'); await page.tap('#dialog [data-close]'); await wait(page, 300);
       w.at('tap the arrow twice'); await page.tap('.card-chev[data-chev="flip-everything"]'); await wait(page, 300);

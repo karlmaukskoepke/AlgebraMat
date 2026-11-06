@@ -56,13 +56,14 @@ import { nextMove } from './engine/solveit/honest.js';
 import { snapshot, changesSince, SEEN_KEY } from './engine/status.js';
 import { demoProgress, demoSeen } from './engine/demo.js';
 import {
-  canTestOut, testOutSeed, testOutProblems, ALL_TAUGHT, checkResult, quiet, HELP_ACTIONS, passCredit, suggestedLevel, attemptRecords,
+  canTestOut, chooserDue, testOutSeed, testOutProblems, ALL_TAUGHT, checkResult, quiet, HELP_ACTIONS, passCredit, suggestedLevel, attemptRecords,
   PASS_WORD, FAIL_WORD, TEST_OUT_PROBLEMS,
 } from './engine/testOut.js';
 import { setNoHelp } from './engine/noHelp.js';
 import { holdRecords, heldRecords, appendRecords } from './lightStore.js';
 import { closeFirst } from './view/visit.js';
-import { askTestOut, renderTestOutBar, renderTestOutFail, passNote } from './view/testOut.js';
+import { askNoHelp, renderTestOutBar, renderTestOutFail, passNote, openPassNote } from './view/testOut.js';
+import { levelStarted, markStarted } from './startedStore.js';
 
 const $ = (id) => document.getElementById(id);
 
@@ -103,6 +104,8 @@ const levelled = (problems, level) => problems.map((p) => ({ ...p, logLevel: lev
 const params = new URLSearchParams(location.search);
 const urlSeed = Number(params.get('seed'));
 const fixedSeed = Number.isInteger(urlSeed) && urlSeed > 0 ? urlSeed : null;
+// ?choose=0 never asks "Start with help" or "Try with no help"; ?choose=1 asks on a test link too, where a seed would skip it (testers; Build AE)
+const CHOOSE = ['0', '1'].includes(params.get('choose')) ? params.get('choose') : null;
 
 // Progress and the level in play are saved under one key (SPEC §7). If
 // storage is blocked, everything still works from memory for this visit.
@@ -241,7 +244,7 @@ function goHome({ keepView = false, openCard = null } = {}) {
     bests: Object.fromEntries(CHALLENGES.map((c) => [c.id, bestScore(runs, c.id, 'all', now)])),
     onDiagnostic: (id) => startDiagnostic(id),
     onFluency: startFluency,
-    onPlay: startLevel,
+    onPlay: (packId, level) => openLevel(packId, level),
     onTestOut: offerTestOut,
     canTry: (packId, level) => canTestOut(progress, packById(packId), level, SECTIONS),
     openCard,
@@ -274,6 +277,7 @@ function startLevel(packId, level, resume = null) {
   clearTimeout(nextTimer);
   const pack = packById(packId);
   const adapter = adapterFor(pack.id, level);
+  markStarted(pack.id, level);                     // (a level started with help is in progress: it opens with no chooser, Build AE)
   const seed = resume?.seed ?? fixedSeed ?? newSeed();
   const problems = levelled(pack.generate(level, seed), level);
   const flags = {};                 // things a card has shown the student in this level (Add to both sides: Trade places)
@@ -364,7 +368,7 @@ function startDiagnostic(section, retake = false) {
     },
     onStop: back,
     onMap: back,
-    onPlay: startLevel,
+    onPlay: (packId, level) => openLevel(packId, level),
     onRetake: () => startDiagnostic(section, true),
   });
   quiz = { kind: 'diagnostic', view };
@@ -387,13 +391,37 @@ function dispatch(action) {
 const levelText = (pack, level) => `Level ${levelNumber(pack, level)}`;
 const RESULT_WAIT = 1500;          // the check's Balanced or Not balanced stays on screen this long (any key or click goes on at once)
 
+// The locked-level door (Build AE replaces Build Z's panel): "Try with no help" (2 problems) and Not now.
 function offerTestOut(packId, level) {
   const pack = packById(packId);
   if (!canTestOut(progress, pack, level, SECTIONS)) return;
-  askTestOut({ title: pack.title, levelText: levelText(pack, level) }, () => startTestOut(packId, level, 0));
+  const from = document.activeElement;
+  askNoHelp({ levelText: levelText(pack, level), locked: true }, {
+    onHelp: () => {},
+    onTry: () => startTestOut(packId, level, 0),
+    returnFocus: () => (from?.isConnected ? from : document.querySelector(`.card-view [data-try-level="${level}"]`)),
+  });
 }
 
-function startTestOut(packId, level, attempt) {
+// ---------- The no-help choice (Build AE): a fresh open level asks "Start with help" or "Try with no help" ----------
+// Every way into a level comes here (the card page, the level popup, Next level, the placement quiz's Start, a link). A level that is in
+// progress, placed or earned, a Count it or Build it level, and any link with a seed open as today (engine/testOut.js, chooserDue). The
+// panel opens over the card page: from anywhere else the card page opens first. Escape or a tap outside leaves the student on the card.
+function openLevel(packId, level) {
+  const pack = packById(packId);
+  const due = pack && chooserDue({ progress, pack, level, sections: SECTIONS, started: levelStarted(pack.id, level), choose: CHOOSE, fixedSeed });
+  if (!due) return startLevel(packId, level);
+  const onCard = !$('home').hidden && Boolean($('home').querySelector('.card-view'));
+  const from = onCard ? document.activeElement : null;
+  if (!onCard) goHome({ openCard: pack.id });
+  askNoHelp({ levelText: levelText(pack, level) }, {
+    onHelp: () => startLevel(packId, level),
+    onTry: () => startTestOut(packId, level, 0, { open: true }),
+    returnFocus: () => (from?.isConnected && from !== document.body ? from : document.querySelector(`.card-view .level-btn[data-level="${level}"]`)),
+  });
+}
+
+function startTestOut(packId, level, attempt, { open = false } = {}) {
   endTour();
   endDragDemo();
   endQuiz();
@@ -411,7 +439,7 @@ function startTestOut(packId, level, attempt) {
   play = {
     pack, adapter, level, seed, problems, index: 0, flags, finished: false, practicing: false, streak: 0, best: 0,
     session: quiet(adapter.newSession(problems[0], { flags, forceMove: false })),
-    testOut: { attempt, over: null, timer: null },
+    testOut: { attempt, over: null, timer: null, open, raw: null },
   };
   useControls(adapter);
   useMat(adapter);
@@ -427,12 +455,16 @@ function drawTestOutBar() {
   if (!play?.testOut) return;
   renderTestOutBar($('testout-bar'), {
     index: play.index, total: TEST_OUT_PROBLEMS, levelText: levelText(play.pack, play.level), over: play.testOut.over,
-    onGiveUp: () => endAttempt('fail', { gaveUp: true }),
+    onGiveUp: () => (play.testOut.open ? helpOn(play.testOut.raw ?? play.session) : endAttempt('fail', { gaveUp: true })),
   });
 }
 
 function endTestOut() {
-  if (play?.testOut && !play.testOut.over) logAttempt('fail');           // left in the middle (← Packs): logged as a give-up
+  if (play?.testOut && !play.testOut.over) {
+    logAttempt('fail');                                                   // left in the middle (← Packs): logged as a give-up
+    if (play.testOut.open) markStarted(play.pack.id, play.level);         // (an open level is now in progress: no chooser next time)
+  }
+  flushAttempt(true);
   setNoHelp(false);
   holdRecords(false);
   $('play').classList.remove('is-testout');
@@ -457,9 +489,11 @@ function testOutDispatch(action) {
   const next = play.adapter.reduce(before, action);
   if (next === before) return;
   play.session = quiet(next);
+  t.raw = next;                                                               // (what the card would show with help: Build AE's miss)
   render(before);
   const result = checkResult(play.session);
-  if (result === 'wrong') endAttempt('fail', { typed: play.session.answers.at(-1)?.typed ?? null });
+  if (result === 'wrong' && t.open) helpOn(next);                             // a miss on an open level: help comes on, same problem
+  else if (result === 'wrong') endAttempt('fail', { typed: play.session.answers.at(-1)?.typed ?? null });
   else if (result === 'right' && play.index + 1 >= play.problems.length) endAttempt('pass');
 }
 
@@ -471,8 +505,9 @@ function endAttempt(outcome, { typed = null, gaveUp = false } = {}) {
   const { pack, level } = play;
   logAttempt(outcome);
   drawTestOutBar();
+  const note = t.open ? openPassNote : passNote;
   const show = outcome === 'pass'
-    ? () => { homeNote = passNote(levelText(pack, level)); goHome({ openCard: pack.id }); homeNote = null; }
+    ? () => { homeNote = note(levelText(pack, level)); goHome({ openCard: pack.id }); homeNote = null; }
     : () => showTestOutFail(typed);
   let done = false;
   const go = () => {
@@ -504,6 +539,40 @@ function logAttempt(outcome) {
   appendRecords(attemptRecords(entries, outcome === 'pass' ? PASS_WORD : FAIL_WORD));
   if (outcome === 'pass' && !pack.comingSoon && !pack.hidden) progress = passCredit(progress, pack.id, level);
   persist();
+}
+
+// A miss or Give up on a level that was open (Build AE): the attempt stops being one. Help comes on and the same problem carries on, with the
+// usual path after a wrong value (the check's Not balanced, Undo, the hint); the problems already solved count on the level as usual (the
+// level's five problems, from the same seed: the attempt's two are its first two). The attempt's rows stay held until this problem ends
+// (solved, or left), then go to the class sheet with `test-out-fail`; the rest of the level logs as any level does.
+function helpOn(session) {
+  const { pack, level } = play;
+  const t = play.testOut;
+  if (!t || t.over) return;
+  t.over = 'help';
+  clearTimeout(t.timer);
+  setNoHelp(false);
+  $('play').classList.remove('is-testout');
+  $('testout-bar').hidden = true;
+  play.testOut = null;
+  play.attemptTail = true;
+  play.problems = levelled(pack.generate(level, play.seed), level);
+  play.flags = { model: true };                     // (the model never draws itself here: the help ladder still has it)
+  play.best = bestFor(loadBests(), pack.id, level);
+  play.session = session;
+  markStarted(pack.id, level);
+  persist();
+  render();
+}
+function flushAttempt(includeCurrent) {
+  if (!play?.attemptTail) return;
+  play.attemptTail = false;
+  const entries = [...heldRecords()];
+  if (includeCurrent && play.session && play.session.step !== 'done' && play.session.stage !== 'done') {
+    entries.push({ session: play.session, meta: { t: Date.now(), pack: play.pack.id, level: play.level, problem: play.adapter.format?.(play.session.problem) ?? '' } });
+  }
+  holdRecords(false);
+  appendRecords(attemptRecords(entries, FAIL_WORD));
 }
 
 function showTestOutFail(typed) {
@@ -571,7 +640,7 @@ function finishLevel() {
     packComplete: !pack.hidden && isPackComplete(progress, pack.id),
     nextPack: pack.hidden ? undefined : PACKS[PACKS.indexOf(pack) + 1],
     best: play.best,
-    onNext: () => startLevel(pack.id, level + 1),
+    onNext: () => openLevel(pack.id, level + 1),
     onMap: goHome,
     onPractice: startPractice,
   });
@@ -757,6 +826,7 @@ function render(before) {
   if (session.step === 'done') feedback.classList.add('celebrate');
 
   if (session.step === 'done' && before?.step !== 'done' && !play.testOut) earnPlaced(session);
+  if (session.step === 'done' && before?.step !== 'done' && play.attemptTail) flushAttempt(false);   // (the miss's problem ended: Build AE)
   if (session.step === 'done' && before?.step !== 'done' && !adapter.noAuto) {
     nextTimer = setTimeout(nextProblem, 2500);
   }
@@ -825,7 +895,7 @@ document.addEventListener('keydown', (e) => {
 });
 
 $('back').addEventListener('click', goHome);
-$('next-level').addEventListener('click', () => startLevel(play.pack.id, play.level + 1));
+$('next-level').addEventListener('click', () => openLevel(play.pack.id, play.level + 1));
 $('practice').addEventListener('click', () => { const to = play?.pack.practice?.pack; if (to) startLevel(to, nextLevel(progress, to) ?? 1); });
 $('save-code').addEventListener('click', () => showSaveCode(encodeProgress(progress)));
 
@@ -884,7 +954,7 @@ if (DIAGNOSTIC_SECTIONS.includes(params.get('diag'))) {
   startLevel(movedTo.id, movedTo.firstLevel ?? 1);
   showMovedNote();
 } else if (urlPack && PLAY[urlPack.id] && Number.isInteger(urlLevel) && urlLevel >= 1 && urlLevel <= lastLevelOf(urlPack)) {
-  startLevel(urlPack.id, urlLevel);
+  openLevel(urlPack.id, urlLevel);
 } else if (resume && !params.get('menu')) {
   startLevel(resume.pack, resume.level, resume);
 } else {

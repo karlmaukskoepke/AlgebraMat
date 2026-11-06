@@ -1006,6 +1006,26 @@ recorded set (`docs/build-ae/ae-multiply-first-*.png`):
 | Fractions of x L4, seed 11, `−⅔x = 12`, after the flip, I'm stuck | "Divide both sides by 2: one part is ⅓x = −6." | "⅔x means ⅔ of x. Multiply both sides by 3 to cancel the bottom 3." | Part 6 |
 | Fractions of x L6, `2x/3 = b`, I'm stuck | unchanged: "2x/3 means 2x divided by 3. Multiply both sides by 3 to cancel the divide by 3." | the same | (already multiply-first) |
 
+## Build AE, Parts 1-5 (2026-11-05): "Start with help" or "Try with no help" at the start of every level
+
+Problems, save codes, class-sheet records, the 25 scripted runs and the 70 recorded screens: unchanged (every recorded state opens a level
+by a link with `seed=`, which skips the chooser; none is the menu). The stricter picture-by-picture comparison of the 70 screens against
+the build before is in the report. The screens that change are outside the recorded set, one by one (`docs/build-ae/ae-*.png`):
+
+| Screen (not recorded) | Before | After | Why |
+|---|---|---|---|
+| A card page, a fresh open level clicked or tapped (every Solve it and Solve it Plus card, from Level 1 on) | the level opens at once | a small panel over the card: "Start with help" (filled, focused) and "Try with no help" / "2 problems"; the card dimmed behind it | Parts 1, 2 |
+| The same from a card's level popup | the level opens at once | the popup closes and the same panel opens over the card | Part 1 |
+| The level-done panel's "Level N →", the header's Next level, the placement quiz's Start, a link without a seed, onto a fresh open level | the level opens at once | the card page opens with the same panel over it | Part 1 |
+| A phone width (390 px) | (no panel) | the two buttons stacked, full width, 72 px tall | Part 1.2 |
+| A locked level tapped (card page or popup) | "Want to try it? Solve 2 problems here to skip ahead.", a heading "Card · Level N", Not now and Try it | no heading, no sentence: "Try with no help" / "2 problems" and "Not now" (Not now focused) | Part 3 |
+| The bar during an attempt (both doors) | "Skip ahead · Level 3 · Problem 1 of 2 · Give up" | "No help · Level 3 · Problem 1 of 2 · Give up" | Part 2.2 |
+| A pass on an open level | (not possible) | "2 of 2 balanced!", then the card with "No help needed! Do one more problem on Level N to make it gold." in the silver box; the level silver, the next open | Part 2.4 |
+| A miss on an open level (a wrong value reaching Not balanced) | (not possible) | the bar goes, the dots become five (the solved ones filled), I'm stuck comes back, and the card's own error pop-up "When x = 9, the equation is not balanced." with Undo | Part 4.1 |
+| Give up on an open level | (not possible) | the bar goes; the same problem with help, five dots; no "Not yet" panel | Part 4.2 |
+| A locked level's attempt: a miss, Give up | "Not yet." panel | unchanged | Part 4.3 |
+| A level in progress, placed or earned; Count it and Build it; a link with `seed=` or `choose=0` | the level opens at once | unchanged | Part 1.1 |
+
 <!-- history: nothing below this line is read by the harness -->
 
 ## History: screen changes accepted by the re-baseline of 2026-10-24 (Build O, Part 0)
