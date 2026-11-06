@@ -990,6 +990,22 @@ The animation's frames are the same pictures as Build AC's; only how long each s
 | The same with `?animslow=1` | 1.2 s each, 6 s | four times the above: 12 s | Part 2 |
 | The new x/1 under the lifted x, and the /1 dropping | drawn on the shared clock (the new /1's fade ran while its frame was still hidden) | each keeps to its own frame | Part 2 (a fix found on the way) |
 
+## Build AE, Part 6 (2026-11-05): Fractions of x suggests multiplying by the bottom first
+
+Problems, save codes, class-sheet records, the 25 scripted runs and the 70 recorded screens: unchanged (the harness lists nothing new; no
+recorded state is a Fractions of x screen). The stricter picture-by-picture comparison (every pixel off by more than 64 of 255 counted, a
+screen flagged at 40) of the 70 screens against the build before: 0 pixels off on every screen. The screens that change are outside the
+recorded set (`docs/build-ae/ae-multiply-first-*.png`):
+
+| Screen (not recorded) | Before | After | Why |
+|---|---|---|---|
+| Fractions of x L4, seed 9, `⅔x = −10`, I'm stuck (the first click) | "⅔x means ⅔ of x: 2 of 3 equal parts make −10. Divide both sides by 2: one part is ⅓x = −5.", Divide lit, its preview | "⅔x means ⅔ of x. Multiply both sides by 3 to cancel the bottom 3.", Multiply lit, its preview `▢(⅔x) = ▢(−10)` | Part 6 |
+| Fractions of x L3, seed 5, `⅔x = 6`, I'm stuck twice (after the model) | the divide reminder, Divide lit | the multiply reminder, Multiply lit | Part 6 |
+| Fractions of x L4, seed 9, a wrong value, then Undo (the hint) | the divide reminder | the multiply reminder | Part 6 |
+| Fractions of x L3, seed 5, multiply by 2 (red), then Undo (the hint) | the divide reminder | the multiply reminder | Part 6 |
+| Fractions of x L4, seed 11, `−⅔x = 12`, after the flip, I'm stuck | "Divide both sides by 2: one part is ⅓x = −6." | "⅔x means ⅔ of x. Multiply both sides by 3 to cancel the bottom 3." | Part 6 |
+| Fractions of x L6, `2x/3 = b`, I'm stuck | unchanged: "2x/3 means 2x divided by 3. Multiply both sides by 3 to cancel the divide by 3." | the same | (already multiply-first) |
+
 <!-- history: nothing below this line is read by the harness -->
 
 ## History: screen changes accepted by the re-baseline of 2026-10-24 (Build O, Part 0)
