@@ -61,7 +61,8 @@
         "reset": true
       },
       "steps": [
-        "On a touch screen (a tablet, or a Chromebook with a touch screen), click the button. Tap Two-step equations, then tap Level 1.",
+        "On a touch screen (a tablet, or a Chromebook with a touch screen), click the button. Tap Two-step equations.",
+        "Tap Level 1. Look at the panel’s two buttons.",
         "Tap Try with no help."
       ],
       "see": "The panel’s two buttons are big (well over a fingertip tall) and side by side, nothing overlapping. Tapping Try with no help starts the try: “No help · Level 1 · Problem 1 of 2 · Give up” at the top."
@@ -126,7 +127,8 @@
         "reset": true
       },
       "steps": [
-        "Click the button, then click Try with no help.",
+        "Click the button. Two-step equations opens with the panel over its card.",
+        "Click Try with no help. The top says “No help · Level 1 · Problem 1 of 2 · Give up”.",
         "Click Give up at the top."
       ],
       "see": "No “Not yet” panel: the bar goes, and 2x + 4 = 16 stays on screen with I’m stuck in the corner and five dots. You carry on in Level 1 with help."
