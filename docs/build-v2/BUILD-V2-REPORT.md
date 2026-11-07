@@ -139,7 +139,7 @@ number, no balance) and to Features to check.
   changes on a no-solution problem; the cap; Try a number records nothing).
 - **`npm run parity`:** PASS at both pushes on problems, save codes, class-sheet records, the 25 scripted runs and the 70 screens (none of
   them is Strange solutions or a placed level). Every screen that changes is listed in `tests/parity/INTENDED-CHANGES.md`.
-- **Features to check:** 14 new items (`v2-placed-one-more`, `v2-no-solution`, `v2-infinitely-many`, `v2-wrong-pick`, `v2-unmerged`,
+- **Features to check:** 13 new items (`v2-placed-one-more`, `v2-no-solution`, `v2-infinitely-many`, `v2-wrong-pick`, `v2-unmerged`,
   `v2-try-none`, `v2-try-all`, `v2-zero-answer`, `v2-zero-not-none`, `v2-new-levels`, `v2-level5-fraction`, `v2-student`,
   `v2-student-nohelp`) and updated: `z-gold`, `x-placed-earned` (placed levels: one problem now), `x-new-levels`, `x-card-name`,
   `x-statuses`, `x-shine`, `x-reduced-motion`, `ab-pop-edge` (five levels), `z-student` (a placed level opens on its last problem).
