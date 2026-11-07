@@ -664,7 +664,7 @@
         "Mistake 4, a half-right answer: type 3 in x =, press Enter, drag the 3 onto the x and press Enter until Balanced, then press Enter. Now on 12 = 2 + 5x, type 2 and finish the check the same way. Wait two seconds.",
         "Mistake 5, testing into the same level twice: on the card, click Level 3 again."
       ],
-      "see": "In the try there is never a clue, pop-up, flash or picture, only the check’s own “Balanced”. After the pass, Level 3 is silver and clicking it opens Level 3 itself (with I’m stuck back), not another try."
+      "see": "In the try there is never a clue, pop-up, flash or picture, only the check’s own “Balanced”. After the pass, Level 3 is silver and clicking it opens Level 3 itself on its last problem, 18 = 3x + 3 (four silver dots, I’m stuck back), not another try."
     },
     {
       "id": "ac-l1-no-moves",

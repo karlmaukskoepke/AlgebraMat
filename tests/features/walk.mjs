@@ -677,7 +677,7 @@ const WALKS = {
     w.at('solve both'); await w.answer(3); await w.enter(); await wait(w.page, 600); await w.answer(2); await wait(w.page, 2200);
     w.at('Level 3 again'); await w.click('.card-view .level-btn[data-level="3"]'); await wait(w.page, 600);
     if (await w.page.locator('#dialog[open]').count()) throw new Error('a placed level opens itself, not another try');
-    await w.see('TWO-STEP EQUATIONS · Level 3'); await w.row('24 = 9 + 5x');
+    await w.see('TWO-STEP EQUATIONS · Level 3'); await w.row('18 = 3x + 3'); await w.lastProblemDots();   // (Build V2, Part A: one problem left)
     if (!(await w.page.locator('[data-action="stuck"]:visible').count())) throw new Error('I’m stuck should be back');
   },
   // ---- Build AC: Fractions of x refinements ----
@@ -1623,7 +1623,7 @@ const WALKS = {
       const place = await w.popPlace();
       const rows = await w.popRows();
       if (place.side !== 'left' || !place.inside || place.own || place.head !== 'Strange solutions 5 of 5') throw new Error(`the popup should open on the left, inside the window: ${JSON.stringify(place)}`);
-      if (rows.length !== 3 || rows.some((r) => r.state !== 'earned')) throw new Error(`Levels 1 to 3 gold: ${JSON.stringify(rows)}`);
+      if (rows.length !== 5 || rows.some((r) => r.state !== 'earned')) throw new Error(`Levels 1 to 5 gold: ${JSON.stringify(rows)}`);
       await w.shot(`ab-pop-edge-${height}`);
     }
   },
