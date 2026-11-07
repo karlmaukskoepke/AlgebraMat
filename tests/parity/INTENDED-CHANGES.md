@@ -1033,7 +1033,7 @@ level). The screens that change are outside the recorded set:
 
 | Screen (not recorded) | Before | After | Why |
 |---|---|---|---|
-| A placed level opened (a no-help pass, the placement quiz, an older card's credit), any Solve it, Solve it Plus, Count it or Build it card | problem 1 of 5, five empty dots; the first problem solved with at most a reminder shows "Level N earned!" and the level goes on to problem 5 | problem 5 of 5 (the level's fifth problem), the first four dots silver; solving it shows "Level N complete!" | Part A |
+| A placed level opened (a no-help pass, the placement quiz, an older card's credit), any Solve it or Solve it Plus card (Count it and Build it unchanged) | problem 1 of 5, five empty dots; the first problem solved with at most a reminder shows "Level N earned!" and the level goes on to problem 5 | problem 5 of 5 (the level's fifth problem), the first four dots silver; solving it shows "Level N complete!" | Part A |
 
 <!-- history: nothing below this line is read by the harness -->
 

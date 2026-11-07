@@ -604,4 +604,5 @@ Its notes: "Improper fractions are full credit, no mixed numbers" and "x can be 
    the usual "Level N complete!" panel; nothing more is asked (not even the extra move problem a correct guess owes on Add's cards). Help is
    available on it as on any level; a miss carries on as on any problem.
 2. **Unchanged:** earned levels; a level in progress resumes where it is; the placement quiz and its credit; save codes; the class-sheet
-   rows (the problem logs as an ordinary problem); the chooser (a placed level opens straight into play).
+   rows (the problem logs as an ordinary problem); the chooser (a placed level opens straight into play); Count it and Build it (their placed
+   levels open at problem 1, as before).

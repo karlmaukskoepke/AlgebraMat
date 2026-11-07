@@ -285,7 +285,7 @@ function startLevel(packId, level, resume = null) {
   // A placed level (by a no-help pass, the placement quiz or an older card's credit: Build X) needs one more problem to be earned, so it
   // opens on the level's last problem with the dots before it filled in silver (credited, not worked). Karl, 2026-11-07 (Build V2, Part A).
   const placedFrom = resume ? (Number.isInteger(resume.placedFrom) ? resume.placedFrom : 0)
-    : placedOpening(progress, pack, level, problems.length, PROBLEMS_PER_LEVEL);
+    : placedOpening(progress, pack, level, problems.length, PROBLEMS_PER_LEVEL, SECTIONS);
   if (!resume && placedFrom) index = placedFrom;
   if (index >= problems.length) {          // a reload in the extra, move-only problem after a correct guess
     const extra = adapter.owesMove && forcedMoveOn(pack, level) ? extraProblem(pack, level, seed, problems) : null;

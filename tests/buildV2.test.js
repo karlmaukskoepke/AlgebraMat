@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { PACKS, packById } from '../src/packs/index.js';
+import { PACKS, SECTIONS, packById } from '../src/packs/index.js';
 import { newProgress, placeLevels, completeLevel, placedOpening, withLegacyCredit } from '../src/engine/progress.js';
 import { PROBLEMS_PER_LEVEL } from '../src/engine/generate.js';
 
@@ -24,6 +24,11 @@ describe('Part A: a placed level opens on its last problem', () => {
     const p = withLegacyCredit(completeLevel(newProgress(PACKS), 'one-step', 3));     // (Divide it's Level 1, saved 2, placed)
     expect(placedOpening(p, packById('divide-it'), 2, 5, PROBLEMS_PER_LEVEL)).toBe(4);
     expect(placedOpening(p, packById('divide-it'), 3, 5, PROBLEMS_PER_LEVEL)).toBe(0);
+  });
+  it('Count it and Build it are unchanged: their placed levels open at problem 1', () => {
+    const p = placeLevels(placeLevels(newProgress(PACKS), 'boxes', 4), 'divide-it', 4);
+    expect(placedOpening(p, packById('boxes'), 1, 5, PROBLEMS_PER_LEVEL, SECTIONS)).toBe(0);
+    expect(placedOpening(p, packById('divide-it'), 2, 5, PROBLEMS_PER_LEVEL, SECTIONS)).toBe(4);
   });
   it('a set that is not five problems (a test-out has two) is never jumped', () => {
     const p = placeLevels(newProgress(PACKS), pack.id, 3);

@@ -509,7 +509,9 @@ export function decodeProgress(code, packs) {
 // Build V2, Part A (Karl, 2026-11-07): a placed level (a no-help pass, the placement quiz, an older card's credit) needs one more problem,
 // so it opens on its last problem with the problems before it credited (silver dots). Returns the problem index to open on: the last
 // one for a placed level of a full set, else 0. An earned level, a level with nothing on it and a hidden or coming-soon card open at 0.
-export function placedOpening(progress, pack, level, count, perLevel) {
+// Solve it and Solve it Plus cards only (`sections`, when given): Count it and Build it are unchanged.
+export function placedOpening(progress, pack, level, count, perLevel, sections = null) {
   if (!pack || pack.comingSoon || pack.hidden || count !== perLevel) return 0;
+  if (sections && !sections.some((sec) => ['solve', 'solve-plus'].includes(sec.id) && sec.packs.includes(pack.id))) return 0;
   return isLevelPlaced(progress, pack.id, level) ? perLevel - 1 : 0;
 }
