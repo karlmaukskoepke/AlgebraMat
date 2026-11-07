@@ -217,9 +217,12 @@ describe.skipIf(!pw)('Build AE: the chooser, in a real browser', () => {
     expect(log.map((r) => r.supports)).toEqual([['test-out-pass'], ['test-out-pass']]);
     await page.click('.card-view .level-btn[data-level="1"]');
     expect(await isOpen(page)).toBe(false);                                                       // a placed level opens as today
+    // (Build V2, Part A: on its last problem, four silver dots, and solving it finishes the level)
+    expect(await page.evaluate(() => [...document.querySelectorAll('#dots .dot')].map((d) => (d.classList.contains('placed') ? 'S' : d.classList.contains('current') ? 'C' : 'N')).join(''))).toBe('SSSSC');
     await check(page);
-    await page.waitForTimeout(300);
-    expect(await page.locator('#earned-note').innerText()).toContain('Level 1 earned!');
+    await dispatch(page, [{ type: 'next' }]);
+    await page.waitForSelector('.level-done', { timeout: 5000 });
+    expect(await page.locator('.level-done h2').innerText()).toBe('Level 1 complete!');
     await page.close();
   }, 60000);
 

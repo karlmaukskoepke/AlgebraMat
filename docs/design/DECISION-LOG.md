@@ -594,3 +594,14 @@ Its notes: "Improper fractions are full credit, no mixed numbers" and "x can be 
    multiply by the bottom); the model and its bridge row `⅓x = 3` (the visual way); Level 2's one-time instruction; the unit-fraction
    reminders; −1 first on a negative fraction; the class-sheet words, slips and tags; the generator.
 
+
+## 2026-11-07: a placed level needs one more problem (Karl, after testing Build AE; built in Build V2, Part A)
+
+1. **A placed level opens on its last problem.** Karl: after passing two problems with no help (the level placed, silver), going back to
+   "do one more problem to make it gold" still asked for all five problems. Now a level placed by any route (a no-help pass on an open
+   level, a locked level's no-help pass, the placement quiz, an older card's credit) opens on problem 5 of 5, with the first four dots
+   filled in silver (credited, not worked). It is the level's fifth problem for a fresh seed. Solving it earns the level (gold) and shows
+   the usual "Level N complete!" panel; nothing more is asked (not even the extra move problem a correct guess owes on Add's cards). Help is
+   available on it as on any level; a miss carries on as on any problem.
+2. **Unchanged:** earned levels; a level in progress resumes where it is; the placement quiz and its credit; save codes; the class-sheet
+   rows (the problem logs as an ordinary problem); the chooser (a placed level opens straight into play).

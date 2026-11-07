@@ -4288,3 +4288,6 @@ button.lb-divbar.is-calc:hover, button.lb-divbar.is-calc:focus-visible { backgro
   display: inline-block; margin: 6px 0 4px; padding: 10px 22px; font-size: 24px; font-weight: 800; color: var(--ink);
   background: var(--metal-silver); border: 2px solid var(--edge-silver); border-radius: 14px;
 }
+
+/* Build V2, Part A: a placed level opens on its last problem; the problems it was credited for are silver dots (credited, not worked). */
+.dot.placed { background: var(--metal-silver); border-color: var(--edge-silver); }

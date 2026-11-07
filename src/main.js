@@ -2,7 +2,7 @@ import './style.css';
 import { PROBLEMS_PER_LEVEL } from './engine/generate.js';
 import {
   completeLevel, isPackComplete, isLevelUnlocked, normalizeProgress, mergeProgress, withLegacyCredit,
-  encodeProgress, decodeProgress, doneCount, nextLevel, isLevelPlaced, PROGRESS_VERSION,
+  encodeProgress, decodeProgress, doneCount, nextLevel, isLevelPlaced, placedOpening, PROGRESS_VERSION,
 } from './engine/progress.js';
 import { createStore } from './storage.js';
 import { PACKS, SECTIONS, HIDDEN_PACKS, packById, levelNumber, isWhyLevel, WHY_LABEL, lastLevelOf, forcedMoveOn } from './packs/index.js';
@@ -129,7 +129,7 @@ let play = null; // { pack, adapter, level, seed, problems, index, session, fini
 
 function saveProgress() {
   const current = play && !play.finished && !play.testOut      // (a test-out is never resumed: Build Z)
-    ? { pack: play.pack.id, level: play.level, seed: play.seed, index: play.index }
+    ? { pack: play.pack.id, level: play.level, seed: play.seed, index: play.index, ...(play.placedFrom ? { placedFrom: play.placedFrom } : {}) }
     : null;
   try {
     const before = store.load();
@@ -282,13 +282,18 @@ function startLevel(packId, level, resume = null) {
   const problems = levelled(pack.generate(level, seed), level);
   const flags = {};                 // things a card has shown the student in this level (Add to both sides: Trade places)
   let index = resume?.index ?? 0;
+  // A placed level (by a no-help pass, the placement quiz or an older card's credit: Build X) needs one more problem to be earned, so it
+  // opens on the level's last problem with the dots before it filled in silver (credited, not worked). Karl, 2026-11-07 (Build V2, Part A).
+  const placedFrom = resume ? (Number.isInteger(resume.placedFrom) ? resume.placedFrom : 0)
+    : placedOpening(progress, pack, level, problems.length, PROBLEMS_PER_LEVEL);
+  if (!resume && placedFrom) index = placedFrom;
   if (index >= problems.length) {          // a reload in the extra, move-only problem after a correct guess
     const extra = adapter.owesMove && forcedMoveOn(pack, level) ? extraProblem(pack, level, seed, problems) : null;
     if (extra) problems.push(extra); else index = 0;
   }
   play = {
     pack, adapter, level, seed, problems, index, flags, session: adapter.newSession(problems[index], { flags }), finished: false,
-    practicing: false, streak: 0, best: bestFor(loadBests(), pack.id, level),
+    practicing: false, streak: 0, best: bestFor(loadBests(), pack.id, level), placedFrom,
   };
   useControls(adapter);
   useMat(adapter);
@@ -611,7 +616,8 @@ function nextProblem() {
   clearTimeout(nextTimer);
   const owed = forcedMoveOn(play.pack, play.level) && Boolean(play.adapter.owesMove?.(play.session));   // (not on a level that lists it off: Build AC)
   if (play.index + 1 >= play.problems.length) {
-    const extra = owed && play.problems.length === PROBLEMS_PER_LEVEL ? extraProblem(play.pack, play.level, play.seed, play.problems) : null;
+    // (a placed level's one problem is never followed by another, even after a correct guess: Build V2, Part A)
+    const extra = owed && !play.placedFrom && play.problems.length === PROBLEMS_PER_LEVEL ? extraProblem(play.pack, play.level, play.seed, play.problems) : null;
     if (extra) play.problems.push(extra);
     else {
       if (!play.practicing) return finishLevel();
@@ -650,6 +656,7 @@ function finishLevel() {
 // Next level button in the header the whole time.
 function startPractice() {
   play.practicing = true;
+  play.placedFrom = 0;
   play.finished = false;
   play.seed = newSeed();
   play.problems = levelled(play.pack.generate(play.level, play.seed), play.level);
@@ -712,7 +719,9 @@ function renderDots() {
   while (dots.children.length > play.problems.length && (play.testOut || dots.children.length > PROBLEMS_PER_LEVEL)) dots.lastElementChild.remove();   // (a test-out has 2)
   $('dots').querySelectorAll('.dot').forEach((d, i) => {
     const solved = finished || i < index || (i === index && session.step === 'done');
-    d.classList.toggle('done', solved);
+    const credited = i < (play.placedFrom ?? 0);       // (a placed level's credited problems: silver, Build V2 Part A)
+    d.classList.toggle('done', solved && !credited);
+    d.classList.toggle('placed', credited);
     d.classList.toggle('current', !solved && i === index);
   });
   $('dots').setAttribute('aria-label', `Problem ${Math.min(index + 1, play.problems.length)} of ${play.problems.length}`);
@@ -839,6 +848,7 @@ const MINIMAL_SUPPORT = ['hint', 'crossoff'];
 const minimalSupport = (s) => !(s.taught > 0) && (s.supportsShown ?? []).every((w) => MINIMAL_SUPPORT.includes(w));
 function earnPlaced(session) {
   const { pack, level } = play;
+  if (play.placedFrom) return;                      // (opened on its last problem: finishing it earns the level, Build V2 Part A)
   if (pack.comingSoon || pack.hidden || !isLevelPlaced(progress, pack.id, level) || !minimalSupport(session)) return;
   progress = completeLevel(progress, pack.id, level);
   persist();

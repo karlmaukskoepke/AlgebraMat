@@ -3,6 +3,24 @@
   "updated": "2026-11-05",
   "checks": [
     {
+      "id": "v2-placed-one-more",
+      "name": "A level passed with no help needs only one more problem",
+      "build": "Build V2",
+      "link": {
+        "label": "Open Two-step equations · Level 1",
+        "query": "?pack=two-step-equations&level=1&seed=7&choose=1&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button and click Try with no help. Type 6 for 2x + 4 = 16 (drag it onto the x, Enter until Balanced, Enter once more), then type 8 for 2x + 2 = 18 the same way. Wait two seconds.",
+        "The card says “No help needed! Do one more problem on Level 1 to make it gold.” Click Level 1 (silver).",
+        "Look at the dots at the top: four are silver and the fifth is ringed. The problem is 3x + 10 = 19.",
+        "Type 3 in x =, press Enter, drag the 3 onto the x and press Enter until Balanced. Press Enter once more (Next problem).",
+        "Click Pack map."
+      ],
+      "see": "“Level 1 complete!” shows after that one problem, with Level 2 → and Keep practicing. On the card, Level 1 is gold with a star."
+    },
+    {
       "id": "ae-chooser-card",
       "name": "Opening a level: Start with help or Try with no help",
       "build": "Build AE",
@@ -418,11 +436,11 @@
       "steps": [
         "Click the button. Under Solve it, click Two-step equations, then click Level 3, then Try with no help.",
         "Solve both problems: type 3 for 24 = 9 + 5x (drag it onto the x, Enter until Balanced, Enter again), then type 2 for 12 = 2 + 5x the same way. Wait two seconds: the card opens with Levels 1 to 3 in silver.",
-        "Click Level 3 (silver). The problem is 24 = 9 + 5x again, and I’m stuck is back in the corner.",
-        "Type 3 in x =, press Enter, drag the 3 onto the x and press Enter until Balanced.",
-        "Click ← Packs, then click Two-step equations."
+        "Click Level 3 (silver). The problem is 18 = 3x + 3, I’m stuck is back in the corner, and the top shows four silver dots and a fifth one ringed: this is the last problem of the level.",
+        "Type 5 in x =, press Enter, drag the 5 onto the x and press Enter until Balanced. Press Enter once more (Next problem).",
+        "Click Pack map."
       ],
-      "see": "A gold note says “Level 3 earned!”. On the card, Level 3 is gold with a star, and Levels 1 and 2 stay silver."
+      "see": "After the problem, “Level 3 complete!” shows with Level 4 → and Keep practicing (no more problems are asked for). On the card, Level 3 is gold with a star, and Levels 1 and 2 stay silver."
     },
     {
       "id": "z-student",
@@ -1176,11 +1194,11 @@
       "steps": [
         "Click the button. It opens the home screen for a test student whose placement quiz placed them at Add to both sides Level 4.",
         "Click the name Add to both sides (silver, 3 of 5).",
-        "Click Level 1 (silver, “One problem earns it”). It opens x + 8 = 11.",
-        "Solve it: Add −8 (Enter), drag the 11 onto the −8 and type 3 (Enter), then type 3 for x, Enter, drag the 3 onto the x, and press Enter until it says Balanced.",
-        "Move the pointer to the top of the screen (the top bar comes back), click ← Packs, then the name Add to both sides."
+        "Click Level 1 (silver, “One problem earns it”). It opens x + 8 = −3, with four silver dots at the top and the fifth one ringed: one problem is left.",
+        "Solve it: Add −8 (Enter), drag the −3 onto the −8 and type −11 (Enter), then type −11 for x, Enter, drag the −11 onto the x, and press Enter until it says Balanced. Press Enter once more (Next problem).",
+        "Click Pack map, then the name Add to both sides."
       ],
-      "see": "When the problem is solved, “Level 1 earned!” shows at the top for a moment. Back on the card, Level 1 is gold with a star, Levels 2 and 3 are still silver, and the card still says 3 of 5 (silver: gold needs every level earned). Its name on the home screen shone once."
+      "see": "After the problem, “Level 1 complete!” shows (no more problems are asked for). Back on the card, Level 1 is gold with a star, Levels 2 and 3 are still silver, and the card still says 3 of 5 (silver: gold needs every level earned). Its name on the home screen shone once."
     },
     {
       "id": "x-shine",

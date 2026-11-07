@@ -1026,6 +1026,15 @@ the build before is in the report. The screens that change are outside the recor
 | A locked level's attempt: a miss, Give up | "Not yet." panel | unchanged | Part 4.3 |
 | A level in progress, placed or earned; Count it and Build it; a link with `seed=` or `choose=0` | the level opens at once | unchanged | Part 1.1 |
 
+## Build V2, Part A (2026-11-07): a placed level needs one more problem
+
+Problems, save codes, class-sheet records, the 25 scripted runs and the 70 recorded screens: unchanged (no recorded state opens a placed
+level). The screens that change are outside the recorded set:
+
+| Screen (not recorded) | Before | After | Why |
+|---|---|---|---|
+| A placed level opened (a no-help pass, the placement quiz, an older card's credit), any Solve it, Solve it Plus, Count it or Build it card | problem 1 of 5, five empty dots; the first problem solved with at most a reminder shows "Level N earned!" and the level goes on to problem 5 | problem 5 of 5 (the level's fifth problem), the first four dots silver; solving it shows "Level N complete!" | Part A |
+
 <!-- history: nothing below this line is read by the harness -->
 
 ## History: screen changes accepted by the re-baseline of 2026-10-24 (Build O, Part 0)

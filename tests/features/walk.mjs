@@ -245,6 +245,11 @@ class Walk {
       : b.classList.contains('is-placed') ? 'placed' : b.dataset.tryLevel ? 'try' : b.disabled ? 'locked' : 'open')));
     if (JSON.stringify(got) !== JSON.stringify(want)) throw new Error(`the levels should be ${want.join(', ')} after step "${this.step}", not ${got.join(', ')}`);
   }
+  // Build V2, Part A: a placed level opens on its last problem: four silver dots, the fifth ringed, "Problem 5 of 5"
+  async lastProblemDots() {
+    const got = await this.page.evaluate(() => ({ dots: [...document.querySelectorAll('#dots .dot')].map((d) => (d.classList.contains('placed') ? 'S' : d.classList.contains('done') ? 'D' : d.classList.contains('current') ? 'C' : 'N')).join(''), label: document.getElementById('dots').getAttribute('aria-label') }));
+    if (got.dots !== 'SSSSC' || got.label !== 'Problem 5 of 5') throw new Error(`four silver dots and the fifth ringed (Problem 5 of 5) after step "${this.step}": ${JSON.stringify(got)}`);
+  }
   // nothing that helps on screen: no pop-up but the check's own, no help button, nothing glowing or flashing, no picture
   async zNoHelp() {
     const found = await this.page.evaluate(() => {
@@ -641,10 +646,12 @@ const WALKS = {
     await w.zStates(['placed', 'placed', 'placed', 'open', 'try', 'try', 'try']);
     await w.both('z-silver');
     w.at('Level 3 (silver)'); await w.click('.card-view .level-btn[data-level="3"]'); await wait(w.page, 600);
-    await w.row('24 = 9 + 5x');
+    await w.row('18 = 3x + 3'); await w.lastProblemDots();
     if (!(await w.page.locator('[data-action="stuck"]:visible').count())) throw new Error('I’m stuck should be back on the level itself');
-    w.at('type 3, check'); await w.answer(3); await w.see('Level 3 earned!');
-    w.at('Packs, Two-step equations'); await w.click('#back'); await wait(w.page, 400); await w.click('.card-name[data-card="two-step-equations"]');
+    w.at('type 5, check, Next problem'); await w.answer(5); await w.see('Balanced'); await w.enter(); await wait(w.page, 900);
+    await w.see('Level 3 complete!', 'Level 4 →', 'Keep practicing');
+    w.at('Pack map'); await w.click('.level-done [data-go="map"]'); await wait(w.page, 500);
+    if (!(await w.page.locator('.card-view').count())) await w.click('.card-name[data-card="two-step-equations"]');
     await w.zStates(['placed', 'placed', 'earned', 'open', 'try', 'try', 'try']);
     await w.both('z-gold');
   },
@@ -784,6 +791,22 @@ const WALKS = {
     await w.see('No help needed! Do one more problem on Level 1 to make it gold.');
     await w.zStates(['placed', 'open', 'try', 'try', 'try', 'try', 'try']);
     await w.both('ae-pass');
+  },
+  async 'v2-placed-one-more'(w) {
+    await w.start(); await w.aeChooser(['Start with help', 'Try with no help 2 problems']);
+    w.at('Try with no help, solve both'); await w.click('#dialog [data-choose="try"]'); await wait(w.page, 700);
+    await w.row('2x + 4 = 16'); await w.answer(6); await w.see('Balanced'); await w.enter(); await wait(w.page, 600);
+    await w.row('2x + 2 = 18'); await w.answer(8); await wait(w.page, 2200);
+    await w.see('No help needed! Do one more problem on Level 1 to make it gold.');
+    w.at('Level 1 (silver)'); await w.click('.card-view .level-btn[data-level="1"]'); await wait(w.page, 700);
+    await w.row('3x + 10 = 19'); await w.lastProblemDots();
+    await w.both('v2-placed-last-problem');
+    w.at('type 3, check, Next problem'); await w.answer(3); await w.see('Balanced'); await w.enter(); await wait(w.page, 900);
+    await w.see('Level 1 complete!', 'Level 2 →', 'Keep practicing');
+    w.at('Pack map'); await w.click('.level-done [data-go="map"]'); await wait(w.page, 500);
+    if (!(await w.page.locator('.card-view').count())) await w.click('.card-name[data-card="two-step-equations"]');
+    await w.zStates(['earned', 'open', 'try', 'try', 'try', 'try', 'try']);
+    await w.both('v2-placed-one-more');
   },
   async 'ae-miss'(w) {
     await w.start();
@@ -1103,14 +1126,13 @@ const WALKS = {
     await w.shot('x-placed-before');
     w.at('click Level 1'); await w.click('.card-view .level-btn[data-level="2"]'); await wait(w.page, 800);
     if (await w.page.locator('text=Skip tour').count()) await w.click('text=Skip tour');
-    await w.see('x + 8 = 11');
-    w.at('Add −8'); await w.addEnter(-8); await wait(w.page, 1500); await w.row('x = 11 − 8');
-    w.at('11 onto −8, 3'); await w.combineTerms('11', '−8', 3); await w.row('x = 3');
-    w.at('type 3, drag, Enter to Balanced'); await w.answerBalanced(3);
-    await w.see('Level 1 earned!');
+    await w.see('x + 8 = −3'); await w.lastProblemDots();
+    w.at('Add −8'); await w.addEnter(-8); await wait(w.page, 1500); await w.row('x = −3 − 8');
+    w.at('−3 onto −8, −11'); await w.combineTerms('−3', '−8', -11); await w.row('x = −11');
+    w.at('type −11, drag, Enter to Balanced, Next problem'); await w.answerBalanced(-11); await w.enter(); await wait(w.page, 900);
+    await w.see('Level 1 complete!');
     await w.shot('x-placed-earned-note');
-    await wait(w.page, 2600);
-    w.at('← Packs, Add to both sides'); await w.page.mouse.move(400, 10, { steps: 4 }); await wait(w.page, 400); await w.click('text=← Packs'); await wait(w.page, 500);
+    w.at('Pack map, Add to both sides'); await w.click('.level-done [data-go="map"]'); await wait(w.page, 500);
     if (!(await w.page.locator('.card-name[data-card="add-both"].is-shining').count())) throw new Error('Add to both sides should shine once');
     await w.click('.card-name[data-card="add-both"]'); await wait(w.page, 400);
     const lv = await w.page.evaluate(() => [...document.querySelectorAll('.card-view .level-btn')].map((b) => (b.matches('.is-earned') ? 'E' : b.matches('.is-placed') ? 'P' : 'N')).join(''));
