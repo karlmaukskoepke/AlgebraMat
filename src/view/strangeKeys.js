@@ -4,12 +4,14 @@
 
 import { keyForMat } from './typingKeys.js';
 import { answerTyping } from '../engine/cards/strange.js';
+import { trialTyping } from '../engine/strangeTry.js';
 
 export function bindStrangeKeys(root, dispatch, getSession, loop) {
   const onKey = (e) => {
     const s = getSession?.();
-    if (!s || !keyForMat(e, root) || !answerTyping(s, loop)) return;
-    const part = s.part ?? 'num';
+    const trying = Boolean(s) && trialTyping(s);                      // (Try a number's box, Build V2)
+    if (!s || !keyForMat(e, root) || !(answerTyping(s, loop) || trying)) return;
+    const part = (trying ? s.trial.part : s.part) ?? 'num';
     let action = null;
     if (e.key === '/' || e.key === 'Divide') action = { type: 'typeChar', ch: '/' };
     else if (e.key === '.' || e.key === ',' || e.key === 'Decimal') action = { type: 'typeChar', ch: '.' };

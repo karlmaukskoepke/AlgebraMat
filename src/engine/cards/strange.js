@@ -11,7 +11,9 @@
 //   - its shapes (engine/solveit/shape.js, family 'strange') and their reminders (engine/solveit/rungs/strange.js).
 // No DOM here.
 
-import { makeBothCard, singleTerm, xAlone } from './bothSides.js';
+import { makeBothCard, singleTerm, xAlone, xBoth, BOTH_SPOT } from './bothSides.js';
+import { boardText } from '../solveTerms.js';
+import { reduceTry, tryOpen } from '../strangeTry.js';
 import { coefOn, otherTerm, mapSides, xWith } from '../fractionMove.js';
 import { fracOf } from '../divideBoard.js';
 import { FRACTIONS } from '../divide.js';
@@ -27,6 +29,36 @@ const fracTerm = (n, inner, sign) => (sign < 0 ? { ...fracOf(n, inner), sign: -1
 export const hasRatio = (board) => [...board.left, ...board.right].some((t) => t.kind === 'ratio' || (t.kind === 'neg' && t.inner?.[0]?.kind === 'ratio'));
 // a value as the screen shows it: a whole number stays a number (every other card's displays), a fraction is its text, `−5/2`
 const shownValue = (v) => (v.d === 1 ? v.n : fracText(v));
+
+// ---------- x disappears (Build V2): no x left anywhere, the equation is a statement (`3 = 7`, `3 = 3`, `0 = 0`) ----------
+// `x =` greys ("x disappeared. What does the equation say?") and the two conclusion buttons appear: "No solution" (never balanced) and
+// "Infinitely many" (always balanced). A right pick finishes the problem; a wrong one is an error (the statement lit, Undo, then the hint).
+const sumNumbers = (side) => side.reduce((a, t) => a + (t.kind === 'num' ? t.v : NaN), 0);
+export const noX = (board) => Boolean(board) && [...board.left, ...board.right].every((t) => t.kind === 'num');
+// the statement on screen: true (always balanced) or false (never balanced)
+export const statementTrue = (board) => sumNumbers(board.left) === sumNumbers(board.right);
+// the conclusion buttons are up: no x left, the problem going, nothing being checked, nothing waiting for Undo
+export const concludeOpen = (s) => s.stage === 'moves' && !s.sub && !s.needUndo && noX(s.board) && !s.lx?.combine && !s.lx?.distribute && !s.lx?.calc;
+export const PICKS = { none: 'No solution', all: 'Infinitely many' };
+function conclude(s, action, api) {
+  if (!concludeOpen(s) || !PICKS[action.pick]) return 'ignore';
+  if (s.feedback?.key === 'sConcludeWrong') return 'ignore';                          // (the error waits for Undo)
+  api.fold(s);
+  const truth = statementTrue(s.board);
+  const right = (truth ? 'all' : 'none') === action.pick;
+  const statement = boardText(s.board);
+  if (right) {
+    s.concluded = action.pick;
+    const out = api.finish(s, 'sConcludeRight');
+    out.feedback.params = { ...out.feedback.params, statement, truth, pick: action.pick };
+    return out;
+  }
+  s.wrongs += 1;
+  s.tag = 'conclusion-wrong';
+  s.tags.push('conclusion-wrong');
+  s.answers.push({ typed: PICKS[action.pick], tag: 'conclusion-wrong' });
+  return api.say(s, 'sConcludeWrong', { statement, truth, pick: action.pick }, true);
+}
 
 // Is x = where the keys go? (not while Add's blank, a sum, the distribute blanks or a Multiply blank takes them)
 export const answerTyping = (s, loop) => loop.answerLive(s) && !(s.menu === 'add' && s.typing !== 'answer') && !s.mopts?.kind && !s.lx?.combine && !s.lx?.distribute && !s.lx?.calc
@@ -83,6 +115,8 @@ function check(s, api) {
   if (v.d > 1 && !isLowest(v)) {
     s.simplifyTries = (s.simplifyTries ?? 0) + 1;
     if (!s.tags.includes('unsimplified')) s.tags.push('unsimplified');
+    // (listed in the class sheet's answers column too, `15/6 → unsimplified`, clearly not a wrong answer: Build V2, Karl's decision 3)
+    s.answers.push({ typed: `${v.n}/${v.d}`, tag: 'unsimplified' });
     const second = s.simplifyTries >= 2;
     if (second && !s.supportsShown.includes('hint')) s.supportsShown.push('hint');
     Object.assign(s, { ansFresh: true, part: 'num' });
@@ -142,11 +176,27 @@ function flipRatio(s, api, MOVE) {
   return MOVE.say(s, xAlone(next) ? 'aSolvedBoard' : 'aFindX');
 }
 
+// While no x is left, a move has nothing to work on (Flip, Divide, Fraction, Multiply, Add, Trade places): it is not made, and a short note
+// says so, never red (Build V2; a sweep found Flip crashing on `3 = 13`). Dragging or combining the numbers still works.
+const MOVES = new Set(['choose', 'addPick', 'multOpen', 'multPick', 'divPick', 'flipPick', 'take', 'flip', 'go']);
+function noMove(s, action) {
+  if (!MOVES.has(action.type) || s.stage !== 'moves' || s.sub || !noX(s.board)) return undefined;
+  if (action.type === 'go' && (s.lx?.combine || s.lx?.calc || s.lx?.distribute)) return undefined;
+  if (s.feedback?.key === 'sConcludeWrong') return s;                                     // (the error waits for Undo)
+  return { ...s, menu: null, mopts: null, typing: null, feedback: { key: 'sNoMoves', params: {}, bad: false } };
+}
+
 const own = {
+  layer: (s, action) => {
+    // "Try a number" after a right pick (Build V2): its own actions while the problem stays solved
+    if (tryOpen(s)) { const c = structuredClone(s); const r = reduceTry(c, action); if (r !== undefined) return r === 'ignore' ? s : r; }
+    return noMove(s, action);
+  },
   reduce(s, action, api, MOVE) {
     if (KEYS.has(action.type) && answerTyping(s, { answerLive: api.answerLive })) return typeAnswer(s, action, api);
     switch (action.type) {
       case 'check': return check(s, api);
+      case 'conclude': return conclude(s, action, api);
       // a click on either box clears it and puts the cursor in it (Build H)
       case 'focus':
         if (action.target !== 'ansTop' && action.target !== 'ansBottom') return undefined;
@@ -173,8 +223,10 @@ const own = {
   },
   extra: { den: '', part: 'num', denSel: false, ansFresh: false, simplifyTries: 0 },
   loop: {
+    // x on one side before checking (Karl's rule), and no x at all: the statement is the answer, x = stays greyed (Build V2)
+    answerBlocked: (s) => xBoth(s.board) || noX(s.board),
     tag: (p, typed) => tagStrange(p, typeof typed === 'number' ? { n: typed, d: 1 } : typed),
-    answerText: (p) => fracText(p.ans),
+    answerText: (p) => (p.ans ? fracText(p.ans) : PICKS[p.type]),
     // a wrong value: the boxes clear so the student retypes (the loop clears the top), with a second sentence where a slip says more
     slip: (s, typed, tag) => {
       Object.assign(s, { den: '', part: 'num' });
@@ -191,3 +243,10 @@ export const solve = CARD.loop;
 export const STRANGE_MENU = CARD.MENU;
 export const STRANGE_LAYER = CARD.LAYER;
 export { xAlone };
+
+// The spotlight on this card: Variables on both sides', and a wrong conclusion (the final statement lit, never greyed; Undo closes the
+// pop-up, then the reminder for the statement: "x disappeared. Is this statement ever true?").
+export const STRANGE_SPOT = {
+  ...BOTH_SPOT,
+  error: (s) => (s.feedback?.key === 'sConcludeWrong' ? { target: 'newest', label: s.feedback.params?.truth ? 'always true' : 'never true', lit: ['newest'], clear: true } : BOTH_SPOT.error(s)),
+};

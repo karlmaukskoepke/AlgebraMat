@@ -2,6 +2,8 @@
 
 import { bothSidesFeedbackText } from './bothSidesFeedback.js';
 
+export const NO_X_NOTE = 'x disappeared. What does the equation say?';
+
 const M = {
   sSimplify: (p) => (p.second ? 'Can you simplify this further? Divide the top and the bottom by the same number.' : 'Can you simplify this further?'),
   sNoDecimal: () => 'Write it as a fraction, like 5/2.',
@@ -19,6 +21,11 @@ const M = {
   sFlipHint: () => 'x has a minus: flip both sides (· −1) to get x alone.',
   sNegHint: (p) => `x is the opposite of ${p.f}. Simplify it, then type x with its sign.`,
   sNoXHint: () => 'x disappeared. Is this statement ever true?',
+  // x disappeared (Build V2): the note by x =, a right pick (in the words of the balance), a wrong pick
+  sConcludeRight: (p) => (p.truth ? `${p.statement} is always true, so every x works. The sides always balance.`
+    : `${p.statement} is never true, so no x can work. The sides never balance.`),
+  sNoMoves: () => 'x disappeared: no move is needed. What does the equation say?',
+  sConcludeWrong: (p) => (p.truth ? `${p.statement} is always true.` : `${p.statement} is false. It is false whatever x is.`),
 };
 
 export function strangeFeedbackText(fb) {

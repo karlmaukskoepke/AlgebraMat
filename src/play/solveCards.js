@@ -48,7 +48,8 @@ import { renderBothSidesScreen, introOpen as bothIntroOpen } from '../view/bothS
 import { bothSidesFeedbackText } from '../view/bothSidesFeedback.js';
 import { bindCrossHint } from '../view/crossHint.js';
 // Strange solutions (Build V): Variables on both sides' card with fraction answers and 0
-import { newStrange, solve as strangeLoop, xAlone as strangeAlone, STRANGE_MENU, STRANGE_LAYER, answerTyping } from '../engine/cards/strange.js';
+import { newStrange, solve as strangeLoop, xAlone as strangeAlone, STRANGE_MENU, STRANGE_LAYER, STRANGE_SPOT, answerTyping } from '../engine/cards/strange.js';
+import { trialTyping } from '../engine/strangeTry.js';
 import { renderStrangeScreen } from '../view/strangeScreen.js';
 import { strangeFeedbackText } from '../view/strangeFeedback.js';
 import { bindStrangeKeys } from '../view/strangeKeys.js';
@@ -340,7 +341,7 @@ export const strangePlay = makeSolvePlay({
   pack: 'strange-solutions',
   loop: strangeLoop,
   layer: STRANGE_LAYER,
-  spot: BOTH_SPOT,
+  spot: STRANGE_SPOT,
   introOpen: bothIntroOpen,
   format: formatBoth,
   newSession: (problem, { flags = null } = {}) => {
@@ -351,18 +352,20 @@ export const strangePlay = makeSolvePlay({
     if (s.divNegCount > 0 && strangeTaught) strangeTaught.divneg = true;
   },
   feedbackText: strangeFeedbackText,
-  buildControls: makeAddBothControls((s) => lightsAnswerLive(s, strangeLoop) || combineOpen(s) || calcOpen(s) || Boolean(s.lx?.distribute) || STRANGE_MENU.typingOpen(s), xKey, (s) => answerTyping(s, strangeLoop)),
+  buildControls: makeAddBothControls((s) => lightsAnswerLive(s, strangeLoop) || combineOpen(s) || calcOpen(s) || Boolean(s.lx?.distribute) || STRANGE_MENU.typingOpen(s) || trialTyping(s), xKey, (s) => answerTyping(s, strangeLoop) || trialTyping(s)),
   bindMat: (root, dispatch, getSession) => {
     const off = [bindStrangeKeys(root, dispatch, getSession, strangeLoop), bindLightsMat(root, dispatch, getSession), bindFractionKeys(root, dispatch, getSession, STRANGE_MENU), bindFactorHint(root), bindCrossHint(root)];
     return () => off.forEach((f) => f?.());
   },
   renderMat: (s) => renderStrangeScreen(s),
-  padOpen: (s) => s.stage !== 'done' && !s.sub && (((blankOpen(s) || seesawAdd(s)) && amountMode(s)) || combineOpen(s) || calcOpen(s) || Boolean(s.lx?.distribute) || STRANGE_MENU.typingOpen(s)
-    || (lightsAnswerLive(s, strangeLoop) && (s.typing === 'answer' || s.ui?.focus === 'answer' || strangeAlone(s.board)))),
+  padOpen: (s) => trialTyping(s) || (s.stage !== 'done' && !s.sub && (((blankOpen(s) || seesawAdd(s)) && amountMode(s)) || combineOpen(s) || calcOpen(s) || Boolean(s.lx?.distribute) || STRANGE_MENU.typingOpen(s)
+    || (lightsAnswerLive(s, strangeLoop) && (s.typing === 'answer' || s.ui?.focus === 'answer' || strangeAlone(s.board))))),
   matAction(d) {
     if (ADD_MAT.has(d.action)) return { type: d.action };
     if (calcAction(d)) return calcAction(d);
     switch (d.action) {
+      case 'tryOpen': case 'tryAgain': return { type: d.action };
+      case 'conclude': return { type: 'conclude', pick: d.pick };
       case 'addPick': return { type: 'addPick', kind: d.kind };
       case 'multOpen': return { type: 'multOpen' };
       case 'divPick': return { type: 'divPick' };

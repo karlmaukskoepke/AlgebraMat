@@ -194,7 +194,7 @@ describe.skipIf(!pw)('Build Z: test out, in a real browser', () => {
     const placed = await page.locator('.card-view .level-btn.is-placed').count();
     const first = pack === 'add-both' || pack === 'divide-it' || pack === 'flip-everything' ? 2 : 1;
     if (placed !== level - first + 1) report.push(`${placed} levels placed, expected ${level - first + 1}`);
-    const last = pack === 'strange-solutions' ? 3 : null;
+    const last = pack === 'strange-solutions' ? 5 : null;
     if (level !== last && await page.locator(`.card-view .level-btn[data-level="${level + 1}"]:not([disabled])`).count() !== 1) report.push('the next level should be open');
     const log = await page.evaluate(() => JSON.parse(localStorage.getItem('mat.events.v1')));
     if (log.length !== 2 || !log.every((r) => r.supports.includes('test-out-pass') && r.level === level && r.pack === pack)) report.push(`the class-sheet rows: ${JSON.stringify(log)}`);
@@ -235,4 +235,64 @@ describe.skipIf(!pw)('Build Z: test out, in a real browser', () => {
     expect(await page.locator('[data-action="stuck"]').first().isVisible()).toBe(true);    // help is back on the level itself
     await page.close();
   }, 60000);
+
+  // Build V2, Part 6: Strange solutions Level 4 with no help. The conclusion buttons are the answer; "Try a number" and the balance are
+  // help and never appear. A wrong pick ends the attempt (locked: the fail panel; open: help comes on, the wrong-pick spotlight and Undo).
+  const cancelX = async (page) => {
+    const s = await page.evaluate(() => { const x = window.__mat.session(); return { c: x.board.left.find((t) => t.kind === 'x')?.coef ?? 1 }; });
+    await dispatch(page, [{ type: 'addPick', kind: 'x' }, ...keys(-s.c), { type: 'go' }]);
+    await page.waitForTimeout(300);
+  };
+  const noTry = async (page, report, when) => {
+    if (await page.locator('[data-action="tryOpen"], [data-action="tryAgain"], .bon-balance').count()) report.push(`Try a number or the balance on screen ${when}`);
+  };
+  it('Strange solutions Level 4, locked and open: the conclusion buttons, a right pick, a wrong pick; no Try a number, no balance', async () => {
+    const report = [];
+    // locked: a right pick on problem 1 (4x + 1 = 4x + 2, no solution), then the next problem is there
+    let page = await browser.newPage({ viewport: { width: 1366, height: 768 } });
+    await freshMenu(page, base);
+    await tryLevel(page, 'strange-solutions', 4);
+    if ((await page.evaluate(() => window.__mat.session().problem.type)) !== 'none') report.push('locked: problem 1 should be a no-solution problem');
+    await cancelX(page);
+    if (!(await page.locator('[data-pick="none"]').isVisible()) || !(await page.locator('[data-pick="all"]').isVisible())) report.push('locked: the two conclusion buttons should show');
+    if (!(await page.locator('.lx-answernote').innerText()).includes('x disappeared. What does the equation say?')) report.push('locked: the note by x =');
+    await page.click('[data-pick="none"]');
+    await page.waitForTimeout(400);
+    if ((await page.evaluate(() => window.__mat.session().stage)) !== 'done') report.push('locked: a right pick should finish the problem');
+    await noTry(page, report, 'after a right pick (locked)');
+    if (await page.locator('.spot-layer:not(.is-intro)').count()) report.push('locked: no pop-up after a right pick');
+    await page.close();
+    // locked: a wrong pick ends the attempt with the fail panel
+    page = await browser.newPage({ viewport: { width: 1366, height: 768 } });
+    await freshMenu(page, base);
+    await tryLevel(page, 'strange-solutions', 4);
+    await cancelX(page);
+    await page.click('[data-pick="all"]');
+    await page.waitForTimeout(2300);
+    if (!(await page.locator('body').innerText()).includes('Not yet.')) report.push('locked: a wrong pick should end the attempt ("Not yet.")');
+    await page.close();
+    // open (Levels 1-3 earned): a wrong pick carries on with help, the wrong-pick spotlight and Undo, then the reminder
+    page = await browser.newPage({ viewport: { width: 1366, height: 768 } });
+    const url = new URL(`?pack=strange-solutions&level=4&seed=${SEED}&choose=1&demo=grew&nosignin=1`, base).href;
+    await page.goto(url);
+    await page.evaluate(() => localStorage.clear());
+    await page.goto(url);
+    await page.click('#dialog [data-choose="try"]');
+    await page.waitForFunction(() => window.__mat?.session()?.board);
+    await cancelX(page);
+    await noTry(page, report, 'in an open attempt');
+    await page.click('[data-pick="all"]');
+    await page.waitForTimeout(500);
+    const said = await page.locator('.spot-layer').innerText().catch(() => '');
+    if (!said.includes('is false. It is false whatever x is.')) report.push(`open: the wrong-pick spotlight: "${said}"`);
+    if (!(await page.locator('#testout-bar').isHidden())) report.push('open: the No help bar should go after a miss');
+    await page.click('.spot-undo');
+    await page.waitForTimeout(400);
+    if (!(await page.locator('.spot-layer').innerText().catch(() => '')).includes('x disappeared. Is this statement ever true?')) report.push('open: the reminder after Undo');
+    await page.click('[data-pick="none"]');
+    await page.waitForTimeout(400);
+    if (!(await page.locator('[data-action="tryOpen"]').count())) report.push('open: with help back on, Try a number should be offered after the right pick');
+    await page.close();
+    expect(report).toEqual([]);
+  }, 120000);
 });

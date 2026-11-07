@@ -20,7 +20,7 @@ const CARDS = [
   ['Distribute, combine, solve', 'distribute-solve', distSolvePlay, [1, 2, 3, 4, 5]],
   ['Variables on both sides', 'variables-both-sides', bothSidesPlay, [1, 2, 3, 4, 5]],             // (Build R)
   ['Distribute more', 'distribute-more', distMorePlay, [1, 2, 3, 4, 5]],                           // (Build U)
-  ['Strange solutions', 'strange-solutions', strangePlay, [1, 2, 3]],                              // (Build V: Levels 4-5 are V2's)
+  ['Strange solutions', 'strange-solutions', strangePlay, [1, 2, 3, 4, 5]],                        // (Build V; 4-5 Build V2)
   ['Fractions of x', 'fractions-of-x', fractionsPlay, [1, 2, 3, 4, 5, 6]],                         // (Build AA)
 ];
 

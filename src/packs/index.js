@@ -232,8 +232,8 @@ export const distributeMore = {
 };
 
 // Strange solutions (Build V, basic form): `10x − 4 = 4x + 5` solved as on Variables on both sides, the divide writing `x = 9/6`, the
-// student simplifying and typing `3/2`; x = 0 mixed in. Five saved levels, shown as saved; Build V builds Levels 1-3 and shows only those
-// (`lastLevel`: the later levels are saved but hidden, as the old "coming soon" cards were, until V2 builds no solution and infinitely many).
+// student simplifying and typing `3/2`; x = 0 mixed in; no solution and infinitely many (Levels 4-5, Build V2). Five saved levels, shown as
+// saved; Build V showed Levels 1-3 (`lastLevel` 3), Build V2 shows all five.
 export const strangeSolutions = {
   id: 'strange-solutions',
   title: 'Strange solutions',
@@ -241,7 +241,7 @@ export const strangeSolutions = {
   blurb: 'Answers that are fractions or 0: divide, simplify, then type x.',
   levels: 5,
   lastLevel: STRANGE_SHOWN,
-  levelNames: ['a fraction answer', 'simplify the fraction', 'x = 0, mixed in', 'no solution, infinitely many', 'mixed, with distributing'],
+  levelNames: ['a fraction answer', 'simplify the fraction', 'x = 0, mixed in', 'No solution or infinitely many', 'All mixed'],
   generate: (level, seed) => generateStrangeLevel(level, seed),
 };
 

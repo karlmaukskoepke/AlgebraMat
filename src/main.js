@@ -106,6 +106,7 @@ const urlSeed = Number(params.get('seed'));
 const fixedSeed = Number.isInteger(urlSeed) && urlSeed > 0 ? urlSeed : null;
 // ?choose=0 never asks "Start with help" or "Try with no help"; ?choose=1 asks on a test link too, where a seed would skip it (testers; Build AE)
 const CHOOSE = ['0', '1'].includes(params.get('choose')) ? params.get('choose') : null;
+let urlProblem = Number(params.get('problem'));                    // (testing only: the problem a test link opens on, with `seed=`; used once)
 
 // Progress and the level in play are saved under one key (SPEC §7). If
 // storage is blocked, everything still works from memory for this visit.
@@ -287,6 +288,9 @@ function startLevel(packId, level, resume = null) {
   const placedFrom = resume ? (Number.isInteger(resume.placedFrom) ? resume.placedFrom : 0)
     : placedOpening(progress, pack, level, problems.length, PROBLEMS_PER_LEVEL, SECTIONS);
   if (!resume && placedFrom) index = placedFrom;
+  // (testing only, Build V2: `problem=N` with a fixed seed opens on problem N of the set, so a test link can show one exact problem)
+  else if (!resume && fixedSeed !== null && urlProblem >= 1 && urlProblem <= problems.length) index = urlProblem - 1;
+  urlProblem = 0;
   if (index >= problems.length) {          // a reload in the extra, move-only problem after a correct guess
     const extra = adapter.owesMove && forcedMoveOn(pack, level) ? extraProblem(pack, level, seed, problems) : null;
     if (extra) problems.push(extra); else index = 0;

@@ -21,6 +21,211 @@
       "see": "“Level 1 complete!” shows after that one problem, with Level 2 → and Keep practicing. On the card, Level 1 is gold with a star."
     },
     {
+      "id": "v2-no-solution",
+      "name": "Strange solutions Level 4: x disappears and the two buttons",
+      "build": "Build V2",
+      "link": {
+        "label": "Open Strange solutions · Level 4",
+        "query": "?pack=strange-solutions&level=4&seed=1&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Strange solutions, Level 4, on 7x + 3 = 7x + 13.",
+        "Click Add (+), then its second option (+ ▢x), type −7 and press Enter. Both 7x terms are crossed out and the next row is 3 = 13.",
+        "Look at the bottom row: x = is greyed with “x disappeared. What does the equation say?” under it, and two buttons beside it: “No solution” with “never balanced” under it, and “Infinitely many” with “always balanced” under it.",
+        "Click No solution."
+      ],
+      "see": "The checking space says “3 = 13 is never true, so no x can work. The sides never balance.” The green button says Next problem, and the No solution button stays, marked in green."
+    },
+    {
+      "id": "v2-infinitely-many",
+      "name": "Strange solutions Level 4: Infinitely many",
+      "build": "Build V2",
+      "link": {
+        "label": "Open Strange solutions · Level 4",
+        "query": "?pack=strange-solutions&level=4&seed=3&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Strange solutions, Level 4, on 3x + 1 = 3x + 1.",
+        "Click Add (+), then + ▢x, type −3 and press Enter. The next row is 1 = 1.",
+        "Click Infinitely many."
+      ],
+      "see": "The checking space says “1 = 1 is always true, so every x works. The sides always balance.” and the green button says Next problem."
+    },
+    {
+      "id": "v2-wrong-pick",
+      "name": "Strange solutions Level 4: a wrong pick",
+      "build": "Build V2",
+      "link": {
+        "label": "Open Strange solutions · Level 4",
+        "query": "?pack=strange-solutions&level=4&seed=1&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button (7x + 3 = 7x + 13). Click Add (+), then + ▢x, type −7 and press Enter. The row 3 = 13 appears.",
+        "Click Infinitely many.",
+        "Read the pop-up, then click Undo.",
+        "Click No solution."
+      ],
+      "see": "After Infinitely many, the screen dims except 3 = 13, outlined with “never true”, and a pop-up says “3 = 13 is false. It is false whatever x is.” with Undo. After Undo a smaller pop-up beside the two buttons asks “x disappeared. Is this statement ever true?”. No solution then finishes the problem."
+    },
+    {
+      "id": "v2-unmerged",
+      "name": "Strange solutions Level 4: 5 + x + x = 2x + 5 (put the x-terms together first)",
+      "build": "Build V2",
+      "link": {
+        "label": "Open 5 + x + x = 2x + 5",
+        "query": "?pack=strange-solutions&level=4&seed=931&problem=4&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Strange solutions, Level 4, on 5 + x + x = 2x + 5.",
+        "Drag the second x on the left onto the first x, type 2x and press Enter. The row is 5 + 2x = 2x + 5.",
+        "Click Add (+), then + ▢x, type −2 and press Enter. The row is 5 = 5.",
+        "Click Infinitely many."
+      ],
+      "see": "“5 = 5 is always true, so every x works. The sides always balance.” in the checking space."
+    },
+    {
+      "id": "v2-try-none",
+      "name": "Try a number on a no-solution problem: the balance, a fraction, the cap, still heavier",
+      "build": "Build V2",
+      "link": {
+        "label": "Open Strange solutions · Level 4",
+        "query": "?pack=strange-solutions&level=4&seed=1&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button (7x + 3 = 7x + 13). Click Add (+), then + ▢x, type −7, press Enter, then click No solution.",
+        "Click Try a number. Type 3/2 (3, then /, then 2) and press Enter.",
+        "Drag the 3/2 onto the first x of 7x + 3 = 7x + 13, then onto the second x. Press Enter until the balance appears.",
+        "Click Try a number again, type 5, press Enter, drag the 5 onto each x and press Enter until the balance appears."
+      ],
+      "see": "The first time, a balance shows seven blocks marked 3/2 and a green +3 ball on the left pan, seven blocks marked 3/2 and a green +13 ball on the right; under the pans “7(3/2) + 3 = 27/2” and “7(3/2) + 13 = 47/2”; the beam leans fully to the right. The words: “x = 3/2. Right side is heavier by 10.” and “Try another number: it is still heavier by 10.” With 5: “x = 5. Right side is heavier by 10.” and the same lean."
+    },
+    {
+      "id": "v2-try-all",
+      "name": "Try a number on an infinitely-many problem: balanced every time",
+      "build": "Build V2",
+      "link": {
+        "label": "Open Strange solutions · Level 4",
+        "query": "?pack=strange-solutions&level=4&seed=3&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button (3x + 1 = 3x + 1). Click Add (+), then + ▢x, type −3, press Enter, then click Infinitely many.",
+        "Click Try a number, type 4 and press Enter.",
+        "Drag the 4 onto each x, then press Enter until the balance appears."
+      ],
+      "see": "The balance sits level: three blocks marked 4 and a green +1 ball on each pan, “3(4) + 1 = 13” under both. The words: “x = 4. Balanced.” and “Try another number: it balances every time.” Nothing is red and there is no Undo."
+    },
+    {
+      "id": "v2-zero-answer",
+      "name": "x = 0 is an answer: 3x + 4 = 4",
+      "build": "Build V2",
+      "link": {
+        "label": "Open 3x + 4 = 4",
+        "query": "?pack=strange-solutions&level=4&seed=178&problem=5&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Strange solutions, Level 4, on 3x + 4 = 4 (Karl’s equation 9).",
+        "Click Add (+), type −4 and press Enter. The row is 3x = 0.",
+        "Click Divide (÷), type 3 and press Enter. The row is x = 0.",
+        "Click the box after x =, type 0 and press Enter. Drag the 0 onto the x and press Enter until the check ends."
+      ],
+      "see": "The check ends 4 = 4 with Balanced: x = 0 is the solution. x was never gone here, so no No solution or Infinitely many buttons appeared."
+    },
+    {
+      "id": "v2-zero-not-none",
+      "name": "0 = 0 is not x = 0",
+      "build": "Build V2",
+      "link": {
+        "label": "Open Strange solutions · Level 4",
+        "query": "?pack=strange-solutions&level=4&seed=3&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button (3x + 1 = 3x + 1). Click Add (+), type −1 and press Enter. The row is 3x = 3x.",
+        "Click Add (+), then + ▢x, type −3 and press Enter. The row is 0 = 0.",
+        "Press the 0 key on the keyboard.",
+        "Click Infinitely many."
+      ],
+      "see": "Pressing 0 puts nothing in x =: it stays greyed (“x disappeared. What does the equation say?”), so 0 can never be typed for this. Infinitely many says “0 = 0 is always true, so every x works. The sides always balance.” (Compare the item before: there x = 0 was the one solution.)"
+    },
+    {
+      "id": "v2-new-levels",
+      "name": "Strange solutions shows five levels: “New levels added!”",
+      "build": "Build V2",
+      "link": {
+        "label": "Open a student who had finished Levels 1-3",
+        "query": "?menu=1&demo=grew&seed=7&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens the home screen for a test student who had earned all three levels Strange solutions used to show.",
+        "Look at Strange solutions under Solve it Plus.",
+        "Click the name Strange solutions."
+      ],
+      "see": "Under the name: “New levels added!”, silver, 3 of 5. On the card, Levels 1 to 3 are gold with a star, Level 4 is open (“No solution or infinitely many”) and Level 5 is locked."
+    },
+    {
+      "id": "v2-level5-fraction",
+      "name": "Strange solutions Level 5: distribute, then a fraction answer",
+      "build": "Build V2",
+      "link": {
+        "label": "Open Strange solutions · Level 5",
+        "query": "?pack=strange-solutions&level=5&seed=8&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Strange solutions, Level 5, on −4(x + 3) + 2 = −6x − 5.",
+        "Drag the −4 onto the parentheses, type −4x (Tab or click the next box) and −12, and press Enter.",
+        "Drag the −6x on the right across to the left. Drag the 6x onto −4x and type 2x, Enter. Drag the 2 onto the −12 and type −10, Enter. The row is 2x − 10 = −5.",
+        "Drag the −10 across to the right, then drag the 10 onto the −5 and type 5, Enter. The row is 2x = 5. Click Divide (÷), type 2 and press Enter: x = 5/2.",
+        "Click the box after x =, type 5/2, press Enter, drag the value onto the x and press Enter until the check ends."
+      ],
+      "see": "The check ends Balanced: x = 5/2, a fraction answer at Level 5."
+    },
+    {
+      "id": "v2-student",
+      "name": "Play it like a student: Strange solutions 4-5",
+      "build": "Build V2",
+      "link": {
+        "label": "Open Strange solutions · Level 4",
+        "query": "?pack=strange-solutions&level=4&seed=1&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button (7x + 3 = 7x + 13). You are going to play a student who gets things wrong.",
+        "Mistake 1, a move that does nothing for x: click Add (+), type 3 and press Enter. A good response writes 7x + 3 + 3 = 7x + 13 + 3 and asks for Undo (it made the numbers bigger). Press Undo: a small pop-up says “Move this x-term to the other side. Drag it across the =, or use Add.” Press Got it.",
+        "Now cancel the x-terms properly: Add (+), then + ▢x, type −7, Enter. The row is 3 = 13.",
+        "Mistake 2, typing a value when x is gone: press 0 on the keyboard. A good response: nothing goes into x =, which stays greyed.",
+        "Mistake 3, a move when nothing is left to do: click Divide (÷). A good response says “x disappeared: no move is needed. What does the equation say?” and writes nothing.",
+        "Mistake 4, the wrong button: click Infinitely many. A good response lights only 3 = 13 with “3 = 13 is false. It is false whatever x is.” and Undo. Press Undo, then click No solution.",
+        "Mistake 5, misreading the balance: click Try a number, type 3/2, press Enter, drag it onto both x’s and press Enter until the balance shows. Then click Try a number again and try −2. A good response: the right side is lower both times and the words say “Right side is heavier by 10.” both times, with “it is still heavier by 10.”"
+      ],
+      "see": "Every mistake gets a calm answer: nothing red except the two moves that waited for Undo, no value accepted while x is gone, and the balance always agrees with its words (right side down, heavier by 10, whatever number is tried)."
+    },
+    {
+      "id": "v2-student-nohelp",
+      "name": "Play it like a student: Try with no help on Strange solutions 4",
+      "build": "Build V2",
+      "link": {
+        "label": "Open the main menu (a fresh student)",
+        "query": "?menu=1&seed=7&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. Under Solve it Plus, click Strange solutions, then click Level 4 (“Tap to skip ahead”), then Try with no help.",
+        "The first problem is 4x + 1 = 4x + 2, with “No help · Level 4 · Problem 1 of 2 · Give up” at the top. Click Add (+), then + ▢x, type −4 and press Enter. The row is 1 = 2 and the two buttons show.",
+        "Mistake 1, ignoring the screen: touch nothing for 10 seconds. A good response: nothing flashes and no pop-up comes (no help in a try).",
+        "Mistake 2, the wrong button: click Infinitely many. Wait two seconds."
+      ],
+      "see": "The try is over: “Not yet.” with “Try Level 1 first.” (Level 4 stays locked, and you can try again). At no point was there an I’m stuck, a Try a number button or a balance."
+    },
+    {
       "id": "ae-chooser-card",
       "name": "Opening a level: Start with help or Try with no help",
       "build": "Build AE",
@@ -1099,7 +1304,7 @@
         "Rest the pointer on the name Strange solutions (the last name under Solve it Plus).",
         "Make the window short (or open it on a 1366×650 screen) and do it again."
       ],
-      "see": "The popup opens to the left of Strange solutions, since there is no room on its right, and stays fully inside the window: “Strange solutions” with “3 of 3” and Levels 1 to 3 gold with a star. It never covers the name you are pointing at."
+      "see": "The popup opens to the left of Strange solutions, since there is no room on its right, and stays fully inside the window: “Strange solutions” with “5 of 5” and Levels 1 to 5 gold with a star. It never covers the name you are pointing at."
     },
     {
       "id": "ab-foot-quiz",
@@ -1164,7 +1369,7 @@
         "Click ← All sections at the top left.",
         "Click the name Strange solutions, under Solve it Plus."
       ],
-      "see": "Each name opens that card on its own, big: its levels (Divide it: Level 1 to Level 5, with See why it works), its dots and “0 of 5”, and “Solve it · 7th grade” beside ← All sections. ← All sections goes back to the four sections. Strange solutions shows Levels 1 to 3 and “0 of 3”."
+      "see": "Each name opens that card on its own, big: its levels (Divide it: Level 1 to Level 5, with See why it works), its dots and “0 of 5”, and “Solve it · 7th grade” beside ← All sections. ← All sections goes back to the four sections. Strange solutions shows Levels 1 to 5 and “0 of 5”."
     },
     {
       "id": "x-statuses",
@@ -1210,7 +1415,7 @@
         "reset": true
       },
       "steps": [
-        "Click the button. It opens the home screen for a test student who has just earned Strange solutions Level 3 (the last card of Solve it Plus) and Divide it Level 2.",
+        "Click the button. It opens the home screen for a test student who has just earned Strange solutions Level 5 (the last card of Solve it Plus) and Divide it Level 2.",
         "Watch Strange solutions, Divide it and the Solve it Plus panel for two seconds.",
         "Reload the page (the circular arrow at the top of the browser), and watch again.",
         "Open the button again, and press any key (or click anywhere) as soon as the page shows."
@@ -1231,7 +1436,7 @@
         "Click the button.",
         "Watch Strange solutions and the Solve it Plus panel, then turn reduced motion off again."
       ],
-      "see": "Nothing sweeps, glows or moves, and the menu opens without its slide-in. The colours, shapes and words are all the same as without reduced motion: Strange solutions gold with a star and 3 of 3, Solve it Plus “Every card gold”."
+      "see": "Nothing sweeps, glows or moves, and the menu opens without its slide-in. The colours, shapes and words are all the same as without reduced motion: Strange solutions gold with a star and 5 of 5, Solve it Plus “Every card gold”."
     },
     {
       "id": "x-new-levels",
@@ -1243,11 +1448,11 @@
         "reset": true
       },
       "steps": [
-        "Click the button. It opens the home screen for a test student who had finished the two levels Strange solutions used to show, and now it shows three (this is how Levels 4 and 5 will arrive).",
+        "Click the button. It opens the home screen for a test student who had finished the three levels Strange solutions used to show, and now it shows five (Levels 4 and 5 arrived in Build V2).",
         "Look at Strange solutions under Solve it Plus.",
         "Reload the page."
       ],
-      "see": "Strange solutions says “New levels added!” under its name and is silver with 2 of 3 (it was gold over two levels: it keeps both, and its colour is worked out over all three). After the reload the note is gone and it stays silver, 2 of 3."
+      "see": "Strange solutions says “New levels added!” under its name and is silver with 3 of 5 (it was gold over three levels: it keeps all three, and its colour is worked out over all five). After the reload the note is gone and it stays silver, 3 of 5."
     },
     {
       "id": "x-two-solve-sections",
@@ -4236,6 +4441,48 @@
       "title": "Live",
       "items": [
         {
+          "name": "Build V2: Strange solutions Levels 4-5, No solution and Infinitely many, Try a number with the balance (2026-11-07)",
+          "about": "Strange solutions shows all five levels. When x disappears, x = greys and two buttons appear: “No solution” (never balanced) and “Infinitely many” (always balanced). After a right pick, “Try a number” checks the original equation with any number and shows a pan balance in the look of Karl’s Balanced or Not? page, with “Right side is heavier by 4.” and the pattern line. Level 4 mixes no solution, infinitely many and one solution (the zero case 3x + 4 = 4 in every set); Level 5 adds distributing. Also in this build: a placed (silver) level opens on its last problem, so one problem earns gold.",
+          "links": [
+            {
+              "label": "No solution: 7x + 3 = 7x + 13",
+              "query": "?pack=strange-solutions&level=4&seed=1&nosignin=1",
+              "reset": true,
+              "look": "Add −7x: the row 3 = 13 and the two buttons."
+            },
+            {
+              "label": "Infinitely many: 3x + 1 = 3x + 1",
+              "query": "?pack=strange-solutions&level=4&seed=3&nosignin=1",
+              "reset": true,
+              "look": "Add −3x: 1 = 1."
+            },
+            {
+              "label": "Put together first: 5 + x + x = 2x + 5",
+              "query": "?pack=strange-solutions&level=4&seed=931&problem=4&nosignin=1",
+              "reset": true,
+              "look": "Combine x + x, then add −2x: 5 = 5."
+            },
+            {
+              "label": "One solution, a fraction: 5x + 2 = x + 7",
+              "query": "?pack=strange-solutions&level=4&seed=18&problem=3&nosignin=1",
+              "reset": true,
+              "look": "x = 5/4 (as 4x + 1 = x + 5 gives 4/3)."
+            },
+            {
+              "label": "x = 0: 3x + 4 = 4",
+              "query": "?pack=strange-solutions&level=4&seed=178&problem=5&nosignin=1",
+              "reset": true,
+              "look": "Karl’s equation 9: the answer is 0, not “no solution”."
+            },
+            {
+              "label": "Level 5: −4(x + 3) + 2 = −6x − 5",
+              "query": "?pack=strange-solutions&level=5&seed=8&nosignin=1",
+              "reset": true,
+              "look": "Distribute, then x = 5/2."
+            }
+          ]
+        },
+        {
           "name": "Build AE: Try with no help at the start of every level; Fractions of x multiplies by the bottom first (2026-11-05)",
           "about": "On a Solve it or Solve it Plus card, opening a fresh open level asks first: “Start with help” (the default, today’s level) or “Try with no help” (2 problems). Two right with no help puts the level in silver and opens the next; one more problem makes it gold. A miss, or Give up, carries on in the level with help, the problems already solved counting. A locked level asks only “Try with no help” or “Not now”. A level already started, silver or gold, Count it and Build it open as before. On Fractions of x, ⅔x = 6 now suggests multiplying both sides by 3 first, with Multiply lit; dividing by 2 first is still never red.",
           "links": [
@@ -4466,7 +4713,7 @@
         },
         {
           "name": "Build V: Strange solutions, Levels 1-3 (2026-10-27)",
-          "about": "A new card in Solve it, after Distribute more: answers that are fractions or 0. Dividing never fails here (2x = 5 makes x = 5/2); the student simplifies and types the answer in two boxes, x = [ ] / [ ]; an unsimplified answer gets a gentle “Can you simplify this further?”; the check works the fractions out step by step. Levels 4-5 (no solution, infinitely many) come in a later build and are hidden for now.",
+          "about": "A new card in Solve it, after Distribute more: answers that are fractions or 0. Dividing never fails here (2x = 5 makes x = 5/2); the student simplifies and types the answer in two boxes, x = [ ] / [ ]; an unsimplified answer gets a gentle “Can you simplify this further?”; the check works the fractions out step by step. Levels 4-5 (no solution, infinitely many) arrived in Build V2.",
           "links": [
             {
               "label": "Strange solutions · Level 1",
@@ -4487,10 +4734,10 @@
               "look": "2x − 7 = 8x − 7 (answer 0); the level mixes in fraction answers"
             },
             {
-              "label": "Home: the card shows 3 levels",
+              "label": "Home: the card shows 5 levels",
               "query": "?nosignin=1",
               "reset": true,
-              "look": "Solve it ends with Strange solutions, three levels (0/3)."
+              "look": "Solve it Plus ends with Strange solutions, five levels (0 of 5)."
             }
           ]
         },

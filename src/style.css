@@ -4291,3 +4291,30 @@ button.lb-divbar.is-calc:hover, button.lb-divbar.is-calc:focus-visible { backgro
 
 /* Build V2, Part A: a placed level opens on its last problem; the problems it was credited for are silver dots (credited, not worked). */
 .dot.placed { background: var(--metal-silver); border-color: var(--edge-silver); }
+
+/* Build V2: the two conclusion buttons beside x = while no x is left ("No solution" / never balanced, "Infinitely many" / always balanced).
+   A fixed place in the answer row; they cover nothing. The main line large and bold, the smaller line under it. */
+.sv-conclude { display: flex; gap: 12px; margin-left: 18px; align-items: stretch; }
+.btn.sv-pick { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 60px; min-width: 150px; padding: 6px 16px; line-height: 1.1;
+  background: #fff; border: 3px solid var(--ink); border-radius: 12px; color: var(--ink); }
+.sv-pick-main { font: 800 22px 'Lexend', system-ui, sans-serif; }
+.sv-pick-sub { font: 600 15px 'Lexend', system-ui, sans-serif; color: #4b4840; margin-top: 3px; }
+.btn.sv-pick:hover:not(:disabled), .btn.sv-pick:focus-visible { background: #eef4ff; outline: 3px solid #1f5fbf; outline-offset: 2px; }
+.btn.sv-pick.is-picked { background: #e7f6ec; border-color: #1e7a36; }
+.btn.sv-pick:disabled:not(.is-picked) { opacity: 0.55; }
+.btn.sv-pick.is-picked:disabled { opacity: 1; }
+.sv-concluded { display: flex; flex-direction: column; gap: 14px; padding: 18px 8px 0; }
+.sv-confirm { margin: 0; font: 700 24px/1.3 'Lexend', system-ui, sans-serif; color: var(--ink); max-width: 30ch; }
+/* Build V2: Try a number, after a right conclusion: the box, then the balance (Karl's look) with his line and the line after it */
+.btn.sv-trybtn { align-self: flex-start; min-height: 48px; padding: 6px 18px; font: 700 20px 'Lexend', system-ui, sans-serif; background: #fff; border: 2px solid var(--ink); border-radius: 10px; }
+.sv-tryask { margin: 0; font: 600 19px 'Lexend', system-ui, sans-serif; color: #4b4840; }
+.sv-tryrow { display: flex; align-items: center; gap: 10px; font: 700 26px 'Lexend', system-ui, sans-serif; }
+.sv-trynote { margin: 0; font: 600 17px 'Lexend', system-ui, sans-serif; color: #5d5a52; }
+.sv-concluded.has-balance { gap: 6px; padding-top: 4px; }
+.sv-concluded.has-balance .sv-confirm { font-size: 18px; }
+.sv-balance { width: 100%; max-width: 520px; }
+.sv-balance .bon-balance { display: block; width: 100%; height: auto; max-height: 38vh; }
+.bon-label { font-family: 'Lexend', system-ui, sans-serif; font-weight: 700; text-anchor: middle; dominant-baseline: central; }
+.bon-expr { font-family: 'Lexend', system-ui, sans-serif; font-weight: 700; text-anchor: middle; fill: #111; }
+.sv-tryline { margin: 0; font: 800 22px/1.25 'Lexend', system-ui, sans-serif; color: var(--ink); }
+.sv-tryafter { margin: 0; font: 600 19px/1.25 'Lexend', system-ui, sans-serif; color: #3d3a33; }

@@ -580,7 +580,7 @@ function workStack(s) {
 // What moving forward means now: { label, action, enabled }. The first that applies wins.
 export function forwardOf(s) {
   const sp = spotOf(s, C.spot);
-  if (s.stage === 'done') return { label: 'Next problem', action: 'next', enabled: true };
+  if (s.stage === 'done') return C.doneForward?.(s) ?? { label: 'Next problem', action: 'next', enabled: true };   // (a card's own after the end: Strange solutions' Try, Build V2)
   if (sp?.kind === 'error') return { label: 'Check', action: 'check', enabled: false };
   if (introOpen(s)) return { label: 'Next', action: 'introNext', enabled: true };
   if (sp?.kind === 'hint') {
@@ -628,6 +628,8 @@ function answerRow(s) {
   const row = html('div', 'lb-answerrow lx-answer', [html('strong', `lb-prompt${live || placing ? '' : ' is-off'}`, ['x =']), typed, f]);
   const note = C.answerNote?.(s);                                    // (a card's reason x = waits: "Get x on one side first.", Build R)
   if (note) row.append(html('p', 'lx-answernote', [note]));
+  const extra = C.answerExtra?.(s);                                  // (a card's own buttons in the row: Strange solutions' conclusions, Build V2)
+  if (extra) row.append(extra);
   return row;
 }
 
@@ -769,7 +771,8 @@ export function renderAddBothScreen(s, card = ADD_CARD) {
     // left: the solving space; right: the checking space (and the room the pop-ups use while nothing is being checked), where the
     // walks at x alone draw too
     const walk = aloneTray(s);
-    main.append(html('div', `sv-work${s.sub ? ' is-checking' : ''}${walk ? ' has-walk' : ''}`, [work, html('div', 'sv-check', [walk ?? substBlock(s)])]));
+    const own = s.sub ? null : C.checkSpace?.(s);                    // (a card's own use of the space: Strange solutions' conclusion, Build V2)
+    main.append(html('div', `sv-work${s.sub ? ' is-checking' : ''}${walk ? ' has-walk' : ''}${own ? ' has-own' : ''}`, [work, html('div', 'sv-check', [walk ?? own ?? substBlock(s)])]));
   }
   main.append(answerRow(s), corners(s));
   body.append(main, panel(s));

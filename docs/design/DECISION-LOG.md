@@ -606,3 +606,24 @@ Its notes: "Improper fractions are full credit, no mixed numbers" and "x can be 
 2. **Unchanged:** earned levels; a level in progress resumes where it is; the placement quiz and its credit; save codes; the class-sheet
    rows (the problem logs as an ordinary problem); the chooser (a placed level opens straight into play); Count it and Build it (their placed
    levels open at problem 1, as before).
+
+## 2026-11-02: Strange solutions Levels 4-5 and the balance (Karl; built in Build V2)
+
+**Why:** Karl teaches one, no and infinitely many solutions with his own finished page, "Balanced or Not?" (12 fixed equations, a pan
+balance, a value for x tried by typing or sliding, "Right side is heavier by 1."). The Mat is the solving practice that follows; it does
+not re-teach the idea, and it uses his words. Whenever his wording and the older Build V wording differ, his wins.
+
+1. **The two conclusion buttons, each with both phrasings** (Karl: "use both"): the main line "No solution" with the smaller line "never
+   balanced", and the main line "Infinitely many" with the smaller line "always balanced". They appear beside `x =` when no x is left; `x =`
+   greys with "x disappeared. What does the equation say?".
+2. **"Try a number"** is an optional confirmation by experiment after a right pick: never graded, never red, no Undo, not on the class
+   sheet. It runs the usual check on the original equation with the student's number, then shows a balance picture and Karl's "heavier by"
+   line, copied from his page's look (drawn in the Mat's own code; his page is not embedded).
+3. **Unsimplified tries are listed in the class sheet's answers column** (`15/6 → unsimplified`), clearly not a wrong answer (Build V's
+   decision 3, approved).
+4. **Levels 4-5 shown.** Level 4: no solution, infinitely many or one (about 3 of 5 strange, Karl's form first, his shapes with the
+   x-terms not yet put together, the zero case `3x + 4 = 4`). Level 5: everything mixed, with distributing.
+5. **Eventually (recorded, not built):** the same balance picture as a scaffold in Teach me and I'm stuck on Solve it Plus cards,
+   Variables on both sides first (a separate build: it touches the shared help layer). Parked: a "Try it on Karl's balance" link from the
+   card to his page (it takes only his 12 equations).
+6. Loop spec revision 2.20: the "no x left" state, the conclusion answer and the balance picture (section 4A).

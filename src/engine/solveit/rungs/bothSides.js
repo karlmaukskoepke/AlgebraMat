@@ -21,7 +21,10 @@ function moveXHint(s, before, shape) {
   const p = shape?.params;
   if (!p?.small) return null;
   s.hint = { kind: 'cross', id: p.small };
-  return { target: 'hinted', key: 'vMoveXHint', params: { term: coefText(p.c) } };
+  // (the same x-terms on both sides, Strange solutions Levels 4-5: neither is smaller, so the reminder does not say so: Build V2)
+  const sum = (xs) => (xs ?? []).reduce((a, c) => a + c, 0);
+  const same = sum(p.xl) === sum(p.xr);
+  return { target: 'hinted', key: 'vMoveXHint', params: { term: coefText(p.c), ...(same ? { same: true } : {}) } };
 }
 
 // VE (Build U): the two like terms not yet put together lit, on the side that has them: "6 and −4 are like terms. Drag one onto the other

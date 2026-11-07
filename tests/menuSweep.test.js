@@ -393,7 +393,7 @@ const wait = (page, ms) => page.waitForTimeout(ms);
       return { text: li.innerText.replace(/\s+/g, ' '), status: [...li.querySelector('.card-name').classList].find((c) => c.startsWith('st-')) };
     });
     expect(item.text).toContain('New levels added!');
-    expect(item.text).toContain('2 of 3');
+    expect(item.text).toContain('3 of 5');
     expect(item.status).toBe('st-silver');
     await page.goto(`${base}?nosignin=1&menu=1`);
     await wait(page, 400);

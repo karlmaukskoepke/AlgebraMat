@@ -112,7 +112,13 @@ export function honestPath(reduce, s0, { grab = true, answer = true } = {}) {
     // Next after every move (each move folds to a row of its own: the most rows a student can have on screen)
     if (s.unfolded && !xAlone(s.board)) { const f = reduce(s, { type: 'foldNext' }); if (f !== s) { s = f; out.push(s); } }
   }
-  if (!answer || !xAlone(s.board ?? { left: [], right: [] })) return out;
+  // (no x left, Strange solutions' Levels 4-5, Build V2: the statement is the answer, picked with its button)
+  const b = s.board ?? { left: [], right: [] };
+  if (answer && s.problem?.type && s.problem.type !== 'one' && [...b.left, ...b.right].every((t) => t.kind === 'num')) {
+    apply(reduce, s, [{ type: 'conclude', pick: s.problem.type }], out);
+    return out;
+  }
+  if (!answer || !xAlone(b)) return out;
   // (a fraction answer, Strange solutions: the top, `/`, the bottom; Build V)
   const f = s.problem?.ans;
   const x = s.problem?.x;

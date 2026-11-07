@@ -34,7 +34,7 @@ const CARDS = [
   ['Distribute, combine, solve', 'distribute-solve', [1, 2, 3, 4, 5]],
   ['Variables on both sides', 'variables-both-sides', [1, 2, 3, 4, 5]],
   ['Distribute more', 'distribute-more', [1, 2, 3, 4, 5]],                                       // (Build U)
-  ['Strange solutions', 'strange-solutions', [1, 2, 3]],                                         // (Build V)
+  ['Strange solutions', 'strange-solutions', [1, 2, 3, 4, 5]],                                   // (Build V; 4-5 Build V2)
   ['Fractions of x', 'fractions-of-x', [1, 2, 3, 4, 5, 6]],                                       // (Build AA)
 ];
 const SEED = 7;
@@ -115,7 +115,9 @@ async function playCard(browser, base, [name, pack, levels], report) {
       await page.goto(url);
       await page.waitForFunction(() => window.__mat?.session()?.board);
       await dispatch([{ type: 'introNext' }]);
-      for (const m of done) await dispatch(m);
+      // (each move worked out again from the board: the moves noted carry the terms' ids, and a fresh page numbers its terms afresh, so
+      // a noted drag would name a term that is not there: found on Strange solutions Level 5, Build V2)
+      for (let k = 0; k < done.length; k++) { const m = await nextMove(); if (m) await dispatch(m); }
     };
 
     for (let step = 0; step < 10; step++) {
@@ -175,6 +177,15 @@ async function playCard(browser, base, [name, pack, levels], report) {
       done.push(m);
       await record();
     }
+    // (no x left, Strange solutions Levels 4-5, Build V2: the conclusion button is clicked like a student, by the pointer)
+    const type = await page.evaluate(() => window.__mat.session().problem.type ?? null);
+    if (type === 'none' || type === 'all') {
+      await watched(lv, 'the conclusion button', () => page.click(`[data-pick="${type}"]`));
+      await page.waitForTimeout(300);
+      if ((await state()).stage !== 'done') fail(lv, `the conclusion did not finish the problem: ${JSON.stringify(await state())}`);
+      if (sizes.size > 1) fail(lv, `the equation's text size changed within the problem: ${[...sizes].join(', ')}`);
+      continue;
+    }
     // the check, one step at a time
     const x = await page.evaluate(() => window.__mat.session().problem.x);
     const f = await page.evaluate(() => window.__mat.session().problem.ans ?? null);
@@ -224,7 +235,11 @@ async function sweepDrags(page, lv, fail, state, restore) {
       const ob = sides[other]?.getBoundingClientRect();
       const dests = [];
       if (ob) {
-        dests.push({ kind: 'across, at the end', x: theirs.length ? box(theirs.at(-1)).r + 16 : ob.left + ob.width / 2, y: rb.top + rb.height / 2 });
+        // (past the end of a long side the place can fall outside the work space, in the check space: a drop there is a drop away from
+        // the equation and simply goes back, Build V2's `15 = 4x − x + 3x + 11`)
+        const workRight = row.closest('.sv-solve')?.getBoundingClientRect().right ?? Infinity;
+        const endX = theirs.length ? box(theirs.at(-1)).r + 16 : ob.left + ob.width / 2;
+        dests.push({ kind: 'across, at the end', x: endX, y: rb.top + rb.height / 2, ...(endX > workRight ? { back: true } : {}) });
         if (theirs.length) dests.push({ kind: 'across, at the start', x: box(theirs[0]).l - 10, y: rb.top + rb.height / 2 });
       }
       // (a parenthesis's own factor is part of it: dropped there, it is dropped where it was)

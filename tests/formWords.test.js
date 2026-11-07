@@ -57,7 +57,7 @@ function helpTexts(P, s) {
 }
 
 const CARDS = [['divide-it', divideMovesPlay, [3, 4, 5, 6]], ['flip-everything', flipPlay, [4, 5, 6]], ['two-step-equations', twoStepPlay, [1, 2, 3, 4, 5, 6, 7]],
-  ['distribute-solve', distSolvePlay, [1, 2, 3, 4, 5]], ['variables-both-sides', bothSidesPlay, [1, 2, 3, 4, 5]], ['distribute-more', distMorePlay, [1, 2, 3, 4, 5]], ['strange-solutions', strangePlay, [1, 2, 3]]];
+  ['distribute-solve', distSolvePlay, [1, 2, 3, 4, 5]], ['variables-both-sides', bothSidesPlay, [1, 2, 3, 4, 5]], ['distribute-more', distMorePlay, [1, 2, 3, 4, 5]], ['strange-solutions', strangePlay, [1, 2, 3, 4, 5]]];
 
 describe('Build T, Part 2: after dividing, help uses the form on the screen', () => {
   for (const [pack, P, levels] of CARDS) {

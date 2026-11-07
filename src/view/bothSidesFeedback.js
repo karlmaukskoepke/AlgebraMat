@@ -5,7 +5,8 @@ import { distSolveFeedbackText } from './distSolveFeedback.js';
 
 export const ONE_SIDE_NOTE = 'Get x on one side first.';
 const M = {
-  vMoveXHint: (p) => `Move this x-term to the other side. Drag it across the =, or use Add. (${p.term} is the one with the smaller number in front.)`,
+  vMoveXHint: (p) => (p.same ? 'Move this x-term to the other side. Drag it across the =, or use Add.'
+    : `Move this x-term to the other side. Drag it across the =, or use Add. (${p.term} is the one with the smaller number in front.)`),
   vPickX: () => 'What x-term do you add to both sides? Type the number in front of x, with its sign.',
   vOneSide: () => ONE_SIDE_NOTE,
   vRed: (p) => (p.before ? `Adding to both sides is used to eliminate terms by adding the opposite. ${p.before} + ${p.added} did not eliminate the term. Press Undo and try again.`

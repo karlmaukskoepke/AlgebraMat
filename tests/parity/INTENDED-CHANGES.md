@@ -1035,6 +1035,26 @@ level). The screens that change are outside the recorded set:
 |---|---|---|---|
 | A placed level opened (a no-help pass, the placement quiz, an older card's credit), any Solve it or Solve it Plus card (Count it and Build it unchanged) | problem 1 of 5, five empty dots; the first problem solved with at most a reminder shows "Level N earned!" and the level goes on to problem 5 | problem 5 of 5 (the level's fifth problem), the first four dots silver; solving it shows "Level N complete!" | Part A |
 
+## Build V2, Parts 0-6 (2026-11-07): Strange solutions Levels 4-5, the conclusion buttons, Try a number with the balance
+
+Problems, save codes, class-sheet records, the 25 scripted runs and the 70 recorded screens: unchanged (none of them is Strange solutions;
+the save-code layout is Build V's, whose Levels 4-5 bits were reserved). The screens that change are outside the recorded set, one by one
+(`docs/build-v2/v2-*.png`):
+
+| Screen (not recorded) | Before | After | Why |
+|---|---|---|---|
+| The home screen and Strange solutions' card, popup and status | 3 levels, "N of 3" | 5 levels, "N of 5"; Level 4 "No solution or infinitely many", Level 5 "All mixed"; a student who had Levels 1-3 earned sees "New levels added!" once and silver | Part 1 |
+| Strange solutions Levels 4-5 (new) | hidden | the problems | Part 1 |
+| A Strange solutions board with no x left (new state) | (could not happen) | `x =` greyed, "x disappeared. What does the equation say?", the buttons "No solution / never balanced" and "Infinitely many / always balanced" beside it | Part 2 |
+| A right pick | (none) | the confirm line in the checking space; the picked button stays, green; Next problem | Part 2.3 |
+| A wrong pick | (none) | the statement lit with "never true" / "always true", the pop-up and Undo; after Undo, "x disappeared. Is this statement ever true?" at the buttons | Part 2.4 |
+| A move pressed with no x left | Flip crashed the card (a page error) | "x disappeared: no move is needed. What does the equation say?", nothing written | found by the sweeps |
+| Try a number (new) | (none) | the box, the usual check on the original equation, then the balance with Karl's line and the line after it | Parts 3-4 |
+| Variables on both sides, Distribute more, Strange solutions: the reminder after Undo when both x-terms are the same (only Strange solutions Levels 4-5 have such boards) | "(7x is the one with the smaller number in front.)" | the sentence without the parenthesis | it was wrong for equal x-terms |
+| Add's x-term option chosen after an undone number Add (those three cards) | the blank kept the undone number (typing −7 made −37) | the blank starts empty when the option changes | found by a walk |
+| Two opposite x-terms combined on a side, typed `0` | sent back with the "5 of what?" picture | accepted (`0` or `0x`); the term drops from the row | Part 2.2 |
+| A test link with `problem=N` (testing only, with `seed=`) | ignored | opens on problem N of the set | test links |
+
 <!-- history: nothing below this line is read by the harness -->
 
 ## History: screen changes accepted by the re-baseline of 2026-10-24 (Build O, Part 0)

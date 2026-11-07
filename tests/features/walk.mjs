@@ -245,6 +245,16 @@ class Walk {
       : b.classList.contains('is-placed') ? 'placed' : b.dataset.tryLevel ? 'try' : b.disabled ? 'locked' : 'open')));
     if (JSON.stringify(got) !== JSON.stringify(want)) throw new Error(`the levels should be ${want.join(', ')} after step "${this.step}", not ${got.join(', ')}`);
   }
+  // Build V2: Add's x-term option (+ ▢x), a number typed, Enter
+  async addX(n) { await this.click(`${act('choose')}[data-move="add"]`); await this.click('[data-aopt="x"]'); await this.type(n); await this.enter(); await wait(this.page, 900); }
+  // Build V2: a number tried after a right conclusion: Try a number, typed, Enter, dragged onto each x, Enter until the balance shows
+  async tryNumber(text) {
+    await this.click('[data-action="tryOpen"], [data-action="tryAgain"]'); await this.type(text); await this.enter(); await wait(this.page, 300);
+    for (let k = 0; k < 4 && await this.page.locator('[data-x][data-action="placeValue"]').count(); k++) await this.drag();
+    for (let k = 0; k < 12 && !(await this.page.locator('.bon-balance').count()); k++) await this.enter();
+    await wait(this.page, 900);
+  }
+  async tilt() { return Number(await this.page.locator('.bon-balance').getAttribute('data-target-angle')); }
   // Build V2, Part A: a placed level opens on its last problem: four silver dots, the fifth ringed, "Problem 5 of 5"
   async lastProblemDots() {
     const got = await this.page.evaluate(() => ({ dots: [...document.querySelectorAll('#dots .dot')].map((d) => (d.classList.contains('placed') ? 'S' : d.classList.contains('done') ? 'D' : d.classList.contains('current') ? 'C' : 'N')).join(''), label: document.getElementById('dots').getAttribute('aria-label') }));
@@ -808,6 +818,132 @@ const WALKS = {
     await w.zStates(['earned', 'open', 'try', 'try', 'try', 'try', 'try']);
     await w.both('v2-placed-one-more');
   },
+  async 'v2-no-solution'(w) {
+    await w.start(); await w.see('7x + 3 = 7x + 13');
+    w.at('Add −7x'); await w.addX(-7); await w.row('3 = 13');
+    await w.see('x disappeared. What does the equation say?', 'No solution', 'never balanced', 'Infinitely many', 'always balanced');
+    if (await w.page.locator('.lb-prompt.is-off').count() !== 1) throw new Error('x = should be greyed');
+    await w.both('v2-gone');
+    w.at('No solution'); await w.click('[data-pick="none"]'); await wait(w.page, 400);
+    await w.see('3 = 13 is never true, so no x can work. The sides never balance.', 'Next problem');
+    await w.both('v2-no-solution');
+  },
+  async 'v2-infinitely-many'(w) {
+    await w.start(); await w.see('3x + 1 = 3x + 1');
+    w.at('Add −3x'); await w.addX(-3); await w.row('1 = 1');
+    w.at('Infinitely many'); await w.click('[data-pick="all"]'); await wait(w.page, 400);
+    await w.see('1 = 1 is always true, so every x works. The sides always balance.', 'Next problem');
+    await w.both('v2-infinitely-many');
+  },
+  async 'v2-wrong-pick'(w) {
+    await w.start(); await w.addX(-7); await w.row('3 = 13');
+    w.at('Infinitely many'); await w.click('[data-pick="all"]'); await wait(w.page, 500);
+    await w.see('3 = 13 is false. It is false whatever x is.', 'never true');
+    await w.both('v2-wrong-pick');
+    w.at('Undo'); await w.click('.spot-undo'); await wait(w.page, 500);
+    await w.see('x disappeared. Is this statement ever true?');
+    await w.shot('v2-wrong-pick-hint');
+    w.at('No solution'); await w.click('[data-pick="none"]'); await wait(w.page, 400);
+    await w.see('3 = 13 is never true');
+  },
+  async 'v2-unmerged'(w) {
+    await w.start(); await w.see('5 + x + x = 2x + 5');
+    w.at('x onto x, 2x'); await w.combineTerms('x', 'x', '2x'); await w.row('5 + 2x = 2x + 5');
+    w.at('Add −2x'); await w.addX(-2); await w.row('5 = 5');
+    w.at('Infinitely many'); await w.click('[data-pick="all"]'); await wait(w.page, 400);
+    await w.see('5 = 5 is always true, so every x works. The sides always balance.');
+    await w.both('v2-unmerged');
+  },
+  async 'v2-try-none'(w) {
+    await w.start(); await w.addX(-7); await w.click('[data-pick="none"]'); await wait(w.page, 400);
+    w.at('Try a number: 3/2'); await w.click('[data-action="tryOpen"]'); await w.type('3/2'); await w.enter(); await wait(w.page, 400);
+    await w.both('v2-try-mid-placing');
+    for (let k = 0; k < 4 && await w.page.locator('[data-x][data-action="placeValue"]').count(); k++) await w.drag();
+    await w.enter(); await wait(w.page, 300);
+    await w.both('v2-try-mid');
+    for (let k = 0; k < 12 && !(await w.page.locator('.bon-balance').count()); k++) await w.enter();
+    await wait(w.page, 900);
+    await w.see('x = 3/2. Right side is heavier by 10.', 'Try another number: it is still heavier by 10.', '7(3/2) + 3 = 27/2', '7(3/2) + 13 = 47/2');
+    if (await w.page.locator('.bon-balance [data-label="3/2"]').count() !== 14) throw new Error('fourteen blocks marked 3/2');
+    if (await w.tilt() !== 18) throw new Error(`the beam should lean fully right (the cap): ${await w.tilt()}`);
+    await w.both('v2-try-none-1');
+    w.at('Try a number: 5'); await w.tryNumber('5');
+    await w.see('x = 5. Right side is heavier by 10.', 'Try another number: it is still heavier by 10.');
+    if (await w.tilt() !== 18) throw new Error('the same lean');
+    await w.both('v2-try-none-2');
+  },
+  async 'v2-try-all'(w) {
+    await w.start(); await w.addX(-3); await w.click('[data-pick="all"]'); await wait(w.page, 400);
+    w.at('Try a number: 4'); await w.tryNumber('4');
+    await w.see('x = 4. Balanced.', 'Try another number: it balances every time.', '3(4) + 1 = 13');
+    if (await w.tilt() !== 0) throw new Error('the beam should sit level');
+    if (await w.page.locator('[data-action="undo"]:not([disabled])').count()) throw new Error('no Undo');
+    await w.both('v2-try-all');
+  },
+  async 'v2-zero-answer'(w) {
+    await w.start(); await w.see('3x + 4 = 4');
+    w.at('Add −4'); await w.addEnter(-4); await wait(w.page, 900); await w.row('3x = 0');
+    w.at('Divide 3'); await w.divEnter(3); await wait(w.page, 600); await w.row('x = 0');
+    w.at('type 0, check'); await w.answer(0); await w.see('Balanced');
+    if (await w.page.locator('[data-pick]').count()) throw new Error('no conclusion buttons when x was never gone');
+    await w.both('v2-zero-answer');
+  },
+  async 'v2-zero-not-none'(w) {
+    await w.start();
+    w.at('Add −1'); await w.addEnter(-1); await wait(w.page, 900); await w.row('3x = 3x');
+    w.at('Add −3x'); await w.addX(-3); await w.row('0 = 0');
+    w.at('press 0'); await w.page.keyboard.press('0'); await wait(w.page, 300);
+    if ((await w.page.locator('[data-target="ansTop"]').innerText()).trim()) throw new Error('nothing should go into x =');
+    await w.see('x disappeared. What does the equation say?');
+    w.at('Infinitely many'); await w.click('[data-pick="all"]'); await wait(w.page, 400);
+    await w.see('0 = 0 is always true, so every x works. The sides always balance.');
+    await w.both('v2-zero-not-none');
+  },
+  async 'v2-new-levels'(w) {
+    await w.start();
+    const item = await w.page.evaluate(() => { const li = document.querySelector('.card-name[data-card="strange-solutions"]').closest('.card-item'); return { t: li.innerText.replace(/\s+/g, ' '), s: [...li.querySelector('.card-name').classList].find((c) => c.startsWith('st-')) }; });
+    if (!item.t.includes('New levels added!') || !item.t.includes('3 of 5') || item.s !== 'st-silver') throw new Error(`New levels added!, silver, 3 of 5: ${JSON.stringify(item)}`);
+    await w.both('v2-new-levels');
+    w.at('click Strange solutions'); await w.click('.card-name[data-card="strange-solutions"]'); await wait(w.page, 400);
+    await w.zStates(['earned', 'earned', 'earned', 'open', 'try']); await w.see('No solution or infinitely many');
+  },
+  async 'v2-level5-fraction'(w) {
+    await w.start(); await w.see('−4(x + 3) + 2 = −6x − 5');
+    w.at('distribute'); await w.distribute('-4x', -12);
+    w.at('−6x across, combine'); await w.crossTerm('−6x', 'left'); await w.combineTerms('6x', '−4x', '2x'); await w.combineTerms('2', '−12', -10); await w.row('2x − 10 = −5');
+    w.at('−10 across, combine, divide'); await w.crossTerm('−10', 'right'); await w.combineTerms('10', '−5', 5); await w.row('2x = 5');
+    await w.divEnter(2); await wait(w.page, 600); await w.row('x = 5/2');
+    w.at('type 5/2, check'); await w.checkFraction('5/2'); await w.see('Balanced');
+    await w.both('v2-level5-fraction');
+  },
+  async 'v2-student'(w) {
+    await w.start();
+    w.at('Add 3'); await w.addEnter(3); await wait(w.page, 1500); await w.see('7x + 3 + 3');
+    await w.click('.spot-undo'); await wait(w.page, 400); await w.see('Move this x-term to the other side. Drag it across the =, or use Add.'); await w.notSee('smaller number');
+    await w.click('text=Got it'); await wait(w.page, 300);
+    w.at('Add −7x'); await w.addX(-7); await w.row('3 = 13');
+    w.at('press 0'); await w.page.keyboard.press('0'); await wait(w.page, 300);
+    if ((await w.page.locator('[data-target="ansTop"]').innerText()).trim()) throw new Error('nothing should go into x =');
+    w.at('Divide'); await w.click(DIV); await wait(w.page, 400); await w.see('x disappeared: no move is needed. What does the equation say?');
+    w.at('Infinitely many'); await w.click('[data-pick="all"]'); await wait(w.page, 500); await w.see('3 = 13 is false. It is false whatever x is.');
+    await w.click('.spot-undo'); await wait(w.page, 400); await w.click('[data-pick="none"]'); await wait(w.page, 400);
+    w.at('try 3/2, then −2'); await w.tryNumber('3/2'); await w.see('Right side is heavier by 10.');
+    if (await w.tilt() <= 0) throw new Error('the right side should be lower');
+    await w.tryNumber('-2'); await w.see('x = −2. Right side is heavier by 10.', 'it is still heavier by 10.');
+    if (await w.tilt() <= 0) throw new Error('the right side should be lower again');
+    await w.both('v2-student');
+  },
+  async 'v2-student-nohelp'(w) {
+    await w.start();
+    await w.click('.card-name[data-card="strange-solutions"]'); await w.click('.level-btn[data-try-level="4"]'); await w.click('#dialog [data-choose="try"]'); await wait(w.page, 700);
+    await w.row('4x + 1 = 4x + 2'); await w.see('No help · Level 4', 'Problem 1 of 2', 'Give up');
+    w.at('Add −4x'); await w.addX(-4); await w.row('1 = 2'); await w.see('No solution', 'Infinitely many');
+    w.at('10 seconds of nothing'); await w.idle(10500); await w.zNoHelp();
+    if (await w.page.locator('[data-action="stuck"]:visible, [data-action="tryOpen"], .bon-balance').count()) throw new Error('no help, no Try a number, no balance');
+    await w.both('v2-student-nohelp');
+    w.at('Infinitely many, wait'); await w.click('[data-pick="all"]'); await wait(w.page, 2400);
+    await w.see('Not yet.', 'Try Level 1 first.');
+  },
   async 'ae-miss'(w) {
     await w.start();
     w.at('Try with no help'); await w.click('#dialog [data-choose="try"]'); await wait(w.page, 700);
@@ -1103,13 +1239,13 @@ const WALKS = {
     w.at('← All sections'); await w.click('[data-back]'); await wait(w.page, 300);
     if (await w.page.locator('.landing .section-panel').count() !== 4) throw new Error('the four sections should be back');
     w.at('click Strange solutions'); await w.click('.card-name[data-card="strange-solutions"]'); await wait(w.page, 400);
-    await w.see('Strange solutions', 'Solve it Plus · 8th grade', '0 of 3', 'Level 3'); await w.notSee('Level 4');
+    await w.see('Strange solutions', 'Solve it Plus · 8th grade', '0 of 5', 'Level 5');
     await w.both('x-card-name');
   },
   async 'x-statuses'(w) {
     await w.start();
     const st = await w.page.evaluate(() => Object.fromEntries([...document.querySelectorAll('.card-name[data-card]')].map((e) => [e.dataset.card, `${[...e.classList].find((c) => c.startsWith('st-'))} ${e.querySelector('.card-count').textContent}`])));
-    const want = { 'groups-of-terms': 'st-plain 0 of 8', lasso: 'st-green 1 of 7', 'flip-everything': 'st-green 1 of 5', flipit: 'st-silver 3 of 5', boxes: 'st-silver 3 of 6', 'divide-it': 'st-silver 3 of 5', combineit: 'st-gold 5 of 5', 'add-both': 'st-gold 5 of 5', 'variables-both-sides': 'st-gold 5 of 5', 'distribute-more': 'st-gold 5 of 5', 'strange-solutions': 'st-gold 3 of 3' };
+    const want = { 'groups-of-terms': 'st-plain 0 of 8', lasso: 'st-green 1 of 7', 'flip-everything': 'st-green 1 of 5', flipit: 'st-silver 3 of 5', boxes: 'st-silver 3 of 6', 'divide-it': 'st-silver 3 of 5', combineit: 'st-gold 5 of 5', 'add-both': 'st-gold 5 of 5', 'variables-both-sides': 'st-gold 5 of 5', 'distribute-more': 'st-gold 5 of 5', 'strange-solutions': 'st-gold 5 of 5' };
     for (const [id, v] of Object.entries(want)) if (st[id] !== v) throw new Error(`${id} should be ${v}, is ${st[id]}`);
     await w.see('Every card gold', '1 of 3 cards gold', '0 of 4 cards gold', '1 of 6 cards gold');
     await w.both('x-statuses');
@@ -1163,7 +1299,7 @@ const WALKS = {
       const moving = await page.evaluate(() => document.getAnimations().filter((a) => a.effect?.target?.closest?.('.home')).length);
       if (moving) throw new Error(`nothing should move under reduced motion: ${moving} animations`);
       const t = (await page.evaluate(() => document.body.innerText)).replace(/\s+/g, ' ');
-      if (!t.includes('Every card gold') || !t.includes('3 of 3')) throw new Error('the words should be the same');
+      if (!t.includes('Every card gold') || !t.includes('5 of 5')) throw new Error('the words should be the same');
       if (!(await page.locator('.card-name[data-card="strange-solutions"].st-gold').count())) throw new Error('Strange solutions should be gold');
       await page.screenshot({ path: path.join(OUT, 'x-reduced-motion-768.png') });
     } finally { await ctx.close(); }
@@ -1171,7 +1307,7 @@ const WALKS = {
   async 'x-new-levels'(w) {
     await w.start();
     const item = await w.page.evaluate(() => { const li = document.querySelector('.card-name[data-card="strange-solutions"]').closest('.card-item'); return { t: li.innerText.replace(/\s+/g, ' '), s: [...li.querySelector('.card-name').classList].find((c) => c.startsWith('st-')) }; });
-    if (!item.t.includes('New levels added!') || !item.t.includes('2 of 3') || item.s !== 'st-silver') throw new Error(`Strange solutions should say New levels added! and be silver, 2 of 3: ${JSON.stringify(item)}`);
+    if (!item.t.includes('New levels added!') || !item.t.includes('3 of 5') || item.s !== 'st-silver') throw new Error(`Strange solutions should say New levels added! and be silver, 3 of 5: ${JSON.stringify(item)}`);
     await w.both('x-new-levels');
     w.at('reload'); await w.page.reload(); await wait(w.page, 600); await w.notSee('New levels added!');
     if (!(await w.page.locator('.card-name[data-card="strange-solutions"].st-silver').count())) throw new Error('it should stay silver');
@@ -1486,7 +1622,7 @@ const WALKS = {
       w.at(`rest on Strange solutions (1366×${height})`); await w.restOn('strange-solutions');
       const place = await w.popPlace();
       const rows = await w.popRows();
-      if (place.side !== 'left' || !place.inside || place.own || place.head !== 'Strange solutions 3 of 3') throw new Error(`the popup should open on the left, inside the window: ${JSON.stringify(place)}`);
+      if (place.side !== 'left' || !place.inside || place.own || place.head !== 'Strange solutions 5 of 5') throw new Error(`the popup should open on the left, inside the window: ${JSON.stringify(place)}`);
       if (rows.length !== 3 || rows.some((r) => r.state !== 'earned')) throw new Error(`Levels 1 to 3 gold: ${JSON.stringify(rows)}`);
       await w.shot(`ab-pop-edge-${height}`);
     }

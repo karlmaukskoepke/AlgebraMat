@@ -19,7 +19,7 @@ const CARDS = [
   ['distribute-solve', distSolvePlay, [1, 2, 3, 4, 5]],
   ['variables-both-sides', bothSidesPlay, [1, 2, 3, 4, 5]],
   ['distribute-more', distMorePlay, [1, 2, 3, 4, 5]],
-  ['strange-solutions', strangePlay, [1, 2, 3]],
+  ['strange-solutions', strangePlay, [1, 2, 3, 4, 5]],
   ['fractions-of-x', fractionsPlay, [1, 2, 3, 4, 5, 6]],                     // (Build AA)
 ];
 const TIMES = /×/;

@@ -68,7 +68,7 @@ describe('Part 1: every check, 200 seeds a level', () => {
         const bad = [];
         let checks = 0;
         for (let seed = 1; seed <= 200; seed++) {
-          const p = pack.generate(level, seed)[0];
+          const p = pack.generate(level, seed).find((q) => q.type !== 'none' && q.type !== 'all');   // (no solution, infinitely many: no value to check)
           const values = p.ans ? [p.ans, { n: p.ans.n + p.ans.d, d: p.ans.d }] : [p.x, p.x + 1, p.x - 2];
           for (const v of values) {
             const L = checkOf(ad, p, level, v);

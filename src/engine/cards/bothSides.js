@@ -215,7 +215,10 @@ function makeLoop({ id, family = 'both', own = null }) {
         const g = api.blockMove(s);
         if (g) return g;
         if (xAlone(s.board)) return say(s, 'aSolvedBoard');
-        Object.assign(s, { menu: 'add', typing: null, addKind: action.kind === 'x' ? 'x' : 'num', mopts: null, amountSide: 'left', amountSel: false });
+        // (switching between a number and an x-term starts the blank afresh: an amount kept from an undone move is not the new kind's)
+        const kind = action.kind === 'x' ? 'x' : 'num';
+        const fresh = kind !== (s.addKind ?? 'num') ? { amountEntry: '' } : {};
+        Object.assign(s, { menu: 'add', typing: null, addKind: kind, mopts: null, amountSide: 'left', amountSel: false, ...fresh });
         return say(s, action.kind === 'x' ? 'vPickX' : 'aPickAmount');
       }
       case 'choose': {

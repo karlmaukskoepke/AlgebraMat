@@ -32,7 +32,7 @@ const sheet2 = () => makeStrange({ level: 2, left: [X(4), N(1)], right: [X(-2), 
 
 describe('the problems', () => {
   it('Levels 1-3, 200 seeds: five problems, answers p/q in lowest terms (q 2 to 6, |p| at most 15) or 0 (Level 3 only), never ±1 or whole, verified exactly', () => {
-    for (let level = 1; level <= STRANGE_SHOWN; level++) {
+    for (let level = 1; level <= 3; level++) {
       for (let seed = 1; seed <= SEEDS; seed++) {
         const set = setOf(level, seed);
         expect(set).toHaveLength(5);
@@ -81,9 +81,10 @@ describe('the problems', () => {
     expect(fracText(p.ans)).toBe('3/2');
     expect(fracText(sheet2().raw)).toBe('15/6');
   });
-  it('Levels 4-5 are not built yet (V2)', () => {
-    expect(() => generateStrangeLevel(4, 1)).toThrow(/not built yet/);
-    expect(() => generateStrangeLevel(5, 1)).toThrow(/not built yet/);
+  it('Levels 4-5 are built (Build V2; their own tests are in tests/strangeV2.test.js)', () => {
+    expect(STRANGE_SHOWN).toBe(5);
+    expect(generateStrangeLevel(4, 1)).toHaveLength(5);
+    expect(generateStrangeLevel(5, 1)).toHaveLength(5);
   });
   it('the slip collisions are reported (Levels 1-3, 200 seeds)', () => {
     for (let level = 1; level <= 3; level++) expect(slipCollisions(level).problems).toBe(1000);
@@ -136,7 +137,7 @@ describe('typing the answer: x = [ ] / [ ]', () => {
     expect(s.feedback.bad).toBe(false);
     expect(s.sub).toBeFalsy();
     expect(s.wrongs).toBe(0);
-    expect(s.answers).toEqual([]);
+    expect(s.answers).toEqual([{ typed: '15/6', tag: 'unsimplified' }]);              // (listed on the class sheet, not wrong: Build V2)
     expect(s.tags).toContain('unsimplified');
     expect(s.supportsShown).not.toContain('hint');
     s = run(s, [...typeFrac(15, 6), { type: 'check' }]);                            // (the first digit starts the fraction again)
@@ -296,15 +297,15 @@ describe('shapes and their reminders', () => {
   it('reports the shapes seen', () => { expect(Object.keys(seen).length).toBeGreaterThan(5); });
 });
 
-describe('the pack: 5 saved levels, 3 shown; save codes', () => {
-  it('sits in Solve it Plus after Distribute more; five levels, the last two hidden', () => {
+describe('the pack: 5 saved levels, all 5 shown since Build V2; save codes', () => {
+  it('sits in Solve it Plus after Distribute more; five levels, all shown', () => {
     expect(SECTIONS.find((s) => s.id === 'solve-plus').packs.at(-1)).toBe('strange-solutions');
-    expect(strangeSolutions).toMatchObject({ id: 'strange-solutions', title: 'Strange solutions', levels: 5, lastLevel: 3 });
-    expect(lastLevelOf(strangeSolutions)).toBe(3);
+    expect(strangeSolutions).toMatchObject({ id: 'strange-solutions', title: 'Strange solutions', levels: 5, lastLevel: 5 });
+    expect(lastLevelOf(strangeSolutions)).toBe(5);
     expect(packById('strange-solutions')).toBe(strangeSolutions);
     expect(PACKS.filter((p) => !p.comingSoon && p.levels).length).toBeLessThanOrEqual(30);
   });
-  it('Level 4 never opens; the card is complete once 1-3 are done; nothing is offered after Level 3', () => {
+  it('Levels unlock in order, 4 after 3 and 5 after 4; the card is complete once all five are done', () => {
     let prog = newProgress(PACKS);
     expect(isLevelUnlocked(prog, 'strange-solutions', 1)).toBe(true);
     expect(isLevelUnlocked(prog, 'strange-solutions', 2)).toBe(false);
@@ -312,7 +313,11 @@ describe('the pack: 5 saved levels, 3 shown; save codes', () => {
     expect(isPackComplete(prog, 'strange-solutions')).toBe(false);
     expect(nextLevel(prog, 'strange-solutions')).toBe(3);
     prog = completeLevel(prog, 'strange-solutions', 3);
-    expect(isLevelUnlocked(prog, 'strange-solutions', 4)).toBe(false);
+    expect(isLevelUnlocked(prog, 'strange-solutions', 4)).toBe(true);
+    expect(isLevelUnlocked(prog, 'strange-solutions', 5)).toBe(false);
+    expect(isPackComplete(prog, 'strange-solutions')).toBe(false);
+    expect(nextLevel(prog, 'strange-solutions')).toBe(4);
+    prog = completeLevel(completeLevel(prog, 'strange-solutions', 4), 'strange-solutions', 5);
     expect(isPackComplete(prog, 'strange-solutions')).toBe(true);
     expect(nextLevel(prog, 'strange-solutions')).toBeNull();
   });

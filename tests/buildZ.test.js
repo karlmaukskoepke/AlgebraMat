@@ -35,14 +35,15 @@ describe('Part 1: which levels can be tried', () => {
       }
     }
   });
-  it('never the open first level, "See why it works", Strange solutions 4-5, an open, placed or earned level, or a retired card', () => {
+  it('never the open first level, "See why it works", a hidden level, an open, placed or earned level, or a retired card', () => {
     let p = fresh();
     expect(canTestOut(p, packById('add-both'), 1, SECTIONS)).toBe(false);          // See why it works
     expect(canTestOut(p, packById('add-both'), 2, SECTIONS)).toBe(false);          // shown as Level 1: open
     expect(canTestOut(p, packById('add-both'), 3, SECTIONS)).toBe(true);
     expect(canTestOut(p, packById('strange-solutions'), 3, SECTIONS)).toBe(true);
-    expect(canTestOut(p, packById('strange-solutions'), 4, SECTIONS)).toBe(false); // hidden
-    expect(canTestOut(p, packById('strange-solutions'), 5, SECTIONS)).toBe(false);
+    expect(canTestOut(p, packById('strange-solutions'), 4, SECTIONS)).toBe(true);  // shown since Build V2
+    expect(canTestOut(p, packById('strange-solutions'), 5, SECTIONS)).toBe(true);
+    expect(canTestOut(p, { ...packById('strange-solutions'), lastLevel: 3 }, 4, SECTIONS)).toBe(false); // (a hidden level, as Build V had them)
     expect(canTestOut(p, packById('one-step'), 4, SECTIONS)).toBe(false);          // retired
     expect(canTestOut(p, packById('combineit'), 3, SECTIONS)).toBe(false);         // Count it
     expect(canTestOut(p, packById('boxes'), 3, SECTIONS)).toBe(false);             // Build it

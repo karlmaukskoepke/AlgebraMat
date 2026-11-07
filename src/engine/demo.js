@@ -19,22 +19,22 @@ function menuState(packs) {
   p = placeLevels(p, 'flip-everything', 3);                     // green: 1 placed of 5
   p = earn(p, 'variables-both-sides', [1, 2, 3, 4, 5]);         // Solve it Plus: every card gold
   p = earn(p, 'distribute-more', [1, 2, 3, 4, 5]);
-  p = earn(p, 'strange-solutions', [1, 2, 3]);
+  p = earn(p, 'strange-solutions', [1, 2, 3, 4, 5]);           // (all five shown since Build V2)
   return p;
 }
 
 export function demoProgress(name, packs) {
   if (name === 'menu' || name === 'shine') return menuState(packs);
   if (name === 'placed') return placeLevels(newProgress(packs), 'add-both', 5);    // Add to both sides Levels 1-3 placed
-  if (name === 'grew') return earn(newProgress(packs), 'strange-solutions', [1, 2]);
+  if (name === 'grew') return earn(newProgress(packs), 'strange-solutions', [1, 2, 3]);   // (Build V2: the three Build V showed, all earned)
   return null;
 }
 
 // What the menu "saw last time", or null to leave it as it is.
 export function demoSeen(name, packs, sections) {
   if (name === 'shine') {
-    // last time: Strange solutions had Level 3 still to do (silver, Solve it Plus not gold) and Divide it's Level 2 was only placed
-    let before = earn(newProgress(packs), 'strange-solutions', [1, 2]);
+    // last time: Strange solutions had Level 5 still to do (silver, Solve it Plus not gold) and Divide it's Level 2 was only placed
+    let before = earn(newProgress(packs), 'strange-solutions', [1, 2, 3, 4]);
     before = earn(before, 'variables-both-sides', [1, 2, 3, 4, 5]);
     before = earn(before, 'distribute-more', [1, 2, 3, 4, 5]);
     before = earn(placeLevels(before, 'divide-it', 5), 'divide-it', [3]);
@@ -43,9 +43,9 @@ export function demoSeen(name, packs, sections) {
     return { packs: { ...now.packs, 'strange-solutions': was.packs['strange-solutions'], 'divide-it': was.packs['divide-it'] }, sections: { ...now.sections, 'solve-plus': was.sections['solve-plus'] } };
   }
   if (name === 'grew') {
-    // last time Strange solutions showed two levels, both earned (gold): it shows three now
+    // last time Strange solutions showed three levels, all earned (gold), as Build V showed it: it shows five now (Build V2)
     const now = snapshot(demoProgress('grew', packs), packs, sections);
-    return { ...now, packs: { ...now.packs, 'strange-solutions': { status: 'gold', shown: 2, states: 'EE' } } };
+    return { ...now, packs: { ...now.packs, 'strange-solutions': { status: 'gold', shown: 3, states: 'EEE' } } };
   }
   return null;
 }

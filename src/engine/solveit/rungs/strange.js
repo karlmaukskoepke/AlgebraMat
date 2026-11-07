@@ -6,7 +6,7 @@
 //   SQ  `x = 5/2`: "x is 5/2. Type it in x =: the top, then /, then the bottom."
 //   SF  `−x = 15/6`: Flip lit, "x has a minus: flip both sides (· −1)."
 //   SM  `x = −(15/6)`: "x is the opposite of 15/6. Simplify it, then type x with its sign."
-//   NT, NF  no x left: "x disappeared. Is this statement ever true?" (V2 adds its two buttons)
+//   NT, NF  no x left: "x disappeared. Is this statement ever true?", at the two conclusion buttons (Build V2)
 
 import { DIVIDE_RUNGS } from './divide.js';
 import { MINUS } from '../../expr.js';
@@ -29,6 +29,6 @@ export const STRANGE_RUNGS = {
   SQ: entry((s, before, shape) => ({ target: 'answer', key: 'sTypeHint', params: { f: fr(shape.params) } })),
   SF: entry(() => ({ target: 'coef', key: 'sFlipHint', move: 'flip' })),
   SM: entry((s, before, shape) => ({ target: 'answer', key: 'sNegHint', params: { f: fr(shape.params) } })),
-  NT: entry(() => ({ target: 'answer', key: 'sNoXHint' })),
-  NF: entry(() => ({ target: 'answer', key: 'sNoXHint' })),
+  NT: entry(() => ({ target: 'conclude', key: 'sNoXHint' })),
+  NF: entry(() => ({ target: 'conclude', key: 'sNoXHint' })),
 };

@@ -68,7 +68,8 @@ export function checkResult(s) {
 // The check's own words are kept (dropping the value onto x, plugging it in, Balanced, and Strange solutions' "Can you simplify this
 // further?", which is the check saying the value is right but not simplest). Everything else the card would say goes: the line shows the
 // plain prompt. No hint spot and no outlined move either.
-const CHECK_WORDS = new Set(['aPlace', 'aPlugIn', 'aPlugCurrent', 'aCorrect', 'sSimplify']);
+// (Strange solutions' confirm line after a right conclusion is its Balanced: Build V2)
+const CHECK_WORDS = new Set(['aPlace', 'aPlugIn', 'aPlugCurrent', 'aCorrect', 'sSimplify', 'sConcludeRight']);
 export function quiet(s) {
   if (!s || typeof s !== 'object') return s;
   const fb = s.feedback;
