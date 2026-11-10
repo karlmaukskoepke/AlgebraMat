@@ -20,7 +20,11 @@ const recordScreens = args.has('--record-screens');
 const record = args.has('--record');
 const list = args.has('--list');                         // print every difference, not the first 15
 const screens = !args.has('--no-screens');
-const TOLERANCE = 0.002;                                  // a screen may differ in at most 0.2% of its pixels
+// The picture comparison (Build AF, Part 3; it was "at most 0.2% of pixels off by more than 40", which let a change under the grey cover
+// through): a pixel counts when any channel is off by more than 64 of 255, and a screen differs when 40 or more pixels count. Under the
+// grey cover (60% dark) a dark-on-white change is still about 90 of 255 off, so it counts; two runs of the same code differ by at most a
+// few such pixels (font smoothing; tests/parity/README.md says how it was measured).
+import { PIXEL_THRESHOLD, FLAG_AT } from './screens.mjs';
 
 const FAMILIES = ['problems', 'savecodes', 'events', 'traces'];
 const t0 = Date.now();
@@ -89,7 +93,7 @@ function report(name, diffs) {
 function short(v) { const s = JSON.stringify(v?.state?.feedback ?? v) ?? 'none'; return s.length > 200 ? `${s.slice(0, 200)}…` : s; }
 
 if (screens) {
-  const { takeScreens, pixelDiff } = await import('./screens.mjs');
+  const { takeScreens, pixelDiff, closeDiff } = await import('./screens.mjs');
   const shots = await takeScreens();
   if (!shots) console.log('SKIP  screens: no Playwright here (set PLAYWRIGHT_PATH, or run with --no-screens)');
   else if (record || recordScreens) {
@@ -104,12 +108,13 @@ if (screens) {
       fs.writeFileSync(path.join(OUT, `${n}.png`), png);
       const file = path.join(SHOTS, `${n}.png`);
       if (!fs.existsSync(file)) { diffs.push({ key: `screen:${n}`, before: 'no baseline' }); continue; }
-      const share = await pixelDiff(fs.readFileSync(file), png);
-      if (share > TOLERANCE) diffs.push({ key: `screen:${n}`, before: `${(share * 100).toFixed(2)}% of pixels differ (see tests/parity/out/${n}.png)` });
+      const off = await pixelDiff(fs.readFileSync(file), png);
+      if (off >= FLAG_AT) diffs.push({ key: `screen:${n}`, before: `${off < 0 ? 'a different size' : `${off} pixels off by more than ${PIXEL_THRESHOLD}`} (see tests/parity/out/${n}.png)` });
     }
     // a recorded screen that is no longer taken is a difference too
     for (const f of fs.readdirSync(SHOTS)) if (f.endsWith('.png') && !(f.slice(0, -4) in shots)) diffs.push({ key: `screen:${f.slice(0, -4)}`, before: 'recorded', after: 'no longer taken' });
     report(`screens (${Object.keys(shots).length})`, diffs);
+    await closeDiff();
   }
 }
 
