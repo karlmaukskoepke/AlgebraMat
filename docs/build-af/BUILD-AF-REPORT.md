@@ -126,7 +126,7 @@ fluency challenge; the problems of cards other than the four above.
 - **Features to check:** 6 new items (`af-box`, `af-try-box`, `af-keypad`, `af-simplify`, `af-walkthrough`, `af-student`) and 13 updated
   for one box (`v-level-1`, `v-simplify`, `v-check`, `v-zero`, `v-keys`, `student-strange`, `ad-whole`, `ad-lowest`, `ad-stays`,
   `ad-improper`, `ad-wrong`, `ac-parens-strange`, `v2-try-none`). Walked on the live site: the 22 Strange solutions items pass;
-  `af-walkthrough` after Part 2 went live (see the push).
+  `af-walkthrough` and the five Part 1 items again after Part 3 went live: all pass.
 - **Pictures** (`docs/build-af/`, 1366×768 and 1366×650): the box empty is in the parity set (`ss-box-empty`); typed `3/2`
   (`af-box-typed`), after Enter (`af-box-entered`), `3/0` (`af-box-zero`), Try a number waiting on `3/` and with the balance, the keypad
   with its `/` key (`af-keypad`, and on the answer box at both sizes and a phone), the walkthrough's steps before and after
