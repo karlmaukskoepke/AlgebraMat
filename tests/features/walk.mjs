@@ -34,7 +34,8 @@ const checks = data.checks ?? [];
 const act = (a) => `[data-action="${a}"]`;
 const wait = (page, ms) => page.waitForTimeout(ms);
 const DIV_BOX = '.mo-divpart:not(.is-mirror)';                  // the Divide blank's box, under the bar (Build O)
-const DIV = '.lx-move[data-action="divPick"]';                   // the Divide button (Build O; its shown blank picks it too)
+const DIV = '.lx-move[data-action="divPick"]';
+const ANS_BOX = '.lx-answer [data-target="answer"]';             // x = [ ], Strange solutions' one box too (Build AF)                   // the Divide button (Build O; its shown blank picks it too)
 
 class Walk {
   constructor(page, item) { this.page = page; this.item = item; this.errors = []; page.on('pageerror', (e) => this.errors.push(String(e))); }
@@ -471,8 +472,11 @@ class Walk {
     const cols = await this.page.locator('.lb-rowwrap.is-stackwork').last().locator('.lx-col').evaluateAll((cs) => cs.map((c) => [c.firstElementChild.innerText.replace(/\s+/g, ''), c.querySelector('.lx-under').innerText.replace(/\s+/g, ''), c.querySelectorAll('.is-struck').length]));
     if (!cols.some(([t, u, n]) => t === term && u === under && n === 2)) throw new Error(`${under} should be written under the struck ${term} after step "${this.step}": ${JSON.stringify(cols)}`);
   }
-  // Strange solutions (Build V): x = [top] / [bottom]; the top box clicked, the fraction typed (`/` goes to the bottom), Enter
-  async fraction(text) { await this.click('[data-target="ansTop"]'); await this.type(text); await this.enter(); await wait(this.page, 300); }
+  // Strange solutions (Build V): x = [3/2], one box as typed (Build AF; two boxes before): the box clicked, the fraction typed, Enter
+  async fraction(text) { await this.click(ANS_BOX); await this.type(text); await this.enter(); await wait(this.page, 300); }
+  // what the one box shows, and whether the green button waits (Build AF)
+  async boxShows(text, sel = ANS_BOX) { await this.typedIn(sel, text); }
+  async greenOff(off) { const d = await this.page.locator('.btn-forward').first().isDisabled(); if (d !== off) throw new Error(`the green button should be ${off ? 'greyed' : 'on'} after step "${this.step}"`); }
   // ... then dragged into each x and Enter a line at a time until the check ends (Balanced or Not balanced)
   async checkFraction(text) {
     await this.fraction(text);
@@ -526,6 +530,82 @@ class Walk {
 
 // ---- one walk per item (same id as in the data file) ---------------------------------------------------------------------------------
 const WALKS = {
+  // ---- Build AF: one box for a fraction answer ----
+  async 'af-box'(w) {
+    await w.start(); await w.see('9x + 1 = 7x + 6');
+    w.at('to x = 5/2'); await w.crossTerm('7x', 'left'); await w.combineTerms('−7x', '9x', '2x'); await w.addEnter(-1); await w.combineTerms('−1', '6', 5); await w.divEnter(2); await wait(w.page, 600); await w.row('x = 5/2');
+    if ((await w.page.locator('.lx-answer .sv-ansbox').count()) !== 1) throw new Error('one box after x =');
+    w.at('click the box, type −4, Backspace twice'); await w.click(ANS_BOX); await w.boxShows(''); await w.type('-4'); await w.boxShows('−4');
+    await w.page.keyboard.press('Backspace'); await w.page.keyboard.press('Backspace'); await wait(w.page, 150); await w.boxShows('');
+    w.at('a slash first, then 3/, Enter'); await w.type('/'); await w.boxShows(''); await w.type('3/'); await w.boxShows('3/'); await w.greenOff(true);
+    await w.enter(); await w.boxShows('3/'); await w.notSee('Balanced');
+    w.at('type 0, Enter'); await w.type('0'); await w.boxShows('3/0'); await w.enter(); await wait(w.page, 400); await w.see('The bottom of a fraction can’t be 0.');
+    await w.both('af-box-zero');
+    w.at('click the box, type 5/2, Enter'); await w.click(ANS_BOX); await w.type('5/2'); await w.boxShows('5/2'); await w.greenOff(false);
+    await w.both('af-box-typed');
+    await w.enter(); await wait(w.page, 500);
+    const chip = (await w.page.locator('[data-chip]').first().innerText()).replace(/\s+/g, '');
+    if (chip !== '5/2') throw new Error(`the value waiting to be dragged should read 5/2: ${chip}`);
+    await w.both('af-box-entered');
+  },
+  async 'af-try-box'(w) {
+    await w.start(); await w.addX(-7); await w.click('[data-pick="none"]'); await wait(w.page, 400);
+    w.at('Try a number, 3/'); await w.click(act('tryOpen')); await wait(w.page, 300); await w.type('3/'); await w.boxShows('3/', '.sv-trybox'); await w.greenOff(true);
+    await w.both('af-try-waits');
+    w.at('2, Enter, drag, Enter'); await w.type('2'); await w.boxShows('3/2', '.sv-trybox'); await w.greenOff(false); await w.enter(); await wait(w.page, 300);
+    for (let k = 0; k < 4 && await w.page.locator('[data-x][data-action="placeValue"]').count(); k++) await w.drag();
+    for (let k = 0; k < 12 && !(await w.page.locator('.bon-balance').count()); k++) await w.enter();
+    await wait(w.page, 900); await w.see('x = 3/2. Right side is heavier by 10.');
+    await w.both('af-try-box');
+  },
+  async 'af-keypad'(w) {
+    for (const h of [768, 650]) {
+      const ctx = await w.page.context().browser().newContext({ viewport: { width: 1366, height: h }, hasTouch: true });
+      const page = await ctx.newPage();
+      try {
+        const href = new URL(w.item.link.query, BASE).href;
+        await page.goto(href); await page.evaluate(() => { try { localStorage.clear(); } catch { /* */ } }); await page.goto(href); await wait(page, 600);
+        const tapKey = async (sel) => { await page.tap(`#controls ${sel}`); await wait(page, 150); };
+        w.step = 'Add x-term −7, No solution'; await page.tap(`${act('choose')}[data-move="add"]`); await wait(page, 300); await page.tap(`${act('choose')}[data-move="add"]`); await wait(page, 300); await page.tap('[data-aopt="x"]'); await wait(page, 300);
+        await tapKey('[data-action="toggleSign"]'); await tapKey('[data-digit="7"]'); await page.tap(act('go')); await wait(page, 1200);
+        await page.tap('[data-pick="none"]'); await wait(page, 500);
+        w.at('Try a number, 3 / 2 on the keypad'); await page.tap(act('tryOpen')); await wait(page, 400);
+        const slash = page.locator('#controls [data-ch="/"]');
+        if (!(await slash.isVisible()) || await slash.isDisabled()) throw new Error('the keypad should show a working / key');
+        await tapKey('[data-digit="3"]'); await tapKey('[data-ch="/"]'); await tapKey('[data-digit="2"]');
+        const box = (await page.locator('.sv-trybox').innerText()).trim();
+        if (box !== '3/2') throw new Error(`the box should show 3/2: ${box}`);
+        const cover = await page.evaluate(() => {
+          const P = document.querySelector('#controls .pad').getBoundingClientRect();
+          return ['.sv-tryrow', '.btn-forward', '.lx-panel'].filter((sel) => { const r = document.querySelector(sel)?.getBoundingClientRect(); return r && r.left < P.right && r.right > P.left && r.top < P.bottom && r.bottom > P.top; });
+        });
+        if (cover.length) throw new Error(`the keypad covers ${cover.join(', ')}`);
+        await page.screenshot({ path: path.join(OUT, `af-keypad-${h}.png`) });
+        w.at('tap Try'); await page.tap('.btn-forward'); await wait(page, 500);
+        if (!(await page.locator('[data-chip]').count())) throw new Error('after Try the 3/2 should wait to be dragged into x');
+      } finally { await ctx.close(); }
+    }
+  },
+  async 'af-simplify'(w) {
+    await w.start(); await w.see('2x + 10 = −4x − 5');
+    w.at('to x = −15/6'); await w.crossTerm('−4x', 'left'); await w.combineTerms('4x', '2x', '6x'); await w.addEnter(-10); await w.combineTerms('−10', '−5', -15); await w.divEnter(6); await w.row('x = −15/6');
+    w.at('15/6'); await w.fraction('15/6'); await w.see('Can you simplify this further?'); await w.notSee('Not balanced'); await w.boxShows('15/6');
+    await w.both('af-simplify');
+    w.at('type 5'); await w.type('5'); await w.boxShows('5');
+  },
+  async 'af-student'(w) {
+    await w.start(); await w.see('3x + 4 = 4');
+    w.at('Add −4, Divide 3'); await w.addEnter(-4); await wait(w.page, 900); await w.divEnter(3); await wait(w.page, 600); await w.row('x = 0');
+    w.at('mistake 1: 3/2'); await w.checkFraction('3/2'); await w.see('Not balanced', 'When x = 3/2, the equation is not balanced.');
+    await w.click(act('undo')); await wait(w.page, 600);
+    w.at('mistake 2: / then 7'); await w.type('/'); await w.type('7'); await w.boxShows('7'); await w.page.keyboard.press('Backspace'); await wait(w.page, 150); await w.boxShows('');
+    w.at('mistake 3: 15/6'); await w.type('15/6'); await w.enter(); await wait(w.page, 400); await w.see('Can you simplify this further?'); await w.notSee('Not balanced');
+    await w.both('af-student');
+    w.at('the answer: 0'); await w.type('0'); await w.enter(); await wait(w.page, 300);
+    for (let k = 0; k < 4 && await w.page.locator('[data-x][data-action="placeValue"]').count(); k++) await w.drag();
+    for (let k = 0; k < 16 && !/Balanced/.test(await w.text()); k++) await w.enter();
+    await w.see('✓ Balanced');
+  },
   // ---- Build AD, Part 2: the rewrite animation, about 3 s, longest on the frames that carry the idea ----
   async 'ad-anim'(w) {
     await w.start(); await w.row('10 = 2/3x');
@@ -893,7 +973,7 @@ const WALKS = {
     w.at('Add −1'); await w.addEnter(-1); await wait(w.page, 900); await w.row('3x = 3x');
     w.at('Add −3x'); await w.addX(-3); await w.row('0 = 0');
     w.at('press 0'); await w.page.keyboard.press('0'); await wait(w.page, 300);
-    if ((await w.page.locator('[data-target="ansTop"]').innerText()).trim()) throw new Error('nothing should go into x =');
+    if ((await w.page.locator(ANS_BOX).innerText()).trim()) throw new Error('nothing should go into x =');
     await w.see('x disappeared. What does the equation say?');
     w.at('Infinitely many'); await w.click('[data-pick="all"]'); await wait(w.page, 400);
     await w.see('0 = 0 is always true, so every x works. The sides always balance.');
@@ -923,7 +1003,7 @@ const WALKS = {
     await w.click('text=Got it'); await wait(w.page, 300);
     w.at('Add −7x'); await w.addX(-7); await w.row('3 = 13');
     w.at('press 0'); await w.page.keyboard.press('0'); await wait(w.page, 300);
-    if ((await w.page.locator('[data-target="ansTop"]').innerText()).trim()) throw new Error('nothing should go into x =');
+    if ((await w.page.locator(ANS_BOX).innerText()).trim()) throw new Error('nothing should go into x =');
     w.at('Divide'); await w.click(DIV); await wait(w.page, 400); await w.see('x disappeared: no move is needed. What does the equation say?');
     w.at('Infinitely many'); await w.click('[data-pick="all"]'); await wait(w.page, 500); await w.see('3 = 13 is false. It is false whatever x is.');
     await w.click('.spot-undo'); await wait(w.page, 400); await w.click('[data-pick="none"]'); await wait(w.page, 400);
@@ -1751,7 +1831,8 @@ const WALKS = {
     await w.start(); await w.see('9x + 1 = 7x + 6');
     w.at('to x = 5/2'); await w.crossTerm('7x', 'left'); await w.combineTerms('−7x', '9x', '2x'); await w.addEnter(-1); await w.combineTerms('−1', '6', 5); await w.divEnter(2); await w.row('x = 5/2');
     w.at('type 5/2, drag'); await w.fraction('5/2');
-    if (!(await w.page.locator('[data-chip] .lx-sfrac').count())) throw new Error('the value to drag should be 5 over 2, stacked');
+    // (the value waiting to be dragged reads as typed, 5/2; dropped into x it is drawn top over bottom: Build AF)
+    if ((await w.page.locator('[data-chip]').first().innerText()).replace(/\s+/g, '') !== '5/2') throw new Error('the value to drag should read 5/2, as typed');
     w.at('check'); for (let k = 0; k < 4 && await w.page.locator('[data-x][data-action="placeValue"]').count(); k++) await w.drag();
     for (let k = 0; k < 16 && !/Balanced/.test(await w.text()); k++) await w.enter();
     await w.lines('9(5/2) + 1 = 7(5/2) + 6', '45/2 + 1 = 35/2 + 6', '45/2 + 2/2 = 35/2 + 12/2', '47/2 = 47/2');
@@ -1768,9 +1849,10 @@ const WALKS = {
   async 'v-keys'(w) {
     await w.start(); await w.see('9x + 1 = 7x + 6');
     w.at('to x = 5/2'); await w.crossTerm('7x', 'left'); await w.combineTerms('−7x', '9x', '2x'); await w.addEnter(-1); await w.combineTerms('−1', '6', 5); await w.divEnter(2);
-    w.at('click the top box, type 5, ↓, 2'); await w.click('[data-target="ansTop"]'); await w.type(5); await w.page.keyboard.press('ArrowDown'); await w.type(2);
-    await w.typedIn('[data-target="ansBottom"]', '2');
-    w.at('click the top box'); await w.click('[data-target="ansTop"]'); await w.typedIn('[data-target="ansTop"]', '');
+    w.at('click the box, type 5/2, Backspace twice, /3'); await w.click(ANS_BOX); await w.type('5/2'); await w.boxShows('5/2');
+    await w.page.keyboard.press('Backspace'); await w.page.keyboard.press('Backspace'); await wait(w.page, 150); await w.boxShows('5');
+    await w.type('/3'); await w.boxShows('5/3');
+    w.at('click the box again'); await w.click(ANS_BOX); await w.boxShows('');
     w.at('type 2.5'); await w.type('2.5'); await w.see('Write it as a fraction, like 5/2.'); await w.both('v-keys');
   },
   async 'student-strange'(w) {
@@ -1780,7 +1862,7 @@ const WALKS = {
     await w.stuck(); await w.see('Move this x-term to the other side.');
     w.at('to x = −15/6'); await w.crossTerm('−4x', 'left'); await w.combineTerms('4x', '2x', '6x'); await w.addEnter(-10); await w.combineTerms('−10', '−5', -15); await w.divEnter(6); await w.row('x = −15/6');
     w.at('mistake 2: 15/6 unsimplified'); await w.fraction('15/6'); await w.see('Can you simplify this further?'); await w.notSee('Not balanced');
-    w.at('mistake 3: 2.5'); await w.click('[data-target="ansTop"]'); await w.type('2.5'); await w.see('Write it as a fraction, like 5/2.');
+    w.at('mistake 3: 2.5'); await w.click(ANS_BOX); await w.type('2.5'); await w.see('Write it as a fraction, like 5/2.');
     w.at('mistake 4: 5/2, the wrong sign'); await w.checkFraction('5/2'); await w.see('Not balanced', 'When x = 5/2, the equation is not balanced.');
     w.at('mistake 5: Undo, 2/5, upside down'); await w.click(act('undo')); await wait(w.page, 600); await w.checkFraction('-2/5'); await w.see('Not balanced', 'Check which number goes on top'); await w.both('student-strange');
     w.at('mistake 6: Undo, I’m stuck at x = −15/6'); await w.click(act('undo')); await wait(w.page, 600); await w.stuck(); await w.see('Simplify −15/6: divide the top and bottom by the same number, then type x.');

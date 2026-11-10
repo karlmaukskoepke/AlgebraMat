@@ -16,7 +16,7 @@ function button(label, action, extra = {}) {
 // `liveOf`: is the x = [ ] row live? (engine/addBothLights.js: from the first frame, unless a move is owed.)
 
 // `xKeyOf`: when the pad also has an x key, for typing a sum of two x-terms like 5x (Distribute, combine, solve: Build M).
-// `slashKeyOf`: when the pad also has a / key, for a fraction answer's bottom (Strange solutions: Build V).
+// `slashKeyOf`: when the pad also has a / key, for a fraction answer typed in one box (Strange solutions: Build V; one box, Build AF).
 export const makeAddBothControls = (liveOf, xKeyOf = null, slashKeyOf = null) => (root, dispatch) => {
   root.innerHTML = '';
   const keys = document.createElement('div');
@@ -25,7 +25,7 @@ export const makeAddBothControls = (liveOf, xKeyOf = null, slashKeyOf = null) =>
   keys.append(button('±', 'toggleSign', { cls: 'btn-pad', aria: 'Change sign' }), ...digits, button('⌫', 'backspace', { cls: 'btn-pad', aria: 'Delete' }));
   const xKey = xKeyOf ? button('x', 'typeChar', { cls: 'btn-pad', data: { ch: 'x', key: 'x' }, aria: 'x' }) : null;
   if (xKey) keys.append(xKey);
-  const slashKey = slashKeyOf ? button('/', 'typeChar', { cls: 'btn-pad', data: { ch: '/', key: '/' }, aria: 'Fraction bar: type the bottom' }) : null;
+  const slashKey = slashKeyOf ? button('/', 'typeChar', { cls: 'btn-pad', data: { ch: '/', key: '/' }, aria: 'Slash, for a fraction like 3/2' }) : null;
   if (slashKey) keys.append(slashKey);
 
   root.append(keys);
@@ -39,7 +39,9 @@ export const makeAddBothControls = (liveOf, xKeyOf = null, slashKeyOf = null) =>
 
   return {
     update(s) {
-      const done = s.stage === 'done' || s.step === 'levelDone';
+      // (Try a number's box types after the problem is solved: the keypad stays on for it. It was off, so it could not be typed on
+      // touch: found by Build AF's typing sweep)
+      const done = (s.stage === 'done' && !(slashKeyOf && slashKeyOf(s))) || s.step === 'levelDone';
       const amountMode = !done && s.stage === 'moves' && s.menu === 'add' && s.typing !== 'answer' && !s.combining;
       // the pad is live for the amount (once the move is open) and for the answer (once it is live); greyed otherwise
       const on = !done && s.step !== 'levelDone' && (amountMode || liveOf(s));

@@ -37,7 +37,7 @@ const ACTIONS = [
   { type: 'addPick', kind: 'num' }, { type: 'addPick', kind: 'x' },                          // (Add's two options: Build R)
   { type: 'focus', target: 'amount', side: 'right' }, { type: 'focus', target: 'amount', side: 'left' },   // (the x-term's two stacked boxes: Build T)
   { type: 'typeChar', ch: '/' }, { type: 'typeChar', ch: '.' }, { type: 'ansPart', part: 'den' }, { type: 'ansPart', part: 'num' },   // (a fraction answer's two boxes: Build V)
-  { type: 'focus', target: 'ansTop' }, { type: 'focus', target: 'ansBottom' },
+  { type: 'focus', target: 'ansTop' }, { type: 'focus', target: 'ansBottom' },   // (since Build AF these do nothing: one box; kept so the walks reach the same states)
 ];
 // the moves that make progress (so the walks get past the first equation and reach every shape): Add the opposite of the number on
 // x's side, divide by x's number, flip, fold the move, answer x correctly; each as the steps a student takes
@@ -77,7 +77,7 @@ function moves(s) {
   const f = s.problem?.ans;
   const typed = f ? [...digits(f.n), ...(f.d > 1 ? [{ type: 'typeChar', ch: '/' }, ...digits(f.d)] : [])] : digits(s.problem?.x);
   if (s.problem?.x !== undefined) out.push([{ type: 'focus', target: 'answer' }, ...typed, { type: 'check' }, { type: 'placeValue' }, { type: 'nextLine' }, { type: 'nextLine' }]);
-  if (f && f.d > 1) out.push([{ type: 'focus', target: 'ansTop' }, ...digits(f.n * 2), { type: 'typeChar', ch: '/' }, ...digits(f.d * 2), { type: 'check' }]);
+  if (f && f.d > 1) out.push([{ type: 'focus', target: 'answer' }, ...digits(f.n * 2), { type: 'typeChar', ch: '/' }, ...digits(f.d * 2), { type: 'check' }]);
   return out;
 }
 
@@ -161,7 +161,7 @@ describe('Build N: can I type? On every card, in every state where it waits for 
           const texts = () => new Map([...root.querySelectorAll('[data-lx-field]:not(.is-mirror)')].map((e) => [fieldKey(e), e.textContent.trim()]));
           const active = () => (document.activeElement?.dataset?.lxField ? fieldKey(document.activeElement) : document.activeElement?.className || document.activeElement?.tagName);
           // clear what is typed in the field the keys go to, then type 3 (a field holding a digit already may refuse a second)
-          for (let i = 0; i < 3; i++) { press('Backspace'); await settle(); }
+          for (let i = 0; i < (pack === 'strange-solutions' ? 8 : 3); i++) { press('Backspace'); await settle(); }   // (Strange solutions' one box holds up to 7 characters, −614/12: Build AF)
           const focusBefore = active();
           const marked = [...root.querySelectorAll('[data-lx-field].is-focus:not(.is-mirror)')].map(fieldKey);
           const before = texts();

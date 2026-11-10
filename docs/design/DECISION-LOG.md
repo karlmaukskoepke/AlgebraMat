@@ -627,3 +627,26 @@ not re-teach the idea, and it uses his words. Whenever his wording and the older
    Variables on both sides first (a separate build: it touches the shared help layer). Parked: a "Try it on Karl's balance" link from the
    card to his page (it takes only his 12 equations).
 6. Loop spec revision 2.20: the "no x left" state, the conclusion answer and the balance picture (section 4A).
+
+## 2026-11-09: one box for fraction answers; Add walkthrough in columns; parity coverage (Karl; built in Build AF)
+
+**Why:** the fraction answer was typed in two boxes (`x = [ ] / [ ]`). To type 5 a student had to leave the bottom blank or type 5 over 1,
+which looks wrong. And Add's "See why it works" walkthrough, the first place students meet Add, still wrote the added number in line, not in
+the column the practice screens use. Every build since Build AA has also reported that no recorded parity screen shows the newer cards.
+
+1. **One plain box for a fraction answer, "as typed".** A fraction is typed with the slash key and shows exactly what was typed (`3/2`); a
+   whole number is just the number. Only the way of typing changes: what each box accepts, the stored values, the judging, the check, the
+   class-sheet text and every tag stay as they were. After Enter the value is drawn stacked in the check and the work, as before.
+   **Parked:** a fraction drawn stacked while it is typed.
+2. **Add's "See why it works" walkthrough is drawn in the column notation** (Build Y's follow-up): the amount under the number, aligned, as
+   the practice screens draw it, with Build AB's gentler cross-out. Its steps and words do not change.
+3. **A parity net for the newer cards:** recorded screens, scripted runs, problems, save codes and class-sheet records for Fractions of x,
+   Strange solutions, the no-help choice, placed levels, the card page and the home screen; the stricter picture comparison becomes the
+   harness's own.
+
+**Parked (decided 2026-11-09, nothing built):**
+- **"Need a refresher?" links**: waiting on Karl's yes for a class-sheet word, `refresher`.
+- **The colour pass**: not a priority now (Karl). The known clashes: Karl's balance page's blue x-blocks and red negative balloon against
+  the Mat's blue (an operation) and red (an error); and his paper convention of red, blue and pink against the app's.
+- **The balance as a Teach me and I'm stuck scaffold** on Variables on both sides.
+- **The touch keypad covering the top of Start over and I'm stuck** at 1366×650.

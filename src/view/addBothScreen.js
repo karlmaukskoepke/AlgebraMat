@@ -603,7 +603,7 @@ function forwardCore(s) {
   if (s.scaffold && s.stage === 'moves' && s.menu === 'add') return { label: 'Go', action: 'go', enabled: (Boolean(s.pending?.both) && s.leftDelta === s.rightDelta) || (!s.pending && valid(s.amountEntry) && Number(s.amountEntry) !== 0) };
   if (blankOpen(s) && amountMode(s)) return { label: 'Go', action: 'go', enabled: valid(s.amountEntry) };
   if (!s.sub && (s.unfolded || s.pic)) return { label: 'Next', action: 'foldNext', enabled: true };   // (the loop: a move that folds, a picture)
-  return { label: 'Check', action: 'check', enabled: C.answerLive(s) && valid(s.entry) };
+  return { label: 'Check', action: 'check', enabled: C.answerLive(s) && (C.answerReady ? C.answerReady(s) : valid(s.entry)) };   // (a card's own rule: Strange solutions' `3/` waits, Build AF)
 }
 
 // ---------- the answer row: x = [ ] [the green button] ----------
@@ -617,7 +617,7 @@ function answerRow(s) {
   const free = !s.mopts?.kind && !(s.menu === 'fraction' && s.typing !== 'answer') && !s.lx?.combine && !s.lx?.distribute && !s.lx?.calc;
   const last = live && !amountMode(s) && free && (C.alone(s.board) || Boolean(s.ui?.fieldCursor) || s.typing === 'answer' || s.ui?.focus === 'answer');
   const placing = Boolean(s.sub?.placing);                 // the typed value is what is dragged into x
-  // (a card may draw its own field: Strange solutions' two boxes for a fraction, Build V)
+  // (a card may draw its own field: Strange solutions' one box for a fraction, Build V; one box since Build AF)
   const typed = C.answerField ? C.answerField(s, { live, last, placing }) : html('button', `ab-typed lb-typed lx-field${text ? '' : ' is-empty'}${last ? ' is-focus' : ''}${last && !text ? ' is-blink' : ''}${live || placing ? '' : ' is-off'}${placing ? ' is-chip' : ''}`, [shown(text)], placing
     ? { type: 'button', 'data-chip': '1', 'data-fk': 'answer', 'data-lx-field': '1', 'aria-label': `Your value ${shown(text)}: drag it into x` }
     : { type: 'button', 'data-action': 'focus', 'data-target': 'answer', 'aria-label': 'Your answer for x', 'data-fk': 'answer', 'data-lx-field': '1' });

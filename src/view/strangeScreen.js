@@ -1,12 +1,11 @@
-// The Strange solutions screen (Build V): Variables on both sides' screen (view/bothSidesScreen.js) with its answer in two boxes, `x =
-// [ ] / [ ]` (the top, a slash, the bottom; a whole number in the top alone), its value carried into the check as one stacked fraction,
+// The Strange solutions screen (Build V): Variables on both sides' screen (view/bothSidesScreen.js) with its answer in one box, `x = [3/2]`,
+// shown as typed (Build AF; it was two boxes, the top and the bottom, Build V), its value carried into the check as one stacked fraction,
 // its own words and its reminders' targets. Rows show a divide that does not split as `x = 15/6`, stacked (view/solveScreen.js).
 
 import { renderAddBothScreen } from './addBothScreen.js';
 import { html } from './addBothMat.js';
 import { BOTH_CARD } from './bothSidesScreen.js';
 import { spotlightLayer } from './spotlight.js';
-import { segKids } from './solveScreen.js';
 import { strangeFeedbackText, NO_X_NOTE } from './strangeFeedback.js';
 import { solve, concludeOpen, noX, PICKS, STRANGE_SPOT } from '../engine/cards/strange.js';
 import { lightsAnswerLive } from '../engine/addBothLights.js';
@@ -15,36 +14,34 @@ import { MINUS } from '../engine/expr.js';
 import { noHelp } from '../engine/noHelp.js';
 import { TRY_NOTES } from '../engine/strangeTry.js';
 import { renderBalance } from './balance.js';
+import { boxText, boxReady } from '../engine/fractionBox.js';
 
 const shown = (v) => (v ? v.replace('-', MINUS) : ' ');
+const ready = (top, bottom, part) => boxReady(top, bottom, part);
 const OWN_REMINDER = {
   sDivideHint: { target: 'coef', move: 'divOption' }, sSimplifyHint: { target: 'answer' }, sTypeHint: { target: 'answer' },
   sFlipHint: { target: 'coef', move: 'flip' }, sNegHint: { target: 'answer' }, sNoXHint: { target: 'conclude' },
 };
 
-// x = [top] / [bottom]; while the value is checked, the value itself (stacked when it is a fraction), the chip that is dragged into x
+// x = [3/2], one box as typed; while the value is checked, the value itself (as typed), the chip that is dragged into x
 function answerField(s, { live, last, placing }) {
   if (s.sub && !live) {
+    // (the box stays as typed, `3/2`, while the check draws the value stacked: Build AF; it was drawn stacked here too, Build V)
     const text = signed(s.sub.typed);
-    const el = html('button', `ab-typed lb-typed lx-field sv-fracchip${placing ? ' is-chip' : ' is-off'}`, segKids(text), placing
+    const el = html('button', `ab-typed lb-typed lx-field sv-ansbox sv-fracchip${placing ? ' is-chip' : ' is-off'}`, [text], placing
       ? { type: 'button', 'data-chip': '1', 'data-fk': 'answer', 'data-lx-field': '1', 'aria-label': `Your value ${text}: drag it into x` }
       : { type: 'button', 'aria-label': `Your value ${text}` });
     el.disabled = !placing;
     return el;
   }
-  const part = s.part ?? 'num';
-  const box = (which) => {
-    const text = which === 'num' ? s.entry : s.den;
-    const on = last && part === which;
-    const b = html('button', `ab-typed lb-typed lx-field sv-ansbox${on ? ' is-focus' : ''}${on && which === 'den' && s.denSel && text ? ' is-selected' : ''}${text ? '' : ' is-empty'}${on && !text ? ' is-blink' : ''}${live ? '' : ' is-off'}`, [shown(text)], {
-      type: 'button', 'data-action': 'focus', 'data-target': which === 'num' ? 'ansTop' : 'ansBottom', 'data-fk': which === 'num' ? 'answer' : 'answer:den', 'data-lx-field': '1',
-      'aria-label': which === 'num' ? 'The top of your answer for x (a whole number goes here alone)' : 'The bottom of your answer for x',
-    });
-    b.disabled = !live;
-    if (on && live) b.dataset.lxFocus = '1';
-    return b;
-  };
-  return html('span', `sv-fracans${live ? '' : ' is-off'}`, [box('num'), html('span', 'sv-fracslash', ['/'], { 'aria-hidden': 'true' }), box('den')], { role: 'group', 'aria-label': 'Your answer for x: the top, then the bottom' });
+  // one box, as typed (Build AF): `3/2`, `-4`, `3/`; the same element and name as every card's x = (a click clears it, Enter checks)
+  const text = boxText(s.entry, s.den, s.part);
+  const b = html('button', `ab-typed lb-typed lx-field sv-ansbox${last ? ' is-focus' : ''}${text ? '' : ' is-empty'}${last && !text ? ' is-blink' : ''}${live ? '' : ' is-off'}`, [shown(text)], {
+    type: 'button', 'data-action': 'focus', 'data-target': 'answer', 'data-fk': 'answer', 'data-lx-field': '1', 'aria-label': 'x equals',
+  });
+  b.disabled = !live;
+  if (last && live) b.dataset.lxFocus = '1';
+  return b;
 }
 
 // The two conclusion buttons (Build V2), beside x = in the answer row while no x is left: the main line and the smaller line under it
@@ -71,15 +68,11 @@ function conclusions(s) {
 // then "Try a number" (not in a no-help attempt): the box for a number, and once its check is done, the balance with Karl's line and the
 // line after it. Never red, no Undo, nothing recorded.
 const tryBox = (t) => {
-  const box = (which) => {
-    const text = which === 'num' ? t.entry : t.den;
-    const on = (t.part ?? 'num') === which;
-    return html('button', `ab-typed lb-typed lx-field sv-ansbox sv-trybox${on ? ' is-focus' : ''}${text ? '' : ' is-empty'}${on && !text ? ' is-blink' : ''}`, [shown(text)], {
-      type: 'button', 'data-action': 'focus', 'data-target': which === 'num' ? 'tryTop' : 'tryBottom', 'data-lx-field': '1',
-      'aria-label': which === 'num' ? 'The number to try for x (the top of a fraction)' : 'The bottom of the fraction to try',
-    });
-  };
-  return html('div', 'sv-tryrow', [html('strong', 'sv-tryx', ['x =']), html('span', 'sv-fracans', [box('num'), html('span', 'sv-fracslash', ['/'], { 'aria-hidden': 'true' }), box('den')], { role: 'group', 'aria-label': 'A number to try for x' })]);
+  const text = boxText(t.entry, t.den, t.part);
+  const box = html('button', `ab-typed lb-typed lx-field sv-ansbox sv-trybox is-focus${text ? '' : ' is-empty is-blink'}`, [shown(text)], {
+    type: 'button', 'data-action': 'focus', 'data-target': 'tryBox', 'data-lx-field': '1', 'aria-label': 'x equals',
+  });
+  return html('div', 'sv-tryrow', [html('strong', 'sv-tryx', ['x =']), box]);
 };
 function concluded(s) {
   if (!(s.stage === 'done' && s.concluded)) return null;
@@ -108,7 +101,8 @@ function tryView(s) {
   return { ...s, stage: 'moves', step: 'moves', sub, history: [], needUndo: false, spot: null, concluded: null, unfolded: false,
     feedback: { key: sub.placing ? 'aPlace' : 'aPlugIn', params: { typed: signed(t.sub.typed), where: 'original' }, bad: false } };
 }
-const doneForward = (s) => (s.trial?.typing && !noHelp() && s.trial.entry !== '' && s.trial.entry !== '-' ? { label: 'Try', action: 'check', enabled: true } : null);
+// (Try waits for a number, and for the bottom once the slash is typed: `3/`, Build AF)
+const doneForward = (s) => (s.trial?.typing && !noHelp() ? { label: 'Try', action: 'check', enabled: ready(s.trial.entry, s.trial.den, s.trial.part) && !/\./.test(s.trial.den) } : null);
 
 const CARD = {
   ...BOTH_CARD,
@@ -121,6 +115,8 @@ const CARD = {
   text: strangeFeedbackText,
   answerLive: (s) => lightsAnswerLive(s, solve),
   answerField,
+  // (the green Check waits for the bottom once the slash is typed, `3/`: Build AF)
+  answerReady: (s) => /^-?\d+$/.test(s.entry ?? '') && (s.part !== 'den' || /^\d+$/.test(s.den ?? '')),
   nudge: { ...BOTH_CARD.nudge, sNoMoves: 'conclude', sSimplify: 'answer', sNoDecimal: 'answer', sZeroBottom: 'answer', sDivideFront: 'preview', sFlipFirst: 'panel' },
   popups(s, wrap, o, sp) {
     const remind = OWN_REMINDER[s.feedback?.key];

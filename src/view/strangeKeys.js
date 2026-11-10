@@ -1,6 +1,7 @@
-// The keys of Strange solutions' answer, x = [ ] / [ ] (Build V): `/` (or ↓, or Tab from the top) goes to the bottom box; ↑ (or Shift+Tab
-// from the bottom) back to the top; a decimal point is answered "Write it as a fraction, like 5/2." Anywhere else Tab is the page's.
-// Digits, the minus and Backspace come by the shared typing keys. Runs before the page's keys (capture).
+// The keys of Strange solutions' answer box and Try a number's box, one box typed as it is written, `3/2` (Build AF; two boxes before,
+// Build V): `/` types the slash; the minus key types a minus only at the front (anywhere else it is ignored, with no message); a decimal
+// point goes to the card's rule (the answer: "Write it as a fraction, like 5/2."; Try a number: read as an exact fraction). Tab is the
+// page's, as on every answer box. Digits and Backspace come by the shared typing keys. Runs before the page's keys (capture).
 
 import { keyForMat } from './typingKeys.js';
 import { answerTyping } from '../engine/cards/strange.js';
@@ -11,12 +12,10 @@ export function bindStrangeKeys(root, dispatch, getSession, loop) {
     const s = getSession?.();
     const trying = Boolean(s) && trialTyping(s);                      // (Try a number's box, Build V2)
     if (!s || !keyForMat(e, root) || !(answerTyping(s, loop) || trying)) return;
-    const part = (trying ? s.trial.part : s.part) ?? 'num';
     let action = null;
     if (e.key === '/' || e.key === 'Divide') action = { type: 'typeChar', ch: '/' };
     else if (e.key === '.' || e.key === ',' || e.key === 'Decimal') action = { type: 'typeChar', ch: '.' };
-    else if (e.key === 'ArrowDown' || (e.key === 'Tab' && !e.shiftKey && part === 'num')) action = { type: 'ansPart', part: 'den' };
-    else if (e.key === 'ArrowUp' || (e.key === 'Tab' && e.shiftKey && part === 'den')) action = { type: 'ansPart', part: 'num' };
+    else if (e.key === '-' || e.key === '−' || e.key === 'Subtract') action = { type: 'typeChar', ch: '-' };
     if (!action) return;
     e.preventDefault();
     e.stopImmediatePropagation();

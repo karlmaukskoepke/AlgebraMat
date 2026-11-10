@@ -105,26 +105,42 @@ describe('the slips', () => {
   });
 });
 
-describe('typing the answer: x = [ ] / [ ]', () => {
+describe('typing the answer: one box, as typed (Build AF; two boxes before)', () => {
   const alone = toAlone(sheet2());                                                    // x = 15/6
   it('the honest path ends at x = 15/6, written as the divide left it', () => {
     expect(boardText(alone.board)).toBe('x = 15/6');
     expect(shapeOf(alone).id).toBe('SR');
   });
-  it('digits go to the top, / to the bottom; Backspace in an empty bottom goes back to the top; a click on a box clears it', () => {
-    let s = run(alone, [{ type: 'focus', target: 'ansTop' }, ...typeFrac(15, 6)]);
+  it('one box: 15/6 as typed; Backspace goes back across the slash; a click on the box clears it', () => {
+    let s = run(alone, [{ type: 'focus', target: 'answer' }, ...typeFrac(15, 6)]);
     expect([s.entry, s.den, s.part]).toEqual(['15', '6', 'den']);
     s = run(s, [{ type: 'backspace' }, { type: 'backspace' }]);
     expect([s.entry, s.den, s.part]).toEqual(['15', '', 'num']);
-    s = run(s, [{ type: 'ansPart', part: 'den' }, ...digits(2), { type: 'ansPart', part: 'num' }, { type: 'toggleSign' }]);
-    expect([s.entry, s.den]).toEqual(['-15', '2']);
-    s = act(s, { type: 'focus', target: 'ansBottom' });
-    expect([s.entry, s.den, s.part]).toEqual(['-15', '', 'den']);
-    s = act(s, { type: 'focus', target: 'ansTop' });
-    expect([s.entry, s.part]).toEqual(['', 'num']);
+    s = run(s, [{ type: 'typeChar', ch: '/' }, ...digits(2), { type: 'toggleSign' }]);
+    expect([s.entry, s.den, s.part]).toEqual(['-15', '2', 'den']);
+    s = act(s, { type: 'focus', target: 'answer' });
+    expect([s.entry, s.den, s.part]).toEqual(['', '', 'num']);
+  });
+  it('the rules of the box: a slash first, a second slash, a minus after the front and letters are ignored; 3/ cannot be checked', () => {
+    const k = (keys) => run(alone, [{ type: 'focus', target: 'answer' }, ...keys]);
+    const slash = { type: 'typeChar', ch: '/' };
+    const minus = { type: 'typeChar', ch: '-' };
+    expect(k([slash]).entry).toBe('');                                                          // a slash first
+    expect(k([minus, slash]).part).toBe('num');                                                 // a slash after a lone minus
+    const two = k([...digits(3), slash, slash, ...digits(2)]);
+    expect([two.entry, two.den]).toEqual(['3', '2']);                                           // a second slash
+    const m = k([minus, ...digits(4), minus, slash, ...digits(3), minus]);
+    expect([m.entry, m.den]).toEqual(['-4', '3']);                                              // a minus only at the front
+    expect(k([...digits(5), { type: 'typeChar', ch: 'q' }]).entry).toBe('5');                   // a letter
+    const open = k([...digits(3), slash]);
+    expect(act(open, { type: 'check' })).toBe(open);                                            // 3/ waits for its bottom
+    const zero = act(k([...digits(3), slash, ...digits(0)]), { type: 'check' });
+    expect([zero.sub, P.feedbackText(zero.feedback)]).toEqual([null, 'The bottom of a fraction can’t be 0.']);
+    const five = act(k(digits(5)), { type: 'check' });
+    expect(five.sub?.value).toEqual({ n: 5, d: 1 });                                            // a whole number is the number alone
   });
   it('a decimal point: “Write it as a fraction, like 5/2.”, never red, nothing checked', () => {
-    const s = run(alone, [{ type: 'focus', target: 'ansTop' }, ...digits(2), { type: 'typeChar', ch: '.' }, ...digits(5)]);
+    const s = run(alone, [{ type: 'focus', target: 'answer' }, ...digits(2), { type: 'typeChar', ch: '.' }, ...digits(5)]);
     expect(s.entry).toBe('2.5');
     expect(P.feedbackText(s.feedback)).toBe('Write it as a fraction, like 5/2.');
     const c = act(s, { type: 'check' });
@@ -132,7 +148,7 @@ describe('typing the answer: x = [ ] / [ ]', () => {
     expect(c.feedback.bad).toBe(false);
   });
   it('15/6: “Can you simplify this further?”, not red, no check, not a wrong answer; the second time it adds the next line, recorded as hint', () => {
-    let s = run(alone, [{ type: 'focus', target: 'ansTop' }, ...typeFrac(15, 6), { type: 'check' }]);
+    let s = run(alone, [{ type: 'focus', target: 'answer' }, ...typeFrac(15, 6), { type: 'check' }]);
     expect(P.feedbackText(s.feedback)).toBe('Can you simplify this further?');
     expect(s.feedback.bad).toBe(false);
     expect(s.sub).toBeFalsy();
@@ -148,16 +164,16 @@ describe('typing the answer: x = [ ] / [ ]', () => {
     expect(s.sub?.ok).toBe(true);
   });
   it('an unsimplified wrong value is nudged too (the nudge never tells the student the value is right)', () => {
-    const s = run(alone, [{ type: 'focus', target: 'ansTop' }, ...typeFrac(4, 6), { type: 'check' }]);
+    const s = run(alone, [{ type: 'focus', target: 'answer' }, ...typeFrac(4, 6), { type: 'check' }]);
     expect(s.feedback.key).toBe('sSimplify');
   });
   it('a wrong value is checked and recorded with its tag: −5/2 sign-flipped, 2/5 upside down (with its second sentence, hint)', () => {
-    let s = run(alone, [{ type: 'focus', target: 'ansTop' }, ...typeFrac(-5, 2), { type: 'check' }]);
+    let s = run(alone, [{ type: 'focus', target: 'answer' }, ...typeFrac(-5, 2), { type: 'check' }]);
     s = run(s, [{ type: 'placeValue', index: 0 }, { type: 'placeValue', index: 1 }]);
     for (let k = 0; k < 16 && s.sub && !s.feedback?.bad; k++) s = act(s, { type: 'nextLine' });
     expect(s.answers.at(-1)).toEqual({ typed: '-5/2', tag: 'sign-flipped' });
     expect(P.feedbackText(s.feedback)).toBe('When x = −5/2, the equation is not balanced.');
-    s = run(s, [{ type: 'undo' }, { type: 'focus', target: 'ansTop' }, ...typeFrac(2, 5), { type: 'check' }, { type: 'placeValue', index: 0 }, { type: 'placeValue', index: 1 }]);
+    s = run(s, [{ type: 'undo' }, { type: 'focus', target: 'answer' }, ...typeFrac(2, 5), { type: 'check' }, { type: 'placeValue', index: 0 }, { type: 'placeValue', index: 1 }]);
     for (let k = 0; k < 16 && s.sub && !s.feedback?.bad; k++) s = act(s, { type: 'nextLine' });
     expect(s.answers.at(-1)).toEqual({ typed: '2/5', tag: 'frac-swapped' });
     expect(P.feedbackText(s.feedback)).toContain('Check which number goes on top');
@@ -246,7 +262,7 @@ describe('the check with a fraction (3x + 4 = x + 9 at 5/2)', () => {
   });
   it('the card checks a fraction on the original equation, one drop per x', () => {
     const alone = toAlone(sheet2());
-    let s = run(alone, [{ type: 'focus', target: 'ansTop' }, ...typeFrac(5, 2), { type: 'check' }]);
+    let s = run(alone, [{ type: 'focus', target: 'answer' }, ...typeFrac(5, 2), { type: 'check' }]);
     expect(s.sub.xs).toBe(2);
     expect(s.sub.typed).toBe('5/2');
     expect(lineText(s.sub.lines[0])).toBe('4(5/2) + 1 = −2(5/2) + 16');

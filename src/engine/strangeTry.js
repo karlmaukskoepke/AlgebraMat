@@ -5,7 +5,7 @@
 // and the line after it that names the pattern. Never graded, never red, no Undo, nothing recorded (no answers, tags or supports), and it
 // does not change the problem: it stays solved. Not in a no-help attempt (the screen does not offer it there). No DOM here.
 //
-//   s.trial   { typing, entry, den, part, denSel, note, sub, result }   the try in hand (null before the button is pressed)
+//   s.trial   { typing, entry, den, part, note, sub, result }  (entry, den, part: one box as typed, `3/2`; Build AF)   the try in hand (null before the button is pressed)
 //   s.trials  [{ value, left, right }]                                  every finished try on this problem (exact fractions)
 
 import { readFraction, frac, lowest, fracText } from './fraction.js';
@@ -13,6 +13,7 @@ import { linear } from './bothSides.js';
 import { substitutionLines, xCount, signed } from './solveTerms.js';
 import { fractionLines } from './fractionCheck.js';
 import { MINUS } from './expr.js';
+import { boxKey } from './fractionBox.js';
 
 const TOP_MAX = 3;
 const BOTTOM_MAX = 2;
@@ -57,7 +58,7 @@ export function readTry(top, bottom) {
   return r.key ? { key: 'tUnreadable' } : { value: lowest(r.value) };
 }
 
-const fresh = () => ({ typing: true, entry: '', den: '', part: 'num', denSel: false, note: null, sub: null, result: null });
+const fresh = () => ({ typing: true, entry: '', den: '', part: 'num', note: null, sub: null, result: null });
 
 // The try's own actions, or undefined for anything that is not the try's. `s` is a fresh copy (the caller cloned it).
 export function reduceTry(s, action) {
@@ -71,11 +72,11 @@ export function reduceTry(s, action) {
   const t = s.trial;
   if (!t) return undefined;
   if (t.typing) {
-    if (action.type === 'focus' && (action.target === 'tryTop' || action.target === 'tryBottom')) {
-      Object.assign(t, action.target === 'tryTop' ? { entry: '', part: 'num' } : { den: '', part: 'den' }, { denSel: false, note: null });
+    if (action.type === 'focus' && action.target === 'tryBox') {                // (a click on the box clears it, as on x =)
+      Object.assign(t, { entry: '', den: '', part: 'num', note: null });
       return s;
     }
-    if (['digit', 'toggleSign', 'typeChar', 'backspace', 'ansPart'].includes(action.type)) return typeTry(s, t, action);
+    if (['digit', 'toggleSign', 'typeChar', 'backspace'].includes(action.type)) return typeTry(s, t, action);
     if (action.type === 'check' || action.type === 'tryGo') return checkTry(s, t);
     return action.type === 'next' ? undefined : 'ignore';
   }
@@ -103,31 +104,20 @@ export function reduceTry(s, action) {
   return undefined;
 }
 
+// one key in the box (the same rules as the answer's box, engine/fractionBox.js); a decimal point once, in the top (1.5 is 3/2)
 function typeTry(s, t, action) {
-  let top = t.entry;
-  let bottom = t.den;
-  let { part } = t;
-  let sel = t.denSel;
-  if (action.type === 'typeChar' && action.ch === '/') { if (part !== 'den' && bottom !== '') sel = true; part = 'den'; }
-  else if (action.type === 'ansPart') { if (action.part === 'den') { if (bottom !== '') sel = true; part = 'den'; } else part = 'num'; }
-  else if (action.type === 'typeChar' && (action.ch === '.' || action.ch === ',')) { if (part === 'num' && !top.includes('.')) top += '.'; else return 'ignore'; }
-  else if (action.type === 'toggleSign' || (action.type === 'typeChar' && action.ch === '-')) top = top.startsWith('-') ? top.slice(1) : `-${top}`;
-  else if (action.type === 'digit') {
-    if (!Number.isInteger(action.digit)) return 'ignore';
-    if (part === 'num') { if (top.replace(/[-.]/g, '').length >= TOP_MAX) return 'ignore'; top += String(action.digit); }
-    else { if (sel) { bottom = ''; sel = false; } if (bottom.length >= BOTTOM_MAX) return 'ignore'; bottom += String(action.digit); }
-  } else if (action.type === 'backspace') {
-    if (part === 'den' && bottom === '') part = 'num';
-    else if (part === 'den') { bottom = sel ? '' : bottom.slice(0, -1); sel = false; }
-    else top = top.slice(0, -1);
-  } else return 'ignore';
-  if (part !== 'den') sel = false;
-  Object.assign(t, { entry: top, den: bottom, part, denSel: sel, note: null });
+  const next = boxKey({ top: t.entry, bottom: t.den, part: t.part ?? 'num' }, action, {
+    topMax: TOP_MAX, bottomMax: BOTTOM_MAX, dot: (b) => (b.part !== 'den' && !b.top.includes('.') ? { ...b, top: `${b.top}.` } : null),
+  });
+  if (!next) return 'ignore';
+  Object.assign(t, { entry: next.top, den: next.part === 'den' ? next.bottom : '', part: next.part, note: null });
   return s;
 }
 
 function checkTry(s, t) {
   if (t.entry === '' || t.entry === '-') { t.note = 'tTypeFirst'; return s; }
+  if (t.part === 'den' && t.den === '') return 'ignore';                          // (`3/` waits for its bottom: Build AF)
+  if (t.part === 'den' && /^0+$/.test(t.den)) { t.note = 'tZeroBottom'; return s; }
   const r = readTry(t.entry, t.den);
   if (r.key) { t.note = r.key; return s; }
   const v = r.value;
@@ -157,5 +147,6 @@ export function workingOf(line, cmp) {
 export const TRY_NOTES = {
   tTypeFirst: 'Type a number for x first.',
   tUnreadable: 'Type a whole number, a fraction like 3/2, or a decimal like 1.5.',
+  tZeroBottom: 'The bottom of a fraction can’t be 0.',
 };
 export { signed };

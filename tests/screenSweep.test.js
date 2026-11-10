@@ -145,8 +145,7 @@ async function playCard(browser, base, [name, pack, levels], report) {
         await mouse.move(600, 740);
       });
       // 1c. a digit typed into x = and taken back
-      // (Strange solutions' answer is two boxes: the top takes the digit, Build V)
-      const xField = page.locator('[data-action="focus"][data-target="answer"]:not([disabled]), [data-action="focus"][data-target="ansTop"]:not([disabled])');
+      const xField = page.locator('[data-action="focus"][data-target="answer"]:not([disabled])');
       if (await xField.count() && await xField.first().isVisible()) {
         await watched(lv, 'type a digit into x = and take it back', async () => { await xField.first().click(); await page.keyboard.press('5'); await page.keyboard.press('Backspace'); });
       }

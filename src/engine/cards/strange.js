@@ -1,7 +1,10 @@
 // Strange solutions (Build V, basic form): Variables on both sides' card (engine/cards/bothSides.js: the same loop, layers, moves, help,
 // x-on-one-side rule and no forced move) with answers that are fractions or 0 (loop spec rev 2.11, §4A). What is its own:
-//   - the answer is typed in two boxes, `x = [ ]/[ ]`: digits go into the top, `/` (or Tab, ↓) to the bottom, Shift+Tab or ↑ back, a click
-//     on a box clears it; the minus is the top's; a whole number is the top alone; a decimal point is refused ("Write it as a fraction");
+//   - the answer is typed in one box, `x = [3/2]`, as typed (Build AF, Karl 2026-11-09; it was two boxes, the top and the bottom, Build V):
+//     an optional minus at the front, digits, at most one `/` and the digits of the bottom. Kept as `entry` (the top), `den` (the bottom)
+//     and `part` ('den' once the slash is typed), so what is stored, checked and recorded is unchanged. A slash first, a second slash and
+//     a minus anywhere but the front are ignored; `3/` waits for its bottom (the green button is off); a whole number is the top alone; a
+//     decimal point is refused ("Write it as a fraction"); a click on the box clears it;
 //   - an unsimplified fraction (`15/6`) is nudged, never red and never checked: "Can you simplify this further?", and after a second try
 //     "Divide the top and the bottom by the same number." (tag `unsimplified`, recorded `hint` only with the second line);
 //   - the check works with fractions exactly (engine/fractionCheck.js);
@@ -22,6 +25,7 @@ import { readFraction, isLowest, same, fracText } from '../fraction.js';
 import { tagStrange } from '../generateStrange.js';
 import { substitutionLines, xCount, signed } from '../solveTerms.js';
 import { fractionLines } from '../fractionCheck.js';
+import { boxKey } from '../fractionBox.js';
 
 const TOP_MAX = 3;
 const BOTTOM_MAX = 2;
@@ -64,49 +68,32 @@ function conclude(s, action, api) {
 export const answerTyping = (s, loop) => loop.answerLive(s) && !(s.menu === 'add' && s.typing !== 'answer') && !s.mopts?.kind && !s.lx?.combine && !s.lx?.distribute && !s.lx?.calc
   && !(s.menu === 'fraction' && s.typing !== 'answer');
 
-// ---------- typing the answer: the top, then the bottom ----------
-const KEYS = new Set(['digit', 'toggleSign', 'typeChar', 'backspace', 'ansPart']);
+// ---------- typing the answer: one box, as typed (Build AF) ----------
+const KEYS = new Set(['digit', 'toggleSign', 'typeChar', 'backspace']);
 function typeAnswer(s, action, api) {
   if (s.sub) {
     if (!(s.sub.kind === 'value' && s.sub.step >= api.subTotal(s.sub) && !s.sub.ok)) return 'ignore';
     s.sub = null;                                                                    // (after a wrong value the first key clears its check)
   }
   if (!api.answerLive(s)) return 'ignore';
-  let top = s.entry ?? '';
-  let bottom = s.den ?? '';
-  let part = s.part ?? 'num';
-  let sel = Boolean(s.denSel);
-  // (after the simplify nudge the first digit starts the fraction again; the boxes keep what was typed until then, to look at)
-  if (s.ansFresh && (action.type === 'digit' || action.type === 'toggleSign')) { top = ''; bottom = ''; part = 'num'; }
+  let box = { top: s.entry ?? '', bottom: s.den ?? '', part: s.part ?? 'num' };
+  // (after the simplify nudge the first digit or minus starts the box again; it keeps what was typed until then, to look at)
+  if (s.ansFresh && (action.type === 'digit' || action.type === 'toggleSign' || (action.type === 'typeChar' && action.ch === '-'))) box = { top: '', bottom: '', part: 'num' };
   // (a decimal point is written where it was typed, so the student sees what they typed, and is answered at once: Build V)
   const dot = action.type === 'typeChar' && (action.ch === '.' || action.ch === ',');
-  if (dot) { if (part === 'num') top += '.'; else bottom += '.'; }
-  const toBottom = (action.type === 'typeChar' && action.ch === '/') || (action.type === 'ansPart' && action.part === 'den');
-  // (moving to the bottom selects what is there: the next digit replaces it, as the fraction blank's boxes do, Build P)
-  if (toBottom) { if (part !== 'den' && bottom !== '') sel = true; part = 'den'; }
-  else if (action.type === 'ansPart') part = 'num';
-  else if (dot) { /* written above */ }
-  else if (action.type === 'toggleSign' || (action.type === 'typeChar' && action.ch === '-')) top = top.startsWith('-') ? top.slice(1) : `-${top}`;   // (the minus is the top's)
-  else if (action.type === 'digit') {
-    if (!Number.isInteger(action.digit)) return 'ignore';
-    if (part === 'num') { if (top.replace('-', '').length >= TOP_MAX) return 'ignore'; top += String(action.digit); }
-    else { if (sel) { bottom = ''; sel = false; } if (bottom.length >= BOTTOM_MAX) return 'ignore'; bottom += String(action.digit); }
-  } else if (action.type === 'backspace') {
-    if (part === 'den' && bottom === '') part = 'num';
-    else if (part === 'den') { bottom = sel ? '' : bottom.slice(0, -1); sel = false; }
-    else top = top.slice(0, -1);
-  } else return 'ignore';
-  if (part !== 'den') sel = false;
-  if (top === (s.entry ?? '') && bottom === (s.den ?? '') && part === (s.part ?? 'num') && sel === Boolean(s.denSel)) return 'ignore';
+  const next = boxKey(box, action, { topMax: TOP_MAX, bottomMax: BOTTOM_MAX, dot: (b) => (b.part === 'den' ? { ...b, bottom: `${b.bottom}.` } : { ...b, top: `${b.top}.` }) });
+  if (!next) return 'ignore';
+  if (next.top === (s.entry ?? '') && next.bottom === (s.den ?? '') && next.part === (s.part ?? 'num')) return 'ignore';
   api.fold(s);                                                                       // typing a value commits the move before it
-  Object.assign(s, { entry: top, den: bottom, part, denSel: sel, typing: 'answer', ansFresh: false });
+  Object.assign(s, { entry: next.top, den: next.part === 'den' ? next.bottom : '', part: next.part, typing: 'answer', ansFresh: false });
   return dot ? api.say(s, 'sNoDecimal', {}, false) : s;
 }
 
-// ---------- the check: a fraction read from the two boxes ----------
+// ---------- the check: a fraction read from the box ----------
 function check(s, api) {
   if (s.sub) return s;
   if (/\./.test(`${s.entry}${s.den}`)) return api.say(s, 'sNoDecimal', {}, false);
+  if (s.part === 'den' && !/\d/.test(s.den ?? '') && /\d/.test(s.entry ?? '')) return 'ignore';   // (`3/` waits for its bottom: Build AF)
   const r = readFraction(s.entry, s.den);
   if (r.key) return api.say(s, r.key, {}, true);
   if (!api.answerLive(s)) return 'ignore';
@@ -119,7 +106,7 @@ function check(s, api) {
     s.answers.push({ typed: `${v.n}/${v.d}`, tag: 'unsimplified' });
     const second = s.simplifyTries >= 2;
     if (second && !s.supportsShown.includes('hint')) s.supportsShown.push('hint');
-    Object.assign(s, { ansFresh: true, part: 'num' });
+    Object.assign(s, { ansFresh: true });                                              // (the box keeps `15/6` on screen)
     return api.say(s, 'sSimplify', { second }, false);
   }
   const p = s.problem;
@@ -197,13 +184,12 @@ const own = {
     switch (action.type) {
       case 'check': return check(s, api);
       case 'conclude': return conclude(s, action, api);
-      // a click on either box clears it and puts the cursor in it (Build H)
+      // a click on the box clears it and puts the cursor in it (Build H; one box since Build AF)
       case 'focus':
-        if (action.target !== 'ansTop' && action.target !== 'ansBottom') return undefined;
-        if (!api.answerLive(s)) return 'ignore';
+        if (action.target !== 'answer') return undefined;
+        if (!api.answerLive(s)) return undefined;
         if (s.sub) { if (!(s.sub.kind === 'value' && s.sub.step >= api.subTotal(s.sub) && !s.sub.ok)) return 'ignore'; s.sub = null; }
-        Object.assign(s, action.target === 'ansTop' ? { entry: '', part: 'num' } : { den: '', part: 'den' }, { denSel: false });
-        Object.assign(s, { typing: 'answer', ansFresh: false });
+        Object.assign(s, { entry: '', den: '', part: 'num', typing: 'answer', ansFresh: false });
         return s;
       case 'take': return take(s, action, api, MOVE);
       case 'flip': return singleTerm(s.board) && otherTerm(s.board).kind === 'ratio' ? flipRatio(s, api, MOVE) : undefined;
@@ -221,7 +207,7 @@ const own = {
         return undefined;
     }
   },
-  extra: { den: '', part: 'num', denSel: false, ansFresh: false, simplifyTries: 0 },
+  extra: { den: '', part: 'num', ansFresh: false, simplifyTries: 0 },
   loop: {
     // x on one side before checking (Karl's rule), and no x at all: the statement is the answer, x = stays greyed (Build V2)
     answerBlocked: (s) => xBoth(s.board) || noX(s.board),

@@ -1,7 +1,94 @@
 {
   "_about": "The test-links page (test-links.html) reads this list: Karl's change list. `checks` is the Features to check section at the top: one item per new feature (id, name, build, one link, numbered steps, what you should see), written from the real code and walked through with tests/features/walk.mjs before a build is called finished; the ticks live only in Karl's browser, and an item stays here until Karl has ticked it. The rest of the page: Live = on the site for everyone. Testing = behind a flag, waiting for Karl to keep or retire it. Retired = deleted. Every build adds or updates its entries (CLAUDE.md, Working with Karl). Each entry is a name, one plain sentence (`about`) and, for Live and Testing, its buttons. A button's `query` is the part after the address: card, level, seed, flags, sign-in skipped. `level` in a link is the saved level number (Add to both sides and Divide it: link level 2 is shown as Level 1). `reset: true` clears this browser's progress first; `look` is one sentence on what to look for; `notLive` says plainly why a link won't work on the live site.",
-  "updated": "2026-11-05",
+  "updated": "2026-11-10",
   "checks": [
+    {
+      "id": "af-box",
+      "name": "A fraction answer is typed in one box, as written",
+      "build": "Build AF",
+      "link": {
+        "label": "Open Strange solutions · Level 1",
+        "query": "?pack=strange-solutions&level=1&seed=1&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Strange solutions, Level 1, on 9x + 1 = 7x + 6.",
+        "Drag the 7x across the = onto the left side and let go. Drag the −7x onto the 9x, type 2x and press Enter. Click Add, type −1 and press Enter. Drag the −1 onto the 6, type 5 and press Enter. Click Divide (÷), type 2 and press Enter. The row reads x = 5/2.",
+        "Click the box after x = and type −4. Then press Backspace twice.",
+        "Type / (a slash with nothing before it). Then type 3/ and press Enter.",
+        "Type 0 and press Enter.",
+        "Click the box, type 5/2 and press Enter."
+      ],
+      "see": "There is one box after x =, with nothing in it until you type. −4 shows as typed and two Backspaces empty the box. The first slash does nothing. 3/ shows “3/” with the green Check greyed, and Enter does nothing. 3/0 gets “The bottom of a fraction can’t be 0.” 5/2 shows “5/2”, and after Enter it waits to be dragged into x."
+    },
+    {
+      "id": "af-try-box",
+      "name": "Try a number takes a fraction in one box",
+      "build": "Build AF",
+      "link": {
+        "label": "Open Strange solutions · Level 4",
+        "query": "?pack=strange-solutions&level=4&seed=1&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button (7x + 3 = 7x + 13). Click Add (+), then + ▢x, type −7, press Enter, then click No solution.",
+        "Click Try a number. Type 3/ and look at the green Try.",
+        "Type 2 and press Enter. Drag the 3/2 onto each x of 7x + 3 = 7x + 13 and press Enter until the balance appears."
+      ],
+      "see": "Try a number has one box after x =. With 3/ in it the green Try is greyed; with 3/2 it works. The balance appears with “x = 3/2. Right side is heavier by 10.”"
+    },
+    {
+      "id": "af-keypad",
+      "name": "On a touch screen: the keypad’s / key",
+      "build": "Build AF",
+      "link": {
+        "label": "Open Strange solutions · Level 4",
+        "query": "?pack=strange-solutions&level=4&seed=1&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "On a touch screen (a tablet, or a Chromebook with a touch screen), click the button (7x + 3 = 7x + 13). Tap Add (+) twice (the first tap shows what it does), then tap + ▢x, tap ± and 7 on the keypad, tap Go, then tap No solution.",
+        "Tap Try a number. On the keypad tap 3, then /, then 2.",
+        "Tap the green Try."
+      ],
+      "see": "The keypad has a / key at its end, and every key works here (before this build the keypad came up greyed for Try a number, so nothing could be typed on a tablet). The box shows 3/2; after Try, the check starts with the 3/2 waiting to be dragged into x. The keypad does not cover the box, the Try button or the panel."
+    },
+    {
+      "id": "af-simplify",
+      "name": "15/6 is still nudged, and the box keeps it to look at",
+      "build": "Build AF",
+      "link": {
+        "label": "Open Strange solutions · Level 2",
+        "query": "?pack=strange-solutions&level=2&seed=27&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Strange solutions, Level 2, on 2x + 10 = −4x − 5.",
+        "Drag the −4x across the = onto the left side and let go. Drag the 4x onto the 2x, type 6x and press Enter. Click Add, type −10 and press Enter. Drag the −10 onto the −5, type −15 and press Enter. Click Divide (÷), type 6 and press Enter. The row reads x = −15/6.",
+        "Click the box after x =, type 15/6 and press Enter.",
+        "Type 5."
+      ],
+      "see": "“Can you simplify this further?” appears, nothing red and no check, and the box still shows 15/6. Typing 5 starts the box again: it shows 5."
+    },
+    {
+      "id": "af-student",
+      "name": "Play it like a student: fraction answer",
+      "build": "Build AF",
+      "link": {
+        "label": "Open 3x + 4 = 4",
+        "query": "?pack=strange-solutions&level=4&seed=178&problem=5&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Strange solutions, Level 4, on 3x + 4 = 4. You are going to play a student who gets things wrong.",
+        "Click Add (+), type −4 and press Enter. Click Divide (÷), type 3 and press Enter. The row is x = 0.",
+        "Mistake 1, a fraction for a whole answer: click the box after x =, type 3/2 and press Enter. Drag the 3/2 onto the x and press Enter until the check ends. Then press Undo.",
+        "Mistake 2, the slash first: type / then 7. Look at the box, then press Backspace.",
+        "Mistake 3, a fraction that is not simplest: type 15/6 and press Enter.",
+        "Now the answer: type 0, press Enter, drag the 0 onto the x and press Enter until the check ends."
+      ],
+      "see": "Mistake 1 is checked like any value and ends Not balanced (“When x = 3/2, the equation is not balanced.”). Mistake 2: the slash does nothing and the box shows 7. Mistake 3 gets the gentle “Can you simplify this further?”, not red, and no check. 0 ends Balanced."
+    },
     {
       "id": "v2-placed-one-more",
       "name": "A level passed with no help needs only one more problem",
@@ -98,7 +185,7 @@
       },
       "steps": [
         "Click the button (7x + 3 = 7x + 13). Click Add (+), then + ▢x, type −7, press Enter, then click No solution.",
-        "Click Try a number. Type 3/2 (3, then /, then 2) and press Enter.",
+        "Click Try a number. Type 3/2 and press Enter.",
         "Drag the 3/2 onto the first x of 7x + 3 = 7x + 13, then onto the second x. Press Enter until the balance appears.",
         "Click Try a number again, type 5, press Enter, drag the 5 onto each x and press Enter until the balance appears."
       ],
@@ -488,7 +575,7 @@
         "Click the button. It opens Strange solutions, Level 1, on 6x + 6 = 3x + 5.",
         "Drag the 3x across the = onto the left side and let go. Drag the −3x onto the 6x, type 3x and press Enter. Click Add, type −6 and press Enter. Drag the −6 onto the 5, type −1 and press Enter.",
         "Click Divide (÷), type 3 and press Enter. The row reads x = −1/3.",
-        "Click the left box after x =, type −1/3 (the minus, 1, then /, then 3) and press Enter. Drag the −1/3 onto each x, then press Enter for each line until the check ends."
+        "Click the box after x =, type −1/3 (the minus, 1, then /, then 3) and press Enter. Drag the −1/3 onto each x, then press Enter for each line until the check ends."
       ],
       "see": "The check reads 6(−1/3) + 6 = 3(−1/3) + 5, then −6/3 + 6 = −3/3 + 5, then −2 + 6 = −1 + 5 (the −6/3 and −3/3 written as the whole numbers they are), then 4 = 4 and ✓ Balanced. No line carries −6/3 along."
     },
@@ -505,7 +592,7 @@
         "Click the button. It opens Strange solutions, Level 1, on 3x − 15 = −3x − 4.",
         "Drag the −3x across the = onto the left side and let go. Drag the 3x onto the first 3x, type 6x and press Enter. Click Add, type 15 and press Enter. Drag the 15 onto the −4, type 11 and press Enter.",
         "Click Divide (÷), type 6 and press Enter. The row reads x = 11/6.",
-        "Click the left box after x =, type 11/6 and press Enter. Drag the 11/6 onto each x, then press Enter for each line until the check ends."
+        "Click the box after x =, type 11/6 and press Enter. Drag the 11/6 onto each x, then press Enter for each line until the check ends."
       ],
       "see": "The check reads 3(11/6) − 15 = −3(11/6) − 4, then 33/6 − 15 = −33/6 − 4, then 11/2 − 15 = −11/2 − 4 (lowest terms, still inside the sum), then 11/2 − 30/2 = −11/2 − 8/2, then −19/2 = −19/2 and ✓ Balanced."
     },
@@ -522,7 +609,7 @@
         "Click the button. It opens Strange solutions, Level 1, on 3x + 10 = −2x + 2.",
         "Drag the −2x across the = onto the left side and let go. Drag the 2x onto the 3x, type 5x and press Enter. Click Add, type −10 and press Enter. Drag the −10 onto the 2, type −8 and press Enter.",
         "Click Divide (÷), type 5 and press Enter. The row reads x = −8/5.",
-        "Click the left box after x =, type −8/5 and press Enter. Drag the −8/5 onto each x, then press Enter for each line until the check ends."
+        "Click the box after x =, type −8/5 and press Enter. Drag the −8/5 onto each x, then press Enter for each line until the check ends."
       ],
       "see": "The check reads 3(−8/5) + 10 = −2(−8/5) + 2, then −24/5 + 10 = 16/5 + 2 (these stay as they are: they are already in lowest terms), then −24/5 + 50/5 = 16/5 + 10/5, then 26/5 = 26/5 and ✓ Balanced. Never a mixed number or a decimal."
     },
@@ -539,7 +626,7 @@
         "Click the button. It opens Strange solutions, Level 3, on 5x − 3 = 2x + 10.",
         "Drag the 2x across the = onto the left side and let go. Drag the −2x onto the 5x, type 3x and press Enter. Click Add, type 3 and press Enter. Drag the 3 onto the 10, type 13 and press Enter.",
         "Click Divide (÷), type 3 and press Enter. The row reads x = 13/3.",
-        "Click the left box after x =, type 13/3 and press Enter. Drag the 13/3 onto each x, then press Enter for each line until the check ends."
+        "Click the box after x =, type 13/3 and press Enter. Drag the 13/3 onto each x, then press Enter for each line until the check ends."
       ],
       "see": "The check reads 5(13/3) − 3 = 2(13/3) + 10, then 65/3 − 3 = 26/3 + 10, then 65/3 − 9/3 = 26/3 + 30/3, then 56/3 = 56/3 and ✓ Balanced: 65/3 and 56/3 stay improper fractions, never 21 2/3 or 18 2/3."
     },
@@ -556,7 +643,7 @@
         "Click the button. It opens Strange solutions, Level 1, on 3x − 15 = −3x − 4.",
         "Drag the −3x across the = onto the left side and let go. Drag the 3x onto the first 3x, type 6x and press Enter. Click Add, type 15 and press Enter. Drag the 15 onto the −4, type 11 and press Enter.",
         "Click Divide (÷), type 6 and press Enter.",
-        "Click the left box after x =, type 5/6 (a wrong value) and press Enter. Drag the 5/6 onto each x, then press Enter for each line until the check ends."
+        "Click the box after x =, type 5/6 (a wrong value) and press Enter. Drag the 5/6 onto each x, then press Enter for each line until the check ends."
       ],
       "see": "The check reads 3(5/6) − 15 = −3(5/6) − 4, then 15/6 − 15 = −15/6 − 4, then 5/2 − 15 = −5/2 − 4 (both sides simplified), then 5/2 − 30/2 = −5/2 − 8/2, then −25/2 = −13/2 and ✗ Not balanced."
     },
@@ -829,7 +916,7 @@
       "steps": [
         "Click the button. It opens Strange solutions, Level 2, on 2x + 10 = −4x − 5.",
         "Drag the −4x across the = onto the left side. Drag the 4x onto the 2x, type 6x, Enter. Click Add, type −10, Enter. Drag the −10 onto the −5, type −15, Enter. Click Divide (÷), type 6, Enter.",
-        "Click the left box after x =, type −5/2 and press Enter. Drag the −5/2 onto each x."
+        "Click the box after x =, type −5/2 and press Enter. Drag the −5/2 onto each x."
       ],
       "see": "The check’s second line reads 2(−5/2) + 10 = −4(−5/2) − 5, each −5/2 stacked, with parentheses as tall as the fraction."
     },
@@ -1748,7 +1835,7 @@
         "Click the button. It opens Strange solutions, Level 1, on 9x + 1 = 7x + 6.",
         "Drag the 7x across the = onto the left side and let go. Drag the −7x onto the 9x, type 2x and press Enter. Click Add, type −1 and press Enter. Drag the −1 onto the 6, type 5 and press Enter.",
         "Click Divide (÷), type 2 and press Enter.",
-        "Click the left box after x =, type 5/2 (5, then /, then 2) and press Enter. Drag the 5/2 onto each x, then press Enter for each line."
+        "Click the box after x =, type 5/2 (5, then /, then 2) and press Enter. Drag the 5/2 onto each x, then press Enter for each line."
       ],
       "see": "The rows read 2x + 1 = 6, then 2x = 5, then x = 5/2 written as 5 over 2, with no “doesn’t split” message. The check ends 47/2 = 47/2 and ✓ Balanced."
     },
@@ -1782,11 +1869,11 @@
         "Drag the −4x across the = onto the left side and let go. Drag the 4x onto the 2x, type 6x and press Enter.",
         "Click Add, type −10 and press Enter. Drag the −10 onto the −5, type −15 and press Enter.",
         "Click Divide (÷), type 6 and press Enter. The row reads x = −15/6.",
-        "Click the left box after x =, type −15/6 and press Enter.",
-        "Click the left box again, type −15/6 and press Enter.",
-        "Click the left box, type −5/2 and press Enter. Drag the −5/2 onto each x, then press Enter for each line."
+        "Click the box after x =, type −15/6 and press Enter.",
+        "Click the box again, type −15/6 and press Enter.",
+        "Click the box, type −5/2 and press Enter. Drag the −5/2 onto each x, then press Enter for each line."
       ],
-      "see": "The first −15/6 gets a small note beside the boxes, “Can you simplify this further?”, nothing red and no check. The second adds “Divide the top and the bottom by the same number.” −5/2 is checked and ends ✓ Balanced."
+      "see": "The first −15/6 gets a small note beside the box, “Can you simplify this further?”, nothing red and no check. The second adds “Divide the top and the bottom by the same number.” −5/2 is checked and ends ✓ Balanced."
     },
     {
       "id": "v-check",
@@ -1801,9 +1888,9 @@
         "Click the button. It opens Level 1 on 9x + 1 = 7x + 6.",
         "Drag the 7x across the = onto the left side and let go. Drag the −7x onto the 9x, type 2x and press Enter. Click Add, type −1 and press Enter. Drag the −1 onto the 6, type 5 and press Enter.",
         "Click Divide (÷), type 2 and press Enter.",
-        "Click the left box after x =, type 5/2 and press Enter. Drag the 5/2 (drawn as 5 over 2) onto each x, then press Enter for each line until it says Balanced."
+        "Click the box after x =, type 5/2 and press Enter. Drag the 5/2 onto each x, then press Enter for each line until it says Balanced."
       ],
-      "see": "The value you drag is one stacked fraction. Each Enter does one kind of step on both sides at once: 9(5/2) + 1 = 7(5/2) + 6, then 45/2 + 1 = 35/2 + 6 (both products), then 45/2 + 2/2 = 35/2 + 12/2 (both whole numbers written over 2), then 47/2 = 47/2 and ✓ Balanced. Every fraction is drawn top over bottom."
+      "see": "The value you drag reads 5/2, as you typed it; dropped into x it is drawn top over bottom. Each Enter does one kind of step on both sides at once: 9(5/2) + 1 = 7(5/2) + 6, then 45/2 + 1 = 35/2 + 6 (both products), then 45/2 + 2/2 = 35/2 + 12/2 (both whole numbers written over 2), then 47/2 = 47/2 and ✓ Balanced. Every fraction is drawn top over bottom."
     },
     {
       "id": "v-zero",
@@ -1819,13 +1906,13 @@
         "Drag the 2x across the = onto the right side and let go. Drag the −2x onto the 8x, type 6x and press Enter.",
         "Click Add, type 7 and press Enter. The −7 on each side is crossed out, and the row reads 0 = 6x.",
         "Click Divide (÷), type 6 and press Enter.",
-        "Click the left box after x =, type 0 and press Enter. Drag the 0 onto each x, then press Enter for each line."
+        "Click the box after x =, type 0 and press Enter. Drag the 0 onto each x, then press Enter for each line."
       ],
       "see": "0 is an answer like any other: the check reads 2(0) − 7 = 8(0) − 7, works down to −7 = −7 and ends ✓ Balanced."
     },
     {
       "id": "v-keys",
-      "name": "Typing a fraction: the two boxes",
+      "name": "Typing a fraction: one box, as typed",
       "build": "Build V",
       "link": {
         "label": "Open Strange solutions · Level 1",
@@ -1836,11 +1923,11 @@
         "Click the button. It opens Level 1 on 9x + 1 = 7x + 6.",
         "Drag the 7x across the = onto the left side and let go. Drag the −7x onto the 9x, type 2x and press Enter. Click Add, type −1 and press Enter. Drag the −1 onto the 6, type 5 and press Enter.",
         "Click Divide (÷), type 2 and press Enter.",
-        "Click the left box after x =, type 5, press the down arrow, type 2.",
-        "Click the left box again.",
+        "Click the box after x = and type 5/2. Then press Backspace twice and type /3.",
+        "Click the box again.",
         "Type 2.5."
       ],
-      "see": "The down arrow moves the cursor to the right box (so do / and Tab), which shows 2. Clicking the left box empties it for retyping. Typing 2.5 gets “Write it as a fraction, like 5/2.” beside the boxes."
+      "see": "The box shows exactly what you type: 5/2, then 5 after the two Backspaces (the slash goes too), then 5/3. Clicking the box empties it for retyping. Typing 2.5 gets “Write it as a fraction, like 5/2.” beside the box."
     },
     {
       "id": "student-strange",
@@ -1855,10 +1942,10 @@
         "Click the button. It opens Level 2 on 2x + 10 = −4x − 5.",
         "Mistake 1, do nothing for 11 seconds, then click I’m stuck. A good response: I’m stuck flashes after 10 seconds, and the hint lights an x-term with “Move this x-term to the other side.” Click Got it.",
         "Drag the −4x across the = onto the left side. Drag the 4x onto the 2x, type 6x, Enter. Click Add, type −10, Enter. Drag the −10 onto the −5, type −15, Enter. Click Divide (÷), type 6, Enter. The row reads x = −15/6.",
-        "Mistake 2, leave it unsimplified (and drop the sign): click the left box after x =, type 15/6 and press Enter. A good response is the gentle “Can you simplify this further?”, never red, and no check.",
-        "Mistake 3, a decimal: click the left box and type 2.5. A good response: “Write it as a fraction, like 5/2.”",
-        "Mistake 4, the wrong sign: click the left box, type 5/2, press Enter, drag the 5/2 onto each x and press Enter for each line. A good response ends Not balanced with “When x = 5/2, the equation is not balanced.”",
-        "Press Undo. Mistake 5, upside down: click the left box, type −2/5, press Enter, drag it onto each x and press Enter for each line. A good response ends Not balanced and adds “Check which number goes on top: x is the number divided by the number in front of x.”",
+        "Mistake 2, leave it unsimplified (and drop the sign): click the box after x =, type 15/6 and press Enter. A good response is the gentle “Can you simplify this further?”, never red, and no check.",
+        "Mistake 3, a decimal: click the box and type 2.5. A good response: “Write it as a fraction, like 5/2.”",
+        "Mistake 4, the wrong sign: click the box, type 5/2, press Enter, drag the 5/2 onto each x and press Enter for each line. A good response ends Not balanced with “When x = 5/2, the equation is not balanced.”",
+        "Press Undo. Mistake 5, upside down: click the box, type −2/5, press Enter, drag it onto each x and press Enter for each line. A good response ends Not balanced and adds “Check which number goes on top: x is the number divided by the number in front of x.”",
         "Press Undo. Mistake 6, press I’m stuck now. A good response: “Simplify −15/6: divide the top and bottom by the same number, then type x.”"
       ],
       "see": "Every mistake gets an answer in its own numbers: the unsimplified fraction and the decimal are gentle notes (nothing red, nothing checked), a wrong value is checked and said plainly, an upside-down one gets one more sentence, and I’m stuck points at simplifying. The answer is never shown. (Since Build Y every number added is written in a column: under the first number of each side, at the end of a side with none.)"

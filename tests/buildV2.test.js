@@ -159,7 +159,7 @@ describe('Part 2: x disappears; the conclusion buttons', () => {
     expect(s.rows.at(-2).work.right.some((t) => t.struck)).toBe(true);
     expect(SP.loop?.answerLive?.(s) ?? false).toBe(false);
     expect(concludeOpen(s)).toBe(true);
-    const typed = runS(s, [{ type: 'focus', target: 'ansTop' }, { type: 'digit', digit: 0 }]);
+    const typed = runS(s, [{ type: 'focus', target: 'answer' }, { type: 'digit', digit: 0 }]);
     expect(typed.entry ?? '').toBe('');                                          // (x = 0 can never stand for "no solution")
     expect(shapeOfBoard(s.board, 'strange').id).toBe('NF');
   });
