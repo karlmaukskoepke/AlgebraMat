@@ -29,6 +29,8 @@ Each check prints **PASS** or **FAIL**. A FAIL lists what differed (the first 15
 
 **Not covered** (so the net does not protect it): Count it and Build it (none of their 40-odd levels); the cards between, Flip everything, Two-step equations, Distribute, combine, solve, Variables on both sides and Distribute more, beyond their openings and the no-help runs; animations mid-frame; touch layouts and the keypad; phone widths; sign-in and the class sheet's sending; the placement quiz and the fluency challenge; the problems of cards other than the four above. The standing sweeps (`npm test`: typing, drags, redraws, font size, panel room, the test-out and chooser sweeps) cover some of this in other ways.
 
+**Fixtures that never change:** `legacy-codes.json` (the older save codes above) and `v14-savecodes.json` (the 72 codes and their round-trip flags as recorded on 2026-10-17, read by the save-code unit tests in `tests/flip.test.js`, `tests/savecode.test.js` and `tests/twoStep.test.js`; they read the baseline file until Build AF re-recorded it).
+
 ## When a change is meant to happen
 
 List each intended difference in `INTENDED-CHANGES.md`, above the history line: one table row per change, with the **key** the harness printed, in backticks, in the first column. Rows below the history line (`<!-- history: … -->`) are the record of changes already accepted by a re-baseline; the harness does not read them. A trace key ending `#N-` allows step N and every later step of that run, since one change carries through the rest of the run. The harness also notes any listed key where nothing differed (a stale line).

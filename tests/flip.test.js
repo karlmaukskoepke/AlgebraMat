@@ -217,7 +217,7 @@ describe('the pack, the home screen and the save codes', () => {
 // 72 recorded v14 codes decodes, re-encodes as the same v14 code, and carries over into v15 with the same levels.
 import { readFileSync } from 'node:fs';
 describe('older save codes keep their meaning', () => {
-  const baseline = JSON.parse(readFileSync(new URL('./parity/baseline/savecodes.json', import.meta.url), 'utf8'));
+  const baseline = JSON.parse(readFileSync(new URL('./parity/v14-savecodes.json', import.meta.url), 'utf8'));
   it('every recorded v14 code decodes to the same progress, and v15 carries it unchanged', () => {
     expect(Object.keys(baseline)).toHaveLength(72);
     for (const [name, { code, roundTrip }] of Object.entries(baseline)) {

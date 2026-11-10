@@ -107,12 +107,16 @@ fluency challenge; the problems of cards other than the four above.
 3. **A lead, not fixed (Distribute more, not in this build):** while changing the "can I type" sweep, a new state it reached showed a key
    going into the second distribute box while the focus was on the first (after a distribute, a focus on the second blank, Add's x-term
    option and Apply). I put the sweep's list back so it explores what it did before; worth its own look.
-4. On touch, the first tap on Add shows its preview and the second opens it (as designed); the keypad item's steps say so.
+4. **Three save-code unit tests read the parity baseline file** for their 72 old codes; re-recording the baseline would have taken
+   their codes away. They now read a frozen copy.
+5. On touch, the first tap on Add shows its preview and the second opens it (as designed); the keypad item's steps say so.
 
 ## Checks
 
 - **`npm test`** before each push, Playwright found (no "screenSweep: SKIP"): Part 1: 115 files, 2,533 tests pass; Part 2: 2,536 pass;
-  Part 3: see the push. The sweeps in it: typing, drags, redraws, font size, panel room, the Add cross-out, the menu, form words,
+  Part 3: 2,533 pass and 3 failed at first: three save-code tests read the old codes from the parity baseline file, which the
+  re-record replaced; those 72 codes are now a fixture of their own (`tests/parity/v14-savecodes.json`) and the three tests pass (82 in
+  their files), the rest unchanged. The sweeps in it: typing, drags, redraws, font size, panel room, the Add cross-out, the menu, form words,
   no-times-sign, parentheses, the test-out and chooser sweeps.
 - **New tests:** `tests/buildAF.test.js` (the one box on both places, by the keyboard and the touch keypad: 5, −4, 3/2, −3/2, a slash
   first, a second slash, `3/` then Enter, `3/0`, Backspace across the slash, a minus after the front and letters; the value after Enter;

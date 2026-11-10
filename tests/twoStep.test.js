@@ -332,7 +332,7 @@ describe('the pack, old progress and save codes', () => {
     expect(encodeProgress(back, 16)).toBe(code);
     const v15 = encodeProgress(prog, 15);
     expect(decodeProgress(v15, PACKS).packs['flip-everything'].levels).toEqual([false, true, true, false, true, false]);
-    const baseline = JSON.parse(readFileSync(new URL('./parity/baseline/savecodes.json', import.meta.url), 'utf8'));
+    const baseline = JSON.parse(readFileSync(new URL('./parity/v14-savecodes.json', import.meta.url), 'utf8'));
     for (const [name, { code: old, roundTrip }] of Object.entries(baseline)) {
       const p = decodeProgress(old, PACKS);
       expect(p, name).toBeTruthy();

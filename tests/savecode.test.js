@@ -291,7 +291,7 @@ describe('save code v17 (Build M)', () => {
     const fromV16 = decodeProgress(v16, PACKS);
     expect(fromV16.packs['distribute-solve'].levels).toEqual(Array(5).fill(false));          // (v16 has no room for it: unfinished)
     expect(fromV16.packs['two-step-equations'].levels).toEqual(prog.packs['two-step-equations'].levels);
-    const baseline = JSON.parse(readFileSync(new URL('./parity/baseline/savecodes.json', import.meta.url), 'utf8'));
+    const baseline = JSON.parse(readFileSync(new URL('./parity/v14-savecodes.json', import.meta.url), 'utf8'));
     for (const [name, { code: old }] of Object.entries(baseline)) {
       const p = decodeProgress(old, PACKS);
       expect(p, name).toBeTruthy();

@@ -4545,6 +4545,30 @@
       "title": "Live",
       "items": [
         {
+          "name": "Build AF: one box for fraction answers, Add’s walkthrough in columns (2026-11-10)",
+          "about": "Strange solutions’ answer and Try a number take a fraction in one box, typed as written (3/2), with the slash key; the keypad has a / key there and now works in Try a number on a tablet. Add’s “See why it works” writes the −3 in columns under each side, as the practice screens do. Also: the parity check now records the newer cards and catches small changes, including on dimmed screens (nothing on screen for this).",
+          "links": [
+            {
+              "label": "Strange solutions · Level 1 (type 5/2 in the box)",
+              "query": "?pack=strange-solutions&level=1&seed=1&nosignin=1",
+              "reset": true,
+              "look": "After the moves to x = 5/2, the box after x = shows what you type, 5/2; 3/ keeps the green button grey."
+            },
+            {
+              "label": "Try a number: 7x + 3 = 7x + 13",
+              "query": "?pack=strange-solutions&level=4&seed=1&nosignin=1",
+              "reset": true,
+              "look": "Add + ▢x −7, No solution, Try a number: one box; type 3/2."
+            },
+            {
+              "label": "Add to both sides · See why it works",
+              "query": "?pack=add-both&level=1&seed=7&problem=5&nosignin=1",
+              "reset": true,
+              "look": "Answer the question, Next: the −3 is written under the +3 and under the 5."
+            }
+          ]
+        },
+        {
           "name": "Build V2: Strange solutions Levels 4-5, No solution and Infinitely many, Try a number with the balance (2026-11-07)",
           "about": "Strange solutions shows all five levels. When x disappears, x = greys and two buttons appear: “No solution” (never balanced) and “Infinitely many” (always balanced). After a right pick, “Try a number” checks the original equation with any number and shows a pan balance in the look of Karl’s Balanced or Not? page, with “Right side is heavier by 4.” and the pattern line. Level 4 mixes no solution, infinitely many and one solution (the zero case 3x + 4 = 4 in every set); Level 5 adds distributing. Also in this build: a placed (silver) level opens on its last problem, so one problem earns gold.",
           "links": [

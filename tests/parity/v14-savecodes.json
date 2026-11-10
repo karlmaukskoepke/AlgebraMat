@@ -1,0 +1,290 @@
+{
+ "empty": {
+  "code": "MAT-G2222222222222222X",
+  "roundTrip": true
+ },
+ "combineit-L1": {
+  "code": "MAT-G22222222224CPPC4X",
+  "roundTrip": true
+ },
+ "combineit-L2": {
+  "code": "MAT-G22222222226QCBP6V",
+  "roundTrip": true
+ },
+ "combineit-L3": {
+  "code": "MAT-G2222222222BDPNBAR",
+  "roundTrip": true
+ },
+ "combineit-L4": {
+  "code": "MAT-G2222222222MSC9MJG",
+  "roundTrip": true
+ },
+ "combineit-L5": {
+  "code": "MAT-G22222222238HPH83W",
+  "roundTrip": true
+ },
+ "flipit-L1": {
+  "code": "MAT-G2222222222222223H",
+  "roundTrip": true
+ },
+ "flipit-L2": {
+  "code": "MAT-G22222222222222244",
+  "roundTrip": true
+ },
+ "flipit-L3": {
+  "code": "MAT-G22222222222222269",
+  "roundTrip": true
+ },
+ "flipit-L4": {
+  "code": "MAT-G222222222222222AK",
+  "roundTrip": true
+ },
+ "flipit-L5": {
+  "code": "MAT-G222222222222222J8",
+  "roundTrip": true
+ },
+ "lasso-L1": {
+  "code": "MAT-G22222222222222333",
+  "roundTrip": true
+ },
+ "lasso-L2": {
+  "code": "MAT-G22222222222222447",
+  "roundTrip": true
+ },
+ "lasso-L3": {
+  "code": "MAT-G2222222222222266F",
+  "roundTrip": true
+ },
+ "lasso-L4": {
+  "code": "MAT-G22222222222222AAY",
+  "roundTrip": true
+ },
+ "lasso-L5": {
+  "code": "MAT-G22222222222222JJZ",
+  "roundTrip": true
+ },
+ "lasso-L6": {
+  "code": "MAT-G22222222222223435",
+  "roundTrip": true
+ },
+ "lasso-L7": {
+  "code": "MAT-G2222222222222464B",
+  "roundTrip": true
+ },
+ "boxes-L1": {
+  "code": "MAT-G22222222222226A6Q",
+  "roundTrip": true
+ },
+ "boxes-L2": {
+  "code": "MAT-G2222222222222AJAG",
+  "roundTrip": true
+ },
+ "boxes-L3": {
+  "code": "MAT-G2222222222222K3JJ",
+  "roundTrip": true
+ },
+ "boxes-L4": {
+  "code": "MAT-G22222222222235537",
+  "roundTrip": true
+ },
+ "boxes-L5": {
+  "code": "MAT-G2222222222224884F",
+  "roundTrip": true
+ },
+ "boxes-L6": {
+  "code": "MAT-G2222222222226EE6Y",
+  "roundTrip": true
+ },
+ "groups-of-terms-L1": {
+  "code": "MAT-G222222222222ATTAZ",
+  "roundTrip": true
+ },
+ "groups-of-terms-L2": {
+  "code": "MAT-G222222222222KMKJ3",
+  "roundTrip": true
+ },
+ "groups-of-terms-L3": {
+  "code": "MAT-G22222222222368637",
+  "roundTrip": true
+ },
+ "groups-of-terms-L4": {
+  "code": "MAT-G222222222224AEA4F",
+  "roundTrip": true
+ },
+ "groups-of-terms-L5": {
+  "code": "MAT-G222222222226JTJ6Y",
+  "roundTrip": true
+ },
+ "groups-of-terms-L6": {
+  "code": "MAT-G22222222222B4M3AF",
+  "roundTrip": true
+ },
+ "groups-of-terms-L7": {
+  "code": "MAT-G22222222222M774JF",
+  "roundTrip": true
+ },
+ "groups-of-terms-L8": {
+  "code": "MAT-G222222222237CC73X",
+  "roundTrip": true
+ },
+ "distribute-combine-L1": {
+  "code": "MAT-G2222222224F2BZE4R",
+  "roundTrip": true
+ },
+ "distribute-combine-L2": {
+  "code": "MAT-G2222222226V2NYT62",
+  "roundTrip": true
+ },
+ "distribute-combine-L3": {
+  "code": "MAT-G222222222BQ3AXKAY",
+  "roundTrip": true
+ },
+ "distribute-combine-L4": {
+  "code": "MAT-G222222222ND4KV5JD",
+  "roundTrip": true
+ },
+ "distribute-combine-L5": {
+  "code": "MAT-G2222222239R76Q93P",
+  "roundTrip": true
+ },
+ "value-L1": {
+  "code": "MAT-G222222224HFCBDG4A",
+  "roundTrip": true
+ },
+ "value-L2": {
+  "code": "MAT-G222222226ZVPMRX6N",
+  "roundTrip": true
+ },
+ "value-L3": {
+  "code": "MAT-G22222222BZRC8GUAY",
+  "roundTrip": true
+ },
+ "value-L4": {
+  "code": "MAT-G22222222NZFPEYNJ9",
+  "roundTrip": true
+ },
+ "add-both-L1": {
+  "code": "MAT-G222DR25MB7KMC65AA",
+  "roundTrip": true
+ },
+ "add-both-L2": {
+  "code": "MAT-G222SF297MD67PA8JX",
+  "roundTrip": true
+ },
+ "add-both-L3": {
+  "code": "MAT-G223HV2GD7RADBJF3E",
+  "roundTrip": true
+ },
+ "add-both-L4": {
+  "code": "MAT-G2252Q2XRDFJRN3V44",
+  "roundTrip": true
+ },
+ "add-both-L5": {
+  "code": "MAT-G2283D3VFRW4G95Q6S",
+  "roundTrip": true
+ },
+ "add-both-L6": {
+  "code": "MAT-G22E4R5QWGS6XG9DA3",
+  "roundTrip": true
+ },
+ "divide-it-L1": {
+  "code": "MAT-G22T7F9ESYHBUXGRJQ",
+  "roundTrip": true
+ },
+ "divide-it-L2": {
+  "code": "MAT-G23KCVGUJWZNPUYG36",
+  "roundTrip": true
+ },
+ "divide-it-L3": {
+  "code": "MAT-G255QQYP4TZACPWX4P",
+  "roundTrip": true
+ },
+ "divide-it-L4": {
+  "code": "MAT-G289EEXB7MYJQCTU6D",
+  "roundTrip": true
+ },
+ "divide-it-L5": {
+  "code": "MAT-G2EGTUUMD8X4DQMNAJ",
+  "roundTrip": true
+ },
+ "divide-it-L6": {
+  "code": "MAT-G2TYMPP7RFU6SE89JT",
+  "roundTrip": true
+ },
+ "one-step-L1": {
+  "code": "MAT-G22222224KXSNPUJ47",
+  "roundTrip": false
+ },
+ "one-step-L2": {
+  "code": "MAT-G222222276VJACP36D",
+  "roundTrip": false
+ },
+ "one-step-L3": {
+  "code": "MAT-G2222222CBR3JQB4A3",
+  "roundTrip": false
+ },
+ "one-step-L4": {
+  "code": "MAT-G2222222PNF54DM6JE",
+  "roundTrip": true
+ },
+ "one-step-L5": {
+  "code": "MAT-G2222223C9V86S7B3J",
+  "roundTrip": false
+ },
+ "switch-L1": {
+  "code": "MAT-G22227PURKM2AJ6F6F",
+  "roundTrip": true
+ },
+ "switch-L2": {
+  "code": "MAT-G2222DCPG672K3AVAV",
+  "roundTrip": true
+ },
+ "switch-L3": {
+  "code": "MAT-G2222RQBXAC354KQJZ",
+  "roundTrip": true
+ },
+ "switch-L4": {
+  "code": "MAT-G2223GDNUJP4876E3B",
+  "roundTrip": false
+ },
+ "switch-L5": {
+  "code": "MAT-G2224XSAP4B6ECAT4X",
+  "roundTrip": true
+ },
+ "switch-L6": {
+  "code": "MAT-G2227VHKB6MATPKK66",
+  "roundTrip": true
+ },
+ "two-step-L1": {
+  "code": "MAT-G222222QB3J7FYRPJ4",
+  "roundTrip": true
+ },
+ "two-step-L2": {
+  "code": "MAT-G222223DM53CWXGC3V",
+  "roundTrip": true
+ },
+ "two-step-L3": {
+  "code": "MAT-G222224S784QTUXP4Y",
+  "roundTrip": true
+ },
+ "two-step-L4": {
+  "code": "MAT-G222227HCE7EMPVB6H",
+  "roundTrip": true
+ },
+ "two-step-L5": {
+  "code": "MAT-G22222CZPTCU8CQMAF",
+  "roundTrip": true
+ },
+ "two-step-L6": {
+  "code": "MAT-G22222QZCKQNEQE7J8",
+  "roundTrip": true
+ },
+ "two-step-L7": {
+  "code": "MAT-G22223EYQ6E9UDTD33",
+  "roundTrip": true
+ },
+ "everything": {
+  "code": "MAT-G3MX89FVET36ERJFGJ",
+  "roundTrip": true
+ }
+}
