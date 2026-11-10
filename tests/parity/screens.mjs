@@ -277,22 +277,43 @@ async function click(page, sel) {
 // of different sizes. A screen differs at FLAG_AT such pixels or more (run.mjs). Build AF, Part 3: it was the share of pixels off by 40.
 export const PIXEL_THRESHOLD = 64;
 export const FLAG_AT = 40;
+// Under the grey cover (an error dims the screen to about 40%), a change is drawn at a fraction of its contrast: a greyed button's word
+// changed shows as 24 to 56 of 255. A pixel is under the cover when nothing within COVER_RADIUS pixels of it is brighter than DARK in either
+// picture (the page's white is dimmed there; next to ordinary dark text there is always white). There it counts from COVER_THRESHOLD.
+export const DARK = 150;
+export const COVER_RADIUS = 6;
+export const COVER_THRESHOLD = 24;
 let diffBrowser = null;
 export async function pixelDiff(a, b) {
   const pw = await loadPlaywright();
   diffBrowser = diffBrowser ?? await pw.chromium.launch();
   const page = await diffBrowser.newPage();
   try {
-    return await page.evaluate(async ([x, y, t]) => {
+    return await page.evaluate(async ([x, y, t, dark, tc, rad]) => {
       const load = (src) => new Promise((ok) => { const i = new Image(); i.onload = () => ok(i); i.src = src; });
       const [i1, i2] = await Promise.all([load(x), load(y)]);
       if (i1.width !== i2.width || i1.height !== i2.height) return -1;
       const px = (img) => { const c = new OffscreenCanvas(img.width, img.height); const g = c.getContext('2d'); g.drawImage(img, 0, 0); return g.getImageData(0, 0, img.width, img.height).data; };
       const d1 = px(i1); const d2 = px(i2);
+      const W = i1.width; const H = i1.height; const r = rad;
+      // the brightest channel of either picture at each pixel, then its maximum over a square of side 2r+1 (rows, then columns)
+      const bright = new Uint8Array(W * H);
+      for (let p = 0; p < W * H; p++) { const i = p * 4; bright[p] = Math.max(d1[i], d1[i + 1], d1[i + 2], d2[i], d2[i + 1], d2[i + 2]); }
+      const rows = new Uint8Array(W * H);
+      for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) { let m = 0; for (let k = Math.max(0, x - r); k <= Math.min(W - 1, x + r); k++) m = Math.max(m, bright[y * W + k]); rows[y * W + x] = m; }
       let n = 0;
-      for (let i = 0; i < d1.length; i += 4) if (Math.abs(d1[i] - d2[i]) > t || Math.abs(d1[i + 1] - d2[i + 1]) > t || Math.abs(d1[i + 2] - d2[i + 2]) > t) n++;
+      for (let p = 0; p < W * H; p++) {
+        const i = p * 4;
+        const off = Math.max(Math.abs(d1[i] - d2[i]), Math.abs(d1[i + 1] - d2[i + 1]), Math.abs(d1[i + 2] - d2[i + 2]));
+        if (off <= tc) continue;
+        if (off > t) { n++; continue; }
+        const x = p % W; const y = (p - x) / W;
+        let m = 0;
+        for (let k = Math.max(0, y - r); k <= Math.min(H - 1, y + r) && m < dark; k++) m = Math.max(m, rows[k * W + x]);
+        if (m < dark) n++;
+      }
       return n;
-    }, [`data:image/png;base64,${a.toString('base64')}`, `data:image/png;base64,${b.toString('base64')}`, PIXEL_THRESHOLD]);
+    }, [`data:image/png;base64,${a.toString('base64')}`, `data:image/png;base64,${b.toString('base64')}`, PIXEL_THRESHOLD, DARK, COVER_THRESHOLD, COVER_RADIUS]);
   } finally {
     await page.close();
   }

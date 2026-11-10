@@ -1,290 +1,1226 @@
 {
+ "legacy:2026-10-17:empty": {
+  "decodes": true,
+  "now": "MAT-Q222222222222222222222222D"
+ },
+ "legacy:2026-10-17:combineit-L1": {
+  "decodes": true,
+  "now": "MAT-Q2222222222222222224CPPC4W"
+ },
+ "legacy:2026-10-17:combineit-L2": {
+  "decodes": true,
+  "now": "MAT-Q2222222222222222226QCBP6V"
+ },
+ "legacy:2026-10-17:combineit-L3": {
+  "decodes": true,
+  "now": "MAT-Q222222222222222222BDPNBAT"
+ },
+ "legacy:2026-10-17:combineit-L4": {
+  "decodes": true,
+  "now": "MAT-Q222222222222222222MSC9MJP"
+ },
+ "legacy:2026-10-17:combineit-L5": {
+  "decodes": true,
+  "now": "MAT-Q2222222222222222238HPH83V"
+ },
+ "legacy:2026-10-17:flipit-L1": {
+  "decodes": true,
+  "now": "MAT-Q2222222222222222222222238"
+ },
+ "legacy:2026-10-17:flipit-L2": {
+  "decodes": true,
+  "now": "MAT-Q2222222222222222222222243"
+ },
+ "legacy:2026-10-17:flipit-L3": {
+  "decodes": true,
+  "now": "MAT-Q222222222222222222222226R"
+ },
+ "legacy:2026-10-17:flipit-L4": {
+  "decodes": true,
+  "now": "MAT-Q22222222222222222222222A4"
+ },
+ "legacy:2026-10-17:flipit-L5": {
+  "decodes": true,
+  "now": "MAT-Q22222222222222222222222JT"
+ },
+ "legacy:2026-10-17:lasso-L1": {
+  "decodes": true,
+  "now": "MAT-Q2222222222222222222222332"
+ },
+ "legacy:2026-10-17:lasso-L2": {
+  "decodes": true,
+  "now": "MAT-Q222222222222222222222244P"
+ },
+ "legacy:2026-10-17:lasso-L3": {
+  "decodes": true,
+  "now": "MAT-Q222222222222222222222266Y"
+ },
+ "legacy:2026-10-17:lasso-L4": {
+  "decodes": true,
+  "now": "MAT-Q2222222222222222222222AAJ"
+ },
+ "legacy:2026-10-17:lasso-L5": {
+  "decodes": true,
+  "now": "MAT-Q2222222222222222222222JJQ"
+ },
+ "legacy:2026-10-17:lasso-L6": {
+  "decodes": true,
+  "now": "MAT-Q222222222222222222222343M"
+ },
+ "legacy:2026-10-17:lasso-L7": {
+  "decodes": true,
+  "now": "MAT-Q222222222222222222222464U"
+ },
+ "legacy:2026-10-17:boxes-L1": {
+  "decodes": true,
+  "now": "MAT-Q2222222222222222222226A6A"
+ },
+ "legacy:2026-10-17:boxes-L2": {
+  "decodes": true,
+  "now": "MAT-Q222222222222222222222AJA7"
+ },
+ "legacy:2026-10-17:boxes-L3": {
+  "decodes": true,
+  "now": "MAT-Q222222222222222222222K3JS"
+ },
+ "legacy:2026-10-17:boxes-L4": {
+  "decodes": true,
+  "now": "MAT-Q222222222222222222223553Q"
+ },
+ "legacy:2026-10-17:boxes-L5": {
+  "decodes": true,
+  "now": "MAT-Q2222222222222222222248842"
+ },
+ "legacy:2026-10-17:boxes-L6": {
+  "decodes": true,
+  "now": "MAT-Q222222222222222222226EE6P"
+ },
+ "legacy:2026-10-17:groups-of-terms-L1": {
+  "decodes": true,
+  "now": "MAT-Q22222222222222222222ATTAY"
+ },
+ "legacy:2026-10-17:groups-of-terms-L2": {
+  "decodes": true,
+  "now": "MAT-Q22222222222222222222KMKJ3"
+ },
+ "legacy:2026-10-17:groups-of-terms-L3": {
+  "decodes": true,
+  "now": "MAT-Q222222222222222222236863S"
+ },
+ "legacy:2026-10-17:groups-of-terms-L4": {
+  "decodes": true,
+  "now": "MAT-Q22222222222222222224AEA46"
+ },
+ "legacy:2026-10-17:groups-of-terms-L5": {
+  "decodes": true,
+  "now": "MAT-Q22222222222222222226JTJ6X"
+ },
+ "legacy:2026-10-17:groups-of-terms-L6": {
+  "decodes": true,
+  "now": "MAT-Q2222222222222222222B4M3AQ"
+ },
+ "legacy:2026-10-17:groups-of-terms-L7": {
+  "decodes": true,
+  "now": "MAT-Q2222222222222222222M774JS"
+ },
+ "legacy:2026-10-17:groups-of-terms-L8": {
+  "decodes": true,
+  "now": "MAT-Q22222222222222222237CC73N"
+ },
+ "legacy:2026-10-17:distribute-combine-L1": {
+  "decodes": true,
+  "now": "MAT-Q222222222222222224F2BZE4R"
+ },
+ "legacy:2026-10-17:distribute-combine-L2": {
+  "decodes": true,
+  "now": "MAT-Q222222222222222226V2NYT6U"
+ },
+ "legacy:2026-10-17:distribute-combine-L3": {
+  "decodes": true,
+  "now": "MAT-Q22222222222222222BQ3AXKA6"
+ },
+ "legacy:2026-10-17:distribute-combine-L4": {
+  "decodes": true,
+  "now": "MAT-Q22222222222222222ND4KV5J4"
+ },
+ "legacy:2026-10-17:distribute-combine-L5": {
+  "decodes": true,
+  "now": "MAT-Q222222222222222239R76Q93P"
+ },
+ "legacy:2026-10-17:value-L1": {
+  "decodes": true,
+  "now": "MAT-Q22222222222222224HFCBDG4C"
+ },
+ "legacy:2026-10-17:value-L2": {
+  "decodes": true,
+  "now": "MAT-Q22222222222222226ZVPMRX6B"
+ },
+ "legacy:2026-10-17:value-L3": {
+  "decodes": true,
+  "now": "MAT-Q2222222222222222BZRC8GUAE"
+ },
+ "legacy:2026-10-17:value-L4": {
+  "decodes": true,
+  "now": "MAT-Q2222222222222222NZFPEYNJG"
+ },
+ "legacy:2026-10-17:add-both-L1": {
+  "decodes": true,
+  "now": "MAT-Q22222222222DR25MB7KMC65AS"
+ },
+ "legacy:2026-10-17:add-both-L2": {
+  "decodes": true,
+  "now": "MAT-Q22222222222SF297MD67PA8JG"
+ },
+ "legacy:2026-10-17:add-both-L3": {
+  "decodes": true,
+  "now": "MAT-Q22222222223HV2GD7RADBJF34"
+ },
+ "legacy:2026-10-17:add-both-L4": {
+  "decodes": true,
+  "now": "MAT-Q222222222252Q2XRDFJRN3V42"
+ },
+ "legacy:2026-10-17:add-both-L5": {
+  "decodes": true,
+  "now": "MAT-Q222222222283D3VFRW4G95Q6Z"
+ },
+ "legacy:2026-10-17:add-both-L6": {
+  "decodes": true,
+  "now": "MAT-Q2222222222E4R5QWGS6XG9DA4"
+ },
+ "legacy:2026-10-17:divide-it-L1": {
+  "decodes": true,
+  "now": "MAT-Q2222222222T7F9ESYHBUXGRJM"
+ },
+ "legacy:2026-10-17:divide-it-L2": {
+  "decodes": true,
+  "now": "MAT-Q2222222223KCVGUJWZNPUYG3B"
+ },
+ "legacy:2026-10-17:divide-it-L3": {
+  "decodes": true,
+  "now": "MAT-Q22222222255QQYP4TZACPWX45"
+ },
+ "legacy:2026-10-17:divide-it-L4": {
+  "decodes": true,
+  "now": "MAT-Q22222222289EEXB7MYJQCTU66"
+ },
+ "legacy:2026-10-17:divide-it-L5": {
+  "decodes": true,
+  "now": "MAT-Q222222222EGTUUMD8X4DQMNAF"
+ },
+ "legacy:2026-10-17:divide-it-L6": {
+  "decodes": true,
+  "now": "MAT-Q222222222TYMPP7RFU6SE89J8"
+ },
+ "legacy:2026-10-17:one-step-L1": {
+  "decodes": true,
+  "now": "MAT-Q2222222222222224KXSNPUJ4V"
+ },
+ "legacy:2026-10-17:one-step-L2": {
+  "decodes": true,
+  "now": "MAT-Q22222222222222276VJACP364"
+ },
+ "legacy:2026-10-17:one-step-L3": {
+  "decodes": true,
+  "now": "MAT-Q222222222222222CBR3JQB4AT"
+ },
+ "legacy:2026-10-17:one-step-L4": {
+  "decodes": true,
+  "now": "MAT-Q222222222222222PNF54DM6J8"
+ },
+ "legacy:2026-10-17:one-step-L5": {
+  "decodes": true,
+  "now": "MAT-Q222222222222223C9V86S7B3R"
+ },
+ "legacy:2026-10-17:switch-L1": {
+  "decodes": true,
+  "now": "MAT-Q2222222222227PURKM2AJ6F65"
+ },
+ "legacy:2026-10-17:switch-L2": {
+  "decodes": true,
+  "now": "MAT-Q222222222222DCPG672K3AVAB"
+ },
+ "legacy:2026-10-17:switch-L3": {
+  "decodes": true,
+  "now": "MAT-Q222222222222RQBXAC354KQJ8"
+ },
+ "legacy:2026-10-17:switch-L4": {
+  "decodes": true,
+  "now": "MAT-Q222222222223GDNUJP4876E3V"
+ },
+ "legacy:2026-10-17:switch-L5": {
+  "decodes": true,
+  "now": "MAT-Q222222222224XSAP4B6ECAT4M"
+ },
+ "legacy:2026-10-17:switch-L6": {
+  "decodes": true,
+  "now": "MAT-Q222222222227VHKB6MATPKK64"
+ },
+ "legacy:2026-10-17:two-step-L1": {
+  "decodes": true,
+  "now": "MAT-Q22222222222222QB3J7FYRPJS"
+ },
+ "legacy:2026-10-17:two-step-L2": {
+  "decodes": true,
+  "now": "MAT-Q22222222222223DM53CWXGC3B"
+ },
+ "legacy:2026-10-17:two-step-L3": {
+  "decodes": true,
+  "now": "MAT-Q22222222222224S784QTUXP47"
+ },
+ "legacy:2026-10-17:two-step-L4": {
+  "decodes": true,
+  "now": "MAT-Q22222222222227HCE7EMPVB63"
+ },
+ "legacy:2026-10-17:two-step-L5": {
+  "decodes": true,
+  "now": "MAT-Q2222222222222CZPTCU8CQMAV"
+ },
+ "legacy:2026-10-17:two-step-L6": {
+  "decodes": true,
+  "now": "MAT-Q2222222222222QZCKQNEQE7J6"
+ },
+ "legacy:2026-10-17:two-step-L7": {
+  "decodes": true,
+  "now": "MAT-Q2222222222223EYQ6E9UDTD3A"
+ },
+ "legacy:2026-10-17:everything": {
+  "decodes": true,
+  "now": "MAT-Q222222223MX89FVET36ERJFGZ"
+ },
+ "legacy:2026-11-10:empty": {
+  "decodes": true,
+  "now": "MAT-Q222222222222222222222222D"
+ },
+ "legacy:2026-11-10:combineit-L1": {
+  "decodes": true,
+  "now": "MAT-Q2222222222222222224CPPC4W"
+ },
+ "legacy:2026-11-10:combineit-L2": {
+  "decodes": true,
+  "now": "MAT-Q2222222222222222226QCBP6V"
+ },
+ "legacy:2026-11-10:combineit-L3": {
+  "decodes": true,
+  "now": "MAT-Q222222222222222222BDPNBAT"
+ },
+ "legacy:2026-11-10:combineit-L4": {
+  "decodes": true,
+  "now": "MAT-Q222222222222222222MSC9MJP"
+ },
+ "legacy:2026-11-10:combineit-L5": {
+  "decodes": true,
+  "now": "MAT-Q2222222222222222238HPH83V"
+ },
+ "legacy:2026-11-10:flipit-L1": {
+  "decodes": true,
+  "now": "MAT-Q2222222222222222222222238"
+ },
+ "legacy:2026-11-10:flipit-L2": {
+  "decodes": true,
+  "now": "MAT-Q2222222222222222222222243"
+ },
+ "legacy:2026-11-10:flipit-L3": {
+  "decodes": true,
+  "now": "MAT-Q222222222222222222222226R"
+ },
+ "legacy:2026-11-10:flipit-L4": {
+  "decodes": true,
+  "now": "MAT-Q22222222222222222222222A4"
+ },
+ "legacy:2026-11-10:flipit-L5": {
+  "decodes": true,
+  "now": "MAT-Q22222222222222222222222JT"
+ },
+ "legacy:2026-11-10:lasso-L1": {
+  "decodes": true,
+  "now": "MAT-Q2222222222222222222222332"
+ },
+ "legacy:2026-11-10:lasso-L2": {
+  "decodes": true,
+  "now": "MAT-Q222222222222222222222244P"
+ },
+ "legacy:2026-11-10:lasso-L3": {
+  "decodes": true,
+  "now": "MAT-Q222222222222222222222266Y"
+ },
+ "legacy:2026-11-10:lasso-L4": {
+  "decodes": true,
+  "now": "MAT-Q2222222222222222222222AAJ"
+ },
+ "legacy:2026-11-10:lasso-L5": {
+  "decodes": true,
+  "now": "MAT-Q2222222222222222222222JJQ"
+ },
+ "legacy:2026-11-10:lasso-L6": {
+  "decodes": true,
+  "now": "MAT-Q222222222222222222222343M"
+ },
+ "legacy:2026-11-10:lasso-L7": {
+  "decodes": true,
+  "now": "MAT-Q222222222222222222222464U"
+ },
+ "legacy:2026-11-10:boxes-L1": {
+  "decodes": true,
+  "now": "MAT-Q2222222222222222222226A6A"
+ },
+ "legacy:2026-11-10:boxes-L2": {
+  "decodes": true,
+  "now": "MAT-Q222222222222222222222AJA7"
+ },
+ "legacy:2026-11-10:boxes-L3": {
+  "decodes": true,
+  "now": "MAT-Q222222222222222222222K3JS"
+ },
+ "legacy:2026-11-10:boxes-L4": {
+  "decodes": true,
+  "now": "MAT-Q222222222222222222223553Q"
+ },
+ "legacy:2026-11-10:boxes-L5": {
+  "decodes": true,
+  "now": "MAT-Q2222222222222222222248842"
+ },
+ "legacy:2026-11-10:boxes-L6": {
+  "decodes": true,
+  "now": "MAT-Q222222222222222222226EE6P"
+ },
+ "legacy:2026-11-10:groups-of-terms-L1": {
+  "decodes": true,
+  "now": "MAT-Q22222222222222222222ATTAY"
+ },
+ "legacy:2026-11-10:groups-of-terms-L2": {
+  "decodes": true,
+  "now": "MAT-Q22222222222222222222KMKJ3"
+ },
+ "legacy:2026-11-10:groups-of-terms-L3": {
+  "decodes": true,
+  "now": "MAT-Q222222222222222222236863S"
+ },
+ "legacy:2026-11-10:groups-of-terms-L4": {
+  "decodes": true,
+  "now": "MAT-Q22222222222222222224AEA46"
+ },
+ "legacy:2026-11-10:groups-of-terms-L5": {
+  "decodes": true,
+  "now": "MAT-Q22222222222222222226JTJ6X"
+ },
+ "legacy:2026-11-10:groups-of-terms-L6": {
+  "decodes": true,
+  "now": "MAT-Q2222222222222222222B4M3AQ"
+ },
+ "legacy:2026-11-10:groups-of-terms-L7": {
+  "decodes": true,
+  "now": "MAT-Q2222222222222222222M774JS"
+ },
+ "legacy:2026-11-10:groups-of-terms-L8": {
+  "decodes": true,
+  "now": "MAT-Q22222222222222222237CC73N"
+ },
+ "legacy:2026-11-10:distribute-combine-L1": {
+  "decodes": true,
+  "now": "MAT-Q222222222222222224F2BZE4R"
+ },
+ "legacy:2026-11-10:distribute-combine-L2": {
+  "decodes": true,
+  "now": "MAT-Q222222222222222226V2NYT6U"
+ },
+ "legacy:2026-11-10:distribute-combine-L3": {
+  "decodes": true,
+  "now": "MAT-Q22222222222222222BQ3AXKA6"
+ },
+ "legacy:2026-11-10:distribute-combine-L4": {
+  "decodes": true,
+  "now": "MAT-Q22222222222222222ND4KV5J4"
+ },
+ "legacy:2026-11-10:distribute-combine-L5": {
+  "decodes": true,
+  "now": "MAT-Q222222222222222239R76Q93P"
+ },
+ "legacy:2026-11-10:value-L1": {
+  "decodes": true,
+  "now": "MAT-Q22222222222222224HFCBDG4C"
+ },
+ "legacy:2026-11-10:value-L2": {
+  "decodes": true,
+  "now": "MAT-Q22222222222222226ZVPMRX6B"
+ },
+ "legacy:2026-11-10:value-L3": {
+  "decodes": true,
+  "now": "MAT-Q2222222222222222BZRC8GUAE"
+ },
+ "legacy:2026-11-10:value-L4": {
+  "decodes": true,
+  "now": "MAT-Q2222222222222222NZFPEYNJG"
+ },
+ "legacy:2026-11-10:add-both-L1": {
+  "decodes": true,
+  "now": "MAT-Q22222222222DR25MB7KMC65AS"
+ },
+ "legacy:2026-11-10:add-both-L2": {
+  "decodes": true,
+  "now": "MAT-Q22222222222SF297MD67PA8JG"
+ },
+ "legacy:2026-11-10:add-both-L3": {
+  "decodes": true,
+  "now": "MAT-Q22222222223HV2GD7RADBJF34"
+ },
+ "legacy:2026-11-10:add-both-L4": {
+  "decodes": true,
+  "now": "MAT-Q222222222252Q2XRDFJRN3V42"
+ },
+ "legacy:2026-11-10:add-both-L5": {
+  "decodes": true,
+  "now": "MAT-Q222222222283D3VFRW4G95Q6Z"
+ },
+ "legacy:2026-11-10:add-both-L6": {
+  "decodes": true,
+  "now": "MAT-Q2222222222E4R5QWGS6XG9DA4"
+ },
+ "legacy:2026-11-10:divide-it-L1": {
+  "decodes": true,
+  "now": "MAT-Q2222222222T7F9ESYHBUXGRJM"
+ },
+ "legacy:2026-11-10:divide-it-L2": {
+  "decodes": true,
+  "now": "MAT-Q2222222223KCVGUJWZNPUYG3B"
+ },
+ "legacy:2026-11-10:divide-it-L3": {
+  "decodes": true,
+  "now": "MAT-Q22222222255QQYP4TZACPWX45"
+ },
+ "legacy:2026-11-10:divide-it-L4": {
+  "decodes": true,
+  "now": "MAT-Q22222222289EEXB7MYJQCTU66"
+ },
+ "legacy:2026-11-10:divide-it-L5": {
+  "decodes": true,
+  "now": "MAT-Q222222222EGTUUMD8X4DQMNAF"
+ },
+ "legacy:2026-11-10:divide-it-L6": {
+  "decodes": true,
+  "now": "MAT-Q222222222TYMPP7RFU6SE89J8"
+ },
+ "legacy:2026-11-10:flip-everything-L1": {
+  "decodes": true,
+  "now": "MAT-Q222222223MX8CBDFWNBHTEH3T"
+ },
+ "legacy:2026-11-10:flip-everything-L2": {
+  "decodes": true,
+  "now": "MAT-Q2222222258UEPMRWT9N2KTZ4J"
+ },
+ "legacy:2026-11-10:flip-everything-L3": {
+  "decodes": true,
+  "now": "MAT-Q222222228FNUC8GTKH936MY6J"
+ },
+ "legacy:2026-11-10:flip-everything-L4": {
+  "decodes": true,
+  "now": "MAT-Q22222222EWANPEYM5ZG4B8WA6"
+ },
+ "legacy:2026-11-10:flip-everything-L5": {
+  "decodes": true,
+  "now": "MAT-Q22222222USKABUX79YX6MFSJM"
+ },
+ "legacy:2026-11-10:flip-everything-L6": {
+  "decodes": true,
+  "now": "MAT-Q22222223PJ5JNPUCHXUB7WJ3F"
+ },
+ "legacy:2026-11-10:one-step-L1": {
+  "decodes": true,
+  "now": "MAT-Q2222222222222224KXSNPUJ4V"
+ },
+ "legacy:2026-11-10:one-step-L2": {
+  "decodes": true,
+  "now": "MAT-Q22222222222222276VJACP364"
+ },
+ "legacy:2026-11-10:one-step-L3": {
+  "decodes": true,
+  "now": "MAT-Q222222222222222CBR3JQB4AT"
+ },
+ "legacy:2026-11-10:one-step-L4": {
+  "decodes": true,
+  "now": "MAT-Q222222222222222PNF54DM6J8"
+ },
+ "legacy:2026-11-10:one-step-L5": {
+  "decodes": true,
+  "now": "MAT-Q222222222222223C9V86S7B3R"
+ },
+ "legacy:2026-11-10:switch-L1": {
+  "decodes": true,
+  "now": "MAT-Q2222222222227PURKM2AJ6F65"
+ },
+ "legacy:2026-11-10:switch-L2": {
+  "decodes": true,
+  "now": "MAT-Q222222222222DCPG672K3AVAB"
+ },
+ "legacy:2026-11-10:switch-L3": {
+  "decodes": true,
+  "now": "MAT-Q222222222222RQBXAC354KQJ8"
+ },
+ "legacy:2026-11-10:switch-L4": {
+  "decodes": true,
+  "now": "MAT-Q222222222223GDNUJP4876E3V"
+ },
+ "legacy:2026-11-10:switch-L5": {
+  "decodes": true,
+  "now": "MAT-Q222222222224XSAP4B6ECAT4M"
+ },
+ "legacy:2026-11-10:switch-L6": {
+  "decodes": true,
+  "now": "MAT-Q222222222227VHKB6MATPKK64"
+ },
+ "legacy:2026-11-10:two-step-L1": {
+  "decodes": true,
+  "now": "MAT-Q22222222222222QB3J7FYRPJS"
+ },
+ "legacy:2026-11-10:two-step-L2": {
+  "decodes": true,
+  "now": "MAT-Q22222222222223DM53CWXGC3B"
+ },
+ "legacy:2026-11-10:two-step-L3": {
+  "decodes": true,
+  "now": "MAT-Q22222222222224S784QTUXP47"
+ },
+ "legacy:2026-11-10:two-step-L4": {
+  "decodes": true,
+  "now": "MAT-Q22222222222227HCE7EMPVB63"
+ },
+ "legacy:2026-11-10:two-step-L5": {
+  "decodes": true,
+  "now": "MAT-Q2222222222222CZPTCU8CQMAV"
+ },
+ "legacy:2026-11-10:two-step-L6": {
+  "decodes": true,
+  "now": "MAT-Q2222222222222QZCKQNEQE7J6"
+ },
+ "legacy:2026-11-10:two-step-L7": {
+  "decodes": true,
+  "now": "MAT-Q2222222222223EYQ6E9UDTD3A"
+ },
+ "legacy:2026-11-10:two-step-equations-L1": {
+  "decodes": true,
+  "now": "MAT-Q22222225C394ACNQ2VNMDT34E"
+ },
+ "legacy:2026-11-10:two-step-equations-L2": {
+  "decodes": true,
+  "now": "MAT-Q22222228P4G6JQAD3RA7SK467"
+ },
+ "legacy:2026-11-10:two-step-equations-L3": {
+  "decodes": true,
+  "now": "MAT-Q2222222FB6XB4DJR5FJDJ56AB"
+ },
+ "legacy:2026-11-10:two-step-equations-L4": {
+  "decodes": true,
+  "now": "MAT-Q2222222VMBUM6S4F8W3S38AJ3"
+ },
+ "legacy:2026-11-10:two-step-equations-L5": {
+  "decodes": true,
+  "now": "MAT-Q2222223R7NP7BH6VFS5H4EK3R"
+ },
+ "legacy:2026-11-10:two-step-equations-L6": {
+  "decodes": true,
+  "now": "MAT-Q2222225FDABCMZBQWH8Z6U543"
+ },
+ "legacy:2026-11-10:two-step-equations-L7": {
+  "decodes": true,
+  "now": "MAT-Q2222228VRJMQ8YNESZFYBN868"
+ },
+ "legacy:2026-11-10:distribute-solve-L1": {
+  "decodes": true,
+  "now": "MAT-Q222222FRG48DFX9UJYWWN9EAF"
+ },
+ "legacy:2026-11-10:distribute-solve-L2": {
+  "decodes": true,
+  "now": "MAT-Q222222WFX6ERWUHP4XTT9GTJ3"
+ },
+ "legacy:2026-11-10:distribute-solve-L3": {
+  "decodes": true,
+  "now": "MAT-Q222223SWUAUGTP2B7VMKGYM39"
+ },
+ "legacy:2026-11-10:distribute-solve-L4": {
+  "decodes": true,
+  "now": "MAT-Q222225JTNKNYMB2MDR85YX74S"
+ },
+ "legacy:2026-11-10:distribute-solve-L5": {
+  "decodes": true,
+  "now": "MAT-Q2222294MA6AX7M37SFE9XUC69"
+ },
+ "legacy:2026-11-10:variables-both-sides-L1": {
+  "decodes": true,
+  "now": "MAT-Q22222G77JAKUD74DHVTHVNPAC"
+ },
+ "legacy:2026-11-10:variables-both-sides-L2": {
+  "decodes": true,
+  "now": "MAT-Q22222XCD3K6NRC6S2RM2RABJ7"
+ },
+ "legacy:2026-11-10:variables-both-sides-L3": {
+  "decodes": true,
+  "now": "MAT-Q22223UPR55BAFPBH3G73FJN3S"
+ },
+ "legacy:2026-11-10:variables-both-sides-L4": {
+  "decodes": true,
+  "now": "MAT-Q22225PCF88MJWBMZ4XC4W494X"
+ },
+ "legacy:2026-11-10:variables-both-sides-L5": {
+  "decodes": true,
+  "now": "MAT-Q22229BPVEF84SN8Y7UP7S6G6C"
+ },
+ "legacy:2026-11-10:distribute-more-L1": {
+  "decodes": true,
+  "now": "MAT-Q2222GNCQTVE7J9FWDPBDHAXAB"
+ },
+ "legacy:2026-11-10:distribute-more-L2": {
+  "decodes": true,
+  "now": "MAT-Q2222Y9QEMQTD3GWSSBMRZKUJU"
+ },
+ "legacy:2026-11-10:distribute-more-L3": {
+  "decodes": true,
+  "now": "MAT-Q2223WHDU8EKR4YTJHN8GZ6P3T"
+ },
+ "legacy:2026-11-10:distribute-more-L4": {
+  "decodes": true,
+  "now": "MAT-Q2225SZSNEU6F7XM429EYYBB4R"
+ },
+ "legacy:2026-11-10:distribute-more-L5": {
+  "decodes": true,
+  "now": "MAT-Q2229JZJ9UNAVDV762GUXWMM6T"
+ },
+ "legacy:2026-11-10:strange-solutions-L1": {
+  "decodes": true,
+  "now": "MAT-Q222H4Z3HP9KQSQCA2YPVT87A2"
+ },
+ "legacy:2026-11-10:strange-solutions-L2": {
+  "decodes": true,
+  "now": "MAT-Q222Z7Y52BH6EJDPJ3XCRKECJW"
+ },
+ "legacy:2026-11-10:strange-solutions-L3": {
+  "decodes": true,
+  "now": "MAT-Q223YDW82MZAU3SC35UQG5TQ35"
+ },
+ "legacy:2026-11-10:strange-solutions-L4": {
+  "decodes": true,
+  "now": "MAT-Q225WSSE38YKN5HP49PDX9MD4M"
+ },
+ "legacy:2026-11-10:strange-solutions-L5": {
+  "decodes": true,
+  "now": "MAT-Q229TJHT4FX6992B6HBSUH7R6M"
+ },
+ "legacy:2026-11-10:fractions-of-x-L1": {
+  "decodes": true,
+  "now": "MAT-Q22HM42K6WUAGG2MAZNJNZDFA5"
+ },
+ "legacy:2026-11-10:fractions-of-x-L2": {
+  "decodes": true,
+  "now": "MAT-Q2327635BTNJXX37KZA4AYRVJU"
+ },
+ "legacy:2026-11-10:fractions-of-x-L3": {
+  "decodes": true,
+  "now": "MAT-Q242CA48NMA4VU4D6YJ6KXGR3D"
+ },
+ "legacy:2026-11-10:fractions-of-x-L4": {
+  "decodes": true,
+  "now": "MAT-Q262PJ6FA7J7RN6RBX3B6UYF48"
+ },
+ "legacy:2026-11-10:fractions-of-x-L5": {
+  "decodes": true,
+  "now": "MAT-Q2A3C3AVJD3DG9BFNU4MBPWV67"
+ },
+ "legacy:2026-11-10:fractions-of-x-L6": {
+  "decodes": true,
+  "now": "MAT-Q2J4P4KR3R4RXGMWAN77NCTQAJ"
+ },
+ "legacy:2026-11-10:everything": {
+  "decodes": true,
+  "now": "MAT-Q337B76F5F7GUVD9J5S86NRBYF"
+ },
+ "legacy:2026-11-10:x-placed": {
+  "decodes": true,
+  "now": "MAT-Q222222222222222222222222D"
+ },
+ "legacy:2026-11-10:x-placed-then-earned": {
+  "decodes": true,
+  "now": "MAT-Q22222222223HV2GD7RADBJF34"
+ },
+ "legacy:2026-11-10:x-merged": {
+  "decodes": true,
+  "now": "MAT-Q2222222223PDJHSAAF7EG2B58"
+ },
+ "legacy:2026-11-10:af-placed-fractions-3": {
+  "decodes": true,
+  "now": "MAT-Q222222222222222222222222D"
+ },
+ "legacy:2026-11-10:af-placed-strange-4": {
+  "decodes": true,
+  "now": "MAT-Q222222222222222222222222D"
+ },
+ "legacy:2026-11-10:af-placed-two-step-1-gold": {
+  "decodes": true,
+  "now": "MAT-Q22222225C394ACNQ2VNMDT34E"
+ },
  "empty": {
-  "code": "MAT-G2222222222222222X",
+  "code": "MAT-Q222222222222222222222222D",
   "roundTrip": true
  },
  "combineit-L1": {
-  "code": "MAT-G22222222224CPPC4X",
+  "code": "MAT-Q2222222222222222224CPPC4W",
   "roundTrip": true
  },
  "combineit-L2": {
-  "code": "MAT-G22222222226QCBP6V",
+  "code": "MAT-Q2222222222222222226QCBP6V",
   "roundTrip": true
  },
  "combineit-L3": {
-  "code": "MAT-G2222222222BDPNBAR",
+  "code": "MAT-Q222222222222222222BDPNBAT",
   "roundTrip": true
  },
  "combineit-L4": {
-  "code": "MAT-G2222222222MSC9MJG",
+  "code": "MAT-Q222222222222222222MSC9MJP",
   "roundTrip": true
  },
  "combineit-L5": {
-  "code": "MAT-G22222222238HPH83W",
+  "code": "MAT-Q2222222222222222238HPH83V",
   "roundTrip": true
  },
  "flipit-L1": {
-  "code": "MAT-G2222222222222223H",
+  "code": "MAT-Q2222222222222222222222238",
   "roundTrip": true
  },
  "flipit-L2": {
-  "code": "MAT-G22222222222222244",
+  "code": "MAT-Q2222222222222222222222243",
   "roundTrip": true
  },
  "flipit-L3": {
-  "code": "MAT-G22222222222222269",
+  "code": "MAT-Q222222222222222222222226R",
   "roundTrip": true
  },
  "flipit-L4": {
-  "code": "MAT-G222222222222222AK",
+  "code": "MAT-Q22222222222222222222222A4",
   "roundTrip": true
  },
  "flipit-L5": {
-  "code": "MAT-G222222222222222J8",
+  "code": "MAT-Q22222222222222222222222JT",
   "roundTrip": true
  },
  "lasso-L1": {
-  "code": "MAT-G22222222222222333",
+  "code": "MAT-Q2222222222222222222222332",
   "roundTrip": true
  },
  "lasso-L2": {
-  "code": "MAT-G22222222222222447",
+  "code": "MAT-Q222222222222222222222244P",
   "roundTrip": true
  },
  "lasso-L3": {
-  "code": "MAT-G2222222222222266F",
+  "code": "MAT-Q222222222222222222222266Y",
   "roundTrip": true
  },
  "lasso-L4": {
-  "code": "MAT-G22222222222222AAY",
+  "code": "MAT-Q2222222222222222222222AAJ",
   "roundTrip": true
  },
  "lasso-L5": {
-  "code": "MAT-G22222222222222JJZ",
+  "code": "MAT-Q2222222222222222222222JJQ",
   "roundTrip": true
  },
  "lasso-L6": {
-  "code": "MAT-G22222222222223435",
+  "code": "MAT-Q222222222222222222222343M",
   "roundTrip": true
  },
  "lasso-L7": {
-  "code": "MAT-G2222222222222464B",
+  "code": "MAT-Q222222222222222222222464U",
   "roundTrip": true
  },
  "boxes-L1": {
-  "code": "MAT-G22222222222226A6Q",
+  "code": "MAT-Q2222222222222222222226A6A",
   "roundTrip": true
  },
  "boxes-L2": {
-  "code": "MAT-G2222222222222AJAG",
+  "code": "MAT-Q222222222222222222222AJA7",
   "roundTrip": true
  },
  "boxes-L3": {
-  "code": "MAT-G2222222222222K3JJ",
+  "code": "MAT-Q222222222222222222222K3JS",
   "roundTrip": true
  },
  "boxes-L4": {
-  "code": "MAT-G22222222222235537",
+  "code": "MAT-Q222222222222222222223553Q",
   "roundTrip": true
  },
  "boxes-L5": {
-  "code": "MAT-G2222222222224884F",
+  "code": "MAT-Q2222222222222222222248842",
   "roundTrip": true
  },
  "boxes-L6": {
-  "code": "MAT-G2222222222226EE6Y",
+  "code": "MAT-Q222222222222222222226EE6P",
   "roundTrip": true
  },
  "groups-of-terms-L1": {
-  "code": "MAT-G222222222222ATTAZ",
+  "code": "MAT-Q22222222222222222222ATTAY",
   "roundTrip": true
  },
  "groups-of-terms-L2": {
-  "code": "MAT-G222222222222KMKJ3",
+  "code": "MAT-Q22222222222222222222KMKJ3",
   "roundTrip": true
  },
  "groups-of-terms-L3": {
-  "code": "MAT-G22222222222368637",
+  "code": "MAT-Q222222222222222222236863S",
   "roundTrip": true
  },
  "groups-of-terms-L4": {
-  "code": "MAT-G222222222224AEA4F",
+  "code": "MAT-Q22222222222222222224AEA46",
   "roundTrip": true
  },
  "groups-of-terms-L5": {
-  "code": "MAT-G222222222226JTJ6Y",
+  "code": "MAT-Q22222222222222222226JTJ6X",
   "roundTrip": true
  },
  "groups-of-terms-L6": {
-  "code": "MAT-G22222222222B4M3AF",
+  "code": "MAT-Q2222222222222222222B4M3AQ",
   "roundTrip": true
  },
  "groups-of-terms-L7": {
-  "code": "MAT-G22222222222M774JF",
+  "code": "MAT-Q2222222222222222222M774JS",
   "roundTrip": true
  },
  "groups-of-terms-L8": {
-  "code": "MAT-G222222222237CC73X",
+  "code": "MAT-Q22222222222222222237CC73N",
   "roundTrip": true
  },
  "distribute-combine-L1": {
-  "code": "MAT-G2222222224F2BZE4R",
+  "code": "MAT-Q222222222222222224F2BZE4R",
   "roundTrip": true
  },
  "distribute-combine-L2": {
-  "code": "MAT-G2222222226V2NYT62",
+  "code": "MAT-Q222222222222222226V2NYT6U",
   "roundTrip": true
  },
  "distribute-combine-L3": {
-  "code": "MAT-G222222222BQ3AXKAY",
+  "code": "MAT-Q22222222222222222BQ3AXKA6",
   "roundTrip": true
  },
  "distribute-combine-L4": {
-  "code": "MAT-G222222222ND4KV5JD",
+  "code": "MAT-Q22222222222222222ND4KV5J4",
   "roundTrip": true
  },
  "distribute-combine-L5": {
-  "code": "MAT-G2222222239R76Q93P",
+  "code": "MAT-Q222222222222222239R76Q93P",
   "roundTrip": true
  },
  "value-L1": {
-  "code": "MAT-G222222224HFCBDG4A",
+  "code": "MAT-Q22222222222222224HFCBDG4C",
   "roundTrip": true
  },
  "value-L2": {
-  "code": "MAT-G222222226ZVPMRX6N",
+  "code": "MAT-Q22222222222222226ZVPMRX6B",
   "roundTrip": true
  },
  "value-L3": {
-  "code": "MAT-G22222222BZRC8GUAY",
+  "code": "MAT-Q2222222222222222BZRC8GUAE",
   "roundTrip": true
  },
  "value-L4": {
-  "code": "MAT-G22222222NZFPEYNJ9",
+  "code": "MAT-Q2222222222222222NZFPEYNJG",
   "roundTrip": true
  },
  "add-both-L1": {
-  "code": "MAT-G222DR25MB7KMC65AA",
+  "code": "MAT-Q22222222222DR25MB7KMC65AS",
   "roundTrip": true
  },
  "add-both-L2": {
-  "code": "MAT-G222SF297MD67PA8JX",
+  "code": "MAT-Q22222222222SF297MD67PA8JG",
   "roundTrip": true
  },
  "add-both-L3": {
-  "code": "MAT-G223HV2GD7RADBJF3E",
+  "code": "MAT-Q22222222223HV2GD7RADBJF34",
   "roundTrip": true
  },
  "add-both-L4": {
-  "code": "MAT-G2252Q2XRDFJRN3V44",
+  "code": "MAT-Q222222222252Q2XRDFJRN3V42",
   "roundTrip": true
  },
  "add-both-L5": {
-  "code": "MAT-G2283D3VFRW4G95Q6S",
+  "code": "MAT-Q222222222283D3VFRW4G95Q6Z",
   "roundTrip": true
  },
  "add-both-L6": {
-  "code": "MAT-G22E4R5QWGS6XG9DA3",
+  "code": "MAT-Q2222222222E4R5QWGS6XG9DA4",
   "roundTrip": true
  },
  "divide-it-L1": {
-  "code": "MAT-G22T7F9ESYHBUXGRJQ",
+  "code": "MAT-Q2222222222T7F9ESYHBUXGRJM",
   "roundTrip": true
  },
  "divide-it-L2": {
-  "code": "MAT-G23KCVGUJWZNPUYG36",
+  "code": "MAT-Q2222222223KCVGUJWZNPUYG3B",
   "roundTrip": true
  },
  "divide-it-L3": {
-  "code": "MAT-G255QQYP4TZACPWX4P",
+  "code": "MAT-Q22222222255QQYP4TZACPWX45",
   "roundTrip": true
  },
  "divide-it-L4": {
-  "code": "MAT-G289EEXB7MYJQCTU6D",
+  "code": "MAT-Q22222222289EEXB7MYJQCTU66",
   "roundTrip": true
  },
  "divide-it-L5": {
-  "code": "MAT-G2EGTUUMD8X4DQMNAJ",
+  "code": "MAT-Q222222222EGTUUMD8X4DQMNAF",
   "roundTrip": true
  },
  "divide-it-L6": {
-  "code": "MAT-G2TYMPP7RFU6SE89JT",
+  "code": "MAT-Q222222222TYMPP7RFU6SE89J8",
+  "roundTrip": true
+ },
+ "flip-everything-L1": {
+  "code": "MAT-Q222222223MX8CBDFWNBHTEH3T",
+  "roundTrip": true
+ },
+ "flip-everything-L2": {
+  "code": "MAT-Q2222222258UEPMRWT9N2KTZ4J",
+  "roundTrip": true
+ },
+ "flip-everything-L3": {
+  "code": "MAT-Q222222228FNUC8GTKH936MY6J",
+  "roundTrip": true
+ },
+ "flip-everything-L4": {
+  "code": "MAT-Q22222222EWANPEYM5ZG4B8WA6",
+  "roundTrip": true
+ },
+ "flip-everything-L5": {
+  "code": "MAT-Q22222222USKABUX79YX6MFSJM",
+  "roundTrip": true
+ },
+ "flip-everything-L6": {
+  "code": "MAT-Q22222223PJ5JNPUCHXUB7WJ3F",
   "roundTrip": true
  },
  "one-step-L1": {
-  "code": "MAT-G22222224KXSNPUJ47",
-  "roundTrip": false
+  "code": "MAT-Q2222222222222224KXSNPUJ4V",
+  "roundTrip": true
  },
  "one-step-L2": {
-  "code": "MAT-G222222276VJACP36D",
-  "roundTrip": false
+  "code": "MAT-Q22222222222222276VJACP364",
+  "roundTrip": true
  },
  "one-step-L3": {
-  "code": "MAT-G2222222CBR3JQB4A3",
-  "roundTrip": false
+  "code": "MAT-Q222222222222222CBR3JQB4AT",
+  "roundTrip": true
  },
  "one-step-L4": {
-  "code": "MAT-G2222222PNF54DM6JE",
+  "code": "MAT-Q222222222222222PNF54DM6J8",
   "roundTrip": true
  },
  "one-step-L5": {
-  "code": "MAT-G2222223C9V86S7B3J",
-  "roundTrip": false
+  "code": "MAT-Q222222222222223C9V86S7B3R",
+  "roundTrip": true
  },
  "switch-L1": {
-  "code": "MAT-G22227PURKM2AJ6F6F",
+  "code": "MAT-Q2222222222227PURKM2AJ6F65",
   "roundTrip": true
  },
  "switch-L2": {
-  "code": "MAT-G2222DCPG672K3AVAV",
+  "code": "MAT-Q222222222222DCPG672K3AVAB",
   "roundTrip": true
  },
  "switch-L3": {
-  "code": "MAT-G2222RQBXAC354KQJZ",
+  "code": "MAT-Q222222222222RQBXAC354KQJ8",
   "roundTrip": true
  },
  "switch-L4": {
-  "code": "MAT-G2223GDNUJP4876E3B",
-  "roundTrip": false
+  "code": "MAT-Q222222222223GDNUJP4876E3V",
+  "roundTrip": true
  },
  "switch-L5": {
-  "code": "MAT-G2224XSAP4B6ECAT4X",
+  "code": "MAT-Q222222222224XSAP4B6ECAT4M",
   "roundTrip": true
  },
  "switch-L6": {
-  "code": "MAT-G2227VHKB6MATPKK66",
+  "code": "MAT-Q222222222227VHKB6MATPKK64",
   "roundTrip": true
  },
  "two-step-L1": {
-  "code": "MAT-G222222QB3J7FYRPJ4",
+  "code": "MAT-Q22222222222222QB3J7FYRPJS",
   "roundTrip": true
  },
  "two-step-L2": {
-  "code": "MAT-G222223DM53CWXGC3V",
+  "code": "MAT-Q22222222222223DM53CWXGC3B",
   "roundTrip": true
  },
  "two-step-L3": {
-  "code": "MAT-G222224S784QTUXP4Y",
+  "code": "MAT-Q22222222222224S784QTUXP47",
   "roundTrip": true
  },
  "two-step-L4": {
-  "code": "MAT-G222227HCE7EMPVB6H",
+  "code": "MAT-Q22222222222227HCE7EMPVB63",
   "roundTrip": true
  },
  "two-step-L5": {
-  "code": "MAT-G22222CZPTCU8CQMAF",
+  "code": "MAT-Q2222222222222CZPTCU8CQMAV",
   "roundTrip": true
  },
  "two-step-L6": {
-  "code": "MAT-G22222QZCKQNEQE7J8",
+  "code": "MAT-Q2222222222222QZCKQNEQE7J6",
   "roundTrip": true
  },
  "two-step-L7": {
-  "code": "MAT-G22223EYQ6E9UDTD33",
+  "code": "MAT-Q2222222222223EYQ6E9UDTD3A",
+  "roundTrip": true
+ },
+ "two-step-equations-L1": {
+  "code": "MAT-Q22222225C394ACNQ2VNMDT34E",
+  "roundTrip": true
+ },
+ "two-step-equations-L2": {
+  "code": "MAT-Q22222228P4G6JQAD3RA7SK467",
+  "roundTrip": true
+ },
+ "two-step-equations-L3": {
+  "code": "MAT-Q2222222FB6XB4DJR5FJDJ56AB",
+  "roundTrip": true
+ },
+ "two-step-equations-L4": {
+  "code": "MAT-Q2222222VMBUM6S4F8W3S38AJ3",
+  "roundTrip": true
+ },
+ "two-step-equations-L5": {
+  "code": "MAT-Q2222223R7NP7BH6VFS5H4EK3R",
+  "roundTrip": true
+ },
+ "two-step-equations-L6": {
+  "code": "MAT-Q2222225FDABCMZBQWH8Z6U543",
+  "roundTrip": true
+ },
+ "two-step-equations-L7": {
+  "code": "MAT-Q2222228VRJMQ8YNESZFYBN868",
+  "roundTrip": true
+ },
+ "distribute-solve-L1": {
+  "code": "MAT-Q222222FRG48DFX9UJYWWN9EAF",
+  "roundTrip": true
+ },
+ "distribute-solve-L2": {
+  "code": "MAT-Q222222WFX6ERWUHP4XTT9GTJ3",
+  "roundTrip": true
+ },
+ "distribute-solve-L3": {
+  "code": "MAT-Q222223SWUAUGTP2B7VMKGYM39",
+  "roundTrip": true
+ },
+ "distribute-solve-L4": {
+  "code": "MAT-Q222225JTNKNYMB2MDR85YX74S",
+  "roundTrip": true
+ },
+ "distribute-solve-L5": {
+  "code": "MAT-Q2222294MA6AX7M37SFE9XUC69",
+  "roundTrip": true
+ },
+ "variables-both-sides-L1": {
+  "code": "MAT-Q22222G77JAKUD74DHVTHVNPAC",
+  "roundTrip": true
+ },
+ "variables-both-sides-L2": {
+  "code": "MAT-Q22222XCD3K6NRC6S2RM2RABJ7",
+  "roundTrip": true
+ },
+ "variables-both-sides-L3": {
+  "code": "MAT-Q22223UPR55BAFPBH3G73FJN3S",
+  "roundTrip": true
+ },
+ "variables-both-sides-L4": {
+  "code": "MAT-Q22225PCF88MJWBMZ4XC4W494X",
+  "roundTrip": true
+ },
+ "variables-both-sides-L5": {
+  "code": "MAT-Q22229BPVEF84SN8Y7UP7S6G6C",
+  "roundTrip": true
+ },
+ "distribute-more-L1": {
+  "code": "MAT-Q2222GNCQTVE7J9FWDPBDHAXAB",
+  "roundTrip": true
+ },
+ "distribute-more-L2": {
+  "code": "MAT-Q2222Y9QEMQTD3GWSSBMRZKUJU",
+  "roundTrip": true
+ },
+ "distribute-more-L3": {
+  "code": "MAT-Q2223WHDU8EKR4YTJHN8GZ6P3T",
+  "roundTrip": true
+ },
+ "distribute-more-L4": {
+  "code": "MAT-Q2225SZSNEU6F7XM429EYYBB4R",
+  "roundTrip": true
+ },
+ "distribute-more-L5": {
+  "code": "MAT-Q2229JZJ9UNAVDV762GUXWMM6T",
+  "roundTrip": true
+ },
+ "strange-solutions-L1": {
+  "code": "MAT-Q222H4Z3HP9KQSQCA2YPVT87A2",
+  "roundTrip": true
+ },
+ "strange-solutions-L2": {
+  "code": "MAT-Q222Z7Y52BH6EJDPJ3XCRKECJW",
+  "roundTrip": true
+ },
+ "strange-solutions-L3": {
+  "code": "MAT-Q223YDW82MZAU3SC35UQG5TQ35",
+  "roundTrip": true
+ },
+ "strange-solutions-L4": {
+  "code": "MAT-Q225WSSE38YKN5HP49PDX9MD4M",
+  "roundTrip": true
+ },
+ "strange-solutions-L5": {
+  "code": "MAT-Q229TJHT4FX6992B6HBSUH7R6M",
+  "roundTrip": true
+ },
+ "fractions-of-x-L1": {
+  "code": "MAT-Q22HM42K6WUAGG2MAZNJNZDFA5",
+  "roundTrip": true
+ },
+ "fractions-of-x-L2": {
+  "code": "MAT-Q2327635BTNJXX37KZA4AYRVJU",
+  "roundTrip": true
+ },
+ "fractions-of-x-L3": {
+  "code": "MAT-Q242CA48NMA4VU4D6YJ6KXGR3D",
+  "roundTrip": true
+ },
+ "fractions-of-x-L4": {
+  "code": "MAT-Q262PJ6FA7J7RN6RBX3B6UYF48",
+  "roundTrip": true
+ },
+ "fractions-of-x-L5": {
+  "code": "MAT-Q2A3C3AVJD3DG9BFNU4MBPWV67",
+  "roundTrip": true
+ },
+ "fractions-of-x-L6": {
+  "code": "MAT-Q2J4P4KR3R4RXGMWAN77NCTQAJ",
   "roundTrip": true
  },
  "everything": {
-  "code": "MAT-G3MX89FVET36ERJFGJ",
+  "code": "MAT-Q337B76F5F7GUVD9J5S86NRBYF",
+  "roundTrip": true
+ },
+ "x-placed": {
+  "code": "MAT-Q222222222222222222222222D",
+  "roundTrip": true
+ },
+ "x-placed-then-earned": {
+  "code": "MAT-Q22222222223HV2GD7RADBJF34",
+  "roundTrip": true
+ },
+ "x-merged": {
+  "code": "MAT-Q2222222223PDJHSAAF7EG2B58",
+  "roundTrip": true
+ },
+ "af-placed-fractions-3": {
+  "code": "MAT-Q222222222222222222222222D",
+  "roundTrip": true
+ },
+ "af-placed-strange-4": {
+  "code": "MAT-Q222222222222222222222222D",
+  "roundTrip": true
+ },
+ "af-placed-two-step-1-gold": {
+  "code": "MAT-Q22222225C394ACNQ2VNMDT34E",
   "roundTrip": true
  }
 }

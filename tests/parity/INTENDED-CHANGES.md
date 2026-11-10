@@ -1,5 +1,18 @@
 # Intended changes since the baseline
 
+Every difference the parity harness finds must be listed here, above the history line, or it fails. The first column is the key the harness prints, in backticks. A trace key ending `#N-` covers step N and every later step of that run. Rows below the history line are the record of changes already accepted by a re-baseline; the harness does not read them.
+
+**The baseline is `main` at `b7c3019` (2026-11-10, Build AF, Part 3)**: every family (problems, save codes, class-sheet records, scripted runs, screens) was recorded again from it, with the newer cards added (tests/parity/README.md). List each change a build makes to a recorded screen, run, problem, code or record here, one row per key.
+
+| Key | Before | After | Why |
+|---|---|---|---|
+
+<!-- history: nothing below this line is read by the harness -->
+
+## History: everything above accepted by the re-baseline of 2026-11-10 (Build AF, Part 3)
+
+Build AF found the list above the history line holding every older change since 2026-10-17 (67 problem keys, 114 save-code keys, 11 record keys, 351 trace keys and all 70 screens, many listed several times by different builds), so the harness passed whatever those keys did: the net could not catch a change to them. Each of those changes had been reviewed and merged by its build. On 2026-11-10 the whole baseline was recorded again from `main` at `b7c3019`, and the rows that were above the line moved here unchanged, as the record of what each build changed.
+
 Every difference the parity harness finds must be listed here, or it fails. The first column is the key the harness prints, in backticks. A trace key ending `#N-` covers step N and every later step of that run.
 
 **Build A, P1** (`docs/build-a/SPEC-BUILD-A-ADD-HELP-AND-PARITY.md`). The baseline is `main` at `0415e23`. Spec item numbers are in brackets.
@@ -1055,7 +1068,9 @@ the save-code layout is Build V's, whose Levels 4-5 bits were reserved). The scr
 | Two opposite x-terms combined on a side, typed `0` | sent back with the "5 of what?" picture | accepted (`0` or `0x`); the term drops from the row | Part 2.2 |
 | A test link with `problem=N` (testing only, with `seed=`) | ignored | opens on problem N of the set | test links |
 
-<!-- history: nothing below this line is read by the harness -->
+
+<!-- (end of the rows that were live until 2026-11-10) -->
+
 
 ## History: screen changes accepted by the re-baseline of 2026-10-24 (Build O, Part 0)
 

@@ -108,7 +108,8 @@
    "problem": "x + 8 = −4",
    "answers": [],
    "supports": [
-    "forced"
+    "forced",
+    "hint"
    ],
    "stuck": 0,
    "taught": 1,
@@ -145,13 +146,8 @@
    "level": 4,
    "problem": "x + 8 = −4",
    "answers": [],
-   "supports": [
-    "hint",
-    "model",
-    "move",
-    "guided"
-   ],
-   "stuck": 4,
+   "supports": [],
+   "stuck": 0,
    "taught": 0,
    "clean": false,
    "on": {
@@ -168,11 +164,9 @@
    "level": 4,
    "problem": "x + 8 = −4",
    "answers": [],
-   "supports": [
-    "forced"
-   ],
+   "supports": [],
    "stuck": 0,
-   "taught": 1,
+   "taught": 0,
    "clean": false,
    "on": {
     "partyBattle": false,
@@ -190,9 +184,7 @@
    "answers": [],
    "supports": [
     "hint",
-    "model",
-    "move",
-    "guided"
+    "model"
    ],
    "stuck": 4,
    "taught": 0,
@@ -204,7 +196,7 @@
   }
  },
  "add-both/x-alone-then-teach": {
-  "done": false,
+  "done": true,
   "record": {
    "t": 0,
    "pack": "add-both",
@@ -212,7 +204,8 @@
    "problem": "x + 8 = −4",
    "answers": [],
    "supports": [
-    "forced"
+    "forced",
+    "hint"
    ],
    "stuck": 0,
    "taught": 1,
@@ -232,11 +225,9 @@
    "problem": "x + 8 = −4",
    "answers": [],
    "supports": [
-    "hint",
-    "model",
-    "move"
+    "hint"
    ],
-   "stuck": 3,
+   "stuck": 1,
    "taught": 0,
    "clean": false,
    "on": {
@@ -254,10 +245,9 @@
    "problem": "x + 8 = −4",
    "answers": [],
    "supports": [
-    "hint",
-    "model"
+    "hint"
    ],
-   "stuck": 2,
+   "stuck": 1,
    "taught": 0,
    "clean": false,
    "on": {
@@ -348,7 +338,9 @@
      "tag": "unmatched"
     }
    ],
-   "supports": [],
+   "supports": [
+    "hint"
+   ],
    "stuck": 0,
    "taught": 0,
    "clean": false,
@@ -379,8 +371,8 @@
    "problem": "5x = −15",
    "answers": [],
    "supports": [
-    "model",
-    "guided"
+    "hint",
+    "model"
    ],
    "stuck": 2,
    "taught": 0,
@@ -429,8 +421,8 @@
    "problem": "4x = 8",
    "answers": [],
    "supports": [
-    "model",
-    "guided"
+    "hint",
+    "model"
    ],
    "stuck": 2,
    "taught": 0,
@@ -464,12 +456,272 @@
    "problem": "5x = −15",
    "answers": [],
    "supports": [
-    "model",
-    "guided"
+    "hint"
    ],
-   "stuck": 3,
+   "stuck": 1,
    "taught": 0,
    "clean": false,
+   "on": {}
+  }
+ },
+ "fractions-of-x/L1-honest": {
+  "done": true,
+  "record": {
+   "t": 0,
+   "pack": "fractions-of-x",
+   "level": 1,
+   "problem": "⅙x = 2",
+   "answers": [],
+   "supports": [],
+   "stuck": 0,
+   "taught": 0,
+   "clean": true,
+   "on": {}
+  }
+ },
+ "fractions-of-x/L3-honest": {
+  "done": true,
+  "record": {
+   "t": 0,
+   "pack": "fractions-of-x",
+   "level": 3,
+   "problem": "⅔x = 8",
+   "answers": [],
+   "supports": [],
+   "stuck": 0,
+   "taught": 0,
+   "clean": true,
+   "on": {}
+  }
+ },
+ "fractions-of-x/L3-stuck": {
+  "done": true,
+  "record": {
+   "t": 0,
+   "pack": "fractions-of-x",
+   "level": 3,
+   "problem": "⅔x = 6",
+   "answers": [],
+   "supports": [
+    "hint"
+   ],
+   "stuck": 2,
+   "taught": 0,
+   "clean": false,
+   "on": {}
+  }
+ },
+ "fractions-of-x/L6-honest": {
+  "done": true,
+  "record": {
+   "t": 0,
+   "pack": "fractions-of-x",
+   "level": 6,
+   "problem": "⅔x = 10",
+   "answers": [],
+   "supports": [],
+   "stuck": 0,
+   "taught": 0,
+   "clean": true,
+   "on": {}
+  }
+ },
+ "strange-solutions/none-pick": {
+  "done": true,
+  "record": {
+   "t": 0,
+   "pack": "strange-solutions",
+   "level": 4,
+   "problem": "7x + 3 = 7x + 13",
+   "answers": [],
+   "supports": [],
+   "stuck": 0,
+   "taught": 0,
+   "clean": true,
+   "on": {}
+  }
+ },
+ "strange-solutions/all-pick": {
+  "done": true,
+  "record": {
+   "t": 0,
+   "pack": "strange-solutions",
+   "level": 4,
+   "problem": "3x + 1 = 3x + 1",
+   "answers": [],
+   "supports": [],
+   "stuck": 0,
+   "taught": 0,
+   "clean": true,
+   "on": {}
+  }
+ },
+ "strange-solutions/wrong-pick": {
+  "done": true,
+  "record": {
+   "t": 0,
+   "pack": "strange-solutions",
+   "level": 4,
+   "problem": "7x + 3 = 7x + 13",
+   "answers": [
+    {
+     "typed": "Infinitely many",
+     "tag": "conclusion-wrong"
+    }
+   ],
+   "supports": [],
+   "stuck": 0,
+   "taught": 0,
+   "clean": false,
+   "on": {}
+  }
+ },
+ "strange-solutions/L5-fraction": {
+  "done": true,
+  "record": {
+   "t": 0,
+   "pack": "strange-solutions",
+   "level": 5,
+   "problem": "−4(x + 3) + 2 = −6x − 5",
+   "answers": [],
+   "supports": [],
+   "stuck": 0,
+   "taught": 0,
+   "clean": true,
+   "on": {}
+  }
+ },
+ "strange-solutions/zero": {
+  "done": true,
+  "record": {
+   "t": 0,
+   "pack": "strange-solutions",
+   "level": 4,
+   "problem": "3x + 4 = 4",
+   "answers": [],
+   "supports": [],
+   "stuck": 0,
+   "taught": 0,
+   "clean": true,
+   "on": {}
+  }
+ },
+ "strange-solutions/unsimplified": {
+  "done": true,
+  "record": {
+   "t": 0,
+   "pack": "strange-solutions",
+   "level": 2,
+   "problem": "2x + 10 = −4x − 5",
+   "answers": [
+    {
+     "typed": "15/6",
+     "tag": "unsimplified"
+    },
+    {
+     "typed": "-15/6",
+     "tag": "unsimplified"
+    }
+   ],
+   "supports": [
+    "hint"
+   ],
+   "stuck": 0,
+   "taught": 0,
+   "clean": true,
+   "on": {}
+  }
+ },
+ "no-help/pass-1": {
+  "done": true,
+  "record": {
+   "t": 0,
+   "pack": "two-step-equations",
+   "level": 1,
+   "problem": "2x + 4 = 16",
+   "answers": [],
+   "supports": [
+    "test-out-pass"
+   ],
+   "stuck": 0,
+   "taught": 0,
+   "clean": true,
+   "on": {}
+  }
+ },
+ "no-help/pass-2": {
+  "done": true,
+  "record": {
+   "t": 0,
+   "pack": "two-step-equations",
+   "level": 1,
+   "problem": "2x + 2 = 18",
+   "answers": [],
+   "supports": [
+    "test-out-pass"
+   ],
+   "stuck": 0,
+   "taught": 0,
+   "clean": true,
+   "on": {}
+  }
+ },
+ "no-help/miss-open": {
+  "done": false,
+  "record": {
+   "t": 0,
+   "pack": "two-step-equations",
+   "level": 1,
+   "problem": "2x + 2 = 18",
+   "answers": [
+    {
+     "typed": "9",
+     "tag": "unmatched"
+    }
+   ],
+   "supports": [
+    "test-out-fail"
+   ],
+   "stuck": 0,
+   "taught": 0,
+   "clean": false,
+   "on": {}
+  }
+ },
+ "no-help/locked-fail": {
+  "done": false,
+  "record": {
+   "t": 0,
+   "pack": "strange-solutions",
+   "level": 4,
+   "problem": "7x + 3 = 7x + 13",
+   "answers": [
+    {
+     "typed": "Infinitely many",
+     "tag": "conclusion-wrong"
+    }
+   ],
+   "supports": [
+    "test-out-fail"
+   ],
+   "stuck": 0,
+   "taught": 0,
+   "clean": false,
+   "on": {}
+  }
+ },
+ "placed/problem-5": {
+  "done": true,
+  "record": {
+   "t": 0,
+   "pack": "two-step-equations",
+   "level": 1,
+   "problem": "3x + 10 = 19",
+   "answers": [],
+   "supports": [],
+   "stuck": 0,
+   "taught": 0,
+   "clean": true,
    "on": {}
   }
  }
