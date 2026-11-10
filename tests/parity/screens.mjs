@@ -155,45 +155,54 @@ export async function takeScreens() {
   const base = server.resolvedUrls.local[0];
   const browser = await pw.chromium.launch();
   const shots = {};
+  // (four lanes side by side, each in its own browser context: the older states and the newer ones, at each size; Build AF, Part 3. One
+  // after another this took about 6 minutes.)
+  const oldLane = async ([w, h]) => {
+    const out = {};
+    const ctx = await browser.newContext({ viewport: { width: w, height: h } });
+    const page = await ctx.newPage();
+    for (const [name, [query, steps]] of Object.entries(STATES)) {
+      await page.goto(`${base}?nosignin=1&${query}`);
+      await page.evaluate(() => { try { localStorage.clear(); } catch { /* blocked */ } });
+      await page.goto(`${base}?nosignin=1&${query}`);
+      await page.addStyleTag({ content: FREEZE });
+      await page.evaluate(() => document.fonts.ready);
+      for (const [kind, arg] of steps) {
+        if (kind === 'type') {
+          for (const d of String(Math.abs(arg))) await click(page, `[data-action="digit"][data-digit="${d}"]`);
+          if (arg < 0) await click(page, '[data-action="toggleSign"]');
+        } else await click(page, arg);
+      }
+      await page.waitForTimeout(400);
+      out[`${name}@${w}x${h}`] = await page.screenshot();
+    }
+    await ctx.close();
+    return out;
+  };
+  const newLane = async ([w, h]) => {
+    const out = {};
+    const ctx = await browser.newContext({ viewport: { width: w, height: h }, reducedMotion: 'reduce' });
+    const page = await ctx.newPage();
+    await page.clock.setFixedTime(new Date('2026-11-10T15:00:00Z'));
+    for (const [name, [query, steps]] of Object.entries(NEW_STATES)) {
+      await page.goto(`${base}?nosignin=1&${query}`);
+      await page.evaluate(() => { try { localStorage.clear(); } catch { /* blocked */ } });
+      await page.goto(`${base}?nosignin=1&${query}`);
+      await page.addStyleTag({ content: FREEZE });
+      await page.evaluate(() => document.fonts.ready);
+      await page.waitForTimeout(300);
+      try { for (const step of steps) await doStep(page, step); }
+      catch (e) { throw new Error(`screen ${name} at ${w}x${h}: ${e.message.split('\n')[0]}`); }
+      await page.mouse.move(2, h - 2);
+      await page.waitForTimeout(400);
+      out[`${name}@${w}x${h}`] = await page.screenshot();
+    }
+    await ctx.close();
+    return out;
+  };
   try {
-    for (const [w, h] of SIZES) {
-      const page = await (await browser.newContext({ viewport: { width: w, height: h } })).newPage();
-      for (const [name, [query, steps]] of Object.entries(STATES)) {
-        await page.goto(`${base}?nosignin=1&${query}`);
-        await page.evaluate(() => { try { localStorage.clear(); } catch { /* blocked */ } });
-        await page.goto(`${base}?nosignin=1&${query}`);
-        await page.addStyleTag({ content: FREEZE });
-        await page.evaluate(() => document.fonts.ready);
-        for (const [kind, arg] of steps) {
-          if (kind === 'type') {
-            for (const d of String(Math.abs(arg))) await click(page, `[data-action="digit"][data-digit="${d}"]`);
-            if (arg < 0) await click(page, '[data-action="toggleSign"]');
-          } else await click(page, arg);
-        }
-        await page.waitForTimeout(400);
-        shots[`${name}@${w}x${h}`] = await page.screenshot();
-      }
-      await page.close();
-    }
-    for (const [w, h] of SIZES) {
-      const ctx = await browser.newContext({ viewport: { width: w, height: h }, reducedMotion: 'reduce' });
-      const page = await ctx.newPage();
-      await page.clock.setFixedTime(new Date('2026-11-10T15:00:00Z'));
-      for (const [name, [query, steps]] of Object.entries(NEW_STATES)) {
-        await page.goto(`${base}?nosignin=1&${query}`);
-        await page.evaluate(() => { try { localStorage.clear(); } catch { /* blocked */ } });
-        await page.goto(`${base}?nosignin=1&${query}`);
-        await page.addStyleTag({ content: FREEZE });
-        await page.evaluate(() => document.fonts.ready);
-        await page.waitForTimeout(300);
-        try { for (const step of steps) await doStep(page, step); }
-        catch (e) { throw new Error(`screen ${name}: ${e.message.split('\n')[0]}`); }
-        await page.mouse.move(2, h - 2);
-        await page.waitForTimeout(400);
-        shots[`${name}@${w}x${h}`] = await page.screenshot();
-      }
-      await ctx.close();
-    }
+    const lanes = await Promise.all([...SIZES.map(oldLane), ...SIZES.map(newLane)]);
+    for (const lane of lanes) Object.assign(shots, lane);
   } finally {
     await browser.close();
     await server.close();
