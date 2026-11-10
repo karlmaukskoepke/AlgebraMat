@@ -593,6 +593,24 @@ const WALKS = {
     await w.both('af-simplify');
     w.at('type 5'); await w.type('5'); await w.boxShows('5');
   },
+  async 'af-walkthrough'(w) {
+    await w.start();
+    w.at('an answer, Next'); await w.click(act('quiz')); await wait(w.page, 300); await w.click(act('quizNext')); await wait(w.page, 600); await w.see('x + 3 = 5');
+    w.at('the panel button, Go'); await w.click(`${act('wtChoose')}, .is-target[data-action="choose"]`); await wait(w.page, 400); await w.click(act('go')); await wait(w.page, 1500);
+    const cols = () => w.page.locator('.lb-walk .lb-work .lx-col.is-num').evaluateAll((cs) => cs.map((c) => [c.firstElementChild.innerText.replace(/\s+/g, ''), c.querySelector('.lx-under').innerText.replace(/\s+/g, ''), c.querySelectorAll('.is-struck').length]));
+    const c1 = await cols();
+    if (JSON.stringify(c1) !== JSON.stringify([['+3', '+−3', 0], ['5', '+−3', 0]])) throw new Error(`the −3 in a column under the +3 and the 5: ${JSON.stringify(c1)}`);
+    await w.see('The −3 is now on both sides. Press Next.');
+    await w.both('af-walkthrough-columns');
+    w.at('Next'); await w.click(act('wtNext')); await wait(w.page, 1500);
+    const c2 = await cols();
+    if (JSON.stringify(c2) !== JSON.stringify([['+3', '+−3', 2], ['5', '+−3', 0]])) throw new Error(`the +3 and its −3 crossed out, the 5 and its −3 not: ${JSON.stringify(c2)}`);
+    if ((await w.page.locator('.lb-walk .lb-work .lx-xo').count()) !== 2) throw new Error('one stroke on the +3 and one on the −3 under it');
+    await w.see('The +3 and −3 cancel. Press Next.'); await w.row('x = 5 + −3');
+    await w.both('af-walkthrough-crossed');
+    w.at('Next until the end'); for (let k = 0; k < 6 && await w.page.locator(act('wtNext')).count(); k++) { await w.click(act('wtNext')); await wait(w.page, 900); }
+    await w.row('x = 2'); await w.see('2 + 3 = 5', 'Balanced');
+  },
   async 'af-student'(w) {
     await w.start(); await w.see('3x + 4 = 4');
     w.at('Add −4, Divide 3'); await w.addEnter(-4); await wait(w.page, 900); await w.divEnter(3); await wait(w.page, 600); await w.row('x = 0');

@@ -71,6 +71,23 @@
       "see": "“Can you simplify this further?” appears, nothing red and no check, and the box still shows 15/6. Typing 5 starts the box again: it shows 5."
     },
     {
+      "id": "af-walkthrough",
+      "name": "Add’s “See why it works” is written in columns",
+      "build": "Build AF",
+      "link": {
+        "label": "Open Add to both sides · See why it works",
+        "query": "?pack=add-both&level=1&seed=7&problem=5&nosignin=1",
+        "reset": true
+      },
+      "steps": [
+        "Click the button. It opens Add to both sides, See why it works, on its last question. Click either answer, then Next.",
+        "The walkthrough starts on x + 3 = 5. Click the highlighted button at the top of the panel, then Go.",
+        "Look at the row under x + 3 = 5. Then press Next.",
+        "Press Next until the green button stops saying Next."
+      ],
+      "see": "After Go the −3 is written in a column, as on the practice screens: “+ −3” under the +3 and under the 5, lined up on the right. After the first Next the +3 and the −3 under it are crossed out, one gentle stroke each (the 5 and its −3 are not), then x = 5 + −3 appears, then x = 2 and “2 + 3 = 5 ✓ Balanced”. The words at the top are the same as before."
+    },
+    {
       "id": "af-student",
       "name": "Play it like a student: fraction answer",
       "build": "Build AF",

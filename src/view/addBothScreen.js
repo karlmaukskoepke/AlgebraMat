@@ -238,7 +238,7 @@ function stackCol(term, under) {
 }
 // A number's column (Build Y): the term with its own sign on top (`+ 8`, as it is written by hand), the amount under it, digits lined up
 // on the right. `els` is a side's elements; `term` the number's element; its sign, if it has one, is the element just before it.
-function stackNum(els, term, under) {
+export function stackNum(els, term, under) {   // (shared with Add's "See why it works" walkthrough: Build AF)
   const at = els.indexOf(term);
   const op = at > 0 && els[at - 1].classList.contains('lb-plus') ? els[at - 1] : null;
   const top = op ? html('span', 'lx-signed', [op, term]) : term;

@@ -2902,6 +2902,8 @@ body {
 .lb-eqcard .lb-line { min-height: 150px; }
 .ab-eqhalo { fill: var(--paper, #fffdf2); }
 .lb-walkstack { min-height: 380px; }
+/* Build AF: under reduced motion the walkthrough is static (its rows appear at once; the cross-off is already static) */
+@media (prefers-reduced-motion: reduce) { .lb-walk .lb-rowwrap .lb-eq, .lb-walk .lb-rowwrap .lb-eq * { animation: none !important; } }
 .lb-main .ab-boardwrap { min-height: 470px; display: flex; flex-direction: column; }
 .lb-main .ab-boardwrap > .ab-actions { margin-top: auto; width: 100%; box-sizing: border-box; }
 @media (max-width: 760px) { .lb-eqcard .lb-line { min-height: 0; } .lb-main .ab-boardwrap { min-height: 0; } }

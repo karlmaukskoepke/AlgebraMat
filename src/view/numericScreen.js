@@ -3,6 +3,7 @@
 // problem, the question in bold and its two answers right under it, and the before / after after a miss.
 
 import { crossOut } from './crossOut.js';
+import { stackNum } from './addBothScreen.js';
 import { numericFeedbackText } from './numericFeedback.js';
 import { signed } from '../engine/addBoth.js';
 import { html, drawBalance, equationSvg, sideButtons, actionRow, groupShape, angleFor } from './addBothMat.js';
@@ -68,11 +69,21 @@ function walkBlock(s) {
   const plus = () => html('span', 'lb-plus', ['+']);
   const added = (cls = '') => num(-3, `is-added ${cls}`.trim());
   const at = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'end'].indexOf(step);
+  // the added −3 is written in a column, under the number of each side, as the practice screens write it (Build AF; Build Y's notation,
+  // the same helper): `+ 3` on top, `+ −3` under it, lined up on the right. Crossed off, it is the gentler stroke of Build AB, one each.
+  const under = (struck) => { const n = added(struck ? 'is-struck' : ''); return html('span', 'lx-under', [html('span', 'lb-plus is-added', ['+']), struck ? crossOut([n]) : n]); };
+  const column = (els, term, struck = false) => stackNum(els, term, under(struck));
   // nothing is erased: every step stays on screen, a row under the one before
   const rows = [equationRow([x(), plus(), num(3)], [num(5)])];
-  if (at >= 2 && at < 3) rows.push(equationRow([x(), plus(), num(3), plus(), added()], [num(5), plus(), added()], 'lb-work'));
+  const work = (struck) => {
+    const three = num(3, struck ? 'is-struck' : '');
+    const left = struck ? [x(), crossOut([plus(), three])] : [x(), plus(), three];
+    const five = num(5);
+    return equationRow(column(left, struck ? left[1] : three, struck), column([five], five), 'lb-work is-stacked');
+  };
+  if (at >= 2 && at < 3) rows.push(work(false));
   if (at >= 3) {
-    rows.push(equationRow([x(), crossOut([plus(), num(3, 'is-struck')]), crossOut([plus(), added('is-struck')])], [num(5), plus(), added()], 'lb-work'));     // (crossed out sign and all: Build W)
+    rows.push(work(true));
     rows.push(equationRow([x()], [num(5), plus(), num(-3)]));
   }
   if (at >= 4) rows.push(equationRow([x()], [num(2)]));
